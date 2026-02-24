@@ -5,7 +5,7 @@ operating system and the Nos class for creating a network
 operating system object.
 """
 
-from simnos.core.simnos import FakeNOS
 from simnos.core.nos import Nos
+from simnos.core.simnos import FakeNOS
 
 __all__ = ("FakeNOS", "Nos")

@@ -15,8 +15,8 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from simnos.core.simnos import FakeNOS, fakenos
 from simnos.core.nos import Nos
+from simnos.core.simnos import FakeNOS, fakenos
 from simnos.plugins.shell.cmd_shell import CMDShell
 
 

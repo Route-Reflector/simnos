@@ -12,9 +12,9 @@ import detect
 import pytest
 import yaml
 
-from simnos.core.simnos import FakeNOS, fakenos
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
+from simnos.core.simnos import FakeNOS, fakenos
 from tests.utils import get_platforms_from_md, get_running_hosts
 
 

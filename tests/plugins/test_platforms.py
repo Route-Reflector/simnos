@@ -14,8 +14,8 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from simnos.core.simnos import FakeNOS
 from simnos.core.nos import available_platforms
+from simnos.core.simnos import FakeNOS
 from tests.utils import get_free_port, get_host_commands
 
 
