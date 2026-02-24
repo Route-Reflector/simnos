@@ -14,8 +14,8 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from fakenos.core.fakenos import FakeNOS
-from fakenos.core.nos import available_platforms
+from simnos.core.simnos import FakeNOS
+from simnos.core.nos import available_platforms
 from tests.utils import get_free_port, get_host_commands
 
 
@@ -26,7 +26,7 @@ def get_py_nos_modules() -> list[str]:
     """
     return [
         f.split(".py", 1)[0]
-        for f in os.listdir("fakenos/plugins/nos/platforms_py")
+        for f in os.listdir("simnos/plugins/nos/platforms_py")
         if f.endswith(".py") and f != "__init__.py" and f != "base_template.py"
     ]
 
@@ -65,7 +65,7 @@ class TestPlatforms:
         It checks if the platform yaml file can be opened correctly using
         the yaml library.
         """
-        with open(f"fakenos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             data: dict = yaml.safe_load(file)
             for key in data:
                 assert key in [
@@ -86,7 +86,7 @@ class TestPlatforms:
         - help
         - prompt
         """
-        with open(f"fakenos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             data = yaml.safe_load(file)
             exceptions: list[str] = [data["initial_prompt"]]
             if "enable_prompt" in data:
@@ -107,11 +107,11 @@ class TestPlatforms:
         It checks if the platform python file can be imported correctly.
         """
         try:
-            module = import_module(f"fakenos.plugins.nos.platforms_py.{platform}")
+            module = import_module(f"simnos.plugins.nos.platforms_py.{platform}")
         except ImportError:
             pytest.fail(f"Failed to import platform module for {platform}")
 
-        assert module.__name__ == f"fakenos.plugins.nos.platforms_py.{platform}"
+        assert module.__name__ == f"simnos.plugins.nos.platforms_py.{platform}"
         assert hasattr(module, "commands")
         assert hasattr(module, "INITIAL_PROMPT")
         assert hasattr(module, "DEVICE_NAME")
@@ -127,7 +127,7 @@ class TestPlatforms:
         - prompt
         """
         try:
-            module = import_module(f"fakenos.plugins.nos.platforms_py.{platform}")
+            module = import_module(f"simnos.plugins.nos.platforms_py.{platform}")
         except ImportError:
             pytest.fail(f"Failed to import platform module for {platform}")
 

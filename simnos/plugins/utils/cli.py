@@ -8,7 +8,7 @@ import logging
 import os
 import time
 
-from fakenos import FakeNOS
+from simnos import FakeNOS
 
 __version__ = version("fakenos")
 

@@ -8,7 +8,7 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
-from fakenos.plugins.shell.utils import (
+from simnos.plugins.shell.utils import (
     change_jinja_to_corresponding_py,
     get_files_changed,
     get_files_lasttime_changed,
@@ -18,7 +18,7 @@ from fakenos.plugins.shell.utils import (
 )
 
 RANDOM_FILE: str = random.choice(
-    [file for file in get_files_under_directory("fakenos/plugins/nos") if file.endswith((".py", ".yaml"))]
+    [file for file in get_files_under_directory("simnos/plugins/nos") if file.endswith((".py", ".yaml"))]
 )
 
 
@@ -68,7 +68,7 @@ class ShellUtilsTest(TestCase):
         """
         Test method for the get_files_under_directory
         """
-        files = get_files_under_directory("fakenos/plugins/nos")
+        files = get_files_under_directory("simnos/plugins/nos")
         self.assertTrue(files)
         self.assertTrue(all(not file.endswith("__init__.py") for file in files))
         self.assertTrue(all(file for file in files if file.endswith((".py", ".j2", ".yaml"))))
@@ -78,7 +78,7 @@ class ShellUtilsTest(TestCase):
         Test to check if we get the last time
         that the files has been changed correctly.
         """
-        files = get_files_under_directory("fakenos/plugins/nos")
+        files = get_files_under_directory("simnos/plugins/nos")
         files_lasttime_changed = get_files_lasttime_changed(files)
         self.assertTrue(files_lasttime_changed)
         self.assertTrue(all(file in files_lasttime_changed for file in files))
@@ -97,7 +97,7 @@ class ShellUtilsTest(TestCase):
         """
         Test to check if we change j2 files to corresponding py files
         """
-        files = get_files_under_directory("fakenos/plugins/nos")
+        files = get_files_under_directory("simnos/plugins/nos")
         files = [file for file in files if "cisco_ios" in file]
         files = [file for file in files if file.endswith(".j2")]
         files = change_jinja_to_corresponding_py(files)
@@ -110,7 +110,7 @@ class ShellUtilsTest(TestCase):
         """
         Test to check if we don't change any j2 files to corresponding py files
         """
-        files = get_files_under_directory("fakenos/plugins/nos")
+        files = get_files_under_directory("simnos/plugins/nos")
         files = [file for file in files if "cisco_ios" in file]
         files = [file for file in files if file.endswith(".py")]
         files = change_jinja_to_corresponding_py(files)
@@ -123,7 +123,7 @@ class ShellUtilsTest(TestCase):
         """
         Test to check if we get the files that have been recently modified
         """
-        files = get_files_under_directory("fakenos/plugins/nos")
+        files = get_files_under_directory("simnos/plugins/nos")
         files_lasttime_changed = get_files_lasttime_changed(files)
         with patch("os.stat", side_effect=mock_os_stat):
             files = get_files_recently_modified(files, files_lasttime_changed)
@@ -135,19 +135,19 @@ class ShellUtilsTest(TestCase):
         """
         Test to check if we get the files that have been changed
         """
-        files = get_files_changed("fakenos/plugins/nos")
+        files = get_files_changed("simnos/plugins/nos")
         self.assertFalse(files)
         with patch("os.stat", side_effect=mock_os_stat):
-            files = get_files_changed("fakenos/plugins/nos")
+            files = get_files_changed("simnos/plugins/nos")
         self.assertTrue(files)
         self.assertIn(RANDOM_FILE, files)
-        files = get_files_changed("fakenos/plugins/nos")
+        files = get_files_changed("simnos/plugins/nos")
 
     def test_get_files_changed_null(self):
         """
         Test to check if we don't get the files that have been changed
         """
-        files = get_files_changed("fakenos/plugins/nos")
+        files = get_files_changed("simnos/plugins/nos")
         self.assertFalse(files)
-        files = get_files_changed("fakenos/plugins/nos")
+        files = get_files_changed("simnos/plugins/nos")
         self.assertFalse(files)

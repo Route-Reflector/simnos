@@ -6,8 +6,8 @@ It also validates the host object using pydantic.
 
 import logging
 
-from fakenos.core.nos import Nos, available_platforms
-from fakenos.core.pydantic_models import ModelHost
+from simnos.core.nos import Nos, available_platforms
+from simnos.core.pydantic_models import ModelHost
 
 log = logging.getLogger(__name__)
 

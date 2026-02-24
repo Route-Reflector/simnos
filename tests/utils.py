@@ -6,7 +6,7 @@ import random
 import socket
 import string
 
-from fakenos.core.host import Host
+from simnos.core.host import Host
 
 
 def get_running_hosts(hosts: dict[str, Host]) -> dict[str, bool]:

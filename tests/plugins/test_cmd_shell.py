@@ -15,9 +15,9 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from fakenos.core.fakenos import FakeNOS, fakenos
-from fakenos.core.nos import Nos
-from fakenos.plugins.shell.cmd_shell import CMDShell
+from simnos.core.simnos import FakeNOS, fakenos
+from simnos.core.nos import Nos
+from simnos.plugins.shell.cmd_shell import CMDShell
 
 
 # pylint: disable=too-many-public-methods
@@ -328,7 +328,7 @@ class HotReloadTest(TestCase):
         shell.precmd("show clock")
         mock_get_files_changed.assert_not_called()
 
-    @patch("fakenos.plugins.shell.cmd_shell.get_files_changed")
+    @patch("simnos.plugins.shell.cmd_shell.get_files_changed")
     def test_hot_reload_activated_does_enter(self, mock_get_files_changed):
         """Test that if there are no changed files, nothing happens."""
         mock_get_files_changed.return_value = []
@@ -336,15 +336,15 @@ class HotReloadTest(TestCase):
         shell.precmd("show clock")
         mock_get_files_changed.assert_called_once()
 
-    @patch("fakenos.core.nos.Nos.from_file")
-    @patch("fakenos.plugins.shell.cmd_shell.get_files_changed")
+    @patch("simnos.core.nos.Nos.from_file")
+    @patch("simnos.plugins.shell.cmd_shell.get_files_changed")
     def test_hot_reload_activated_update_commands(self, mock_get_files_changed, mock_from_file):
         """
         Test that if there are change files,
         the nos_from_file is called
         and the commands are updated correctly.
         """
-        changed_module = "fakenos.plugins.nos.platforms_py.cisco_ios"
+        changed_module = "simnos.plugins.nos.platforms_py.cisco_ios"
         mock_get_files_changed.return_value = [changed_module.replace(".", "/") + ".py"]
         shell = CMDShell(**self.arguments)
         shell.precmd("show clock")
@@ -359,8 +359,8 @@ class HotReloadTest(TestCase):
         """
         Test that the hot reload feature works correctly
         """
-        original_filename = "fakenos/plugins/nos/platforms_yaml/cisco_ios.yaml"
-        copy_filename = "fakenos/plugins/nos/platforms_yaml/copy_ios.yaml"
+        original_filename = "simnos/plugins/nos/platforms_yaml/cisco_ios.yaml"
+        copy_filename = "simnos/plugins/nos/platforms_yaml/copy_ios.yaml"
         test_commands = {
             "test": {
                 "output": "test output",
@@ -403,8 +403,8 @@ class HotReloadTest(TestCase):
         """
         Test that the hot reload feature works correctly
         """
-        original_filename = "fakenos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2"
-        copy_filename = "fakenos/plugins/nos/platforms_py/templates/cisco_ios/copy_show_version.j2"
+        original_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2"
+        copy_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/copy_show_version.j2"
 
         def change_file():
             shutil.copyfile(original_filename, copy_filename)

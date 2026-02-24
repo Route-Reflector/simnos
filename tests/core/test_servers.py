@@ -1,6 +1,6 @@
 """
-Test module for fakenos.core.servers.
-The file can be found under fakenos/core/servers.py
+Test module for simnos.core.servers.
+The file can be found under simnos/core/servers.py
 """
 
 import socket
@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from fakenos.core.servers import TCPServerBase
+from simnos.core.servers import TCPServerBase
 
 
 class FakeServer(TCPServerBase):
@@ -51,7 +51,7 @@ class ServersTest(unittest.TestCase):
 
     @patch("threading.Event")
     @patch("threading.Thread")
-    @patch("fakenos.core.servers.TCPServerBase._bind_sockets")
+    @patch("simnos.core.servers.TCPServerBase._bind_sockets")
     def test_start_executed_without_arguments(
         self,
         mock_bind_sockets,

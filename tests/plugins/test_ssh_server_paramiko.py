@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, Mock
 
 import paramiko
 
-from fakenos.plugins.servers.ssh_server_paramiko import (
+from simnos.plugins.servers.ssh_server_paramiko import (
     DEFAULT_SSH_KEY,
     ParamikoSshServer,
     ParamikoSshServerInterface,
@@ -799,8 +799,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         paramiko_server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
         mock_shell.stop.assert_called_once()
 
-    @mock.patch("fakenos.plugins.servers.ssh_server_paramiko.channel_to_shell_tap")
-    @mock.patch("fakenos.plugins.servers.ssh_server_paramiko.shell_to_channel_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.channel_to_shell_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_channel_tap")
     @mock.patch("paramiko.Transport")
     def test_connection_function(
         self,

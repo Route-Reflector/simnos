@@ -14,8 +14,8 @@ import paramiko
 import paramiko.channel
 import paramiko.rsakey
 
-from fakenos.core.nos import Nos
-from fakenos.core.servers import TCPServerBase
+from simnos.core.nos import Nos
+from simnos.core.servers import TCPServerBase
 
 log = logging.getLogger(__name__)
 

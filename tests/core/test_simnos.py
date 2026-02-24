@@ -1,6 +1,6 @@
 """
-Test module for fakenos.core.fakenos.
-The file can be found in fakenos/core/fakenos.py
+Test module for simnos.core.simnos.
+The file can be found in simnos/core/simnos.py
 """
 
 # pylint: disable=protected-access
@@ -12,9 +12,9 @@ import detect
 import pytest
 import yaml
 
-from fakenos.core.fakenos import FakeNOS, fakenos
-from fakenos.core.host import Host
-from fakenos.core.nos import available_platforms
+from simnos.core.simnos import FakeNOS, fakenos
+from simnos.core.host import Host
+from simnos.core.nos import available_platforms
 from tests.utils import get_platforms_from_md, get_running_hosts
 
 
@@ -199,7 +199,7 @@ class TestFakeNOS:
         with pytest.raises(ValueError, match=r"Inventory file must end with \.yaml or \.yml"):
             net._load_inventory()
 
-    @patch("fakenos.core.fakenos.FakeNOS._allocate_port")
+    @patch("simnos.core.simnos.FakeNOS._allocate_port")
     def test_init_unit(self, mock_allocate_port):
         """
         Test that the function _init creates the hosts.

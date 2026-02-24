@@ -15,7 +15,7 @@ class BaseDevice:
     def __init__(self, configuration_file: str) -> None:
         self.configurations = self.load_configurations(configuration_file)
         self.env = Environment(
-            loader=PackageLoader("fakenos.plugins.nos.platforms_py", "templates"),
+            loader=PackageLoader("simnos.plugins.nos.platforms_py", "templates"),
             autoescape=select_autoescape(["j2"]),
         )
 

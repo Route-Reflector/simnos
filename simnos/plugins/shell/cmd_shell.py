@@ -8,9 +8,9 @@ import logging
 import os
 import traceback
 
-from fakenos.core.nos import Nos
-from fakenos.plugins import nos
-from fakenos.plugins.shell.utils import get_files_changed
+from simnos.core.nos import Nos
+from simnos.plugins import nos
+from simnos.plugins.shell.utils import get_files_changed
 
 log = logging.getLogger(__name__)
 

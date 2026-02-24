@@ -1,6 +1,6 @@
 """
 Base model for any server implemented as a plugin. To see an example
-look for fakenos/plugins/servers/ssh_server_paramiko.py
+look for simnos/plugins/servers/ssh_server_paramiko.py
 """
 
 from abc import ABC, abstractmethod

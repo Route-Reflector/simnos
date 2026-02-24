@@ -1,15 +1,15 @@
 """
-Test module for the module fakenos.core.host
-under fakenos/core/host.py
+Test module for the module simnos.core.host
+under simnos/core/host.py
 """
 
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from fakenos import FakeNOS
-from fakenos.core.host import Host
-from fakenos.core.nos import available_platforms
+from simnos import FakeNOS
+from simnos.core.host import Host
+from simnos.core.nos import available_platforms
 
 
 class TestHost:

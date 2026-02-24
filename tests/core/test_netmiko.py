@@ -15,8 +15,8 @@ from netmiko import (
 )
 import pytest
 
-from fakenos import FakeNOS
-from fakenos.core.nos import available_platforms
+from simnos import FakeNOS
+from simnos.core.nos import available_platforms
 from tests.utils import generate_random_string, get_free_port, get_platforms_from_md
 
 

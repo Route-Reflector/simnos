@@ -5,7 +5,7 @@ NOS module for Huawei SmartAX
 # import time
 # import os
 
-from fakenos.plugins.nos.platforms_py.base_template import BaseDevice
+from simnos.plugins.nos.platforms_py.base_template import BaseDevice
 
 NAME: str = "huawei_smartax"
 INITIAL_PROMPT: str = "{base_prompt}>"
@@ -13,7 +13,7 @@ ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
 DEVICE_NAME: str = "HuaweiSmartAX"
 
-DEFAULT_CONFIGURATION: str = "fakenos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2"
+DEFAULT_CONFIGURATION: str = "simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2"
 
 
 class HuaweiSmartAX(BaseDevice):

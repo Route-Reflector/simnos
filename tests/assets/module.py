@@ -4,7 +4,7 @@ This is a testing module
 
 import time
 
-from fakenos.plugins.nos.platforms_py.base_template import BaseDevice
+from simnos.plugins.nos.platforms_py.base_template import BaseDevice
 
 NAME: str = "test_module"
 INITIAL_PROMPT = "{base_prompt}>"

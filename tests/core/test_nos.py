@@ -1,6 +1,6 @@
 """
-Test module for fakenos.core.nos module.
-This module can be found at fakenos/core/nos.py
+Test module for simnos.core.nos module.
+This module can be found at simnos/core/nos.py
 """
 
 import unittest
@@ -9,8 +9,8 @@ from pydantic import ValidationError
 import pytest
 import yaml
 
-from fakenos.core.nos import Nos
-from fakenos.plugins.nos import nos_plugins
+from simnos.core.nos import Nos
+from simnos.plugins.nos import nos_plugins
 from tests.assets import module
 
 

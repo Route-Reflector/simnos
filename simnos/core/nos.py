@@ -8,7 +8,7 @@ import os
 
 import yaml
 
-from fakenos.core.pydantic_models import ModelNosAttributes
+from simnos.core.pydantic_models import ModelNosAttributes
 
 log = logging.getLogger(__name__)
 

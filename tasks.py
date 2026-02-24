@@ -13,7 +13,7 @@ from invoke import task
 from netmiko import ConnectHandler
 import yaml
 
-from fakenos import FakeNOS
+from simnos import FakeNOS
 
 
 def strtobool(val: str) -> bool:
@@ -203,7 +203,7 @@ def gen_docs_platform_commands(ctx):
     """
     Generate platform specific commands in the docs.
     """
-    platforms_folder: str = "fakenos/plugins/nos/platforms"
+    platforms_folder: str = "simnos/plugins/nos/platforms"
     files: list[str] = os.listdir(platforms_folder)
     platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
 

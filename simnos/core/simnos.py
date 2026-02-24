@@ -14,12 +14,12 @@ import time
 import detect
 import yaml
 
-from fakenos.core.host import Host
-from fakenos.core.nos import Nos
-from fakenos.core.pydantic_models import ModelFakenosInventory
-from fakenos.plugins.nos import nos_plugins
-from fakenos.plugins.servers import servers_plugins
-from fakenos.plugins.shell import shell_plugins
+from simnos.core.host import Host
+from simnos.core.nos import Nos
+from simnos.core.pydantic_models import ModelFakenosInventory
+from simnos.plugins.nos import nos_plugins
+from simnos.plugins.servers import servers_plugins
+from simnos.plugins.shell import shell_plugins
 
 log = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class FakeNOS:
     Sample usage:
 
     ```python
-    from fakenos import FakeNOS
+    from simnos import FakeNOS
 
     net = FakeNOS()
     net.start()
