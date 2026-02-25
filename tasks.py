@@ -203,7 +203,7 @@ def gen_docs_platform_commands(ctx):
     """
     Generate platform specific commands in the docs.
     """
-    platforms_folder: str = "simnos/plugins/nos/platforms"
+    platforms_folder: str = "simnos/plugins/nos/platforms_yaml"
     files: list[str] = os.listdir(platforms_folder)
     platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
 

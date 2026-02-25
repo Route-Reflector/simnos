@@ -23,7 +23,7 @@ from ruamel.yaml import YAML
 
 tmp_ntc_templates_dir: str = "/tmp/ntc-templates"
 netmiko_platforms_url: str = "https://raw.githubusercontent.com/ktbyers/netmiko/develop/PLATFORMS.md"
-platforms_folder: str = "simnos/plugins/nos/platforms"
+platforms_folder: str = "simnos/plugins/nos/platforms_yaml"
 
 
 def clone_or_update_repository(repo_url, target_dir):
