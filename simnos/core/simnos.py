@@ -195,15 +195,15 @@ class SimNOS:
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
-        hosts_name: set[str] = {}
-        ports: set[int] = {}
+        hosts_name: list[str] = []
+        ports: list[int] = []
 
         if replicas:
-            hosts_name = {f"{host_name}{i}" for i in range(replicas)}
-            ports = set(range(port[0], port[1] + 1))
+            hosts_name = [f"{host_name}{i}" for i in range(replicas)]
+            ports = list(range(port[0], port[1] + 1))
         else:
-            hosts_name = {host_name}
-            ports = {port}
+            hosts_name = [host_name]
+            ports = [port]
         return hosts_name, ports
 
     def _instantiate_single_host_object(self, host, port, params):
