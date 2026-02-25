@@ -1,6 +1,6 @@
 # Developing Scripts
 
-Usually, when developing a network automation task, you will run the script against a device via SSH. For development purposes, a good approach is to use a fake device. This way, you can test your script without the risk of breaking a real device. That's where FakeNOS comes in. You can create this fake platform easily in local, instead of having to set up a real device in a real network.
+Usually, when developing a network automation task, you will run the script against a device via SSH. For development purposes, a good approach is to use a fake device. This way, you can test your script without the risk of breaking a real device. That's where SIMNOS comes in. You can create this fake platform easily in local, instead of having to set up a real device in a real network.
 
 ## Using the YAML
 
@@ -21,8 +21,8 @@ For each device, we can set a `username`, `password`, `port` and `platform`. All
 
 Then, create a Python script with the following content:
 ```python
-from fakenos import FakeNOS
-network_os = FakeNOS(inventory='inventory.yaml')
+from simnos import SimNOS
+network_os = SimNOS(inventory='inventory.yaml')
 network_os.start()
 
 try:
@@ -61,7 +61,7 @@ Imagine you want to be able to specify the platform using the CLI. The following
 
 ```python
 import argparse
-from fakenos import FakeNOS
+from simnos import SimNOS
 
 parser = argparse.ArgumentParser(
     description="Create a fake device specifying the platform."
@@ -86,7 +86,7 @@ inventory = {
     }
 }
 
-net = FakeNOS(inventory=inventory)
+net = SimNOS(inventory=inventory)
 ```
 
 For example, you can run it using the following command:

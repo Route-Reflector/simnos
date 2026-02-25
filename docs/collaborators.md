@@ -1,7 +1,7 @@
 # Collaborators
 This section is intended for all the people who collaborated in the project. It is a way to thank them for their contributions. It is important to keep in mind that the following people has spent some of their time enhancing this project.
 
-> From all the team of FakeNOS, we want to thank you all for your contributions. :tada:
+> From all the team of SIMNOS, we want to thank you all for your contributions. :tada:
 
 ## Contributors
 The following people have contributed to this project:

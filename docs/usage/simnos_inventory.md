@@ -1,7 +1,7 @@
 # Inventory
-FakeNOS uses an inventory to define a set of SSH hosts and their configuration. It is a key part to the project. The inventory is a dictionary that contains two sections: `default` and `hosts`. The `default` section contains parameters and configuration that FakeNOS uses by default for each host. The `hosts` section is a dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
+SIMNOS uses an inventory to define a set of SSH hosts and their configuration. It is a key part to the project. The inventory is a dictionary that contains two sections: `default` and `hosts`. The `default` section contains parameters and configuration that SIMNOS uses by default for each host. The `hosts` section is a dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
 
-The are two ways to provide inventory data to FakeNOS:
+The are two ways to provide inventory data to SIMNOS:
 
 1. Using YAML file
 2. Using Python dictionary
@@ -9,16 +9,16 @@ The are two ways to provide inventory data to FakeNOS:
 ## Basic structure
 In all cases the inventory data must have the following structure independently of the method used to provide it:
 
-- **default**: A dictionary containing default parameters and configuration that FakeNOS uses by default for each host.
+- **default**: A dictionary containing default parameters and configuration that SIMNOS uses by default for each host.
 - **hosts**: A dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
 
-It is mandatory always to provide the `hosts` section. The `default` section is optional. If not provided, FakeNOS uses a default configuration. This stucture works in hierarchical way, so the `hosts` section will override the `default` section.
+It is mandatory always to provide the `hosts` section. The `default` section is optional. If not provided, SIMNOS uses a default configuration. This stucture works in hierarchical way, so the `hosts` section will override the `default` section.
 
 !!! warning
     Even though you can freely change the default parameters, it is recommended to keep them as they are and override them through the `hosts` section. In case you change the `default` section, you must provide all the parameters that are in the default configuration.
 
 ### Default inventory
-If no inventory data provided on FakeNOS object instantiation, FakeNOS falls back on using default inventory configuration. These are the current defaults[^1]:
+If no inventory data provided on SIMNOS object instantiation, SIMNOS falls back on using default inventory configuration. These are the current defaults[^1]:
 ``` py linenums="1" hl_lines="16 17 18 19"
 default_inventory = {
     "default": {
@@ -66,21 +66,21 @@ hosts:
         platform: cisco_ios
 ```
 
-In this case, you are creating 2 hosts: `router1` and `router2`. `router1` will have the port `6001` and the platform `huawei_smartax`. `router2` will have the port `6002` and the platform `cisco_ios`. As the credentials are not provided in the `hosts` section, FakeNOS will use the default credentials.
+In this case, you are creating 2 hosts: `router1` and `router2`. `router1` will have the port `6001` and the platform `huawei_smartax`. `router2` will have the port `6002` and the platform `cisco_ios`. As the credentials are not provided in the `hosts` section, SIMNOS will use the default credentials.
 
-To use the YAML file, you can use the FakeNOS CLI tool:
+To use the YAML file, you can use the SIMNOS CLI tool:
 
 ``` bash
-fakenos -i path/to/inventory.yaml
+simnos -i path/to/inventory.yaml
 ```
 
 ## Python dictionary
-Although YAML is the easier way to provide inventory data to FakeNOS, using Python dictionary is more flexible and allows for more complex inventory data structures. As a matter of fact, python dictionaries are used internally by FakeNOS to handle the inventory data.
+Although YAML is the easier way to provide inventory data to SIMNOS, using Python dictionary is more flexible and allows for more complex inventory data structures. As a matter of fact, python dictionaries are used internally by SIMNOS to handle the inventory data.
 
-In case you want to use your own Python dictionary, you can provide it directly to FakeNOS. In the following code we are doing exactly the same as the first code in YAML:
+In case you want to use your own Python dictionary, you can provide it directly to SIMNOS. In the following code we are doing exactly the same as the first code in YAML:
 
 ``` python
-from fakenos import FakeNOS
+from simnos import SimNOS
 
 inventory_data = {
     "hosts": {
@@ -91,7 +91,7 @@ inventory_data = {
     }
 }
 
-network = FakeNOS(inventory=inventory_data)
+network = SimNOS(inventory=inventory_data)
 ```
 
 As before, in case that you want to create more hosts, you can add them to the `hosts` section:
@@ -110,7 +110,7 @@ inventory_data = {
 Sample inventory data and code to start the servers:
 
 ```{ .python .annotate }
-from fakenos import FakeNOS
+from simnos import SimNOS
 
 fake_network = {
     "default": { # (4)
@@ -131,8 +131,8 @@ fake_network = {
     "hosts": {
         "R1": {
             "port": 5001,
-            "username": "fakenos", # (2)
-            "password": "fakenos",
+            "username": "simnos", # (2)
+            "password": "simnos",
             "server": {
                 "plugin": "ParamikoSshServer",
                 "configuration": {"address": "0.0.0.0"},  # (1)
@@ -147,7 +147,7 @@ fake_network = {
     },
 }
 
-network = FakeNOS(inventory=fake_network)
+network = SimNOS(inventory=fake_network)
 network.starts()
 
 print(network.list_hosts())
@@ -160,10 +160,10 @@ print(network.list_hosts())
 4. Settings used by all hosts by default
 
 Alternative to running above code is to supply custom inventory to
-FakeNOS CLI tool:
+SIMNOS CLI tool:
 
 ```bash
-fakenos -i path/to/my_inventory.yaml
+simnos -i path/to/my_inventory.yaml
 ```
 
 Where `my_inventory.yaml` could contain equivalent to above Python code
@@ -188,9 +188,9 @@ default:
     plugin: cisco_ios
 hosts:
   R1:
-    password: fakenos
+    password: simnos
     port: 5001
-    username: fakenos
+    username: simnos
     server:
       plugin: ParamikoSshServer
       configuration:
@@ -233,7 +233,7 @@ inventory_data = {
 }
 ```
 
-This configuration will result in FakeNOS running 10 instances of hosts servers named `router1` to `router10` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
+This configuration will result in SIMNOS running 10 instances of hosts servers named `router1` to `router10` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
 
 !!! warning
     If host inventory data contains `replicas` parameter, `port` parameter must be a list
@@ -242,13 +242,13 @@ This configuration will result in FakeNOS running 10 instances of hosts servers 
 
 ## Generating SSH private key
 
-By default FakeNOS uses SSH private key embedded with the package, making that key publicly available, which is insecure. Instead, FakeNOS can use locally generated SSH key.
+By default SIMNOS uses SSH private key embedded with the package, making that key publicly available, which is insecure. Instead, SIMNOS can use locally generated SSH key.
 
 ### Linux and MacOS
 
 Use the command `ssh-keygen -A` in terminal to generate all of your SSH keys. Once the command is run,
 you can find the RSA key in the following location: `~/.ssh/id_rsa` a.k.a. `/home/<username>.ssh/id_rsa`.
-Supply above path as `ssh_key_file` argument to FakeNOS server configuration.
+Supply above path as `ssh_key_file` argument to SIMNOS server configuration.
 
 Alternatively can use `ckeygen -t rsa -f ssh-keys/ssh_host_rsa_key` command to generate private key.
 
@@ -257,13 +257,13 @@ Alternatively can use `ckeygen -t rsa -f ssh-keys/ssh_host_rsa_key` command to g
 Press Windows Key, type `Manage Optional Features`. If OpenSSH Client & Server is in the list, you're all set.
 If either is not, click on "Add a feature" and search for `OpenSSH`, click on them to install.
 Next, open cmd as administrator. Enter the command `ssh-keygen` and follow the on screen prompts.
-The location of the key will be displayed. Supply displayed path as `ssh_key_file` argument to FakeNOS
+The location of the key will be displayed. Supply displayed path as `ssh_key_file` argument to SIMNOS
 server configuration. If you put a password, include it as the `ssh_key_file_password` parameter.
 
 
 ## Inventory JSON Schema
 
-FakeNOS internally uses [Pydantic](https://pydantic-docs.helpmanual.io/usage/models/)
+SIMNOS internally uses [Pydantic](https://pydantic-docs.helpmanual.io/usage/models/)
 models to validate inventory data and raise `ValidationError` if inventory does
 not comply with defined schema.
 
@@ -272,8 +272,8 @@ like this:
 
 ```json
 {
-    "title": "ModelFakenosInventory",
-    "description": "FakeNOS inventory data schema",
+    "title": "ModelSimnosInventory",
+    "description": "SIMNOS inventory data schema",
     "type": "object",
     "properties": {
         "default": {
@@ -306,7 +306,7 @@ like this:
                 },
                 "ssh_banner": {
                     "title": "Ssh Banner",
-                    "default": "FakeNOS Paramiko SSH Server",
+                    "default": "SIMNOS Paramiko SSH Server",
                     "type": "string"
                 },
                 "timeout": {
@@ -543,7 +543,7 @@ The following options can be used either in the `default` section or in the `hos
 | ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |
 | `ssh_key_file`            | :key:                     | path to SSH private key file          | `ssh_key_file: /path/to/ssh_key`               |
 | `ssh_key_file_password`   | :key:                     | password for SSH private key          | `ssh_key_file_password: password`              |
-| `ssh_banner`              | :scroll:                  | SSH banner to display                 | `ssh_banner: "Welcome to FakeNOS SSH Server"`  |
+| `ssh_banner`              | :scroll:                  | SSH banner to display                 | `ssh_banner: "Welcome to SIMNOS SSH Server"`   |
 | `timeout`                 | :hourglass:               | timeout for server                    | `timeout: 1`                                   |
 | `address`                 | :globe_with_meridians:    | address to bind server to             | `address: 127.0.0.1`                           |
 | `watchdog_interval`       | :dog:                     | interval for watchdog                 | `watchdog_interval: 1`                         |
@@ -565,4 +565,4 @@ The following options can be used either in the `default` section or in the `hos
 | `configuration`           | :gear:                    | NOS configuration                     | The configuration entirely rely on the plugin                           |
 
 
-[^1]: To see the current defaults, check the [source code](https://github.com/fakenos/fakenos/blob/master/fakenos/core/fakenos.py) of FakeNOS.
+[^1]: To see the current defaults, check the [source code](https://github.com/Route-Reflector/simnos/blob/master/simnos/core/simnos.py) of SIMNOS.

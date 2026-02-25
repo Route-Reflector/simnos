@@ -26,7 +26,7 @@ nav = [
     {"Usage" = [
         {"Installation" = "usage/installation.md"},
         {"Getting Started" = "usage/getting_started.md"},
-        {"Inventory" = "usage/fakenos_inventory.md"},
+        {"Inventory" = "usage/simnos_inventory.md"},
         {"Running in Docker Container" = "usage/running_in_docker.md"},
         {"Configurations" = "usage/configurations.md"},
     ]},

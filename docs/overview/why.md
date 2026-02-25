@@ -1,7 +1,7 @@
 # Why?
 
 Testing is a crucial aspect of modern software engineering and therefore it is
-important in Network Automation. FakeNOS solves the problem of testing scripts
+important in Network Automation. SIMNOS solves the problem of testing scripts
 in a lightweight and easy to use manner. It allows to create a test environment
 with multiple devices running different Network Operating Systems (NOS) in a
 matter of minutes.
@@ -35,8 +35,8 @@ for each command that you want to test. This is very time consuming and not alwa
 the best solution.
 
 ## Our approach
-FakeNOS positions itself somewhere in the middle between full integration testing
-and testing that mocks device interactions. FakeNOS allows to create NOS plugins
+SIMNOS positions itself somewhere in the middle between full integration testing
+and testing that mocks device interactions. SIMNOS allows to create NOS plugins
 to produce pre-defined output to test applications behavior while running servers
 to establish connections with.
 

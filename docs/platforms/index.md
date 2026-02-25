@@ -1,11 +1,11 @@
 # Platforms
-The following list of platforms are supported by FakeNOS. All the platforms listed here have been tested using Netmiko to enter, so you can be sure that at least you can enter correctly. The status of each platform is indicated by the following symbols:
+The following list of platforms are supported by SIMNOS. All the platforms listed here have been tested using Netmiko to enter, so you can be sure that at least you can enter correctly. The status of each platform is indicated by the following symbols:
 
 - ✅: Fully supported
 - ❌: Not currently working
 
 !!! note
-    If you encounter any issues with a platform, please open an issue on the [GitHub repository](https://github.com/fakenos/fakenos/issues).
+    If you encounter any issues with a platform, please open an issue on the [GitHub repository](https://github.com/Route-Reflector/simnos/issues).
 
 
 ## Available Platforms

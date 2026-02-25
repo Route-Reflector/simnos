@@ -1,11 +1,11 @@
 ## NOS Plugins
 
-NOS plugins are at the heart of FakeNOS, they are what enables to realize its
+NOS plugins are at the heart of SIMNOS, they are what enables to realize its
 full potential.
 
 ### Cisco IOS
 
-::: fakenos.plugins.nos.platforms_py.cisco_ios
+::: simnos.plugins.nos.platforms_py.cisco_ios
     rendering:
       show_if_no_docstring: true
 	  heading_level: 4
@@ -17,7 +17,7 @@ Servers Plugins acts as an access layer, simulating device connections.
 
 ### ParamikoSshServer
 
-::: fakenos.plugins.servers.ssh_server_paramiko.ParamikoSshServer
+::: simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServer
     rendering:
 	  heading_level: 4
 	  show_object_full_path: false
@@ -29,7 +29,7 @@ gluing, connecting them together.
 
 ### CMDShell
 
-::: fakenos.plugins.shell.cmd_shell.CMDShell
+::: simnos.plugins.shell.cmd_shell.CMDShell
     rendering:
 	  heading_level: 4
 	  show_object_full_path: false

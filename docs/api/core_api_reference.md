@@ -1,15 +1,15 @@
-## FakeNOS Class
+## SimNOS Class
 
-::: fakenos.core.fakenos.FakeNOS
+::: simnos.core.simnos.SimNOS
 
 ## Host Class
 
-::: fakenos.core.host.Host
+::: simnos.core.host.Host
 
 ## Nos Class
 
-::: fakenos.core.nos.Nos
+::: simnos.core.nos.Nos
 
 ## TCPServerBase Class
 
-::: fakenos.core.servers.TCPServerBase
+::: simnos.core.servers.TCPServerBase

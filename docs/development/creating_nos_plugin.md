@@ -1,4 +1,4 @@
-You can create NOS plugins and register them with a FakeNOS instance before
+You can create NOS plugins and register them with a SIMNOS instance before
 starting the servers.
 
 There are several ways to create a NOS plugin:
@@ -135,7 +135,7 @@ the current prompt value should be set to the `new_prompt` value.
 Create a YAML file with this sample content in `path/to/my_nos.yaml`:
 
 ```yaml
-name: MyFakeNOSPlugin
+name: MySimNOSPlugin
 
 initial_prompt: "{base_prompt}>"
 
@@ -192,12 +192,12 @@ hosts:
 And to quickly test it, you can run this command in the terminal:
 
 ```bash
-fakenos -i path/to/inventory.yaml
+simnos -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from a Python file
 
-NOS plugins created from Python modules are one of the main strengths of FakeNOS as they allow for interactivity. The idea of the commands is that the output of these instead of being a predefined output, you can define a function that returns the output of the command. This allows the output of the command to be dynamic and can change depending on the time, day, host, etc. If you are developing a Python NOS module, then it is worth reading this section carefully.
+NOS plugins created from Python modules are one of the main strengths of SIMNOS as they allow for interactivity. The idea of the commands is that the output of these instead of being a predefined output, you can define a function that returns the output of the command. This allows the output of the command to be dynamic and can change depending on the time, day, host, etc. If you are developing a Python NOS module, then it is worth reading this section carefully.
 
 The following code is a Python module that we use during tests, but it is fully functional (in Netmiko the object is generic):
 
@@ -208,7 +208,7 @@ This is a testing module
 
 import time
 
-from fakenos.plugins.nos.platforms_py.base_template import BaseDevice
+from simnos.plugins.nos.platforms_py.base_template import BaseDevice
 
 NAME: str = "test_module"
 INITIAL_PROMPT = "{base_prompt}>"
@@ -254,15 +254,15 @@ commands = {
 }
 ```
 
-Let's break it down. FakeNOS allows loading modules dynamically, but it needs the module to have a certain structure. On one hand, it must have some constants (NAME, INITIAL_PROMPT, ENABLE_PROMPT, CONFIG_PROMPT, and DEVICE_NAME), on the other hand, a dictionary of commands, and lastly a class that inherits from BaseDevice. This is mandatory for FakeNOS to be able to load the module.
+Let's break it down. SIMNOS allows loading modules dynamically, but it needs the module to have a certain structure. On one hand, it must have some constants (NAME, INITIAL_PROMPT, ENABLE_PROMPT, CONFIG_PROMPT, and DEVICE_NAME), on the other hand, a dictionary of commands, and lastly a class that inherits from BaseDevice. This is mandatory for SIMNOS to be able to load the module.
 
-First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for FakeNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
+First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
 
 Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string or a function that returns a string. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
 
-Lastly, we have a class that inherits from BaseDevice. This class is necessary for FakeNOS to be able to load the module correctly. Internally, it already initializes the module with an attribute `self.configurations` where the data from the [configuration](usage/configurations.md) file defined in the `DEFAULT_CONFIGURATION` attribute by default will be loaded as a dictionary. It also includes a method `render(self, template: str, **kwargs) -> str` that allows rendering a Jinja2 template under the `fakenos/plugins/nos/platforms_py/templates/` directory. Having this class with these attributes helps to standardize the modules. At the same time, having it in a class instead of separate functions allows you to share variables between commands or even modify the state of the device. For example, if I create a command to modify the IP of the device, I can modify the state of the device in the class and have the rest of the commands take this change into account, returning the string with the new IP.
+Lastly, we have a class that inherits from BaseDevice. This class is necessary for SIMNOS to be able to load the module correctly. Internally, it already initializes the module with an attribute `self.configurations` where the data from the [configuration](usage/configurations.md) file defined in the `DEFAULT_CONFIGURATION` attribute by default will be loaded as a dictionary. It also includes a method `render(self, template: str, **kwargs) -> str` that allows rendering a Jinja2 template under the `simnos/plugins/nos/platforms_py/templates/` directory. Having this class with these attributes helps to standardize the modules. At the same time, having it in a class instead of separate functions allows you to share variables between commands or even modify the state of the device. For example, if I create a command to modify the IP of the device, I can modify the state of the device in the class and have the rest of the commands take this change into account, returning the string with the new IP.
 
-Obviously, you can also create your own Python module with your own commands and logic. Just make sure it has the correct structure and can be loaded correctly. You have to indicate it in the FakeNOS inventory and FakeNOS will take care of loading it and registering the commands.
+Obviously, you can also create your own Python module with your own commands and logic. Just make sure it has the correct structure and can be loaded correctly. You have to indicate it in the SIMNOS inventory and SIMNOS will take care of loading it and registering the commands.
 
 To be able to check the above code, we can create a YAML with the inventory as we have done before:
 ```yaml
@@ -277,28 +277,28 @@ hosts:
 
 And to test it quickly, you can run the following command in the terminal:
 ```bash
-fakenos -i path/to/inventory.yaml
+simnos -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from the Nos class
 !!! warning
     It is discouraged to develop NOS plugins using the Nos class directly as it is more complicated to maintain. Instead, it is recommended to use the Python module.
 
-The FakeNOS package comes with the base class Nos that can be used to create
-NOS plugins to register them with a FakeNOS instance. After all, we have previously done the same but instead of creating it ourselves, we have let FakeNOS do it for us.
+The SIMNOS package comes with the base class Nos that can be used to create
+NOS plugins to register them with a SIMNOS instance. After all, we have previously done the same but instead of creating it ourselves, we have let SIMNOS do it for us.
 
 Sample core to define a custom NOS plugin using
 the Nos class by supplying the required attributes during instantiation:
 
 ```python
-from fakenos import FakeNOS, Nos
+from simnos import SimNOS, Nos
 
 nos = Nos(
-    name="MyFakeNOSPlugin",
+    name="MySimNOSPlugin",
     initial_prompt="{base_prompt}>",
     commands={
         "terminal length 0": {"output": "", "help": "Set terminal length to 0", "prompt": "{base_prompt}>"},
-        "show clock": {"output": "MyFakeNOSPlugin system time is 00:00:00", "help": "Display the system clock", "prompt": "{base_prompt}>"},
+        "show clock": {"output": "MySimNOSPlugin system time is 00:00:00", "help": "Display the system clock", "prompt": "{base_prompt}>"},
     },
 )
 
@@ -306,12 +306,12 @@ inventory = {
     "hosts": {
         "router42": {
             "port": 6005,
-            "nos": {"plugin": "MyFakeNOSPlugin"},
+            "nos": {"plugin": "MySimNOSPlugin"},
         },
     }
 }
 
-net = FakeNOS(inventory)
+net = SimNOS(inventory)
 
 net.register_nos_plugin(plugin=nos)
 
@@ -325,7 +325,7 @@ except KeyboardInterrupt:
 ```
 
 In this example, an object Nos is created with the required attributes and registered with
-an instance of FakeNOS.
+an instance of SimNOS.
 
 Additionally, the methods `from_dict` and `from_file` of the Nos class
 can be used to supply Nos attributes. For example, you can get equivalent results to
@@ -339,7 +339,7 @@ inventory = {
     "hosts": {
         "router42": {
             "port": 6005,
-            "nos": {"plugin": "MyFakeNOSPlugin"},
+            "nos": {"plugin": "MySimNOSPlugin"},
         },
     }
 }

@@ -1,6 +1,6 @@
 # huawei_smartax
 
-Some commands have configurable outputs. This is indicated by the :gear: emoji. You can modify the output of these commands by changing the values in the `configurations` file. If you want to see the defaults look at `fakenos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2`.
+Some commands have configurable outputs. This is indicated by the :gear: emoji. You can modify the output of these commands by changing the values in the `configurations` file. If you want to see the defaults look at `simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2`.
 
 ## Specific devices
 -  [Huawei OptiXaccess MA5800](
