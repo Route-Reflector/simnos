@@ -9,7 +9,6 @@ import logging
 import platform
 import socket
 import threading
-import time
 
 import detect
 import yaml
@@ -302,13 +301,7 @@ class SimNOS:
         """
         hosts: list[str] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
-        managed_threads: list[threading.Thread] = []
-        if hosts == list(self.hosts.values()):
-            for host in hosts:
-                if host.server is not None:
-                    if host.server._listen_thread is not None:
-                        managed_threads.append(host.server._listen_thread)
-                    managed_threads.extend(host.server._connection_threads)
+        managed_threads = self._collect_server_threads(hosts)
         self._execute_function_over_hosts(
             hosts,
             "stop",
@@ -319,6 +312,14 @@ class SimNOS:
         if managed_threads:
             self._join_threads(managed_threads)
 
+    def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
+        """Collect all managed threads from host servers before stopping."""
+        threads: list[threading.Thread] = []
+        for host in hosts:
+            if host.server is not None:
+                threads.extend(host.server.managed_threads)
+        return threads
+
     def _join_threads(self, threads: list[threading.Thread]) -> None:
         """
         Join SimNOS-managed threads after all hosts are stopped.
@@ -327,12 +328,9 @@ class SimNOS:
         """
         for thread in threads:
             thread.join(timeout=5)
-        deadline = time.monotonic() + 10
-        while any(t.is_alive() for t in threads):
-            if time.monotonic() > deadline:
-                log.warning("Some threads did not exit within timeout")
-                break
-            time.sleep(0.01)
+        alive = [t for t in threads if t.is_alive()]
+        if alive:
+            log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 
     def _execute_function_over_hosts(
         self,

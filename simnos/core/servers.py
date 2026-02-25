@@ -67,6 +67,14 @@ class TCPServerBase(ABC):
         self._socket.settimeout(self.timeout)
         self._socket.bind((self.address, self.port))
 
+    @property
+    def managed_threads(self) -> list[threading.Thread]:
+        """Return all threads managed by this server (listen + connections)."""
+        threads = list(self._connection_threads)
+        if self._listen_thread is not None:
+            threads.append(self._listen_thread)
+        return threads
+
     def stop(self):
         """
         It stops the server joining the threads
