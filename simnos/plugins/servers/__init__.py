@@ -1,5 +1,5 @@
 """
-This module is the point of entry for server plugins in FakeNOS.
+This module is the point of entry for server plugins in SIMNOS.
 
 """
 

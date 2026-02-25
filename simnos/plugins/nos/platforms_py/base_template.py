@@ -1,6 +1,6 @@
 """
 This module is intended to be used as a template
-for creating new module devices for FakeNOS.
+for creating new module devices for SIMNOS.
 It has certain atributes and methods which are
 generally common to all devices.
 """

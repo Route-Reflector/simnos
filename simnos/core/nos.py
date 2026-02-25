@@ -1,5 +1,5 @@
 """
-Network Operating Systems (NOS). Base class to build NOS plugins instances to use with FakeNOS.
+Network Operating Systems (NOS). Base class to build NOS plugins instances to use with SIMNOS.
 """
 
 import importlib.util
@@ -59,14 +59,14 @@ available_platforms: list[str] = [
 
 class Nos:
     """
-    Base class to build NOS plugins instances to use with FakeNOS.
+    Base class to build NOS plugins instances to use with SIMNOS.
     """
 
     def __init__(
         self,
-        name: str = "FakeNOS",
+        name: str = "SimNOS",
         commands: dict | None = None,
-        initial_prompt: str = "FakeNOS>",
+        initial_prompt: str = "SimNOS>",
         filename: str | list[str] | None = None,
         configuration_file: str | None = None,
         dict_args: dict | None = None,
@@ -112,7 +112,7 @@ class Nos:
         Sample NOS dictionary::
 
             nos_plugin_dict = {
-                "name": "MyFakeNOSPlugin",
+                "name": "MySimNOSPlugin",
                 "initial_prompt": "{base_prompt}>",
                 "commands": {
                     "terminal width 511": {
@@ -126,7 +126,7 @@ class Nos:
                         "prompt": "{base_prompt}>",
                     },
                     "show clock": {
-                        "output": "MyFakeNOSPlugin system time is 00:00:00",
+                        "output": "MySimNOSPlugin system time is 00:00:00",
                         "help": "Show system time",
                         "prompt": "{base_prompt}>",
                     },
@@ -148,7 +148,7 @@ class Nos:
 
         Sample NOS YAML file content::
 
-            name: "MyFakeNOSPlugin"
+            name: "MySimNOSPlugin"
             initial_prompt: "{base_prompt}>"
             commands:
                 terminal width 511: {
@@ -162,7 +162,7 @@ class Nos:
                     "prompt": "{base_prompt}>",
                 }
                 show clock: {
-                    "output": "MyFakeNOSPlugin system time is 00:00:00",
+                    "output": "MySimNOSPlugin system time is 00:00:00",
                     "help": "Show system time",
                     "prompt": "{base_prompt}>",
                 }
@@ -181,7 +181,7 @@ class Nos:
 
         Sample Python NOS plugin file::
 
-            name = "MyFakeNOSPlugin"
+            name = "MySimNOSPlugin"
 
             INITIAL_PROMPT = "{base_prompt}>"
 
@@ -197,7 +197,7 @@ class Nos:
                     "prompt": "{base_prompt}>",
                 },
                 "show clock": {
-                    "output": "MyFakeNOSPlugin system time is 00:00:00",
+                    "output": "MySimNOSPlugin system time is 00:00:00",
                     "help": "Show system time",
                     "prompt": "{base_prompt}>",
                 },

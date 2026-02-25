@@ -64,21 +64,21 @@ class TestSimNOS:
         Those routers should have the following:
         - names are R1 and R2
         - port are 5001 and 6000
-        - username is fakenos
-        - password is fakenos
+        - username is simnos
+        - password is simnos
         """
         inventory = {
             "hosts": {
                 "R1": {
                     "port": 5001,
-                    "username": "fakenos_R1",
-                    "password": "fakenos_R1",
+                    "username": "simnos_R1",
+                    "password": "simnos_R1",
                     "platform": available_platforms[0],
                 },
                 "R2": {
                     "port": 6000,
-                    "username": "fakenos_R2",
-                    "password": "fakenos_R2",
+                    "username": "simnos_R2",
+                    "password": "simnos_R2",
                     "platform": available_platforms[0],
                 },
             }
@@ -87,8 +87,8 @@ class TestSimNOS:
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
-            assert host.username in ["fakenos_R1", "fakenos_R2"]
-            assert host.password in ["fakenos_R1", "fakenos_R2"]
+            assert host.username in ["simnos_R1", "simnos_R2"]
+            assert host.password in ["simnos_R1", "simnos_R2"]
             assert host.port in [5001, 6000]
 
     def test_create_simnos_with_inventory_as_file(self):
@@ -97,15 +97,15 @@ class TestSimNOS:
         Those routers should have the following:
         - names are R1 and R2
         - port are 5001 and 6000
-        - username is fakenos
-        - password is fakenos
+        - username is simnos
+        - password is simnos
         """
         net = SimNOS(inventory="tests/assets/inventory.yaml")
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
-            assert host.username in "fakenos"
-            assert host.password in "fakenos"
+            assert host.username in "simnos"
+            assert host.password in "simnos"
             assert host.port in [5001, 6000]
 
     def test_is_inventory_in_yaml(self):

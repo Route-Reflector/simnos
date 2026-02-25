@@ -1,5 +1,5 @@
 """
-This module sets up the host object which is the main object in FakeNOS.
+This module sets up the host object which is the main object in SIMNOS.
 It provides the methods to start and stop the server instance for the host.
 It also validates the host object using pydantic.
 """
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class Host:
     """
-    Host class to build host instances to use with FakeNOS.
+    Host class to build host instances to use with SIMNOS.
     """
 
     # pylint: disable=too-many-arguments
@@ -96,6 +96,6 @@ class Host:
         """Check if the platform is supported"""
         if platform not in available_platforms:
             raise ValueError(
-                f"Platform {platform} is not supported by FakeNOS. \
+                f"Platform {platform} is not supported by SIMNOS. \
                     Supported platforms are: {available_platforms}"
             )

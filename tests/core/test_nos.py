@@ -35,26 +35,26 @@ class NosTest(unittest.TestCase):
         Test that the init method works when no arguments are provided.
         """
         nos = Nos()
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
     def test_init_with_arguments(self):
         """
         Test that the init method works when arguments are provided.
         """
-        nos = Nos(name="MyFakeNOS", initial_prompt="MyFakeNOS>", commands=self.commands)
-        assert nos.name == "MyFakeNOS"
-        assert nos.initial_prompt == "MyFakeNOS>"
+        nos = Nos(name="MySimNOS", initial_prompt="MySimNOS>", commands=self.commands)
+        assert nos.name == "MySimNOS"
+        assert nos.initial_prompt == "MySimNOS>"
         assert nos.commands == self.commands
 
     def test_init_with_argument_name(self):
         """
         Test that the init method works when the name argument is provided.
         """
-        nos = Nos(name="MyFakeNOS")
-        assert nos.name == "MyFakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        nos = Nos(name="MySimNOS")
+        assert nos.name == "MySimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
     def test_init_with_argument_initial_prompt(self):
@@ -62,9 +62,9 @@ class NosTest(unittest.TestCase):
         Test that the init method works when
         the initial_prompt argument is provided.
         """
-        nos = Nos(initial_prompt="MyFakeNOS>")
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "MyFakeNOS>"
+        nos = Nos(initial_prompt="MySimNOS>")
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "MySimNOS>"
         assert nos.commands == {}
 
     def test_init_with_argument_commands(self):
@@ -72,8 +72,8 @@ class NosTest(unittest.TestCase):
         Test that the init method works when the commands argument is provided.
         """
         nos = Nos(commands=self.commands)
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == self.commands
 
     def test_validate(self):
@@ -92,13 +92,13 @@ class NosTest(unittest.TestCase):
         nos = Nos()
         nos.from_dict(
             {
-                "name": "MyFakeNOS",
-                "initial_prompt": "MyFakeNOS>",
+                "name": "MySimNOS",
+                "initial_prompt": "MySimNOS>",
                 "commands": self.commands,
             }
         )
-        assert nos.name == "MyFakeNOS"
-        assert nos.initial_prompt == "MyFakeNOS>"
+        assert nos.name == "MySimNOS"
+        assert nos.initial_prompt == "MySimNOS>"
         assert nos.commands == self.commands
 
     def test_from_dict_incorrect_name(self):
@@ -107,7 +107,7 @@ class NosTest(unittest.TestCase):
         ValidationError when the name is incorrect.
         """
         with pytest.raises(ValidationError):
-            Nos({"name": 123, "initial_prompt": "MyFakeNOS>", "commands": self.commands})
+            Nos({"name": 123, "initial_prompt": "MySimNOS>", "commands": self.commands})
 
     def test_from_dict_incorrect_initial_prompt(self):
         """
@@ -115,7 +115,7 @@ class NosTest(unittest.TestCase):
         ValidationError when the initial_prompt is incorrect.
         """
         with pytest.raises(ValidationError):
-            Nos({"name": "MyFakeNOS", "initial_prompt": 123, "commands": self.commands})
+            Nos({"name": "MySimNOS", "initial_prompt": 123, "commands": self.commands})
 
     def test_from_dict_incorrect_commands(self):
         """
@@ -125,8 +125,8 @@ class NosTest(unittest.TestCase):
         with pytest.raises(ValidationError):
             Nos(
                 {
-                    "name": "MyFakeNOS",
-                    "initial_prompt": "MyFakeNOS>",
+                    "name": "MySimNOS",
+                    "initial_prompt": "MySimNOS>",
                     "commands": "invalid_commands",
                 }
             )
@@ -136,9 +136,9 @@ class NosTest(unittest.TestCase):
         Test that the from_dict method works when only the name is provided.
         """
         nos = Nos()
-        nos.from_dict({"name": "MyFakeNOS"})
-        assert nos.name == "MyFakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        nos.from_dict({"name": "MySimNOS"})
+        assert nos.name == "MySimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
     def test_from_dict_only_initial_prompt(self):
@@ -147,9 +147,9 @@ class NosTest(unittest.TestCase):
         when only the initial_prompt is provided.
         """
         nos = Nos()
-        nos.from_dict({"initial_prompt": "MyFakeNOS>"})
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "MyFakeNOS>"
+        nos.from_dict({"initial_prompt": "MySimNOS>"})
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "MySimNOS>"
         assert nos.commands == {}
 
     def test_from_dict_only_commands(self):
@@ -159,8 +159,8 @@ class NosTest(unittest.TestCase):
         """
         nos = Nos()
         nos.from_dict({"commands": self.commands})
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == self.commands
 
     def test_from_dict_no_data(self):
@@ -169,8 +169,8 @@ class NosTest(unittest.TestCase):
         """
         nos = Nos()
         nos.from_dict({})
-        assert nos.name == "FakeNOS"
-        assert nos.initial_prompt == "FakeNOS>"
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
     def test_from_yaml_file(self):
@@ -244,15 +244,15 @@ class NosTest(unittest.TestCase):
         commands = {
             "terminal width 511": {"output": "", "help": "Set terminal width to 511"},
             "terminal length 0": {"output": "", "help": "Set terminal length to 0"},
-            "show clock": {"output": "MyFakeNOSPlugin system time is 00:00:00"},
+            "show clock": {"output": "MySimNOSPlugin system time is 00:00:00"},
         }
         nos = Nos(
-            name="MyFakeNOSPlugin",
+            name="MySimNOSPlugin",
             initial_prompt="{base_prompt}>",
             commands=commands,
         )
 
-        assert nos.name == "MyFakeNOSPlugin"
+        assert nos.name == "MySimNOSPlugin"
         assert nos.initial_prompt == "{base_prompt}>"
         assert nos.commands == commands
 
@@ -261,7 +261,7 @@ class NosTest(unittest.TestCase):
         Test that we can register a nos model from a dict.
         """
         nos_dict = {
-            "name": "MyFakeNOSPlugin",
+            "name": "MySimNOSPlugin",
             "initial_prompt": "{base_prompt}>",
             "commands": {
                 "terminal width 511": {
@@ -269,7 +269,7 @@ class NosTest(unittest.TestCase):
                     "help": "Set terminal width to 511",
                 },
                 "terminal length 0": {"output": "", "help": "Set terminal length to 0"},
-                "show clock": {"output": "MyFakeNOSPlugin system time is 00:00:00"},
+                "show clock": {"output": "MySimNOSPlugin system time is 00:00:00"},
             },
         }
 
@@ -295,7 +295,7 @@ class NosTest(unittest.TestCase):
         """
         with pytest.raises(ValidationError):
             Nos(
-                name="MyFakeNOSPlugin",
+                name="MySimNOSPlugin",
                 initial_prompt="{base_prompt}>",
                 commands={
                     "show clock": {"output": 37},

@@ -67,7 +67,7 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
 
     def __init__(
         self,
-        ssh_banner: str = "FakeNOS Paramiko SSH Server",
+        ssh_banner: str = "SIMNOS Paramiko SSH Server",
         username: str | None = None,
         password: str | None = None,
         allow_auth_none: bool = False,
@@ -289,7 +289,7 @@ class ParamikoSshServer(TCPServerBase):
         password: str,
         ssh_key_file: paramiko.rsakey.RSAKey | None = None,
         ssh_key_file_password: str | None = None,
-        ssh_banner: str = "FakeNOS Paramiko SSH Server",
+        ssh_banner: str = "SIMNOS Paramiko SSH Server",
         shell_configuration: dict | None = None,
         address: str = "127.0.0.1",
         timeout: int = 1,

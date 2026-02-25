@@ -85,7 +85,7 @@ class ParamikoSshServerConfig(BaseModel):
 
     ssh_key_file: StrictStr | None = None
     ssh_key_file_password: StrictStr | None = None
-    ssh_banner: StrictStr | None = "FakeNOS Paramiko SSH Server"
+    ssh_banner: StrictStr | None = "SIMNOS Paramiko SSH Server"
     timeout: StrictInt | None = 1
     address: Literal["localhost"] | IPvAnyAddress | None = None
     watchdog_interval: StrictInt | None = 1
