@@ -57,7 +57,7 @@ args = argparser.parse_args()
 logging.basicConfig(level=args.LOG_LEVEL.upper())
 
 if args.RELOAD_COMMANDS:
-    os.environ["FAKENOS_RELOAD_COMMANDS"] = "ON"
+    os.environ["SIMNOS_RELOAD_COMMANDS"] = "ON"
 
 
 def run_cli():
@@ -73,7 +73,7 @@ def run_cli():
         log.info("Shutting down SimNOS")
         fakenet.stop()
         if args.RELOAD_COMMANDS:
-            os.environ.pop("FAKENOS_RELOAD_COMMANDS")
+            os.environ.pop("SIMNOS_RELOAD_COMMANDS")
 
 
 if __name__ == "__main__":

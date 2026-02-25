@@ -313,15 +313,15 @@ class HotReloadTest(TestCase):
             "base_prompt": "test",
             "is_running": threading.Event(),
         }
-        os.environ["FAKENOS_RELOAD_COMMANDS"] = "ON"
+        os.environ["SIMNOS_RELOAD_COMMANDS"] = "ON"
 
     def tearDown(self):
-        if "FAKENOS_RELOAD_COMMANDS" in os.environ:
-            os.environ.pop("FAKENOS_RELOAD_COMMANDS")
+        if "SIMNOS_RELOAD_COMMANDS" in os.environ:
+            os.environ.pop("SIMNOS_RELOAD_COMMANDS")
 
     def test_hot_reload_not_activated_doesnt_enter(self):
         """Test that the if is not set  hot_reload method does nothing."""
-        os.environ.pop("FAKENOS_RELOAD_COMMANDS")
+        os.environ.pop("SIMNOS_RELOAD_COMMANDS")
         mock_get_files_changed = Mock()
         shell = CMDShell(**self.arguments)
         shell.get_files_changed = mock_get_files_changed

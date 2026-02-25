@@ -90,7 +90,7 @@ class CMDShell(Cmd):
 
     def precmd(self, line):
         """Method to return line before processing the command"""
-        if os.environ.get("FAKENOS_RELOAD_COMMANDS"):
+        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
             changed_files = get_files_changed(nos.__path__[0])
             if changed_files:
                 log.debug("Reloading... Files changed: %s", changed_files)
