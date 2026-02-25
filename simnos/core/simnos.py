@@ -301,6 +301,14 @@ class SimNOS:
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
         hosts: list[str] = self._get_hosts_as_list(hosts)
+        # Collect managed threads before stopping (Host.stop sets server to None)
+        managed_threads: list[threading.Thread] = []
+        if hosts == list(self.hosts.values()):
+            for host in hosts:
+                if host.server is not None:
+                    if host.server._listen_thread is not None:
+                        managed_threads.append(host.server._listen_thread)
+                    managed_threads.extend(host.server._connection_threads)
         self._execute_function_over_hosts(
             hosts,
             "stop",
@@ -308,20 +316,19 @@ class SimNOS:
             parallel=parallel,
             workers=workers,
         )
-        if hosts == list(self.hosts.values()):
-            self._join_threads()
+        if managed_threads:
+            self._join_threads(managed_threads)
 
-    def _join_threads(self) -> None:
+    def _join_threads(self, threads: list[threading.Thread]) -> None:
         """
-        Method to join threads in case that all hosts are stopped.
+        Join SimNOS-managed threads after all hosts are stopped.
+        Server threads are already joined by TCPServerBase.stop();
+        this is a safety net for any stragglers.
         """
-        all_threads = threading.enumerate()
-        for thread in all_threads:
-            if thread is not threading.main_thread() and "pytest_timeout" not in thread.name:
-                thread.join(timeout=5)
+        for thread in threads:
+            thread.join(timeout=5)
         deadline = time.monotonic() + 10
-        n_threads: int = 2 if detect.windows else 1
-        while threading.active_count() > n_threads:
+        while any(t.is_alive() for t in threads):
             if time.monotonic() > deadline:
                 log.warning("Some threads did not exit within timeout")
                 break

@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
@@ -170,8 +171,4 @@ class ModelSimnosInventory(BaseModel):
     default: InventoryDefaultSection | None = None
     hosts: dict[StrictStr, HostConfig]
 
-    # pylint: disable=too-few-public-methods
-    class ConfigDict:
-        """Pydantic model configuration"""
-
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")

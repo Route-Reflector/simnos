@@ -2,6 +2,7 @@
 NOS module for Cisco IOS
 """
 
+import os
 import time
 
 from simnos.plugins.nos.platforms_py.base_template import BaseDevice
@@ -12,7 +13,7 @@ ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
 DEVICE_NAME: str = "CiscoIOS"
 
-DEFAULT_CONFIGURATION: str = "simnos/plugins/nos/platforms_py/configurations/cisco_ios.yaml.j2"
+DEFAULT_CONFIGURATION: str = os.path.join(os.path.dirname(__file__), "configurations", "cisco_ios.yaml.j2")
 
 
 # pylint: disable=unused-argument

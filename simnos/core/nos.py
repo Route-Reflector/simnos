@@ -218,7 +218,14 @@ class Nos:
         configuration_file = self.configuration_file
         if not self.configuration_file:
             configuration_file = getattr(module, "DEFAULT_CONFIGURATION", None)
-        self.device = getattr(module, classname)(configuration_file=configuration_file)
+        if classname is not None:
+            device_class = getattr(module, classname, None)
+            if device_class is None:
+                raise AttributeError(
+                    f"Module '{filename}' defines DEVICE_NAME='{classname}' "
+                    f"but class '{classname}' was not found"
+                )
+            self.device = device_class(configuration_file=configuration_file)
 
     def from_file(self, filename: str) -> None:
         """
