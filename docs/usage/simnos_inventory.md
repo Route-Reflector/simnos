@@ -148,7 +148,7 @@ fake_network = {
 }
 
 network = SimNOS(inventory=fake_network)
-network.starts()
+network.start()
 
 print(network.list_hosts())
 ```
