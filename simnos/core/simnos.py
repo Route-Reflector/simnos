@@ -1,6 +1,6 @@
 """
-Main module to interact with FakeNOS servers.
-It is the entry point to start, stop and list FakeNOS servers.
+Main module to interact with SimNOS servers.
+It is the entry point to start, stop and list SimNOS servers.
 """
 
 import concurrent.futures
@@ -16,7 +16,7 @@ import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import Nos
-from simnos.core.pydantic_models import ModelFakenosInventory
+from simnos.core.pydantic_models import ModelSimnosInventory
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
@@ -52,12 +52,12 @@ if detect.docker and "WSL2" in platform.release():
     server_config["address"] = "0.0.0.0"  # noqa: S104
 
 
-class FakeNOS:
+class SimNOS:
     """
-    FakeNOS class is a main entry point to interact
+    SimNOS class is a main entry point to interact
     with fake NOS servers - start, stop, list.
 
-    :param inventory: FakeNOS inventory dictionary or
+    :param inventory: SimNOS inventory dictionary or
                       OS path to .yaml file with inventory data
     :param plugins: Plugins to add extra devices/commands
                     currently not supported easily.
@@ -65,9 +65,9 @@ class FakeNOS:
     Sample usage:
 
     ```python
-    from simnos import FakeNOS
+    from simnos import SimNOS
 
-    net = FakeNOS()
+    net = SimNOS()
     net.start()
     ```
     """
@@ -93,7 +93,7 @@ class FakeNOS:
 
     def __enter__(self):
         """
-        Method to start the FakeNOS servers when entering the context manager.
+        Method to start the SimNOS servers when entering the context manager.
         It is meant to be used with the `with` statement.
         """
         self.start()
@@ -101,7 +101,7 @@ class FakeNOS:
 
     def __exit__(self, *args):
         """
-        Method to stop the FakeNOS servers when exiting the context manager.
+        Method to stop the SimNOS servers when exiting the context manager.
         It is meant to be used with the `with` statement.
         """
         self.stop()
@@ -111,12 +111,12 @@ class FakeNOS:
         return isinstance(self.inventory, str) and self.inventory.endswith((".yaml", ".yml"))
 
     def _load_inventory_yaml(self) -> None:
-        """Helper method to load FakeNOS inventory if it is yaml."""
+        """Helper method to load SimNOS inventory if it is yaml."""
         with open(self.inventory, encoding="utf-8") as f:
             self.inventory = yaml.safe_load(f.read())
 
     def _load_inventory(self) -> None:
-        """Helper method to load FakeNOS inventory"""
+        """Helper method to load SimNOS inventory"""
         if self._is_inventory_in_yaml():
             self._load_inventory_yaml()
 
@@ -129,14 +129,14 @@ class FakeNOS:
             **default_inventory["default"],
             **self.inventory.get("default", {}),
         }
-        ModelFakenosInventory(**self.inventory)
-        log.debug("FakeNOS inventory validation succeeded")
+        ModelSimnosInventory(**self.inventory)
+        log.debug("SimNOS inventory validation succeeded")
 
     def _init(self) -> None:
         """
         Helper method to initiate host objects
         and store them in self.hosts, this
-        method called automatically on FakeNOS object instantiation.
+        method called automatically on SimNOS object instantiation.
         """
         for host_name, host_config in self.inventory["hosts"].items():
             params = {
@@ -216,7 +216,7 @@ class FakeNOS:
                                     the host like configurations
         """
         self._allocate_port(port)
-        self.hosts[host] = Host(name=host, port=port, fakenos=self, **params)
+        self.hosts[host] = Host(name=host, port=port, simnos=self, **params)
 
     def _allocate_port(self, port: int | list[int]) -> None:
         """
@@ -362,7 +362,7 @@ class FakeNOS:
 
     def _register_nos_plugins(self) -> None:
         """
-        Method to register NOS plugin with FakeNOS object, all plugins
+        Method to register NOS plugin with SimNOS object, all plugins
         must be registered before calling start method.
 
         :param plugin: OS path string to NOS plugin `.yaml/.yml` or `.py` file,
@@ -384,16 +384,16 @@ class FakeNOS:
 
 def _get_free_port() -> int:
     """
-    Method to get a free port for the FakeNOS server.
+    Method to get a free port for the SimNOS server.
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(("", 0))
         return s.getsockname()[1]
 
 
-def fakenos(platform: str | None = None, inventory: dict | None = None, return_instance: bool = False):
+def simnos(platform: str | None = None, inventory: dict | None = None, return_instance: bool = False):
     """
-    Decorator to run a test with FakeNOS server.
+    Decorator to run a test with SimNOS server.
     """
     if platform and inventory:
         raise ValueError("platform and inventory cannot be used together")
@@ -402,7 +402,7 @@ def fakenos(platform: str | None = None, inventory: dict | None = None, return_i
     if platform:
         inventory = {
             "hosts": {
-                "FakeNOS": {
+                "SimNOS": {
                     "username": "test",
                     "password": "test",
                     "port": _get_free_port(),
@@ -413,7 +413,7 @@ def fakenos(platform: str | None = None, inventory: dict | None = None, return_i
 
     def decorator(func):
         def wrapper(*args, **kwargs):
-            with FakeNOS(inventory=inventory) as net:
+            with SimNOS(inventory=inventory) as net:
                 if return_instance:
                     return func(*args, net=net, **kwargs)
                 return func(*args, **kwargs)

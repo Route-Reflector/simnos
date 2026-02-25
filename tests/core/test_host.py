@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-from simnos import FakeNOS
+from simnos import SimNOS
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
 
@@ -23,13 +23,13 @@ class TestHost:
         server = {"plugin": "server_plugin", "configuration": {}}
         shell = {"plugin": "shell_plugin", "configuration": {}}
         nos = {"plugin": "nos_plugin", "configuration": {}}
-        fakenos = Mock()
-        fakenos.servers_plugins = {"server_plugin": Mock()}
-        fakenos.shell_plugins = {"shell_plugin": Mock()}
-        fakenos.nos_plugins = {"nos_plugin": Mock()}
+        net = Mock()
+        net.servers_plugins = {"server_plugin": Mock()}
+        net.shell_plugins = {"shell_plugin": Mock()}
+        net.nos_plugins = {"nos_plugin": Mock()}
         with patch.object(Host, "_check_if_platform_is_supported") as mock_check_platform:
             mock_check_platform.return_value = None
-            host = Host("name", "username", "password", 22, server, shell, nos, fakenos)
+            host = Host("name", "username", "password", 22, server, shell, nos, net)
         return host
 
     def test_init(self, host):
@@ -75,7 +75,7 @@ class TestHost:
         The test passes if the ValueError is raised when the platform is not supported.
         """
         platform = "wrong_platform"
-        host.fakenos = FakeNOS()
+        host.simnos = SimNOS()
         with pytest.raises(ValueError):
             # pylint: disable=protected-access
             host._check_if_platform_is_supported(platform)
@@ -84,7 +84,7 @@ class TestHost:
         """
         The test passes if the platform is supported.
         """
-        host.fakenos = FakeNOS()
+        host.simnos = SimNOS()
         platform = available_platforms[0]
         # pylint: disable=protected-access
         host._check_if_platform_is_supported(platform)

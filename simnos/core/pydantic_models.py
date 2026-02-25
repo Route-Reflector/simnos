@@ -57,7 +57,7 @@ class ModelHost(BaseModel):
 
 
 # ---------------------------------------------------------------------------------------
-# FakeNOS inventory data model components
+# SimNOS inventory data model components
 # ---------------------------------------------------------------------------------------
 
 
@@ -122,7 +122,7 @@ class CMDShellPlugin(BaseModel):
 
 class InventoryDefaultSection(BaseModel):
     """
-    Pydantic model for FakeNOS inventory default section.
+    Pydantic model for SimNOS inventory default section.
     """
 
     username: StrictStr | None = None
@@ -141,7 +141,7 @@ class InventoryDefaultSection(BaseModel):
 
 class HostConfig(InventoryDefaultSection):
     """
-    Pydantic model for FakeNOS inventory host configuration.
+    Pydantic model for SimNOS inventory host configuration.
     """
 
     # count: Optional[conint(strict=True, gt=0)]
@@ -164,8 +164,8 @@ class HostConfig(InventoryDefaultSection):
         return values
 
 
-class ModelFakenosInventory(BaseModel):
-    """FakeNOS inventory data schema"""
+class ModelSimnosInventory(BaseModel):
+    """SimNOS inventory data schema"""
 
     default: InventoryDefaultSection | None = None
     hosts: dict[StrictStr, HostConfig]

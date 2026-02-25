@@ -28,7 +28,7 @@ class Host:
         server: dict,
         shell: dict,
         nos: dict,
-        fakenos,
+        simnos,
         platform: str | None = None,
         configuration_file: str | None = None,
     ) -> None:
@@ -39,7 +39,7 @@ class Host:
         self.username: str = username
         self.password: str = password
         self.port: int = port
-        self.fakenos = fakenos  # FakeNOS object
+        self.simnos = simnos  # SimNOS object
         self.shell_inventory["configuration"].setdefault("base_prompt", self.name)
         self.running = False
         self.server = None
@@ -57,11 +57,11 @@ class Host:
 
     def start(self):
         """Method to start server instance for this hosts"""
-        self.server_plugin = self.fakenos.servers_plugins[self.server_inventory["plugin"]]
-        self.shell_plugin = self.fakenos.shell_plugins[self.shell_inventory["plugin"]]
+        self.server_plugin = self.simnos.servers_plugins[self.server_inventory["plugin"]]
+        self.shell_plugin = self.simnos.shell_plugins[self.shell_inventory["plugin"]]
         if self.platform:
             self.nos_inventory["plugin"] = self.platform
-        self.nos_plugin = self.fakenos.nos_plugins.get(self.nos_inventory["plugin"], self.nos_inventory["plugin"])
+        self.nos_plugin = self.simnos.nos_plugins.get(self.nos_inventory["plugin"], self.nos_inventory["plugin"])
         self.nos = (
             Nos(filename=self.nos_plugin, configuration_file=self.configuration_file)
             if not isinstance(self.nos_plugin, Nos)

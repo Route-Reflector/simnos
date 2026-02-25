@@ -13,7 +13,7 @@ from invoke import task
 from netmiko import ConnectHandler
 import yaml
 
-from simnos import FakeNOS
+from simnos import SimNOS
 
 
 def strtobool(val: str) -> bool:
@@ -260,7 +260,7 @@ def netmiko_check(ctx, device_type: str):
         "device_type": device_type,
     }
 
-    net = FakeNOS(inventory=inventory)
+    net = SimNOS(inventory=inventory)
     net.start()
 
     with ConnectHandler(**credentials):

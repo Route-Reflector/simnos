@@ -15,7 +15,7 @@ from netmiko import (
 )
 import pytest
 
-from simnos import FakeNOS
+from simnos import SimNOS
 from simnos.core.nos import available_platforms
 from tests.utils import generate_random_string, get_free_port, get_platforms_from_md
 
@@ -48,7 +48,7 @@ class TestNetmiko:
                     }
                 }
             }
-            net = FakeNOS(inventory=inventory)
+            net = SimNOS(inventory=inventory)
 
             net.start()
 
@@ -75,7 +75,7 @@ class TestNetmiko:
         assert threading.active_count() == n_threads
 
     @pytest.mark.timeout(20 * 10)
-    def test_fakenos_start_stop_hosts(self):
+    def test_simnos_start_stop_hosts(self):
         """
         Test that the function start and stop hosts by the name.
         """
@@ -107,7 +107,7 @@ class TestNetmiko:
                 "device_type": inventory["hosts"][router]["platform"],
             }
 
-        net = FakeNOS(inventory=inventory)
+        net = SimNOS(inventory=inventory)
 
         for _ in range(10):  # Run the loop 10 times
             router_to_toggle = random.choice(list(inventory["hosts"].keys()))  # Choose a router randomly
@@ -149,6 +149,6 @@ class TestNetmiko:
             "port": free_port,
             "device_type": "generic",
         }
-        with FakeNOS(inventory=inventory), ConnectHandler(**credentials) as conn:
+        with SimNOS(inventory=inventory), ConnectHandler(**credentials) as conn:
             output = conn.send_command("show clock")
             assert re.match(r"^\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}$", output)

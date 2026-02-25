@@ -14,19 +14,19 @@ import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
-from simnos.core.simnos import FakeNOS, fakenos
+from simnos.core.simnos import SimNOS, simnos
 from tests.utils import get_platforms_from_md, get_running_hosts
 
 
 # pylint: disable=too-many-public-methods
-class TestFakeNOS:
+class TestSimNOS:
     """
-    Test class for the FakeNOS class.
+    Test class for the SimNOS class.
     """
 
-    def test_create_fakenos_without_arguments(self):
+    def test_create_simnos_without_arguments(self):
         """
-        Test that fakeNOS creates two hosts when no
+        Test that SimNOS creates two hosts when no
         arguments are passed.
         Those routers should have the following:
         - names are router0 and router1
@@ -38,7 +38,7 @@ class TestFakeNOS:
         - server plugin is ParamikoSshServer
         - shell plugin is CMDShell
         """
-        net = FakeNOS()
+        net = SimNOS()
         assert len(net.hosts) == 3
         for router_name, host in net.hosts.items():
             assert router_name in [
@@ -58,9 +58,9 @@ class TestFakeNOS:
             assert host.shell_inventory["plugin"] == "CMDShell"
             assert host.shell_inventory["configuration"] == {"base_prompt": router_name}
 
-    def test_create_fakenos_with_inventory_as_dict(self):
+    def test_create_simnos_with_inventory_as_dict(self):
         """
-        Test that fakeNOS creates two hosts when an inventory is passed.
+        Test that SimNOS creates two hosts when an inventory is passed.
         Those routers should have the following:
         - names are R1 and R2
         - port are 5001 and 6000
@@ -83,7 +83,7 @@ class TestFakeNOS:
                 },
             }
         }
-        net = FakeNOS(inventory=inventory)
+        net = SimNOS(inventory=inventory)
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
@@ -91,16 +91,16 @@ class TestFakeNOS:
             assert host.password in ["fakenos_R1", "fakenos_R2"]
             assert host.port in [5001, 6000]
 
-    def test_create_fakenos_with_inventory_as_file(self):
+    def test_create_simnos_with_inventory_as_file(self):
         """
-        Test that fakeNOS creates two hosts when an inventory is passed as a file.
+        Test that SimNOS creates two hosts when an inventory is passed as a file.
         Those routers should have the following:
         - names are R1 and R2
         - port are 5001 and 6000
         - username is fakenos
         - password is fakenos
         """
-        net = FakeNOS(inventory="tests/assets/inventory.yaml")
+        net = SimNOS(inventory="tests/assets/inventory.yaml")
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
@@ -112,7 +112,7 @@ class TestFakeNOS:
         """
         Test that the inventory is in yaml format.
         """
-        net = FakeNOS(inventory="tests/assets/inventory.yaml")
+        net = SimNOS(inventory="tests/assets/inventory.yaml")
         assert isinstance(net.inventory, dict)
 
     def test_is_inventory_in_yaml_false(self):
@@ -120,14 +120,14 @@ class TestFakeNOS:
         Test that the inventory is in yaml format.
         """
         with pytest.raises(ValueError, match=r"Inventory file must end with \.yaml or \.yml"):
-            FakeNOS(inventory="tests/assets/inventory.txt")
+            SimNOS(inventory="tests/assets/inventory.txt")
 
     def test_is_inventory_in_yaml_unit(self):
         """
         Test that the function _is_inventory_in_yaml returns True
         when the inventory is in yaml format.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.yaml"
         assert net._is_inventory_in_yaml() is True
 
@@ -136,7 +136,7 @@ class TestFakeNOS:
         Test that the function _is_inventory_in_yaml returns False
         when the inventory is not in yaml format.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.txt"
         assert net._is_inventory_in_yaml() is False
 
@@ -145,7 +145,7 @@ class TestFakeNOS:
         Test that the function _load_inventory_yaml returns a dictionary
         when the inventory is in yaml format.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.yaml"
         net._load_inventory_yaml()
         assert isinstance(net.inventory, dict)
@@ -155,7 +155,7 @@ class TestFakeNOS:
         Test that the function _load_inventory_yaml returns None
         when the inventory is not in yaml format.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.txt"
         assert net._load_inventory_yaml() is None
 
@@ -164,7 +164,7 @@ class TestFakeNOS:
         Test that the function _load_inventory loads the inventory
         when the inventory is in yaml format.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.yaml"
         net._load_inventory()
         assert isinstance(net.inventory, dict)
@@ -174,7 +174,7 @@ class TestFakeNOS:
         Test that the function _load_inventory loads the inventory
         when the inventory is a dictionary.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = {"hosts": {"R1": {"port": 5001}}}
         net._load_inventory()
         assert isinstance(net.inventory, dict)
@@ -184,7 +184,7 @@ class TestFakeNOS:
         Test that the function _load_inventory loads the inventory
         when the inventory is a dictionary with a default key.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = {"default": {"port": 5001}, "hosts": {"R1": {}}}
         net._load_inventory()
         assert isinstance(net.inventory, dict)
@@ -194,18 +194,18 @@ class TestFakeNOS:
         Test that the function _load_inventory raises an exception
         when the inventory is not a dictionary.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.inventory = "tests/assets/inventory.txt"
         with pytest.raises(ValueError, match=r"Inventory file must end with \.yaml or \.yml"):
             net._load_inventory()
 
-    @patch("simnos.core.simnos.FakeNOS._allocate_port")
+    @patch("simnos.core.simnos.SimNOS._allocate_port")
     def test_init_unit(self, mock_allocate_port):
         """
         Test that the function _init creates the hosts.
         """
         inventory = {"hosts": {"R1": {"port": 5001, "platform": "cisco_ios"}}}
-        net = FakeNOS(inventory)
+        net = SimNOS(inventory)
         assert len(net.hosts) == 1
         assert "R1" in net.hosts
         assert mock_allocate_port.call_count == 1
@@ -215,7 +215,7 @@ class TestFakeNOS:
         Test that the function _allocate_port raises an exception
         when the port is already allocated.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.allocated_ports = [5000]
         with pytest.raises(ValueError):
             net._allocate_port(5000)
@@ -225,7 +225,7 @@ class TestFakeNOS:
         Test that the function _allocate_port allocates the port.
         """
         inventory = {"hosts": {"R1": {"port": 5000, "platform": "cisco_ios"}}}
-        net = FakeNOS(inventory=inventory)
+        net = SimNOS(inventory=inventory)
         assert 5000 in net.allocated_ports
         assert len(net.allocated_ports) == 1
 
@@ -234,7 +234,7 @@ class TestFakeNOS:
         Test that the function _allocate_port allocates the port.
         """
         inventory = {"hosts": {"R1": {"port": [5000, 5001], "replicas": 2, "platform": "cisco_ios"}}}
-        net = FakeNOS(inventory=inventory)
+        net = SimNOS(inventory=inventory)
         assert net.allocated_ports == {5000, 5001}
 
     def test_replicas_not_set_and_port_list(self):
@@ -244,7 +244,7 @@ class TestFakeNOS:
         """
         inventory = {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}}
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_int(self):
         """
@@ -253,7 +253,7 @@ class TestFakeNOS:
         """
         inventory = {"default": {"port": 5000, "replicas": 2}, "hosts": {"R1": {}}}
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_list_not_enough_ports(self):
         """
@@ -262,7 +262,7 @@ class TestFakeNOS:
         """
         inventory = {"default": {"port": [5000], "replicas": 2}, "hosts": {"R1": {}}}
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_list_too_many_ports(self):
         """
@@ -274,7 +274,7 @@ class TestFakeNOS:
             "hosts": {"R1": {}},
         }
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_1_larger_than_port_2(self):
         """
@@ -286,7 +286,7 @@ class TestFakeNOS:
             "hosts": {"R1": {}},
         }
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_replicas_less_than_1(self):
         """
@@ -298,7 +298,7 @@ class TestFakeNOS:
             "hosts": {"R1": {}},
         }
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_replicas_set_and_ports_set_not_same_length(self):
         """
@@ -310,7 +310,7 @@ class TestFakeNOS:
             "hosts": {"R1": {}},
         }
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_wrong_plugin_name(self):
         """
@@ -319,7 +319,7 @@ class TestFakeNOS:
         """
         inventory = {"hosts": {"R1": {"server": {"plugin": "wrong_plugin"}}}}
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_wrong_platform(self):
         """
@@ -328,7 +328,7 @@ class TestFakeNOS:
         """
         inventory = {"hosts": {"R1": {"platform": "wrong_platform"}}}
         with pytest.raises(ValueError):
-            FakeNOS(inventory=inventory)
+            SimNOS(inventory=inventory)
 
     def test_inventory_validation_cmdshell_plugin(self):
         """
@@ -347,7 +347,7 @@ class TestFakeNOS:
                 }
             }
         }
-        net = FakeNOS(inventory=inventory)
+        net = SimNOS(inventory=inventory)
         assert net.inventory["hosts"]["R1"]["shell"]["plugin"] == "CMDShell"
 
     def test_inventory_configuration_dict(self):
@@ -368,7 +368,7 @@ class TestFakeNOS:
                 }
             }
         }
-        with FakeNOS(inventory=inventory) as net:
+        with SimNOS(inventory=inventory) as net:
             host: Host = next(iter(net.hosts.values()))
             assert host.nos.device.configurations == configurations
 
@@ -381,15 +381,15 @@ class TestFakeNOS:
         with open("tests/assets/test_module.yaml.j2", encoding="utf-8") as file:
             data = file.read()
             configurations = yaml.safe_load(data)
-        with FakeNOS(inventory="tests/assets/inventory_configuration.yaml") as net:
+        with SimNOS(inventory="tests/assets/inventory_configuration.yaml") as net:
             host: Host = next(iter(net.hosts.values()))
             assert host.nos.device.configurations == configurations
 
-    def test_fakenos_start_stop_hosts(self):
+    def test_simnos_start_stop_hosts(self):
         """
         Test that the function start and stop hosts by the name.
         """
-        net = FakeNOS()
+        net = SimNOS()
 
         net.start(hosts="router_cisco_ios")
         assert net.hosts["router_cisco_ios"].running is True
@@ -423,12 +423,12 @@ class TestFakeNOS:
 
         net.stop()
 
-    def test_fakenos_base_inventory(self):
+    def test_simnos_base_inventory(self):
         """
         Base test for checking the start and stop operations
         using default inventory.
         """
-        net = FakeNOS()
+        net = SimNOS()
         before_start = get_running_hosts(net.hosts)
         for running_state in before_start.values():
             assert running_state is False
@@ -449,7 +449,7 @@ class TestFakeNOS:
         """
         Test that the number of threads after stopping the network is only the main thread.
         """
-        net = FakeNOS()
+        net = SimNOS()
         net.start()
         net.stop()
         active_threads = threading.active_count()
@@ -460,7 +460,7 @@ class TestFakeNOS:
         Test that _execute_function_over_hosts raises ValueError
         when workers < 1.
         """
-        net = FakeNOS()
+        net = SimNOS()
         hosts = list(net.hosts.values())
         with pytest.raises(ValueError, match="workers must be >= 1"):
             net._execute_function_over_hosts(
@@ -477,7 +477,7 @@ class TestFakeNOS:
         cisco_ios.py and cisco_ios.yaml definitions
         """
         inventory = {"hosts": {"R1": {"port": 5001, "platform": "cisco_ios"}}}
-        net = FakeNOS(inventory)
+        net = SimNOS(inventory)
         assert len(net.nos_plugins["cisco_ios"]) == 2, "Not all files detected"
 
 
@@ -513,12 +513,12 @@ class TestPlatforms:
         """
         Test that the with statement works.
         """
-        with FakeNOS() as net:
+        with SimNOS() as net:
             assert len(net.hosts) == 3
         assert threading.active_count() == 1
 
-    @fakenos(platform="cisco_ios", return_instance=True)
-    def test_decorator_with_platform(self, net: FakeNOS):
+    @simnos(platform="cisco_ios", return_instance=True)
+    def test_decorator_with_platform(self, net: SimNOS):
         """Test that the decorator works with a platform."""
         platforms_used = [host.nos.name for host in net.hosts.values()]
         assert len(net.hosts) == 1
@@ -526,7 +526,7 @@ class TestPlatforms:
         assert "huawei_smartax" not in platforms_used
         assert "arista_eos" not in platforms_used
 
-    @fakenos(inventory="tests/assets/inventory.yaml")
+    @simnos(inventory="tests/assets/inventory.yaml")
     def test_decorator_with_inventory(self):
         """
         Test that the decorator works with an inventory.
@@ -538,7 +538,7 @@ class TestPlatforms:
         """Test that the decorator raises an exception if both platform and inventory are set."""
         with pytest.raises(ValueError):
 
-            @fakenos(platform="cisco_ios", inventory="tests/assets/inventory.yaml")
+            @simnos(platform="cisco_ios", inventory="tests/assets/inventory.yaml")
             def dummy_function():
                 pass
 
@@ -548,7 +548,7 @@ class TestPlatforms:
         """Test that the decorator raises an exception if neither platform nor inventory are set."""
         with pytest.raises(ValueError):
 
-            @fakenos()
+            @simnos()
             def dummy_function():
                 pass
 

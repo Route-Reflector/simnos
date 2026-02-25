@@ -16,7 +16,7 @@ import pytest
 import yaml
 
 from simnos.core.nos import Nos
-from simnos.core.simnos import FakeNOS, fakenos
+from simnos.core.simnos import SimNOS, simnos
 from simnos.plugins.shell.cmd_shell import CMDShell
 
 
@@ -354,8 +354,8 @@ class HotReloadTest(TestCase):
         assert all(key in shell.commands for key in module.commands)
 
     @pytest.mark.skipif(detect.windows, reason="Windows does not allow file movement on Github runners")
-    @fakenos(platform="cisco_ios", return_instance=True)
-    def test_hot_reload_integration_yaml(self, net: FakeNOS):
+    @simnos(platform="cisco_ios", return_instance=True)
+    def test_hot_reload_integration_yaml(self, net: SimNOS):
         """
         Test that the hot reload feature works correctly
         """
@@ -398,8 +398,8 @@ class HotReloadTest(TestCase):
             assert output == "test output"
 
     @pytest.mark.skipif(detect.windows, reason="Windows does not allow file movement on Github runners")
-    @fakenos(platform="cisco_ios", return_instance=True)
-    def test_hot_reload_integration_py_jinja(self, net: FakeNOS):
+    @simnos(platform="cisco_ios", return_instance=True)
+    def test_hot_reload_integration_py_jinja(self, net: SimNOS):
         """
         Test that the hot reload feature works correctly
         """

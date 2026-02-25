@@ -1,5 +1,5 @@
 """
-Test the platforms that are supported by FakeNOS.
+Test the platforms that are supported by SimNOS.
 Currently, it checks if the platforms are correctly set
 in the yaml and python files.
 """
@@ -15,7 +15,7 @@ import pytest
 import yaml
 
 from simnos.core.nos import available_platforms
-from simnos.core.simnos import FakeNOS
+from simnos.core.simnos import SimNOS
 from tests.utils import get_free_port, get_host_commands
 
 
@@ -55,7 +55,7 @@ def has_single_curly_brackets(text: Any, exceptions: list[str]) -> bool:
 
 class TestPlatforms:
     """
-    This class tests all the platforms that are supported by FakeNOS
+    This class tests all the platforms that are supported by SimNOS
     and checks if they are correctly set
     """
 
@@ -179,7 +179,7 @@ class TestPlatforms:
         initial_commands: list[str] = []
         enable_commands: list[str] = []
         config_commands: list[str] = []
-        with FakeNOS(inventory=inventory) as net:
+        with SimNOS(inventory=inventory) as net:
             host = next(iter(net.hosts.values()))
             initial_commands, enable_commands, config_commands = get_host_commands(host)
             with ConnectHandler(**credentials) as conn:

@@ -1,5 +1,5 @@
 """
-FakeNOS Command Line Tool for running fake servers.
+SimNOS Command Line Tool for running fake servers.
 """
 
 import argparse
@@ -8,7 +8,7 @@ import logging
 import os
 import time
 
-from simnos import FakeNOS
+from simnos import SimNOS
 
 __version__ = version("fakenos")
 
@@ -18,7 +18,7 @@ DESCRIPTION_TEXT = """-i --inventory   OS Path to inventory file
 """
 
 argparser = argparse.ArgumentParser(
-    description=f"FakeNOS, version {__version__}",
+    description=f"SimNOS, version {__version__}",
     formatter_class=argparse.RawDescriptionHelpFormatter,
 )
 opts = argparser.add_argument_group(description=DESCRIPTION_TEXT)
@@ -61,16 +61,16 @@ if args.RELOAD_COMMANDS:
 
 
 def run_cli():
-    """Function to start FakeNOS CLI"""
-    fakenet = FakeNOS(inventory=args.INVENTORY)
-    log.info("Initiating FakeNOS")
+    """Function to start SimNOS CLI"""
+    fakenet = SimNOS(inventory=args.INVENTORY)
+    log.info("Initiating SimNOS")
     fakenet.start()
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        log.info("Shutting down FakeNOS")
+        log.info("Shutting down SimNOS")
         fakenet.stop()
         if args.RELOAD_COMMANDS:
             os.environ.pop("FAKENOS_RELOAD_COMMANDS")
