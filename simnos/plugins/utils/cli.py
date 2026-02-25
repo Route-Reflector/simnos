@@ -10,7 +10,7 @@ import time
 
 from simnos import SimNOS
 
-__version__ = version("fakenos")
+__version__ = version("simnos")
 
 log = logging.getLogger(__name__)
 

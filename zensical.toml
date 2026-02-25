@@ -1,13 +1,13 @@
 [project]
-site_name = "FakeNOS Docs"
-site_url = "https://docs.fakenos.com/"
-site_description = "FakeNOS (Fake Network Operating System) is a network device simulator designed for testing and development of network automation tools and scripts."
-site_author = "Denis Mulyalin, Enric Perpinyà Pitarch"
-copyright = "&copy; 2025 FakeNOS Authors"
+site_name = "SIMNOS Docs"
+site_url = "https://github.com/Route-Reflector/simnos/"
+site_description = "SIMNOS (Simulated Network Operating System) is a network device simulator designed for testing and development of network automation tools and scripts."
+site_author = "KeroRoute lab"
+copyright = "&copy; 2025 Denis Mulyalin, Enric Perpinyà Pitarch &amp; KeroRoute lab"
 docs_dir = "docs"
 dev_addr = "localhost:8000"
-repo_url = "https://github.com/Route-Reflector/fakenos"
-repo_name = "Route-Reflector/fakenos"
+repo_url = "https://github.com/Route-Reflector/simnos"
+repo_name = "Route-Reflector/simnos"
 edit_uri = "docs"
 nav = [
     {"Overview" = [
@@ -117,7 +117,7 @@ repo = "fontawesome/brands/github"
 
 [[project.extra.social]]
 icon = "fontawesome/brands/github"
-link = "https://github.com/Route-Reflector/fakenos/"
+link = "https://github.com/Route-Reflector/simnos/"
 
 
 # Palette toggle for automatic mode

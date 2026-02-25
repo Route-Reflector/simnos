@@ -1,14 +1,12 @@
 [project]
-name = "fakenos"
-version = "1.1.0"
-description = "Fake Network Operating System"
+name = "simnos"
+version = "2.0.0"
+description = "Simulated Network Operating System"
 authors = [
-    { name = "Denis Mulyalin", email = "d.mulyalin@gmail.com" },
-    { name = "Enric Perpinyà Pitarch", email = "eperpinyapitarch@gmail.com" }
+    { name = "KeroRoute lab" },
 ]
 maintainers = [
-    { name = "Denis Mulyalin", email = "d.mulyalin@gmail.com" },
-    { name = "Enric Perpinyà Pitarch", email = "eperpinyapitarch@gmail.com" }
+    { name = "KeroRoute lab" },
 ]
 license = { text = "MIT" }
 readme = "README.md"
@@ -46,11 +44,11 @@ dependencies = [
 
 
 [project.urls]
-Homepage = "https://github.com/fakenos/fakenos/"
-Documentation = "https://docs.fakenos.com/"
+Homepage = "https://github.com/Route-Reflector/simnos/"
+Documentation = "https://github.com/Route-Reflector/simnos/"
 
 [project.scripts]
-fakenos = "fakenos.plugins.utils.cli:run_cli"
+simnos = "simnos.plugins.utils.cli:run_cli"
 
 [tool.ruff]
 line-length = 120
@@ -122,7 +120,7 @@ testpaths = ["tests"]
 addopts = "-vv"
 
 [tool.uv.build-backend]
-module-name = "fakenos"
+module-name = "simnos"
 module-root = ""
 
 [build-system]

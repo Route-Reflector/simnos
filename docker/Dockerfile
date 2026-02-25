@@ -46,4 +46,4 @@ ENTRYPOINT []
 # Use the non-root user to run our application
 USER nonroot
 
-CMD ["fakenos", "-i", "/app/docker/inventory.yaml"]
+CMD ["simnos", "-i", "/app/docker/inventory.yaml"]

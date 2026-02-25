@@ -1,5 +1,5 @@
 ---
-name: FakeNOS Tests
+name: SIMNOS Tests
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -13,7 +13,7 @@ on:
   pull_request: ~
 
 env:
-  IMAGE_NAME: "fakenos"
+  IMAGE_NAME: "simnos"
 
 jobs:
   ruff:
