@@ -5,7 +5,7 @@ SIMNOS has some built in default hosts which are used in case that no `inventory
 - **router_huawei_smartax**: a device with username `user` and password `user` in the port 6001. The platform is `huawei_smartax`.
 - **router_arista_eos**: a device with username `user` and password `user` in the port 6002. The platform is `arista_eos`.
 
-In both cases, the fake devices are running on the localhost or 127.0.0.1 address. To run those just use the following code:
+In all cases, the fake devices are running on the localhost or 127.0.0.1 address. To run those just use the following code:
 
 ```python
 from simnos import SimNOS

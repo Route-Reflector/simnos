@@ -1,5 +1,12 @@
+default:
+  server:
+    plugin: "ParamikoSshServer"
+    configuration:
+      address: "0.0.0.0"
+      timeout: 1
+
 hosts:
-  fakerouter:
+  router:
     username: user
     password: user
     port:

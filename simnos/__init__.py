@@ -6,6 +6,6 @@ operating system object.
 """
 
 from simnos.core.nos import Nos
-from simnos.core.simnos import SimNOS
+from simnos.core.simnos import SimNOS, simnos
 
-__all__ = ("Nos", "SimNOS")
+__all__ = ("Nos", "SimNOS", "simnos")

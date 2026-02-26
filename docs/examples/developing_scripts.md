@@ -50,14 +50,14 @@ And here are some commands you can try:
 -  `display board`
 -  `display sysman service state`
 
-**And that's all!** 💅 We that we have create a fake network device that emulates the Huawei SmartAX and to which we can connect to using SSH.
+**And that's all!** 💅 With that, we have created a fake network device that emulates the Huawei SmartAX and to which we can connect to using SSH.
 
 If you want to try more, we want to encourage you to try more platforms, change the credentials and the ports so you can get familiar.
 
 ## Using the dict
 As well, it is possible to use a dictionary instead of a `.yaml` file in the cases that you may want to have a programmatic way to define the variables. It is fairly similar to the other method described before, but in this case instead of having 2 files, we will keep all in 1 file.
 
-Imagine you want to be able to specify the platform using the CLI. The following script allows you to do the same,. but defining the `platform`:
+Imagine you want to be able to specify the platform using the CLI. The following script allows you to do the same, but defining the `platform`:
 
 ```python
 import argparse

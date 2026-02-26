@@ -38,7 +38,7 @@ ruff format .   # format
 ## Code coverage: coverage
 Coverage is a tool used in software development to measure the extent to which the source code of a program is executed during testing. It helps developers understand how thoroughly their tests exercise the codebase by providing metrics on code coverage, typically expressed as a percentage. Coverage tools track which lines or branches of code are executed during tests and generate reports highlighting areas that are covered and those that are not. This information enables developers to identify untested code paths and improve the effectiveness of their testing efforts.
 
-To run coverage in conjuntion with pytest do the following:
+To run coverage in conjunction with pytest do the following:
 ```bash
 coverage run -m pytest
 ```

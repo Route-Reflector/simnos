@@ -14,7 +14,7 @@
 
 SIMNOS simulates Network Operating Systems interactions. You can simulate
 network devices like Cisco IOS or Huawei SmartAX interactions over
-SSH with little effort. This project it is mainly intented for testing
+SSH with little effort. This project is mainly intended for testing
 and development purposes.
 
 [Installation](usage/installation.md) | [Examples](examples/index.md) | [Platforms](platforms/index.md)

@@ -3,7 +3,7 @@
 One of the most interesting use cases is the automatic testing. In this example it will be shown how SIMNOS can help easily doing the testing for you in your library. It is not intended to substitute other kind of tests, like unit tests, but rather complement those giving a light fake platform. We will do first the script and later the test, although it is recommended to do the other way around (TDD).
 
 ## Script
-The following script is similar to the one explained before in the example [developing_scripts](developing_scripts.md). It is recommended to do first that example. Briefly, it enters a device Huawei SmartAX, it the value for all the ONTs in a port and then it looks for the serial number of the first one.
+The following script is similar to the one explained before in the example [developing_scripts](developing_scripts.md). It is recommended to do first that example. Briefly, it enters a device Huawei SmartAX, it gets the value for all the ONTs in a port and then it looks for the serial number of the first one.
 
 ```python
 from netmiko import ConnectHandler
@@ -94,7 +94,7 @@ This test will perform the following steps:
 2. Perform the action to be tested
 3. Close the fake devices
 
-In case of automatic testing, always needs to be followed the same structure. This sandwitch is needed. In case that you don't call the `net.stop()` the test suites will hang up as some underlying thread will be still wait for new connections.
+In case of automatic testing, always needs to be followed the same structure. This sandwich is needed. In case that you don't call the `net.stop()` the test suites will hang up as some underlying thread will be still wait for new connections.
 
 !!! note
     There are plans to make with a decorator like `@simnos(platform="cisco_ios")`, but for now
