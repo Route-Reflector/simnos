@@ -217,7 +217,7 @@ class Nos:
         classname = getattr(module, "DEVICE_NAME", None)
         if classname is None:
             log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
-        if classname is not None:
+        else:
             device_class = getattr(module, classname, None)
             if device_class is None:
                 raise AttributeError(
@@ -235,8 +235,7 @@ class Nos:
         """
         if not self.is_file_ending_correct(filename):
             raise ValueError(
-                f'Unsupported "{filename}" file extension.\
-                              Supported: .py, .yml, .yaml'
+                f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml'
             )
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)

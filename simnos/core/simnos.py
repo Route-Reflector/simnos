@@ -80,7 +80,7 @@ class SimNOS:
         self.plugins: list = plugins or []
 
         self.hosts: dict[str, Host] = {}
-        self.allocated_ports: set[str] = set()
+        self.allocated_ports: set[int] = set()
 
         self.shell_plugins = shell_plugins
         self.nos_plugins = nos_plugins
@@ -194,9 +194,6 @@ class SimNOS:
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
-        hosts_name: list[str] = []
-        ports: list[int] = []
-
         if replicas:
             hosts_name = [f"{host_name}{i}" for i in range(replicas)]
             ports = list(range(port[0], port[1] + 1))
@@ -249,13 +246,11 @@ class SimNOS:
         :param hosts: string or list of strings
         :return: list of strings
         """
-        hosts_list: list[Host] = []
         if not hosts:
             hosts = list(self.hosts.keys())
         if isinstance(hosts, str):
             hosts = [hosts]
-        hosts_list = [self.hosts[host] for host in hosts]
-        return hosts_list
+        return [self.hosts[host] for host in hosts]
 
     def start(
         self,
