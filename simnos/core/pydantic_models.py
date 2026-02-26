@@ -137,6 +137,7 @@ class InventoryDefaultSection(BaseModel):
     # https://github.com/mkdocstrings/griffe/issues/66
     port: StrictInt | list[StrictInt] | None = None
     configuration_file: StrictStr | None = None
+    platform: StrictStr | None = None
     server: ParamikoSshServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
@@ -146,8 +147,6 @@ class HostConfig(InventoryDefaultSection):
     """
     Pydantic model for SimNOS inventory host configuration.
     """
-
-    platform: StrictStr | None = None
     # count: Optional[conint(strict=True, gt=0)]
     # use this for now, mkdocstring having issue with pydantic
     # https://github.com/mkdocstrings/griffe/issues/66
