@@ -22,8 +22,6 @@ class CiscoIOS(BaseDevice):
     Class that keeps track of the state of the Cisco IOS device.
     """
 
-    hola = "Hello test"
-
     def make_show_clock(self, base_prompt, current_prompt, command):
         "Return String in format '*11:54:03.018 UTC Sat Apr 16 2022'"
         return time.strftime("*%H:%M:%S.000 %Z %a %b %d %Y")

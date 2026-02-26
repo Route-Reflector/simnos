@@ -47,8 +47,8 @@ class Host:
         self.shell_plugin = None
         self.nos_plugin = None
         self.nos = None
-        self.platform: str = platform
-        self.configuration_file: str = configuration_file
+        self.platform: str | None = platform
+        self.configuration_file: str | None = configuration_file
 
         if self.platform:
             self.nos_inventory["plugin"] = self.platform
@@ -95,7 +95,5 @@ class Host:
     def _check_if_platform_is_supported(self, platform: str):
         """Check if the platform is supported"""
         if platform not in available_platforms:
-            raise ValueError(
-                f"Platform {platform} is not supported by SIMNOS. \
-                    Supported platforms are: {available_platforms}"
-            )
+            msg = f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {available_platforms}"
+            raise ValueError(msg)

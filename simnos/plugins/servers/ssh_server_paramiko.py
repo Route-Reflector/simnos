@@ -302,7 +302,7 @@ class ParamikoSshServer(TCPServerBase):
         timeout: int = 1,
         watchdog_interval: float = 1,
     ):
-        super().__init__()
+        super().__init__(address=address, port=port, timeout=timeout)
 
         self.nos: Nos = nos
         self.nos_inventory_config: dict = nos_inventory_config
@@ -311,9 +311,6 @@ class ParamikoSshServer(TCPServerBase):
         self.ssh_banner: str = ssh_banner
         self.username: str = username
         self.password: str = password
-        self.port: int = port
-        self.address: str = address
-        self.timeout: int = timeout
         self.watchdog_interval: float = watchdog_interval
 
         if ssh_key_file:

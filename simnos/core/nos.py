@@ -142,9 +142,9 @@ class Nos:
         self.enable_prompt = data.get("enable_prompt", self.enable_prompt)
         self.config_prompt = data.get("config_prompt", self.config_prompt)
 
-    def _from_yaml(self, data: str) -> None:
+    def _from_yaml(self, filepath: str) -> None:
         """
-        Method to build NOS from YAML data.
+        Method to build NOS from YAML file.
 
         Sample NOS YAML file content::
 
@@ -167,9 +167,9 @@ class Nos:
                     "prompt": "{base_prompt}>",
                 }
 
-        :param data: YAML structured text
+        :param filepath: OS path to YAML file with NOS data
         """
-        with open(data, encoding="utf-8") as f:
+        with open(filepath, encoding="utf-8") as f:
             self.from_dict(yaml.safe_load(f))
 
     def _from_module(self, filename: str) -> None:

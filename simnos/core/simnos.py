@@ -5,6 +5,7 @@ It is the entry point to start, stop and list SimNOS servers.
 
 import concurrent.futures
 import copy
+import functools
 import logging
 import platform
 import socket
@@ -231,6 +232,8 @@ class SimNOS:
 
         :param port: integer - port to allocate
         """
+        if not (0 < port <= 65535):
+            raise ValueError(f"Port {port} out of valid range (1-65535)")
         if port in self.allocated_ports:
             raise ValueError(f"Port {port} already in use")
         self.allocated_ports.add(port)
@@ -251,10 +254,10 @@ class SimNOS:
 
     def start(
         self,
-        hosts: str | list | None = None,
+        hosts: str | list[str] | None = None,
         parallel: bool = False,
         workers: int | None = None,
-    ) -> None:  # type: ignore
+    ) -> None:
         """
         Function to start NOS servers instances
 
@@ -425,12 +428,16 @@ def simnos(platform: str | None = None, inventory: dict | None = None, return_in
         }
 
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             with SimNOS(inventory=inventory) as net:
                 if return_instance:
                     return func(*args, net=net, **kwargs)
                 return func(*args, **kwargs)
 
+        # Remove __wrapped__ so that pytest does not introspect the
+        # original signature and try to inject 'net' as a fixture.
+        del wrapper.__wrapped__
         return wrapper
 
     return decorator

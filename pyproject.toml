@@ -45,7 +45,7 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/Route-Reflector/simnos/"
-Documentation = "https://github.com/Route-Reflector/simnos/"
+Documentation = "https://route-reflector.github.io/simnos/"
 
 [project.scripts]
 simnos = "simnos.plugins.utils.cli:run_cli"
