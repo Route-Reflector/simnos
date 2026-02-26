@@ -4,9 +4,10 @@ The file can be found in simnos/core/simnos.py
 """
 
 # pylint: disable=protected-access
+import logging
 import platform
 import threading
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import detect
 import pytest
@@ -555,3 +556,56 @@ class TestPlatforms:
                 pass
 
             dummy_function()
+
+
+class TestWarnSecurity:
+    """Test cases for SimNOS._warn_security()."""
+
+    def test_default_credentials_warning(self, caplog):
+        """Default credentials (user/user) should emit a warning."""
+        host = Mock(
+            username="user",
+            password="user",
+            name="R1",
+            server_inventory={"configuration": {"address": "127.0.0.1"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "default credentials" in caplog.text
+
+    def test_bind_all_interfaces_warning(self, caplog):
+        """Binding to 0.0.0.0 should emit a warning."""
+        host = Mock(
+            username="admin",
+            password="secret",
+            name="R1",
+            server_inventory={"configuration": {"address": "0.0.0.0"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "0.0.0.0" in caplog.text
+
+    def test_no_warning_for_safe_config(self, caplog):
+        """Safe configuration should not emit any warning."""
+        host = Mock(
+            username="admin",
+            password="secret",
+            name="R1",
+            server_inventory={"configuration": {"address": "127.0.0.1"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert caplog.text == ""
+
+    def test_both_warnings(self, caplog):
+        """Default credentials + 0.0.0.0 should emit both warnings."""
+        host = Mock(
+            username="user",
+            password="user",
+            name="R1",
+            server_inventory={"configuration": {"address": "0.0.0.0"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "default credentials" in caplog.text
+        assert "0.0.0.0" in caplog.text

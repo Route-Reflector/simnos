@@ -3,6 +3,7 @@ Test cases for the ssh_server_paramiko plugin.
 """
 
 import io
+import logging
 import threading
 import unittest
 from unittest import mock
@@ -380,6 +381,21 @@ class ChannelToShellTapTest(unittest.TestCase):
         )
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
         self.assertEqual(self.mock_channel_stdio.read.call_count, 1)
+
+    def test_channel_to_shell_tap_timeout_error_continues_loop(self):
+        """TimeoutError on read() should be caught and the loop should continue."""
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
+        self.mock_channel_stdio.read.side_effect = [TimeoutError, b"a", b"\x00"]
+        channel_to_shell_tap(
+            channel_stdio=self.mock_channel_stdio,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        # read called 3 times: TimeoutError, b"a", b"\x00"
+        self.assertEqual(self.mock_channel_stdio.read.call_count, 3)
+        # b"a" should be echoed back
+        self.mock_channel_stdio.write.assert_any_call(b"a")
 
 
 class ShellToChannelTapTest(unittest.TestCase):
@@ -832,6 +848,21 @@ class ParamikoSshServerTest(unittest.TestCase):
 
         mock_session.accept.assert_called_once()
         mock_session.close.assert_called_once()
+
+    def test_default_ssh_key_emits_warning(self):
+        """Creating a server without ssh_key_file should emit a security warning."""
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING) as cm:
+            ParamikoSshServer(**self.arguments)
+        self.assertTrue(any("shared default SSH host key" in msg for msg in cm.output))
+
+    def test_custom_ssh_key_no_warning(self):
+        """Creating a server with a custom ssh_key_file should not emit the default key warning."""
+        with (
+            self.assertRaises(AssertionError),
+            self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING),
+        ):
+            # assertLogs raises AssertionError when no log records are emitted at WARNING
+            ParamikoSshServer(**self.arguments, ssh_key_file="tests/assets/ssh_host_rsa_key")
 
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):
