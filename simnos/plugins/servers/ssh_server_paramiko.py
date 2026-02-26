@@ -294,7 +294,7 @@ class ParamikoSshServer(TCPServerBase):
         port: int,
         username: str,
         password: str,
-        ssh_key_file: paramiko.rsakey.RSAKey | None = None,
+        ssh_key_file: str | None = None,
         ssh_key_file_password: str | None = None,
         ssh_banner: str = "SIMNOS Paramiko SSH Server",
         shell_configuration: dict | None = None,
@@ -302,18 +302,15 @@ class ParamikoSshServer(TCPServerBase):
         timeout: int = 1,
         watchdog_interval: float = 1,
     ):
-        super().__init__()
+        super().__init__(address=address, port=port, timeout=timeout)
 
         self.nos: Nos = nos
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
-        self.shell_configuration: dict | None = shell_configuration or {}
+        self.shell_configuration: dict = shell_configuration or {}
         self.ssh_banner: str = ssh_banner
         self.username: str = username
         self.password: str = password
-        self.port: int = port
-        self.address: str = address
-        self.timeout: int = timeout
         self.watchdog_interval: float = watchdog_interval
 
         if ssh_key_file:
