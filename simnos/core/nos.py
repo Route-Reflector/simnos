@@ -215,6 +215,8 @@ class Nos:
         self.enable_prompt = getattr(module, "ENABLE_PROMPT", self.enable_prompt)
         self.config_prompt = getattr(module, "CONFIG_PROMPT", self.config_prompt)
         classname = getattr(module, "DEVICE_NAME", None)
+        if classname is None:
+            log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
         if classname is not None:
             device_class = getattr(module, classname, None)
             if device_class is None:

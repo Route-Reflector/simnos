@@ -292,8 +292,7 @@ class SimNOS:
         workers: int | None = None,
     ) -> None:
         """
-        Function to stop NOS servers instances. It waits 2 seconds
-        just in case that there is any thread doing something.
+        Function to stop NOS servers instances and join managed threads.
 
         :param hosts: single or list of hosts to stop by their name.
         :param parallel: if True, stop hosts in parallel using threads.

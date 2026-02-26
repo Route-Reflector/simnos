@@ -126,6 +126,8 @@ class InventoryDefaultSection(BaseModel):
     Pydantic model for SimNOS inventory default section.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     username: StrictStr | None = None
     password: StrictStr | None = None
     # port: Optional[Union[conint(strict=True, gt=0, le=65535),
@@ -145,6 +147,7 @@ class HostConfig(InventoryDefaultSection):
     Pydantic model for SimNOS inventory host configuration.
     """
 
+    platform: StrictStr | None = None
     # count: Optional[conint(strict=True, gt=0)]
     # use this for now, mkdocstring having issue with pydantic
     # https://github.com/mkdocstrings/griffe/issues/66
