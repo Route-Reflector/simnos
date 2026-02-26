@@ -1,6 +1,6 @@
 # Running in Docker
 
-Running SIMNOS in a container enables numerous integrations use cases.
+Running SIMNOS in a container enables numerous integration use cases.
 
 ## Running with Docker
 
