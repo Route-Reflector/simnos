@@ -135,6 +135,7 @@ dev = [
     "pytest", # Testing framework
     "pytest-repeat", # Pytest: Repeat tests
     "pytest-timeout", # Pytest: Timeout tests
+    "pytest-xdist>=3.8.0", # Pytest: Parallel test execution
     "bandit",
     "coverage",
     "invoke",
