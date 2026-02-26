@@ -1,7 +1,7 @@
 # Inventory
 SIMNOS uses an inventory to define a set of SSH hosts and their configuration. It is a key part to the project. The inventory is a dictionary that contains two sections: `default` and `hosts`. The `default` section contains parameters and configuration that SIMNOS uses by default for each host. The `hosts` section is a dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
 
-The are two ways to provide inventory data to SIMNOS:
+There are two ways to provide inventory data to SIMNOS:
 
 1. Using YAML file
 2. Using Python dictionary
@@ -12,7 +12,7 @@ In all cases the inventory data must have the following structure independently 
 - **default**: A dictionary containing default parameters and configuration that SIMNOS uses by default for each host.
 - **hosts**: A dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
 
-It is mandatory always to provide the `hosts` section. The `default` section is optional. If not provided, SIMNOS uses a default configuration. This stucture works in hierarchical way, so the `hosts` section will override the `default` section.
+It is mandatory always to provide the `hosts` section. The `default` section is optional. If not provided, SIMNOS uses a default configuration. This structure works in hierarchical way, so the `hosts` section will override the `default` section.
 
 !!! warning
     Even though you can freely change the default parameters, it is recommended to keep them as they are and override them through the `hosts` section. In case you change the `default` section, you must provide all the parameters that are in the default configuration.
@@ -36,9 +36,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "platform":"cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "platform": "huawei_smartax"}
-        "router_arista_eos": {"port": 6002, "platform": "arista_eos"}
+        "router_cisco_ios": {"port": 6000, "platform": "cisco_ios"},
+        "router_huawei_smartax": {"port": 6001, "platform": "huawei_smartax"},
+        "router_arista_eos": {"port": 6002, "platform": "arista_eos"},
     }
 }
 ```
@@ -84,10 +84,12 @@ from simnos import SimNOS
 
 inventory_data = {
     "hosts": {
-        "username": "user",
-        "password": "user",
-        "port": 6000,
-        "platform": "cisco_ios",
+        "router1": {
+            "username": "user",
+            "password": "user",
+            "port": 6000,
+            "platform": "cisco_ios",
+        }
     }
 }
 
@@ -233,7 +235,7 @@ inventory_data = {
 }
 ```
 
-This configuration will result in SIMNOS running 10 instances of hosts servers named `router1` to `router10` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
+This configuration will result in SIMNOS running 10 instances of hosts servers named `router0` to `router9` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
 
 !!! warning
     If host inventory data contains `replicas` parameter, `port` parameter must be a list
@@ -247,10 +249,10 @@ By default SIMNOS uses SSH private key embedded with the package, making that ke
 ### Linux and MacOS
 
 Use the command `ssh-keygen -A` in terminal to generate all of your SSH keys. Once the command is run,
-you can find the RSA key in the following location: `~/.ssh/id_rsa` a.k.a. `/home/<username>.ssh/id_rsa`.
+you can find the RSA key in the following location: `~/.ssh/id_rsa` a.k.a. `/home/<username>/.ssh/id_rsa`.
 Supply above path as `ssh_key_file` argument to SIMNOS server configuration.
 
-Alternatively can use `ckeygen -t rsa -f ssh-keys/ssh_host_rsa_key` command to generate private key.
+Alternatively can use `ssh-keygen -t rsa -f ssh-keys/ssh_host_rsa_key` command to generate private key.
 
 ### Windows 10
 
@@ -263,7 +265,7 @@ server configuration. If you put a password, include it as the `ssh_key_file_pas
 
 ## Inventory JSON Schema
 
-SIMNOS internally uses [Pydantic](https://pydantic-docs.helpmanual.io/usage/models/)
+SIMNOS internally uses [Pydantic](https://docs.pydantic.dev/latest/concepts/models/)
 models to validate inventory data and raise `ValidationError` if inventory does
 not comply with defined schema.
 
@@ -503,8 +505,8 @@ like this:
                 "nos": {
                     "$ref": "#/definitions/NosPlugin"
                 },
-                "count": {
-                    "title": "Count",
+                "replicas": {
+                    "title": "Replicas",
                     "exclusiveMinimum": 0,
                     "type": "integer"
                 }
@@ -565,4 +567,4 @@ The following options can be used either in the `default` section or in the `hos
 | `configuration`           | :gear:                    | NOS configuration                     | The configuration entirely rely on the plugin                           |
 
 
-[^1]: To see the current defaults, check the [source code](https://github.com/Route-Reflector/simnos/blob/master/simnos/core/simnos.py) of SIMNOS.
+[^1]: To see the current defaults, check the [source code](https://github.com/Route-Reflector/simnos/blob/main/simnos/core/simnos.py) of SIMNOS.

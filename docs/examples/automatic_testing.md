@@ -3,7 +3,7 @@
 One of the most interesting use cases is the automatic testing. In this example it will be shown how SIMNOS can help easily doing the testing for you in your library. It is not intended to substitute other kind of tests, like unit tests, but rather complement those giving a light fake platform. We will do first the script and later the test, although it is recommended to do the other way around (TDD).
 
 ## Script
-The following script is similar to the one explained before in the example [developing_scripts](developing_scripts.md). It is recommended to do first that example. Briefly, it enters a device Huawei SmartAX, it the value for all the ONTs in a port and then it looks for the serial number of the first one.
+The following script is similar to the one explained before in the example [developing_scripts](developing_scripts.md). It is recommended to do first that example. Briefly, it enters a device Huawei SmartAX, it gets the value for all the ONTs in a port and then it looks for the serial number of the first one.
 
 ```python
 from netmiko import ConnectHandler
@@ -94,11 +94,11 @@ This test will perform the following steps:
 2. Perform the action to be tested
 3. Close the fake devices
 
-In case of automatic testing, always needs to be followed the same structure. This sandwitch is needed. In case that you don't call the `net.stop()` the test suites will hang up as some underlying thread will be still wait for new connections.
+In case of automatic testing, always needs to be followed the same structure. This sandwich is needed. In case that you don't call the `net.stop()` the test suites will hang up as some underlying thread will be still wait for new connections.
 
-!!! note
-    There are plans to make with a decorator like `@simnos(platform="cisco_ios")`, but for now
-    this is the main way to do it. PR doing this are more than welcome! :smiley:
+!!! tip
+    You can also use the `@simnos` decorator or the `with` statement for a cleaner approach.
+    See the sections below.
 
 ## Implemented using the `with`
 The previous example can be implemented using the `with` statement. This is a more pythonic way to do it, and it is recommended to use it. The previous example can be rewritten as follows:
@@ -153,7 +153,7 @@ from simnos import simnos
 @simnos(platform="huawei_smartax", return_instance=True)
 def get_ports_used_in_decorator():
     """ We want to see the ports of the fake device """
-    host_ports = [host.port for hosts in net.hosts.values()]
+    host_ports = [host.port for host in net.hosts.values()]
     print(host_ports)
 ```
 

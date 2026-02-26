@@ -17,6 +17,6 @@ In this case, the configuration file is located in the `my_configurations` folde
 
 Currently SIMNOS accepts configurations in the following platforms:
 
-- [cisco_ios](https://github.com/Route-Reflector/simnos/tree/master/simnos/plugins/nos/platforms_py/configurations/cisco_ios.yaml.j2)
-- [huawei_smartax](https://github.com/Route-Reflector/simnos/tree/master/simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2)
-- [arista_eos](https://github.com/Route-Reflector/simnos/tree/master/simnos/plugins/nos/platforms_py/configurations/arista_eos.yaml.j2)
+- [cisco_ios](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/cisco_ios.yaml.j2)
+- [huawei_smartax](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2)
+- [arista_eos](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/arista_eos.yaml.j2)

@@ -96,10 +96,10 @@ Configuration register is 0x2102
 6. Returning `None` as command output will not produce a response
 7. Returning True as command output will close the shell
 8. Returning an empty output with produce a response containing only newline characters
-9. The returned output can contain the `base_prompt` formatter
+9. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
 10. The only prompt where this command is valid
 11. Default response content used for undefined commands
-12. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
+12. The returned output can contain the `base_prompt` formatter
 
 Attributes supported by the commands dictionary:
 
@@ -219,7 +219,7 @@ DEVICE_NAME: str = "TestModule"
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 
 
-# pylint: disable=unused-argument
+# noqa: ARG002
 class TestModule(BaseDevice):
     """
     Class that keeps track of the state of the TestModule device.

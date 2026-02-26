@@ -8,8 +8,8 @@ full potential.
 ::: simnos.plugins.nos.platforms_py.cisco_ios
     rendering:
       show_if_no_docstring: true
-	  heading_level: 4
-	  show_object_full_path: false
+      heading_level: 4
+      show_object_full_path: false
 
 ## Servers Plugins
 
@@ -19,8 +19,8 @@ Servers Plugins acts as an access layer, simulating device connections.
 
 ::: simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServer
     rendering:
-	  heading_level: 4
-	  show_object_full_path: false
+      heading_level: 4
+      show_object_full_path: false
 
 ## Shell Plugins
 
@@ -31,8 +31,8 @@ gluing, connecting them together.
 
 ::: simnos.plugins.shell.cmd_shell.CMDShell
     rendering:
-	  heading_level: 4
-	  show_object_full_path: false
+      heading_level: 4
+      show_object_full_path: false
 
 ## Tape Plugins
 

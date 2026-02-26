@@ -28,7 +28,7 @@ uv run pre-commit install                              # (5)
 ```
 
 1.  Install uv
-2.  Clone SIMNOS repository from GitHub master branch
+2.  Clone SIMNOS repository from GitHub main branch
 3.  Navigate to simnos folder
 4.  Run uv to create virtual environment and install dependencies
 5.  Enable pre-commit hooks for automatic code checks on git commit
