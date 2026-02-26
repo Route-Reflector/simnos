@@ -1,7 +1,7 @@
 # Inventory
 SIMNOS uses an inventory to define a set of SSH hosts and their configuration. It is a key part to the project. The inventory is a dictionary that contains two sections: `default` and `hosts`. The `default` section contains parameters and configuration that SIMNOS uses by default for each host. The `hosts` section is a dictionary keyed by hosts' names containing host definition. Any parameter defined per-host overrides parameters defined in the `default` section.
 
-The are two ways to provide inventory data to SIMNOS:
+There are two ways to provide inventory data to SIMNOS:
 
 1. Using YAML file
 2. Using Python dictionary
@@ -84,10 +84,12 @@ from simnos import SimNOS
 
 inventory_data = {
     "hosts": {
-        "username": "user",
-        "password": "user",
-        "port": 6000,
-        "platform": "cisco_ios",
+        "router1": {
+            "username": "user",
+            "password": "user",
+            "port": 6000,
+            "platform": "cisco_ios",
+        }
     }
 }
 
@@ -233,7 +235,7 @@ inventory_data = {
 }
 ```
 
-This configuration will result in SIMNOS running 10 instances of hosts servers named `router1` to `router10` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
+This configuration will result in SIMNOS running 10 instances of hosts servers named `router0` to `router9` using ports 5001 to 5010 respectively. That makes it very easy to define sets of hosts that use same configuration to scale the setup out.
 
 !!! warning
     If host inventory data contains `replicas` parameter, `port` parameter must be a list
