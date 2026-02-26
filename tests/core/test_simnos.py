@@ -238,6 +238,24 @@ class TestSimNOS:
         net = SimNOS(inventory=inventory)
         assert net.allocated_ports == {5000, 5001}
 
+    @pytest.mark.parametrize(
+        "port",
+        [0, -1, 65536, 100000],
+        ids=["zero", "negative", "above_max", "far_above_max"],
+    )
+    def test_allocate_port_out_of_range(self, port):
+        """Test that _allocate_port_single rejects ports outside 1-65535."""
+        net = SimNOS()
+        with pytest.raises(ValueError, match="out of valid range"):
+            net._allocate_port_single(port)
+
+    def test_allocate_port_boundary_valid(self):
+        """Test that port 1 and 65535 are accepted as valid boundary values."""
+        net = SimNOS()
+        net._allocate_port_single(1)
+        net._allocate_port_single(65535)
+        assert {1, 65535}.issubset(net.allocated_ports)
+
     def test_replicas_not_set_and_port_list(self):
         """
         Test that the function _check_ports_and_replicas raises an exception
