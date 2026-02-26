@@ -27,3 +27,10 @@ any arguments:
 ```bash
 simnos
 ```
+
+!!! warning "Security notice"
+    SIMNOS is intended for **testing and development only**. Be aware of the following defaults:
+
+    - **Default credentials**: The built-in inventory uses `user`/`user`. Change these in your inventory for any non-local deployment.
+    - **Default SSH host key**: All SIMNOS instances share the same RSA key. An attacker who knows this key can perform MITM attacks. Provide a custom key via `ssh_key_file` in the server configuration for non-local use.
+    - **Bind address**: By default SIMNOS binds to `127.0.0.1` (localhost only). In Docker/WSL environments it may bind to `0.0.0.0` (all interfaces), exposing the service to the network.

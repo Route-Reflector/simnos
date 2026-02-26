@@ -141,7 +141,6 @@ tests/tofile_outputs/
 act
 
 # internal dev .yaml files
-fake_nos.yaml
 inventory.yaml
 # local work artifacts
 design/

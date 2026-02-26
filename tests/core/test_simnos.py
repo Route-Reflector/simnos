@@ -4,9 +4,10 @@ The file can be found in simnos/core/simnos.py
 """
 
 # pylint: disable=protected-access
+import logging
 import platform
 import threading
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import detect
 import pytest
@@ -104,8 +105,8 @@ class TestSimNOS:
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
-            assert host.username in "simnos"
-            assert host.password in "simnos"
+            assert host.username == "simnos"
+            assert host.password == "simnos"
             assert host.port in [5001, 6000]
 
     def test_is_inventory_in_yaml(self):
@@ -239,7 +240,7 @@ class TestSimNOS:
 
     def test_replicas_not_set_and_port_list(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is not set.
         """
         inventory = {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}}
@@ -248,7 +249,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_int(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and port is an int.
         """
         inventory = {"default": {"port": 5000, "replicas": 2}, "hosts": {"R1": {}}}
@@ -257,7 +258,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_list_not_enough_ports(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and there are not enough ports.
         """
         inventory = {"default": {"port": [5000], "replicas": 2}, "hosts": {"R1": {}}}
@@ -266,7 +267,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_list_too_many_ports(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and there are too many ports.
         """
         inventory = {
@@ -278,7 +279,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_1_larger_than_port_2(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the first port is larger than the second port.
         """
         inventory = {
@@ -290,7 +291,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_replicas_less_than_1(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the replicas are less than 1.
         """
         inventory = {
@@ -302,7 +303,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_ports_set_not_same_length(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the ports are not the same length.
         """
         inventory = {
@@ -447,13 +448,14 @@ class TestSimNOS:
 
     def test_number_of_threads_after_stop_is_only_main(self):
         """
-        Test that the number of threads after stopping the network is only the main thread.
+        Test that the number of threads after stopping the network
+        returns to the baseline (before start).
         """
+        baseline = threading.active_count()
         net = SimNOS()
         net.start()
         net.stop()
-        active_threads = threading.active_count()
-        assert active_threads == 1
+        assert threading.active_count() <= baseline
 
     def test_execute_function_over_hosts_invalid_workers(self):
         """
@@ -513,9 +515,10 @@ class TestPlatforms:
         """
         Test that the with statement works.
         """
+        baseline = threading.active_count()
         with SimNOS() as net:
             assert len(net.hosts) == 3
-        assert threading.active_count() == 1
+        assert threading.active_count() <= baseline
 
     @simnos(platform="cisco_ios", return_instance=True)
     def test_decorator_with_platform(self, net: SimNOS):
@@ -553,3 +556,56 @@ class TestPlatforms:
                 pass
 
             dummy_function()
+
+
+class TestWarnSecurity:
+    """Test cases for SimNOS._warn_security()."""
+
+    def test_default_credentials_warning(self, caplog):
+        """Default credentials (user/user) should emit a warning."""
+        host = Mock(
+            username="user",
+            password="user",
+            name="R1",
+            server_inventory={"configuration": {"address": "127.0.0.1"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "default credentials" in caplog.text
+
+    def test_bind_all_interfaces_warning(self, caplog):
+        """Binding to 0.0.0.0 should emit a warning."""
+        host = Mock(
+            username="admin",
+            password="secret",
+            name="R1",
+            server_inventory={"configuration": {"address": "0.0.0.0"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "0.0.0.0" in caplog.text
+
+    def test_no_warning_for_safe_config(self, caplog):
+        """Safe configuration should not emit any warning."""
+        host = Mock(
+            username="admin",
+            password="secret",
+            name="R1",
+            server_inventory={"configuration": {"address": "127.0.0.1"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert caplog.text == ""
+
+    def test_both_warnings(self, caplog):
+        """Default credentials + 0.0.0.0 should emit both warnings."""
+        host = Mock(
+            username="user",
+            password="user",
+            name="R1",
+            server_inventory={"configuration": {"address": "0.0.0.0"}},
+        )
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS._warn_security(host)
+        assert "default credentials" in caplog.text
+        assert "0.0.0.0" in caplog.text

@@ -4,6 +4,7 @@ Module tests for compatibility with Docker containers.
 
 # pylint: disable=unused-argument
 import os
+import socket
 import subprocess
 import time
 
@@ -12,7 +13,7 @@ import pytest
 
 IN_GITHUB_ACTIONS: bool = os.getenv("GITHUB_ACTIONS") is not None
 
-fakerouter1 = {
+router1 = {
     "device_type": "cisco_ios",
     "host": "localhost",
     "username": "user",
@@ -20,7 +21,7 @@ fakerouter1 = {
     "port": 12723,
 }
 
-fakerouter2 = {
+router2 = {
     "device_type": "cisco_ios",
     "host": "localhost",
     "username": "user",
@@ -44,6 +45,18 @@ def _skip_docker_tests() -> bool:
         return True
 
 
+def _wait_for_port(host, port, timeout=30, interval=0.5):
+    """Wait until a TCP port is accepting connections."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            with socket.create_connection((host, port), timeout=1):
+                return
+        except OSError:
+            time.sleep(interval)
+    raise TimeoutError(f"Port {port} not ready after {timeout}s")
+
+
 @pytest.fixture
 def setup():
     """Starts the docker containers."""
@@ -52,7 +65,8 @@ def setup():
             ["docker", "compose", "-f", "docker/docker-compose.yaml", "up", "-d"],
             check=True,
         )
-        time.sleep(5)
+        _wait_for_port("localhost", 12723)
+        _wait_for_port("localhost", 12724)
         yield
     finally:
         subprocess.run(
@@ -72,7 +86,7 @@ def test_container(setup):
     """
     times_to_collect: int = 100
 
-    device = ConnectHandler(**fakerouter1)
+    device = ConnectHandler(**router1)
 
     outputs = [device.send_command("show clock") for _ in range(times_to_collect)]
 
@@ -93,8 +107,8 @@ def test_container_multiple_connections(setup):
     outputs = {"device1": [], "device2": []}
 
     for _ in range(connections_count):
-        device1 = ConnectHandler(**fakerouter1)
-        device2 = ConnectHandler(**fakerouter2)
+        device1 = ConnectHandler(**router1)
+        device2 = ConnectHandler(**router2)
 
         for _ in range(times_to_collect):
             outputs["device1"].append(device1.send_command("show clock"))

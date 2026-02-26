@@ -13,9 +13,9 @@ import pytest
 from simnos.core.servers import TCPServerBase
 
 
-class FakeServer(TCPServerBase):
+class StubServer(TCPServerBase):
     """
-    FakeServer class that inherits from TCPServerBase
+    StubServer class that inherits from TCPServerBase
     to test the abstract class.
     """
 
@@ -40,7 +40,7 @@ class ServersTest(unittest.TestCase):
         Test that the init method works as
         expected creating the needed threads.
         """
-        servers = FakeServer()
+        servers = StubServer()
 
         assert servers._is_running == mock_thread_event.return_value
         mock_thread_event.assert_called_once()
@@ -65,7 +65,7 @@ class ServersTest(unittest.TestCase):
         mock_thread_event().is_set.return_value = False
         mock_socket = MagicMock()
 
-        servers = FakeServer()
+        servers = StubServer()
         servers._socket = mock_socket
         servers.start()
 
@@ -83,7 +83,7 @@ class ServersTest(unittest.TestCase):
         """
         mock_thread_event().is_set.return_value = True
 
-        servers = FakeServer()
+        servers = StubServer()
         servers.start()
 
         mock_thread_event().set.assert_not_called()
@@ -97,7 +97,7 @@ class ServersTest(unittest.TestCase):
         setsockopt is called with the right parameters
         in Linux.
         """
-        servers = FakeServer()
+        servers = StubServer()
         servers._bind_sockets()
 
         mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
@@ -114,7 +114,7 @@ class ServersTest(unittest.TestCase):
         setsockopt is called with the right parameters
         in OSX.
         """
-        servers = FakeServer()
+        servers = StubServer()
         servers._bind_sockets()
 
         mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
@@ -130,7 +130,7 @@ class ServersTest(unittest.TestCase):
         setsockopt is called with the right parameters
         in Windows.
         """
-        servers = FakeServer()
+        servers = StubServer()
         servers._bind_sockets()
 
         mock_socket.assert_called_once_with(socket.AF_INET, socket.SOCK_STREAM)
@@ -146,7 +146,7 @@ class ServersTest(unittest.TestCase):
         """
         mock_thread_event().is_set.return_value = False
 
-        servers = FakeServer()
+        servers = StubServer()
         servers.stop()
 
         mock_thread_event().clear.assert_not_called()
@@ -160,7 +160,7 @@ class ServersTest(unittest.TestCase):
         the is_running flag is still set to true.
         """
         mock_thread_event().is_set.return_value = True
-        servers = FakeServer()
+        servers = StubServer()
         servers._listen_thread = mock_thread()
         servers._socket = mock_socket()
         servers.stop()
@@ -176,7 +176,7 @@ class ServersTest(unittest.TestCase):
         called.
         """
         mock_thread_event().is_set.return_value = True
-        servers = FakeServer()
+        servers = StubServer()
         servers._listen_thread = mock_thread()
         servers._socket = mock_socket()
 
@@ -192,13 +192,18 @@ class ServersTest(unittest.TestCase):
         after the program is interrupted.
         """
         mock_thread_event().is_set.return_value = True
-        servers = FakeServer()
+        servers = StubServer()
         servers._listen_thread = mock_thread()
         servers._socket = mock_socket()
 
+        # Add mock connection threads so the join loop is exercised
+        mock_conn_thread1 = MagicMock()
+        mock_conn_thread2 = MagicMock()
+        servers._connection_threads = [mock_conn_thread1, mock_conn_thread2]
+
         servers.stop()
-        for connection_thread in servers._connection_threads:
-            connection_thread.join.assert_called_once()
+        mock_conn_thread1.join.assert_called_once_with(timeout=2)
+        mock_conn_thread2.join.assert_called_once_with(timeout=2)
 
     @patch("threading.Event")
     @patch("threading.Thread")
@@ -210,7 +215,7 @@ class ServersTest(unittest.TestCase):
         coming in.
         """
         mock_thread_event().is_set.side_effect = [True, False]
-        servers = FakeServer()
+        servers = StubServer()
         servers._socket = mock_socket()
         servers._socket.accept.return_value = (MagicMock(), MagicMock())
 
@@ -233,7 +238,7 @@ class ServersTest(unittest.TestCase):
         reached.
         """
         mock_thread_event().is_set.side_effect = [True, False]
-        servers = FakeServer()
+        servers = StubServer()
         servers._socket = mock_socket()
         servers._socket.accept.side_effect = socket.timeout
 
@@ -252,7 +257,7 @@ class ServersTest(unittest.TestCase):
         thread not running anymore stops.
         """
         mock_thread_event().is_set.side_effect = [True] * 100 + [False]
-        servers = FakeServer()
+        servers = StubServer()
         servers._socket = mock_socket()
         servers._socket.accept.return_value = (MagicMock(), MagicMock())
         servers._listen()

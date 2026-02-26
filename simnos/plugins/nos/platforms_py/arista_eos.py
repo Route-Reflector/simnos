@@ -33,7 +33,7 @@ class AristaEOS(BaseDevice):
         config_prompt = CONFIG_PROMPT.format(base_prompt=base_prompt)
         if current_prompt in [initial_prompt, enable_prompt]:
             return True  # close session
-        if current_prompt in config_prompt:
+        if current_prompt == config_prompt:
             return {"output": "", "new_prompt": ENABLE_PROMPT}
         raise RuntimeError(f"make_exit does not know how to handle '{current_prompt}' prompt")
 

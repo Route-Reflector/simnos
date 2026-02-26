@@ -128,7 +128,7 @@ class ShellUtilsTest(TestCase):
         with patch("os.stat", side_effect=mock_os_stat):
             files = get_files_recently_modified(files, files_lasttime_changed)
         self.assertTrue(files)
-        self.assertTrue(all(file in files for file in files))
+        self.assertIn(RANDOM_FILE, files)
         self.assertTrue(all(files_lasttime_changed[file] != 0 for file in files))
 
     def test_get_files_changed(self):

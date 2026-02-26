@@ -172,7 +172,8 @@ class TestCmdShell(TestCase):
     def test_emptyline(self):
         """Test that the emptyline method does nothing."""
         shell = CMDShell(**self.arguments)
-        shell.emptyline()
+        result = shell.emptyline()
+        self.assertIsNone(result)
 
     def test_precmd(self):
         """Test that the precmd method returns the line."""

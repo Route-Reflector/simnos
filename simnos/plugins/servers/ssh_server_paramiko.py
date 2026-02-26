@@ -3,6 +3,7 @@ This module implements an SSH server done using
 paramiko as the SSH connection library.
 """
 
+from collections import deque
 import io
 import logging
 import socket
@@ -166,11 +167,14 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
 class TapIO(io.StringIO):
     """
     Class to implement StringIO subclass but with blocking readline method
-    and a list to buffer lines on write
+    and a deque to buffer lines on write.
+
+    Uses ``collections.deque`` for thread-safe, O(1) append/pop operations
+    (CPython's GIL guarantees atomicity for deque ``append``/``pop``).
     """
 
     def __init__(self, run_srv: threading.Event, initial_value: str = "", newline: str = "\n"):
-        self.lines: list[str] = []
+        self.lines: deque[str] = deque()
         self.run_srv: threading.Event = run_srv
         super().__init__(initial_value, newline)
 
@@ -178,7 +182,7 @@ class TapIO(io.StringIO):
         """method to readline in indefinite block mode"""
         while self.run_srv.is_set():
             if self.lines:
-                return self.lines.pop(-1)
+                return self.lines.pop()
             time.sleep(0.01)
         return None
 
@@ -186,7 +190,7 @@ class TapIO(io.StringIO):
         """
         :param value: line to add to self.lines buffer
         """
-        self.lines.insert(0, value)
+        self.lines.appendleft(value)
 
 
 def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_srv):
@@ -195,7 +199,10 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
     """
     buffer: io.BytesIO = io.BytesIO()
     while run_srv.is_set():
-        byte: bytes = channel_stdio.read(1)
+        try:
+            byte: bytes = channel_stdio.read(1)
+        except TimeoutError:
+            continue
         log.debug("ssh_server.channel_to_shell_tap received from channel: %s", [byte])
 
         # EOF / channel closed
@@ -314,6 +321,11 @@ class ParamikoSshServer(TCPServerBase):
                 ssh_key_file, ssh_key_file_password
             )
         else:
+            log.warning(
+                "Using shared default SSH host key. All SIMNOS instances share this key, "
+                "making them vulnerable to MITM attacks. Provide a custom key via "
+                "ssh_key_file for non-local use."
+            )
             self._ssh_server_key: paramiko.rsakey.RSAKey = paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY))
 
         # Load SSH moduli once for DH Group Exchange support in server mode.

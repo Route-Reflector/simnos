@@ -17,8 +17,14 @@ def get_running_hosts(hosts: dict[str, Host]) -> dict[str, bool]:
 
 
 def get_free_port():
-    """It returns a free port."""
+    """Return a free port.
+
+    Note: There is an inherent TOCTOU race between closing this socket
+    and the caller binding to the returned port.  This is acceptable
+    for test usage in controlled environments.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
         s.bind(("", 0))
         return s.getsockname()[1]
 
