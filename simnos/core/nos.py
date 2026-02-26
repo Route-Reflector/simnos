@@ -221,8 +221,7 @@ class Nos:
             device_class = getattr(module, classname, None)
             if device_class is None:
                 raise AttributeError(
-                    f"Module '{filename}' defines DEVICE_NAME='{classname}' "
-                    f"but class '{classname}' was not found"
+                    f"Module '{filename}' defines DEVICE_NAME='{classname}' but class '{classname}' was not found"
                 )
             configuration_file = self.configuration_file or getattr(module, "DEFAULT_CONFIGURATION", None)
             self.device = device_class(configuration_file=configuration_file)
@@ -234,9 +233,7 @@ class Nos:
         :param filename: OS path string to `.yaml/.yml` or `.py` file with NOS data
         """
         if not self.is_file_ending_correct(filename):
-            raise ValueError(
-                f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml'
-            )
+            raise ValueError(f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
         if filename.endswith((".yaml", ".yml")):

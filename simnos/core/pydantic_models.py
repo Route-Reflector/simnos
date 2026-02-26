@@ -147,6 +147,7 @@ class HostConfig(InventoryDefaultSection):
     """
     Pydantic model for SimNOS inventory host configuration.
     """
+
     # count: Optional[conint(strict=True, gt=0)]
     # use this for now, mkdocstring having issue with pydantic
     # https://github.com/mkdocstrings/griffe/issues/66
