@@ -146,3 +146,6 @@ inventory.yaml
 # local work artifacts
 design/
 workslog/
+
+# Claude Code settings
+.claude/settings.json
