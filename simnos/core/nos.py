@@ -215,10 +215,16 @@ class Nos:
         self.enable_prompt = getattr(module, "ENABLE_PROMPT", self.enable_prompt)
         self.config_prompt = getattr(module, "CONFIG_PROMPT", self.config_prompt)
         classname = getattr(module, "DEVICE_NAME", None)
-        configuration_file = self.configuration_file
-        if not self.configuration_file:
-            configuration_file = getattr(module, "DEFAULT_CONFIGURATION", None)
-        self.device = getattr(module, classname)(configuration_file=configuration_file)
+        if classname is None:
+            log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
+        else:
+            device_class = getattr(module, classname, None)
+            if device_class is None:
+                raise AttributeError(
+                    f"Module '{filename}' defines DEVICE_NAME='{classname}' but class '{classname}' was not found"
+                )
+            configuration_file = self.configuration_file or getattr(module, "DEFAULT_CONFIGURATION", None)
+            self.device = device_class(configuration_file=configuration_file)
 
     def from_file(self, filename: str) -> None:
         """
@@ -227,10 +233,7 @@ class Nos:
         :param filename: OS path string to `.yaml/.yml` or `.py` file with NOS data
         """
         if not self.is_file_ending_correct(filename):
-            raise ValueError(
-                f'Unsupported "{filename}" file extension.\
-                              Supported: .py, .yml, .yaml'
-            )
+            raise ValueError(f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
         if filename.endswith((".yaml", ".yml")):

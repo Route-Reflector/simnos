@@ -9,7 +9,6 @@ import logging
 import platform
 import socket
 import threading
-import time
 
 import detect
 import yaml
@@ -81,7 +80,7 @@ class SimNOS:
         self.plugins: list = plugins or []
 
         self.hosts: dict[str, Host] = {}
-        self.allocated_ports: set[str] = set()
+        self.allocated_ports: set[int] = set()
 
         self.shell_plugins = shell_plugins
         self.nos_plugins = nos_plugins
@@ -195,9 +194,6 @@ class SimNOS:
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
-        hosts_name: list[str] = []
-        ports: list[int] = []
-
         if replicas:
             hosts_name = [f"{host_name}{i}" for i in range(replicas)]
             ports = list(range(port[0], port[1] + 1))
@@ -250,13 +246,11 @@ class SimNOS:
         :param hosts: string or list of strings
         :return: list of strings
         """
-        hosts_list: list[Host] = []
         if not hosts:
             hosts = list(self.hosts.keys())
         if isinstance(hosts, str):
             hosts = [hosts]
-        hosts_list = [self.hosts[host] for host in hosts]
-        return hosts_list
+        return [self.hosts[host] for host in hosts]
 
     def start(
         self,
@@ -293,14 +287,15 @@ class SimNOS:
         workers: int | None = None,
     ) -> None:
         """
-        Function to stop NOS servers instances. It waits 2 seconds
-        just in case that there is any thread doing something.
+        Function to stop NOS servers instances and join managed threads.
 
         :param hosts: single or list of hosts to stop by their name.
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
         hosts: list[str] = self._get_hosts_as_list(hosts)
+        # Collect managed threads before stopping (Host.stop sets server to None)
+        managed_threads = self._collect_server_threads(hosts)
         self._execute_function_over_hosts(
             hosts,
             "stop",
@@ -308,24 +303,28 @@ class SimNOS:
             parallel=parallel,
             workers=workers,
         )
-        if hosts == list(self.hosts.values()):
-            self._join_threads()
+        if managed_threads:
+            self._join_threads(managed_threads)
 
-    def _join_threads(self) -> None:
+    def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
+        """Collect all managed threads from host servers before stopping."""
+        threads: list[threading.Thread] = []
+        for host in hosts:
+            if host.server is not None:
+                threads.extend(host.server.managed_threads)
+        return threads
+
+    def _join_threads(self, threads: list[threading.Thread]) -> None:
         """
-        Method to join threads in case that all hosts are stopped.
+        Join SimNOS-managed threads after all hosts are stopped.
+        Server threads are already joined by TCPServerBase.stop();
+        this is a safety net for any stragglers.
         """
-        all_threads = threading.enumerate()
-        for thread in all_threads:
-            if thread is not threading.main_thread() and "pytest_timeout" not in thread.name:
-                thread.join(timeout=5)
-        deadline = time.monotonic() + 10
-        n_threads: int = 2 if detect.windows else 1
-        while threading.active_count() > n_threads:
-            if time.monotonic() > deadline:
-                log.warning("Some threads did not exit within timeout")
-                break
-            time.sleep(0.01)
+        for thread in threads:
+            thread.join(timeout=5)
+        alive = [t for t in threads if t.is_alive()]
+        if alive:
+            log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 
     def _execute_function_over_hosts(
         self,

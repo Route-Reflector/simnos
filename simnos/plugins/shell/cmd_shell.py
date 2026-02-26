@@ -145,7 +145,7 @@ class CMDShell(Cmd):
         try:
             cmd_data = self.commands[line]
             if "alias" in cmd_data:
-                cmd_data = {**self.commands[cmd_data.pop("alias")], **cmd_data}
+                cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
             if self._check_prompt(cmd_data.get("prompt")):
                 ret = cmd_data["output"]
                 if callable(ret):

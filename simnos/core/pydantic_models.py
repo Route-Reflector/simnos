@@ -7,6 +7,7 @@ from typing import Literal
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
@@ -125,6 +126,8 @@ class InventoryDefaultSection(BaseModel):
     Pydantic model for SimNOS inventory default section.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     username: StrictStr | None = None
     password: StrictStr | None = None
     # port: Optional[Union[conint(strict=True, gt=0, le=65535),
@@ -134,6 +137,7 @@ class InventoryDefaultSection(BaseModel):
     # https://github.com/mkdocstrings/griffe/issues/66
     port: StrictInt | list[StrictInt] | None = None
     configuration_file: StrictStr | None = None
+    platform: StrictStr | None = None
     server: ParamikoSshServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
@@ -170,8 +174,4 @@ class ModelSimnosInventory(BaseModel):
     default: InventoryDefaultSection | None = None
     hosts: dict[StrictStr, HostConfig]
 
-    # pylint: disable=too-few-public-methods
-    class ConfigDict:
-        """Pydantic model configuration"""
-
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")
