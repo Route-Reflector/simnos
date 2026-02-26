@@ -239,7 +239,7 @@ class TestSimNOS:
 
     def test_replicas_not_set_and_port_list(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is not set.
         """
         inventory = {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}}
@@ -248,7 +248,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_int(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and port is an int.
         """
         inventory = {"default": {"port": 5000, "replicas": 2}, "hosts": {"R1": {}}}
@@ -257,7 +257,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_list_not_enough_ports(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and there are not enough ports.
         """
         inventory = {"default": {"port": [5000], "replicas": 2}, "hosts": {"R1": {}}}
@@ -266,7 +266,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_list_too_many_ports(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and there are too many ports.
         """
         inventory = {
@@ -278,7 +278,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_port_1_larger_than_port_2(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the first port is larger than the second port.
         """
         inventory = {
@@ -290,7 +290,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_replicas_less_than_1(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the replicas are less than 1.
         """
         inventory = {
@@ -302,7 +302,7 @@ class TestSimNOS:
 
     def test_replicas_set_and_ports_set_not_same_length(self):
         """
-        Test that the function _check_ports_and_replicas_are_okey raises an exception
+        Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the ports are not the same length.
         """
         inventory = {

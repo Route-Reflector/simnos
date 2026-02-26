@@ -144,12 +144,12 @@ class SimNOS:
             }
             port: int | list = params.pop("port")
             replicas: int = params.pop("replicas", None)
-            self._check_ports_and_replicas_are_okey(port, replicas)
+            self._check_ports_and_replicas(port, replicas)
             self._instantiate_host_object(host_name, port, replicas, params)
 
-    def _check_ports_and_replicas_are_okey(self, port, replicas):
+    def _check_ports_and_replicas(self, port, replicas):
         """
-        Method to check if the port and replicas are okey
+        Method to check if the port and replicas are valid
 
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
@@ -165,19 +165,16 @@ class SimNOS:
         if replicas and replicas < 1:
             raise ValueError("If replicas is set, replicas must be greater than 0.")
         if replicas and port[1] - port[0] + 1 != replicas:
-            raise ValueError(
-                "If replicas is set, port range \
-                    must be equal to the number of replicas."
-            )
+            raise ValueError("If replicas is set, port range must be equal to the number of replicas.")
 
     def _instantiate_host_object(self, host_name: str, port: int | list[int], replicas: int, params: dict):
         """
         Method that instantiate the host objects. It initializes the hosts
         with the corresponding name, port and network operating system
 
-        :param host: string - name of the host
+        :param host_name: string - name of the host
         :param port: integer or list of two integers - port to allocate
-        :param count: integer - number of hosts to create
+        :param replicas: integer - number of hosts to create
         :param params: dictionary - parameters to pass to
                                     the host like configurations
         """
@@ -274,7 +271,7 @@ class SimNOS:
             workers=workers,
         )
         log.info(
-            "The following devices has been initiated: %s",
+            "The following devices have been initiated: %s",
             [host.name for host in hosts],
         )
         for host in hosts:
