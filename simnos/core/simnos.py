@@ -54,7 +54,7 @@ if detect.docker and "WSL2" in platform.release():
 class SimNOS:
     """
     SimNOS class is a main entry point to interact
-    with fake NOS servers - start, stop, list.
+    with SimNOS servers - start, stop, list.
 
     :param inventory: SimNOS inventory dictionary or
                       OS path to .yaml file with inventory data
@@ -279,6 +279,7 @@ class SimNOS:
         )
         for host in hosts:
             log.info("Device %s is running on port %s", host.name, host.port)
+            self._warn_security(host)
 
     def stop(
         self,
@@ -358,6 +359,22 @@ class SimNOS:
             futures = [ex.submit(getattr(h, func)) for h in targets]
             for f in futures:
                 f.result()
+
+    @staticmethod
+    def _warn_security(host: Host) -> None:
+        """Emit warnings for common security misconfigurations."""
+        if host.username == "user" and host.password == "user":  # noqa: S105
+            log.warning(
+                "Device %s uses default credentials (user/user). "
+                "Change username/password in the inventory for non-local use.",
+                host.name,
+            )
+        address = host.server_inventory.get("configuration", {}).get("address", "")
+        if address == "0.0.0.0":  # noqa: S104
+            log.warning(
+                "Device %s binds to 0.0.0.0 (all interfaces). Use 127.0.0.1 to restrict access to localhost only.",
+                host.name,
+            )
 
     def _register_nos_plugins(self) -> None:
         """

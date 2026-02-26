@@ -5,7 +5,7 @@ It has certain atributes and methods which are
 generally common to all devices.
 """
 
-from jinja2 import Environment, PackageLoader, Template, select_autoescape
+from jinja2 import Environment, PackageLoader, Template
 import yaml
 
 
@@ -16,7 +16,7 @@ class BaseDevice:
         self.configurations = self.load_configurations(configuration_file)
         self.env = Environment(
             loader=PackageLoader("simnos.plugins.nos.platforms_py", "templates"),
-            autoescape=select_autoescape(["j2"]),
+            autoescape=False,  # noqa: S701 — output is CLI text, not HTML
         )
 
     def load_configurations(self, configuration_file: str) -> dict:

@@ -211,7 +211,7 @@ class TapIOTest(unittest.TestCase):
         run_srv.set()
         tap_io: TapIO = TapIO(run_srv=run_srv)
         self.assertTrue(tap_io.run_srv)
-        self.assertEqual(tap_io.lines, [])
+        self.assertEqual(len(tap_io.lines), 0)
         self.assertEqual(tap_io.closed, False)
         run_srv.clear()
 
@@ -232,7 +232,7 @@ class TapIOTest(unittest.TestCase):
         """Check that the write method appends the line to the lines list."""
         tap_io: TapIO = TapIO(run_srv=threading.Event())
         tap_io.write("line1")
-        self.assertEqual(tap_io.lines, ["line1"])
+        self.assertEqual(list(tap_io.lines), ["line1"])
 
 
 class ChannelToShellTapTest(unittest.TestCase):

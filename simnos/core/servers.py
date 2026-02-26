@@ -110,6 +110,9 @@ class TCPServerBase(ABC):
                 self._connection_threads.append(connection_thread)
             except TimeoutError:
                 pass
+            finally:
+                # Prune finished threads to prevent unbounded growth
+                self._connection_threads = [t for t in self._connection_threads if t.is_alive()]
 
     @abstractmethod
     def connection_function(self, client, is_running):

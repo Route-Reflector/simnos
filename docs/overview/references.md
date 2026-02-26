@@ -1,4 +1,4 @@
-# FakeNOS inspired by and borrowed from
+# SIMNOS inspired by and borrowed from
 
 - [sshim](https://pythonhosted.org/sshim/) - library for testing and debugging SSH automation clients
 - [PythonSSHServerTutorial](https://github.com/ramonmeza/PythonSSHServerTutorial) - tutorial on creating paramiko based SSH server

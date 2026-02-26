@@ -62,16 +62,16 @@ if args.RELOAD_COMMANDS:
 
 def run_cli():
     """Function to start SimNOS CLI"""
-    fakenet = SimNOS(inventory=args.INVENTORY)
+    net = SimNOS(inventory=args.INVENTORY)
     log.info("Initiating SimNOS")
-    fakenet.start()
+    net.start()
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
         log.info("Shutting down SimNOS")
-        fakenet.stop()
+        net.stop()
         if args.RELOAD_COMMANDS:
             os.environ.pop("SIMNOS_RELOAD_COMMANDS")
 

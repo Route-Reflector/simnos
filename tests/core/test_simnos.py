@@ -104,8 +104,8 @@ class TestSimNOS:
         assert len(net.hosts) == 2
         for router_name, host in net.hosts.items():
             assert router_name in ["R1", "R2"]
-            assert host.username in "simnos"
-            assert host.password in "simnos"
+            assert host.username == "simnos"
+            assert host.password == "simnos"
             assert host.port in [5001, 6000]
 
     def test_is_inventory_in_yaml(self):
@@ -447,13 +447,14 @@ class TestSimNOS:
 
     def test_number_of_threads_after_stop_is_only_main(self):
         """
-        Test that the number of threads after stopping the network is only the main thread.
+        Test that the number of threads after stopping the network
+        returns to the baseline (before start).
         """
+        baseline = threading.active_count()
         net = SimNOS()
         net.start()
         net.stop()
-        active_threads = threading.active_count()
-        assert active_threads == 1
+        assert threading.active_count() <= baseline
 
     def test_execute_function_over_hosts_invalid_workers(self):
         """
@@ -513,9 +514,10 @@ class TestPlatforms:
         """
         Test that the with statement works.
         """
+        baseline = threading.active_count()
         with SimNOS() as net:
             assert len(net.hosts) == 3
-        assert threading.active_count() == 1
+        assert threading.active_count() <= baseline
 
     @simnos(platform="cisco_ios", return_instance=True)
     def test_decorator_with_platform(self, net: SimNOS):
