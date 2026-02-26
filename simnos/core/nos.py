@@ -243,7 +243,7 @@ class Nos:
 
     def is_file_ending_correct(self, filename: str) -> bool:
         """
-        Method to check if file extension is correct and load NOS data.
-        Correct types are: .yaml, .yml and .py
+        Method to check if file extension is supported.
+        Supported types are: .yaml, .yml and .py
         """
         return filename.endswith((".yaml", ".yml", ".py"))

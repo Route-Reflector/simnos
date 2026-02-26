@@ -143,8 +143,8 @@ class SimNOS:
                 **copy.deepcopy(self.inventory["default"]),
                 **copy.deepcopy(host_config),
             }
-            port: int | list = params.pop("port")
-            replicas: int = params.pop("replicas", None)
+            port: int | list[int] = params.pop("port")
+            replicas: int | None = params.pop("replicas", None)
             self._check_ports_and_replicas(port, replicas)
             self._instantiate_host_object(host_name, port, replicas, params)
 
@@ -168,7 +168,7 @@ class SimNOS:
         if replicas and port[1] - port[0] + 1 != replicas:
             raise ValueError("If replicas is set, port range must be equal to the number of replicas.")
 
-    def _instantiate_host_object(self, host_name: str, port: int | list[int], replicas: int, params: dict):
+    def _instantiate_host_object(self, host_name: str, port: int | list[int], replicas: int | None, params: dict):
         """
         Method that instantiate the host objects. It initializes the hosts
         with the corresponding name, port and network operating system
@@ -200,14 +200,13 @@ class SimNOS:
             ports = [port]
         return hosts_name, ports
 
-    def _instantiate_single_host_object(self, host, port, params):
+    def _instantiate_single_host_object(self, host: str, port: int, params: dict):
         """
-        Method that instantiate the host objects. It initializes the hosts
+        Method that instantiates a single host object.
 
-        :param host: string - name of the host
-        :param port: integer or list of two integers - port to allocate
-        :param params: dictionary - parameters to pass to
-                                    the host like configurations
+        :param host: name of the host
+        :param port: port to allocate
+        :param params: parameters to pass to the host like configurations
         """
         self._allocate_port(port)
         self.hosts[host] = Host(name=host, port=port, simnos=self, **params)
@@ -223,10 +222,9 @@ class SimNOS:
             port: list[int] = [port]
 
         for p in port:
-            allocated_port = self._allocate_port_single(p)
-            self.allocated_ports.add(allocated_port)
+            self._allocate_port_single(p)
 
-    def _allocate_port_single(self, port: int) -> int:
+    def _allocate_port_single(self, port: int) -> None:
         """
         Method to allocate single port for host.
 
@@ -237,14 +235,13 @@ class SimNOS:
         if port in self.allocated_ports:
             raise ValueError(f"Port {port} already in use")
         self.allocated_ports.add(port)
-        return port
 
     def _get_hosts_as_list(self, hosts: str | list[str] | None = None) -> list[Host]:
         """
         Helper method to get hosts as list
 
         :param hosts: string or list of strings
-        :return: list of strings
+        :return: list of Host objects
         """
         if not hosts:
             hosts = list(self.hosts.keys())
@@ -265,7 +262,7 @@ class SimNOS:
         :param parallel: if True, start hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
-        hosts: list[str] = self._get_hosts_as_list(hosts)
+        hosts: list[Host] = self._get_hosts_as_list(hosts)
         self._execute_function_over_hosts(
             hosts,
             "start",
@@ -294,7 +291,7 @@ class SimNOS:
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
-        hosts: list[str] = self._get_hosts_as_list(hosts)
+        hosts: list[Host] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
         managed_threads = self._collect_server_threads(hosts)
         self._execute_function_over_hosts(
@@ -378,11 +375,8 @@ class SimNOS:
 
     def _register_nos_plugins(self) -> None:
         """
-        Method to register NOS plugin with SimNOS object, all plugins
+        Method to register NOS plugins with SimNOS object, all plugins
         must be registered before calling start method.
-
-        :param plugin: OS path string to NOS plugin `.yaml/.yml` or `.py` file,
-          dictionary or instance if Nos class
         """
         for plugin in self.plugins:
             if isinstance(plugin, Nos):
