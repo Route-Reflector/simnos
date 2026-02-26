@@ -22,6 +22,7 @@ jobs:
         with:
           version: "0.9.8"
           activate-environment: true
+          enable-cache: true
           python-version: "3.13"
       - run: uv run zensical build --clean
       - uses: actions/upload-pages-artifact@v4
