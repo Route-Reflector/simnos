@@ -857,11 +857,7 @@ class ParamikoSshServerTest(unittest.TestCase):
 
     def test_custom_ssh_key_no_warning(self):
         """Creating a server with a custom ssh_key_file should not emit the default key warning."""
-        with (
-            self.assertRaises(AssertionError),
-            self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING),
-        ):
-            # assertLogs raises AssertionError when no log records are emitted at WARNING
+        with self.assertNoLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING):
             ParamikoSshServer(**self.arguments, ssh_key_file="tests/assets/ssh_host_rsa_key")
 
 
