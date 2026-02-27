@@ -16,7 +16,7 @@ env:
   IMAGE_NAME: "simnos"
 
 jobs:
-  ruff:
+  lint:
     runs-on: "ubuntu-latest"
     env:
       INVOKE_LOCAL: "True"
@@ -28,32 +28,40 @@ jobs:
         with:
           version: "0.9.8"
           activate-environment: true
+          enable-cache: true
       - name: "Linting: ruff"
         run: "uv run invoke ruff"
-
-  bandit:
-    runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v5"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-      - name: "Linting: bandit"
+      - name: "Security: bandit"
         run: "uv run invoke bandit"
-    needs:
-      - ruff
 
   pytest:
     strategy:
       fail-fast: true
       matrix:
         python-version: ["3.13", "3.14"]
-        os: ["ubuntu-latest", "macos-latest", "windows-latest"]
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v5"
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          activate-environment: true
+          enable-cache: true
+          python-version: ${{ matrix.python-version }}
+      - name: "Run Tests"
+        run: "uv run pytest -n auto"
+    needs:
+      - "lint"
+
+  pytest-full-matrix:
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      fail-fast: true
+      matrix:
+        python-version: ["3.13", "3.14"]
+        os: ["macos-latest", "windows-latest"]
     runs-on: "${{ matrix.os }}"
     steps:
       - name: "Check out repository code"
@@ -63,12 +71,12 @@ jobs:
         with:
           version: "0.9.8"
           activate-environment: true
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: "Run Tests"
-        run: "uv run pytest"
+        run: "uv run pytest -n auto"
     needs:
-      - "ruff"
-      - "bandit"
+      - "lint"
 
   build:
     strategy:
@@ -85,6 +93,7 @@ jobs:
         uses: "astral-sh/setup-uv@v7"
         with:
           version: "0.9.8"
+          enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: "Get image version"
         run: "echo IMAGE_VER=$(python -c \"import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])\")-py${{ matrix.python-version }} >> $GITHUB_ENV"
