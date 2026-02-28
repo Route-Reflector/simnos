@@ -1,6 +1,6 @@
 [project]
 site_name = "SIMNOS Docs"
-site_url = "https://github.com/Route-Reflector/simnos/"
+site_url = "https://route-reflector.github.io/simnos/"
 site_description = "SIMNOS (Simulated Network Operating System) is a network device simulator designed for testing and development of network automation tools and scripts."
 site_author = "KeroRoute lab"
 copyright = "&copy; 2025 Denis Mulyalin, Enric Perpinyà Pitarch &amp; KeroRoute lab"
@@ -122,10 +122,11 @@ repo = "fontawesome/brands/github"
 icon = "fontawesome/brands/github"
 link = "https://github.com/Route-Reflector/simnos/"
 
-
 # Palette toggle for automatic mode
 [[project.theme.palette]]
 media = "(prefers-color-scheme)"
+primary = "green"
+accent = "teal"
 toggle.icon = "lucide/sun-moon"
 toggle.name = "Switch to light mode"
 
@@ -133,6 +134,8 @@ toggle.name = "Switch to light mode"
 [[project.theme.palette]]
 media = "(prefers-color-scheme: light)"
 scheme = "default"
+primary = "green"
+accent = "teal"
 toggle.icon = "lucide/sun"
 toggle.name = "Switch to dark mode"
 
@@ -140,5 +143,7 @@ toggle.name = "Switch to dark mode"
 [[project.theme.palette]]
 media = "(prefers-color-scheme: dark)"
 scheme = "slate"
+primary = "green"
+accent = "teal"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to system preference"
