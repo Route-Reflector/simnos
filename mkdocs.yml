@@ -157,6 +157,11 @@ plugins:
         - locale: "ja"
           name: "日本語"
           build: true
+  # mkdocstrings generates API docs for both en and ja (via fallback).
+  # This causes mkdocs-autorefs to emit a harmless WARNING about
+  # duplicate primary URLs (e.g. TCPServerBase). This is a known
+  # constraint of combining mkdocstrings with i18n fallback and
+  # will block --strict until resolved upstream.
   - mkdocstrings:
       handlers:
         python:
