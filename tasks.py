@@ -186,7 +186,7 @@ def tests(context, local=INVOKE_LOCAL):
 @task
 def docs(context, local=INVOKE_LOCAL):
     """Build and serve docs locally for development."""
-    exec_cmd = "zensical serve --dev-addr 0.0.0.0:8001"
+    exec_cmd = "mkdocs serve --dev-addr 0.0.0.0:8001"
     run_cmd(context, exec_cmd, local=local, port="8001:8001")
 
 

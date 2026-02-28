@@ -10,8 +10,6 @@ on:
   pull_request: ~
 permissions:
   contents: read
-  pages: write
-  id-token: write
 jobs:
   build:
     runs-on: "ubuntu-latest"
@@ -26,7 +24,7 @@ jobs:
           enable-cache: true
           python-version: "3.13"
       - name: "Build documentation"
-        run: "uv run zensical build --clean"
+        run: "uv run mkdocs build --clean"
       - name: "Upload pages artifact"
         uses: "actions/upload-pages-artifact@v4"
         if: github.event_name == 'push'
@@ -35,6 +33,9 @@ jobs:
   deploy:
     if: github.event_name == 'push'
     needs: "build"
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

@@ -149,5 +149,4 @@ dev = [
     "mkdocs-static-i18n",
     "pymdown-extensions",
     "yamllint", # YAML linter
-    "zensical>=0.0.6",
 ]
