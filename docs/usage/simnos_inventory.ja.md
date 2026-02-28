@@ -522,18 +522,18 @@ SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/
 | `platform`    | :station:     | 使用するネットワークオペレーティングシステム | `platform: cisco_ios`                           |
 | `port`        | :ship:        | 接続するポート                       | `port: 6000`                                    |
 | `replicas`    | :repeat:      | 作成するホスト数                     | `replicas: 10`                                  |
-| `server`      | :satellite:   | サーバー設定                         | [サーバーオプション](#サーバーオプション)セクションを参照 |
-| `shell`       | :shell:       | シェル設定                           | [シェルオプション](#シェルオプション)セクションを参照   |
-| `nos`         | :computer:    | NOS 設定                            | [NOS オプション](#nos-オプション)セクションを参照     |
+| `server`      | :satellite:   | サーバー設定                         | [Server options](#server-options) セクションを参照     |
+| `shell`       | :shell:       | シェル設定                           | [Shell options](#shell-options) セクションを参照       |
+| `nos`         | :computer:    | NOS 設定                            | [NOS options](#nos-options) セクションを参照           |
 
-### サーバーオプション
+### Server options
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                                                         |
 | ------------------------- | ------------------------- | ------------------------------------- | ------------------------------------------------------------------------- |
 | `plugin`                  | :electric_plug:           | 使用するサーバープラグイン               | `plugin: ParamikoSshServer`                                               |
-| `configuration`           | :gear:                    | サーバー設定                           | [サーバー設定オプション](#サーバー設定オプション)セクションを参照                  |
+| `configuration`           | :gear:                    | サーバー設定                           | [Server configuration options](#server-configuration-options) セクションを参照 |
 
-### サーバー設定オプション
+### Server configuration options
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                              |
 | ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |
@@ -545,7 +545,7 @@ SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/
 | `watchdog_interval`       | :dog:                     | ウォッチドッグの間隔                    | `watchdog_interval: 1`                         |
 
 
-### シェルオプション
+### Shell options
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                                                       |
 | ------------------------- | ------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
@@ -553,7 +553,7 @@ SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/
 | `configuration`           | :gear:                    | シェル設定                             | 設定はプラグインに完全に依存します                                           |
 
 
-### NOS オプション
+### NOS options
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                                                       |
 | ------------------------- | ------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
