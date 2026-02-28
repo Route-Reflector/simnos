@@ -1,4 +1,4 @@
 # Documentation
 
 ## Multi-language support
-In order to have the documentation written in multiple language a Zensical plugin is being used. Perhaps you have already seen a strange format in the docs. We use a plugin that indicates the language file to be used based on the suffix of the file. For example, if you want to write a documentation in Spanish, you should create a file with the suffix `.es.md` and the plugin will automatically use the Spanish language file.
+SIMNOS uses the [mkdocs-static-i18n](https://github.com/ultrabug/mkdocs-static-i18n) plugin for multi-language documentation. The plugin uses a suffix-based approach to identify language-specific files. For example, to write documentation in Japanese, create a file with the suffix `.ja.md` and the plugin will automatically use it for the Japanese version of the site. If a translated file does not exist, the default language (English) is used as a fallback.
