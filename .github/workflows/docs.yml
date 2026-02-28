@@ -1,9 +1,11 @@
 name: Documentation
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches:
       - main
-      - dev
 permissions:
   contents: read
   pages: write
