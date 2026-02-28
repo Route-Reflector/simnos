@@ -143,18 +143,18 @@ extra:
 plugins:
   - search:
       lang:
-        - en
-        - ja
+        - "en"
+        - "ja"
   - i18n:
-      docs_structure: suffix
+      docs_structure: "suffix"
       fallback_to_default: true
       reconfigure_material: true
       languages:
-        - locale: en
-          name: English
+        - locale: "en"
+          name: "English"
           build: true
           default: true
-        - locale: ja
+        - locale: "ja"
           name: "日本語"
           build: true
   - mkdocstrings:
