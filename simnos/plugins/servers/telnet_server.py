@@ -34,6 +34,12 @@ SGA = 0x03  # Suppress Go Ahead
 ECHO = 0x01  # Echo
 NAWS = 0x1F  # Negotiate About Window Size
 
+# Short timeout (seconds) for draining initial IAC negotiation responses.
+# Must be long enough for TCP-fragmented IAC sequences to arrive completely,
+# but short enough not to delay the login prompt noticeably.  Loopback RTT
+# is sub-millisecond, so 50 ms gives ample margin.
+_IAC_DRAIN_TIMEOUT = 0.05
+
 
 def _is_loopback(address: str) -> bool:
     """Check whether *address* resolves to a loopback IP."""
@@ -328,7 +334,7 @@ class TelnetServer(TCPServerBase):
             # so that multi-byte IAC sequences split across TCP segments
             # are received completely rather than raising mid-sequence.
             time.sleep(0.1)
-            client.settimeout(0.05)
+            client.settimeout(_IAC_DRAIN_TIMEOUT)
             try:
                 while True:
                     if self._recv_byte(client) is None:
