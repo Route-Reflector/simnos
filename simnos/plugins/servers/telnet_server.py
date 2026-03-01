@@ -7,10 +7,9 @@ and the existing TCPServerBase + TapIO architecture. No external dependencies.
 
 import contextlib
 import io
-import ipaddress as _ipaddress
+import ipaddress
 import logging
 import socket
-import socket as _socket
 import threading
 import time
 from typing import Any
@@ -39,8 +38,8 @@ NAWS = 0x1F  # Negotiate About Window Size
 def _is_loopback(address: str) -> bool:
     """Check whether *address* resolves to a loopback IP."""
     try:
-        info = _socket.getaddrinfo(address, None, type=_socket.SOCK_STREAM)
-        return all(_ipaddress.ip_address(ai[4][0]).is_loopback for ai in info)
+        info = socket.getaddrinfo(address, None, type=socket.SOCK_STREAM)
+        return all(ipaddress.ip_address(ai[4][0]).is_loopback for ai in info)
     except (OSError, ValueError):
         return False
 
@@ -161,7 +160,7 @@ class TelnetServer(TCPServerBase):
             byte = self._recv_byte(sock)
             if byte is None:
                 break
-            if byte in (b"\r",):
+            if byte == b"\r":
                 if echo:
                     sock.sendall(b"\r\n")
                 # Consume trailing LF or NUL after CR
@@ -172,7 +171,7 @@ class TelnetServer(TCPServerBase):
                     # In practice, clients always send CR LF or CR NUL.
                     pass
                 break
-            if byte in (b"\n",):
+            if byte == b"\n":
                 if echo:
                     sock.sendall(b"\r\n")
                 break
@@ -250,7 +249,7 @@ class TelnetServer(TCPServerBase):
                     )
                     buffer.write(byte)
                 time.sleep(0.01)
-            except (OSError, BrokenPipeError) as e:
+            except OSError as e:
                 log.error("telnet_server.socket_to_shell_tap socket write error: %s", e)
                 break
 
@@ -276,7 +275,7 @@ class TelnetServer(TCPServerBase):
             log.debug("telnet_server.shell_to_socket_tap sending line to socket: %s", [line])
             try:
                 sock.sendall(line.encode(encoding="utf-8"))
-            except (OSError, BrokenPipeError) as e:
+            except OSError as e:
                 log.error("telnet_server.shell_to_socket_tap socket write error: %s", e)
                 break
             shell_replied_event.set()
@@ -323,8 +322,7 @@ class TelnetServer(TCPServerBase):
             client.setblocking(False)
             try:
                 while True:
-                    data = client.recv(64)
-                    if not data:
+                    if not client.recv(64):
                         break
             except BlockingIOError:
                 pass  # No more data available — expected

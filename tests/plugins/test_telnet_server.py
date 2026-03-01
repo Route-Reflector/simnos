@@ -185,9 +185,6 @@ class AuthenticateTest(unittest.TestCase):
     def test_authenticate_success(self):
         """Correct credentials return True."""
         sock = MagicMock(spec=socket.socket)
-        # "admin\r\n" then "secret\r\n"
-        sock.recv.side_effect = list(b"admin\r\n") + list(b"secret\r\n")
-        # Convert integers back to single-byte bytes
         sock.recv.side_effect = [bytes([b]) for b in b"admin\r\n"] + [bytes([b]) for b in b"secret\r\n"]
         result = self.server._authenticate(sock)
         self.assertTrue(result)
