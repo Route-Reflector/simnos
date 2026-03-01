@@ -381,6 +381,8 @@ class ParamikoSshServer(TCPServerBase):
                     if any(part.startswith(prefix) for prefix in ParamikoSshServer._KNOWN_KEY_TYPES):
                         if i + 1 < len(parts):
                             keys.add((part, parts[i + 1]))
+                        else:
+                            log.warning("Key type found but base64 data missing, skipping line: %s", line)
                         break
                 else:
                     log.warning("No known key type found, skipping line: %s", line)
@@ -488,7 +490,10 @@ class ParamikoSshServer(TCPServerBase):
             session.close()
             return
 
-        # for auth_none, perform channel-level login before starting the shell
+        # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
+        # login before starting the shell.  When publickey auth is also configured,
+        # clients that authenticate via publickey bypass this channel-level login
+        # intentionally — SSH-level publickey auth already verified the identity.
         if server.auth_method_used == "none" and not self._channel_login(channel):
             log.warning("Channel login failed, closing connection")
             channel.close()

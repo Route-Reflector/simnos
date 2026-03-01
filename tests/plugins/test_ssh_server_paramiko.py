@@ -1222,8 +1222,41 @@ class PublicKeyAuthTest(unittest.TestCase):
         self.assertEqual(len(keys), 1)
         self.assertTrue(any("Skipping unsupported marker line" in msg for msg in cm.output))
 
+    def test_load_authorized_keys_warns_on_missing_base64(self):
+        """Key type found but base64 missing should emit a warning."""
+        content = f"{self.key_type}\n"
+        path = self._write_authorized_keys(content)
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
+            keys = ParamikoSshServer._load_authorized_keys(path)
+        self.assertEqual(len(keys), 0)
+        self.assertTrue(any("base64 data missing" in msg for msg in cm.output))
+
+    def test_check_auth_publickey_mikrotik_suffix(self):
+        """MikroTik-style user+suffix should succeed with publickey auth."""
+        server = ParamikoSshServerInterface(
+            username="admin",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("admin+ct511w4098h", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_SUCCESSFUL)
+
+    def test_publickey_auth_bypasses_channel_login_with_auth_none(self):
+        """When auth_none and publickey are both enabled, publickey auth should
+        bypass channel-level login — SSH-level identity is already verified."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            allow_auth_none=True,
+            authorized_keys=self.authorized_keys_set,
+        )
+        server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(server.auth_method_used, "publickey")
+        # auth_method_used != "none" means _channel_login is skipped
+        self.assertNotEqual(server.auth_method_used, "none")
+
     def test_server_passes_authorized_keys_to_interface(self):
-        """ParamikoSshServer should pass parsed keys to ParamikoSshServerInterface."""
+        """connection_function should pass authorized_keys to ParamikoSshServerInterface."""
         content = f"{self.key_type} {self.key_base64} user@host\n"
         path = self._write_authorized_keys(content)
         server = ParamikoSshServer(
@@ -1235,5 +1268,16 @@ class PublicKeyAuthTest(unittest.TestCase):
             password="pass",
             authorized_keys=path,
         )
-        self.assertIsNotNone(server._authorized_keys)
-        self.assertIn((self.key_type, self.key_base64), server._authorized_keys)
+        expected_keys = {(self.key_type, self.key_base64)}
+        with mock.patch(
+            "simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface"
+        ) as mock_interface:
+            mock_interface.return_value = Mock(auth_method_used="password")
+            mock_transport = Mock()
+            mock_transport.accept.return_value = None
+            transport_path = "simnos.plugins.servers.ssh_server_paramiko.paramiko.Transport"
+            with mock.patch(transport_path, return_value=mock_transport):
+                server.connection_function(Mock(), Mock())
+            mock_interface.assert_called_once()
+            call_kwargs = mock_interface.call_args
+            self.assertEqual(call_kwargs.kwargs.get("authorized_keys"), expected_keys)
