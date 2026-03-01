@@ -4,6 +4,7 @@ Test cases for the telnet_server plugin.
 
 import contextlib
 import socket
+import threading
 import time
 import unittest
 from unittest.mock import MagicMock
@@ -405,7 +406,7 @@ class TelnetIntegrationTest(unittest.TestCase):
         finally:
             server.stop()
 
-    def test_telnet_connection_and_command(self):
+    def test_telnet_connection_auth_starts_shell(self):
         """Successful auth should start the shell."""
         server, port, shell_cls = self._create_server_on_free_port()
 
@@ -432,6 +433,95 @@ class TelnetIntegrationTest(unittest.TestCase):
                 time.sleep(0.5)
                 # Shell should have been called
                 self.assertTrue(shell_cls.called)
+            finally:
+                sock.close()
+        finally:
+            server.stop()
+
+    def test_client_disconnect_stops_shell(self):
+        """Closing the client socket should propagate to shell.stop()."""
+        server, port, shell_cls = self._create_server_on_free_port()
+
+        shell_stop_called = threading.Event()
+        shell_started = threading.Event()
+
+        def shell_factory(*args, **kwargs):
+            shell_instance = MagicMock()
+
+            def blocking_start():
+                shell_started.set()
+                # Block until stop() is called (simulating cmdloop)
+                shell_stop_called.wait(timeout=5)
+
+            shell_instance.start.side_effect = blocking_start
+            shell_instance.stop.side_effect = lambda: shell_stop_called.set()
+            return shell_instance
+
+        shell_cls.side_effect = shell_factory
+
+        server.start()
+        try:
+            sock, _initial_data = self._telnet_connect(port)
+            try:
+                # Authenticate
+                sock.sendall(b"admin\r\n")
+                time.sleep(0.2)
+                with contextlib.suppress(TimeoutError):
+                    sock.recv(4096)
+                sock.sendall(b"admin\r\n")
+                # Wait for the shell to start
+                self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
+            finally:
+                # Disconnect the client
+                sock.close()
+
+            # shell.stop() should be called within watchdog_interval + margin
+            self.assertTrue(
+                shell_stop_called.wait(timeout=5),
+                "shell.stop() was not called after client disconnect",
+            )
+        finally:
+            server.stop()
+
+    def test_initial_iac_drain_uses_negotiation(self):
+        """Initial IAC drain should respond to client negotiation via _handle_negotiation."""
+        server, port, shell_cls = self._create_server_on_free_port()
+
+        # Shell that blocks briefly then exits
+        def shell_factory(*args, **kwargs):
+            shell_instance = MagicMock()
+            shell_instance.start.side_effect = lambda: time.sleep(1)
+            return shell_instance
+
+        shell_cls.side_effect = shell_factory
+
+        server.start()
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(5)
+            sock.connect(("127.0.0.1", port))
+            try:
+                # Send WILL NAWS — server should respond with DO NAWS
+                sock.sendall(bytes([0xFF, 0xFB, 0x1F]))  # IAC WILL NAWS
+                time.sleep(0.5)
+                # Read all available data (server's initial WILL SGA, WILL ECHO,
+                # banner, DO NAWS response, Username prompt, etc.)
+                data = b""
+                while True:
+                    try:
+                        chunk = sock.recv(4096)
+                        if not chunk:
+                            break
+                        data += chunk
+                    except TimeoutError:
+                        break
+
+                # Verify IAC DO NAWS (0xFF 0xFD 0x1F) is present
+                self.assertIn(
+                    bytes([0xFF, 0xFD, 0x1F]),
+                    data,
+                    f"Expected IAC DO NAWS in response, got: {data!r}",
+                )
             finally:
                 sock.close()
         finally:

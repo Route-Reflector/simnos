@@ -293,12 +293,19 @@ class TelnetServer(TCPServerBase):
         run_srv: threading.Event,
         shell: Any,
     ) -> None:
-        """Monitor server liveness. Tap functions handle disconnect detection."""
+        """Monitor server liveness and ensure shell stops on disconnect.
+
+        The loop exits when either ``run_srv`` is cleared (client disconnect
+        detected by a tap function) or ``is_running`` is cleared (server-wide
+        shutdown).  In both cases ``shell.stop()`` must be called so that
+        ``CMDShell.cmdloop()`` unblocks and ``connection_function`` can return.
+        """
         while run_srv.is_set():
             if not is_running.is_set():
-                shell.stop()
                 break
             time.sleep(self.watchdog_interval)
+        # Always stop the shell — whether run_srv or is_running caused the exit.
+        shell.stop()
 
     # ------------------------------------------------------------------
     # Connection handler
@@ -317,13 +324,14 @@ class TelnetServer(TCPServerBase):
             client.sendall(bytes([IAC, WILL, ECHO]))
 
             # Give the client a moment to send initial IAC responses,
-            # then drain them via _recv_byte's transparent IAC handling.
+            # then drain them using _recv_byte so that negotiation commands
+            # (e.g. DO SGA, DO ECHO, WILL NAWS) are properly answered via
+            # _handle_negotiation instead of being silently discarded.
             time.sleep(0.1)
             client.setblocking(False)
             try:
                 while True:
-                    if not client.recv(64):
-                        break
+                    self._recv_byte(client)
             except BlockingIOError:
                 pass  # No more data available — expected
             finally:
@@ -335,7 +343,12 @@ class TelnetServer(TCPServerBase):
                 client.sendall((self.banner + "\r\n").encode("utf-8"))
 
             # Authenticate
-            if not self._authenticate(client):
+            try:
+                auth_ok = self._authenticate(client)
+            except (TimeoutError, OSError):
+                log.debug("Client disconnected during authentication")
+                return
+            if not auth_ok:
                 log.warning("Telnet authentication failed, closing connection")
                 client.sendall(b"Authentication failed.\r\n")
                 return
