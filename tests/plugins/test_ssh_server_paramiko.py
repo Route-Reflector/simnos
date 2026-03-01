@@ -1269,15 +1269,18 @@ class PublicKeyAuthTest(unittest.TestCase):
             authorized_keys=path,
         )
         expected_keys = {(self.key_type, self.key_base64)}
-        with mock.patch(
-            "simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface"
-        ) as mock_interface:
+        mock_transport = Mock()
+        mock_transport.accept.return_value = None
+        with (
+            mock.patch(
+                "simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface"
+            ) as mock_interface,
+            mock.patch(
+                "simnos.plugins.servers.ssh_server_paramiko.paramiko.Transport",
+                return_value=mock_transport,
+            ),
+        ):
             mock_interface.return_value = Mock(auth_method_used="password")
-            mock_transport = Mock()
-            mock_transport.accept.return_value = None
-            transport_path = "simnos.plugins.servers.ssh_server_paramiko.paramiko.Transport"
-            with mock.patch(transport_path, return_value=mock_transport):
-                server.connection_function(Mock(), Mock())
-            mock_interface.assert_called_once()
-            call_kwargs = mock_interface.call_args
-            self.assertEqual(call_kwargs.kwargs.get("authorized_keys"), expected_keys)
+            server.connection_function(Mock(), Mock())
+        mock_interface.assert_called_once()
+        self.assertEqual(mock_interface.call_args.kwargs.get("authorized_keys"), expected_keys)
