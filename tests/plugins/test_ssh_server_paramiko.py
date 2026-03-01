@@ -4,6 +4,8 @@ Test cases for the ssh_server_paramiko plugin.
 
 import io
 import logging
+import os
+import tempfile
 import threading
 import unittest
 from unittest import mock
@@ -1088,3 +1090,189 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         # Password chars should NOT be echoed
         username_echo_count = sum(1 for c in calls if c in (b"a", b"d", b"m", b"i", b"n"))
         self.assertEqual(username_echo_count, 5)
+
+
+class PublicKeyAuthTest(unittest.TestCase):
+    """Test cases for SSH public key authentication."""
+
+    def setUp(self):
+        """Generate a test RSA key pair and create an authorized_keys file."""
+        self.test_key = paramiko.RSAKey.generate(2048)
+        self.key_type = self.test_key.get_name()
+        self.key_base64 = self.test_key.get_base64()
+        self.authorized_keys_set = {(self.key_type, self.key_base64)}
+
+    def _write_authorized_keys(self, content: str) -> str:
+        """Write content to a temporary authorized_keys file and register cleanup.
+
+        Returns the file path.
+        """
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            path = f.name
+        self.addCleanup(os.unlink, path)
+        return path
+
+    def test_check_auth_publickey_success(self):
+        """Registered key should return AUTH_SUCCESSFUL."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_SUCCESSFUL)
+
+    def test_check_auth_publickey_unknown_key(self):
+        """Unregistered key should return AUTH_FAILED."""
+        other_key = paramiko.RSAKey.generate(2048)
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("user", other_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_wrong_username(self):
+        """Wrong username should return AUTH_FAILED."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("wrong_user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_no_keys_configured(self):
+        """No authorized_keys configured should return AUTH_FAILED."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+        )
+        result = server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_sets_auth_method(self):
+        """Successful publickey auth should set auth_method_used."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(server.auth_method_used, "publickey")
+
+    def test_get_allowed_auths_includes_publickey(self):
+        """get_allowed_auths should include publickey when keys are configured."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        auths = server.get_allowed_auths("user")
+        self.assertIn("publickey", auths)
+
+    def test_get_allowed_auths_excludes_publickey(self):
+        """get_allowed_auths should not include publickey when no keys are configured."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+        )
+        auths = server.get_allowed_auths("user")
+        self.assertNotIn("publickey", auths)
+
+    def test_load_authorized_keys_parses_file(self):
+        """Parser should handle comments, blank lines, and multiple keys."""
+        key2 = paramiko.RSAKey.generate(2048)
+        content = (
+            f"# comment line\n\n{self.key_type} {self.key_base64} user@host\n{key2.get_name()} {key2.get_base64()}\n"
+        )
+        path = self._write_authorized_keys(content)
+        keys = ParamikoSshServer._load_authorized_keys(path)
+        self.assertEqual(len(keys), 2)
+        self.assertIn((self.key_type, self.key_base64), keys)
+        self.assertIn((key2.get_name(), key2.get_base64()), keys)
+
+    def test_load_authorized_keys_with_options(self):
+        """Parser should handle lines with leading options."""
+        content = f'command="/bin/sh",no-pty {self.key_type} {self.key_base64} user@host\n'
+        path = self._write_authorized_keys(content)
+        keys = ParamikoSshServer._load_authorized_keys(path)
+        self.assertEqual(len(keys), 1)
+        self.assertIn((self.key_type, self.key_base64), keys)
+
+    def test_load_authorized_keys_file_not_found(self):
+        """Non-existent file should raise FileNotFoundError (fail-fast)."""
+        with self.assertRaises(FileNotFoundError):
+            ParamikoSshServer._load_authorized_keys("/nonexistent/authorized_keys")
+
+    def test_load_authorized_keys_skips_marker_lines(self):
+        """@marker lines should be skipped with a warning."""
+        content = f"@cert-authority {self.key_type} {self.key_base64}\n{self.key_type} {self.key_base64} normal-key\n"
+        path = self._write_authorized_keys(content)
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
+            keys = ParamikoSshServer._load_authorized_keys(path)
+        self.assertEqual(len(keys), 1)
+        self.assertTrue(any("Skipping unsupported marker line" in msg for msg in cm.output))
+
+    def test_load_authorized_keys_warns_on_missing_base64(self):
+        """Key type found but base64 missing should emit a warning."""
+        content = f"{self.key_type}\n"
+        path = self._write_authorized_keys(content)
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
+            keys = ParamikoSshServer._load_authorized_keys(path)
+        self.assertEqual(len(keys), 0)
+        self.assertTrue(any("base64 data missing" in msg for msg in cm.output))
+
+    def test_check_auth_publickey_mikrotik_suffix(self):
+        """MikroTik-style user+suffix should succeed with publickey auth."""
+        server = ParamikoSshServerInterface(
+            username="admin",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("admin+ct511w4098h", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_SUCCESSFUL)
+
+    def test_publickey_auth_bypasses_channel_login_with_auth_none(self):
+        """When auth_none and publickey are both enabled, publickey auth should
+        bypass channel-level login — SSH-level identity is already verified."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            allow_auth_none=True,
+            authorized_keys=self.authorized_keys_set,
+        )
+        server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(server.auth_method_used, "publickey")
+        # auth_method_used != "none" means _channel_login is skipped
+        self.assertNotEqual(server.auth_method_used, "none")
+
+    def test_server_passes_authorized_keys_to_interface(self):
+        """connection_function should pass authorized_keys to ParamikoSshServerInterface."""
+        content = f"{self.key_type} {self.key_base64} user@host\n"
+        path = self._write_authorized_keys(content)
+        server = ParamikoSshServer(
+            shell=Mock(),
+            nos=Mock(),
+            nos_inventory_config={},
+            port=22,
+            username="user",
+            password="pass",
+            authorized_keys=path,
+        )
+        expected_keys = {(self.key_type, self.key_base64)}
+        mock_transport = Mock()
+        mock_transport.accept.return_value = None
+        with (
+            mock.patch("simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface") as mock_interface,
+            mock.patch(
+                "simnos.plugins.servers.ssh_server_paramiko.paramiko.Transport",
+                return_value=mock_transport,
+            ),
+        ):
+            mock_interface.return_value = Mock(auth_method_used="password")
+            server.connection_function(Mock(), Mock())
+        mock_interface.assert_called_once()
+        self.assertEqual(mock_interface.call_args.kwargs.get("authorized_keys"), expected_keys)
