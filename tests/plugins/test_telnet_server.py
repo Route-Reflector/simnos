@@ -502,7 +502,7 @@ class TelnetIntegrationTest(unittest.TestCase):
             sock.connect(("127.0.0.1", port))
             try:
                 # Send WILL NAWS — server should respond with DO NAWS
-                sock.sendall(bytes([0xFF, 0xFB, 0x1F]))  # IAC WILL NAWS
+                sock.sendall(bytes([IAC, WILL, NAWS]))
                 time.sleep(0.5)
                 # Read all available data (server's initial WILL SGA, WILL ECHO,
                 # banner, DO NAWS response, Username prompt, etc.)
@@ -516,9 +516,9 @@ class TelnetIntegrationTest(unittest.TestCase):
                     except TimeoutError:
                         break
 
-                # Verify IAC DO NAWS (0xFF 0xFD 0x1F) is present
+                # Verify IAC DO NAWS is present in the response
                 self.assertIn(
-                    bytes([0xFF, 0xFD, 0x1F]),
+                    bytes([IAC, DO, NAWS]),
                     data,
                     f"Expected IAC DO NAWS in response, got: {data!r}",
                 )

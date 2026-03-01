@@ -163,13 +163,10 @@ class TelnetServer(TCPServerBase):
             if byte == b"\r":
                 if echo:
                     sock.sendall(b"\r\n")
-                # Consume trailing LF or NUL after CR
-                next_byte = self._recv_byte(sock)
-                if next_byte is not None and next_byte not in (b"\n", b"\x00"):
-                    # Not a CR follower — this byte belongs to next input.
-                    # For simplicity in line-oriented auth, we discard it.
-                    # In practice, clients always send CR LF or CR NUL.
-                    pass
+                # Consume trailing LF or NUL after CR (RFC 854).
+                # Non-standard followers are discarded for simplicity;
+                # in practice, clients always send CR LF or CR NUL.
+                self._recv_byte(sock)
                 break
             if byte == b"\n":
                 if echo:
