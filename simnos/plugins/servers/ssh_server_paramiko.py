@@ -3,7 +3,6 @@ This module implements an SSH server done using
 paramiko as the SSH connection library.
 """
 
-from collections import deque
 import io
 import logging
 import socket
@@ -17,6 +16,7 @@ import paramiko.rsakey
 
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
+from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
 
@@ -177,35 +177,6 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
         after the authentication.
         """
         return (self.ssh_banner + "\r\n", "en-US")
-
-
-class TapIO(io.StringIO):
-    """
-    Class to implement StringIO subclass but with blocking readline method
-    and a deque to buffer lines on write.
-
-    Uses ``collections.deque`` for thread-safe, O(1) append/pop operations
-    (CPython's GIL guarantees atomicity for deque ``append``/``pop``).
-    """
-
-    def __init__(self, run_srv: threading.Event, initial_value: str = "", newline: str = "\n"):
-        self.lines: deque[str] = deque()
-        self.run_srv: threading.Event = run_srv
-        super().__init__(initial_value, newline)
-
-    def readline(self):
-        """method to readline in indefinite block mode"""
-        while self.run_srv.is_set():
-            if self.lines:
-                return self.lines.pop()
-            time.sleep(0.01)
-        return None
-
-    def write(self, value: str):
-        """
-        :param value: line to add to self.lines buffer
-        """
-        self.lines.appendleft(value)
 
 
 def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_srv):

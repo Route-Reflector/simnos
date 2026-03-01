@@ -17,10 +17,10 @@ from simnos.plugins.servers.ssh_server_paramiko import (
     DEFAULT_SSH_KEY,
     ParamikoSshServer,
     ParamikoSshServerInterface,
-    TapIO,
     channel_to_shell_tap,
     shell_to_channel_tap,
 )
+from simnos.plugins.servers.tap_io import TapIO
 
 
 class ParamikoSshServerInterfaceTest(unittest.TestCase):

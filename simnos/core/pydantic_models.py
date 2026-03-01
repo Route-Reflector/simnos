@@ -102,6 +102,26 @@ class ParamikoSshServerPlugin(BaseModel):
     configuration: ParamikoSshServerConfig | None = None
 
 
+class TelnetServerConfig(BaseModel):
+    """
+    Pydantic model for Telnet server configuration.
+    """
+
+    banner: StrictStr | None = "SIMNOS Telnet Server"
+    timeout: StrictInt | None = 1
+    address: Literal["localhost"] | IPvAnyAddress | None = None
+    watchdog_interval: StrictInt | None = 1
+
+
+class TelnetServerPlugin(BaseModel):
+    """
+    Pydantic model for Telnet server plugin.
+    """
+
+    plugin: Literal["TelnetServer"]
+    configuration: TelnetServerConfig | None = None
+
+
 class CMDShellConfig(BaseModel):
     """
     Pydantic model for CMD shell configuration.
@@ -139,7 +159,7 @@ class InventoryDefaultSection(BaseModel):
     port: StrictInt | list[StrictInt] | None = None
     configuration_file: StrictStr | None = None
     platform: StrictStr | None = None
-    server: ParamikoSshServerPlugin | None = None
+    server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
 
