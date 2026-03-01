@@ -4,6 +4,7 @@ Test cases for the ssh_server_paramiko plugin.
 
 import io
 import logging
+import tempfile
 import threading
 import unittest
 from unittest import mock
@@ -1088,3 +1089,147 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         # Password chars should NOT be echoed
         username_echo_count = sum(1 for c in calls if c in (b"a", b"d", b"m", b"i", b"n"))
         self.assertEqual(username_echo_count, 5)
+
+
+class PublicKeyAuthTest(unittest.TestCase):
+    """Test cases for SSH public key authentication."""
+
+    def setUp(self):
+        """Generate a test RSA key pair and create an authorized_keys file."""
+        self.test_key = paramiko.RSAKey.generate(2048)
+        self.key_type = self.test_key.get_name()
+        self.key_base64 = self.test_key.get_base64()
+        self.authorized_keys_set = {(self.key_type, self.key_base64)}
+
+    def test_check_auth_publickey_success(self):
+        """Registered key should return AUTH_SUCCESSFUL."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_SUCCESSFUL)
+
+    def test_check_auth_publickey_unknown_key(self):
+        """Unregistered key should return AUTH_FAILED."""
+        other_key = paramiko.RSAKey.generate(2048)
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("user", other_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_wrong_username(self):
+        """Wrong username should return AUTH_FAILED."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        result = server.check_auth_publickey("wrong_user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_no_keys_configured(self):
+        """No authorized_keys configured should return AUTH_FAILED."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+        )
+        result = server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(result, paramiko.AUTH_FAILED)
+
+    def test_check_auth_publickey_sets_auth_method(self):
+        """Successful publickey auth should set auth_method_used."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        server.check_auth_publickey("user", self.test_key)
+        self.assertEqual(server.auth_method_used, "publickey")
+
+    def test_get_allowed_auths_includes_publickey(self):
+        """get_allowed_auths should include publickey when keys are configured."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+            authorized_keys=self.authorized_keys_set,
+        )
+        auths = server.get_allowed_auths("user")
+        self.assertIn("publickey", auths)
+
+    def test_get_allowed_auths_excludes_publickey(self):
+        """get_allowed_auths should not include publickey when no keys are configured."""
+        server = ParamikoSshServerInterface(
+            username="user",
+            password="pass",
+        )
+        auths = server.get_allowed_auths("user")
+        self.assertNotIn("publickey", auths)
+
+    def test_load_authorized_keys_parses_file(self):
+        """Parser should handle comments, blank lines, and multiple keys."""
+        key2 = paramiko.RSAKey.generate(2048)
+        content = (
+            "# comment line\n"
+            "\n"
+            f"{self.key_type} {self.key_base64} user@host\n"
+            f"{key2.get_name()} {key2.get_base64()}\n"
+        )
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            f.flush()
+            keys = ParamikoSshServer._load_authorized_keys(f.name)
+        self.assertEqual(len(keys), 2)
+        self.assertIn((self.key_type, self.key_base64), keys)
+        self.assertIn((key2.get_name(), key2.get_base64()), keys)
+
+    def test_load_authorized_keys_with_options(self):
+        """Parser should handle lines with leading options."""
+        content = f'command="/bin/sh",no-pty {self.key_type} {self.key_base64} user@host\n'
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            f.flush()
+            keys = ParamikoSshServer._load_authorized_keys(f.name)
+        self.assertEqual(len(keys), 1)
+        self.assertIn((self.key_type, self.key_base64), keys)
+
+    def test_load_authorized_keys_file_not_found(self):
+        """Non-existent file should raise FileNotFoundError (fail-fast)."""
+        with self.assertRaises(FileNotFoundError):
+            ParamikoSshServer._load_authorized_keys("/nonexistent/authorized_keys")
+
+    def test_load_authorized_keys_skips_marker_lines(self):
+        """@marker lines should be skipped with a warning."""
+        content = (
+            f"@cert-authority {self.key_type} {self.key_base64}\n"
+            f"{self.key_type} {self.key_base64} normal-key\n"
+        )
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            f.flush()
+            with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
+                keys = ParamikoSshServer._load_authorized_keys(f.name)
+        self.assertEqual(len(keys), 1)
+        self.assertTrue(any("Skipping unsupported marker line" in msg for msg in cm.output))
+
+    def test_server_passes_authorized_keys_to_interface(self):
+        """ParamikoSshServer should pass parsed keys to ParamikoSshServerInterface."""
+        content = f"{self.key_type} {self.key_base64} user@host\n"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            f.flush()
+            server = ParamikoSshServer(
+                shell=Mock(),
+                nos=Mock(),
+                nos_inventory_config={},
+                port=22,
+                username="user",
+                password="pass",
+                authorized_keys=f.name,
+            )
+        self.assertIsNotNone(server._authorized_keys)
+        self.assertIn((self.key_type, self.key_base64), server._authorized_keys)

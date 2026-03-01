@@ -90,6 +90,7 @@ class ParamikoSshServerConfig(BaseModel):
     timeout: StrictInt | None = 1
     address: Literal["localhost"] | IPvAnyAddress | None = None
     watchdog_interval: StrictInt | None = 1
+    authorized_keys: StrictStr | None = None
 
 
 class ParamikoSshServerPlugin(BaseModel):

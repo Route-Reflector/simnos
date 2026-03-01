@@ -72,11 +72,13 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
         username: str | None = None,
         password: str | None = None,
         allow_auth_none: bool = False,
+        authorized_keys: set[tuple[str, str]] | None = None,
     ):
         self.ssh_banner = ssh_banner
         self.username = username
         self.password = password
         self.allow_auth_none = allow_auth_none
+        self.authorized_keys = authorized_keys
         self.auth_method_used: str | None = None
 
     def check_channel_request(self, kind, chanid):
@@ -108,6 +110,8 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
     def get_allowed_auths(self, username):
         """Return the authentication methods supported by this server."""
         methods = "password,keyboard-interactive"
+        if self.authorized_keys:
+            methods = "publickey," + methods
         if self.allow_auth_none:
             methods = "none," + methods
         return methods
@@ -116,6 +120,17 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
         """Allow auth_none if configured (e.g. for Dell PowerConnect)."""
         if self.allow_auth_none:
             self.auth_method_used = "none"
+            return paramiko.AUTH_SUCCESSFUL
+        return paramiko.AUTH_FAILED
+
+    def check_auth_publickey(self, username, key):
+        """Validate public key authentication."""
+        if not self.authorized_keys:
+            return paramiko.AUTH_FAILED
+        if not self._match_username(username):
+            return paramiko.AUTH_FAILED
+        if (key.get_name(), key.get_base64()) in self.authorized_keys:
+            self.auth_method_used = "publickey"
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
@@ -285,6 +300,14 @@ class ParamikoSshServer(TCPServerBase):
     """
 
     _moduli_loaded: bool | None = None
+    _KNOWN_KEY_TYPES = (
+        "ssh-rsa",
+        "ssh-ed25519",
+        "ssh-dss",
+        "ecdsa-sha2-",
+        "sk-ssh-ed25519",
+        "sk-ecdsa-sha2-",
+    )
 
     def __init__(
         self,
@@ -301,6 +324,7 @@ class ParamikoSshServer(TCPServerBase):
         address: str = "127.0.0.1",
         timeout: int = 1,
         watchdog_interval: float = 1,
+        authorized_keys: str | None = None,
     ):
         super().__init__(address=address, port=port, timeout=timeout)
 
@@ -312,6 +336,9 @@ class ParamikoSshServer(TCPServerBase):
         self.username: str = username
         self.password: str = password
         self.watchdog_interval: float = watchdog_interval
+        self._authorized_keys = (
+            self._load_authorized_keys(authorized_keys) if authorized_keys else None
+        )
 
         if ssh_key_file:
             self._ssh_server_key: paramiko.rsakey.RSAKey = paramiko.RSAKey.from_private_key_file(
@@ -329,6 +356,35 @@ class ParamikoSshServer(TCPServerBase):
         # Result is cached at the class level so subsequent instances skip the file I/O.
         if ParamikoSshServer._moduli_loaded is None:
             ParamikoSshServer._moduli_loaded = paramiko.Transport.load_server_moduli()
+
+    @staticmethod
+    def _load_authorized_keys(path: str) -> set[tuple[str, str]]:
+        """Parse an OpenSSH authorized_keys file.
+
+        Supports bare key lines and lines with leading options.
+        Skips comment lines, blank lines, and @marker lines.
+        File not found / permission errors propagate as-is (fail-fast).
+
+        Returns a set of (key_type, base64_data) tuples.
+        """
+        keys: set[tuple[str, str]] = set()
+        with open(path) as fh:
+            for line in fh:
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                if line.startswith("@"):
+                    log.warning("Skipping unsupported marker line: %s", line)
+                    continue
+                parts = line.split()
+                for i, part in enumerate(parts):
+                    if any(part.startswith(prefix) for prefix in ParamikoSshServer._KNOWN_KEY_TYPES):
+                        if i + 1 < len(parts):
+                            keys.add((part, parts[i + 1]))
+                        break
+                else:
+                    log.warning("No known key type found, skipping line: %s", line)
+        return keys
 
     def watchdog(
         self,
@@ -419,6 +475,7 @@ class ParamikoSshServer(TCPServerBase):
             username=self.username,
             password=self.password,
             allow_auth_none=allow_auth_none,
+            authorized_keys=self._authorized_keys,
         )
 
         # start the SSH server
