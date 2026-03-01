@@ -19,6 +19,8 @@ env:
 jobs:
   test:
     runs-on: "ubuntu-latest"
+    env:
+      INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v5"
@@ -98,5 +100,7 @@ jobs:
           platforms: "linux/amd64,linux/arm64"
           tags: "${{ steps.meta.outputs.tags }}"
           labels: "${{ steps.meta.outputs.labels }}"
-          cache-from: "type=gha,scope=docker-publish"
+          cache-from: |
+            type=gha,scope=docker-scan
+            type=gha,scope=docker-publish
           cache-to: "type=gha,mode=max,scope=docker-publish"
