@@ -4,6 +4,7 @@ Test cases for the ssh_server_paramiko plugin.
 
 import io
 import logging
+import os
 import tempfile
 import threading
 import unittest
@@ -1101,6 +1102,17 @@ class PublicKeyAuthTest(unittest.TestCase):
         self.key_base64 = self.test_key.get_base64()
         self.authorized_keys_set = {(self.key_type, self.key_base64)}
 
+    def _write_authorized_keys(self, content: str) -> str:
+        """Write content to a temporary authorized_keys file and register cleanup.
+
+        Returns the file path.
+        """
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
+            f.write(content)
+            path = f.name
+        self.addCleanup(os.unlink, path)
+        return path
+
     def test_check_auth_publickey_success(self):
         """Registered key should return AUTH_SUCCESSFUL."""
         server = ParamikoSshServerInterface(
@@ -1179,10 +1191,8 @@ class PublicKeyAuthTest(unittest.TestCase):
             f"{self.key_type} {self.key_base64} user@host\n"
             f"{key2.get_name()} {key2.get_base64()}\n"
         )
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
-            f.write(content)
-            f.flush()
-            keys = ParamikoSshServer._load_authorized_keys(f.name)
+        path = self._write_authorized_keys(content)
+        keys = ParamikoSshServer._load_authorized_keys(path)
         self.assertEqual(len(keys), 2)
         self.assertIn((self.key_type, self.key_base64), keys)
         self.assertIn((key2.get_name(), key2.get_base64()), keys)
@@ -1190,10 +1200,8 @@ class PublicKeyAuthTest(unittest.TestCase):
     def test_load_authorized_keys_with_options(self):
         """Parser should handle lines with leading options."""
         content = f'command="/bin/sh",no-pty {self.key_type} {self.key_base64} user@host\n'
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
-            f.write(content)
-            f.flush()
-            keys = ParamikoSshServer._load_authorized_keys(f.name)
+        path = self._write_authorized_keys(content)
+        keys = ParamikoSshServer._load_authorized_keys(path)
         self.assertEqual(len(keys), 1)
         self.assertIn((self.key_type, self.key_base64), keys)
 
@@ -1208,28 +1216,24 @@ class PublicKeyAuthTest(unittest.TestCase):
             f"@cert-authority {self.key_type} {self.key_base64}\n"
             f"{self.key_type} {self.key_base64} normal-key\n"
         )
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
-            f.write(content)
-            f.flush()
-            with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
-                keys = ParamikoSshServer._load_authorized_keys(f.name)
+        path = self._write_authorized_keys(content)
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
+            keys = ParamikoSshServer._load_authorized_keys(path)
         self.assertEqual(len(keys), 1)
         self.assertTrue(any("Skipping unsupported marker line" in msg for msg in cm.output))
 
     def test_server_passes_authorized_keys_to_interface(self):
         """ParamikoSshServer should pass parsed keys to ParamikoSshServerInterface."""
         content = f"{self.key_type} {self.key_base64} user@host\n"
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".pub", delete=False) as f:
-            f.write(content)
-            f.flush()
-            server = ParamikoSshServer(
-                shell=Mock(),
-                nos=Mock(),
-                nos_inventory_config={},
-                port=22,
-                username="user",
-                password="pass",
-                authorized_keys=f.name,
-            )
+        path = self._write_authorized_keys(content)
+        server = ParamikoSshServer(
+            shell=Mock(),
+            nos=Mock(),
+            nos_inventory_config={},
+            port=22,
+            username="user",
+            password="pass",
+            authorized_keys=path,
+        )
         self.assertIsNotNone(server._authorized_keys)
         self.assertIn((self.key_type, self.key_base64), server._authorized_keys)
