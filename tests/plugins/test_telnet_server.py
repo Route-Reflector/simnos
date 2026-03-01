@@ -341,7 +341,6 @@ class TelnetIntegrationTest(unittest.TestCase):
         nos.initial_prompt = "Router>"
         nos.commands = {}
 
-        # Use a simple shell mock that writes a prompt and reads commands
         shell_cls = MagicMock()
 
         server = TelnetServer(
