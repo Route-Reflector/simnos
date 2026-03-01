@@ -1186,10 +1186,7 @@ class PublicKeyAuthTest(unittest.TestCase):
         """Parser should handle comments, blank lines, and multiple keys."""
         key2 = paramiko.RSAKey.generate(2048)
         content = (
-            "# comment line\n"
-            "\n"
-            f"{self.key_type} {self.key_base64} user@host\n"
-            f"{key2.get_name()} {key2.get_base64()}\n"
+            f"# comment line\n\n{self.key_type} {self.key_base64} user@host\n{key2.get_name()} {key2.get_base64()}\n"
         )
         path = self._write_authorized_keys(content)
         keys = ParamikoSshServer._load_authorized_keys(path)
@@ -1212,10 +1209,7 @@ class PublicKeyAuthTest(unittest.TestCase):
 
     def test_load_authorized_keys_skips_marker_lines(self):
         """@marker lines should be skipped with a warning."""
-        content = (
-            f"@cert-authority {self.key_type} {self.key_base64}\n"
-            f"{self.key_type} {self.key_base64} normal-key\n"
-        )
+        content = f"@cert-authority {self.key_type} {self.key_base64}\n{self.key_type} {self.key_base64} normal-key\n"
         path = self._write_authorized_keys(content)
         with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level="WARNING") as cm:
             keys = ParamikoSshServer._load_authorized_keys(path)
@@ -1272,9 +1266,7 @@ class PublicKeyAuthTest(unittest.TestCase):
         mock_transport = Mock()
         mock_transport.accept.return_value = None
         with (
-            mock.patch(
-                "simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface"
-            ) as mock_interface,
+            mock.patch("simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface") as mock_interface,
             mock.patch(
                 "simnos.plugins.servers.ssh_server_paramiko.paramiko.Transport",
                 return_value=mock_transport,

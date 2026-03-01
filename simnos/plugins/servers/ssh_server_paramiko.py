@@ -336,9 +336,7 @@ class ParamikoSshServer(TCPServerBase):
         self.username: str = username
         self.password: str = password
         self.watchdog_interval: float = watchdog_interval
-        self._authorized_keys = (
-            self._load_authorized_keys(authorized_keys) if authorized_keys else None
-        )
+        self._authorized_keys = self._load_authorized_keys(authorized_keys) if authorized_keys else None
 
         if ssh_key_file:
             self._ssh_server_key: paramiko.rsakey.RSAKey = paramiko.RSAKey.from_private_key_file(
