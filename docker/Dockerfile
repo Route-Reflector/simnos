@@ -1,49 +1,45 @@
+# Multi-stage build for minimal runtime image
 # Based on https://github.com/astral-sh/uv-docker-example/
 
-# Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:alpine
+ARG PYTHON_VER=3.13
 
-# Setup a non-root user
-RUN addgroup -S -g 456 nonroot \
- && adduser -S -u 456 -G nonroot -D -s /bin/sh -h /home/nonroot -k /etc/skel nonroot \
- && mkdir -p /home/nonroot/.cache/uv \
- && chown -R nonroot:nonroot /home/nonroot \
- && chmod -R 755 /home/nonroot
+# ============ Builder ============
+FROM python:${PYTHON_VER}-alpine AS builder
 
-ENV HOME=/home/nonroot
+# Copy uv binary from official image (version pinned to match CI)
+COPY --from=ghcr.io/astral-sh/uv:0.9.8 /uv /uvx /bin/
 
-
-# Install the project into `/app`
 WORKDIR /app
 
-# Enable bytecode compilation
+# Enable bytecode compilation for faster startup
 ENV UV_COMPILE_BYTECODE=1
-
 # Copy from the cache instead of linking since it's a mounted volume
 ENV UV_LINK_MODE=copy
 
-# Ensure installed tools can be executed out of the box
-ENV UV_TOOL_BIN_DIR=/usr/local/bin
-
-# Install the project's dependencies using the lockfile and settings
+# Install dependencies first (cached layer)
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --no-dev
+    uv sync --locked --no-install-project --no-dev --no-editable
 
-# Then, add the rest of the project source code and install it
-# Installing separately from its dependencies allows optimal layer caching
+# Copy source and install project as package
 COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+    uv sync --locked --no-dev --no-editable
 
-# Place executables in the environment at the front of the path
+# ============ Runtime ============
+FROM python:${PYTHON_VER}-alpine
+
+# Non-root user for security
+RUN addgroup -S -g 456 nonroot \
+    && adduser -S -u 456 -G nonroot -D -s /bin/sh nonroot
+
+# Copy only the venv (contains installed package) and default inventory
+COPY --from=builder --chown=nonroot:nonroot /app/.venv /app/.venv
+COPY --from=builder --chown=nonroot:nonroot /app/docker/inventory.yaml /app/docker/inventory.yaml
+
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Reset the entrypoint, don't invoke `uv`
-ENTRYPOINT []
-
-# Use the non-root user to run our application
 USER nonroot
 
 CMD ["simnos", "-i", "/app/docker/inventory.yaml"]

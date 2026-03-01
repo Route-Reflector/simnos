@@ -9,16 +9,27 @@ environments/
 **/.pytest_cache/
 **/.venv/
 
+# Tests
+tests/
+
+# Documentation
+docs/
+mkdocs.yml
+coverage_html_report/
+site/
+
+# Development
+design/
+workslog/
+
+# CI/CD
+.github/
 
 # Other
-docs/_build
-FAQ.md
 .git/
 .gitignore
-.github
 tasks.py
 LICENSE
 **/*.log
 **/.vscode/
 invoke*.yml
-site/

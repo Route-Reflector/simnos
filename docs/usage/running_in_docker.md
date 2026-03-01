@@ -5,8 +5,31 @@ Running SIMNOS in a container enables numerous integration use cases.
 ## Running with Docker
 
 Pre-built SIMNOS docker container published to
-[DockerHUB repository](https://hub.docker.com/r/simnos/simnos)
+[GitHub Container Registry](https://github.com/Route-Reflector/simnos/pkgs/container/simnos).
 
+```{ .bash .annotate }
+docker pull ghcr.io/route-reflector/simnos:latest   # (1)
+docker run -d -p 12723:6001 -p 12724:6002 \
+  --name simnos ghcr.io/route-reflector/simnos       # (2)
+ssh localhost -l user -p 12723                        # (3)
+```
+
+1. Pull the latest SIMNOS image from GHCR
+2. Run the container in detached mode with port mappings
+3. Initiate SSH connection to SIMNOS router via mapped port
+
+To use a custom inventory, mount it as a volume:
+
+```bash
+docker run -d -p 12723:6001 -p 12724:6002 \
+  -v /path/to/inventory.yaml:/app/docker/inventory.yaml \
+  --name simnos ghcr.io/route-reflector/simnos
+```
+
+!!! warning
+    The default inventory binds to `0.0.0.0` with credentials `user:user`.
+    This is intended for local testing only. For shared or production
+    environments, use a custom inventory with appropriate credentials.
 
 ## Build and Run with Docker-Compose
 
@@ -53,7 +76,3 @@ hosts:
 
 Adjust inventory settings before running the container or update inventory content
 and restart `simnos` container to apply changes - `docker restart simnos`
-
-Inventory file bound to the `simnos` container as a `volume` in docker-compose file,
-as a result any changes to `inventory.yaml` file visible to `simnos` process
-running inside the container.
