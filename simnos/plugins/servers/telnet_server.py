@@ -324,15 +324,18 @@ class TelnetServer(TCPServerBase):
             # then drain them using _recv_byte so that negotiation commands
             # (e.g. DO SGA, DO ECHO, WILL NAWS) are properly answered via
             # _handle_negotiation instead of being silently discarded.
+            # A short blocking timeout is used instead of non-blocking mode
+            # so that multi-byte IAC sequences split across TCP segments
+            # are received completely rather than raising mid-sequence.
             time.sleep(0.1)
-            client.setblocking(False)
+            client.settimeout(0.05)
             try:
                 while True:
-                    self._recv_byte(client)
-            except BlockingIOError:
+                    if self._recv_byte(client) is None:
+                        break  # EOF — client disconnected
+            except TimeoutError:
                 pass  # No more data available — expected
             finally:
-                client.setblocking(True)
                 client.settimeout(self.timeout)
 
             # Send banner
