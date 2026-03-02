@@ -2,6 +2,7 @@
 Test cases for the ssh_server_paramiko plugin.
 """
 
+import concurrent.futures
 import logging
 import os
 import tempfile
@@ -871,8 +872,6 @@ class ParamikoSshServerTest(unittest.TestCase):
 
     def test_default_key_generation_is_thread_safe(self):
         """Concurrent instantiation should produce the same key for all instances."""
-        import concurrent.futures
-
         self.addCleanup(setattr, ParamikoSshServer, "_default_key", None)
         num_threads = 8
         barrier = threading.Barrier(num_threads)
