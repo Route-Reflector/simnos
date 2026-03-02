@@ -10,7 +10,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   test:
@@ -59,7 +58,11 @@ jobs:
     runs-on: "ubuntu-latest"
     needs:
       - "build"
-    environment: "release"
+    environment:
+      name: "release"
+      url: "https://pypi.org/p/simnos"
+    permissions:
+      id-token: write
     steps:
       - name: "Download distributions"
         uses: "actions/download-artifact@v4"
