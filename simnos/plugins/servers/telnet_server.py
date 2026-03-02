@@ -163,7 +163,10 @@ class TelnetServer(TCPServerBase):
         """
         buf = b""
         while True:
-            byte = self._recv_byte(sock)
+            try:
+                byte = self._recv_byte(sock)
+            except TimeoutError:
+                continue
             if byte is None:
                 break
             if byte == b"\r":
@@ -172,7 +175,10 @@ class TelnetServer(TCPServerBase):
                 # Consume trailing LF or NUL after CR (RFC 854).
                 # Non-standard followers are discarded for simplicity;
                 # in practice, clients always send CR LF or CR NUL.
-                self._recv_byte(sock)
+                try:
+                    self._recv_byte(sock)
+                except TimeoutError:
+                    pass
                 break
             if byte == b"\n":
                 if echo:
