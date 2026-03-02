@@ -1,0 +1,73 @@
+---
+name: PyPI Publish
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: "ubuntu-latest"
+    env:
+      INVOKE_LOCAL: "True"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v5"
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          activate-environment: true
+          enable-cache: true
+          python-version: "3.13"
+      - name: "Linting: ruff"
+        run: "uv run invoke ruff"
+      - name: "Security: bandit"
+        run: "uv run invoke bandit"
+      - name: "Run Tests"
+        run: "uv run pytest -n auto"
+
+  build:
+    runs-on: "ubuntu-latest"
+    needs:
+      - "test"
+    steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v5"
+      - name: "Install uv"
+        uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          enable-cache: true
+          python-version: "3.13"
+      - name: "Build package"
+        run: "uv build"
+      - name: "Upload distributions"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: "dist"
+          path: "dist/"
+
+  publish:
+    runs-on: "ubuntu-latest"
+    needs:
+      - "build"
+    environment:
+      name: "release"
+      url: "https://pypi.org/p/simnos"
+    permissions:
+      id-token: write
+    steps:
+      - name: "Download distributions"
+        uses: "actions/download-artifact@v4"
+        with:
+          name: "dist"
+          path: "dist/"
+      - name: "Publish to PyPI"
+        uses: "pypa/gh-action-pypi-publish@release/v1"
