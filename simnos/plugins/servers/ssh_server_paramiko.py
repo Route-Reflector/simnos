@@ -31,34 +31,6 @@ _DISABLED_GEX_ALGORITHMS = {
     ]
 }
 
-DEFAULT_SSH_KEY = """-----BEGIN RSA PRIVATE KEY-----
-MIIEogIBAAKCAQEAnahBtR7uxtHmk5UwlFfpC/zxdxjUKPD8UpNOOtIJwpei7gaZ
-+Jgub5GFJtTG6CK+DIZiR4tE9JxMjTEFDCGA3U4C36shHB15Pl3bLx+UxdyFylpc
-c7XYp4fpQjhFUoHOAIl5ZaA223kIxi7sFXtM1Gjy6g49u+G5teVfMbeZnks2xjjy
-F84qVADFBXCsfjrY5m4R+Wnfups/jP1agOpnOvqHlX/bpvzEZRcwJ0A8CylBZzQP
-D1Y4EXy1B4QLyLJKFIMRkWnr0f8rK5Q/obCLTjl+IMmZrkItbfC/hYCy6TDi+Efn
-cgGw02L93Mf6QGDNc21BsRELPYMME22MmpLphQIBIwKCAQEAmScbQjtOWr1GY3r7
-/dG90SGaG+w70AALDmM2DUEQy6k/MF4vLAGMMd3RzfNE4YDV4EgHszbVRWSiIsHn
-pWJf7OyyVZ7s9r2LuO111gFr82iB98V+YcaX8zOSIxIXdLicOwk0GZRSjA8tGErW
-tcg8AYqFkulDSMylxqRN2IZ3+NnTROxh4uUFH57roSYoCvzjM2v1Xa+S42BLpBD1
-3mLAJD36JhOhMTgYUgHAROx9+YUUUzYk3jpkTGWnAYSumnJXQYphLE9zadXxh94N
-HZJdvXajuP5N2M3Q2b4Gbyt2wNFlNcHGA+Zwk8wHIBnY9Sb9Gz0QALsOAwUoRY8T
-rCysSwKBgQDPVjFdSgM3jScmFV9fVnx3iNIlM6Ea7+UCrOOCvcGtzDo5vuTPktw7
-8abHEFHw7VrtxI3lRQ41rlmK3B//Q7b+ZJ0HdZaRdyCqW1u91tq1tQe7yiJBm0c5
-hZ3F0Vr6HAXoBVOux5wUq55jvUJ8dCVYNYfctZducVmOos3toDkSzQKBgQDCqRQ/
-GO5AU3nKfuJ+SZvv8/gV1ki8pGmyxkSebUqZSXFx+rQEQ1e6tZvIz/rYftRkXAyL
-XfzXX8mU1wEci6O1oSLiUBgnT82PtUxlO3Peg1W/cpKAaIFvvOIvUMRGFbzWhuj7
-4p4KJjZWjYkAV2YlZZ8Br23DFFjjCuawX7NhmQKBgHCN4EiV5H09/08wLHWVWYK3
-/Qzhg1fEDpsNZZAd3isluTVKXvRXCddl7NJ2kuHf74hjYvjNt0G2ax9+z4qSeUhF
-P00xNHraRO7D4VhtUiggcemZnZFUSzx7vAxNFCFfq29TWVBAeU0MtRGSoG9yQCiS
-Fo3BqfogRo9Cb8ojxzYXAoGBAIV7QRVS7IPheBXTWXsrKRmRWaiS8AxTe63JyKcm
-XwoGea0+MkwQ67M6s/dqCxgcdGITO81Hw1HbSGYPxj91shYlWb/B5K0+CUyZk3id
-y8vHxcUbXSTZ8ls/sQqAhpZ1Tkn2HBpvglAaM+OUQK/G5vUSe6liWeTawJuvtCEr
-rjRLAoGAUNNY4/7vyYFX6HkX4O2yL/LZiEeR6reI9lrK/rSA0OCg9wvbIpq+0xPG
-jCrc8nTlA0K0LtEnE+4g0an76nSWUNiP4kALROfZpXajRRaWdwFRAO17c9T7Uxc0
-Eez9wYRqHiuvU0rryYvGyokr62w1MtJO0tttnxe1Of6wzb1WeCU=
------END RSA PRIVATE KEY-----"""
-
 
 class ParamikoSshServerInterface(paramiko.ServerInterface):
     """
@@ -271,6 +243,8 @@ class ParamikoSshServer(TCPServerBase):
     """
 
     _moduli_loaded: bool | None = None
+    _default_key: paramiko.rsakey.RSAKey | None = None
+    _default_key_lock: threading.Lock = threading.Lock()
     _KNOWN_KEY_TYPES = (
         "ssh-rsa",
         "ssh-ed25519",
@@ -314,12 +288,15 @@ class ParamikoSshServer(TCPServerBase):
                 ssh_key_file, ssh_key_file_password
             )
         else:
+            with ParamikoSshServer._default_key_lock:
+                if ParamikoSshServer._default_key is None:
+                    ParamikoSshServer._default_key = paramiko.RSAKey.generate(2048)
+            self._ssh_server_key = ParamikoSshServer._default_key
             log.warning(
-                "Using shared default SSH host key. All SIMNOS instances share this key, "
-                "making them vulnerable to MITM attacks. Provide a custom key via "
-                "ssh_key_file for non-local use."
+                "Using auto-generated SSH host key. This key is not persisted and "
+                "will change on restart. Provide a custom key via ssh_key_file "
+                "for non-local use."
             )
-            self._ssh_server_key: paramiko.rsakey.RSAKey = paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY))
 
         # Load SSH moduli once for DH Group Exchange support in server mode.
         # Result is cached at the class level so subsequent instances skip the file I/O.

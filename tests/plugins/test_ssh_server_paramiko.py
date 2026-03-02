@@ -2,7 +2,7 @@
 Test cases for the ssh_server_paramiko plugin.
 """
 
-import io
+import concurrent.futures
 import logging
 import os
 import tempfile
@@ -14,7 +14,6 @@ from unittest.mock import MagicMock, Mock
 import paramiko
 
 from simnos.plugins.servers.ssh_server_paramiko import (
-    DEFAULT_SSH_KEY,
     ParamikoSshServer,
     ParamikoSshServerInterface,
     channel_to_shell_tap,
@@ -531,6 +530,7 @@ class ParamikoSshServerTest(unittest.TestCase):
 
     def setUp(self):
         """Set up the ParamikoSshServer tests."""
+        ParamikoSshServer._default_key = None
         self.arguments: dict = {
             "shell": Mock(),
             "nos": Mock(),
@@ -557,10 +557,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.1")
         self.assertEqual(paramiko_server.timeout, 1)
         self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_ssh_key_file(self):
         """
@@ -636,10 +634,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.1")
         self.assertEqual(paramiko_server.timeout, 1)
         self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_shell_configuration(self):
         """
@@ -661,10 +657,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.1")
         self.assertEqual(paramiko_server.timeout, 1)
         self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_address(self):
         """
@@ -686,10 +680,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.2")
         self.assertEqual(paramiko_server.timeout, 1)
         self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_timeout(self):
         """
@@ -711,10 +703,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.1")
         self.assertEqual(paramiko_server.timeout, 2)
         self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_watchdog_interval(self):
         """
@@ -736,10 +726,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.1")
         self.assertEqual(paramiko_server.timeout, 1)
         self.assertEqual(paramiko_server.watchdog_interval, 2)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_init_with_all_parameters(self):
         """
@@ -765,10 +753,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.assertEqual(paramiko_server.address, "127.0.0.2")
         self.assertEqual(paramiko_server.timeout, 2)
         self.assertEqual(paramiko_server.watchdog_interval, 2)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(file_obj=io.StringIO(DEFAULT_SSH_KEY)),
-        )
+        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
+        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
 
     def test_watchdog_run_srv_loop(self):
         """Check that the watchdog run_srv loop is executed."""
@@ -855,12 +841,51 @@ class ParamikoSshServerTest(unittest.TestCase):
         """Creating a server without ssh_key_file should emit a security warning."""
         with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING) as cm:
             ParamikoSshServer(**self.arguments)
-        self.assertTrue(any("shared default SSH host key" in msg for msg in cm.output))
+        self.assertTrue(any("auto-generated SSH host key" in msg for msg in cm.output))
 
     def test_custom_ssh_key_no_warning(self):
         """Creating a server with a custom ssh_key_file should not emit the default key warning."""
         with self.assertNoLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.WARNING):
             ParamikoSshServer(**self.arguments, ssh_key_file="tests/assets/ssh_host_rsa_key")
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.paramiko.RSAKey.generate")
+    def test_default_key_is_cached_across_instances(self, mock_generate):
+        """Multiple servers without ssh_key_file should share one generated key."""
+        sentinel_key = MagicMock(spec=paramiko.RSAKey)
+        mock_generate.return_value = sentinel_key
+        self.addCleanup(setattr, ParamikoSshServer, "_default_key", None)
+
+        server1 = ParamikoSshServer(**self.arguments)
+        server2_args = {**self.arguments, "port": 23}
+        server2 = ParamikoSshServer(**server2_args)
+
+        mock_generate.assert_called_once_with(2048)
+        self.assertIs(server1._ssh_server_key, sentinel_key)
+        self.assertIs(server2._ssh_server_key, sentinel_key)
+        self.assertIs(server1._ssh_server_key, server2._ssh_server_key)
+
+    def test_custom_key_does_not_affect_default_cache(self):
+        """A server with custom ssh_key_file should not populate the class default key."""
+        self.addCleanup(setattr, ParamikoSshServer, "_default_key", None)
+        ParamikoSshServer(**self.arguments, ssh_key_file="tests/assets/ssh_host_rsa_key")
+        self.assertIsNone(ParamikoSshServer._default_key)
+
+    def test_default_key_generation_is_thread_safe(self):
+        """Concurrent instantiation should produce the same key for all instances."""
+        self.addCleanup(setattr, ParamikoSshServer, "_default_key", None)
+        num_threads = 8
+        barrier = threading.Barrier(num_threads)
+
+        def create_server(port):
+            barrier.wait()
+            return ParamikoSshServer(**{**self.arguments, "port": port})
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as ex:
+            futures = [ex.submit(create_server, 6000 + i) for i in range(num_threads)]
+            servers = [f.result() for f in futures]
+
+        keys = {id(s._ssh_server_key) for s in servers}
+        self.assertEqual(len(keys), 1, f"Expected all servers to share the same key, got {len(keys)} distinct keys")
 
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):
