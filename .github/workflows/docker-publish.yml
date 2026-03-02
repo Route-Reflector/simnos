@@ -61,6 +61,7 @@ jobs:
         uses: "aquasecurity/trivy-action@0.34.1"
         with:
           image-ref: "${{ env.IMAGE_NAME }}:scan"
+          version: "v0.69.2"
           format: "table"
           exit-code: "1"
           severity: "CRITICAL,HIGH"
