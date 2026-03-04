@@ -31,12 +31,18 @@ def join_threads_with_deadline(
     :returns: list of threads that are still alive after the deadline.
     """
     deadline = time.monotonic() + total_timeout
+    alive: list[threading.Thread] = []
+    skipped = False
     for thread in threads:
-        remaining = max(0, deadline - time.monotonic())
-        if remaining <= 0:
-            break
-        thread.join(timeout=min(per_thread_timeout, remaining))
-    return [t for t in threads if t.is_alive()]
+        if not skipped:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                skipped = True
+            else:
+                thread.join(timeout=min(per_thread_timeout, remaining))
+        if thread.is_alive():
+            alive.append(thread)
+    return alive
 
 
 class TCPServerBase(ABC):

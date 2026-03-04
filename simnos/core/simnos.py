@@ -10,6 +10,7 @@ import logging
 import platform
 import socket
 import threading
+import time
 
 import detect
 import yaml
@@ -279,6 +280,10 @@ class SimNOS:
             log.info("Device %s is running on port %s", host.name, host.port)
             self._warn_security(host)
 
+    # Global wall-clock budget for the entire stop() operation.
+    # Covers host.stop() calls + safety-net thread join.
+    _STOP_GLOBAL_DEADLINE = 60
+
     def stop(
         self,
         hosts: str | list[str] | None = None,
@@ -292,6 +297,7 @@ class SimNOS:
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
+        deadline = time.monotonic() + self._STOP_GLOBAL_DEADLINE
         hosts: list[Host] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
         managed_threads = self._collect_server_threads(hosts)
@@ -301,9 +307,11 @@ class SimNOS:
             host_running=True,
             parallel=parallel,
             workers=workers,
+            deadline=deadline,
         )
         if managed_threads:
-            self._join_threads(managed_threads)
+            remaining = max(0, deadline - time.monotonic())
+            self._join_threads(managed_threads, timeout=min(self._SAFETY_NET_DEADLINE, remaining))
 
     def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
         """Collect all managed threads from host servers before stopping."""
@@ -318,14 +326,19 @@ class SimNOS:
     _SAFETY_NET_DEADLINE = 15
     _SAFETY_NET_PER_THREAD = 5
 
-    def _join_threads(self, threads: list[threading.Thread]) -> None:
+    def _join_threads(
+        self,
+        threads: list[threading.Thread],
+        timeout: float | None = None,
+    ) -> None:
         """
         Join SimNOS-managed threads after all hosts are stopped.
         Server threads are already joined by TCPServerBase.stop();
         this is a safety net for any stragglers.
         """
+        total = timeout if timeout is not None else self._SAFETY_NET_DEADLINE
         alive = join_threads_with_deadline(
-            threads, self._SAFETY_NET_DEADLINE, self._SAFETY_NET_PER_THREAD
+            threads, total, self._SAFETY_NET_PER_THREAD
         )
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
@@ -337,6 +350,7 @@ class SimNOS:
         host_running: bool = True,
         parallel: bool = False,
         workers: int | None = None,
+        deadline: float | None = None,
     ):
         """
         Function that executes a function like start or stop over
@@ -346,6 +360,7 @@ class SimNOS:
         be executed.
         :param parallel: if True, execute in parallel using threads.
         :param workers: max number of worker threads.
+        :param deadline: optional monotonic deadline; skip remaining hosts if exceeded.
         """
         for host in hosts:
             if host not in self.hosts.values():
@@ -353,14 +368,19 @@ class SimNOS:
         targets = [h for h in hosts if h.running == host_running]
         if not parallel or len(targets) <= 1:
             for h in targets:
+                if deadline is not None and time.monotonic() >= deadline:
+                    skipped = len(targets) - targets.index(h)
+                    log.warning("Global stop deadline exceeded, %d host(s) not stopped", skipped)
+                    break
                 getattr(h, func)()
             return
         if workers is not None and workers < 1:
             raise ValueError(f"workers must be >= 1, got {workers}")
         max_workers = workers or min(32, len(targets))
+        timeout = max(0, deadline - time.monotonic()) if deadline is not None else None
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futures = [ex.submit(getattr(h, func)) for h in targets]
-            for f in futures:
+            for f in concurrent.futures.as_completed(futures, timeout=timeout):
                 f.result()
 
     @staticmethod

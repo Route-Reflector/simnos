@@ -271,7 +271,7 @@ class ChannelToShellTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_replied_event.wait.assert_called_with(10)
+        self.mock_shell_replied_event.wait.assert_called_with(timeout=_SHUTDOWN_TIMEOUT)
 
     def test_channel_to_shell_tap_break_loop_when_channel_stdio_not_active(self):
         """Check that the ChannelToShellTap object breaks the loop when the channel_stdio is not active."""
@@ -1522,3 +1522,146 @@ class TeardownFixTests(unittest.TestCase):
         assert len(threads_created) == 3
         for t in threads_created:
             assert t.daemon is True, f"Thread {t.name} should be daemon"
+
+    @mock.patch("paramiko.Transport")
+    def test_start_server_exception_triggers_cleanup(self, mock_transport_cls: MagicMock):
+        """start_server() raising SSHException should still close session via finally."""
+        mock_session = MagicMock()
+        mock_session.start_server.side_effect = paramiko.SSHException("handshake failed")
+        mock_transport_cls.return_value = mock_session
+
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), Mock())
+
+        mock_session.close.assert_called_once()
+
+    @mock.patch("paramiko.Transport")
+    def test_unexpected_exception_triggers_cleanup(self, mock_transport_cls: MagicMock):
+        """Unexpected exception after start_server should still close session."""
+        mock_session = MagicMock()
+        mock_session.accept.side_effect = RuntimeError("unexpected")
+        mock_transport_cls.return_value = mock_session
+
+        server = ParamikoSshServer(**self.arguments)
+        with self.assertRaises(RuntimeError):
+            server.connection_function(MagicMock(), Mock())
+
+        mock_session.close.assert_called_once()
+
+
+class SshIntegrationTests(unittest.TestCase):
+    """Integration tests using real Paramiko connections (design tests 14 & 15)."""
+
+    def setUp(self):
+        ParamikoSshServer._default_key = None
+        nos = MagicMock()
+        nos.initial_prompt = "Router>"
+        nos.commands = {}
+        nos.auth = None
+
+        self.shell_cls = MagicMock()
+
+        import socket as _socket
+
+        with _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", 0))
+            self.port = s.getsockname()[1]
+
+        self.server = ParamikoSshServer(
+            shell=self.shell_cls,
+            nos=nos,
+            nos_inventory_config={},
+            port=self.port,
+            username="admin",
+            password="admin",
+            address="127.0.0.1",
+            timeout=1,
+            watchdog_interval=0.1,
+        )
+        self.server.port = self.port
+
+    def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
+        """After SSH session + stop(), shell.stop() is called and threads converge."""
+        import time
+
+        shell_stop_called = threading.Event()
+        shell_started = threading.Event()
+
+        def shell_factory(*args, **kwargs):
+            shell_instance = MagicMock()
+
+            def blocking_start():
+                shell_started.set()
+                shell_stop_called.wait(timeout=10)
+
+            shell_instance.start.side_effect = blocking_start
+            shell_instance.stop.side_effect = lambda: shell_stop_called.set()
+            return shell_instance
+
+        self.shell_cls.side_effect = shell_factory
+
+        self.server.start()
+        try:
+            # Connect via Paramiko client
+            client = paramiko.SSHClient()
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.connect(
+                "127.0.0.1",
+                port=self.port,
+                username="admin",
+                password="admin",
+                timeout=5,
+            )
+            try:
+                # Open a channel to trigger connection_function
+                client.invoke_shell()
+                self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
+            finally:
+                client.close()
+
+            # shell.stop() should be called by watchdog after client disconnect
+            self.assertTrue(
+                shell_stop_called.wait(timeout=5),
+                "shell.stop() was not called after client disconnect",
+            )
+        finally:
+            self.server.stop()
+
+        # All connection threads should have converged
+        alive = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")
+
+    def test_ssh_incomplete_handshake_stop_converges(self):
+        """TCP-only connection (no SSH handshake) + stop() should converge."""
+        import socket as _socket
+        import time
+
+        self.server.start()
+        try:
+            # Open raw TCP connection without SSH handshake
+            sock = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+            sock.settimeout(5)
+            sock.connect(("127.0.0.1", self.port))
+            try:
+                # Wait briefly so the server accepts the connection
+                time.sleep(0.5)
+            finally:
+                sock.close()
+
+            # Stop should converge within banner_timeout + margin
+            t0 = time.monotonic()
+            self.server.stop()
+            elapsed = time.monotonic() - t0
+
+            # Should not take more than _SHUTDOWN_TIMEOUT * 3 (handshake + accept + margin)
+            self.assertLess(
+                elapsed,
+                _SHUTDOWN_TIMEOUT * 3 + 2,
+                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
+            )
+        except Exception:
+            self.server.stop()
+            raise
+
+        alive = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")

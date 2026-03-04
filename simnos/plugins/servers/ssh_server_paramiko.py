@@ -179,7 +179,11 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
         if byte == b"\x00":
             continue
 
-        shell_replied_event.wait(10)
+        # Wait for the shell to reply, but check run_srv periodically
+        # so that shutdown is not blocked for the full wait duration.
+        while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
+            if not run_srv.is_set():
+                break
         if not channel_stdio.channel.active:
             log.error("SSH channel is not active. Exiting.")
             break
@@ -239,7 +243,8 @@ def shell_to_channel_tap(
                 channel_stdio.write(line.encode(encoding="utf-8"))
                 written = True
             except TimeoutError:
-                continue  # Retry same line (slow client tolerance)
+                log.debug("ssh_server.shell_to_channel_tap write timeout, retrying")
+                continue
             except (OSError, EOFError) as e:
                 log.error("ssh_server.shell_to_channel_tap channel write error: %s", e)
                 break
@@ -434,86 +439,88 @@ class ParamikoSshServer(TCPServerBase):
         session.banner_timeout = _SHUTDOWN_TIMEOUT
         session.handshake_timeout = _SHUTDOWN_TIMEOUT
 
-        # create the server
-        server = ParamikoSshServerInterface(
-            ssh_banner=self.ssh_banner,
-            username=self.username,
-            password=self.password,
-            allow_auth_none=allow_auth_none,
-            authorized_keys=self._authorized_keys,
-        )
+        try:
+            # create the server
+            server = ParamikoSshServerInterface(
+                ssh_banner=self.ssh_banner,
+                username=self.username,
+                password=self.password,
+                allow_auth_none=allow_auth_none,
+                authorized_keys=self._authorized_keys,
+            )
 
-        # start the SSH server
-        session.start_server(server=server)
+            # start the SSH server — may raise SSHException if the client
+            # disconnects during handshake or if stop() races with accept.
+            try:
+                session.start_server(server=server)
+            except paramiko.SSHException as e:
+                log.debug("SSH handshake failed (likely client disconnect or stop): %s", e)
+                return
 
-        # create the channel and get the stdio
-        channel = None
-        while channel is None and is_running.is_set() and session.is_alive():
-            channel = session.accept(_SHUTDOWN_TIMEOUT)
-        if channel is None:
-            log.warning("session.accept() returned None or server stopping, closing transport")
+            # create the channel and get the stdio
+            channel = None
+            while channel is None and is_running.is_set() and session.is_alive():
+                channel = session.accept(_SHUTDOWN_TIMEOUT)
+            if channel is None:
+                log.warning("session.accept() returned None or server stopping, closing transport")
+                return
+
+            # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
+            # login before starting the shell.  When publickey auth is also configured,
+            # clients that authenticate via publickey bypass this channel-level login
+            # intentionally — SSH-level publickey auth already verified the identity.
+            if server.auth_method_used == "none" and not self._channel_login(channel):
+                log.warning("Channel login failed, closing connection")
+                return
+
+            channel.settimeout(self.timeout)
+            channel_stdio = channel.makefile("rw")
+
+            # create stdio for the shell
+            shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
+
+            # start intermediate thread to tap into
+            # the channel_stdio->shell_stdin bytes stream
+            channel_to_shell_tapper = threading.Thread(
+                target=channel_to_shell_tap,
+                args=(channel_stdio, shell_stdin, shell_replied_event, run_srv),
+                daemon=True,
+            )
+            channel_to_shell_tapper.start()
+
+            # start intermediate thread to tap into
+            # the shell_stdout->channel_stdio bytes stream
+            shell_to_channel_tapper = threading.Thread(
+                target=shell_to_channel_tap,
+                args=(channel_stdio, shell_stdout, shell_replied_event, run_srv),
+                daemon=True,
+            )
+            shell_to_channel_tapper.start()
+
+            # create the client shell
+            client_shell = self.shell(
+                stdin=shell_stdin,
+                stdout=shell_stdout,
+                nos=self.nos,
+                nos_inventory_config=self.nos_inventory_config,
+                is_running=is_running,
+                **self.shell_configuration,
+            )
+
+            # start watchdog thread
+            watchdog_thread = threading.Thread(
+                target=self.watchdog, args=(is_running, run_srv, session, client_shell), daemon=True
+            )
+            watchdog_thread.start()
+
+            # running this command will block this function until shell exits
+            client_shell.start()
+            log.debug("ParamikoSshServer.connection_function stopped shell thread")
+
+        finally:
+            # Stop all server threads
+            run_srv.clear()
+            log.debug("ParamikoSshServer.connection_function stopped server threads")
+
             session.close()
-            return
-
-        # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
-        # login before starting the shell.  When publickey auth is also configured,
-        # clients that authenticate via publickey bypass this channel-level login
-        # intentionally — SSH-level publickey auth already verified the identity.
-        if server.auth_method_used == "none" and not self._channel_login(channel):
-            log.warning("Channel login failed, closing connection")
-            channel.close()
-            session.close()
-            return
-
-        channel.settimeout(self.timeout)
-        channel_stdio = channel.makefile("rw")
-
-        # create stdio for the shell
-        shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
-
-        # start intermediate thread to tap into
-        # the channel_stdio->shell_stdin bytes stream
-        channel_to_shell_tapper = threading.Thread(
-            target=channel_to_shell_tap,
-            args=(channel_stdio, shell_stdin, shell_replied_event, run_srv),
-            daemon=True,
-        )
-        channel_to_shell_tapper.start()
-
-        # start intermediate thread to tap into
-        # the shell_stdout->channel_stdio bytes stream
-        shell_to_channel_tapper = threading.Thread(
-            target=shell_to_channel_tap,
-            args=(channel_stdio, shell_stdout, shell_replied_event, run_srv),
-            daemon=True,
-        )
-        shell_to_channel_tapper.start()
-
-        # create the client shell
-        client_shell = self.shell(
-            stdin=shell_stdin,
-            stdout=shell_stdout,
-            nos=self.nos,
-            nos_inventory_config=self.nos_inventory_config,
-            is_running=is_running,
-            **self.shell_configuration,
-        )
-
-        # start watchdog thread
-        watchdog_thread = threading.Thread(
-            target=self.watchdog, args=(is_running, run_srv, session, client_shell), daemon=True
-        )
-        watchdog_thread.start()
-
-        # running this command will block this function until shell exits
-        client_shell.start()
-        log.debug("ParamikoSshServer.connection_function stopped shell thread")
-
-        # kill this server threads - watchdog, TapIO,
-        # shell_to_channel_tapper and channel_to_shell_tapper
-        run_srv.clear()
-        log.debug("ParamikoSshServer.connection_function stopped server threads")
-
-        # After execution continues, we can close the session
-        session.close()
-        log.debug("ParamikoSshServer.connection_function closed transport %s", session)
+            log.debug("ParamikoSshServer.connection_function closed transport %s", session)

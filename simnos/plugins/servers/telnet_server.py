@@ -235,7 +235,11 @@ class TelnetServer(TCPServerBase):
             if byte == b"\x00":
                 continue
 
-            shell_replied_event.wait(10)
+            # Wait for the shell to reply, but check run_srv periodically
+            # so that shutdown is not blocked for the full wait duration.
+            while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
+                if not run_srv.is_set():
+                    break
 
             try:
                 if byte in (b"\r", b"\n"):
