@@ -5,8 +5,10 @@ Test cases for the ssh_server_paramiko plugin.
 import concurrent.futures
 import logging
 import os
+import socket
 import tempfile
 import threading
+import time
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock, Mock
@@ -1561,9 +1563,7 @@ class SshIntegrationTests(unittest.TestCase):
 
         self.shell_cls = MagicMock()
 
-        import socket as _socket
-
-        with _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM) as s:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(("127.0.0.1", 0))
             self.port = s.getsockname()[1]
 
@@ -1582,8 +1582,6 @@ class SshIntegrationTests(unittest.TestCase):
 
     def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
         """After SSH session + stop(), shell.stop() is called and threads converge."""
-        import time
-
         shell_stop_called = threading.Event()
         shell_started = threading.Event()
 
@@ -1633,13 +1631,10 @@ class SshIntegrationTests(unittest.TestCase):
 
     def test_ssh_incomplete_handshake_stop_converges(self):
         """TCP-only connection (no SSH handshake) + stop() should converge."""
-        import socket as _socket
-        import time
-
         self.server.start()
         try:
             # Open raw TCP connection without SSH handshake
-            sock = _socket.socket(_socket.AF_INET, _socket.SOCK_STREAM)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(5)
             sock.connect(("127.0.0.1", self.port))
             try:
@@ -1659,9 +1654,8 @@ class SshIntegrationTests(unittest.TestCase):
                 _SHUTDOWN_TIMEOUT * 3 + 2,
                 f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
             )
-        except Exception:
+        finally:
             self.server.stop()
-            raise
 
         alive = [t for t in self.server._connection_threads if t.is_alive()]
         self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")

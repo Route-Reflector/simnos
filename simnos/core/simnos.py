@@ -367,21 +367,23 @@ class SimNOS:
                 raise ValueError(f"Host {host} not found")
         targets = [h for h in hosts if h.running == host_running]
         if not parallel or len(targets) <= 1:
-            for h in targets:
+            for i, h in enumerate(targets):
                 if deadline is not None and time.monotonic() >= deadline:
-                    skipped = len(targets) - targets.index(h)
-                    log.warning("Global stop deadline exceeded, %d host(s) not stopped", skipped)
+                    log.warning("Global stop deadline exceeded, %d host(s) not stopped", len(targets) - i)
                     break
                 getattr(h, func)()
             return
         if workers is not None and workers < 1:
             raise ValueError(f"workers must be >= 1, got {workers}")
         max_workers = workers or min(32, len(targets))
-        timeout = max(0, deadline - time.monotonic()) if deadline is not None else None
+        remaining = max(0, deadline - time.monotonic()) if deadline is not None else None
         with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
             futures = [ex.submit(getattr(h, func)) for h in targets]
-            for f in concurrent.futures.as_completed(futures, timeout=timeout):
-                f.result()
+            try:
+                for f in concurrent.futures.as_completed(futures, timeout=remaining):
+                    f.result()
+            except TimeoutError:
+                log.warning("Global stop deadline exceeded during parallel %s", func)
 
     @staticmethod
     def _warn_security(host: Host) -> None:
