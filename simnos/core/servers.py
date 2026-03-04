@@ -12,6 +12,32 @@ import time
 
 log = logging.getLogger(__name__)
 
+# Timeout constants for thread joining during shutdown
+_STOP_DEADLINE = 10  # Total wall-clock budget for joining connection threads
+_PER_THREAD_JOIN = 2  # Max join timeout per individual connection thread
+
+
+def join_threads_with_deadline(
+    threads: list[threading.Thread],
+    total_timeout: float,
+    per_thread_timeout: float,
+) -> list[threading.Thread]:
+    """Join threads with a total wall-clock deadline.
+
+    Iterates over *threads*, joining each with at most *per_thread_timeout*
+    seconds.  Stops early when the cumulative elapsed time exceeds
+    *total_timeout*.
+
+    :returns: list of threads that are still alive after the deadline.
+    """
+    deadline = time.monotonic() + total_timeout
+    for thread in threads:
+        remaining = max(0, deadline - time.monotonic())
+        if remaining <= 0:
+            break
+        thread.join(timeout=min(per_thread_timeout, remaining))
+    return [t for t in threads if t.is_alive()]
+
 
 class TCPServerBase(ABC):
     """
@@ -88,12 +114,11 @@ class TCPServerBase(ABC):
         self._listen_thread.join(timeout=5)
         self._socket.close()
 
-        deadline = time.monotonic() + 10
-        for connection_thread in self._connection_threads:
-            remaining = max(0, deadline - time.monotonic())
-            if remaining <= 0:
-                break
-            connection_thread.join(timeout=min(2, remaining))
+        alive = join_threads_with_deadline(
+            self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN
+        )
+        if alive:
+            log.warning("%d connection thread(s) did not exit within %ds", len(alive), _STOP_DEADLINE)
 
     def _listen(self):
         """

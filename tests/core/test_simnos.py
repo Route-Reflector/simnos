@@ -648,7 +648,7 @@ class TestJoinThreadsDeadline:
                 return base_time + 5  # remaining = 10 (within deadline)
             return base_time + 16  # past deadline
 
-        with patch("simnos.core.simnos.time.monotonic", side_effect=mock_monotonic):
+        with patch("simnos.core.servers.time.monotonic", side_effect=mock_monotonic):
             net._join_threads(mock_threads)
 
         # First 2 threads should have been joined, rest skipped

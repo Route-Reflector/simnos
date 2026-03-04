@@ -10,7 +10,6 @@ import logging
 import platform
 import socket
 import threading
-import time
 
 import detect
 import yaml
@@ -18,6 +17,7 @@ import yaml
 from simnos.core.host import Host
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelSimnosInventory
+from simnos.core.servers import join_threads_with_deadline
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
@@ -313,19 +313,20 @@ class SimNOS:
                 threads.extend(host.server.managed_threads)
         return threads
 
+    # Safety-net join budget: longer than per-server budget because this
+    # covers ALL hosts after they have already been told to stop.
+    _SAFETY_NET_DEADLINE = 15
+    _SAFETY_NET_PER_THREAD = 5
+
     def _join_threads(self, threads: list[threading.Thread]) -> None:
         """
         Join SimNOS-managed threads after all hosts are stopped.
         Server threads are already joined by TCPServerBase.stop();
         this is a safety net for any stragglers.
         """
-        deadline = time.monotonic() + 15
-        for thread in threads:
-            remaining = max(0, deadline - time.monotonic())
-            if remaining <= 0:
-                break
-            thread.join(timeout=min(5, remaining))
-        alive = [t for t in threads if t.is_alive()]
+        alive = join_threads_with_deadline(
+            threads, self._SAFETY_NET_DEADLINE, self._SAFETY_NET_PER_THREAD
+        )
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 
