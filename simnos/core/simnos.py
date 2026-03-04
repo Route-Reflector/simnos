@@ -10,6 +10,7 @@ import logging
 import platform
 import socket
 import threading
+import time
 
 import detect
 import yaml
@@ -318,8 +319,12 @@ class SimNOS:
         Server threads are already joined by TCPServerBase.stop();
         this is a safety net for any stragglers.
         """
+        deadline = time.monotonic() + 15
         for thread in threads:
-            thread.join(timeout=5)
+            remaining = max(0, deadline - time.monotonic())
+            if remaining <= 0:
+                break
+            thread.join(timeout=min(5, remaining))
         alive = [t for t in threads if t.is_alive()]
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))

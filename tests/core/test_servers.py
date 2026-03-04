@@ -265,3 +265,38 @@ class ServersTest(unittest.TestCase):
         self.assertEqual(mock_thread.call_count, 100)
         self.assertEqual(mock_thread().start.call_count, 100)
         self.assertEqual(len(servers._connection_threads), 100)
+
+    @patch("threading.Event")
+    @patch("socket.socket")
+    def test_stop_deadline_caps_join_time(self, mock_socket, mock_thread_event):
+        """Deadline should cap total join time: threads past deadline are skipped."""
+        mock_thread_event().is_set.return_value = True
+        servers = StubServer()
+        servers._listen_thread = MagicMock()
+        servers._socket = mock_socket()
+
+        # Create 5 mock connection threads
+        mock_threads = [MagicMock() for _ in range(5)]
+        servers._connection_threads = mock_threads
+
+        # Mock time.monotonic to simulate deadline expiration after 2nd thread
+        call_count = [0]
+        base_time = 1000.0
+
+        def mock_monotonic():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return base_time  # deadline = base_time + 10
+            if call_count[0] <= 3:
+                return base_time + 3  # remaining = 7 (within deadline)
+            return base_time + 11  # past deadline
+
+        with patch("simnos.core.servers.time.monotonic", side_effect=mock_monotonic):
+            servers.stop()
+
+        # First 2 threads should have been joined, rest skipped
+        mock_threads[0].join.assert_called_once()
+        mock_threads[1].join.assert_called_once()
+        mock_threads[2].join.assert_not_called()
+        mock_threads[3].join.assert_not_called()
+        mock_threads[4].join.assert_not_called()

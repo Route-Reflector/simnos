@@ -34,6 +34,8 @@ SGA = 0x03  # Suppress Go Ahead
 ECHO = 0x01  # Echo
 NAWS = 0x1F  # Negotiate About Window Size
 
+_SHUTDOWN_TIMEOUT = 2  # Bounded timeout for shutdown-critical paths (watchdog sleep cap)
+
 # Short timeout (seconds) for draining initial IAC negotiation responses.
 # Must be long enough for TCP-fragmented IAC sequences to arrive completely,
 # but short enough not to delay the login prompt noticeably.  Loopback RTT
@@ -312,7 +314,7 @@ class TelnetServer(TCPServerBase):
         while run_srv.is_set():
             if not is_running.is_set():
                 break
-            time.sleep(self.watchdog_interval)
+            time.sleep(min(self.watchdog_interval, _SHUTDOWN_TIMEOUT))
         # Always stop the shell — whether run_srv or is_running caused the exit.
         shell.stop()
 
@@ -372,6 +374,7 @@ class TelnetServer(TCPServerBase):
             socket_to_shell_tapper = threading.Thread(
                 target=self.socket_to_shell_tap,
                 args=(client, shell_stdin, shell_replied_event, run_srv),
+                daemon=True,
             )
             socket_to_shell_tapper.start()
 
@@ -379,6 +382,7 @@ class TelnetServer(TCPServerBase):
             shell_to_socket_tapper = threading.Thread(
                 target=self.shell_to_socket_tap,
                 args=(client, shell_stdout, shell_replied_event, run_srv),
+                daemon=True,
             )
             shell_to_socket_tapper.start()
 
@@ -396,6 +400,7 @@ class TelnetServer(TCPServerBase):
             watchdog_thread = threading.Thread(
                 target=self.watchdog,
                 args=(is_running, run_srv, client_shell),
+                daemon=True,
             )
             watchdog_thread.start()
 

@@ -14,6 +14,7 @@ from unittest.mock import MagicMock, Mock
 import paramiko
 
 from simnos.plugins.servers.ssh_server_paramiko import (
+    _SHUTDOWN_TIMEOUT,
     ParamikoSshServer,
     ParamikoSshServerInterface,
     channel_to_shell_tap,
@@ -443,7 +444,7 @@ class ShellToChannelTapTest(unittest.TestCase):
         Check that the ShellToChannelTap object reads a line
         from the shell_stdout that is a carriage return and newline.
         """
-        self.mock_run_srv.is_set.side_effect = [True, False]
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "\r\n"
         shell_to_channel_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -459,7 +460,7 @@ class ShellToChannelTapTest(unittest.TestCase):
         Check that the ShellToChannelTap object reads a line
         from the shell_stdout that is a newline.
         """
-        self.mock_run_srv.is_set.side_effect = [True, False]
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "\n"
         shell_to_channel_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -475,7 +476,7 @@ class ShellToChannelTapTest(unittest.TestCase):
         Check that the ShellToChannelTap object reads a line
         from the shell_stdout that is a character.
         """
-        self.mock_run_srv.is_set.side_effect = [True, False]
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -496,11 +497,12 @@ class ShellToChannelTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_run_srv.is_set.assert_called_once()
+        # Called twice: outer loop check + inner retry loop check
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
     def test_shell_to_channel_tap_set_replied_flag(self):
         """Check that the ShellToChannelTap object sets the replied flag."""
-        self.mock_run_srv.is_set.side_effect = [True, False]
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -512,7 +514,7 @@ class ShellToChannelTapTest(unittest.TestCase):
 
     def test_shell_to_channel_tap_exit_run_srv(self):
         """Check that the ShellToChannelTap object exits the run_srv."""
-        self.mock_run_srv.is_set.side_effect = [True, False]
+        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -520,7 +522,8 @@ class ShellToChannelTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+        # 4 calls: outer(True), inner enter(True), inner exit recheck(True), outer exit(False)
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 4)
 
 
 class ParamikoSshServerTest(unittest.TestCase):
@@ -824,13 +827,14 @@ class ParamikoSshServerTest(unittest.TestCase):
 
     @mock.patch("paramiko.Transport")
     def test_connection_function_accept_returns_none(self, mock_transport_cls: MagicMock):
-        """session.accept() returning None should close session and return early."""
+        """session.accept() returning None should close session when is_running clears."""
         mock_session = MagicMock()
         mock_session.accept.return_value = None
         mock_transport_cls.return_value = mock_session
 
         mock_client = MagicMock()
         mock_is_running = Mock()
+        mock_is_running.is_set.side_effect = [True, False]
         paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments)
         paramiko_server.connection_function(mock_client, mock_is_running)
 
@@ -1298,6 +1302,223 @@ class PublicKeyAuthTest(unittest.TestCase):
             ),
         ):
             mock_interface.return_value = Mock(auth_method_used="password")
-            server.connection_function(Mock(), Mock())
+            mock_is_running = Mock()
+            mock_is_running.is_set.side_effect = [True, False]
+            server.connection_function(Mock(), mock_is_running)
         mock_interface.assert_called_once()
         self.assertEqual(mock_interface.call_args.kwargs.get("authorized_keys"), expected_keys)
+
+
+class TeardownFixTests(unittest.TestCase):
+    """Tests for Issue #65 — stop() teardown hang fixes."""
+
+    def setUp(self):
+        """Set up common fixtures."""
+        ParamikoSshServer._default_key = None
+        self.arguments = {
+            "shell": Mock(),
+            "nos": Mock(),
+            "nos_inventory_config": {},
+            "port": 22,
+            "username": "admin",
+            "password": "admin",
+        }
+
+    # -- Watchdog tests --------------------------------------------------------
+
+    def test_ssh_watchdog_breaks_on_is_running_cleared(self):
+        """Watchdog should break and call shell.stop() once when is_running clears."""
+        server = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
+        mock_is_running = Mock()
+        mock_run_srv = Mock()
+        mock_session = Mock()
+        mock_shell = Mock()
+        mock_run_srv.is_set.side_effect = [True, False]
+        mock_is_running.is_set.return_value = False
+        server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
+        mock_shell.stop.assert_called_once()
+
+    def test_ssh_watchdog_breaks_on_session_not_alive(self):
+        """Watchdog should break and call shell.stop() once when session is dead."""
+        server = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
+        mock_is_running = Mock()
+        mock_run_srv = Mock()
+        mock_session = Mock()
+        mock_shell = Mock()
+        mock_session.is_alive.return_value = False
+        server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
+        mock_shell.stop.assert_called_once()
+
+    # -- channel_to_shell_tap tests -------------------------------------------
+
+    def test_channel_to_shell_tap_oserror_breaks(self):
+        """OSError on read should break the tap loop."""
+        mock_channel_stdio = Mock()
+        mock_channel_stdio.read.side_effect = OSError("channel closed")
+        mock_shell_stdin = Mock()
+        mock_shell_replied_event = Mock()
+        mock_run_srv = Mock()
+        channel_to_shell_tap(mock_channel_stdio, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
+        mock_run_srv.clear.assert_called_once()
+
+    def test_channel_to_shell_tap_clears_run_srv(self):
+        """channel_to_shell_tap should call run_srv.clear() on exit."""
+        mock_channel_stdio = Mock()
+        mock_channel_stdio.read.return_value = b""  # EOF
+        mock_shell_stdin = Mock()
+        mock_shell_replied_event = Mock()
+        mock_run_srv = Mock()
+        channel_to_shell_tap(mock_channel_stdio, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
+        mock_run_srv.clear.assert_called_once()
+
+    # -- shell_to_channel_tap tests -------------------------------------------
+
+    def test_shell_to_channel_tap_clears_run_srv(self):
+        """shell_to_channel_tap should call run_srv.clear() on exit."""
+        mock_channel_stdio = Mock()
+        mock_channel_stdio.closed = False
+        mock_shell_stdout = Mock()
+        mock_shell_stdout.readline.return_value = None  # EOF
+        mock_shell_replied_event = Mock()
+        mock_run_srv = Mock()
+        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        mock_run_srv.clear.assert_called_once()
+
+    def test_shell_to_channel_tap_breaks_on_non_timeout_oserror(self):
+        """Non-TimeoutError OSError should break and reach run_srv.clear()."""
+        mock_channel_stdio = Mock()
+        mock_channel_stdio.closed = False
+        mock_shell_stdout = Mock()
+        mock_shell_stdout.readline.return_value = "test line"
+        mock_channel_stdio.write.side_effect = OSError(32, "Broken pipe")
+        mock_shell_replied_event = Mock()
+        mock_run_srv = Mock()
+        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        mock_run_srv.clear.assert_called_once()
+
+    def test_shell_to_channel_tap_retries_on_timeout(self):
+        """Write-side TimeoutError should retry same line without loss."""
+        mock_channel_stdio = Mock()
+        mock_channel_stdio.closed = False
+        mock_shell_stdout = Mock()
+        mock_shell_stdout.readline.side_effect = ["hello\r\n", None]
+        # First write times out, second succeeds
+        mock_channel_stdio.write.side_effect = [TimeoutError(), None]
+        mock_shell_replied_event = Mock()
+        mock_run_srv = Mock()
+        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        # write should have been called twice with the same data
+        assert mock_channel_stdio.write.call_count == 2
+        mock_channel_stdio.write.assert_any_call(b"hello\r\n")
+        mock_shell_replied_event.set.assert_called_once()
+
+    # -- connection_function tests --------------------------------------------
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.channel_to_shell_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_channel_tap")
+    @mock.patch("paramiko.Transport")
+    def test_channel_settimeout_is_called(
+        self,
+        mock_transport_cls: MagicMock,
+        mock_shell_to_channel_tap: MagicMock,
+        mock_channel_to_shell_tap: MagicMock,
+    ):
+        """connection_function should call channel.settimeout(self.timeout)."""
+        mock_session = MagicMock()
+        mock_channel = MagicMock()
+        mock_session.accept.return_value = mock_channel
+        mock_transport_cls.return_value = mock_session
+
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), Mock())
+
+        mock_channel.settimeout.assert_called_once_with(server.timeout)
+
+    @mock.patch("paramiko.Transport")
+    def test_session_accept_bounded(self, mock_transport_cls: MagicMock):
+        """session.accept() should be called with _SHUTDOWN_TIMEOUT."""
+        mock_session = MagicMock()
+        mock_session.accept.return_value = None
+        mock_transport_cls.return_value = mock_session
+
+        mock_is_running = Mock()
+        mock_is_running.is_set.side_effect = [True, False]
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), mock_is_running)
+
+        mock_session.accept.assert_called_with(_SHUTDOWN_TIMEOUT)
+
+    @mock.patch("paramiko.Transport")
+    def test_session_accept_returns_on_stop(self, mock_transport_cls: MagicMock):
+        """accept loop should exit when is_running clears and close transport."""
+        mock_session = MagicMock()
+        mock_session.accept.return_value = None
+        mock_transport_cls.return_value = mock_session
+
+        mock_is_running = Mock()
+        mock_is_running.is_set.side_effect = [True, False]
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), mock_is_running)
+
+        mock_session.close.assert_called_once()
+
+    @mock.patch("paramiko.Transport")
+    def test_session_accept_returns_on_transport_dead(self, mock_transport_cls: MagicMock):
+        """accept loop should exit when session.is_alive() returns False."""
+        mock_session = MagicMock()
+        mock_session.accept.return_value = None
+        mock_session.is_alive.side_effect = [True, False]
+        mock_transport_cls.return_value = mock_session
+
+        mock_is_running = Mock()
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), mock_is_running)
+
+        mock_session.close.assert_called_once()
+
+    @mock.patch("paramiko.Transport")
+    def test_handshake_timeout_is_set(self, mock_transport_cls: MagicMock):
+        """connection_function should set banner_timeout and handshake_timeout."""
+        mock_session = MagicMock()
+        mock_session.accept.return_value = None
+        mock_transport_cls.return_value = mock_session
+
+        mock_is_running = Mock()
+        mock_is_running.is_set.return_value = False
+        server = ParamikoSshServer(**self.arguments)
+        server.connection_function(MagicMock(), mock_is_running)
+
+        assert mock_session.banner_timeout == _SHUTDOWN_TIMEOUT
+        assert mock_session.handshake_timeout == _SHUTDOWN_TIMEOUT
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.channel_to_shell_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_channel_tap")
+    @mock.patch("paramiko.Transport")
+    def test_tapper_threads_are_daemon(
+        self,
+        mock_transport_cls: MagicMock,
+        mock_shell_to_channel_tap: MagicMock,
+        mock_channel_to_shell_tap: MagicMock,
+    ):
+        """Tapper and watchdog threads should be created with daemon=True."""
+        mock_session = MagicMock()
+        mock_channel = MagicMock()
+        mock_session.accept.return_value = mock_channel
+        mock_transport_cls.return_value = mock_session
+
+        threads_created = []
+        original_thread = threading.Thread
+
+        def capture_thread(*args, **kwargs):
+            t = original_thread(*args, **kwargs)
+            threads_created.append(t)
+            return t
+
+        server = ParamikoSshServer(**self.arguments)
+        with mock.patch("simnos.plugins.servers.ssh_server_paramiko.threading.Thread", side_effect=capture_thread):
+            server.connection_function(MagicMock(), Mock())
+
+        # 3 threads: channel_to_shell_tapper, shell_to_channel_tapper, watchdog
+        assert len(threads_created) == 3
+        for t in threads_created:
+            assert t.daemon is True, f"Thread {t.name} should be daemon"

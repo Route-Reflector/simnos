@@ -24,6 +24,8 @@ log = logging.getLogger(__name__)
 # Workaround for Paramiko server-mode bug where GEX algorithms are advertised
 # in KEXINIT despite the server being unable to handle them without moduli,
 # causing MessageOrderError when a client selects GEX.
+_SHUTDOWN_TIMEOUT = 2  # Bounded timeout for shutdown-critical paths (handshake, accept)
+
 _DISABLED_GEX_ALGORITHMS = {
     "kex": [
         "diffie-hellman-group-exchange-sha256",
@@ -161,6 +163,9 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
             byte: bytes = channel_stdio.read(1)
         except TimeoutError:
             continue
+        except (OSError, EOFError):
+            log.debug("ssh_server.channel_to_shell_tap channel read closed")
+            break
         log.debug("ssh_server.channel_to_shell_tap received from channel: %s", [byte])
 
         # EOF / channel closed
@@ -202,6 +207,8 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
             log.error("ssh_server.channel_to_shell_tap channel write error: %s", e)
             break
 
+    run_srv.clear()
+
 
 def shell_to_channel_tap(
     channel_stdio: paramiko.channel.ChannelFile,
@@ -223,17 +230,21 @@ def shell_to_channel_tap(
         if "\r\n" not in line and "\n" in line:
             line = line.replace("\n", "\r\n")
         log.debug("ssh_server.shell_to_channel_tap sending line to channel %s", [line])
-        try:
-            channel_stdio.write(line.encode(encoding="utf-8"))
-        except OSError as e:
-            if e.errno == 104:
+        written = False
+        while run_srv.is_set() and not written:
+            try:
+                channel_stdio.write(line.encode(encoding="utf-8"))
+                written = True
+            except TimeoutError:
+                continue  # Retry same line (slow client tolerance)
+            except (OSError, EOFError) as e:
                 log.error("ssh_server.shell_to_channel_tap channel write error: %s", e)
-                log.error("Connection reset by peer, exiting")
                 break
-        except EOFError as e:
-            log.error("ssh_server.shell_to_channel_tap channel write error: %s", e)
+        if not written:
             break
         shell_replied_event.set()
+
+    run_srv.clear()
 
 
 class ParamikoSshServer(TCPServerBase):
@@ -347,13 +358,14 @@ class ParamikoSshServer(TCPServerBase):
         while run_srv.is_set():
             if not session.is_alive():
                 log.warning("ParamikoSshServer.watchdog - session not alive, stopping shell")
-                shell.stop()
                 break
 
             if not is_running.is_set():
-                shell.stop()
+                break
 
-            time.sleep(self.watchdog_interval)
+            time.sleep(min(self.watchdog_interval, _SHUTDOWN_TIMEOUT))
+
+        shell.stop()
 
     def _read_channel_line(self, channel, echo: bool = True) -> str:
         """
@@ -416,6 +428,8 @@ class ParamikoSshServer(TCPServerBase):
         if not self._moduli_loaded:
             session.disabled_algorithms = _DISABLED_GEX_ALGORITHMS
         session.add_server_key(self._ssh_server_key)
+        session.banner_timeout = _SHUTDOWN_TIMEOUT
+        session.handshake_timeout = _SHUTDOWN_TIMEOUT
 
         # create the server
         server = ParamikoSshServerInterface(
@@ -430,9 +444,11 @@ class ParamikoSshServer(TCPServerBase):
         session.start_server(server=server)
 
         # create the channel and get the stdio
-        channel = session.accept()
+        channel = None
+        while channel is None and is_running.is_set() and session.is_alive():
+            channel = session.accept(_SHUTDOWN_TIMEOUT)
         if channel is None:
-            log.warning("session.accept() returned None, closing transport")
+            log.warning("session.accept() returned None or server stopping, closing transport")
             session.close()
             return
 
@@ -446,6 +462,7 @@ class ParamikoSshServer(TCPServerBase):
             session.close()
             return
 
+        channel.settimeout(self.timeout)
         channel_stdio = channel.makefile("rw")
 
         # create stdio for the shell
@@ -456,6 +473,7 @@ class ParamikoSshServer(TCPServerBase):
         channel_to_shell_tapper = threading.Thread(
             target=channel_to_shell_tap,
             args=(channel_stdio, shell_stdin, shell_replied_event, run_srv),
+            daemon=True,
         )
         channel_to_shell_tapper.start()
 
@@ -464,6 +482,7 @@ class ParamikoSshServer(TCPServerBase):
         shell_to_channel_tapper = threading.Thread(
             target=shell_to_channel_tap,
             args=(channel_stdio, shell_stdout, shell_replied_event, run_srv),
+            daemon=True,
         )
         shell_to_channel_tapper.start()
 
@@ -478,7 +497,9 @@ class ParamikoSshServer(TCPServerBase):
         )
 
         # start watchdog thread
-        watchdog_thread = threading.Thread(target=self.watchdog, args=(is_running, run_srv, session, client_shell))
+        watchdog_thread = threading.Thread(
+            target=self.watchdog, args=(is_running, run_srv, session, client_shell), daemon=True
+        )
         watchdog_thread.start()
 
         # running this command will block this function until shell exits

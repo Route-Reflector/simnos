@@ -8,6 +8,7 @@ import logging
 import socket
 import sys
 import threading
+import time
 
 log = logging.getLogger(__name__)
 
@@ -87,8 +88,12 @@ class TCPServerBase(ABC):
         self._listen_thread.join(timeout=5)
         self._socket.close()
 
+        deadline = time.monotonic() + 10
         for connection_thread in self._connection_threads:
-            connection_thread.join(timeout=2)
+            remaining = max(0, deadline - time.monotonic())
+            if remaining <= 0:
+                break
+            connection_thread.join(timeout=min(2, remaining))
 
     def _listen(self):
         """

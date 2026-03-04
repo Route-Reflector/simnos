@@ -627,3 +627,33 @@ class TestWarnSecurity:
             SimNOS._warn_security(host)
         assert "default credentials" in caplog.text
         assert "0.0.0.0" in caplog.text
+
+
+class TestJoinThreadsDeadline:
+    """Tests for deadline-capped _join_threads (Issue #65)."""
+
+    def test_join_threads_deadline_caps_total_time(self):
+        """Deadline should cap total join time: threads past deadline are skipped."""
+        net = SimNOS()
+
+        mock_threads = [Mock() for _ in range(5)]
+        call_count = [0]
+        base_time = 1000.0
+
+        def mock_monotonic():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return base_time  # deadline = base_time + 15
+            if call_count[0] <= 3:
+                return base_time + 5  # remaining = 10 (within deadline)
+            return base_time + 16  # past deadline
+
+        with patch("simnos.core.simnos.time.monotonic", side_effect=mock_monotonic):
+            net._join_threads(mock_threads)
+
+        # First 2 threads should have been joined, rest skipped
+        mock_threads[0].join.assert_called_once()
+        mock_threads[1].join.assert_called_once()
+        mock_threads[2].join.assert_not_called()
+        mock_threads[3].join.assert_not_called()
+        mock_threads[4].join.assert_not_called()
