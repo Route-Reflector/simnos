@@ -15,7 +15,7 @@ import time
 from typing import Any
 
 from simnos.core.nos import Nos
-from simnos.core.servers import TCPServerBase
+from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
 from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
@@ -33,8 +33,6 @@ SE = 0xF0  # Subnegotiation End
 SGA = 0x03  # Suppress Go Ahead
 ECHO = 0x01  # Echo
 NAWS = 0x1F  # Negotiate About Window Size
-
-_SHUTDOWN_TIMEOUT = 2  # Bounded timeout for shutdown-critical paths (watchdog sleep cap)
 
 # Short timeout (seconds) for draining initial IAC negotiation responses.
 # Must be long enough for TCP-fragmented IAC sequences to arrive completely,

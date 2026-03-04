@@ -15,15 +15,10 @@ import paramiko.channel
 import paramiko.rsakey
 
 from simnos.core.nos import Nos
-from simnos.core.servers import TCPServerBase
+from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
 from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
-
-# Bounded timeout (seconds) for shutdown-critical paths: SSH handshake, accept,
-# and watchdog sleep cap.  Kept short so that stop() converges quickly even when
-# user-configured self.timeout is large.
-_SHUTDOWN_TIMEOUT = 2
 
 # DH Group Exchange algorithms to disable when server moduli are unavailable.
 # Workaround for Paramiko server-mode bug where GEX algorithms are advertised

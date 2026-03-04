@@ -1582,44 +1582,51 @@ class SshIntegrationTests(unittest.TestCase):
         )
         self.server.port = self.port
 
-    def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
-        """After SSH session + stop(), shell.stop() is called and threads converge."""
+    def _make_blocking_shell(self):
+        """Create a shell factory whose start() blocks until stop() is called.
+
+        Returns (shell_started, shell_stop_called) events and installs the
+        factory on self.shell_cls.
+        """
         shell_stop_called = threading.Event()
         shell_started = threading.Event()
 
         def shell_factory(*args, **kwargs):
             shell_instance = MagicMock()
-
-            def blocking_start():
-                shell_started.set()
-                shell_stop_called.wait(timeout=10)
-
-            shell_instance.start.side_effect = blocking_start
+            shell_instance.start.side_effect = lambda: (
+                shell_started.set() or shell_stop_called.wait(timeout=10)
+            )
             shell_instance.stop.side_effect = lambda: shell_stop_called.set()
             return shell_instance
 
         self.shell_cls.side_effect = shell_factory
+        return shell_started, shell_stop_called
+
+    def _assert_threads_converged(self):
+        """Assert all server connection threads have exited."""
+        alive = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")
+
+    def _assert_stop_time(self, elapsed):
+        """Assert stop() completed within the expected time budget."""
+        budget = _SHUTDOWN_TIMEOUT * 3 + 2
+        self.assertLess(elapsed, budget, f"stop() took {elapsed:.1f}s, expected < {budget}s")
+
+    def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
+        """After SSH session + stop(), shell.stop() is called and threads converge."""
+        shell_started, shell_stop_called = self._make_blocking_shell()
 
         self.server.start()
         try:
-            # Connect via Paramiko client
             client = paramiko.SSHClient()
             client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            client.connect(
-                "127.0.0.1",
-                port=self.port,
-                username="admin",
-                password="admin",
-                timeout=5,
-            )
+            client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
             try:
-                # Open a channel to trigger connection_function
                 client.invoke_shell()
                 self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
             finally:
                 client.close()
 
-            # shell.stop() should be called by watchdog after client disconnect
             self.assertTrue(
                 shell_stop_called.wait(timeout=5),
                 "shell.stop() was not called after client disconnect",
@@ -1627,93 +1634,51 @@ class SshIntegrationTests(unittest.TestCase):
         finally:
             self.server.stop()
 
-        # All connection threads should have converged
-        alive_client_disconnect = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive_client_disconnect), 0, f"Threads still alive: {alive_client_disconnect}")
+        self._assert_threads_converged()
 
     def test_ssh_server_stop_first_propagates_shell_stop(self):
         """server.stop() while client is connected should propagate shell.stop() and converge."""
-        shell_stop_called = threading.Event()
-        shell_started = threading.Event()
-
-        def shell_factory(*args, **kwargs):
-            shell_instance = MagicMock()
-
-            def blocking_start():
-                shell_started.set()
-                shell_stop_called.wait(timeout=10)
-
-            shell_instance.start.side_effect = blocking_start
-            shell_instance.stop.side_effect = lambda: shell_stop_called.set()
-            return shell_instance
-
-        self.shell_cls.side_effect = shell_factory
+        shell_started, shell_stop_called = self._make_blocking_shell()
 
         self.server.start()
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
         try:
-            client.connect(
-                "127.0.0.1",
-                port=self.port,
-                username="admin",
-                password="admin",
-                timeout=5,
-            )
+            client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
             client.invoke_shell()
             self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
 
-            # Stop server while client is still connected
             t0 = time.monotonic()
             self.server.stop()
             elapsed = time.monotonic() - t0
 
-            self.assertTrue(
-                shell_stop_called.is_set(),
-                "shell.stop() was not called after server.stop()",
-            )
-            self.assertLess(
-                elapsed,
-                _SHUTDOWN_TIMEOUT * 3 + 2,
-                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
-            )
+            self.assertTrue(shell_stop_called.is_set(), "shell.stop() was not called after server.stop()")
+            self._assert_stop_time(elapsed)
         finally:
             client.close()
             self.server.stop()
 
-        alive_stop_first = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive_stop_first), 0, f"Threads still alive: {alive_stop_first}")
+        self._assert_threads_converged()
 
     def test_ssh_incomplete_handshake_stop_converges(self):
         """TCP-only connection (no SSH handshake) + stop() should converge."""
         self.server.start()
         try:
-            # Open raw TCP connection without SSH handshake
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(5)
             sock.connect(("127.0.0.1", self.port))
             try:
-                # Wait briefly so the server accepts the connection
                 time.sleep(0.5)
             finally:
                 sock.close()
 
-            # Stop should converge within banner_timeout + margin
             t0 = time.monotonic()
             self.server.stop()
-            elapsed = time.monotonic() - t0
-
-            # Should not take more than _SHUTDOWN_TIMEOUT * 3 (handshake + accept + margin)
-            self.assertLess(
-                elapsed,
-                _SHUTDOWN_TIMEOUT * 3 + 2,
-                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
-            )
+            self._assert_stop_time(time.monotonic() - t0)
         finally:
             self.server.stop()
 
-        alive_handshake = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive_handshake), 0, f"Threads still alive: {alive_handshake}")
+        self._assert_threads_converged()
 
     def test_ssh_incomplete_handshake_server_stop_first_converges(self):
         """server.stop() with raw TCP socket still open should converge."""
@@ -1724,19 +1689,11 @@ class SshIntegrationTests(unittest.TestCase):
             sock.connect(("127.0.0.1", self.port))
             time.sleep(0.5)
 
-            # Stop server while raw socket is still open (no SSH handshake)
             t0 = time.monotonic()
             self.server.stop()
-            elapsed = time.monotonic() - t0
-
-            self.assertLess(
-                elapsed,
-                _SHUTDOWN_TIMEOUT * 3 + 2,
-                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
-            )
+            self._assert_stop_time(time.monotonic() - t0)
         finally:
             sock.close()
             self.server.stop()
 
-        alive_stop_first = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive_stop_first), 0, f"Threads still alive: {alive_stop_first}")
+        self._assert_threads_converged()

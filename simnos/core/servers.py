@@ -12,7 +12,8 @@ import time
 
 log = logging.getLogger(__name__)
 
-# Timeout constants for thread joining during shutdown
+# Timeout constants for shutdown
+_SHUTDOWN_TIMEOUT = 2  # Bounded timeout (seconds) for shutdown-critical I/O paths
 _STOP_DEADLINE = 10  # Total wall-clock budget for joining connection threads
 _PER_THREAD_JOIN = 2  # Max join timeout per individual connection thread
 
