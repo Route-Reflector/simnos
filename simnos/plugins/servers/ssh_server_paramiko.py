@@ -184,6 +184,8 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
         while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
             if not run_srv.is_set():
                 break
+        if not run_srv.is_set():
+            break
         if not channel_stdio.channel.active:
             log.error("SSH channel is not active. Exiting.")
             break

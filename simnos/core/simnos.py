@@ -377,13 +377,15 @@ class SimNOS:
             raise ValueError(f"workers must be >= 1, got {workers}")
         max_workers = workers or min(32, len(targets))
         remaining = max(0, deadline - time.monotonic()) if deadline is not None else None
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
-            futures = [ex.submit(getattr(h, func)) for h in targets]
-            try:
-                for f in concurrent.futures.as_completed(futures, timeout=remaining):
-                    f.result()
-            except TimeoutError:
-                log.warning("Global stop deadline exceeded during parallel %s", func)
+        ex = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+        futures = [ex.submit(getattr(h, func)) for h in targets]
+        try:
+            for f in concurrent.futures.as_completed(futures, timeout=remaining):
+                f.result()
+        except TimeoutError:
+            log.warning("Global stop deadline exceeded during parallel %s", func)
+        finally:
+            ex.shutdown(wait=False, cancel_futures=True)
 
     @staticmethod
     def _warn_security(host: Host) -> None:

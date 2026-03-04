@@ -240,6 +240,8 @@ class TelnetServer(TCPServerBase):
             while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
                 if not run_srv.is_set():
                     break
+            if not run_srv.is_set():
+                break
 
             try:
                 if byte in (b"\r", b"\n"):

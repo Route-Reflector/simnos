@@ -296,7 +296,8 @@ class ChannelToShellTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.assertEqual(self.mock_run_srv.is_set.call_count, 1)
+        # 2 calls: while loop condition + run_srv guard after interruptible wait
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
     def test_channel_to_shell_tap_break_loop_if_eof_error(self):
         """Check that the ChannelToShellTap object breaks the loop if an EOFError occurs."""
@@ -307,11 +308,12 @@ class ChannelToShellTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.assertEqual(self.mock_run_srv.is_set.call_count, 1)
+        # 2 calls: while loop condition + run_srv guard after interruptible wait
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
     def test_channel_to_shell_tap_byte_return_character(self):
         """Check that the ChannelToShellTap object returns a character."""
-        self.mock_run_srv.is_set.side_effect = [True] * 2 + [False]
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
         self.mock_channel_stdio.read.side_effect = [b"\r", b"\n"]
         channel_to_shell_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -329,7 +331,7 @@ class ChannelToShellTapTest(unittest.TestCase):
 
     def test_channel_to_shell_tap_nul_bytes_are_dropped(self):
         """NUL bytes should be silently dropped (not echoed, not buffered)."""
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
+        self.mock_run_srv.is_set.side_effect = [True] * 5 + [False]
         self.mock_channel_stdio.read.side_effect = [b"\x00", b"a", b"\n"]
         channel_to_shell_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -359,7 +361,7 @@ class ChannelToShellTapTest(unittest.TestCase):
 
     def test_channel_to_shell_tap_byte_return_other(self):
         """Check that the ChannelToShellTap object returns a character."""
-        self.mock_run_srv.is_set.side_effect = [True] * 3 + [False]
+        self.mock_run_srv.is_set.side_effect = [True] * 6 + [False]
         self.mock_channel_stdio.read.side_effect = [b"b", b"c", b"\n"]
         channel_to_shell_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -388,7 +390,7 @@ class ChannelToShellTapTest(unittest.TestCase):
 
     def test_channel_to_shell_tap_timeout_error_continues_loop(self):
         """TimeoutError on read() should be caught and the loop should continue."""
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
         self.mock_channel_stdio.read.side_effect = [TimeoutError, b"a", b"\x00"]
         channel_to_shell_tap(
             channel_stdio=self.mock_channel_stdio,
@@ -1626,8 +1628,61 @@ class SshIntegrationTests(unittest.TestCase):
             self.server.stop()
 
         # All connection threads should have converged
-        alive = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")
+        alive_client_disconnect = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive_client_disconnect), 0, f"Threads still alive: {alive_client_disconnect}")
+
+    def test_ssh_server_stop_first_propagates_shell_stop(self):
+        """server.stop() while client is connected should propagate shell.stop() and converge."""
+        shell_stop_called = threading.Event()
+        shell_started = threading.Event()
+
+        def shell_factory(*args, **kwargs):
+            shell_instance = MagicMock()
+
+            def blocking_start():
+                shell_started.set()
+                shell_stop_called.wait(timeout=10)
+
+            shell_instance.start.side_effect = blocking_start
+            shell_instance.stop.side_effect = lambda: shell_stop_called.set()
+            return shell_instance
+
+        self.shell_cls.side_effect = shell_factory
+
+        self.server.start()
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
+        try:
+            client.connect(
+                "127.0.0.1",
+                port=self.port,
+                username="admin",
+                password="admin",
+                timeout=5,
+            )
+            client.invoke_shell()
+            self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
+
+            # Stop server while client is still connected
+            t0 = time.monotonic()
+            self.server.stop()
+            elapsed = time.monotonic() - t0
+
+            self.assertTrue(
+                shell_stop_called.is_set(),
+                "shell.stop() was not called after server.stop()",
+            )
+            self.assertLess(
+                elapsed,
+                _SHUTDOWN_TIMEOUT * 3 + 2,
+                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
+            )
+        finally:
+            client.close()
+            self.server.stop()
+
+        alive_stop_first = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive_stop_first), 0, f"Threads still alive: {alive_stop_first}")
 
     def test_ssh_incomplete_handshake_stop_converges(self):
         """TCP-only connection (no SSH handshake) + stop() should converge."""
@@ -1657,5 +1712,31 @@ class SshIntegrationTests(unittest.TestCase):
         finally:
             self.server.stop()
 
-        alive = [t for t in self.server._connection_threads if t.is_alive()]
-        self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")
+        alive_handshake = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive_handshake), 0, f"Threads still alive: {alive_handshake}")
+
+    def test_ssh_incomplete_handshake_server_stop_first_converges(self):
+        """server.stop() with raw TCP socket still open should converge."""
+        self.server.start()
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(5)
+        try:
+            sock.connect(("127.0.0.1", self.port))
+            time.sleep(0.5)
+
+            # Stop server while raw socket is still open (no SSH handshake)
+            t0 = time.monotonic()
+            self.server.stop()
+            elapsed = time.monotonic() - t0
+
+            self.assertLess(
+                elapsed,
+                _SHUTDOWN_TIMEOUT * 3 + 2,
+                f"stop() took {elapsed:.1f}s, expected < {_SHUTDOWN_TIMEOUT * 3 + 2}s",
+            )
+        finally:
+            sock.close()
+            self.server.stop()
+
+        alive_stop_first = [t for t in self.server._connection_threads if t.is_alive()]
+        self.assertEqual(len(alive_stop_first), 0, f"Threads still alive: {alive_stop_first}")
