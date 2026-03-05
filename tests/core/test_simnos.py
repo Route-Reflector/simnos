@@ -720,3 +720,61 @@ class TestGlobalDeadline:
             )
 
         mock_ex.shutdown.assert_called_once_with(wait=False, cancel_futures=True)
+
+    def test_parallel_normal_completion_uses_shutdown_wait_true(self):
+        """Parallel path without timeout: executor uses shutdown(wait=True)."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = False
+            h.start = Mock()
+
+        mock_ex = MagicMock()
+        mock_future = MagicMock()
+        mock_ex.submit.return_value = mock_future
+
+        with (
+            patch("simnos.core.simnos.concurrent.futures.ThreadPoolExecutor", return_value=mock_ex),
+            patch("simnos.core.simnos.concurrent.futures.as_completed", return_value=[mock_future]),
+        ):
+            net._execute_function_over_hosts(
+                hosts, "start", host_running=False, parallel=True,
+            )
+
+        mock_ex.shutdown.assert_called_once_with(wait=True)
+
+    def test_parallel_exception_uses_shutdown_wait_true(self):
+        """Parallel path with exception (not timeout): executor still uses shutdown(wait=True)."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = False
+            h.start = Mock()
+
+        mock_ex = MagicMock()
+        mock_future = MagicMock()
+        mock_future.result.side_effect = RuntimeError("start failed")
+        mock_ex.submit.return_value = mock_future
+
+        with (
+            patch("simnos.core.simnos.concurrent.futures.ThreadPoolExecutor", return_value=mock_ex),
+            patch("simnos.core.simnos.concurrent.futures.as_completed", return_value=[mock_future]),
+            pytest.raises(RuntimeError, match="start failed"),
+        ):
+            net._execute_function_over_hosts(
+                hosts, "start", host_running=False, parallel=True,
+            )
+
+        mock_ex.shutdown.assert_called_once_with(wait=True)

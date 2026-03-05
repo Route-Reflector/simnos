@@ -293,6 +293,10 @@ class SimNOS:
         """
         Function to stop NOS servers instances and join managed threads.
 
+        Uses a global deadline (_STOP_GLOBAL_DEADLINE seconds) to bound the
+        total wall-clock time.  If the deadline is exceeded, remaining hosts
+        may be left running and a warning is logged.
+
         :param hosts: single or list of hosts to stop by their name.
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
@@ -379,13 +383,18 @@ class SimNOS:
         remaining = max(0, deadline - time.monotonic()) if deadline is not None else None
         ex = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
         futures = [ex.submit(getattr(h, func)) for h in targets]
+        timed_out = False
         try:
             for f in concurrent.futures.as_completed(futures, timeout=remaining):
                 f.result()
         except TimeoutError:
+            timed_out = True
             log.warning("Global stop deadline exceeded during parallel %s", func)
         finally:
-            ex.shutdown(wait=False, cancel_futures=True)
+            if timed_out:
+                ex.shutdown(wait=False, cancel_futures=True)
+            else:
+                ex.shutdown(wait=True)
 
     @staticmethod
     def _warn_security(host: Host) -> None:
