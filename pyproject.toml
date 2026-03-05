@@ -133,17 +133,14 @@ dev = [
     "ruamel-yaml", # YAML parser
     "ty>=0.0.1a26", # Type checkers
     "pytest", # Testing framework
-    "pytest-repeat", # Pytest: Repeat tests
     "pytest-timeout", # Pytest: Timeout tests
     "pytest-xdist>=3.8.0", # Pytest: Parallel test execution
     "bandit",
     "coverage",
     "invoke",
     "pre-commit>=3.8.0,<4.0.0",
-    "pyenchant",
     "netmiko",
     "requests",
-    "psutil",
     "mkdocstrings[crystal,python]",
     "mkdocs-material",
     "mkdocs-static-i18n",
