@@ -341,9 +341,7 @@ class SimNOS:
         this is a safety net for any stragglers.
         """
         total = timeout if timeout is not None else self._SAFETY_NET_DEADLINE
-        alive = join_threads_with_deadline(
-            threads, total, self._SAFETY_NET_PER_THREAD
-        )
+        alive = join_threads_with_deadline(threads, total, self._SAFETY_NET_PER_THREAD)
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 

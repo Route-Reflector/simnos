@@ -1593,9 +1593,7 @@ class SshIntegrationTests(unittest.TestCase):
 
         def shell_factory(*args, **kwargs):
             shell_instance = MagicMock()
-            shell_instance.start.side_effect = lambda: (
-                shell_started.set() or shell_stop_called.wait(timeout=10)
-            )
+            shell_instance.start.side_effect = lambda: (shell_started.set() or shell_stop_called.wait(timeout=10))
             shell_instance.stop.side_effect = lambda: shell_stop_called.set()
             return shell_instance
 

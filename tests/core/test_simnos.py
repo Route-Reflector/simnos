@@ -686,9 +686,7 @@ class TestGlobalDeadline:
 
         # Deadline already in the past → all hosts skipped
         with patch("simnos.core.simnos.time.monotonic", return_value=1000.0):
-            net._execute_function_over_hosts(
-                hosts, "stop", host_running=True, deadline=999.0
-            )
+            net._execute_function_over_hosts(hosts, "stop", host_running=True, deadline=999.0)
         assert call_count[0] == 0, "No hosts should have been stopped past deadline"
 
     def test_parallel_deadline_uses_shutdown_wait_false(self):
@@ -715,8 +713,11 @@ class TestGlobalDeadline:
             patch("simnos.core.simnos.time.monotonic", return_value=1000.0),
         ):
             net._execute_function_over_hosts(
-                hosts, "stop", host_running=True,
-                parallel=True, deadline=1001.0,
+                hosts,
+                "stop",
+                host_running=True,
+                parallel=True,
+                deadline=1001.0,
             )
 
         mock_ex.shutdown.assert_called_once_with(wait=False, cancel_futures=True)
@@ -744,7 +745,10 @@ class TestGlobalDeadline:
             patch("simnos.core.simnos.concurrent.futures.as_completed", return_value=[mock_future]),
         ):
             net._execute_function_over_hosts(
-                hosts, "start", host_running=False, parallel=True,
+                hosts,
+                "start",
+                host_running=False,
+                parallel=True,
             )
 
         mock_ex.shutdown.assert_called_once_with(wait=True)
@@ -774,7 +778,10 @@ class TestGlobalDeadline:
             pytest.raises(RuntimeError, match="start failed"),
         ):
             net._execute_function_over_hosts(
-                hosts, "start", host_running=False, parallel=True,
+                hosts,
+                "start",
+                host_running=False,
+                parallel=True,
             )
 
         mock_ex.shutdown.assert_called_once_with(wait=True)

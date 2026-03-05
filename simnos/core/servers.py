@@ -121,9 +121,7 @@ class TCPServerBase(ABC):
         self._listen_thread.join(timeout=5)
         self._socket.close()
 
-        alive = join_threads_with_deadline(
-            self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN
-        )
+        alive = join_threads_with_deadline(self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN)
         if alive:
             log.warning("%d connection thread(s) did not exit within %ds", len(alive), _STOP_DEADLINE)
 
