@@ -15,7 +15,7 @@ import time
 from typing import Any
 
 from simnos.core.nos import Nos
-from simnos.core.servers import TCPServerBase
+from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
 from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
@@ -233,7 +233,13 @@ class TelnetServer(TCPServerBase):
             if byte == b"\x00":
                 continue
 
-            shell_replied_event.wait(10)
+            # Wait for the shell to reply, but check run_srv periodically
+            # so that shutdown is not blocked for the full wait duration.
+            while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
+                if not run_srv.is_set():
+                    break
+            if not run_srv.is_set():
+                break
 
             try:
                 if byte in (b"\r", b"\n"):
@@ -312,7 +318,7 @@ class TelnetServer(TCPServerBase):
         while run_srv.is_set():
             if not is_running.is_set():
                 break
-            time.sleep(self.watchdog_interval)
+            time.sleep(min(self.watchdog_interval, _SHUTDOWN_TIMEOUT))
         # Always stop the shell — whether run_srv or is_running caused the exit.
         shell.stop()
 
@@ -372,6 +378,7 @@ class TelnetServer(TCPServerBase):
             socket_to_shell_tapper = threading.Thread(
                 target=self.socket_to_shell_tap,
                 args=(client, shell_stdin, shell_replied_event, run_srv),
+                daemon=True,
             )
             socket_to_shell_tapper.start()
 
@@ -379,6 +386,7 @@ class TelnetServer(TCPServerBase):
             shell_to_socket_tapper = threading.Thread(
                 target=self.shell_to_socket_tap,
                 args=(client, shell_stdout, shell_replied_event, run_srv),
+                daemon=True,
             )
             shell_to_socket_tapper.start()
 
@@ -396,6 +404,7 @@ class TelnetServer(TCPServerBase):
             watchdog_thread = threading.Thread(
                 target=self.watchdog,
                 args=(is_running, run_srv, client_shell),
+                daemon=True,
             )
             watchdog_thread.start()
 

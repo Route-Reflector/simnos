@@ -10,6 +10,7 @@ import logging
 import platform
 import socket
 import threading
+import time
 
 import detect
 import yaml
@@ -17,6 +18,7 @@ import yaml
 from simnos.core.host import Host
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelSimnosInventory
+from simnos.core.servers import join_threads_with_deadline
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
@@ -278,6 +280,10 @@ class SimNOS:
             log.info("Device %s is running on port %s", host.name, host.port)
             self._warn_security(host)
 
+    # Global wall-clock budget for the entire stop() operation.
+    # Covers host.stop() calls + safety-net thread join.
+    _STOP_GLOBAL_DEADLINE = 60
+
     def stop(
         self,
         hosts: str | list[str] | None = None,
@@ -287,10 +293,15 @@ class SimNOS:
         """
         Function to stop NOS servers instances and join managed threads.
 
+        Uses a global deadline (_STOP_GLOBAL_DEADLINE seconds) to bound the
+        total wall-clock time.  If the deadline is exceeded, remaining hosts
+        may be left running and a warning is logged.
+
         :param hosts: single or list of hosts to stop by their name.
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
+        deadline = time.monotonic() + self._STOP_GLOBAL_DEADLINE
         hosts: list[Host] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
         managed_threads = self._collect_server_threads(hosts)
@@ -300,9 +311,11 @@ class SimNOS:
             host_running=True,
             parallel=parallel,
             workers=workers,
+            deadline=deadline,
         )
         if managed_threads:
-            self._join_threads(managed_threads)
+            remaining = max(0, deadline - time.monotonic())
+            self._join_threads(managed_threads, timeout=min(self._SAFETY_NET_DEADLINE, remaining))
 
     def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
         """Collect all managed threads from host servers before stopping."""
@@ -312,15 +325,23 @@ class SimNOS:
                 threads.extend(host.server.managed_threads)
         return threads
 
-    def _join_threads(self, threads: list[threading.Thread]) -> None:
+    # Safety-net join budget: longer than per-server budget because this
+    # covers ALL hosts after they have already been told to stop.
+    _SAFETY_NET_DEADLINE = 15
+    _SAFETY_NET_PER_THREAD = 5
+
+    def _join_threads(
+        self,
+        threads: list[threading.Thread],
+        timeout: float | None = None,
+    ) -> None:
         """
         Join SimNOS-managed threads after all hosts are stopped.
         Server threads are already joined by TCPServerBase.stop();
         this is a safety net for any stragglers.
         """
-        for thread in threads:
-            thread.join(timeout=5)
-        alive = [t for t in threads if t.is_alive()]
+        total = timeout if timeout is not None else self._SAFETY_NET_DEADLINE
+        alive = join_threads_with_deadline(threads, total, self._SAFETY_NET_PER_THREAD)
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 
@@ -331,6 +352,7 @@ class SimNOS:
         host_running: bool = True,
         parallel: bool = False,
         workers: int | None = None,
+        deadline: float | None = None,
     ):
         """
         Function that executes a function like start or stop over
@@ -340,22 +362,37 @@ class SimNOS:
         be executed.
         :param parallel: if True, execute in parallel using threads.
         :param workers: max number of worker threads.
+        :param deadline: optional monotonic deadline; skip remaining hosts if exceeded.
         """
         for host in hosts:
             if host not in self.hosts.values():
                 raise ValueError(f"Host {host} not found")
         targets = [h for h in hosts if h.running == host_running]
         if not parallel or len(targets) <= 1:
-            for h in targets:
+            for i, h in enumerate(targets):
+                if deadline is not None and time.monotonic() >= deadline:
+                    log.warning("Global stop deadline exceeded, %d host(s) not stopped", len(targets) - i)
+                    break
                 getattr(h, func)()
             return
         if workers is not None and workers < 1:
             raise ValueError(f"workers must be >= 1, got {workers}")
         max_workers = workers or min(32, len(targets))
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as ex:
-            futures = [ex.submit(getattr(h, func)) for h in targets]
-            for f in futures:
+        remaining = max(0, deadline - time.monotonic()) if deadline is not None else None
+        ex = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
+        futures = [ex.submit(getattr(h, func)) for h in targets]
+        timed_out = False
+        try:
+            for f in concurrent.futures.as_completed(futures, timeout=remaining):
                 f.result()
+        except TimeoutError:
+            timed_out = True
+            log.warning("Global stop deadline exceeded during parallel %s", func)
+        finally:
+            if timed_out:
+                ex.shutdown(wait=False, cancel_futures=True)
+            else:
+                ex.shutdown(wait=True)
 
     @staticmethod
     def _warn_security(host: Host) -> None:

@@ -7,7 +7,7 @@ The file can be found in simnos/core/simnos.py
 import logging
 import platform
 import threading
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import detect
 import pytest
@@ -627,3 +627,161 @@ class TestWarnSecurity:
             SimNOS._warn_security(host)
         assert "default credentials" in caplog.text
         assert "0.0.0.0" in caplog.text
+
+
+class TestJoinThreadsDeadline:
+    """Tests for deadline-capped _join_threads (Issue #65)."""
+
+    def test_join_threads_deadline_caps_total_time(self):
+        """Deadline should cap total join time: threads past deadline are skipped."""
+        net = SimNOS()
+
+        mock_threads = [Mock() for _ in range(5)]
+        call_count = [0]
+        base_time = 1000.0
+
+        def mock_monotonic():
+            call_count[0] += 1
+            if call_count[0] == 1:
+                return base_time  # deadline = base_time + 15
+            if call_count[0] <= 3:
+                return base_time + 5  # remaining = 10 (within deadline)
+            return base_time + 16  # past deadline
+
+        with patch("simnos.core.servers.time.monotonic", side_effect=mock_monotonic):
+            net._join_threads(mock_threads)
+
+        # First 2 threads should have been joined, rest skipped
+        mock_threads[0].join.assert_called_once()
+        mock_threads[1].join.assert_called_once()
+        mock_threads[2].join.assert_not_called()
+        mock_threads[3].join.assert_not_called()
+        mock_threads[4].join.assert_not_called()
+
+
+class TestGlobalDeadline:
+    """Tests for global deadline in _execute_function_over_hosts (Issue #65 R2)."""
+
+    def test_sequential_deadline_skips_remaining_hosts(self):
+        """Sequential path: hosts past deadline are skipped with a warning."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+                "R3": {"port": 5003, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = True
+
+        call_count = [0]
+
+        def slow_stop():
+            call_count[0] += 1
+
+        for h in hosts:
+            h.stop = slow_stop
+
+        # Deadline already in the past → all hosts skipped
+        with patch("simnos.core.simnos.time.monotonic", return_value=1000.0):
+            net._execute_function_over_hosts(hosts, "stop", host_running=True, deadline=999.0)
+        assert call_count[0] == 0, "No hosts should have been stopped past deadline"
+
+    def test_parallel_deadline_uses_shutdown_wait_false(self):
+        """Parallel path: executor uses shutdown(wait=False, cancel_futures=True)."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = True
+            h.stop = Mock()
+
+        mock_ex = MagicMock()
+        mock_future = MagicMock()
+        mock_ex.submit.return_value = mock_future
+
+        with (
+            patch("simnos.core.simnos.concurrent.futures.ThreadPoolExecutor", return_value=mock_ex),
+            patch("simnos.core.simnos.concurrent.futures.as_completed", side_effect=TimeoutError),
+            patch("simnos.core.simnos.time.monotonic", return_value=1000.0),
+        ):
+            net._execute_function_over_hosts(
+                hosts,
+                "stop",
+                host_running=True,
+                parallel=True,
+                deadline=1001.0,
+            )
+
+        mock_ex.shutdown.assert_called_once_with(wait=False, cancel_futures=True)
+
+    def test_parallel_normal_completion_uses_shutdown_wait_true(self):
+        """Parallel path without timeout: executor uses shutdown(wait=True)."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = False
+            h.start = Mock()
+
+        mock_ex = MagicMock()
+        mock_future = MagicMock()
+        mock_ex.submit.return_value = mock_future
+
+        with (
+            patch("simnos.core.simnos.concurrent.futures.ThreadPoolExecutor", return_value=mock_ex),
+            patch("simnos.core.simnos.concurrent.futures.as_completed", return_value=[mock_future]),
+        ):
+            net._execute_function_over_hosts(
+                hosts,
+                "start",
+                host_running=False,
+                parallel=True,
+            )
+
+        mock_ex.shutdown.assert_called_once_with(wait=True)
+
+    def test_parallel_exception_uses_shutdown_wait_true(self):
+        """Parallel path with exception (not timeout): executor still uses shutdown(wait=True)."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 5001, "platform": "cisco_ios"},
+                "R2": {"port": 5002, "platform": "cisco_ios"},
+            }
+        }
+        net = SimNOS(inventory)
+        hosts = list(net.hosts.values())
+        for h in hosts:
+            h.running = False
+            h.start = Mock()
+
+        mock_ex = MagicMock()
+        mock_future = MagicMock()
+        mock_future.result.side_effect = RuntimeError("start failed")
+        mock_ex.submit.return_value = mock_future
+
+        with (
+            patch("simnos.core.simnos.concurrent.futures.ThreadPoolExecutor", return_value=mock_ex),
+            patch("simnos.core.simnos.concurrent.futures.as_completed", return_value=[mock_future]),
+            pytest.raises(RuntimeError, match="start failed"),
+        ):
+            net._execute_function_over_hosts(
+                hosts,
+                "start",
+                host_running=False,
+                parallel=True,
+            )
+
+        mock_ex.shutdown.assert_called_once_with(wait=True)
