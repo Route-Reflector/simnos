@@ -175,10 +175,8 @@ class TelnetServer(TCPServerBase):
                 # Consume trailing LF or NUL after CR (RFC 854).
                 # Non-standard followers are discarded for simplicity;
                 # in practice, clients always send CR LF or CR NUL.
-                try:
+                with contextlib.suppress(TimeoutError):
                     self._recv_byte(sock)
-                except TimeoutError:
-                    pass
                 break
             if byte == b"\n":
                 if echo:
@@ -281,7 +279,9 @@ class TelnetServer(TCPServerBase):
         """Read lines from shell stdout and send them to the socket."""
         while run_srv.is_set():
             line = shell_stdout.readline()
-            if line is None:
+            if not line:
+                break
+            if not run_srv.is_set():
                 break
             if "\x00" in line:
                 line = line.replace("\x00", "")

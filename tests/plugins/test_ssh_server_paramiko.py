@@ -229,7 +229,7 @@ class TapIOTest(unittest.TestCase):
 
         self.assertEqual(tap_io.readline(), "line2")
         self.assertEqual(tap_io.readline(), "line1")
-        self.assertEqual(tap_io.readline(), None)
+        self.assertEqual(tap_io.readline(), "")
 
         self.assertEqual(mock_run_srv.is_set.call_count, 11)
 
@@ -1617,7 +1617,7 @@ class SshIntegrationTests(unittest.TestCase):
         self.server.start()
         try:
             client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
             client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
             try:
                 client.invoke_shell()
