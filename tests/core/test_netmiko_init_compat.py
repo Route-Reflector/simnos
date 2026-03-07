@@ -3,7 +3,6 @@ Tests for netmiko init compatibility and shutdown/EOF regression.
 
 Verifies that:
 - netmiko session_preparation() does not produce "Unknown command" (#69, #71)
-- Defined show commands return correct responses
 - Unknown commands are handled gracefully without crashing
 - Shell exits cleanly on shutdown without thread leaks (#71 regression)
 """
@@ -33,11 +32,6 @@ INIT_UNKNOWN_CMD_ALLOWED = {
 }
 
 
-def _platforms():
-    """Return test platforms excluding known-incompatible ones."""
-    return get_platforms_from_md()
-
-
 def _make_simnos(device_type, port):
     """Create a SimNOS instance for a single device."""
     inventory = {
@@ -57,7 +51,7 @@ class TestNetmikoInitCompat:
     """Test netmiko session_preparation() compatibility."""
 
     @pytest.mark.timeout(30)
-    @pytest.mark.parametrize("device_type", _platforms())
+    @pytest.mark.parametrize("device_type", get_platforms_from_md())
     def test_no_unknown_command_on_init(self, device_type, tmp_path):
         """ConnectHandler init should not produce 'Unknown command'."""
         if device_type in INIT_UNKNOWN_CMD_ALLOWED:
@@ -86,7 +80,7 @@ class TestNetmikoInitCompat:
             net.stop()
 
     @pytest.mark.timeout(30)
-    @pytest.mark.parametrize("device_type", _platforms())
+    @pytest.mark.parametrize("device_type", get_platforms_from_md())
     def test_unknown_command_graceful(self, device_type):
         """Unknown commands should not crash the shell."""
         port = get_free_port()
@@ -106,6 +100,9 @@ class TestNetmikoInitCompat:
                     read_timeout=10,
                 )
                 assert output is not None
+                # Verify session is still alive after unknown command
+                follow_up = conn.send_command_timing("?")
+                assert follow_up is not None
         finally:
             net.stop()
 
