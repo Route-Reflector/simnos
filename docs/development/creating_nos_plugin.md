@@ -262,7 +262,7 @@ Let's break it down. SIMNOS allows loading modules dynamically, but it needs the
 
 First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
 
-Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string or a function that returns a string. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid. A callable command can return:
+Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid. A callable command can return:
 
 - `str` - output string to display
 - `None` - no response
