@@ -87,6 +87,8 @@ All checks passed!
 - `c0c8c84` fix: yamaha output: true misinterpreted as shell exit signal (#69)
 - `0f7913d` test: add netmiko init compat and shutdown/EOF regression tests (#72)
 - `cb45b7b` style: fix pre-existing ruff lint errors
+- `05f9a65` test: final refactoring and session continuity verification (#72)
+- `2ce96b7` chore: add worklog for issue-69-71-cmdshell-readline-crash
 
 ## 備考・判断事項
 - #70 は Won't Fix でクローズ済み（#54 prompt-toolkit 移行の scope で対応予定）
