@@ -6,7 +6,7 @@ commands:
   enable:
     help: enter enable mode
     new_prompt: "{base_prompt}#"
-    output: 'null'
+    output: null
     prompt: "{base_prompt}>"
   show isdp neighbors:
     help: execute the command "show isdp neighbors"

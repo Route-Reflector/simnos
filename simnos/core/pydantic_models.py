@@ -25,7 +25,8 @@ class ModelNosCommand(BaseModel):
     Pydantic model for NOS command attributes.
     """
 
-    output: StrictStr | Callable | StrictBool | None = None
+    output: StrictStr | Callable | None = None
+    exit: StrictBool | None = None
     help: StrictStr | None = None
     prompt: StrictStr | list[StrictStr] | None = None
     new_prompt: StrictStr | None = None

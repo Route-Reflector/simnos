@@ -67,12 +67,7 @@ def get_host_commands(host: Host) -> tuple:
             continue
         prompts = options["prompt"]
         new_prompt = options.get("new_prompt", None)
-        if (
-            new_prompt
-            or "alias" in options
-            or isinstance(options.get("output", ""), bool)
-            or command in ["exit", "quit", "logout"]
-        ):
+        if new_prompt or "alias" in options or options.get("exit") or command in ["exit", "quit", "logout"]:
             continue
         if isinstance(prompts, str):
             prompts = [prompts]

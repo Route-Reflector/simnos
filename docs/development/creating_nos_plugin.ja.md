@@ -77,7 +77,7 @@ Configuration register is 0x2102
         "output": "",
         "help": "Set terminal length to 0"
     },
-    "exit": {"output": True, "help": "Exit commands shell"} # (7)
+    "exit": {"exit": True, "help": "Exit commands shell"} # (7)
 }
 ```
 
@@ -87,7 +87,7 @@ Configuration register is 0x2102
 4. 複数行のコマンド出力
 5. シェルで `?` または `help` が入力された場合に表示されるヘルプメッセージ
 6. コマンド出力として `None` を返すとレスポンスは生成されない
-7. コマンド出力として True を返すとシェルが閉じる
+7. `exit: true` を設定するとシェルが閉じる
 8. 空の出力を返すと改行文字のみを含むレスポンスが生成される
 9. 出力は関数などの呼び出し可能なオブジェクトを参照でき、シェルプラグインによって実行されてレスポンス内容が生成される
 10. このコマンドが有効な唯一のプロンプト
@@ -103,14 +103,18 @@ Configuration register is 0x2102
 | `prompt`       | :simple-powershell:              | このコマンドが有効なインジケーターまたはインジケーターのリスト |
 | `new_prompt`   | :simple-nushell:                | コマンド出力が返された後に表示する新しいプロンプト   |
 | `alias`        | :material-drama-masks:              | 呼び出し可能な関数としてのコマンド出力                      |
+| `exit`         | :material-exit-run:                 | true の場合、シェルセッションを終了する                     |
 
 
 コマンド辞書の `output` 属性の値は以下の型が使用できます:
 
 - `string` - レスポンスで返す1行以上の文字列。`base_prompt` フォーマッターを含めることができます。
 - `None` - レスポンスは返されません
-- `True` - シェルを閉じます
-- `callable` - 返される出力は関数などの呼び出し可能なオブジェクトを参照でき、シェルプラグインによって実行されてレスポンス内容が生成されます
+- `callable` - 呼び出し可能なオブジェクトで、シェルプラグインによって実行されてレスポンス内容が生成されます
+
+`exit` 属性:
+
+- `true` - シェルセッションを終了します
 
 `prompt` と `new_prompt` 属性に関する補足事項。
 
@@ -246,7 +250,14 @@ commands = {
 
 まず、NAME、INITIAL_PROMPT、ENABLE_PROMPT（任意）、CONFIG_PROMPT（任意）、DEVICE_NAME の属性があります。これらの属性は SIMNOS が NOS プラグインを登録するために必要です。NAME はプラグインの名前、INITIAL_PROMPT は初期シェルインジケーター、ENABLE_PROMPT は enable モードのシェルインジケーター、CONFIG_PROMPT は config モードのシェルインジケーター、DEVICE_NAME はデバイスの名前です。
 
-次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列または文字列を返す関数にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。
+次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列または文字列を返す関数にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。callable コマンドは以下の値を返せます:
+
+- `str` - 表示する出力文字列
+- `None` - レスポンスなし
+- `dict` - 以下のオプションキーを持つ辞書:
+    - `"output"` - 表示する文字列
+    - `"new_prompt"` - 新しいプロンプト値（`{base_prompt}` フォーマッターが使用可能）
+    - `"exit"` - `True` の場合、シェルセッションを終了（output は表示されない）
 
 最後に、BaseDevice を継承するクラスがあります。このクラスは SIMNOS がモジュールを正しくロードするために必要です。内部的には、`DEFAULT_CONFIGURATION` 属性で定義された[設定](../usage/configurations.md)ファイルのデータが辞書としてロードされる `self.configurations` 属性でモジュールを初期化します。また、`simnos/plugins/nos/platforms_py/templates/` ディレクトリ内の Jinja2 テンプレートをレンダリングできる `render(self, template: str, **kwargs) -> str` メソッドも含まれています。これらの属性を持つクラスにすることで、モジュールの標準化に役立ちます。同時に、個別の関数ではなくクラスにすることで、コマンド間で変数を共有したり、デバイスの状態を変更することもできます。例えば、デバイスの IP を変更するコマンドを作成した場合、クラス内のデバイスの状態を変更し、残りのコマンドがこの変更を考慮して新しい IP で文字列を返すようにできます。
 

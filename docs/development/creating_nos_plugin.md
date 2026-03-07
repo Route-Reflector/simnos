@@ -84,7 +84,7 @@ Configuration register is 0x2102
         "output": "",
         "help": "Set terminal length to 0"
     },
-    "exit": {"output": True, "help": "Exit commands shell"} # (7)
+    "exit": {"exit": True, "help": "Exit commands shell"} # (7)
 }
 ```
 
@@ -94,7 +94,7 @@ Configuration register is 0x2102
 4. Multi-line command output
 5. Help message to show for this command if `?` or `help` is entered in the shell
 6. Returning `None` as command output will not produce a response
-7. Returning True as command output will close the shell
+7. Setting `exit: true` will close the shell
 8. Returning an empty output with produce a response containing only newline characters
 9. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
 10. The only prompt where this command is valid
@@ -110,6 +110,7 @@ Attributes supported by the commands dictionary:
 | `prompt`       | :simple-powershell:              | Indicator or list of indicators where this command is valid |
 | `new_prompt`   | :simple-nushell:                | New prompt to show after the command output is returned   |
 | `alias`        | :material-drama-masks:              | Command output as a callable function                      |
+| `exit`         | :material-exit-run:                 | If true, close the shell session                           |
 
 
 The value of the `output` attribute of the commands dictionary can be of these types:
@@ -117,8 +118,11 @@ The value of the `output` attribute of the commands dictionary can be of these t
 - `string` - string of one or more lines to return in the response, that string
    can contain the `base_prompt` formatter.
 - `None` - no response is returned
-- `True` - will close the shell
-- `callable` - the returned output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
+- `callable` - a callable object that will be executed to produce the response content
+
+The `exit` attribute:
+
+- `true` - will close the shell session
 
 Some notes about the `prompt` and `new_prompt` attributes.
 
@@ -258,7 +262,14 @@ Let's break it down. SIMNOS allows loading modules dynamically, but it needs the
 
 First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
 
-Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string or a function that returns a string. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
+Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string or a function that returns a string. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid. A callable command can return:
+
+- `str` - output string to display
+- `None` - no response
+- `dict` - a dictionary with optional keys:
+    - `"output"` - string to display
+    - `"new_prompt"` - new prompt value (can use `{base_prompt}` formatter)
+    - `"exit"` - if `True`, close the shell session (output is not displayed)
 
 Lastly, we have a class that inherits from BaseDevice. This class is necessary for SIMNOS to be able to load the module correctly. Internally, it already initializes the module with an attribute `self.configurations` where the data from the [configuration](../usage/configurations.md) file defined in the `DEFAULT_CONFIGURATION` attribute by default will be loaded as a dictionary. It also includes a method `render(self, template: str, **kwargs) -> str` that allows rendering a Jinja2 template under the `simnos/plugins/nos/platforms_py/templates/` directory. Having this class with these attributes helps to standardize the modules. At the same time, having it in a class instead of separate functions allows you to share variables between commands or even modify the state of the device. For example, if I create a command to modify the IP of the device, I can modify the state of the device in the class and have the rest of the commands take this change into account, returning the string with the new IP.
 

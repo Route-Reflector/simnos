@@ -10,7 +10,7 @@ commands:
     prompt: "{base_prompt}>"
   ex:
     help: exit the terminal
-    output: true
+    exit: true
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

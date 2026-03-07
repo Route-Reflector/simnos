@@ -9,7 +9,7 @@ commands:
     help: enter enable mode
     prompt: "{base_prompt}>"
   ex:
-    output: true
+    exit: true
     help: exit the terminal
     prompt:
     - "{base_prompt}>"

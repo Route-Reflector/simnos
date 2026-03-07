@@ -94,8 +94,9 @@ class TestPlatforms:
             if "config_prompt" in data:
                 exceptions.append(data["config_prompt"])
             for values in data["commands"].values():
-                assert "output" in values
-                assert has_single_curly_brackets(values["output"], exceptions) is False
+                assert "output" in values or "exit" in values
+                if "output" in values:
+                    assert has_single_curly_brackets(values["output"], exceptions) is False
                 assert "help" in values
                 assert has_single_curly_brackets(values["help"], exceptions) is False
                 assert "prompt" in values
