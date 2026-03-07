@@ -562,20 +562,12 @@ class SocketToShellTapTest(unittest.TestCase):
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
-    def test_crlf_sends_two_lines_to_shell(self, mock_recv, _mock_sleep):
-        """CRLF input: \\r triggers line send, then \\n sends an empty line.
-
-        Current implementation treats \\r and \\n independently, so a CRLF
-        sequence results in two shell_stdin.write() calls. This test documents
-        the existing behavior for regression detection.
-        """
+    def test_crlf_sends_single_line_to_shell(self, mock_recv, _mock_sleep):
+        """CRLF input: \\r triggers line send, trailing \\n is consumed (RFC 854)."""
         mock_recv.side_effect = [b"h", b"i", b"\r", b"\n", None]
         self.run_srv.is_set.side_effect = [True] * 10 + [False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
-        # \r triggers "hi\r", then \n triggers "\n" (empty command)
-        self.assertEqual(self.shell_stdin.write.call_count, 2)
-        self.shell_stdin.write.assert_any_call("hi\r")
-        self.shell_stdin.write.assert_any_call("\n")
+        self.shell_stdin.write.assert_called_once_with("hi\r")
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")

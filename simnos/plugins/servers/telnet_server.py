@@ -214,6 +214,7 @@ class TelnetServer(TCPServerBase):
     ) -> None:
         """Read bytes from socket and forward complete lines to shell stdin."""
         buffer: io.BytesIO = io.BytesIO()
+        skip_lf = False  # Set after \r to consume the trailing \n of CR LF
         while run_srv.is_set():
             try:
                 byte = self._recv_byte(sock)
@@ -231,6 +232,12 @@ class TelnetServer(TCPServerBase):
             if byte == b"\x00":
                 continue
 
+            # Consume the LF half of a CR LF pair (RFC 854).
+            if skip_lf:
+                skip_lf = False
+                if byte == b"\n":
+                    continue
+
             # Wait for the shell to reply, but check run_srv periodically
             # so that shutdown is not blocked for the full wait duration.
             while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
@@ -241,6 +248,7 @@ class TelnetServer(TCPServerBase):
 
             try:
                 if byte in (b"\r", b"\n"):
+                    skip_lf = byte == b"\r"
                     sock.sendall(b"\r\n")
                     log.debug("telnet_server.socket_to_shell_tap echoing newline to socket")
                     buffer.write(byte)
