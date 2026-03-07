@@ -101,7 +101,7 @@ All checks passed!
 - 設計レビュー 3 回実施（codex + gemini）、3rd round で全員 LGTM
 
 ## 次やること(Next)
-- [ ] PR 作成・push
+- [x] PR 作成・push
 - [ ] #69, #71 のクローズ確認
 
 ## コメント(レビュー/指摘/提案)
