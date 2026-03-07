@@ -144,7 +144,7 @@ act
 inventory.yaml
 # local work artifacts
 design/
-workslog/
+worklogs/
 
 # Claude Code settings
 .claude/settings.json
