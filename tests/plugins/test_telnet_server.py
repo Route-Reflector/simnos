@@ -571,6 +571,27 @@ class SocketToShellTapTest(unittest.TestCase):
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
+    def test_cr_nul_resets_skip_lf(self, mock_recv, _mock_sleep):
+        """CR NUL is a complete sequence (RFC 854); a subsequent LF is a new line."""
+        mock_recv.side_effect = [b"a", b"\r", b"\x00", b"\n", None]
+        self.run_srv.is_set.side_effect = [True] * 12 + [False]
+        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        self.assertEqual(self.shell_stdin.write.call_count, 2)
+        self.shell_stdin.write.assert_any_call("a\r")
+        self.shell_stdin.write.assert_any_call("\n")
+
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch.object(TelnetServer, "_recv_byte")
+    def test_cr_followed_by_data_preserves_data(self, mock_recv, _mock_sleep):
+        """CR followed by a non-LF byte: line is sent, next byte is not lost."""
+        mock_recv.side_effect = [b"x", b"\r", b"y", None]
+        self.run_srv.is_set.side_effect = [True] * 10 + [False]
+        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        self.shell_stdin.write.assert_called_once_with("x\r")
+        self.sock.sendall.assert_any_call(b"y")
+
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_eof_breaks_loop(self, mock_recv, _mock_sleep):
         """EOF (None) breaks the loop and clears run_srv."""
         mock_recv.return_value = None

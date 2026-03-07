@@ -228,8 +228,10 @@ class TelnetServer(TCPServerBase):
             if byte is None:
                 break
 
-            # Drop NUL bytes completely
+            # Drop NUL bytes completely.
+            # CR NUL is a complete sequence (RFC 854), so reset skip_lf.
             if byte == b"\x00":
+                skip_lf = False
                 continue
 
             # Consume the LF half of a CR LF pair (RFC 854).
