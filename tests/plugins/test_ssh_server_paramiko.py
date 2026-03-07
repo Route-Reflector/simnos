@@ -229,7 +229,7 @@ class TapIOTest(unittest.TestCase):
 
         self.assertEqual(tap_io.readline(), "line2")
         self.assertEqual(tap_io.readline(), "line1")
-        self.assertEqual(tap_io.readline(), None)
+        self.assertEqual(tap_io.readline(), "")
 
         self.assertEqual(mock_run_srv.is_set.call_count, 11)
 

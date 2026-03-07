@@ -281,7 +281,9 @@ class TelnetServer(TCPServerBase):
         """Read lines from shell stdout and send them to the socket."""
         while run_srv.is_set():
             line = shell_stdout.readline()
-            if line is None:
+            if not line:
+                break
+            if not run_srv.is_set():
                 break
             if "\x00" in line:
                 line = line.replace("\x00", "")

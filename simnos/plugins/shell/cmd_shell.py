@@ -79,6 +79,10 @@ class CMDShell(Cmd):
         for line in str(value).splitlines():
             self.stdout.write(line + self.newline)
 
+    def do_EOF(self, line):
+        """Handle EOF from readline — exit the shell gracefully."""
+        return True
+
     def emptyline(self):
         """This method to do nothing if empty line entered"""
 

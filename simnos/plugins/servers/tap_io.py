@@ -31,7 +31,9 @@ class TapIO(io.StringIO):
             if self.lines:
                 return self.lines.pop()
             time.sleep(0.01)
-        return None
+        if self.lines:
+            return self.lines.pop()
+        return ""
 
     def write(self, value: str):
         """

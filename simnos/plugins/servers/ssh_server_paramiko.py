@@ -227,7 +227,7 @@ def shell_to_channel_tap(
         if channel_stdio.closed:
             break
         line = shell_stdout.readline()
-        if line is None:
+        if not line:
             break
         if "\x00" in line:
             line = line.replace("\x00", "")
