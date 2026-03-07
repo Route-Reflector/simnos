@@ -544,7 +544,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_normal_byte_echoed_to_socket(self, mock_recv, _mock_sleep):
         """A normal byte is echoed to the socket and buffered."""
         mock_recv.side_effect = [b"a", None]  # One byte, then EOF
-        # 1. loop start, 2. after wait, 3. loop start (None case)
         self.run_srv.is_set.side_effect = [True, True, True, False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_with(b"a")
@@ -554,7 +553,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_newline_sends_line_to_shell(self, mock_recv, _mock_sleep):
         """Receiving a newline sends the buffered line to the shell and clears replied event."""
         mock_recv.side_effect = [b"h", b"i", b"\r", None]
-        # 3 bytes * 2 calls + 1 call for None = 7 calls
         self.run_srv.is_set.side_effect = [True] * 7 + [False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("hi\r")
@@ -576,7 +574,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_nul_bytes_dropped(self, mock_recv, _mock_sleep):
         """NUL bytes (0x00) are dropped and not echoed."""
         mock_recv.side_effect = [b"\x00", b"a", None]
-        # nul: 1 call (top) -> skip. next: 1 call (top) + 1 call (after wait) + 1 call (None) = 4 calls total
         self.run_srv.is_set.side_effect = [True] * 4 + [False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
@@ -628,7 +625,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_timeout_error_continues_loop(self, mock_recv, _mock_sleep):
         """TimeoutError during _recv_byte is caught and loop continues."""
         mock_recv.side_effect = [TimeoutError(), b"a", None]
-        # timeout: 1 call. 'a': 2 calls. None: 1 call. total: 4 calls
         self.run_srv.is_set.side_effect = [True] * 4 + [False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
@@ -638,7 +634,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_shell_replied_event_cleared_on_newline(self, mock_recv, _mock_sleep):
         """Receiving a newline clears the shell_replied_event."""
         mock_recv.side_effect = [b"\n", None]
-        # '\n': 2 calls. None: 1 call. total: 3 calls
         self.run_srv.is_set.side_effect = [True] * 3 + [False]
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.clear.assert_called_once()
@@ -744,7 +739,7 @@ class WatchdogTest(unittest.TestCase):
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_sleep_interval_capped_by_shutdown_timeout(self, mock_sleep):
         """Sleep interval is the minimum of watchdog_interval and _SHUTDOWN_TIMEOUT."""
-        self.server.watchdog_interval = 10.0  # Larger than _SHUTDOWN_TIMEOUT (0.1)
+        self.server.watchdog_interval = 10.0  # Larger than _SHUTDOWN_TIMEOUT
         self.run_srv.is_set.side_effect = [True, False]
         self.is_running.is_set.return_value = True
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
