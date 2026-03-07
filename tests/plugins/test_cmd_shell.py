@@ -299,6 +299,12 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         self.assertTrue(shell.default("exit"))
 
+    def test_do_eof(self):
+        """Test that do_EOF returns True to exit cmdloop gracefully."""
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        self.assertTrue(shell.do_EOF(""))
+
 
 class HotReloadTest(TestCase):
     """
