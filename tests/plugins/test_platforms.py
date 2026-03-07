@@ -94,8 +94,9 @@ class TestPlatforms:
             if "config_prompt" in data:
                 exceptions.append(data["config_prompt"])
             for values in data["commands"].values():
-                assert "output" in values
-                assert has_single_curly_brackets(values["output"], exceptions) is False
+                assert "output" in values or "exit" in values
+                if "output" in values:
+                    assert has_single_curly_brackets(values["output"], exceptions) is False
                 assert "help" in values
                 assert has_single_curly_brackets(values["help"], exceptions) is False
                 assert "prompt" in values
@@ -141,12 +142,13 @@ class TestPlatforms:
                 exceptions.append(module.ENABLE_PROMPT)
             if hasattr(module, "CONFIG_PROMPT"):
                 exceptions.append(module.CONFIG_PROMPT)
-            assert "output" in value
-            if callable(value["output"]):
-                assert isinstance(value["output"], types.FunctionType)
-                assert value["output"].__name__ in dir(module_class)
-            else:
-                assert has_single_curly_brackets(value["output"], exceptions) is False
+            assert "output" in value or "exit" in value
+            if "output" in value:
+                if callable(value["output"]):
+                    assert isinstance(value["output"], types.FunctionType)
+                    assert value["output"].__name__ in dir(module_class)
+                else:
+                    assert has_single_curly_brackets(value["output"], exceptions) is False
             assert "help" in value
             assert has_single_curly_brackets(value["help"], exceptions) is False
             assert "prompt" in value
@@ -175,10 +177,6 @@ class TestPlatforms:
                 }
             }
         }
-        initial_commands, enable_commands, config_commands = [], [], []
-        initial_commands: list[str] = []
-        enable_commands: list[str] = []
-        config_commands: list[str] = []
         with SimNOS(inventory=inventory) as net:
             host = next(iter(net.hosts.values()))
             initial_commands, enable_commands, config_commands = get_host_commands(host)

@@ -15,7 +15,7 @@ from simnos.plugins.shell.utils import get_files_changed
 log = logging.getLogger(__name__)
 
 BASIC_COMMANDS: dict = {
-    "exit": {"output": True, "help": "Exit commands shell"},
+    "exit": {"exit": True, "help": "Exit commands shell"},
     "_default_": {
         "output": "Unknown command",
         "help": "Output to print for unknown commands",
@@ -151,7 +151,9 @@ class CMDShell(Cmd):
             if "alias" in cmd_data:
                 cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
             if self._check_prompt(cmd_data.get("prompt")):
-                ret = cmd_data["output"]
+                if cmd_data.get("exit"):
+                    return True
+                ret = cmd_data.get("output")
                 if callable(ret):
                     ret = ret(
                         self.nos.device,
@@ -162,7 +164,9 @@ class CMDShell(Cmd):
                     if isinstance(ret, dict):
                         if "new_prompt" in ret:
                             self.prompt = ret["new_prompt"].format(base_prompt=self.base_prompt)
-                        ret = ret["output"]
+                        if ret.get("exit"):
+                            return True
+                        ret = ret.get("output")
                 if "new_prompt" in cmd_data:
                     self.prompt = cmd_data["new_prompt"].format(base_prompt=self.base_prompt)
             else:
@@ -188,8 +192,7 @@ class CMDShell(Cmd):
             log.error("An error occurred: %s", str(e))
             ret = traceback.format_exc()
             ret = ret.replace("\n", self.newline)
-        # check if need to exit
-        if ret is True or not self.is_running.is_set():
+        if not self.is_running.is_set():
             return True
         if ret is not None:
             try:

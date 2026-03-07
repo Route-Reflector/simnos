@@ -3,7 +3,7 @@ initial_prompt: "{base_prompt}$"
 enable_prompt: "{base_prompt}#"
 commands:
   enable:
-    output: 'null'
+    output: null
     new_prompt: "{base_prompt}#"
     help: enter enable mode
     prompt: "{base_prompt}$"

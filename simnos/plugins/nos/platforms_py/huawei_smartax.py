@@ -69,7 +69,7 @@ class HuaweiSmartAX(BaseDevice):
 
     def quit(self, base_prompt, current_prompt, command):
         "Exit from device"
-        return True
+        return {"exit": True}
 
     def disable(self, base_prompt, current_prompt, command):
         "Exit exec prompt"

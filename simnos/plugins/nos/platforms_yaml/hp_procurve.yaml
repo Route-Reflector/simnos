@@ -4,7 +4,7 @@ enable_prompt: "{base_prompt}#"
 config_prompt: "{base_prompt}(config)#"
 commands:
   enable:
-    output: 'null'
+    output: null
     new_prompt: "{base_prompt}#"
     help: enter enable mode
     prompt: "{base_prompt}>"
@@ -27,7 +27,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   logout:
-    output: true
+    exit: true
     help: not implemented the exit
     prompt:
     - "{base_prompt}>"

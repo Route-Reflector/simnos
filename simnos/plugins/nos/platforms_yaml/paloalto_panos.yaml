@@ -21,7 +21,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ex:
-    output: True
+    exit: true
     help: exit the terminal
     prompt:
     - "{base_prompt}>"

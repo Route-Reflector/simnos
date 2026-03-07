@@ -5,7 +5,7 @@ config_prompt: "{base_prompt}(config)#"
 auth: "none"
 commands:
   enable:
-    output: 'null'
+    output: null
     new_prompt: "{base_prompt}#"
     help: enter enable mode
     prompt: "{base_prompt}>"
@@ -120,13 +120,13 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal datadump:
-    output: ""
+    output: null
     help: disable paging (Dell 34xx)
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal length 0:
-    output: ""
+    output: null
     help: disable paging (Dell 7xxx)
     prompt:
     - "{base_prompt}>"
