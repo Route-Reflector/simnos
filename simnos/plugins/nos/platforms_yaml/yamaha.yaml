@@ -9,7 +9,7 @@ commands:
     help: enter enable mode
     prompt: "{base_prompt}>"
   console lines infinity:
-    output: true
+    output: ""
     help: set the terminal width to maximum
     prompt:
     - "{base_prompt}>"
