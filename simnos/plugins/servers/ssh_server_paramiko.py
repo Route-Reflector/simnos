@@ -238,6 +238,7 @@ def shell_to_channel_tap(
         while run_srv.is_set() and not written:
             try:
                 channel_stdio.write(line.encode(encoding="utf-8"))
+                channel_stdio.flush()
                 written = True
             except TimeoutError:
                 log.debug("ssh_server.shell_to_channel_tap write timeout, retrying")
