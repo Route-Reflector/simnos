@@ -164,10 +164,8 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
 
 
 # Platforms where send_command is flaky:
-# - aruba_os, hp_comware: intermittently return empty output (race condition
-#   beyond the ChannelFile fix in #85; possibly TapIO timing)
-# - mikrotik_routeros: trailing prompt included in output (netmiko prompt
-#   detection issue, unrelated to SSH I/O)
+# - aruba_os, hp_comware: intermittently return empty output (#87)
+# - mikrotik_routeros: trailing prompt included in output (#86)
 SEND_CMD_XFAIL = {"aruba_os", "hp_comware", "mikrotik_routeros"}
 
 
