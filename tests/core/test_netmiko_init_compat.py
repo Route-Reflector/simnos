@@ -18,6 +18,8 @@ import pytest
 from simnos import SimNOS
 from tests.utils import get_free_port, get_platforms_from_md
 
+HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output formatting
+
 # Platforms where "Unknown command" is expected during init due to
 # missing command definitions for netmiko's session_preparation().
 # These should be fixed individually as separate issues.
@@ -37,7 +39,7 @@ def _make_simnos(device_type, port):
     """Create a SimNOS instance for a single device."""
     inventory = {
         "hosts": {
-            "router": {
+            HOSTNAME: {
                 "username": "test",
                 "password": "test",
                 "port": port,
@@ -106,9 +108,6 @@ class TestNetmikoInitCompat:
                 assert follow_up is not None
         finally:
             net.stop()
-
-
-HOSTNAME = "router"  # Must match the host name in _make_simnos()
 
 
 def _get_test_command(device_type: str) -> tuple[str, str] | None:
