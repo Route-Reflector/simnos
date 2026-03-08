@@ -56,18 +56,20 @@ def get_platforms_from_md() -> list[str]:
     return platforms
 
 
-def get_host_commands(host: Host) -> tuple:
+def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
     """
     Get the commands of the host.
     It gets the initial, enable and config commands.
     """
     initial_commands, enable_commands, config_commands = [], [], []
     for command, options in host.nos.commands.items():
-        if not hasattr(options, "prompt"):
+        if command.startswith("_") and command.endswith("_"):
+            continue
+        if "prompt" not in options:
             continue
         prompts = options["prompt"]
-        new_prompt = options.get("new_prompt", None)
-        if new_prompt or "alias" in options or options.get("exit") or command in ["exit", "quit", "logout"]:
+        new_prompt = options.get("new_prompt")
+        if new_prompt or "alias" in options or options.get("exit") or command in {"exit", "quit", "logout"}:
             continue
         if isinstance(prompts, str):
             prompts = [prompts]
