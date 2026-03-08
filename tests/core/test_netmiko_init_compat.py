@@ -1,9 +1,10 @@
 """
-Tests for netmiko init compatibility and shutdown/EOF regression.
+Tests for netmiko init compatibility, send_command response, and shutdown/EOF regression.
 
 Verifies that:
 - netmiko session_preparation() does not produce "Unknown command" (#69, #71)
 - Unknown commands are handled gracefully without crashing
+- send_command returns the defined output for each platform (#76)
 - Shell exits cleanly on shutdown without thread leaks (#71 regression)
 """
 
@@ -103,6 +104,100 @@ class TestNetmikoInitCompat:
                 # Verify session is still alive after unknown command
                 follow_up = conn.send_command_timing("?")
                 assert follow_up is not None
+        finally:
+            net.stop()
+
+
+HOSTNAME = "router"  # Must match the host name in _make_simnos()
+
+
+def _get_test_command(device_type: str) -> tuple[str, str] | None:
+    """Pick one command from the Nos-loaded definition for testing.
+
+    Selection priority:
+    1. First non-empty string output without curly braces
+    2. First non-empty string output with curly braces (fallback)
+
+    Outputs with curly braces are deprioritized because they may contain
+    format placeholders ({base_prompt}) or platform-specific markers
+    ({master:0} on Juniper) that interfere with netmiko prompt detection.
+
+    Excludes: special commands (_default_ etc.), alias, new_prompt,
+    exit flag, callable output, and prompt-mode-changing commands.
+    """
+    from simnos.core.nos import Nos
+    from simnos.plugins.nos import nos_plugins
+
+    if device_type not in nos_plugins:
+        return None
+
+    nos = Nos(filename=nos_plugins[device_type])
+    fallback = None
+
+    for cmd_name, cmd_data in nos.commands.items():
+        if cmd_name.startswith("_") and cmd_name.endswith("_"):
+            continue
+        if cmd_name in ("enable", "exit", "quit", "logout", "ex"):
+            continue
+        if "alias" in cmd_data or "new_prompt" in cmd_data:
+            continue
+        if cmd_data.get("exit"):
+            continue
+
+        output = cmd_data.get("output")
+        if not isinstance(output, str) or not output.strip():
+            continue
+
+        prompt = cmd_data.get("prompt")
+        if prompt is None:
+            continue
+        prompts = [prompt] if isinstance(prompt, str) else prompt
+        if nos.initial_prompt not in prompts:
+            continue
+
+        # Prefer output without curly braces
+        if "{" not in output:
+            return (cmd_name, output)
+        if fallback is None:
+            fallback = (cmd_name, output)
+
+    return fallback
+
+
+class TestSendCommandResponse:
+    """Test that send_command returns the defined output for each platform (#76)."""
+
+    @pytest.mark.timeout(30)
+    @pytest.mark.parametrize("device_type", get_platforms_from_md())
+    def test_send_command_returns_defined_output(self, device_type: str):
+        """Defined command should return matching output via send_command."""
+        result = _get_test_command(device_type)
+        assert result is not None, (
+            f"No testable command found for {device_type}. "
+            "Every docs-listed platform must have at least one testable command."
+        )
+
+        cmd, expected_raw = result
+        expected = expected_raw.format(base_prompt=HOSTNAME)
+        port = get_free_port()
+
+        net = _make_simnos(device_type, port)
+        try:
+            net.start()
+            device = {
+                "host": "localhost",
+                "username": "test",
+                "password": "test",
+                "port": port,
+                "device_type": device_type,
+            }
+            with ConnectHandler(**device) as conn:
+                output = conn.send_command(cmd, read_timeout=15)
+                assert output.strip() == expected.strip(), (
+                    f"{device_type}: '{cmd}' returned unexpected output.\n"
+                    f"  expected: {expected.strip()!r}\n"
+                    f"  actual:   {output.strip()!r}"
+                )
         finally:
             net.stop()
 

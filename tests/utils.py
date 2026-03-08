@@ -63,7 +63,7 @@ def get_host_commands(host: Host) -> tuple:
     """
     initial_commands, enable_commands, config_commands = [], [], []
     for command, options in host.nos.commands.items():
-        if not hasattr(options, "prompt"):
+        if "prompt" not in options:
             continue
         prompts = options["prompt"]
         new_prompt = options.get("new_prompt", None)
