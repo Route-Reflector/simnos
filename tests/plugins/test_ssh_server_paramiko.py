@@ -277,7 +277,7 @@ class ChannelToShellTapTest(unittest.TestCase):
 
     def test_channel_to_shell_tap_break_loop_when_channel_not_active(self):
         """Check that channel_to_shell_tap breaks the loop when the channel is not active."""
-        self.mock_channel.recv.return_value = b""
+        self.mock_channel.recv.return_value = b"a"
         self.mock_channel.active = False
         channel_to_shell_tap(
             channel=self.mock_channel,
@@ -285,7 +285,9 @@ class ChannelToShellTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.assertEqual(self.mock_run_srv.is_set.call_count, 1)
+        # while loop + run_srv guard = 2 calls
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+        self.mock_run_srv.clear.assert_called_once()
 
     def test_channel_to_shell_tap_break_loop_if_os_error(self):
         """Check that channel_to_shell_tap breaks the loop if an OSError occurs."""
