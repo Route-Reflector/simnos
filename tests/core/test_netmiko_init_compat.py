@@ -163,8 +163,9 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
     return fallback
 
 
-# Platforms where send_command returns empty due to SSH channel buffering
-# issues under CI load. Root cause tracked in #83.
+# Platforms where send_command is flaky:
+# - aruba_os, hp_comware: intermittently return empty output (#87)
+# - mikrotik_routeros: trailing prompt included in output (#86)
 SEND_CMD_XFAIL = {"aruba_os", "hp_comware", "mikrotik_routeros"}
 
 
@@ -176,7 +177,10 @@ class TestSendCommandResponse:
     def test_send_command_returns_defined_output(self, device_type: str):
         """Defined command should return matching output via send_command."""
         if device_type in SEND_CMD_XFAIL:
-            pytest.xfail(f"{device_type}: flaky under CI load (#83)")
+            if device_type == "mikrotik_routeros":
+                pytest.xfail(f"{device_type}: trailing prompt in output (#86)")
+            else:
+                pytest.xfail(f"{device_type}: intermittently empty output (#87)")
 
         result = _get_test_command(device_type)
         assert result is not None, (

@@ -11,7 +11,6 @@ import time
 from typing import Any
 
 import paramiko
-import paramiko.channel
 import paramiko.rsakey
 
 from simnos.core.nos import Nos
@@ -151,17 +150,20 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
         return (self.ssh_banner + "\r\n", "en-US")
 
 
-def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_srv):
-    """
-    Method to tap into the channel_stdio and send it to the shell
-    """
+def channel_to_shell_tap(
+    channel: paramiko.Channel,
+    shell_stdin: TapIO,
+    shell_replied_event: threading.Event,
+    run_srv: threading.Event,
+) -> None:
+    """Read bytes from SSH channel and forward complete lines to shell stdin."""
     buffer: io.BytesIO = io.BytesIO()
     while run_srv.is_set():
         try:
-            byte: bytes = channel_stdio.read(1)
+            byte: bytes = channel.recv(1)
         except TimeoutError:
             continue
-        except (OSError, EOFError):
+        except (OSError, EOFError, paramiko.SSHException):
             log.debug("ssh_server.channel_to_shell_tap channel read closed")
             break
         log.debug("ssh_server.channel_to_shell_tap received from channel: %s", [byte])
@@ -181,12 +183,12 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
                 break
         if not run_srv.is_set():
             break
-        if not channel_stdio.channel.active:
+        if not channel.active:
             log.error("SSH channel is not active. Exiting.")
             break
         try:
             if byte in (b"\r", b"\n"):
-                channel_stdio.write(b"\r\n")
+                channel.sendall(b"\r\n")
                 log.debug(
                     "ssh_server.channel_to_shell_tap echoing new line to channel: %s",
                     [b"\r\n"],
@@ -200,14 +202,14 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
                 shell_stdin.write(line)
                 shell_replied_event.clear()
             else:
-                channel_stdio.write(byte)
+                channel.sendall(byte)
                 log.debug(
                     "ssh_server.channel_to_shell_tap echoing byte to channel: %s",
                     [byte],
                 )
                 buffer.write(byte)
             time.sleep(0.01)
-        except (OSError, EOFError) as e:
+        except (OSError, EOFError, paramiko.SSHException) as e:
             log.error("ssh_server.channel_to_shell_tap channel write error: %s", e)
             break
 
@@ -215,16 +217,14 @@ def channel_to_shell_tap(channel_stdio, shell_stdin, shell_replied_event, run_sr
 
 
 def shell_to_channel_tap(
-    channel_stdio: paramiko.channel.ChannelFile,
+    channel: paramiko.Channel,
     shell_stdout: TapIO,
     shell_replied_event: threading.Event,
     run_srv: threading.Event,
-):
-    """
-    Method to tap into the shell_stdout and send it to the channel
-    """
+) -> None:
+    """Read lines from shell stdout and send them to the SSH channel."""
     while run_srv.is_set():
-        if channel_stdio.closed:
+        if channel.closed:
             break
         line = shell_stdout.readline()
         if not line:
@@ -237,13 +237,12 @@ def shell_to_channel_tap(
         written = False
         while run_srv.is_set() and not written:
             try:
-                channel_stdio.write(line.encode(encoding="utf-8"))
-                channel_stdio.flush()
+                channel.sendall(line.encode(encoding="utf-8"))
                 written = True
             except TimeoutError:
                 log.debug("ssh_server.shell_to_channel_tap write timeout, retrying")
                 continue
-            except (OSError, EOFError) as e:
+            except (OSError, EOFError, paramiko.SSHException) as e:
                 log.error("ssh_server.shell_to_channel_tap channel write error: %s", e)
                 break
         if not written:
@@ -455,7 +454,7 @@ class ParamikoSshServer(TCPServerBase):
                 log.debug("SSH handshake failed (likely client disconnect or stop): %s", e)
                 return
 
-            # create the channel and get the stdio
+            # wait for the client to open a channel
             channel = None
             while channel is None and is_running.is_set() and session.is_alive():
                 channel = session.accept(_SHUTDOWN_TIMEOUT)
@@ -472,25 +471,24 @@ class ParamikoSshServer(TCPServerBase):
                 return
 
             channel.settimeout(self.timeout)
-            channel_stdio = channel.makefile("rw")
 
             # create stdio for the shell
             shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
 
             # start intermediate thread to tap into
-            # the channel_stdio->shell_stdin bytes stream
+            # the channel->shell_stdin bytes stream
             channel_to_shell_tapper = threading.Thread(
                 target=channel_to_shell_tap,
-                args=(channel_stdio, shell_stdin, shell_replied_event, run_srv),
+                args=(channel, shell_stdin, shell_replied_event, run_srv),
                 daemon=True,
             )
             channel_to_shell_tapper.start()
 
             # start intermediate thread to tap into
-            # the shell_stdout->channel_stdio bytes stream
+            # the shell_stdout->channel bytes stream
             shell_to_channel_tapper = threading.Thread(
                 target=shell_to_channel_tap,
-                args=(channel_stdio, shell_stdout, shell_replied_event, run_srv),
+                args=(channel, shell_stdout, shell_replied_event, run_srv),
                 daemon=True,
             )
             shell_to_channel_tapper.start()

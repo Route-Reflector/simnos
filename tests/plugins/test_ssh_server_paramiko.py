@@ -242,56 +242,58 @@ class TapIOTest(unittest.TestCase):
 
 class ChannelToShellTapTest(unittest.TestCase):
     """
-    Test cases for the ChannelToShellTap class.
+    Test cases for the channel_to_shell_tap function.
     """
 
     def setUp(self):
-        """Set up the ChannelToShellTap object."""
-        self.mock_channel_stdio: Mock = Mock()
-        self.mock_channel_stdio.read.return_value = b"b"
+        """Set up the mock channel object."""
+        self.mock_channel: Mock = Mock()
+        self.mock_channel.recv.return_value = b"b"
         self.mock_shell_stdin: Mock = Mock()
         self.mock_shell_replied_event: Mock = Mock()
         self.mock_run_srv: Mock = Mock()
 
     def test_channel_to_shell_tap_received_byte(self):
-        """Check that the ChannelToShellTap object receives a byte."""
+        """Check that channel_to_shell_tap receives a byte via channel.recv."""
         self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_channel_stdio.read.assert_called_with(1)
+        self.mock_channel.recv.assert_called_with(1)
 
     def test_channel_to_shell_tap_shell_replied_event_wait(self):
-        """Check that the ChannelToShellTap object waits for the shell_replied_event."""
+        """Check that channel_to_shell_tap waits for the shell_replied_event."""
         self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         self.mock_shell_replied_event.wait.assert_called_with(timeout=_SHUTDOWN_TIMEOUT)
 
-    def test_channel_to_shell_tap_break_loop_when_channel_stdio_not_active(self):
-        """Check that the ChannelToShellTap object breaks the loop when the channel_stdio is not active."""
-        self.mock_channel_stdio.read.return_value = b""
-        self.mock_channel_stdio.channel.active = False
+    def test_channel_to_shell_tap_break_loop_when_channel_not_active(self):
+        """Check that channel_to_shell_tap breaks the loop when the channel is not active."""
+        self.mock_channel.recv.return_value = b"a"
+        self.mock_channel.active = False
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.assertEqual(self.mock_run_srv.is_set.call_count, 1)
+        # while loop + run_srv guard = 2 calls
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+        self.mock_run_srv.clear.assert_called_once()
 
     def test_channel_to_shell_tap_break_loop_if_os_error(self):
-        """Check that the ChannelToShellTap object breaks the loop if an OSError occurs."""
-        self.mock_channel_stdio.write.side_effect = OSError
+        """Check that channel_to_shell_tap breaks the loop if an OSError occurs."""
+        self.mock_channel.sendall.side_effect = OSError
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -300,10 +302,10 @@ class ChannelToShellTapTest(unittest.TestCase):
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
     def test_channel_to_shell_tap_break_loop_if_eof_error(self):
-        """Check that the ChannelToShellTap object breaks the loop if an EOFError occurs."""
-        self.mock_channel_stdio.write.side_effect = EOFError
+        """Check that channel_to_shell_tap breaks the loop if an EOFError occurs."""
+        self.mock_channel.sendall.side_effect = EOFError
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -311,18 +313,43 @@ class ChannelToShellTapTest(unittest.TestCase):
         # 2 calls: while loop condition + run_srv guard after interruptible wait
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
-    def test_channel_to_shell_tap_byte_return_character(self):
-        """Check that the ChannelToShellTap object returns a character."""
-        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
-        self.mock_channel_stdio.read.side_effect = [b"\r", b"\n"]
+    def test_channel_to_shell_tap_break_loop_if_ssh_exception(self):
+        """SSHException on sendall should break the loop (#85)."""
+        self.mock_channel.sendall.side_effect = paramiko.SSHException("Transport closed")
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_channel_stdio.write.assert_called_with(b"\r\n")
-        self.assertEqual(self.mock_channel_stdio.write.call_count, 2)
+        # 2 calls: while loop condition + run_srv guard after interruptible wait
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+
+    def test_channel_to_shell_tap_recv_ssh_exception_breaks(self):
+        """SSHException on recv should break the tap loop (#85)."""
+        self.mock_channel.recv.side_effect = paramiko.SSHException("Transport closed")
+        self.mock_run_srv.is_set.return_value = True
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_channel.recv.assert_called_once_with(1)
+        self.mock_run_srv.clear.assert_called_once()
+
+    def test_channel_to_shell_tap_byte_return_character(self):
+        """Check that channel_to_shell_tap echoes CR/LF via channel.sendall."""
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
+        self.mock_channel.recv.side_effect = [b"\r", b"\n"]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_channel.sendall.assert_called_with(b"\r\n")
+        self.assertEqual(self.mock_channel.sendall.call_count, 2)
 
         self.mock_shell_stdin.write.assert_called_with("\n")
         self.assertEqual(self.mock_shell_stdin.write.call_count, 2)
@@ -332,96 +359,96 @@ class ChannelToShellTapTest(unittest.TestCase):
     def test_channel_to_shell_tap_nul_bytes_are_dropped(self):
         """NUL bytes should be silently dropped (not echoed, not buffered)."""
         self.mock_run_srv.is_set.side_effect = [True] * 5 + [False]
-        self.mock_channel_stdio.read.side_effect = [b"\x00", b"a", b"\n"]
+        self.mock_channel.recv.side_effect = [b"\x00", b"a", b"\n"]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         # NUL byte must NOT be echoed to channel
-        for call_args in self.mock_channel_stdio.write.call_args_list:
+        for call_args in self.mock_channel.sendall.call_args_list:
             self.assertNotEqual(call_args, unittest.mock.call(b"\x00"))
         # "a" echoed + "\r\n" for newline = 2 writes
-        self.assertEqual(self.mock_channel_stdio.write.call_count, 2)
+        self.assertEqual(self.mock_channel.sendall.call_count, 2)
         self.mock_shell_stdin.write.assert_called_with("a\n")
 
     def test_channel_to_shell_tap_empty_byte_causes_exit(self):
         """Empty byte (EOF) should cause the loop to exit."""
         self.mock_run_srv.is_set.side_effect = [True, True]
-        self.mock_channel_stdio.read.side_effect = [b"", b"\n"]
+        self.mock_channel.recv.side_effect = [b"", b"\n"]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         # Empty byte triggers break before any write
-        self.mock_channel_stdio.write.assert_not_called()
+        self.mock_channel.sendall.assert_not_called()
 
     def test_channel_to_shell_tap_byte_return_other(self):
-        """Check that the ChannelToShellTap object returns a character."""
+        """Check that channel_to_shell_tap echoes bytes via channel.sendall."""
         self.mock_run_srv.is_set.side_effect = [True] * 6 + [False]
-        self.mock_channel_stdio.read.side_effect = [b"b", b"c", b"\n"]
+        self.mock_channel.recv.side_effect = [b"b", b"c", b"\n"]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_channel_stdio.write.assert_any_call(b"b")
-        self.mock_channel_stdio.write.assert_any_call(b"c")
-        self.assertEqual(self.mock_channel_stdio.write.call_count, 3)
+        self.mock_channel.sendall.assert_any_call(b"b")
+        self.mock_channel.sendall.assert_any_call(b"c")
+        self.assertEqual(self.mock_channel.sendall.call_count, 3)
 
         self.assertEqual(self.mock_shell_stdin.write.call_count, 1)
 
     def test_channel_to_shell_tap_exit_run_srv(self):
-        """Check that the ChannelToShellTap object exits the run_srv."""
+        """Check that channel_to_shell_tap exits the run_srv."""
         self.mock_run_srv.is_set.side_effect = [True, False]
-        self.mock_channel_stdio.read.side_effect = [b"\x00"]
+        self.mock_channel.recv.side_effect = [b"\x00"]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
-        self.assertEqual(self.mock_channel_stdio.read.call_count, 1)
+        self.assertEqual(self.mock_channel.recv.call_count, 1)
 
     def test_channel_to_shell_tap_timeout_error_continues_loop(self):
-        """TimeoutError on read() should be caught and the loop should continue."""
+        """TimeoutError on recv() should be caught and the loop should continue."""
         self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
-        self.mock_channel_stdio.read.side_effect = [TimeoutError, b"a", b"\x00"]
+        self.mock_channel.recv.side_effect = [TimeoutError, b"a", b"\x00"]
         channel_to_shell_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        # read called 3 times: TimeoutError, b"a", b"\x00"
-        self.assertEqual(self.mock_channel_stdio.read.call_count, 3)
+        # recv called 3 times: TimeoutError, b"a", b"\x00"
+        self.assertEqual(self.mock_channel.recv.call_count, 3)
         # b"a" should be echoed back
-        self.mock_channel_stdio.write.assert_any_call(b"a")
+        self.mock_channel.sendall.assert_any_call(b"a")
 
 
 class ShellToChannelTapTest(unittest.TestCase):
     """
-    Test cases for the ShellToChannelTap class.
+    Test cases for the shell_to_channel_tap function.
     """
 
     def setUp(self):
-        """Set up the ShellToChannelTap object."""
-        self.mock_channel_stdio: Mock = Mock()
-        self.mock_channel_stdio.closed = False
+        """Set up the mock channel object."""
+        self.mock_channel: Mock = Mock()
+        self.mock_channel.closed = False
         self.mock_shell_stdout: Mock = Mock()
         self.mock_shell_replied_event: Mock = Mock()
         self.mock_run_srv: Mock = Mock()
 
-    def test_shell_to_channel_tap_channel_stdio_closed(self):
-        """Check that the ShellToChannelTap object closes the channel_stdio."""
-        self.mock_channel_stdio.closed = True
+    def test_shell_to_channel_tap_channel_closed(self):
+        """Check that shell_to_channel_tap exits when channel.closed is True."""
+        self.mock_channel.closed = True
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -430,12 +457,11 @@ class ShellToChannelTapTest(unittest.TestCase):
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_none(self):
         """
-        Check that the ShellToChannelTap object reads a line
-        from the shell_stdout that is None.
+        Check that shell_to_channel_tap exits when readline returns None.
         """
         self.mock_shell_stdout.readline.return_value = None
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -445,58 +471,68 @@ class ShellToChannelTapTest(unittest.TestCase):
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_carry_return(self):
         """
-        Check that the ShellToChannelTap object reads a line
-        from the shell_stdout that is a carriage return and newline.
+        Check that shell_to_channel_tap sends CRLF via channel.sendall.
         """
         self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "\r\n"
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel_stdio.write.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_newline(self):
         """
-        Check that the ShellToChannelTap object reads a line
-        from the shell_stdout that is a newline.
+        Check that shell_to_channel_tap converts LF to CRLF via channel.sendall.
         """
         self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "\n"
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel_stdio.write.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_other(self):
         """
-        Check that the ShellToChannelTap object reads a line
-        from the shell_stdout that is a character.
+        Check that shell_to_channel_tap sends data via channel.sendall.
         """
         self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
         self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel_stdio.write.assert_called_once_with(b"b")
+        self.mock_channel.sendall.assert_called_once_with(b"b")
 
     def test_shell_to_channel_tap_socket_error(self):
-        """Check that the ShellToChannelTap object breaks the loop if a socket error occurs."""
+        """Check that shell_to_channel_tap breaks the loop if a socket error occurs."""
         self.mock_shell_stdout.readline.return_value = "b"
-        self.mock_channel_stdio.write.side_effect = OSError(104, "Connection reset by peer")
+        self.mock_channel.sendall.side_effect = OSError(104, "Connection reset by peer")
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
+            shell_stdout=self.mock_shell_stdout,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        # Called twice: outer loop check + inner retry loop check
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+
+    def test_shell_to_channel_tap_ssh_exception(self):
+        """Check that shell_to_channel_tap breaks the loop if SSHException occurs (#85)."""
+        self.mock_shell_stdout.readline.return_value = "b"
+        self.mock_channel.sendall.side_effect = paramiko.SSHException("Transport closed")
+        shell_to_channel_tap(
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -505,11 +541,11 @@ class ShellToChannelTapTest(unittest.TestCase):
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
     def test_shell_to_channel_tap_set_replied_flag(self):
-        """Check that the ShellToChannelTap object sets the replied flag."""
+        """Check that shell_to_channel_tap sets the replied flag."""
         self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -517,11 +553,11 @@ class ShellToChannelTapTest(unittest.TestCase):
         self.mock_shell_replied_event.set.assert_called_once()
 
     def test_shell_to_channel_tap_exit_run_srv(self):
-        """Check that the ShellToChannelTap object exits the run_srv."""
+        """Check that shell_to_channel_tap exits the run_srv."""
         self.mock_run_srv.is_set.side_effect = [True, True, True, False]
         self.mock_shell_stdout.readline.return_value = "b"
         shell_to_channel_tap(
-            channel_stdio=self.mock_channel_stdio,
+            channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
@@ -1356,64 +1392,64 @@ class TeardownFixTests(unittest.TestCase):
     # -- channel_to_shell_tap tests -------------------------------------------
 
     def test_channel_to_shell_tap_oserror_breaks(self):
-        """OSError on read should break the tap loop."""
-        mock_channel_stdio = Mock()
-        mock_channel_stdio.read.side_effect = OSError("channel closed")
+        """OSError on recv should break the tap loop."""
+        mock_channel = Mock()
+        mock_channel.recv.side_effect = OSError("channel closed")
         mock_shell_stdin = Mock()
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
-        channel_to_shell_tap(mock_channel_stdio, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
+        channel_to_shell_tap(mock_channel, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
         mock_run_srv.clear.assert_called_once()
 
     def test_channel_to_shell_tap_clears_run_srv(self):
         """channel_to_shell_tap should call run_srv.clear() on exit."""
-        mock_channel_stdio = Mock()
-        mock_channel_stdio.read.return_value = b""  # EOF
+        mock_channel = Mock()
+        mock_channel.recv.return_value = b""  # EOF
         mock_shell_stdin = Mock()
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
-        channel_to_shell_tap(mock_channel_stdio, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
+        channel_to_shell_tap(mock_channel, mock_shell_stdin, mock_shell_replied_event, mock_run_srv)
         mock_run_srv.clear.assert_called_once()
 
     # -- shell_to_channel_tap tests -------------------------------------------
 
     def test_shell_to_channel_tap_clears_run_srv(self):
         """shell_to_channel_tap should call run_srv.clear() on exit."""
-        mock_channel_stdio = Mock()
-        mock_channel_stdio.closed = False
+        mock_channel = Mock()
+        mock_channel.closed = False
         mock_shell_stdout = Mock()
         mock_shell_stdout.readline.return_value = None  # EOF
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
-        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        shell_to_channel_tap(mock_channel, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
         mock_run_srv.clear.assert_called_once()
 
     def test_shell_to_channel_tap_breaks_on_non_timeout_oserror(self):
         """Non-TimeoutError OSError should break and reach run_srv.clear()."""
-        mock_channel_stdio = Mock()
-        mock_channel_stdio.closed = False
+        mock_channel = Mock()
+        mock_channel.closed = False
         mock_shell_stdout = Mock()
         mock_shell_stdout.readline.return_value = "test line"
-        mock_channel_stdio.write.side_effect = OSError(32, "Broken pipe")
+        mock_channel.sendall.side_effect = OSError(32, "Broken pipe")
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
-        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        shell_to_channel_tap(mock_channel, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
         mock_run_srv.clear.assert_called_once()
 
     def test_shell_to_channel_tap_retries_on_timeout(self):
         """Write-side TimeoutError should retry same line without loss."""
-        mock_channel_stdio = Mock()
-        mock_channel_stdio.closed = False
+        mock_channel = Mock()
+        mock_channel.closed = False
         mock_shell_stdout = Mock()
         mock_shell_stdout.readline.side_effect = ["hello\r\n", None]
-        # First write times out, second succeeds
-        mock_channel_stdio.write.side_effect = [TimeoutError(), None]
+        # First sendall times out, second succeeds
+        mock_channel.sendall.side_effect = [TimeoutError(), None]
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
-        shell_to_channel_tap(mock_channel_stdio, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
-        # write should have been called twice with the same data
-        assert mock_channel_stdio.write.call_count == 2
-        mock_channel_stdio.write.assert_any_call(b"hello\r\n")
+        shell_to_channel_tap(mock_channel, mock_shell_stdout, mock_shell_replied_event, mock_run_srv)
+        # sendall should have been called twice with the same data
+        assert mock_channel.sendall.call_count == 2
+        mock_channel.sendall.assert_any_call(b"hello\r\n")
         mock_shell_replied_event.set.assert_called_once()
 
     # -- connection_function tests --------------------------------------------
