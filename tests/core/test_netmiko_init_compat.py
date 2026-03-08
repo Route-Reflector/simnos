@@ -177,7 +177,10 @@ class TestSendCommandResponse:
     def test_send_command_returns_defined_output(self, device_type: str):
         """Defined command should return matching output via send_command."""
         if device_type in SEND_CMD_XFAIL:
-            pytest.xfail(f"{device_type}: flaky or prompt detection issue")
+            if device_type == "mikrotik_routeros":
+                pytest.xfail(f"{device_type}: trailing prompt in output (#86)")
+            else:
+                pytest.xfail(f"{device_type}: intermittently empty output (#87)")
 
         result = _get_test_command(device_type)
         assert result is not None, (

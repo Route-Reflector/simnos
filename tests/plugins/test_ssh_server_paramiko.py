@@ -311,6 +311,31 @@ class ChannelToShellTapTest(unittest.TestCase):
         # 2 calls: while loop condition + run_srv guard after interruptible wait
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
 
+    def test_channel_to_shell_tap_break_loop_if_ssh_exception(self):
+        """SSHException on sendall should break the loop (#85)."""
+        self.mock_channel.sendall.side_effect = paramiko.SSHException("Transport closed")
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        # 2 calls: while loop condition + run_srv guard after interruptible wait
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+
+    def test_channel_to_shell_tap_recv_ssh_exception_breaks(self):
+        """SSHException on recv should break the tap loop (#85)."""
+        self.mock_channel.recv.side_effect = paramiko.SSHException("Transport closed")
+        self.mock_run_srv.is_set.return_value = True
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_channel.recv.assert_called_once_with(1)
+        self.mock_run_srv.clear.assert_called_once()
+
     def test_channel_to_shell_tap_byte_return_character(self):
         """Check that channel_to_shell_tap echoes CR/LF via channel.sendall."""
         self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
@@ -491,6 +516,19 @@ class ShellToChannelTapTest(unittest.TestCase):
         """Check that shell_to_channel_tap breaks the loop if a socket error occurs."""
         self.mock_shell_stdout.readline.return_value = "b"
         self.mock_channel.sendall.side_effect = OSError(104, "Connection reset by peer")
+        shell_to_channel_tap(
+            channel=self.mock_channel,
+            shell_stdout=self.mock_shell_stdout,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        # Called twice: outer loop check + inner retry loop check
+        self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
+
+    def test_shell_to_channel_tap_ssh_exception(self):
+        """Check that shell_to_channel_tap breaks the loop if SSHException occurs (#85)."""
+        self.mock_shell_stdout.readline.return_value = "b"
+        self.mock_channel.sendall.side_effect = paramiko.SSHException("Transport closed")
         shell_to_channel_tap(
             channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
