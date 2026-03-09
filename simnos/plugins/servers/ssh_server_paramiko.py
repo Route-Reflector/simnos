@@ -155,9 +155,12 @@ def channel_to_shell_tap(
     shell_stdin: TapIO,
     shell_replied_event: threading.Event,
     run_srv: threading.Event,
+    *,
+    initial_skip_lf: bool = False,
 ) -> None:
     """Read bytes from SSH channel and forward complete lines to shell stdin."""
     buffer: io.BytesIO = io.BytesIO()
+    skip_lf = initial_skip_lf
     while run_srv.is_set():
         try:
             byte: bytes = channel.recv(1)
@@ -172,9 +175,17 @@ def channel_to_shell_tap(
         if byte in (b"", None):
             break
 
-        # Drop NUL bytes completely (don't echo, don't buffer)
+        # Drop NUL bytes completely (don't echo, don't buffer).
+        # Unlike Telnet (RFC 854), SSH has no CR NUL convention,
+        # so skip_lf is intentionally preserved across NUL bytes.
         if byte == b"\x00":
             continue
+
+        # Consume the LF half of a CR LF pair.
+        if skip_lf:
+            skip_lf = False
+            if byte == b"\n":
+                continue
 
         # Wait for the shell to reply, but check run_srv periodically
         # so that shutdown is not blocked for the full wait duration.
@@ -188,6 +199,7 @@ def channel_to_shell_tap(
             break
         try:
             if byte in (b"\r", b"\n"):
+                skip_lf = byte == b"\r"
                 channel.sendall(b"\r\n")
                 log.debug(
                     "ssh_server.channel_to_shell_tap echoing new line to channel: %s",
@@ -372,13 +384,19 @@ class ParamikoSshServer(TCPServerBase):
 
         shell.stop()
 
-    def _read_channel_line(self, channel, echo: bool = True) -> str:
+    def _read_channel_line(
+        self,
+        channel,
+        echo: bool = True,
+        skip_lf: bool = False,
+    ) -> tuple[str, bool]:
         """
         Read a single line from the channel byte-by-byte.
 
         :param channel: paramiko Channel
         :param echo: if True, echo each byte back to the client
-        :return: the line read (without trailing CR/LF)
+        :param skip_lf: if True, consume a leading LF left over from a previous CR
+        :return: (line without trailing CR/LF, whether next call should skip LF)
         """
         channel.settimeout(self.timeout)
         buf = b""
@@ -387,38 +405,52 @@ class ParamikoSshServer(TCPServerBase):
                 byte = channel.recv(1)
             except TimeoutError:
                 continue
+            except (OSError, EOFError, paramiko.SSHException):
+                break
             if byte in (b"", None):
                 break
-            if byte in (b"\r", b"\n"):
+            if byte == b"\x00":
+                continue
+            if skip_lf:
+                skip_lf = False
+                if byte == b"\n":
+                    continue
+            if byte == b"\r":
                 if echo:
                     channel.sendall(b"\r\n")
-                break
+                return buf.decode("utf-8", errors="replace"), True
+            if byte == b"\n":
+                if echo:
+                    channel.sendall(b"\r\n")
+                return buf.decode("utf-8", errors="replace"), False
             if echo:
                 channel.sendall(byte)
             buf += byte
-        return buf.decode("utf-8", errors="replace")
+        return buf.decode("utf-8", errors="replace"), False
 
-    def _channel_login(self, channel) -> bool:
+    def _channel_login(self, channel) -> tuple[bool, bool]:
         """
         Perform channel-level login for auth_none platforms (e.g. Dell PowerConnect).
 
         Sends "User Name:" / "Password:" prompts and validates credentials.
 
         :param channel: paramiko Channel
-        :return: True if login succeeded, False otherwise
+        :return: (authenticated, skip_lf) — skip_lf should be forwarded to
+                 channel_to_shell_tap so it can consume a trailing LF after
+                 the final CR of the password line.
         """
         channel.sendall(b"\r\nUser Name:")
-        username = self._read_channel_line(channel, echo=True)
+        username, skip_lf = self._read_channel_line(channel, echo=True, skip_lf=False)
         channel.sendall(b"\r\nPassword:")
-        password = self._read_channel_line(channel, echo=False)
+        password, skip_lf = self._read_channel_line(channel, echo=False, skip_lf=skip_lf)
         channel.sendall(b"\r\n")
 
         if username == self.username and password == self.password:
             log.debug("Channel login succeeded for user %s", username)
-            return True
+            return True, skip_lf
 
         log.warning("Channel login failed for user %s", username)
-        return False
+        return False, skip_lf
 
     def connection_function(self, client: socket.socket, is_running: threading.Event):
         shell_replied_event = threading.Event()
@@ -466,9 +498,12 @@ class ParamikoSshServer(TCPServerBase):
             # login before starting the shell.  When publickey auth is also configured,
             # clients that authenticate via publickey bypass this channel-level login
             # intentionally — SSH-level publickey auth already verified the identity.
-            if server.auth_method_used == "none" and not self._channel_login(channel):
-                log.warning("Channel login failed, closing connection")
-                return
+            skip_lf = False
+            if server.auth_method_used == "none":
+                authenticated, skip_lf = self._channel_login(channel)
+                if not authenticated:
+                    log.warning("Channel login failed, closing connection")
+                    return
 
             channel.settimeout(self.timeout)
 
@@ -480,6 +515,7 @@ class ParamikoSshServer(TCPServerBase):
             channel_to_shell_tapper = threading.Thread(
                 target=channel_to_shell_tap,
                 args=(channel, shell_stdin, shell_replied_event, run_srv),
+                kwargs={"initial_skip_lf": skip_lf},
                 daemon=True,
             )
             channel_to_shell_tapper.start()
