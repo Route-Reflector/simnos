@@ -521,33 +521,35 @@ class ShellToChannelTapTest(unittest.TestCase):
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_carry_return(self):
         """
-        Check that shell_to_channel_tap sends CRLF via channel.sendall.
+        Check that echo-only readline triggers a second readline for the prompt.
+
+        When the first readline returns whitespace-only (echo \\r\\n), a
+        second readline is performed to wait for the prompt so they are
+        sent together in one sendall().
         """
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
-        self.mock_shell_stdout.readline.return_value = "\r\n"
+        self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
+        self.mock_shell_stdout.readline.side_effect = ["\r\n", "Router>", ""]
         shell_to_channel_tap(
             channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\nRouter>")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_newline(self):
         """
-        Check that shell_to_channel_tap converts LF to CRLF via channel.sendall.
+        Check that LF echo triggers a second readline and LF is converted to CRLF.
         """
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
-        self.mock_shell_stdout.readline.return_value = "\n"
+        self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
+        self.mock_shell_stdout.readline.side_effect = ["\n", "Router>", ""]
         shell_to_channel_tap(
             channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\nRouter>")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_other(self):
         """

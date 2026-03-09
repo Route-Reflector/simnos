@@ -262,6 +262,13 @@ def shell_to_channel_tap(
     following a newline echo).  All available lines are then sent in a
     single ``sendall()`` call so the client receives them in one SSH
     packet, avoiding a GIL-scheduling race in paramiko (#87).
+
+    When the first line is whitespace-only (a newline echo from
+    ``channel_to_shell_tap``), the function blocks on a second
+    ``readline()`` instead of sending the echo alone.  This guarantees
+    the echo and the prompt that follows it are always delivered in the
+    same ``sendall()`` call, even when the shell is slow (e.g. hot
+    reload YAML re-parse in ``precmd()``).
     """
     while run_srv.is_set():
         if channel.closed:
@@ -275,7 +282,25 @@ def shell_to_channel_tap(
         time.sleep(0.001)
 
         batch = _process_tap_line(line)
-        for extra in shell_stdout.drain():
+        drained = shell_stdout.drain()
+
+        if not drained and batch.strip() == "":
+            # Echo-only batch (e.g. "\r\n") with nothing else queued.
+            # The shell hasn't produced the prompt yet — block until it
+            # does so we never send a bare echo as a separate packet.
+            next_line = shell_stdout.readline()
+            if next_line:
+                batch += _process_tap_line(next_line)
+                # Drain any extra items that arrived alongside the prompt.
+                time.sleep(0.001)
+                drained = shell_stdout.drain()
+
+        for extra in drained:
+            # Separate consecutive lines that don't end with a newline
+            # (e.g. prompts: "SimNOS>") so they aren't concatenated into
+            # "SimNOS>SimNOS>..." which breaks netmiko's find_prompt().
+            if batch and not batch.endswith("\n"):
+                batch += "\r\n"
             batch += _process_tap_line(extra)
 
         log.debug("ssh_server.shell_to_channel_tap sending batch to channel %s", [batch])
