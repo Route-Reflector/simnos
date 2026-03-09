@@ -490,6 +490,7 @@ class ShellToChannelTapTest(unittest.TestCase):
         self.mock_channel: Mock = Mock()
         self.mock_channel.closed = False
         self.mock_shell_stdout: Mock = Mock()
+        self.mock_shell_stdout.drain.return_value = []
         self.mock_shell_replied_event: Mock = Mock()
         self.mock_run_srv: Mock = Mock()
 
@@ -520,33 +521,35 @@ class ShellToChannelTapTest(unittest.TestCase):
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_carry_return(self):
         """
-        Check that shell_to_channel_tap sends CRLF via channel.sendall.
+        Check that echo-only readline triggers a second readline for the prompt.
+
+        When the first readline returns whitespace-only (echo \\r\\n), a
+        second readline is performed to wait for the prompt so they are
+        sent together in one sendall().
         """
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
-        self.mock_shell_stdout.readline.return_value = "\r\n"
+        self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
+        self.mock_shell_stdout.readline.side_effect = ["\r\n", "Router>", ""]
         shell_to_channel_tap(
             channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\nRouter>")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_newline(self):
         """
-        Check that shell_to_channel_tap converts LF to CRLF via channel.sendall.
+        Check that LF echo triggers a second readline and LF is converted to CRLF.
         """
-        self.mock_run_srv.is_set.side_effect = [True, True, True, False]
-        self.mock_shell_stdout.readline.return_value = "\n"
+        self.mock_run_srv.is_set.side_effect = [True] * 10 + [False]
+        self.mock_shell_stdout.readline.side_effect = ["\n", "Router>", ""]
         shell_to_channel_tap(
             channel=self.mock_channel,
             shell_stdout=self.mock_shell_stdout,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_stdout.readline.assert_called_once()
-        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
+        self.mock_channel.sendall.assert_called_once_with(b"\r\nRouter>")
 
     def test_shell_to_channel_tap_shell_stdout_readline_return_other(self):
         """
@@ -1549,6 +1552,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.return_value = None  # EOF
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
@@ -1560,6 +1564,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.return_value = "test line"
         mock_channel.sendall.side_effect = OSError(32, "Broken pipe")
         mock_shell_replied_event = Mock()
@@ -1572,6 +1577,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.side_effect = ["hello\r\n", None]
         # First sendall times out, second succeeds
         mock_channel.sendall.side_effect = [TimeoutError(), None]
@@ -1760,7 +1766,7 @@ class SshIntegrationTests(unittest.TestCase):
 
         def shell_factory(*args, **kwargs):
             shell_instance = MagicMock()
-            shell_instance.start.side_effect = lambda: (shell_started.set() or shell_stop_called.wait(timeout=10))
+            shell_instance.start.side_effect = lambda: shell_started.set() or shell_stop_called.wait(timeout=10)
             shell_instance.stop.side_effect = lambda: shell_stop_called.set()
             return shell_instance
 
