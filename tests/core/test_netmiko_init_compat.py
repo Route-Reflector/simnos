@@ -164,8 +164,7 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
 
 
 # Platforms where send_command is flaky:
-# - aruba_os, hp_comware: intermittently return empty output (#87)
-SEND_CMD_XFAIL = {"aruba_os", "hp_comware"}
+SEND_CMD_XFAIL: set[str] = set()
 
 
 class TestSendCommandResponse:

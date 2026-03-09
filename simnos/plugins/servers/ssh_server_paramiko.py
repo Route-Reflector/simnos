@@ -157,8 +157,17 @@ def channel_to_shell_tap(
     run_srv: threading.Event,
     *,
     initial_skip_lf: bool = False,
+    shell_stdout: TapIO | None = None,
 ) -> None:
-    """Read bytes from SSH channel and forward complete lines to shell stdin."""
+    """Read bytes from SSH channel and forward complete lines to shell stdin.
+
+    When *shell_stdout* is provided, the newline echo (``\\r\\n``) for
+    line-ending bytes is written to *shell_stdout* instead of being sent
+    directly to the channel.  ``shell_to_channel_tap`` then batches the
+    echo together with the shell's response into a single ``sendall()``,
+    preventing a GIL-scheduling race where the client reads the echo and
+    the prompt as separate SSH packets (#87).
+    """
     buffer: io.BytesIO = io.BytesIO()
     skip_lf = initial_skip_lf
     while run_srv.is_set():
@@ -200,7 +209,10 @@ def channel_to_shell_tap(
         try:
             if byte in (b"\r", b"\n"):
                 skip_lf = byte == b"\r"
-                channel.sendall(b"\r\n")
+                if shell_stdout is not None:
+                    shell_stdout.write("\r\n")
+                else:
+                    channel.sendall(b"\r\n")
                 log.debug(
                     "ssh_server.channel_to_shell_tap echoing new line to channel: %s",
                     [b"\r\n"],
@@ -228,28 +240,50 @@ def channel_to_shell_tap(
     run_srv.clear()
 
 
+def _process_tap_line(line: str) -> str:
+    """Sanitise a single line from shell stdout for the SSH channel."""
+    if "\x00" in line:
+        line = line.replace("\x00", "")
+    if "\r\n" not in line and "\n" in line:
+        line = line.replace("\n", "\r\n")
+    return line
+
+
 def shell_to_channel_tap(
     channel: paramiko.Channel,
     shell_stdout: TapIO,
     shell_replied_event: threading.Event,
     run_srv: threading.Event,
 ) -> None:
-    """Read lines from shell stdout and send them to the SSH channel."""
+    """Read lines from shell stdout and send them to the SSH channel.
+
+    After reading the first available line, a brief coalescing pause
+    (1 ms) allows the shell to enqueue additional output (e.g. a prompt
+    following a newline echo).  All available lines are then sent in a
+    single ``sendall()`` call so the client receives them in one SSH
+    packet, avoiding a GIL-scheduling race in paramiko (#87).
+    """
     while run_srv.is_set():
         if channel.closed:
             break
         line = shell_stdout.readline()
         if not line:
             break
-        if "\x00" in line:
-            line = line.replace("\x00", "")
-        if "\r\n" not in line and "\n" in line:
-            line = line.replace("\n", "\r\n")
-        log.debug("ssh_server.shell_to_channel_tap sending line to channel %s", [line])
+
+        # Coalesce: brief pause lets the shell enqueue the prompt
+        # after the newline echo, so both are sent in one packet.
+        time.sleep(0.001)
+
+        batch = _process_tap_line(line)
+        while shell_stdout.lines:
+            extra = shell_stdout.lines.pop()
+            batch += _process_tap_line(extra)
+
+        log.debug("ssh_server.shell_to_channel_tap sending batch to channel %s", [batch])
         written = False
         while run_srv.is_set() and not written:
             try:
-                channel.sendall(line.encode(encoding="utf-8"))
+                channel.sendall(batch.encode(encoding="utf-8"))
                 written = True
             except TimeoutError:
                 log.debug("ssh_server.shell_to_channel_tap write timeout, retrying")
@@ -513,7 +547,7 @@ class ParamikoSshServer(TCPServerBase):
             channel_to_shell_tapper = threading.Thread(
                 target=channel_to_shell_tap,
                 args=(channel, shell_stdin, shell_replied_event, run_srv),
-                kwargs={"initial_skip_lf": skip_lf},
+                kwargs={"initial_skip_lf": skip_lf, "shell_stdout": shell_stdout},
                 daemon=True,
             )
             channel_to_shell_tapper.start()
