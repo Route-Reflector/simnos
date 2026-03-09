@@ -1275,12 +1275,12 @@ class ReadChannelLineTest(unittest.TestCase):
         self.assertEqual(line, "Pass")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_nul_dropped(self):
-        """NUL bytes should be silently dropped from login input."""
+    def test_read_channel_line_nul_preserved(self):
+        """NUL bytes should be preserved in login input to prevent auth bypass."""
         server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"ad\x00min\r")
         line, skip_lf = server._read_channel_line(channel)
-        self.assertEqual(line, "admin")
+        self.assertEqual(line, "ad\x00min")
         self.assertTrue(skip_lf)
 
     def test_read_channel_line_eof(self):

@@ -409,8 +409,6 @@ class ParamikoSshServer(TCPServerBase):
                 break
             if byte in (b"", None):
                 break
-            if byte == b"\x00":
-                continue
             if skip_lf:
                 skip_lf = False
                 if byte == b"\n":
