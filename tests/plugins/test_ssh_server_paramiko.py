@@ -339,22 +339,71 @@ class ChannelToShellTapTest(unittest.TestCase):
         self.mock_run_srv.clear.assert_called_once()
 
     def test_channel_to_shell_tap_byte_return_character(self):
-        """Check that channel_to_shell_tap echoes CR/LF via channel.sendall."""
+        """CRLF should be treated as a single line terminator (skip_lf consumes LF)."""
         self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
-        self.mock_channel.recv.side_effect = [b"\r", b"\n"]
+        self.mock_channel.recv.side_effect = [b"\r", b"\n", b""]
         channel_to_shell_tap(
             channel=self.mock_channel,
             shell_stdin=self.mock_shell_stdin,
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_channel.sendall.assert_called_with(b"\r\n")
-        self.assertEqual(self.mock_channel.sendall.call_count, 2)
+        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
 
-        self.mock_shell_stdin.write.assert_called_with("\n")
-        self.assertEqual(self.mock_shell_stdin.write.call_count, 2)
+        self.mock_shell_stdin.write.assert_called_once_with("\r")
 
-        self.assertEqual(self.mock_shell_replied_event.clear.call_count, 2)
+        self.assertEqual(self.mock_shell_replied_event.clear.call_count, 1)
+
+    def test_channel_to_shell_tap_crlf_single_line(self):
+        """CRLF after data should produce one line, not two."""
+        self.mock_run_srv.is_set.side_effect = [True] * 6 + [False]
+        self.mock_channel.recv.side_effect = [b"h", b"i", b"\r", b"\n", b""]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_shell_stdin.write.assert_called_once_with("hi\r")
+        self.assertEqual(self.mock_channel.sendall.call_count, 3)  # h, i, \r\n
+
+    def test_channel_to_shell_tap_cr_nul_lf_keeps_skip_lf(self):
+        """SSH NUL does not reset skip_lf (unlike Telnet CR NUL)."""
+        self.mock_run_srv.is_set.side_effect = [True] * 6 + [False]
+        self.mock_channel.recv.side_effect = [b"a", b"\r", b"\x00", b"\n", b""]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_shell_stdin.write.assert_called_once_with("a\r")
+
+    def test_channel_to_shell_tap_cr_followed_by_data(self):
+        """CR followed by non-LF data should produce two lines."""
+        self.mock_run_srv.is_set.side_effect = [True] * 8 + [False]
+        self.mock_channel.recv.side_effect = [b"x", b"\r", b"y", b"\n", b""]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        calls = [c[0][0] for c in self.mock_shell_stdin.write.call_args_list]
+        self.assertEqual(calls, ["x\r", "y\n"])
+
+    def test_channel_to_shell_tap_initial_skip_lf(self):
+        """initial_skip_lf=True should consume a leading LF."""
+        self.mock_run_srv.is_set.side_effect = [True] * 5 + [False]
+        self.mock_channel.recv.side_effect = [b"\n", b"a", b"\r", b""]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+            initial_skip_lf=True,
+        )
+        self.mock_shell_stdin.write.assert_called_once_with("a\r")
 
     def test_channel_to_shell_tap_nul_bytes_are_dropped(self):
         """NUL bytes should be silently dropped (not echoed, not buffered)."""
@@ -1119,25 +1168,28 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         return mock_channel
 
     def test_channel_login_success(self):
-        """Correct credentials should return True."""
+        """Correct credentials should return (True, skip_lf)."""
         server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"admin\radmin\r")
-        result = server._channel_login(channel)
-        self.assertTrue(result)
+        authenticated, skip_lf = server._channel_login(channel)
+        self.assertTrue(authenticated)
+        self.assertTrue(skip_lf)
 
     def test_channel_login_wrong_password(self):
-        """Wrong password should return False."""
+        """Wrong password should return (False, skip_lf)."""
         server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"admin\rwrong\r")
-        result = server._channel_login(channel)
-        self.assertFalse(result)
+        authenticated, skip_lf = server._channel_login(channel)
+        self.assertFalse(authenticated)
+        self.assertTrue(skip_lf)
 
     def test_channel_login_wrong_username(self):
-        """Wrong username should return False."""
+        """Wrong username should return (False, skip_lf)."""
         server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"wrong\radmin\r")
-        result = server._channel_login(channel)
-        self.assertFalse(result)
+        authenticated, skip_lf = server._channel_login(channel)
+        self.assertFalse(authenticated)
+        self.assertTrue(skip_lf)
 
     def test_channel_login_sends_prompts(self):
         """_channel_login should send User Name: and Password: prompts."""
@@ -1159,6 +1211,85 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         # Password chars should NOT be echoed
         username_echo_count = sum(1 for c in calls if c in (b"a", b"d", b"m", b"i", b"n"))
         self.assertEqual(username_echo_count, 5)
+
+    def test_channel_login_crlf_skip_lf_propagation(self):
+        """CRLF line endings should be handled; trailing LF consumed between calls."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"admin\r\nadmin\r\n")
+        authenticated, skip_lf = server._channel_login(channel)
+        self.assertTrue(authenticated)
+        self.assertTrue(skip_lf)
+
+
+class ReadChannelLineTest(unittest.TestCase):
+    """Test cases for _read_channel_line CRLF handling."""
+
+    def setUp(self):
+        self.arguments = {
+            "shell": Mock(),
+            "nos": Mock(),
+            "nos_inventory_config": {},
+            "port": 22,
+            "username": "admin",
+            "password": "admin",
+        }
+
+    def _make_channel(self, data: bytes):
+        """Create a mock channel whose recv returns bytes one at a time."""
+        mock_channel = MagicMock()
+        byte_list = [bytes([b]) for b in data]
+        byte_iter = iter(byte_list)
+        mock_channel.recv.side_effect = lambda n: next(byte_iter, b"")
+        mock_channel.sendall = MagicMock()
+        return mock_channel
+
+    def test_read_channel_line_bare_cr(self):
+        """Bare CR should return (line, True) without blocking."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"test\r")
+        line, skip_lf = server._read_channel_line(channel)
+        self.assertEqual(line, "test")
+        self.assertTrue(skip_lf)
+
+    def test_read_channel_line_bare_lf(self):
+        """Bare LF should return (line, False)."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"test\n")
+        line, skip_lf = server._read_channel_line(channel)
+        self.assertEqual(line, "test")
+        self.assertFalse(skip_lf)
+
+    def test_read_channel_line_skip_lf_consumes_lf(self):
+        """skip_lf=True should consume a leading LF, then read normally."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"\nnext\r")
+        line, skip_lf = server._read_channel_line(channel, skip_lf=True)
+        self.assertEqual(line, "next")
+        self.assertTrue(skip_lf)
+
+    def test_read_channel_line_skip_lf_non_lf(self):
+        """skip_lf=True with non-LF first byte should not consume it."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"Pass\r")
+        line, skip_lf = server._read_channel_line(channel, skip_lf=True)
+        self.assertEqual(line, "Pass")
+        self.assertTrue(skip_lf)
+
+    def test_read_channel_line_nul_preserved(self):
+        """NUL bytes should be preserved in login input to prevent auth bypass."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"ad\x00min\r")
+        line, skip_lf = server._read_channel_line(channel)
+        self.assertEqual(line, "ad\x00min")
+        self.assertTrue(skip_lf)
+
+    def test_read_channel_line_eof(self):
+        """EOF should return accumulated buffer with skip_lf=False."""
+        server = ParamikoSshServer(**self.arguments)
+        channel = self._make_channel(b"partial")
+        line, skip_lf = server._read_channel_line(channel)
+        self.assertEqual(line, "partial")
+        self.assertFalse(skip_lf)
 
 
 class PublicKeyAuthTest(unittest.TestCase):
