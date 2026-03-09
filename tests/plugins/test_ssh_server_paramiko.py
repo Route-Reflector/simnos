@@ -239,6 +239,38 @@ class TapIOTest(unittest.TestCase):
         tap_io.write("line1")
         self.assertEqual(list(tap_io.lines), ["line1"])
 
+    def test_drain_returns_fifo_order(self):
+        """drain() returns all buffered items in FIFO order (oldest first)."""
+        tap_io: TapIO = TapIO(run_srv=threading.Event())
+        tap_io.write("first")
+        tap_io.write("second")
+        tap_io.write("third")
+        self.assertEqual(tap_io.drain(), ["first", "second", "third"])
+
+    def test_drain_empties_buffer(self):
+        """drain() leaves the buffer empty after returning all items."""
+        tap_io: TapIO = TapIO(run_srv=threading.Event())
+        tap_io.write("a")
+        tap_io.write("b")
+        tap_io.drain()
+        self.assertEqual(len(tap_io.lines), 0)
+
+    def test_drain_after_readline(self):
+        """readline() consumes one item; drain() returns the rest."""
+        run_srv: Mock = Mock()
+        run_srv.is_set.return_value = True
+        tap_io: TapIO = TapIO(run_srv=run_srv)
+        tap_io.write("first")
+        tap_io.write("second")
+        tap_io.write("third")
+        self.assertEqual(tap_io.readline(), "first")
+        self.assertEqual(tap_io.drain(), ["second", "third"])
+
+    def test_drain_empty(self):
+        """drain() on an empty buffer returns an empty list."""
+        tap_io: TapIO = TapIO(run_srv=threading.Event())
+        self.assertEqual(tap_io.drain(), [])
+
 
 class ChannelToShellTapTest(unittest.TestCase):
     """
@@ -478,6 +510,66 @@ class ChannelToShellTapTest(unittest.TestCase):
         self.assertEqual(self.mock_channel.recv.call_count, 3)
         # b"a" should be echoed back
         self.mock_channel.sendall.assert_any_call(b"a")
+
+    def test_channel_to_shell_tap_shell_stdout_receives_echo(self):
+        """When shell_stdout is provided, newline echo goes to shell_stdout, not channel (#96)."""
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
+        self.mock_channel.recv.side_effect = [b"\r", b"\n", b""]
+        mock_shell_stdout: Mock = Mock()
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+            shell_stdout=mock_shell_stdout,
+        )
+        mock_shell_stdout.write.assert_called_once_with("\r\n")
+        self.mock_channel.sendall.assert_not_called()
+
+    def test_channel_to_shell_tap_shell_stdout_data_then_newline(self):
+        """With shell_stdout, regular bytes echo to channel; only newline goes to shell_stdout (#96)."""
+        self.mock_run_srv.is_set.side_effect = [True] * 6 + [False]
+        self.mock_channel.recv.side_effect = [b"a", b"\r", b"\n", b""]
+        mock_shell_stdout: Mock = Mock()
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+            shell_stdout=mock_shell_stdout,
+        )
+        self.mock_channel.sendall.assert_called_once_with(b"a")
+        mock_shell_stdout.write.assert_called_once_with("\r\n")
+
+    def test_channel_to_shell_tap_no_shell_stdout_echo_to_channel(self):
+        """When shell_stdout is None (default), newline echo goes to channel.sendall (#96)."""
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
+        self.mock_channel.recv.side_effect = [b"\r", b"\n", b""]
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        self.mock_channel.sendall.assert_called_once_with(b"\r\n")
+
+    def test_channel_to_shell_tap_shell_stdout_event_clear_order(self):
+        """shell_replied_event.clear() is called after shell_stdin.write, with shell_stdout (#96)."""
+        self.mock_run_srv.is_set.side_effect = [True] * 4 + [False]
+        self.mock_channel.recv.side_effect = [b"\r", b"\n", b""]
+        mock_shell_stdout: Mock = Mock()
+        call_order: list[str] = []
+        self.mock_shell_stdin.write.side_effect = lambda x: call_order.append("shell_stdin.write")
+        mock_shell_stdout.write.side_effect = lambda x: call_order.append("shell_stdout.write")
+        self.mock_shell_replied_event.clear.side_effect = lambda: call_order.append("event.clear")
+        channel_to_shell_tap(
+            channel=self.mock_channel,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+            shell_stdout=mock_shell_stdout,
+        )
+        self.assertEqual(call_order, ["shell_stdout.write", "shell_stdin.write", "event.clear"])
 
 
 class ShellToChannelTapTest(unittest.TestCase):
