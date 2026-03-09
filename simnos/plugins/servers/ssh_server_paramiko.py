@@ -275,8 +275,7 @@ def shell_to_channel_tap(
         time.sleep(0.001)
 
         batch = _process_tap_line(line)
-        while shell_stdout.lines:
-            extra = shell_stdout.lines.pop()
+        for extra in shell_stdout.drain():
             batch += _process_tap_line(extra)
 
         log.debug("ssh_server.shell_to_channel_tap sending batch to channel %s", [batch])

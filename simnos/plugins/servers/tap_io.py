@@ -40,6 +40,16 @@ class TapIO(io.StringIO):
             return self.lines.pop()
         return ""
 
+    def drain(self) -> list[str]:
+        """Pop all buffered lines without blocking.
+
+        Returns a list in FIFO order (oldest first).
+        """
+        items: list[str] = []
+        while self.lines:
+            items.append(self.lines.pop())
+        return items
+
     def write(self, value: str):
         """
         :param value: line to add to self.lines buffer

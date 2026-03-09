@@ -2,7 +2,6 @@
 Test cases for the ssh_server_paramiko plugin.
 """
 
-from collections import deque
 import concurrent.futures
 import logging
 import os
@@ -491,7 +490,7 @@ class ShellToChannelTapTest(unittest.TestCase):
         self.mock_channel: Mock = Mock()
         self.mock_channel.closed = False
         self.mock_shell_stdout: Mock = Mock()
-        self.mock_shell_stdout.lines = deque()
+        self.mock_shell_stdout.drain.return_value = []
         self.mock_shell_replied_event: Mock = Mock()
         self.mock_run_srv: Mock = Mock()
 
@@ -1551,7 +1550,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
-        mock_shell_stdout.lines = deque()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.return_value = None  # EOF
         mock_shell_replied_event = Mock()
         mock_run_srv = Mock()
@@ -1563,7 +1562,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
-        mock_shell_stdout.lines = deque()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.return_value = "test line"
         mock_channel.sendall.side_effect = OSError(32, "Broken pipe")
         mock_shell_replied_event = Mock()
@@ -1576,7 +1575,7 @@ class TeardownFixTests(unittest.TestCase):
         mock_channel = Mock()
         mock_channel.closed = False
         mock_shell_stdout = Mock()
-        mock_shell_stdout.lines = deque()
+        mock_shell_stdout.drain.return_value = []
         mock_shell_stdout.readline.side_effect = ["hello\r\n", None]
         # First sendall times out, second succeeds
         mock_channel.sendall.side_effect = [TimeoutError(), None]
