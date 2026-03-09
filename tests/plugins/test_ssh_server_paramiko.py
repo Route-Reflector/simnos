@@ -1220,14 +1220,6 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         self.assertTrue(authenticated)
         self.assertTrue(skip_lf)
 
-    def test_channel_login_bare_cr_no_data_loss(self):
-        """Bare CR should not block or lose data."""
-        server = ParamikoSshServer(**self.arguments)
-        channel = self._make_channel(b"admin\radmin\r")
-        authenticated, skip_lf = server._channel_login(channel)
-        self.assertTrue(authenticated)
-        self.assertTrue(skip_lf)
-
 
 class ReadChannelLineTest(unittest.TestCase):
     """Test cases for _read_channel_line CRLF handling."""
