@@ -51,9 +51,7 @@ class TapIO(io.StringIO):
         return items
 
     def write(self, value: str):
-        """
-        :param value: line to add to self.lines buffer
-        """
+        """Append *value* to the buffer and wake any blocked ``readline()``."""
         self.lines.appendleft(value)
         with self._cond:
             self._cond.notify()
