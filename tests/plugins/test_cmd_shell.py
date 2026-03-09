@@ -400,9 +400,11 @@ class HotReloadTest(TestCase):
             output = conn.send_command("test")
             assert output == "% Invalid input detected at '^' marker."
             change_file()
-            output = conn.send_command("test")
-            undo_change_file()
-            assert output == "test output"
+            try:
+                output = conn.send_command("test")
+                assert output == "test output"
+            finally:
+                undo_change_file()
 
     @pytest.mark.skipif(detect.windows, reason="Windows does not allow file movement on Github runners")
     @simnos(platform="cisco_ios", return_instance=True)
@@ -435,6 +437,8 @@ class HotReloadTest(TestCase):
             output = conn.send_command("show version")
             assert output != "test output"
             change_file()
-            output = conn.send_command("show version")
-            undo_change_file()
-            assert output == "test output"
+            try:
+                output = conn.send_command("show version")
+                assert output == "test output"
+            finally:
+                undo_change_file()
