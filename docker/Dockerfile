@@ -30,6 +30,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ============ Runtime ============
 FROM python:${PYTHON_VER}-alpine
 
+# Apply security updates to base image packages (e.g. zlib CVEs)
+RUN apk upgrade --no-cache
+
 # Non-root user for security
 RUN addgroup -S -g 456 nonroot \
     && adduser -S -u 456 -G nonroot -D -s /bin/sh nonroot
