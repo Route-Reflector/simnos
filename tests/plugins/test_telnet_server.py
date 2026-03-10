@@ -777,7 +777,10 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         mock_recv.side_effect = [b"\r", None]
         self.run_srv.is_set.side_effect = [True] * 5 + [False]
         self.server.socket_to_shell_tap(
-            self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv,
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
             shell_stdout=self.shell_stdout,
         )
         self.shell_stdout.write.assert_called_once_with("\r\n")
@@ -792,7 +795,10 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         mock_recv.side_effect = [b"\r", None]
         self.run_srv.is_set.side_effect = [True] * 5 + [False]
         self.server.socket_to_shell_tap(
-            self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv,
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
         )
         self.sock.sendall.assert_any_call(b"\r\n")
 
@@ -803,7 +809,10 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         mock_recv.side_effect = [b"a", None]
         self.run_srv.is_set.side_effect = [True, True, True, False]
         self.server.socket_to_shell_tap(
-            self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv,
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
             shell_stdout=self.shell_stdout,
         )
         self.sock.sendall.assert_called_with(b"a")
