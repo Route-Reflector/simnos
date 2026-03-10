@@ -346,6 +346,8 @@ class TelnetServer(TCPServerBase):
                 batch += process_tap_line(extra)
 
             log.debug("telnet_server.shell_to_socket_tap sending batch to socket: %s", [batch])
+            if not run_srv.is_set():
+                break
             try:
                 sock.sendall(batch.encode(encoding="utf-8"))
             except OSError as e:
