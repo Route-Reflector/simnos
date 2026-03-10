@@ -428,7 +428,8 @@ class TelnetServer(TCPServerBase):
                 return
             if not auth_ok:
                 log.warning("Telnet authentication failed, closing connection")
-                client.sendall(b"Authentication failed.\r\n")
+                with contextlib.suppress(OSError):
+                    client.sendall(b"Authentication failed.\r\n")
                 return
 
             # Create stdio for the shell
