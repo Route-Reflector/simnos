@@ -15,7 +15,7 @@ import paramiko.rsakey
 
 from simnos.core.nos import Nos
 from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
-from simnos.plugins.servers.tap_io import TapIO
+from simnos.plugins.servers.tap_io import TapIO, process_tap_line
 
 log = logging.getLogger(__name__)
 
@@ -240,15 +240,6 @@ def channel_to_shell_tap(
     run_srv.clear()
 
 
-def _process_tap_line(line: str) -> str:
-    """Sanitise a single line from shell stdout for the SSH channel."""
-    if "\x00" in line:
-        line = line.replace("\x00", "")
-    if "\r\n" not in line and "\n" in line:
-        line = line.replace("\n", "\r\n")
-    return line
-
-
 def shell_to_channel_tap(
     channel: paramiko.Channel,
     shell_stdout: TapIO,
@@ -281,7 +272,7 @@ def shell_to_channel_tap(
         # after the newline echo, so both are sent in one packet.
         time.sleep(0.001)
 
-        batch = _process_tap_line(line)
+        batch = process_tap_line(line)
         drained = shell_stdout.drain()
 
         if not drained and batch.strip() == "":
@@ -290,7 +281,7 @@ def shell_to_channel_tap(
             # does so we never send a bare echo as a separate packet.
             next_line = shell_stdout.readline()
             if next_line:
-                batch += _process_tap_line(next_line)
+                batch += process_tap_line(next_line)
                 # Drain any extra items that arrived alongside the prompt.
                 time.sleep(0.001)
                 drained = shell_stdout.drain()
@@ -301,7 +292,7 @@ def shell_to_channel_tap(
             # "SimNOS>SimNOS>..." which breaks netmiko's find_prompt().
             if batch and not batch.endswith("\n"):
                 batch += "\r\n"
-            batch += _process_tap_line(extra)
+            batch += process_tap_line(extra)
 
         log.debug("ssh_server.shell_to_channel_tap sending batch to channel %s", [batch])
         written = False

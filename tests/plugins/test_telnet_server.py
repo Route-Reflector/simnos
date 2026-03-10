@@ -676,6 +676,7 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.server = _make_server()
         self.sock = MagicMock(spec=socket.socket)
         self.shell_stdout = MagicMock()
+        self.shell_stdout.drain.return_value = []
         self.shell_replied_event = MagicMock()
         self.run_srv = MagicMock()
 
@@ -694,10 +695,9 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
-    def test_run_srv_recheck_after_readline(self):
-        """Loop rechecks run_srv after blocking readline."""
-        self.shell_stdout.readline.return_value = "Router>\r\n"
-        # 1. loop start, 2. after readline
+    def test_run_srv_cleared_skips_sendall(self):
+        """When run_srv is cleared after readline, sendall is skipped."""
+        self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
         self.run_srv.is_set.side_effect = [True, False]
         self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_not_called()
@@ -730,6 +730,92 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.run_srv.is_set.side_effect = [True, True, False]
         self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.set.assert_called_once()
+
+    def test_echo_only_blocks_for_prompt(self):
+        """Whitespace-only first line blocks on second readline for prompt."""
+        self.shell_stdout.readline.side_effect = ["\r\n", "Router>", ""]
+        self.shell_stdout.drain.side_effect = [[], [], []]
+        self.run_srv.is_set.side_effect = [True, True, True, False]
+        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        # Echo and prompt are sent together in one sendall
+        self.sock.sendall.assert_called_once_with(b"\r\nRouter>")
+
+    def test_drain_coalesces_multiple_lines(self):
+        """Drained lines are coalesced into a single sendall."""
+        self.shell_stdout.readline.side_effect = ["line1\r\n", ""]
+        self.shell_stdout.drain.side_effect = [["line2\r\n", "Router>"], []]
+        self.run_srv.is_set.side_effect = [True, True, False]
+        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.sock.sendall.assert_called_once_with(b"line1\r\nline2\r\nRouter>")
+
+    def test_prompt_separator_prevents_concatenation(self):
+        """Consecutive prompts without trailing newline get \\r\\n separator."""
+        self.shell_stdout.readline.side_effect = ["Router>", ""]
+        self.shell_stdout.drain.side_effect = [["Router>"], []]
+        self.run_srv.is_set.side_effect = [True, True, False]
+        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        # Prompts are separated, not concatenated as "Router>Router>"
+        self.sock.sendall.assert_called_once_with(b"Router>\r\nRouter>")
+
+
+class SocketToShellTapShellStdoutTest(unittest.TestCase):
+    """Test echo routing via shell_stdout parameter."""
+
+    def setUp(self):
+        self.server = _make_server()
+        self.sock = MagicMock(spec=socket.socket)
+        self.shell_stdin = MagicMock()
+        self.shell_stdout = MagicMock()
+        self.shell_replied_event = MagicMock()
+        self.shell_replied_event.wait.return_value = True
+        self.run_srv = MagicMock()
+
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch.object(TelnetServer, "_recv_byte")
+    def test_newline_echo_routed_to_shell_stdout(self, mock_recv, _mock_sleep):
+        """When shell_stdout is provided, newline echo goes to shell_stdout, not socket."""
+        mock_recv.side_effect = [b"\r", None]
+        self.run_srv.is_set.side_effect = [True] * 5 + [False]
+        self.server.socket_to_shell_tap(
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
+            shell_stdout=self.shell_stdout,
+        )
+        self.shell_stdout.write.assert_called_once_with("\r\n")
+        # Socket should NOT receive the newline echo
+        sendall_args = [call.args[0] for call in self.sock.sendall.call_args_list]
+        self.assertNotIn(b"\r\n", sendall_args)
+
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch.object(TelnetServer, "_recv_byte")
+    def test_newline_echo_to_socket_without_shell_stdout(self, mock_recv, _mock_sleep):
+        """Without shell_stdout, newline echo goes directly to socket."""
+        mock_recv.side_effect = [b"\r", None]
+        self.run_srv.is_set.side_effect = [True] * 5 + [False]
+        self.server.socket_to_shell_tap(
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
+        )
+        self.sock.sendall.assert_any_call(b"\r\n")
+
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch.object(TelnetServer, "_recv_byte")
+    def test_normal_byte_still_echoed_to_socket(self, mock_recv, _mock_sleep):
+        """Normal bytes are always echoed directly to socket, even with shell_stdout."""
+        mock_recv.side_effect = [b"a", None]
+        self.run_srv.is_set.side_effect = [True, True, True, False]
+        self.server.socket_to_shell_tap(
+            self.sock,
+            self.shell_stdin,
+            self.shell_replied_event,
+            self.run_srv,
+            shell_stdout=self.shell_stdout,
+        )
+        self.sock.sendall.assert_called_with(b"a")
 
 
 class WatchdogTest(unittest.TestCase):
