@@ -16,7 +16,7 @@ from typing import Any
 
 from simnos.core.nos import Nos
 from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
-from simnos.plugins.servers.tap_io import TapIO
+from simnos.plugins.servers.tap_io import TapIO, process_tap_line
 
 log = logging.getLogger(__name__)
 
@@ -211,8 +211,18 @@ class TelnetServer(TCPServerBase):
         shell_stdin: TapIO,
         shell_replied_event: threading.Event,
         run_srv: threading.Event,
+        *,
+        shell_stdout: TapIO | None = None,
     ) -> None:
-        """Read bytes from socket and forward complete lines to shell stdin."""
+        """Read bytes from socket and forward complete lines to shell stdin.
+
+        When *shell_stdout* is provided, the newline echo (``\\r\\n``) for
+        line-ending bytes is written to *shell_stdout* instead of being sent
+        directly to the socket.  ``shell_to_socket_tap`` then batches the
+        echo together with the shell's response into a single ``sendall()``,
+        preventing a race where the client reads the echo and the prompt as
+        separate TCP segments (#94).
+        """
         buffer: io.BytesIO = io.BytesIO()
         skip_lf = False  # Set after \r to consume the trailing \n of CR LF
         while run_srv.is_set():
@@ -251,7 +261,10 @@ class TelnetServer(TCPServerBase):
             try:
                 if byte in (b"\r", b"\n"):
                     skip_lf = byte == b"\r"
-                    sock.sendall(b"\r\n")
+                    if shell_stdout is not None:
+                        shell_stdout.write("\r\n")
+                    else:
+                        sock.sendall(b"\r\n")
                     log.debug("telnet_server.socket_to_shell_tap echoing newline to socket")
                     buffer.write(byte)
                     buffer.seek(0)
@@ -286,20 +299,55 @@ class TelnetServer(TCPServerBase):
         shell_replied_event: threading.Event,
         run_srv: threading.Event,
     ) -> None:
-        """Read lines from shell stdout and send them to the socket."""
+        """Read lines from shell stdout and send them to the socket.
+
+        After reading the first available line, a brief coalescing pause
+        (1 ms) allows the shell to enqueue additional output (e.g. a prompt
+        following a newline echo).  All available lines are then sent in a
+        single ``sendall()`` call so the client receives them in one TCP
+        segment, avoiding a race where echo and prompt arrive separately
+        (#94, mirrors SSH fix in #87).
+
+        When the first line is whitespace-only (a newline echo from
+        ``socket_to_shell_tap``), the function blocks on a second
+        ``readline()`` instead of sending the echo alone.  This guarantees
+        the echo and the prompt that follows it are always delivered in the
+        same ``sendall()`` call.
+        """
         while run_srv.is_set():
             line = shell_stdout.readline()
             if not line:
                 break
-            if not run_srv.is_set():
-                break
-            if "\x00" in line:
-                line = line.replace("\x00", "")
-            if "\r\n" not in line and "\n" in line:
-                line = line.replace("\n", "\r\n")
-            log.debug("telnet_server.shell_to_socket_tap sending line to socket: %s", [line])
+
+            # Coalesce: brief pause lets the shell enqueue the prompt
+            # after the newline echo, so both are sent in one segment.
+            time.sleep(0.001)
+
+            batch = process_tap_line(line)
+            drained = shell_stdout.drain()
+
+            if not drained and batch.strip() == "":
+                # Echo-only batch (e.g. "\r\n") with nothing else queued.
+                # The shell hasn't produced the prompt yet — block until it
+                # does so we never send a bare echo as a separate segment.
+                next_line = shell_stdout.readline()
+                if next_line:
+                    batch += process_tap_line(next_line)
+                    # Drain any extra items that arrived alongside the prompt.
+                    time.sleep(0.001)
+                    drained = shell_stdout.drain()
+
+            for extra in drained:
+                # Separate consecutive lines that don't end with a newline
+                # (e.g. prompts) so they aren't concatenated into one string
+                # which breaks netmiko's find_prompt().
+                if batch and not batch.endswith("\n"):
+                    batch += "\r\n"
+                batch += process_tap_line(extra)
+
+            log.debug("telnet_server.shell_to_socket_tap sending batch to socket: %s", [batch])
             try:
-                sock.sendall(line.encode(encoding="utf-8"))
+                sock.sendall(batch.encode(encoding="utf-8"))
             except OSError as e:
                 log.error("telnet_server.shell_to_socket_tap socket write error: %s", e)
                 break
@@ -388,6 +436,7 @@ class TelnetServer(TCPServerBase):
             socket_to_shell_tapper = threading.Thread(
                 target=self.socket_to_shell_tap,
                 args=(client, shell_stdin, shell_replied_event, run_srv),
+                kwargs={"shell_stdout": shell_stdout},
                 daemon=True,
             )
             socket_to_shell_tapper.start()

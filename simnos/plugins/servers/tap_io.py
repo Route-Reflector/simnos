@@ -55,3 +55,18 @@ class TapIO(io.StringIO):
         self.lines.appendleft(value)
         with self._cond:
             self._cond.notify()
+
+
+def process_tap_line(line: str) -> str:
+    """Sanitise a single line from shell stdout for the network client.
+
+    - Strips NUL bytes.
+    - Converts bare ``\\n`` to ``\\r\\n`` (leaves existing ``\\r\\n`` intact).
+
+    Shared by both SSH and Telnet tap functions.
+    """
+    if "\x00" in line:
+        line = line.replace("\x00", "")
+    if "\r\n" not in line and "\n" in line:
+        line = line.replace("\n", "\r\n")
+    return line

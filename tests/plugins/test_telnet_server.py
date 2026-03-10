@@ -676,6 +676,7 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.server = _make_server()
         self.sock = MagicMock(spec=socket.socket)
         self.shell_stdout = MagicMock()
+        self.shell_stdout.drain.return_value = []
         self.shell_replied_event = MagicMock()
         self.run_srv = MagicMock()
 
@@ -694,13 +695,13 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
-    def test_run_srv_recheck_after_readline(self):
-        """Loop rechecks run_srv after blocking readline."""
-        self.shell_stdout.readline.return_value = "Router>\r\n"
-        # 1. loop start, 2. after readline
+    def test_run_srv_cleared_exits_loop(self):
+        """Loop exits when run_srv is cleared after sending."""
+        self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
         self.run_srv.is_set.side_effect = [True, False]
         self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
-        self.sock.sendall.assert_not_called()
+        # Line is sent before run_srv is rechecked (coalescing sends immediately)
+        self.sock.sendall.assert_called_once_with(b"Router>\r\n")
 
     def test_nul_stripped_from_line(self):
         """NUL bytes are stripped from the shell output."""
