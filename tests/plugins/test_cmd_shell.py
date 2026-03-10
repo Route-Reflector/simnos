@@ -5,6 +5,7 @@ Module to test the cmd_shell plugin.
 import importlib
 import os
 import shutil
+import tempfile
 import threading
 import time
 from unittest import TestCase
@@ -381,8 +382,16 @@ class HotReloadTest(TestCase):
             with open(original_filename, encoding="utf-8") as file:
                 values = yaml.safe_load(file)
             values["commands"].update(test_commands)
-            with open(original_filename, "w", encoding="utf-8") as file:
-                file.write(yaml.dump(values))
+            # Write to a temp file then atomically replace to avoid
+            # exposing an empty/partial file to parallel test workers.
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".yaml")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as file:
+                    file.write(yaml.dump(values))
+                os.replace(tmp, original_filename)
+            except BaseException:
+                os.unlink(tmp)
+                raise
 
         def undo_change_file():
             os.remove(original_filename)
@@ -417,8 +426,16 @@ class HotReloadTest(TestCase):
 
         def change_file():
             shutil.copyfile(original_filename, copy_filename)
-            with open(original_filename, "w", encoding="utf-8") as file:
-                file.write("test output")
+            # Write to a temp file then atomically replace to avoid
+            # exposing an empty/partial file to parallel test workers.
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".j2")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as file:
+                    file.write("test output")
+                os.replace(tmp, original_filename)
+            except BaseException:
+                os.unlink(tmp)
+                raise
 
         def undo_change_file():
             os.remove(original_filename)
