@@ -783,7 +783,7 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         self.shell_stdout.write.assert_called_once_with("\r\n")
         # Socket should NOT receive the newline echo
         sendall_args = [call.args[0] for call in self.sock.sendall.call_args_list]
-        assert b"\r\n" not in sendall_args
+        self.assertNotIn(b"\r\n", sendall_args)
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")

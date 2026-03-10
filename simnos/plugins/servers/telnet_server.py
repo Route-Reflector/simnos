@@ -265,7 +265,7 @@ class TelnetServer(TCPServerBase):
                         shell_stdout.write("\r\n")
                     else:
                         sock.sendall(b"\r\n")
-                    log.debug("telnet_server.socket_to_shell_tap echoing newline to socket")
+                    log.debug("telnet_server.socket_to_shell_tap echoing newline")
                     buffer.write(byte)
                     buffer.seek(0)
                     line = buffer.read().decode(encoding="utf-8")
