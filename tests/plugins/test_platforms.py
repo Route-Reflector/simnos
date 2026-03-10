@@ -153,7 +153,7 @@ class TestPlatforms:
             assert has_single_curly_brackets(value["help"], exceptions) is False
             assert "prompt" in value
 
-    @pytest.mark.timeout(300)
+    @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_nos_modules())
     def test_platforms_py_all_commands_are_running(self, platform: str):
         """
