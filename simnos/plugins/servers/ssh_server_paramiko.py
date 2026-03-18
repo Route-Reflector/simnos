@@ -232,7 +232,6 @@ def channel_to_shell_tap(
                     [byte],
                 )
                 buffer.write(byte)
-            time.sleep(0.01)
         except (OSError, EOFError, paramiko.SSHException) as e:
             log.error("ssh_server.channel_to_shell_tap channel write error: %s", e)
             break
