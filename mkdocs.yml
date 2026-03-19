@@ -83,6 +83,7 @@ nav:
       - Documentation: "development/documentation.md"
       - Tasks: "development/tasks.md"
   - Collaborators: "collaborators.md"
+  - Changelog: "changelog.md"
   - API:
       - Core API: "api/core_api_reference.md"
       - Built-in Plugins API: "api/builtin_plugins_api_reference.md"
