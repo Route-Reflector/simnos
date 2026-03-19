@@ -4,7 +4,9 @@ look for simnos/plugins/servers/ssh_server_paramiko.py
 """
 
 from abc import ABC, abstractmethod
+import contextlib
 import logging
+import selectors
 import socket
 import sys
 import threading
@@ -50,9 +52,6 @@ class TCPServerBase(ABC):
     """
     Base class for a TCP Server.
     It provides the methods to start and stop the server.
-
-    Note: We are looking to switch to socketserver as it is
-    the standard library in python.
     """
 
     def __init__(self, address="localhost", port=6000, timeout=1):
@@ -68,6 +67,9 @@ class TCPServerBase(ABC):
         self.client_shell = None
         self._listen_thread = None
         self._connection_threads = []
+        self._wakeup_r: socket.socket | None = None
+        self._wakeup_w: socket.socket | None = None
+        self._selector: selectors.BaseSelector | None = None
 
     def start(self):
         """
@@ -79,12 +81,23 @@ class TCPServerBase(ABC):
             return
 
         self._is_running.set()
+        try:
+            self._bind_sockets()
+            self._socket.listen()
 
-        self._bind_sockets()
-        self._socket.listen()
+            self._wakeup_r, self._wakeup_w = socket.socketpair()
+            self._wakeup_r.setblocking(False)
 
-        self._listen_thread = threading.Thread(target=self._listen)
-        self._listen_thread.start()
+            self._selector = selectors.DefaultSelector()
+            self._selector.register(self._socket, selectors.EVENT_READ, data="listen")
+            self._selector.register(self._wakeup_r, selectors.EVENT_READ, data="wakeup")
+
+            self._listen_thread = threading.Thread(target=self._listen)
+            self._listen_thread.start()
+        except Exception:
+            self._cleanup_resources()
+            self._is_running.clear()
+            raise
 
     def _bind_sockets(self):
         """
@@ -98,7 +111,7 @@ class TCPServerBase(ABC):
         if sys.platform in ["linux"]:
             self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, True)
 
-        self._socket.settimeout(self.timeout)
+        self._socket.setblocking(False)
         self._socket.bind((self.address, self.port))
 
     @property
@@ -118,36 +131,84 @@ class TCPServerBase(ABC):
             return
 
         self._is_running.clear()
-        self._listen_thread.join(timeout=5)
-        self._socket.close()
 
-        alive = join_threads_with_deadline(self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN)
-        if alive:
-            log.warning("%d connection thread(s) did not exit within %ds", len(alive), _STOP_DEADLINE)
+        if self._wakeup_w is not None:
+            with contextlib.suppress(OSError):
+                self._wakeup_w.send(b"\x00")
+
+        self._listen_thread.join(timeout=2)
+
+        try:
+            alive = join_threads_with_deadline(self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN)
+            if alive:
+                log.warning(
+                    "%d connection thread(s) did not exit within %ds",
+                    len(alive),
+                    _STOP_DEADLINE,
+                )
+        finally:
+            self._cleanup_resources()
+
+    def _cleanup_resources(self):
+        """Safely close selector, wakeup socketpair, and listen socket."""
+        if self._selector is not None:
+            with contextlib.suppress(Exception):
+                self._selector.close()
+            self._selector = None
+        if self._socket is not None:
+            with contextlib.suppress(OSError):
+                self._socket.close()
+            self._socket = None
+        for sock in (self._wakeup_r, self._wakeup_w):
+            if sock is not None:
+                with contextlib.suppress(OSError):
+                    sock.close()
+        self._wakeup_r = self._wakeup_w = None
 
     def _listen(self):
         """
-        This function is constantly running if the server is running.
-        It waits for a connection, and if a connection is made, it will
-        call the connection function.
+        Wait for connections using selectors.
+        A wakeup socketpair allows stop() to unblock select() instantly
+        instead of waiting for the timeout to expire.
         """
         while self._is_running.is_set():
             try:
-                client, _ = self._socket.accept()
-                connection_thread = threading.Thread(
-                    target=self.connection_function,
-                    args=(
-                        client,
-                        self._is_running,
-                    ),
-                )
-                connection_thread.start()
-                self._connection_threads.append(connection_thread)
-            except TimeoutError:
-                pass
-            finally:
-                # Prune finished threads to prevent unbounded growth
-                self._connection_threads = [t for t in self._connection_threads if t.is_alive()]
+                # select(timeout=1) is a safety net. Normal shutdown is
+                # signalled via the wakeup socket and returns immediately.
+                events = self._selector.select(timeout=1)
+            except (OSError, ValueError):
+                break  # selector was closed
+
+            # Check wakeup first: if shutdown and accept fire simultaneously,
+            # skip accept and exit immediately.
+            for key, _ in events:
+                if key.data == "wakeup":
+                    return
+
+            # No wakeup — process accept events.
+            for key, _ in events:
+                if key.data == "listen":
+                    try:
+                        client, _ = self._socket.accept()
+                    except BlockingIOError:
+                        continue  # spurious wakeup
+                    except OSError:
+                        break  # socket was closed (shutdown path)
+
+                    # listen socket is non-blocking, so accepted client
+                    # inherits that mode (OS-dependent). Restore blocking
+                    # before handing to connection_function (e.g. paramiko).
+                    client.setblocking(True)
+
+                    connection_thread = threading.Thread(
+                        target=self.connection_function,
+                        args=(client, self._is_running),
+                    )
+                    connection_thread.start()
+                    self._connection_threads.append(connection_thread)
+
+            # Prune finished threads to prevent unbounded growth
+            self._connection_threads = [t for t in self._connection_threads if t.is_alive()]
 
     @abstractmethod
     def connection_function(self, client, is_running):
