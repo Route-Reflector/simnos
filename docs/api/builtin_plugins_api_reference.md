@@ -13,7 +13,7 @@ full potential.
 
 ## Servers Plugins
 
-Servers Plugins acts as an access layer, simulating device connections.
+Server plugins act as an access layer, simulating device connections.
 
 ### ParamikoSshServer
 
@@ -43,8 +43,8 @@ This is an internal helper, not a public API.
 
 ## Shell Plugins
 
-Shell Plugins act as a plumbing between servers plugins and NOS plugins,
-gluing, connecting them together.
+Shell plugins act as plumbing between server plugins and NOS plugins,
+connecting them together.
 
 ### CMDShell
 

@@ -273,8 +273,8 @@ and `TelnetServer` (Telnet) plugins.
 The following JSON Schema is auto-generated from `ModelSimnosInventory.model_json_schema()`:
 
 ```python
-from simnos.core.pydantic_models import ModelSimnosInventory
 import json
+from simnos.core.pydantic_models import ModelSimnosInventory
 print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 ```
 
