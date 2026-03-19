@@ -57,7 +57,7 @@ class TCPServerBase(ABC):
     def __init__(self, address="localhost", port=6000, timeout=1):
         """
         Initialize the server with the address and port
-        and the timeout for the socket.
+        and the safety-net timeout for select() (seconds).
         """
         self.address = address
         self.port = port
@@ -173,9 +173,9 @@ class TCPServerBase(ABC):
         """
         while self._is_running.is_set():
             try:
-                # select(timeout=1) is a safety net. Normal shutdown is
+                # select(timeout) is a safety net. Normal shutdown is
                 # signalled via the wakeup socket and returns immediately.
-                events = self._selector.select(timeout=1)
+                events = self._selector.select(timeout=self.timeout)
             except (OSError, ValueError):
                 break  # selector was closed
 
