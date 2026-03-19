@@ -284,7 +284,6 @@ class TelnetServer(TCPServerBase):
                         [byte],
                     )
                     buffer.write(byte)
-                time.sleep(0.01)
             except OSError as e:
                 log.error("telnet_server.socket_to_shell_tap socket write error: %s", e)
                 break
