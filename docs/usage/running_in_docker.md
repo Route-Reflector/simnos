@@ -76,3 +76,10 @@ hosts:
 
 Adjust inventory settings before running the container or update inventory content
 and restart `simnos` container to apply changes - `docker restart simnos`
+
+## Security
+
+The SIMNOS Docker image includes the following security measures:
+
+- **Non-root user:** The container runs as a non-root user (`nonroot`, UID 456) to limit the impact of potential vulnerabilities.
+- **Security patches:** The image applies `apk upgrade --no-cache` during build to include security patches available at build time. To get the latest patches, re-pull or re-build the image periodically.
