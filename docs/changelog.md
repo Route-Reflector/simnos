@@ -3,6 +3,12 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## Unreleased
+
+**CI/CD**
+
+- Update GitHub Actions to Node.js 24 compatible versions (#112)
+
 ## v2.1.2
 
 **Performance**
@@ -13,7 +19,6 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 **Security**
 
 - Upgrade dependencies to fix 7 Dependabot alerts: urllib3, filelock, virtualenv, pynacl (#111)
-- Update GitHub Actions to Node.js 24 compatible versions (#112)
 
 ## v2.1.1
 

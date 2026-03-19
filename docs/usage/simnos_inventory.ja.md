@@ -261,254 +261,23 @@ Windows キーを押して、`Manage Optional Features` と入力します。Ope
 
 SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/)
 モデルを使用してインベントリデータを検証し、インベントリが定義されたスキーマに
-準拠しない場合は `ValidationError` を発生させます。
+準拠しない場合は `ValidationError` を発生させます。サーバーセクションは
+`ParamikoSshServer`（SSH）と `TelnetServer`（Telnet）の両方のプラグインをサポートしています。
 
-インベントリは Pydantic モデルでモデリングされていますが、同等の JSON スキーマは
-以下のようになります:
+以下のコマンドで現在の JSON スキーマを生成できます:
 
-```json
-{
-    "title": "ModelSimnosInventory",
-    "description": "SIMNOS inventory data schema",
-    "type": "object",
-    "properties": {
-        "default": {
-            "$ref": "#/definitions/InventoryDefaultSection"
-        },
-        "hosts": {
-            "title": "Hosts",
-            "type": "object",
-            "additionalProperties": {
-                "$ref": "#/definitions/HostConfig"
-            }
-        }
-    },
-    "required": [
-        "hosts"
-    ],
-    "additionalProperties": false,
-    "definitions": {
-        "ParamikoSshServerConfig": {
-            "title": "ParamikoSshServerConfig",
-            "type": "object",
-            "properties": {
-                "ssh_key_file": {
-                    "title": "Ssh Key File",
-                    "type": "string"
-                },
-                "ssh_key_file_password": {
-                    "title": "Ssh Key File Password",
-                    "type": "string"
-                },
-                "ssh_banner": {
-                    "title": "Ssh Banner",
-                    "default": "SIMNOS Paramiko SSH Server",
-                    "type": "string"
-                },
-                "timeout": {
-                    "title": "Timeout",
-                    "default": 1,
-                    "type": "integer"
-                },
-                "address": {
-                    "title": "Address",
-                    "anyOf": [
-                        {
-                            "enum": [
-                                "localhost"
-                            ],
-                            "type": "string"
-                        },
-                        {
-                            "type": "string",
-                            "format": "ipvanyaddress"
-                        }
-                    ]
-                },
-                "watchdog_interval": {
-                    "title": "Watchdog Interval",
-                    "default": 1,
-                    "type": "integer"
-                }
-            }
-        },
-        "ParamikoSshServerPlugin": {
-            "title": "ParamikoSshServerPlugin",
-            "type": "object",
-            "properties": {
-                "plugin": {
-                    "title": "Plugin",
-                    "enum": [
-                        "ParamikoSshServer"
-                    ],
-                    "type": "string"
-                },
-                "configuration": {
-                    "$ref": "#/definitions/ParamikoSshServerConfig"
-                }
-            },
-            "required": [
-                "plugin"
-            ]
-        },
-        "CMDShellConfig": {
-            "title": "CMDShellConfig",
-            "type": "object",
-            "properties": {
-                "intro": {
-                    "title": "Intro",
-                    "default": "Custom SSH Shell",
-                    "type": "string"
-                },
-                "ruler": {
-                    "title": "Ruler",
-                    "default": "",
-                    "type": "string"
-                },
-                "completekey": {
-                    "title": "Completekey",
-                    "default": "tab",
-                    "type": "string"
-                },
-                "newline": {
-                    "title": "Newline",
-                    "default": "\r\n",
-                    "type": "string"
-                }
-            }
-        },
-        "CMDShellPlugin": {
-            "title": "CMDShellPlugin",
-            "type": "object",
-            "properties": {
-                "plugin": {
-                    "title": "Plugin",
-                    "enum": [
-                        "CMDShell"
-                    ],
-                    "type": "string"
-                },
-                "configuration": {
-                    "$ref": "#/definitions/CMDShellConfig"
-                }
-            },
-            "required": [
-                "plugin"
-            ]
-        },
-        "NosPlugin": {
-            "title": "NosPlugin",
-            "type": "object",
-            "properties": {
-                "plugin": {
-                    "title": "Plugin",
-                    "type": "string"
-                },
-                "configuration": {
-                    "title": "Configuration",
-                    "type": "object"
-                }
-            },
-            "required": [
-                "plugin"
-            ]
-        },
-        "InventoryDefaultSection": {
-            "title": "InventoryDefaultSection",
-            "type": "object",
-            "properties": {
-                "username": {
-                    "title": "Username",
-                    "type": "string"
-                },
-                "password": {
-                    "title": "Password",
-                    "type": "string"
-                },
-                "port": {
-                    "title": "Port",
-                    "anyOf": [
-                        {
-                            "type": "integer",
-                            "exclusiveMinimum": 0,
-                            "maximum": 65535
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "exclusiveMinimum": 0,
-                                "maximum": 65535
-                            },
-                            "minItems": 2,
-                            "maxItems": 2,
-                            "uniqueItems": true
-                        }
-                    ]
-                },
-                "server": {
-                    "$ref": "#/definitions/ParamikoSshServerPlugin"
-                },
-                "shell": {
-                    "$ref": "#/definitions/CMDShellPlugin"
-                },
-                "nos": {
-                    "$ref": "#/definitions/NosPlugin"
-                }
-            }
-        },
-        "HostConfig": {
-            "title": "HostConfig",
-            "type": "object",
-            "properties": {
-                "username": {
-                    "title": "Username",
-                    "type": "string"
-                },
-                "password": {
-                    "title": "Password",
-                    "type": "string"
-                },
-                "port": {
-                    "title": "Port",
-                    "anyOf": [
-                        {
-                            "type": "integer",
-                            "exclusiveMinimum": 0,
-                            "maximum": 65535
-                        },
-                        {
-                            "type": "array",
-                            "items": {
-                                "type": "integer",
-                                "exclusiveMinimum": 0,
-                                "maximum": 65535
-                            },
-                            "minItems": 2,
-                            "maxItems": 2,
-                            "uniqueItems": true
-                        }
-                    ]
-                },
-                "server": {
-                    "$ref": "#/definitions/ParamikoSshServerPlugin"
-                },
-                "shell": {
-                    "$ref": "#/definitions/CMDShellPlugin"
-                },
-                "nos": {
-                    "$ref": "#/definitions/NosPlugin"
-                },
-                "replicas": {
-                    "title": "Replicas",
-                    "exclusiveMinimum": 0,
-                    "type": "integer"
-                }
-            }
-        }
-    }
-}
+```python
+import json
+from simnos.core.pydantic_models import ModelSimnosInventory
+print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 ```
+
+スキーマの要点:
+
+- `server` は `ParamikoSshServerPlugin` または `TelnetServerPlugin` のいずれかを受け入れます（`anyOf`）
+- `ParamikoSshServerConfig` の設定項目: `ssh_key_file`, `ssh_key_file_password`, `ssh_banner`, `timeout`, `address`, `watchdog_interval`, `authorized_keys`
+- `TelnetServerConfig` の設定項目: `banner`, `timeout`, `address`, `watchdog_interval`
+- すべての設定フィールドは任意で、適切なデフォルト値が設定されています
 
 ## インベントリオプション
 以下のオプションは、`default` セクションまたは `hosts` セクションのいずれかで使用して、デフォルト値を上書きできます。
@@ -535,14 +304,40 @@ SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/
 
 ### Server configuration options
 
+SIMNOS は2つのサーバープラグインをサポートしています: **ParamikoSshServer**（SSH、デフォルト）と **TelnetServer**（Telnet）。
+
+#### 共通オプション（SSH・Telnet 両方）
+
+| オプション                 | 絵文字                     | 説明                                  | 例                                              |
+| ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |
+| `timeout`                 | :hourglass:               | select のセーフティネットタイムアウト(秒) | `timeout: 1`                                   |
+| `address`                 | :globe_with_meridians:    | サーバーのバインドアドレス               | `address: 127.0.0.1`                           |
+| `watchdog_interval`       | :dog:                     | ウォッチドッグの間隔                    | `watchdog_interval: 1`                         |
+
+#### ParamikoSshServer オプション
+
 | オプション                 | 絵文字                     | 説明                                  | 例                                              |
 | ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |
 | `ssh_key_file`            | :key:                     | SSH 秘密鍵ファイルのパス                | `ssh_key_file: /path/to/ssh_key`               |
 | `ssh_key_file_password`   | :key:                     | SSH 秘密鍵のパスワード                  | `ssh_key_file_password: password`              |
 | `ssh_banner`              | :scroll:                  | 表示する SSH バナー                    | `ssh_banner: "Welcome to SIMNOS SSH Server"`   |
-| `timeout`                 | :hourglass:               | サーバーのタイムアウト                  | `timeout: 1`                                   |
-| `address`                 | :globe_with_meridians:    | サーバーのバインドアドレス               | `address: 127.0.0.1`                           |
-| `watchdog_interval`       | :dog:                     | ウォッチドッグの間隔                    | `watchdog_interval: 1`                         |
+| `authorized_keys`         | :lock:                    | authorized_keys ファイルのパス          | `authorized_keys: /path/to/authorized_keys`    |
+
+#### TelnetServer オプション
+
+| オプション                 | 絵文字                     | 説明                                  | 例                                              |
+| ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |
+| `banner`                  | :scroll:                  | 表示する Telnet バナー                 | `banner: "Welcome to SIMNOS Telnet Server"`    |
+
+Telnet サーバーを使用するには、サーバーセクションの `plugin` を `TelnetServer` に設定します:
+
+```yaml
+server:
+  plugin: TelnetServer
+  configuration:
+    banner: "SIMNOS Telnet Server"
+    address: "127.0.0.1"
+```
 
 
 ### Shell options

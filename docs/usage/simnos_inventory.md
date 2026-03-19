@@ -270,7 +270,7 @@ models to validate inventory data and raise `ValidationError` if inventory does
 not comply with defined schema. The server section supports both `ParamikoSshServer` (SSH)
 and `TelnetServer` (Telnet) plugins.
 
-The following JSON Schema is auto-generated from `ModelSimnosInventory.model_json_schema()`:
+You can generate the current JSON Schema with:
 
 ```python
 import json

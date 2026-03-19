@@ -11,7 +11,7 @@ full potential.
       heading_level: 4
       show_object_full_path: false
 
-## Servers Plugins
+## Server Plugins
 
 Server plugins act as an access layer, simulating device connections.
 
