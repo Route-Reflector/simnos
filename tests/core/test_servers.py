@@ -407,8 +407,6 @@ class ListenSelectorsTest(unittest.TestCase):
                 [(listen_key, None)],
             ]
         )
-        servers._socket.accept.side_effect = [BlockingIOError, MagicMock()]
-        # Patch accept to return properly on second call
         mock_client = MagicMock()
         servers._socket.accept.side_effect = [BlockingIOError, (mock_client, ("127.0.0.1", 12345))]
         servers._is_running.is_set = MagicMock(side_effect=[True, True, False])
