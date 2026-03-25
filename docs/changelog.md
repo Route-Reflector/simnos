@@ -3,11 +3,16 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
-## Unreleased
+## v2.1.3
+
+**Security**
+
+- Fix trivy-action supply chain compromise: update 0.34.1 → v0.35.0 (#117)
 
 **CI/CD**
 
-- Update GitHub Actions to Node.js 24 compatible versions (#112)
+- Update GitHub Actions to Node.js 24 compatible versions (#112, #118)
+- Add Dependabot configuration for automated weekly updates (#116)
 
 ## v2.1.2
 
