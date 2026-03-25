@@ -22,7 +22,7 @@ jobs:
       INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Install uv"
         uses: "astral-sh/setup-uv@v7"
         with:
@@ -42,7 +42,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Install uv"
         uses: "astral-sh/setup-uv@v7"
         with:
@@ -65,7 +65,7 @@ jobs:
     runs-on: "${{ matrix.os }}"
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Install uv"
         uses: "astral-sh/setup-uv@v7"
         with:
@@ -88,7 +88,7 @@ jobs:
       PYTHON_VER: ${{ matrix.python-version }}
     steps:
       - name: "Check out repository code"
-        uses: "actions/checkout@v5"
+        uses: "actions/checkout@v6"
       - name: "Install uv"
         uses: "astral-sh/setup-uv@v7"
         with:
