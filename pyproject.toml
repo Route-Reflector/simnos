@@ -88,7 +88,7 @@ dummy-variable-rgx = "^_.*"
     "S603",  # Allow subprocess calls in tests (e.g. docker compose)
     "S607",  # Allow starting a process with a partial executable path in tests
 ]
-"update_platforms.py" = [
+"sync_ntc_commands.py" = [
     "S108",  # Probably insecure usage of temp file/directory - this is a script
     "S603",  # Use of subprocess without shell=True - this is a script
     "S607",  # Starting a process with a partial executable path - this is a script
@@ -98,7 +98,7 @@ dummy-variable-rgx = "^_.*"
 force-sort-within-sections = true
 
 [tool.bandit]
-exclude_dirs = ["./tests/", "./.venv", "./docs/", "./update_platforms.py"]
+exclude_dirs = ["./tests/", "./.venv", "./docs/", "./sync_ntc_commands.py"]
 tests = ["B201", "B301"]
 skips = ["B101", "B601"]
 

@@ -16,28 +16,37 @@ from __future__ import annotations
 import argparse
 from datetime import UTC, datetime
 import os
+import shutil
 import subprocess
 import sys
 
 from ruamel.yaml import YAML
 
 NTC_REPO_URL = "https://github.com/networktocode/ntc-templates"
-NTC_LOCAL_DIR = "/tmp/ntc-templates"  # noqa: S108
+NTC_LOCAL_DIR = "/tmp/ntc-templates"
 SIMNOS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
-DEFAULT_OUTPUT_DIR = "/tmp/ntc-diff"  # noqa: S108
+DEFAULT_OUTPUT_DIR = "/tmp/ntc-diff"
 
 
 def clone_or_update_ntc(target_dir: str) -> None:
-    """Clone or pull the NTC Templates repository."""
+    """Clone or pull the NTC Templates repository.
+
+    If a local clone exists but pull fails (e.g. offline), the existing
+    clone is used as-is with a warning.
+    """
     if os.path.exists(os.path.join(target_dir, ".git")):
-        subprocess.check_call(  # noqa: S603
-            ["git", "-C", target_dir, "pull", "--quiet"],  # noqa: S607
-            stdout=subprocess.DEVNULL,
-        )
-        print(f"NTC Templates updated: {target_dir}")
+        try:
+            subprocess.check_call(
+                ["git", "-C", target_dir, "pull", "--quiet"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            print(f"NTC Templates updated: {target_dir}")
+        except subprocess.CalledProcessError:
+            print(f"WARNING: git pull failed, using existing clone: {target_dir}")
     else:
-        subprocess.check_call(  # noqa: S603
-            ["git", "clone", "--quiet", NTC_REPO_URL, target_dir],  # noqa: S607
+        subprocess.check_call(
+            ["git", "clone", "--quiet", NTC_REPO_URL, target_dir],
             stdout=subprocess.DEVNULL,
         )
         print(f"NTC Templates cloned: {target_dir}")
@@ -45,8 +54,8 @@ def clone_or_update_ntc(target_dir: str) -> None:
 
 def get_ntc_commit_sha(target_dir: str) -> str:
     """Get the current commit SHA of the NTC Templates repo."""
-    result = subprocess.run(  # noqa: S603
-        ["git", "-C", target_dir, "rev-parse", "HEAD"],  # noqa: S607
+    result = subprocess.run(
+        ["git", "-C", target_dir, "rev-parse", "HEAD"],
         capture_output=True,
         text=True,
         check=True,
@@ -95,20 +104,45 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     return commands
 
 
-def get_simnos_commands(platform: str) -> set[str]:
-    """Get command names from simnos YAML file."""
+def get_simnos_yaml_data(platform: str) -> dict | None:
+    """Load and return the full YAML data for a simnos platform."""
     yaml_path = os.path.join(SIMNOS_YAML_DIR, f"{platform}.yaml")
     if not os.path.isfile(yaml_path):
-        return set()
+        return None
 
     yaml = YAML()
     with open(yaml_path, encoding="utf-8") as f:
         data = yaml.load(f)
 
     if not data or "commands" not in data:
-        return set()
+        return None
 
-    return set(data["commands"].keys())
+    return data
+
+
+def get_simnos_commands(platform_data: dict | None) -> set[str]:
+    """Get command names from simnos YAML data."""
+    if platform_data is None:
+        return set()
+    return set(platform_data["commands"].keys())
+
+
+def get_platform_prompts(platform_data: dict | None) -> list[str]:
+    """Get prompt patterns from simnos YAML data.
+
+    Returns a list of prompt strings suitable for the 'prompt' field
+    in diff YAML output, derived from the platform's initial_prompt
+    and enable_prompt.
+    """
+    if platform_data is None:
+        return ["{base_prompt}>", "{base_prompt}#"]
+
+    initial = platform_data.get("initial_prompt", "{base_prompt}>")
+    enable = platform_data.get("enable_prompt")
+
+    if enable and enable != initial:
+        return [initial, enable]
+    return [initial]
 
 
 def get_simnos_platforms() -> set[str]:
@@ -134,6 +168,7 @@ def write_diff_file(
     new_commands: dict[str, dict],
     ntc_commit: str,
     is_new_platform: bool,
+    prompts: list[str],
 ) -> str:
     """Write diff YAML file and return the file path."""
     os.makedirs(output_dir, exist_ok=True)
@@ -146,10 +181,11 @@ def write_diff_file(
     commands_data = {}
     raw_paths = []
     for cmd_name, cmd_data in new_commands.items():
+        prompt_value = prompts[0] if len(prompts) == 1 else prompts
         commands_data[cmd_name] = {
             "output": cmd_data["output"],
             "help": f'execute the command "{cmd_name}"',
-            "prompt": ["{base_prompt}>", "{base_prompt}#"],
+            "prompt": prompt_value,
         }
         raw_paths.append(cmd_data["raw_path"])
 
@@ -206,6 +242,10 @@ def main() -> None:
     else:
         platforms_to_process = ntc_platforms
 
+    # Clean stale diff files from previous runs
+    if os.path.isdir(args.output):
+        shutil.rmtree(args.output)
+
     # Step 3: Process each platform
     total_new = 0
     platforms_with_diff = 0
@@ -217,7 +257,9 @@ def main() -> None:
             continue
 
         is_new_platform = platform not in simnos_platforms
-        simnos_cmds = get_simnos_commands(platform) if not is_new_platform else set()
+        platform_data = get_simnos_yaml_data(platform) if not is_new_platform else None
+        simnos_cmds = get_simnos_commands(platform_data)
+        prompts = get_platform_prompts(platform_data)
 
         new_commands = compute_diff(ntc_commands, simnos_cmds)
 
@@ -233,6 +275,7 @@ def main() -> None:
             new_commands,
             ntc_commit,
             is_new_platform,
+            prompts,
         )
 
         marker = " [NEW PLATFORM]" if is_new_platform else ""
