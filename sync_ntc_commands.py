@@ -16,7 +16,6 @@ from __future__ import annotations
 import argparse
 from datetime import UTC, datetime
 import os
-import shutil
 import subprocess
 import sys
 
@@ -178,10 +177,10 @@ def write_diff_file(
     yaml.default_flow_style = False
 
     # Build commands dict for YAML output
+    prompt_value = prompts[0] if len(prompts) == 1 else prompts
     commands_data = {}
     raw_paths = []
     for cmd_name, cmd_data in new_commands.items():
-        prompt_value = prompts[0] if len(prompts) == 1 else prompts
         commands_data[cmd_name] = {
             "output": cmd_data["output"],
             "help": f'execute the command "{cmd_name}"',
@@ -242,9 +241,11 @@ def main() -> None:
     else:
         platforms_to_process = ntc_platforms
 
-    # Clean stale diff files from previous runs
+    # Clean stale diff YAML files from previous runs
     if os.path.isdir(args.output):
-        shutil.rmtree(args.output)
+        for f in os.listdir(args.output):
+            if f.endswith(".yaml"):
+                os.remove(os.path.join(args.output, f))
 
     # Step 3: Process each platform
     total_new = 0
