@@ -21,7 +21,7 @@ AI-assisted development (Claude Code, Codex, Gemini, etc.) is actively used in t
 **AI-assisted contributions are welcome.** If you use AI tools in your contribution, please:
 
 - Disclose it — mention which AI tool(s) you used in your PR description
-- Use the best available model and reasoning level (e.g., the highest-tier model with the longest thinking time)
+- Use the best available model with reasoning (extended thinking) enabled
 - Review the AI output yourself before submitting — you are responsible for the code, not the AI
 
 ## How to Contribute
@@ -76,26 +76,23 @@ cd simnos
 # Install dependencies and create virtual environment
 uv sync
 
-# Activate the virtual environment
-source .venv/bin/activate
-
 # Install pre-commit hooks
-pre-commit install
+uv run pre-commit install
 ```
 
 ### Running Tests
 
 ```bash
 # Run all checks (lint + security + tests) in Docker
-invoke tests
+uv run invoke tests
 
 # Run locally without Docker
-invoke tests --local
+uv run invoke tests --local
 
 # Or run individual checks
-invoke ruff --local      # Linting and formatting
-invoke bandit --local    # Security checks
-invoke pytest --local    # Unit tests
+uv run invoke ruff --local      # Linting and formatting
+uv run invoke bandit --local    # Security checks
+uv run invoke pytest --local    # Unit tests
 ```
 
 ### Code Style

@@ -21,7 +21,7 @@ SIMNOS はネットワーク自動化ツールのための**軽量テストス�
 **AI を利用したコントリビューションも歓迎します。** AI ツールを使用した場合は以下をお願いします:
 
 - PR の説明に使用した AI ツールを明記してください
-- 利用可能な最上位のモデル、最上位の思考時間を使用してください
+- 利用可能な最上位のモデルを、推論（Reasoning）機能を有効にした状態で使用してください
 - 提出前に AI の出力を自分でレビューしてください — コードの責任は AI ではなくあなたにあります
 
 ## コントリビューションの方法
@@ -56,7 +56,7 @@ SIMNOS はネットワーク自動化ツールのための**軽量テストス�
 - **プラットフォーム YAML の構造**: `simnos/plugins/nos/platforms_yaml/` の既存プラットフォームを参考にしてください。最低限必要なもの:
   - `initial_prompt` — デフォルトの CLI プロンプト
   - `commands` — コマンド名と出力、ヘルプテキスト、プロンプトのマッピング
-- 詳細は [新プラットフォームの作成](https://route-reflector.github.io/simnos/development/creating_new_platforms/) ガイドを参照してください。
+- 詳細は [新プラットフォームの作成](https://route-reflector.github.io/simnos/ja/development/creating_new_platforms/) ガイドを参照してください。
 
 ## 開発環境のセットアップ
 
@@ -76,26 +76,23 @@ cd simnos
 # 依存関係のインストールと仮想環境の作成
 uv sync
 
-# 仮想環境を有効化
-source .venv/bin/activate
-
 # pre-commit フックのインストール
-pre-commit install
+uv run pre-commit install
 ```
 
 ### テストの実行
 
 ```bash
 # すべてのチェック（lint + security + tests）を Docker で実行
-invoke tests
+uv run invoke tests
 
 # Docker なしでローカル実行
-invoke tests --local
+uv run invoke tests --local
 
 # 個別のチェック
-invoke ruff --local      # リンティングとフォーマット
-invoke bandit --local    # セキュリティチェック
-invoke pytest --local    # ユニットテスト
+uv run invoke ruff --local      # リンティングとフォーマット
+uv run invoke bandit --local    # セキュリティチェック
+uv run invoke pytest --local    # ユニットテスト
 ```
 
 ### コードスタイル
@@ -106,7 +103,7 @@ invoke pytest --local    # ユニットテスト
 - 行の長さ: 120 文字
 - 対象 Python: 3.13+
 
-詳細は [Conventions](https://route-reflector.github.io/simnos/development/conventions/) を参照してください。
+詳細は [Conventions](https://route-reflector.github.io/simnos/ja/development/conventions/) を参照してください。
 
 ### コミットメッセージ
 
