@@ -241,6 +241,11 @@ def main() -> None:
     else:
         platforms_to_process = ntc_platforms
 
+    # Guard against accidental cleanup of simnos platform YAML
+    if os.path.realpath(args.output) == os.path.realpath(SIMNOS_YAML_DIR):
+        print(f"Error: --output must not point to simnos YAML directory ({SIMNOS_YAML_DIR})")
+        sys.exit(1)
+
     # Clean stale diff YAML files from previous runs
     if os.path.isdir(args.output):
         for f in os.listdir(args.output):
