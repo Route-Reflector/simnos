@@ -23,6 +23,9 @@ AI-assisted development (Claude Code, Codex, Gemini, etc.) is actively used in t
 - Disclose it — mention which AI tool(s) you used in your PR description
 - Use the best available model with reasoning (extended thinking) enabled
 - Review the AI output yourself before submitting — you are responsible for the code, not the AI
+- If possible, cross-review with a different AI (e.g., code written by Claude reviewed by Gemini). Different AIs catch different issues
+
+**Do not use AI to mass-submit PRs or flood issues/comments.** Even if the content is technically correct, bulk AI-generated submissions will be treated as spam and closed without review.
 
 ## How to Contribute
 
