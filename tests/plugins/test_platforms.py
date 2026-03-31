@@ -182,7 +182,6 @@ class TestPlatforms:
             "ericsson_ipos": "requires administrator with secret",
             "hp_comware": "fails to enter configuration mode",
             "linux": "Linux-based, requires sudo -s for enable",
-            "paloalto_panos": "netmiko expects # prompt but platform uses >",
             "yamaha": "requires enable with secret",
         }
         if platform in xfail_platforms:

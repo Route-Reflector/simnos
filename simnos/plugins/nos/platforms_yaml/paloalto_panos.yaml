@@ -1,6 +1,5 @@
 name: paloalto_panos
 initial_prompt: "{base_prompt}>"
-config_prompt: "{base_prompt}#"
 commands:
   set cli scripting-mode on:
     output: "{base_prompt}> set cli scripting-mode on"
