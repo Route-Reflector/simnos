@@ -8,6 +8,13 @@ import string
 
 from simnos.core.host import Host
 
+# Mapping for platforms where simnos name differs from netmiko device_type
+NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
+    "edgecore": "edgecore_sonic",
+    "extreme_slxos": "extreme_slx",
+    "watchguard_firebox": "watchguard_fireware",
+}
+
 
 def get_running_hosts(hosts: dict[str, Host]) -> dict[str, bool]:
     """
@@ -42,16 +49,19 @@ def get_random_available_platform():
 
 
 def get_platforms_from_md() -> list[str]:
-    """Get the platforms in the platforms.md file."""
+    """Get the platforms in the platforms.md file.
+
+    Supports both list format ('- [name](link)') and
+    table format ('| [name](link) | ...').
+    """
     platforms = []
     with open("docs/platforms/index.md", encoding="utf-8") as file:
         for line in file:
-            if line.startswith("- ["):
-                platform = line[1:].strip()  # Remove the dash and whitespace
-                if "❌" in platform:
+            stripped = line.strip()
+            if stripped.startswith("- [") or stripped.startswith("| ["):
+                if "❌" in stripped:
                     continue
-                # Get the word in between brackets, eg. "aruba_eos" from "[aruba_eos]"
-                platform = platform.split("[")[1].split("]")[0]
+                platform = stripped.split("[")[1].split("]")[0]
                 platforms.append(platform)
     return platforms
 

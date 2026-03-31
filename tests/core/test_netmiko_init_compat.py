@@ -16,7 +16,7 @@ from netmiko import ConnectHandler
 import pytest
 
 from simnos import SimNOS
-from tests.utils import get_free_port, get_platforms_from_md
+from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_platforms_from_md
 
 HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output formatting
 
@@ -70,7 +70,7 @@ class TestNetmikoInitCompat:
                 "username": "test",
                 "password": "test",
                 "port": port,
-                "device_type": device_type,
+                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
                 "session_log": str(log_file),
             }
             with ConnectHandler(**device):
@@ -95,7 +95,7 @@ class TestNetmikoInitCompat:
                 "username": "test",
                 "password": "test",
                 "port": port,
-                "device_type": device_type,
+                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
             }
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(
@@ -188,7 +188,7 @@ class TestSendCommandResponse:
                 "username": "test",
                 "password": "test",
                 "port": port,
-                "device_type": device_type,
+                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
             }
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(cmd, read_timeout=15)

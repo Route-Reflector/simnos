@@ -1,0 +1,46 @@
+# cisco_apic
+
+
+!!! warning
+    This is automatically generated. In case of any issues,
+    please refer to the source code or, even better,
+    open an issue on the GitHub repository. Thanks! 🤗📖
+## Platforms:
+
+## Commands
+
+### enable
+
+**Output:** None
+
+**Help:** enter enable mode
+
+**Prompt:**
+- {base_prompt}$
+
+### fabric show vlan extended
+
+**Output:**
+```
+'apic1# fabric 203 show vlan extended\n----------------------------------------------------------------\n Node 203 (lab1r00002-ne-RDC-LF3)\n----------------------------------------------------------------\n\n VLAN Name                             Encap            Ports                    \n ---- -------------------------------- ---------------- ------------------------ \n9    5GC-N6:N3-INT:l3out-UPF-N3-INT-  vxlan-15171532,  Eth1/1, Eth1/2, Eth1/3,  \n      VRF-FLT:vlan-541                 vlan-541         Eth1/4, Eth1/5, Eth1/6,  \n                                                        Eth1/7, Eth1/8, Eth1/9,  \n                                                        Eth1/10, Eth1/11,        \n                                                        Eth1/12, Eth1/13,        \n                                                        Eth1/14, Eth1/15,        \n                                                        Eth1/16, Eth1/17,        \n                                                        Eth1/18, Eth1/19,        \n                                                        Eth1/20, Eth1/21,        \n                                                        Eth1/22, Eth1/23,        \n                                                        Eth1/24, Eth1/28,        \n                                                        Eth1/29, Eth1/30,        \n                                                        Eth1/31, Eth1/32,        \n                                                        Eth1/33, Eth1/34,        \n                                                        Eth1/35, Eth1/36,        \n                                                        Eth1/37, Eth1/38,        \n                                                        Eth1/39, Eth1/40,        \n                                                        Eth1/41, Eth1/42,        \n                                                        Eth1/43, Po1, Po2        \n 11   NSO-XDOMAIN:Source-TG-BD         vxlan-16318378   Eth1/16                  \n 12   NSO-XDOMAIN:Traffic-             vlan-621         Eth1/16                  \n      Generators:source-tg-epg                                                   \n 14   infra:default                    vxlan-16777209,  Eth1/1, Eth1/48          \n                                       vlan-3914\n'
+```
+
+**Help:** execute the command "fabric show vlan extended"
+
+**Prompt:**
+- {base_prompt}$
+- {base_prompt}#
+
+### _default_
+
+**Output:**
+```
+'% Invalid input detected'
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+- {base_prompt}$
+- {base_prompt}#
+
