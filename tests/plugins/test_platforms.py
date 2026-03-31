@@ -17,14 +17,7 @@ import yaml
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS
 from simnos.plugins.nos import nos_plugins
-from tests.utils import get_free_port, get_host_commands
-
-# Mapping for platforms where simnos name differs from netmiko device_type
-NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
-    "edgecore": "edgecore_sonic",
-    "extreme_slxos": "extreme_slx",
-    "watchguard_firebox": "watchguard_fireware",
-}
+from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_commands
 
 
 def get_yaml_only_platforms() -> list[str]:
