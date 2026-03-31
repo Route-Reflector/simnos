@@ -16,7 +16,21 @@ import yaml
 
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS
+from simnos.plugins.nos import nos_plugins
 from tests.utils import get_free_port, get_host_commands
+
+# Mapping for platforms where simnos name differs from netmiko device_type
+NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
+    "edgecore": "edgecore_sonic",
+    "extreme_slxos": "extreme_slx",
+    "watchguard_firebox": "watchguard_fireware",
+}
+
+
+def get_yaml_only_platforms() -> list[str]:
+    """Return platforms that have YAML definitions but no Python module."""
+    py_modules = set(get_py_nos_modules())
+    return [p for p in sorted(nos_plugins) if p not in py_modules and p != "base_template"]
 
 
 def get_py_nos_modules() -> list[str]:
@@ -152,6 +166,63 @@ class TestPlatforms:
             assert "help" in value
             assert has_single_curly_brackets(value["help"], exceptions) is False
             assert "prompt" in value
+
+    @pytest.mark.timeout(600)
+    @pytest.mark.parametrize("platform", get_yaml_only_platforms())
+    def test_platforms_yaml_all_commands_are_running(self, platform: str):
+        """
+        Test that all YAML-only platform commands can
+        run without any error via netmiko.
+        """
+        # Platforms that require secret (enable password), sudo, or have other incompatibilities
+        xfail_platforms = {
+            "alcatel_sros": "requires enable-admin with secret",
+            "cisco_apic": "Linux-based, requires sudo -s for enable",
+            "edgecore": "Linux-based (SONiC), requires sudo -s for enable",
+            "ericsson_ipos": "requires administrator with secret",
+            "hp_comware": "fails to enter configuration mode",
+            "linux": "Linux-based, requires sudo -s for enable",
+            "paloalto_panos": "netmiko expects # prompt but platform uses >",
+            "yamaha": "requires enable with secret",
+        }
+        if platform in xfail_platforms:
+            pytest.xfail(xfail_platforms[platform])
+        device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
+        free_port: int = get_free_port()
+        credentials: dict = {
+            "host": "localhost",
+            "username": "test_user",
+            "password": "test_password",
+            "port": free_port,
+            "device_type": device_type,
+        }
+        inventory: dict = {
+            "hosts": {
+                "test_device": {
+                    "username": credentials["username"],
+                    "password": credentials["password"],
+                    "port": credentials["port"],
+                    "platform": platform,
+                }
+            }
+        }
+        with SimNOS(inventory=inventory) as net:
+            host = next(iter(net.hosts.values()))
+            initial_commands, enable_commands, config_commands = get_host_commands(host)
+            with ConnectHandler(**credentials) as conn:
+                for command in initial_commands:
+                    output = conn.send_command(command)
+                    assert output or output == ""
+                if enable_commands:
+                    conn.enable()
+                    for command in enable_commands:
+                        output = conn.send_command(command)
+                        assert output or output == ""
+                if config_commands:
+                    conn.config_mode()
+                    for command in config_commands:
+                        output = conn.send_command(command)
+                        assert output or output == ""
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_nos_modules())
