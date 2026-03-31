@@ -28,7 +28,7 @@
 **Help:** execute the command "fabric show vlan extended"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### _default_

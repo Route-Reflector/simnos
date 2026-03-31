@@ -177,9 +177,9 @@ class TestPlatforms:
             "linux": "Linux-based, requires sudo -s for enable",
             "yamaha": "requires enable with secret",
         }
-        skip_config_platforms = {
-            "hp_comware": "system-view not available, netmiko cleanup also triggers config check",
-        }
+        # hp_comware: config_mode() fails (system-view not available) AND netmiko
+        # cleanup after enable() also triggers config check, causing test failure.
+        skip_enable_platforms["hp_comware"] = "system-view unavailable, cleanup triggers config check"
         device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
         free_port: int = get_free_port()
         credentials: dict = {
@@ -206,13 +206,12 @@ class TestPlatforms:
                 for command in initial_commands:
                     output = conn.send_command(command)
                     assert output or output == ""
-                skip_elevated = platform in skip_enable_platforms or platform in skip_config_platforms
-                if enable_commands and not skip_elevated:
+                if enable_commands and platform not in skip_enable_platforms:
                     conn.enable()
                     for command in enable_commands:
                         output = conn.send_command(command)
                         assert output or output == ""
-                if config_commands and not skip_elevated:
+                if config_commands and platform not in skip_enable_platforms:
                     conn.config_mode()
                     for command in config_commands:
                         output = conn.send_command(command)

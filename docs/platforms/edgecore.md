@@ -28,7 +28,7 @@
 **Help:** execute the command "show interfaces brief"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show interfaces status
@@ -41,7 +41,7 @@
 **Help:** execute the command "show interfaces status"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show interfaces switchport
@@ -54,7 +54,7 @@
 **Help:** execute the command "show interfaces switchport"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show ip interface
@@ -67,7 +67,7 @@
 **Help:** execute the command "show ip interface"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show system
@@ -80,7 +80,7 @@
 **Help:** execute the command "show system"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show version
@@ -93,7 +93,7 @@
 **Help:** execute the command "show version"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### show vlan
@@ -106,7 +106,7 @@
 **Help:** execute the command "show vlan"
 
 **Prompt:**
-- {base_prompt}>
+- {base_prompt}$
 - {base_prompt}#
 
 ### _default_

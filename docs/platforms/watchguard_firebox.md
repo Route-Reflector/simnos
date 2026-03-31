@@ -19,7 +19,6 @@
 **Help:** execute the command "show arp"
 
 **Prompt:**
-- {base_prompt}>
 - {base_prompt}#
 
 ### _default_

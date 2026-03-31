@@ -19,7 +19,6 @@
 **Help:** execute the command "show clock"
 
 **Prompt:**
-- {base_prompt}>
 - {base_prompt}#
 
 ### show ip interface brief
@@ -32,7 +31,6 @@
 **Help:** execute the command "show ip interface brief"
 
 **Prompt:**
-- {base_prompt}>
 - {base_prompt}#
 
 ### _default_
