@@ -17,7 +17,7 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.nos import available_platforms
-from tests.utils import generate_random_string, get_free_port, get_platforms_from_md
+from tests.utils import NETMIKO_DEVICE_TYPE_MAP, generate_random_string, get_free_port, get_platforms_from_md
 
 
 class TestNetmiko:
@@ -57,7 +57,7 @@ class TestNetmiko:
                 "username": "usertest",
                 "password": "passwordtest",
                 "port": free_port,
-                "device_type": device_type,
+                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
             }
             print(f"Testing device_type: {device_type}")
             with ConnectHandler(**device_credentials):
@@ -99,12 +99,13 @@ class TestNetmiko:
         }
         credentials = {}
         for router in inventory["hosts"]:
+            platform = inventory["hosts"][router]["platform"]
             credentials[router] = {
                 "host": "localhost",
                 "username": inventory["hosts"][router]["username"],
                 "password": inventory["hosts"][router]["password"],
                 "port": inventory["hosts"][router]["port"],
-                "device_type": inventory["hosts"][router]["platform"],
+                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(platform, platform),
             }
 
         net = SimNOS(inventory=inventory)

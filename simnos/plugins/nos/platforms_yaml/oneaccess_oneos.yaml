@@ -956,7 +956,7 @@ commands:
       \       3028707428\nr10            0x1      1\nr11            0x134170 1261936\nr12            0x0      0\nsp      \
       \       0xb486685c       0xb486685c\nlr             0xb55ad774       3042629492\npc             0xb55a9ab4       0xb55a9ab4\
       \ <raise+52>\ncpsr           0x20030010       537067536\n*\n* Current instructions\n*\n=> 0xb55a9ab4 <raise+52>:   \
-      \    cmn     r0, #4096       ; 0x1000\n   0xb55a9ab8 <raise+56>:       pop     {r7}            ; (ldr r7, [sp], #4)\n\
+      \    cmn     r0, #4096       ; 0x1000\n   0xb55a9ab8 <raise+56>:       pop     {{r7}}            ; (ldr r7, [sp], #4)\n\
       \   0xb55a9abc <raise+60>:       ldrhi   r2, [pc, #44]   ; 0xb55a9af0 <raise+112>\n   0xb55a9ac0 <raise+64>:       rsbhi\
       \   r1, r0, #0\n   0xb55a9ac4 <raise+68>:       mvnhi   r0, #0\n   0xb55a9ac8 <raise+72>:       ldrhi   r2, [pc, r2]\n\
       \   0xb55a9acc <raise+76>:       strhi   r1, [r3, r2]\n   0xb55a9ad0 <raise+80>:       bx      lr\n   0xb55a9ad4 <raise+84>:\

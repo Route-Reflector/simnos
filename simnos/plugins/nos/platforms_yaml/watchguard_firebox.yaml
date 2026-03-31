@@ -23,9 +23,7 @@ commands:
 
       '
     help: execute the command "show arp"
-    prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    prompt: '{base_prompt}#'
   _default_:
     output: '% Invalid input detected'
     help: default output for unknown commands

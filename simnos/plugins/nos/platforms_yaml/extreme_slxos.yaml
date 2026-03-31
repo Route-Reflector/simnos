@@ -7,9 +7,7 @@ commands:
 
       '
     help: execute the command "show clock"
-    prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    prompt: '{base_prompt}#'
   show ip interface brief:
     output: 'Flags:  I - Insight Enabled     U - Unnumbered interface
 
@@ -65,7 +63,7 @@ commands:
 
       '
     help: execute the command "show ip interface brief"
-    prompt: *id001
+    prompt: '{base_prompt}#'
   _default_:
     output: '% Invalid input detected'
     help: default output for unknown commands
