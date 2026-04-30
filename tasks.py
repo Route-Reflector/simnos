@@ -177,6 +177,7 @@ def cli(context):
 def tests(context, local=INVOKE_LOCAL):
     """Run all tests."""
     ruff(context, local=local)
+    yamllint(context, local=local)
     bandit(context, local=local)
     pytest(context, local=local)
 

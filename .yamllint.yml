@@ -31,7 +31,8 @@ rules:
     indent-sequences: whatever
     check-multi-line-strings: false
 
-  # Allow `output: true` in platform YAMLs (do not flag truthy values).
+  # GitHub Actions workflows use `on:` as a top-level key, which YAML parses
+  # as boolean `True`. Disable truthy check on keys to allow this idiom.
   truthy:
     allowed-values: ['true', 'false']
     check-keys: false
