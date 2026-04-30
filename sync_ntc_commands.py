@@ -73,7 +73,18 @@ def get_ntc_platforms(target_dir: str) -> list[str]:
 def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     """Extract commands and outputs from NTC Templates test data.
 
-    Returns a dict of {command_name: {"output": str, "raw_path": str}}.
+    Each command folder may contain multiple `.raw` fixtures representing
+    different device states. We collect them all: the canonical fixture
+    (named ``<platform>_<folder>.raw``) is selected as the primary
+    ``output``; the rest are stored as ``output_variants``. If the
+    canonical name is absent we fall back to the alphabetical-first raw.
+
+    Returns a dict of {command_name: {
+        "output": str,
+        "output_variants": list[str],
+        "raw_path": str,
+        "raw_paths_variants": list[str],
+    }}.
     """
     tests_dir = os.path.join(target_dir, "tests", platform)
     if not os.path.isdir(tests_dir):
@@ -89,15 +100,31 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         if not raw_files:
             continue
 
-        # Use first .raw file (sorted for reproducibility)
-        raw_path = os.path.join(folder_path, raw_files[0])
-        with open(raw_path, encoding="utf-8") as f:
+        # Prefer the canonical fixture "<platform>_<folder>.raw" (suffix-less);
+        # fall back to alphabetical first if absent.
+        canonical = f"{platform}_{folder}.raw"
+        primary = canonical if canonical in raw_files else raw_files[0]
+
+        primary_path = os.path.join(folder_path, primary)
+        with open(primary_path, encoding="utf-8") as f:
             output = f.read()
+
+        variants: list[str] = []
+        variants_paths: list[str] = []
+        for variant in raw_files:
+            if variant == primary:
+                continue
+            variant_path = os.path.join(folder_path, variant)
+            with open(variant_path, encoding="utf-8") as f:
+                variants.append(f.read())
+            variants_paths.append(variant_path)
 
         command_name = folder.replace("_", " ")
         commands[command_name] = {
             "output": output,
-            "raw_path": raw_path,
+            "output_variants": variants,
+            "raw_path": primary_path,
+            "raw_paths_variants": variants_paths,
         }
 
     return commands
@@ -181,12 +208,16 @@ def write_diff_file(
     commands_data = {}
     raw_paths = []
     for cmd_name, cmd_data in new_commands.items():
-        commands_data[cmd_name] = {
+        entry: dict = {
             "output": cmd_data["output"],
             "help": f'execute the command "{cmd_name}"',
             "prompt": prompt_value,
         }
+        if cmd_data.get("output_variants"):
+            entry["output_variants"] = cmd_data["output_variants"]
+        commands_data[cmd_name] = entry
         raw_paths.append(cmd_data["raw_path"])
+        raw_paths.extend(cmd_data.get("raw_paths_variants", []))
 
     now = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
