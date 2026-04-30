@@ -1,0 +1,50 @@
+---
+# yamllint configuration for simnos
+# See: https://yamllint.readthedocs.io/
+
+extends: default
+
+ignore: |
+  .venv/
+  .git/
+  build/
+  dist/
+  *.egg-info/
+  htmlcov/
+  site/
+
+rules:
+  # Platform YAMLs contain raw NTC Templates command outputs which can be very long.
+  # Workflow YAMLs and configs are kept under 200 chars.
+  line-length:
+    max: 200
+    ignore:
+      - simnos/plugins/nos/platforms_yaml/
+
+  # simnos YAMLs do not use document start markers.
+  document-start: disable
+
+  # Project YAMLs mix indented sequences (workflows) and non-indented (platforms_yaml).
+  # Accept either style.
+  indentation:
+    spaces: 2
+    indent-sequences: whatever
+    check-multi-line-strings: false
+
+  # GitHub Actions workflows use `on:` as a top-level key, which YAML parses
+  # as boolean `True`. Disable truthy check on keys to allow this idiom.
+  truthy:
+    allowed-values: ['true', 'false']
+    check-keys: false
+
+  # Allow up to 3 consecutive blank lines (excluding platform YAMLs which
+  # contain raw command outputs that may include multiple blank lines).
+  empty-lines:
+    max: 3
+    ignore:
+      - simnos/plugins/nos/platforms_yaml/
+
+  # Comment formatting is not strictly enforced.
+  comments-indentation: disable
+  comments:
+    min-spaces-from-content: 1
