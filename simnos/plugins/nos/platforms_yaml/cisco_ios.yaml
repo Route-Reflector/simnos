@@ -4574,3 +4574,396 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  show arp:
+    output: "Protocol  Address          Age (min)  Hardware Addr   Type   Interface\n\
+      Internet  10.100.88.1             -   c4f7.d564.b716  ARPA   Vlan10\nInternet\
+      \  10.100.88.199           0   Incomplete      ARPA\nInternet  10.152.1.229\
+      \            0   488f.5a5a.87ea  ARPA   Vlan1\nInternet  1.2.3.4           \
+      \      0   c4ad.3425.b7be  ARPA   FastEthernet4\nInternet  1.2.3.5         \
+      \        -   c4f7.d564.b71a  ARPA   FastEthernet4\n"
+    help: execute the command "show arp"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+  show cts credentials:
+    output: No CTS credentials exist.
+    help: execute the command "show cts credentials"
+    prompt: *id001
+  show cts pacs:
+    output: "AID: 0123456789ABCDEF0123456789ABCDEF\nPAC-Info:\n  PAC-type = Cisco
+      Trustsec\n  AID: 0123456789ABCDEF0123456789ABCDEF\n  I-ID: switch0001\n  A-ID-Info:
+      Identity Services Engine\n  Credential Lifetime: 20:42:42 CEST Wed Jun 08 )\n\
+      b^Lz\nPAC-Opaque: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF01234567\n\
+      Refresh timer is set for 00:00:24\nRefresh delayed for 4286610 seconds waiting
+      for server address information."
+    help: execute the command "show cts pacs"
+    prompt: *id001
+  show endpoint-tracker:
+    output: "Interface                    Record Name            Status          RTT
+      in msecs    Probe ID        Next Hop\nGigabitEthernet1             trk_umbrella\
+      \           Up              2               1               10.44.22.1\nGigabitEthernet2\
+      \             trk_goolge             Up              2               1     \
+      \          10.2.2.1"
+    help: execute the command "show endpoint-tracker"
+    prompt: *id001
+  show endpoint-tracker tracker-group:
+    output: "Tracker Name                     Element trackers name              Status\
+      \                       RTT in msec      Probe ID\ntrkgrp_grp1             \
+      \         trk_google-web, trk_umbrella       UP(UP OR UP)                 16,
+      3            5, 6\ntrkgrp_endpoint                  trk_google-web1, trk_umbrella1\
+      \     UP(UP AND UP)                16, 3            5, 6"
+    help: execute the command "show endpoint-tracker tracker-group"
+    prompt: *id001
+  show interfaces status err-disabled:
+    output: "Port      Name               Status       Reason\nEth1      EM PM   \
+      \           err-disabled  psecure-violation\nEth2                         err-disabled\
+      \  bpduguard\nEth3                         err-disabled  loopback\n"
+    help: execute the command "show interfaces status err-disabled"
+    prompt: *id001
+  show ip dhcp binding:
+    output: "Bindings from all pools not associated with VRF:\nIP address        \
+      \  Client-ID/              Lease expiration        Type\n                  \
+      \  Hardware address/\n                    User name\n10.100.88.26        01aa.aaaa.aaaa.aa\
+      \       Infinite                Manual\n10.100.88.197       01dd.dddd.dddd.dd\
+      \       Infinite                Manual\n"
+    help: execute the command "show ip dhcp binding"
+    prompt: *id001
+  show ip dhcp snooping binding:
+    output: "  MacAddress          IpAddress        Lease(sec)  Type           VLAN\
+      \  Interface\n  ------------------  ---------------  ----------  -------------\
+      \  ----  --------------------\n  4A:20:93:E5:FA:23   172.16.92.198    1512 \
+      \       dhcp-snooping   1     GigabitEthernet0/5\n  14:21:4E:F4:87:5B   172.16.92.217\
+      \    1765        dhcp-snooping   1     GigabitEthernet0/24\n  B8:6E:07:ED:86:55\
+      \   172.16.92.209    1598        dhcp-snooping   1     GigabitEthernet0/16\n\
+      \  E9:DD:6C:F8:D1:DE   172.16.92.197    1520        dhcp-snooping   1     GigabitEthernet0/4\n\
+      \  5E:00:34:5E:16:E7   172.16.92.206    1767        dhcp-snooping   1     GigabitEthernet0/13\n\
+      \  0E:46:62:44:76:AB   172.16.92.199    1572        dhcp-snooping   1     GigabitEthernet0/6\n\
+      \  08:00:E1:75:DF:68   172.16.92.211    1569        dhcp-snooping   1     GigabitEthernet0/18\n\
+      \  B2:D4:79:F2:DE:9A   172.16.92.195    1703        dhcp-snooping   1     GigabitEthernet0/2\n\
+      \  8A:8B:5E:72:2D:D4   172.16.92.212    1766        dhcp-snooping   1     GigabitEthernet0/19\n\
+      \  52:6F:62:C9:56:76   172.16.92.201    1706        dhcp-snooping   1     GigabitEthernet0/8\n\
+      \  82:8E:29:BC:11:90   172.16.92.196    1514        dhcp-snooping   1     GigabitEthernet0/3\n\
+      \  D2:DC:D1:80:D0:E6   172.16.92.213    1569        dhcp-snooping   1     GigabitEthernet0/20\n\
+      \  5E:CB:5B:39:98:29   172.16.92.216    1575        dhcp-snooping   1     GigabitEthernet0/23\n\
+      \  DA:C3:77:3F:E3:36   172.16.92.202    1653        dhcp-snooping   1     GigabitEthernet0/9\n\
+      \  3E:20:22:8A:7C:A2   172.16.92.205    1766        dhcp-snooping   1     GigabitEthernet0/12\n\
+      \  B0:B8:68:1B:22:D9   172.16.92.210    1653        dhcp-snooping   1     GigabitEthernet0/17\n\
+      \  E2:2A:F2:38:EF:68   172.16.92.220    1765        dhcp-snooping   1     GigabitEthernet0/27\n\
+      \  38:25:96:B4:88:22   172.16.92.200    1767        dhcp-snooping   1     GigabitEthernet0/7\n\
+      \  54:36:63:96:D7:4C   172.16.92.204    1686        dhcp-snooping   1     GigabitEthernet0/11\n\
+      \  1A:AD:FE:27:06:F8   172.16.92.214    1571        dhcp-snooping   1     GigabitEthernet0/21\n\
+      \  8C:A9:83:87:FD:6A   172.16.92.207    1766        dhcp-snooping   1     GigabitEthernet0/14\n\
+      \  73:73:60:35:EC:65   172.16.92.194    1687        dhcp-snooping   1     GigabitEthernet0/1\n\
+      \  FC:AA:2D:97:0A:95   172.16.92.215    1569        dhcp-snooping   1     GigabitEthernet0/22\n\
+      \  8C:13:7D:5C:24:AA   172.16.92.203    1571        dhcp-snooping   1     GigabitEthernet0/10\n\
+      \  AA:3B:E3:12:41:9B   172.16.92.218    1688        dhcp-snooping   1     GigabitEthernet0/25\n\
+      \  BA:DF:39:2C:9A:85   172.16.92.208    1768        dhcp-snooping   1     GigabitEthernet0/15\n\
+      \  10:85:9B:DA:04:09   172.16.92.219    1765        dhcp-snooping   1     GigabitEthernet0/26\n\
+      \  Total number of bindings: 27\n"
+    help: execute the command "show ip dhcp snooping binding"
+    prompt: *id001
+  show ip eigrp neighbors detail:
+    output: "EIGRP-IPv4 Neighbors for AS(215)\nH   Address                 Interface\
+      \              Hold Uptime   SRTT   RTO  Q  Seq\n                          \
+      \                         (sec)         (ms)       Cnt Num\n1   81.211.127.255\
+      \          Tu5                      13 18:52:46   55   330  0  1042408760\n\
+      \   Version 25.0/2.0, Retrans: 1, Retries: 0, Prefixes: 952\n   Topology-ids
+      from peer - 0\n0   83.151.157.254          Tu5                      12 6d08h\
+      \      50   300  0  564418354\n   Version 25.0/2.0, Retrans: 6, Retries: 0,
+      Prefixes: 952\n   Topology-ids from peer - 0\nMax Nbrs: 0, Current Nbrs: 0\n"
+    help: execute the command "show ip eigrp neighbors detail"
+    prompt: *id001
+  show ip ospf neighbor detail:
+    output: "Neighbor 192.168.5.2, interface address 10.225.200.28\n    In the area
+      0 via interface GigabitEthernet1/0/0\n    Neighbor priority is 1, State is FULL,
+      6 state changes\n    DR is 10.225.200.28 BDR is 10.225.200.30\n    Options is
+      0x42\n    LLS Options is 0x1 (LR), last OOB-Resync 00:03:08 ago\n    Dead timer
+      due in 00:00:36\n    Neighbor is up for 00:09:46\n   Index 1/1, retransmission
+      queue length 0, number of retransmission 1\n    First 0x0(0)/0x0(0) Next 0x0(0)/0x0(0)\n\
+      \    Last retransmission scan length is 1, maximum is 1\n    Last retransmission
+      scan time is 0 msec, maximum is 0 msec\n\nNeighbor 10.0.0.2, interface address
+      10.0.0.2\n    In the area 0 via interface FastEthernet0/0\n    Neighbor priority
+      is 1, State is FULL, 6 state changes\n    DR is 10.0.0.1 BDR is 10.0.0.2\n \
+      \   Options is 0x52\n    Dead timer due in 00:00:39\n    Neighbor is up for
+      00:03:15\n    Index 1/1, retransmission queue length 0, number of retransmission
+      1\n    First 0x0(0)/0x0(0) Next 0x0(0)/0x0(0)\n    Last retransmission scan
+      length is 1, maximum is 1\n    Last retransmission scan time is 0 msec, maximum
+      is 0 msec\n"
+    help: execute the command "show ip ospf neighbor detail"
+    prompt: *id001
+  show license status:
+    output: "Smart Licensing is ENABLED\n\nUtility:\n  Status: DISABLED\n\nData Privacy:\n\
+      \  Sending Hostname: yes\n    Callhome hostname privacy: DISABLED\n    Smart
+      Licensing hostname privacy: DISABLED\n  Version privacy: DISABLED\n\nTransport:\n\
+      \  Type: Callhome\n\nRegistration:\n  Status: REGISTERED\n  Smart Account: ACME
+      Corporation\n  Virtual Account: Wile E. Coyote\n  Export-Controlled Functionality:
+      ALLOWED\n  Initial Registration: SUCCEEDED on Aug 22 18:58:03 2022 UTC\n  Last
+      Renewal Attempt: None\n  Next Renewal Attempt: Feb 18 18:58:03 2023 UTC\n  Registration
+      Expires: Aug 22 18:52:49 2023 UTC\n\nLicense Authorization: \n  Status: OUT
+      OF COMPLIANCE on Aug 22 18:58:17 2022 UTC\n  Last Communication Attempt: SUCCEEDED
+      on Aug 22 18:58:17 2022 UTC\n  Next Communication Attempt: Aug 23 06:58:17 2022
+      UTC\n  Communication Deadline: Nov 20 18:53:16 2022 UTC\n\nExport Authorization
+      Key:\n  Features Authorized:\n    <none>\n"
+    help: execute the command "show license status"
+    prompt: *id001
+  show mpls l2transport vc:
+    output: "Local intf     Local circuit      Dest address    VC ID      Status\n\
+      -------------  ------------------ --------------- ---------- ----------\nSe5/0\
+      \          FR DLCI 55         10.0.0.1        55         UP\nAT4/0         \
+      \ ATM AAL5 0/100     10.0.0.1        100        UP\nAT4/0.300      ATM AAL5
+      0/300     10.0.0.1        300        UP\n"
+    help: execute the command "show mpls l2transport vc"
+    prompt: *id001
+  show platform:
+    output: "Switch  Ports    Model                Serial No.   MAC address     Hw
+      Ver.       Sw Ver.\n------  -----   ---------             -----------  --------------\
+      \  -------       --------\n 1       65     C9300-48P             J111111111a\
+      \  f000.f000.f000  V03           16.12.4\n 2       65     C9300-48P        \
+      \     J222222222b  f000.f000.f001  V03           16.12.4\n"
+    help: execute the command "show platform"
+    prompt: *id001
+  show policy-map:
+    output: "  Policy Map vpn-bandwidths\n    Class internet-private\n      bandwidth
+      remaining ratio 5 account user-defined 4\n      service-policy internet-private_class\n\
+      \    Class systems-m2m\n      bandwidth remaining ratio 5 account user-defined
+      4\n      service-policy systems-m2m_class\n    Class internal-office\n     \
+      \ bandwidth remaining ratio 5 account user-defined 4\n      service-policy internal-office_class\n\
+      \    Class db-net-lst\n      bandwidth remaining ratio 5 account user-defined
+      4\n      service-policy db-net-lst_class\n    Class db-systems-abc\n      bandwidth
+      remaining ratio 5 account user-defined 4\n      service-policy db-systems-abc_class\n\
+      \    Class iot-systems\n      bandwidth remaining ratio 5 account user-defined
+      4\n      service-policy iot-systems_class\n    Class class-default\n      bandwidth
+      remaining ratio 6 account user-defined 4\n      service-policy db-systems-net_class\n\
+      \n  Policy Map db-systems-abc_class\n    Class premium\n      bandwidth remaining
+      ratio 10 account user-defined 1\n      queue-limit 50 ms\n    Class classic\n\
+      \      bandwidth remaining ratio 20 account user-defined 2\n      queue-limit
+      50 ms\n    Class class-default\n      bandwidth remaining ratio 60 account user-defined
+      3\n      queue-limit 50 ms\n"
+    help: execute the command "show policy-map"
+    prompt: *id001
+  show power inline:
+    output: "\nModule   Available     Used     Remaining\n          (Watts)     (Watts)\
+      \    (Watts)\n------   ---------   --------   ---------\n1           740.0 \
+      \     330.0       410.0\nInterface Admin  Oper       Power   Device        \
+      \      Class Max\n                            (Watts)\n--------- ------ ----------
+      ------- ------------------- ----- ----\nGi1/0/1   auto   on         30.0   \
+      \ AIR-AP1562I-E-K9    4     30.0\nGi1/0/2   auto   on         30.0    AIR-AP1562I-E-K9\
+      \    4     30.0\nGi1/0/3   auto   on         30.0    AIR-AP1562I-E-K9    4 \
+      \    30.0\nGi1/0/4   auto   off        0.0    \nGi1/0/5   auto   faulty    \
+      \ 0.0     n/a                 n/a   30.0\nGi1/0/10  auto   on         23.2 \
+      \   C9120AXE-E          4     30.0\nGi1/0/11  auto   on         30.0    AIR-AP1562I-E-K9\
+      \    4     30.0\nGi1/0/12  auto   off        0.0     n/a                 n/a\
+      \   30.0\nGi1/0/13  auto   off        0.0     n/a                 n/a   30.0\n\
+      --------- ------ ---------- ---------- ---------- ------ -----\nTotals:    \
+      \      11   on    330.0\n\n"
+    help: execute the command "show power inline"
+    prompt: *id001
+  show power used:
+    output: "system power used =      2255.76 Watts (43.38 Amps @ 52V)\n"
+    help: execute the command "show power used"
+    prompt: *id001
+  show running-config interface:
+    output: "Building configuration...\n\nCurrent configuration : 440 bytes\n!\ninterface
+      GigabitEthernet2/0/4.223415\n description DISTRIBUTION  | 2048K\n bandwidth
+      2048\n encapsulation dot1Q 2234 second-dot1q 15\n vrf forwarding CLIENT_VOIP:1234\n\
+      \ ip address 10.30.33.161 255.255.255.252\n no ip proxy-arp\n ip verify unicast
+      source reachable-via rx allow-default allow-self-ping\n service-policy input
+      VIPSIP_POLICY_2048_V1\n service-policy output VIPSIP_POLICY_2048_OUT\n!\ninterface
+      GigabitEthernet2/0/4.223427\n description PEOPLE | 100M\n bandwidth 100000\n\
+      \ encapsulation dot1Q 2234 second-dot1q 27\n vrf forwarding CLIENT_VOIP:1234\n\
+      \ ip address 10.53.8.241 255.255.255.252\n no ip proxy-arp\n ip verify unicast
+      source reachable-via rx allow-default allow-self-ping\n service-policy input
+      DATA_POLICY_100M_V1\n service-policy output DATA_POLICY_100M_OUT\n!\ninterface
+      GigabitEthernet2/0/4.223436\n description AVENIDA | 100M\n bandwidth 2048\n\
+      \ encapsulation dot1Q 2234 second-dot1q 36\n vrf forwarding CLIENT_VOIP:1234\n\
+      \ ip address 10.39.246.29 255.255.255.252\n no ip proxy-arp\n ip verify unicast
+      source reachable-via rx allow-default allow-self-ping\n ip access-group oACL
+      out\n ip access-group iACL in\n service-policy input VIPSIP_POLICY_2048_V1\n\
+      \ service-policy output VIPSIP_POLICY_2048_OUT\n!\ninterface GigabitEthernet2/0/4.223449\n\
+      \ description MONTE EVEREST | 1500K\n bandwidth 2048\n encapsulation dot1Q 2234
+      second-dot1q 49\n vrf forwarding CLIENT_VOIP:1234\n ip address 10.30.33.41 255.255.255.252\n\
+      \ no ip proxy-arp\n ip verify unicast source reachable-via tx allow-default
+      allow-self-ping\n ip access-group iACL in\n ip access-group ACL_OUTPUT out\n\
+      \ service-policy input VIPSIP_POLICY_2048_V1\n service-policy output VIPSIP_POLICY_2048_OUT\n\
+      !\ninterface GigabitEthernet2/0/4.223478\n description TEST PASS| 100M\n mtu
+      9096\n bandwidth 1000\n encapsulation dot1Q 2234 second-dot1q 1011\n ip vrf
+      forwarding CLIENT_VOIP:1234\n ip address 10.39.18.217 255.255.255.252\n ipv6
+      address FE80:A8::2DA::1689/126\n ip flow monitor IPV4_MONITOR_MAP sampler FNF_SAMPLER_MAP
+      input\n no ip proxy-arp\n no negotiation\n ip verify unicast source reachable-via
+      rx allow-default allow-self-ping\n ip access-group ACL_INPUT in\n service-policy
+      input VIPSIP_POLICY_1000_V1\n service-policy output VIPSIP_POLICY_1000_OUT\n\
+      !\ninterface GigabitEthernet2/0/4.22341020\n description BLUE | 800K\n mtu 1546\n\
+      \ bandwidth 800\n encapsulation dot1Q 2234 second-dot1q 1020\n vrf forwarding
+      CLIENT_VOIP:1234\n ip flow monitor IPV4_MONITOR_MAP sampler FNF_SAMPLER_MAP
+      input\n ip address 10.30.33.197 255.255.255.252\n no ip proxy-arp\n ip verify
+      unicast source reachable-via rx allow-default allow-self-ping\n ip access-group
+      oACL out\n service-policy input VIPSIP_POLICY_800_V1\n service-policy output
+      VIPSIP_POLICY_800_OUT\n!\n"
+    help: execute the command "show running-config interface"
+    prompt: *id001
+  show sdwan bfd sessions table:
+    output: "                                     SRC    DST                   SITE\
+      \   LOCAL                      DETECT      TX\nSRC IP       DST IP         \
+      \  PROTO  PORT   PORT   SYSTEM IP      ID     COLOR     COLOR     STATE  MULTIPLIER\
+      \  INTERVAL  UPTIME       TRANSITIONS\n----------------------------------------------------------------------------------------------------------------------------------------------------\n\
+      10.11.22.4   44.117.23.0      ipsec  12346  12346  10.9.255.1     65222  gold\
+      \      gold      up     7           1000      17:00:15:23  4\n10.11.22.36  10.2.242.36\
+      \      ipsec  12346  12346  10.9.255.1     65222  private6  private6  up   \
+      \  7           1000      2:06:48:29   64\n10.11.22.4   30.114.33.32     ipsec\
+      \  12346  12346  10.9.255.6     65222  gold      silver    up     7        \
+      \   1000      17:00:15:23  5\n10.11.22.36  10.2.242.37      ipsec  12346  12346\
+      \  10.9.255.6     65222  private6  private6  up     7           1000      17:00:15:23\
+      \  2\n10.11.22.4   25.117.111.208   ipsec  12346  12346  10.66.255.1    65211\
+      \  gold      gold      up     7           1000      17:00:15:23  2\n10.11.22.36\
+      \  10.51.242.36     ipsec  12346  12346  10.66.255.1    65211  private6  private6\
+      \  down   7           1000      NA           0\n10.11.22.4   51.142.56.212 \
+      \   ipsec  12346  12386  10.94.2.247    145    gold      gold      up     7\
+      \           1000      17:00:15:23  1\n10.11.22.4   17.69.229.192    ipsec  12346\
+      \  12386  10.94.3.247    305    gold      gold      up     7           1000\
+      \      17:00:15:23  1\n10.11.22.4   242.135.190.254  ipsec  12346  12386  172.47.255.1\
+      \   65003  gold      silver    up     7           1000      17:00:15:23  24\n\
+      10.11.22.4   237.111.137.218  ipsec  12346  12346  172.47.255.1   65003  gold\
+      \      gold      up     7           1000      17:00:15:23  10\n10.11.22.4  \
+      \ 84.169.24.206    ipsec  12346  12386  172.47.255.6   65003  gold      gold\
+      \      up     7           1000      17:00:15:23  6\n10.11.22.4   242.105.174.58\
+      \   ipsec  12346  12386  172.47.255.6   65003  gold      silver    up     7\
+      \           1000      17:00:15:23  2"
+    help: execute the command "show sdwan bfd sessions table"
+    prompt: *id001
+  show sdwan bfd summary:
+    output: "sessions-total         24\nsessions-up            23\nsessions-max  \
+      \         25\nsessions-flap          444\npoll-interval          123400\n"
+    help: execute the command "show sdwan bfd summary"
+    prompt: *id001
+  show sdwan control connections:
+    output: "                                                                    \
+      \                   PEER                                          PEER     \
+      \                                     CONTROLLER \nPEER    PEER PEER       \
+      \     SITE       DOMAIN PEER                                    PRIV  PEER \
+      \                                   PUB                                    \
+      \       GROUP      \nTYPE    PROT SYSTEM IP       ID         ID     PRIVATE
+      IP                              PORT  PUBLIC IP                            \
+      \   PORT  ORGANIZATION            LOCAL COLOR     PROXY STATE UPTIME      ID\
+      \         \n----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\
+      vsmart  dtls 10.14.2.250     102        1      10.14.2.71                  \
+      \            12346 21.254.56.204                           12346 network-SDWAN\
+      \           gold            No    up     110:18:17:060           \nvsmart  dtls
+      10.14.3.250     202        1      10.14.3.70                              12346
+      30.238.57.220                           12346 network-SDWAN           gold \
+      \           No    up     59:12:26:430           \nvbond   dtls 0.0.0.0     \
+      \    0          0      24.254.21.185                           12346 24.254.21.185\
+      \                           12346 network-SDWAN           gold            -\
+      \     up     110:18:34:340           \nvmanage dtls 10.14.2.248     100    \
+      \    0      10.14.2.70                              12346 40.117.123.18    \
+      \                       12346 network-SDWAN           gold            No   \
+      \ up     110:18:39:240   "
+    help: execute the command "show sdwan control connections"
+    prompt: *id001
+  show sdwan omp peers:
+    output: "R -> routes received\nI -> routes installed\nS -> routes sent\n\nTENANT\
+      \                             DOMAIN    OVERLAY   SITE      REGION\nID     \
+      \   PEER             TYPE    ID        ID        ID        ID        STATE \
+      \   UPTIME           R/I/S\n-----------------------------------------------------------------------------------------------------------------\n\
+      0         10.94.2.240      vsmart  1         1         142       None      up\
+      \       16:23:52:59      520/383/30\n0         10.94.3.240      vsmart  1  \
+      \       1         242       None      up       16:23:52:59      520/0/30"
+    help: execute the command "show sdwan omp peers"
+    prompt: *id001
+  show sdwan tunnel statistics table:
+    output: "                                                                    \
+      \                                                                          \
+      \         TCP\nTUNNEL                                  SOURCE  DEST        \
+      \          LOCAL     REMOTE    TUNNEL                                      \
+      \                MSS                                                       \
+      \                                                                          \
+      \                    \nPROTOCOL  SOURCE IP    DEST IP          PORT    PORT\
+      \   SYSTEM IP      COLOR     COLOR     MTU     tx-pkts    tx-octets     rx-pkts\
+      \     rx-octets      ADJUST  ipv6-tx-pkts  ipv6-tx-octets  ipv6-rx-pkts  ipv6-rx-octets\
+      \  tx-ipv4-mcast-pkts  tx-ipv4-mcast-octets  rx-ipv4-mcast-pkts  rx-ipv4-mcast-octets\
+      \  \n--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\
+      ipsec     10.11.42.4   13.69.209.192    12346   12386  10.94.3.247    gold \
+      \     gold      1438    3675069    394034058     3633540     441945296     \
+      \ 1358    0             0               0             0               0    \
+      \               0                     0                   0                \
+      \     \nipsec     10.11.42.4   20.0.90.144      12346   12346  172.19.215.21\
+      \  gold      gold      1438    60181998   33872433281   50457920    18667139551\
+      \    1358    0             0               0             0               0 \
+      \                  0                     0                   0             \
+      \        \nipsec     10.11.42.4   20.0.90.145      12346   65088  172.19.215.26\
+      \  gold      gold      1438    51559237   35211660410   49788888    18447910988\
+      \    1358    0             0               0             0               0 \
+      \                  0                     0                   0             \
+      \        \nipsec     10.11.42.4   20.117.33.0      12346   12346  10.21.55.1\
+      \     gold      gold      1438    524507811  275129936987  658493052   523115960007\
+      \   1358    0             0               0             0               0  \
+      \                 0                     0                   0              \
+      \       \nipsec     10.11.42.4   20.117.33.32     12346   12346  10.21.55.6\
+      \     gold      silver    1438    893005796  406705382612  739625917   614172474866\
+      \   1358    0             0               0             0               0  \
+      \                 0                     0                   0              \
+      \       \nipsec     10.11.42.4   20.117.210.152   12346   12346  172.29.155.26\
+      \  gold      silver    1438    56613126   30012090793   51120016    17386139057\
+      \    1358    0             0               0             0               0 \
+      \                  0                     0                   0             \
+      \        \nipsec     10.11.42.4   20.117.210.153   12346   12386  172.29.155.21\
+      \  gold      silver    1438    50210316   27862783665   51447748    18414059862\
+      \    1358    0             0               0             0               0 \
+      \                  0                     0                   0             \
+      \                           \nipsec     10.11.42.36  10.21.42..36     12346\
+      \   12346  10.21.55.1     private6  private6  1438    439400369  213633937560\
+      \  1379033146  1252855204172  1358    0             0               0      \
+      \       0               0                   0                     0        \
+      \           0                     \n"
+    help: execute the command "show sdwan tunnel statistics table"
+    prompt: *id001
+  show spanning-tree root:
+    output: "                                        Root    Hello Max Fwd\nVlan \
+      \                  Root ID          Cost    Time  Age Dly  Root Port\n----------------
+      -------------------- --------- ----- --- ---  ------------\nVLAN0001       \
+      \  11175 5c6e.f0a7.a0b0         0    2   20  15                  \nVLAN0002\
+      \         11185 5c6e.f0a7.a0b0         0    2   20  15                  \nVLAN0003\
+      \         11195 5c6e.f0a7.a0b0         0    2   20  15  Po34\n"
+    help: execute the command "show spanning-tree root"
+    prompt: *id001
+  show stack-power:
+    output: "    Power Stack                      Stack   Stack    Total   Rsvd  \
+      \  Alloc   Sw_Avail Num  Num\n    Name                             Mode    Topolgy\
+      \  Pwr(W)  Pwr(W)  Pwr(W)   Pwr(W)  SW   PS\n    --------------------      \
+      \       ------  -------  ------  ------  ------  ------  ----- -----\n    Powerstack-1\
+      \                     SP-PS   Stndaln  1430    0       340     1090      1 \
+      \   2   \n\n"
+    help: execute the command "show stack-power"
+    prompt: *id001
+  show switch virtual:
+    output: "Executing the command on VSS member switch role = VSS Active, id = 1\n\
+      \ \n \nSwitch mode                  : Virtual Switch\nVirtual switch domain
+      number : 100\nLocal switch number          : 1\nLocal switch operational role:
+      Virtual Switch Active\nPeer switch number           : 2\nPeer switch operational
+      role : Virtual Switch Standby\n \nExecuting the command on VSS member switch
+      role = VSS Standby, id = 2\n \n \nSwitch mode                  : Virtual Switch\n\
+      Virtual switch domain number : 100\nLocal switch number          : 2\nLocal
+      switch operational role: Virtual Switch Standby\nPeer switch number        \
+      \   : 1\nPeer switch operational role : Virtual Switch Active"
+    help: execute the command "show switch virtual"
+    prompt: *id001
+  show users:
+    output: "    Line       User       Host(s)              Idle       Location\n\
+      * 10 vty 0     arm        idle                 00:00:00   1.2.3.4\n\n  Interface\
+      \    User               Mode         Idle     Peer Address\n"
+    help: execute the command "show users"
+    prompt: *id001
+  show vlan group:
+    output: "vlan group VLAN_NAME_1 : 1\nvlan group VLAN2 : 2\nvlan group VLAN_TEST_123
+      : 123\nvlan group MULTI_VLAN_TEST_1 : 5, 66\nvlan group MULTI_VLAN_TEST_2 :
+      761-763, 197, 200, 208"
+    help: execute the command "show vlan group"
+    prompt: *id001
+  show wireless tag policy summary:
+    output: "\nNumber of Policy Tags: 10\n\nPolicy Tag Name                   Description\n\
+      ------------------------------------------------------------------------\nPT_VIP\
+      \                            PT_VIP\nPT_Test                           PT_Test\n\
+      PT_Mgmt\nPT_Media                          PT_Media\nPT_Default            \
+      \            PT_Default\nPT_Extra\nPT_Hallway                        PT_Hallway\n\
+      default-policy-tag                default policy-tag\n"
+    help: execute the command "show wireless tag policy summary"
+    prompt: *id001
