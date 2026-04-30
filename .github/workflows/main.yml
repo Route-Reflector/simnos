@@ -31,6 +31,8 @@ jobs:
           enable-cache: true
       - name: "Linting: ruff"
         run: "uv run invoke ruff"
+      - name: "Linting: yamllint"
+        run: "uv run invoke yamllint"
       - name: "Security: bandit"
         run: "uv run invoke bandit"
 
