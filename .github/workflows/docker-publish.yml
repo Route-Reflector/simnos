@@ -57,7 +57,7 @@ jobs:
           cache-from: "type=gha,scope=docker-scan"
           cache-to: "type=gha,mode=max,scope=docker-scan"
       - name: "Trivy vulnerability scan"
-        uses: "aquasecurity/trivy-action@v0.35.0"
+        uses: "aquasecurity/trivy-action@v0.36.0"
         with:
           image-ref: "${{ env.IMAGE_NAME }}:scan"
           format: "table"
