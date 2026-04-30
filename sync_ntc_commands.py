@@ -83,7 +83,7 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         "output": str,
         "output_variants": list[str],
         "raw_path": str,
-        "raw_paths_variants": list[str],
+        "raw_path_variants": list[str],
     }}.
     """
     tests_dir = os.path.join(target_dir, "tests", platform)
@@ -110,21 +110,21 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
             output = f.read()
 
         variants: list[str] = []
-        variants_paths: list[str] = []
+        variant_paths: list[str] = []
         for variant in raw_files:
             if variant == primary:
                 continue
             variant_path = os.path.join(folder_path, variant)
             with open(variant_path, encoding="utf-8") as f:
                 variants.append(f.read())
-            variants_paths.append(variant_path)
+            variant_paths.append(variant_path)
 
         command_name = folder.replace("_", " ")
         commands[command_name] = {
             "output": output,
             "output_variants": variants,
             "raw_path": primary_path,
-            "raw_paths_variants": variants_paths,
+            "raw_path_variants": variant_paths,
         }
 
     return commands
@@ -217,7 +217,7 @@ def write_diff_file(
             entry["output_variants"] = cmd_data["output_variants"]
         commands_data[cmd_name] = entry
         raw_paths.append(cmd_data["raw_path"])
-        raw_paths.extend(cmd_data.get("raw_paths_variants", []))
+        raw_paths.extend(cmd_data.get("raw_path_variants", []))
 
     now = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
