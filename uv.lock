@@ -763,14 +763,14 @@ wheels = [
 
 [[package]]
 name = "ntc-templates"
-version = "9.0.0"
+version = "9.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "textfsm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/db/9f/92d8d13e21d9b3dab816e47cf3383939ce526429fa2ef0a5b23fccfdde9c/ntc_templates-9.0.0.tar.gz", hash = "sha256:eb4a6f55a02be3db284e4da470907f52f0dd04ef2c721e6f031c2128c9fbcb98", size = 322291, upload-time = "2026-02-19T18:04:17.29Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/13/4a/dede7aa900a47acd8e6a10785b3b1bed69d7dc68f367230b8a77b8ad05fa/ntc_templates-9.1.0.tar.gz", hash = "sha256:2187df39edcd03ee953433c3cec37e2834acbb67dbc03971f06a5842d6e13c71", size = 322614, upload-time = "2026-04-01T14:12:07.468Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9f/aa/d533f89a11be590a757ee1a0bea229a8a8ce064b01fea07208462ce8b6ac/ntc_templates-9.0.0-py3-none-any.whl", hash = "sha256:1eb3a94a090aa83004c8e781e05210200c583505a4d86dcd71ead93e3a472834", size = 642149, upload-time = "2026-02-19T18:04:15.595Z" },
+    { url = "https://files.pythonhosted.org/packages/3a/5a/2e863b5479ce69d2bd0c0183f3758434635dac2157268e959117b915c2f1/ntc_templates-9.1.0-py3-none-any.whl", hash = "sha256:d6a25ff09c603ba84deea3a31589287a47320f12e8c2a3613e953951079ae715", size = 642361, upload-time = "2026-04-01T14:12:06.07Z" },
 ]
 
 [[package]]
