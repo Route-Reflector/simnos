@@ -3,6 +3,36 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## v2.2.0
+
+**Features**
+
+- Add 9 new platforms from NTC Templates v9.0: aruba_aoscx, cisco_apic, cisco_viptela, cisco_wlc_ssh, edgecore, extreme_slxos, oneaccess_oneos, watchguard_firebox, zte_zxros (#129)
+- Add 28 new commands to cisco_ios from NTC Templates v9.1, including SD-WAN, CTS, endpoint-tracker, and license commands (#128)
+
+**Tests**
+
+- Add netmiko connection tests for all YAML-only platforms (#129)
+- Refine test skip logic with granular `skip_enable_platforms` instead of full-platform xfail (#129)
+
+**Documentation**
+
+- Add `CONTRIBUTING.md` with bilingual support (English / Japanese), AI Transparency policy, and contribution workflow (#121)
+- Add `SECURITY.md` with bilingual support pointing to GitHub Private Vulnerability Reporting (#120)
+- Convert platform compatibility list to detailed compatibility table with notes (#129)
+
+**CI/CD**
+
+- Add yamllint to CI for YAML platform validation across 50+ YAML files (#137)
+
+**Dependencies**
+
+- Bump ntc-templates 9.0.0 → 9.1.0 (transitive via netmiko)
+- Bump cryptography 46.0.5 → 46.0.7
+- Bump pytest 9.0.2 → 9.0.3
+- Bump trivy-action 0.35.0 → 0.36.0
+- Bump GitHub Actions Pages workflows to Node.js 24 compatible versions
+
 ## v2.1.3
 
 **Security**
