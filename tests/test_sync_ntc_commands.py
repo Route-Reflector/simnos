@@ -35,6 +35,11 @@ class TestSelectPrimaryRaw:
         files = sorted(["cisco_ios_show_cts_pacs.raw", "cisco_ios_show-cts-pacs_6.raw"])
         assert select_primary_raw("cisco_ios", "show_cts_pacs", files) == "cisco_ios_show_cts_pacs.raw"
 
+    def test_canonical_separator_normalization(self):
+        """`<platform>_<folder normalized -→_>.raw` wins when folder uses `-`."""
+        files = sorted(["cisco_ios_show_foo.raw", "something_unrelated.raw"])
+        assert select_primary_raw("cisco_ios", "show-foo", files) == "cisco_ios_show_foo.raw"
+
     def test_separator_normalization(self):
         """Folder name with `-` matches a raw file using `_`, no platform prefix."""
         files = sorted(["show_ip_bgp_neighbors_advertised_routes.raw", "show_ip_bgp_neighbors_advertised_routes2.raw"])
@@ -57,9 +62,13 @@ class TestSelectPrimaryRaw:
         )
 
     def test_alphabetical_last_resort(self):
-        """When nothing matches the folder name, fall back to alphabetical-first."""
-        files = ["random_unrelated_file.raw"]
-        assert select_primary_raw("cisco_ios", "some_command", files) == "random_unrelated_file.raw"
+        """When nothing matches the folder name, fall back to alphabetical-first.
+
+        Multiple files are required to exercise the actual ordering — a
+        single-file fixture would pass any selector trivially.
+        """
+        files = sorted(["zzz_unrelated.raw", "aaa_unrelated.raw", "mmm_unrelated.raw"])
+        assert select_primary_raw("cisco_ios", "some_command", files) == "aaa_unrelated.raw"
 
     def test_single_raw_file(self):
         """Single-raw folder picks that file regardless of canonical match."""
