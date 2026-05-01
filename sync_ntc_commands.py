@@ -146,20 +146,20 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         with open(primary_path, encoding="utf-8") as f:
             output = f.read()
 
-        variants: list[str] = []
+        variant_outputs: list[str] = []
         variant_paths: list[str] = []
         for variant in raw_files:
             if variant == primary:
                 continue
             variant_path = os.path.join(folder_path, variant)
             with open(variant_path, encoding="utf-8") as f:
-                variants.append(f.read())
+                variant_outputs.append(f.read())
             variant_paths.append(variant_path)
 
         command_name = folder.replace("_", " ")
         commands[command_name] = {
             "output": output,
-            "output_variants": variants,
+            "output_variants": variant_outputs,
             "raw_path": primary_path,
             "raw_path_variants": variant_paths,
         }
