@@ -40,6 +40,11 @@ class TestSelectPrimaryRaw:
         files = sorted(["cisco_ios_show_foo.raw", "something_unrelated.raw"])
         assert select_primary_raw("cisco_ios", "show-foo", files) == "cisco_ios_show_foo.raw"
 
+    def test_prefix_less_canonical(self):
+        """`<folder>.raw` (no platform prefix) wins over suffixed siblings."""
+        files = sorted(["ping.raw", "ping_bounce.raw", "ping_fail.raw", "ping_rapid.raw"])
+        assert select_primary_raw("alcatel_sros", "ping", files) == "ping.raw"
+
     def test_separator_normalization(self):
         """Folder name with `-` matches a raw file using `_`, no platform prefix."""
         files = sorted(["show_ip_bgp_neighbors_advertised_routes.raw", "show_ip_bgp_neighbors_advertised_routes2.raw"])
@@ -47,11 +52,6 @@ class TestSelectPrimaryRaw:
             select_primary_raw("cisco_ios", "show_ip_bgp_neighbors_advertised-routes", files)
             == "show_ip_bgp_neighbors_advertised_routes.raw"
         )
-
-    def test_prefix_less_canonical(self):
-        """`<folder>.raw` (no platform prefix) wins over suffixed siblings."""
-        files = sorted(["ping.raw", "ping_bounce.raw", "ping_fail.raw", "ping_rapid.raw"])
-        assert select_primary_raw("alcatel_sros", "ping", files) == "ping.raw"
 
     def test_folder_name_filter_skips_sibling_fixture(self):
         """`<folder>` contained in the raw stem wins over an unrelated alpha-first sibling."""
