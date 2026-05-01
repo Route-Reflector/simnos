@@ -70,14 +70,55 @@ def get_ntc_platforms(target_dir: str) -> list[str]:
     return sorted(name for name in os.listdir(tests_dir) if os.path.isdir(os.path.join(tests_dir, name)))
 
 
+def select_primary_raw(platform: str, folder: str, raw_files: list[str]) -> str:
+    """Pick the primary ``.raw`` file for a NTC command folder.
+
+    NTC's fixture naming is inconsistent: some folders have a clean
+    ``<platform>_<folder>.raw``, others use the folder name directly
+    (``ping.raw``), and some swap separators (folder
+    ``...advertised-routes`` vs file ``...advertised_routes.raw``). A
+    naive alphabetical pick can also land on a fixture that belongs to a
+    sibling command (e.g. ``alcatel_aos_show_interfaces_R8.raw`` sitting
+    inside ``show_interfaces_ethernet/``).
+
+    Selection order:
+
+    1. ``<platform>_<folder>.raw`` (canonical exact)
+    2. ``<platform>_<folder normalized>.raw`` (``-`` → ``_``)
+    3. ``<folder>.raw`` (no platform prefix)
+    4. ``<folder normalized>.raw``
+    5. The alphabetical-first raw whose stem contains the (normalized)
+       folder name — filters out unrelated siblings.
+    6. The alphabetical-first raw (last resort).
+
+    ``raw_files`` must be alphabetically sorted; the function does not
+    re-sort.
+    """
+    folder_normalized = folder.replace("-", "_")
+    candidates = [
+        f"{platform}_{folder}.raw",
+        f"{platform}_{folder_normalized}.raw",
+        f"{folder}.raw",
+        f"{folder_normalized}.raw",
+    ]
+    for candidate in candidates:
+        if candidate in raw_files:
+            return candidate
+
+    matching = [f for f in raw_files if folder_normalized in f.replace("-", "_").removesuffix(".raw")]
+    if matching:
+        return matching[0]
+
+    return raw_files[0]
+
+
 def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     """Extract commands and outputs from NTC Templates test data.
 
-    Each command folder may contain multiple `.raw` fixtures representing
-    different device states. We collect them all: the canonical fixture
-    (named ``<platform>_<folder>.raw``) is selected as the primary
-    ``output``; the rest are stored as ``output_variants``. If the
-    canonical name is absent we fall back to the alphabetical-first raw.
+    Each command folder may contain multiple ``.raw`` fixtures
+    representing different device states. We collect them all: a
+    primary fixture is picked via :func:`select_primary_raw` and stored
+    as ``output``; the rest are stored as ``output_variants``.
 
     Returns a dict of {command_name: {
         "output": str,
@@ -100,11 +141,7 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         if not raw_files:
             continue
 
-        # Prefer the canonical fixture "<platform>_<folder>.raw" (suffix-less);
-        # fall back to alphabetical first if absent.
-        canonical = f"{platform}_{folder}.raw"
-        primary = canonical if canonical in raw_files else raw_files[0]
-
+        primary = select_primary_raw(platform, folder, raw_files)
         primary_path = os.path.join(folder_path, primary)
         with open(primary_path, encoding="utf-8") as f:
             output = f.read()
@@ -206,7 +243,7 @@ def write_diff_file(
     # Build commands dict for YAML output
     prompt_value = prompts[0] if len(prompts) == 1 else prompts
     commands_data = {}
-    raw_paths = []
+    has_any_variants = False
     for cmd_name, cmd_data in new_commands.items():
         entry: dict = {
             "output": cmd_data["output"],
@@ -215,9 +252,8 @@ def write_diff_file(
         }
         if cmd_data.get("output_variants"):
             entry["output_variants"] = cmd_data["output_variants"]
+            has_any_variants = True
         commands_data[cmd_name] = entry
-        raw_paths.append(cmd_data["raw_path"])
-        raw_paths.extend(cmd_data.get("raw_path_variants", []))
 
     now = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
@@ -229,10 +265,18 @@ def write_diff_file(
         if is_new_platform:
             f.write("# NOTE: New platform — not yet in simnos\n")
         f.write(f"# New commands: {len(new_commands)}\n")
+        if has_any_variants:
+            f.write("#\n")
+            f.write("# NOTE: `output_variants` lists alternate fixtures from NTC and is\n")
+            f.write("# currently ignored by the simnos runtime (no schema support yet).\n")
+            f.write("# It is preserved for future scenario / random response features.\n")
         f.write("#\n")
-        f.write("# Source .raw files:\n")
-        for path in raw_paths:
-            f.write(f"#   {path}\n")
+        f.write("# Source .raw files (primary marked with *):\n")
+        for cmd_name, cmd_data in new_commands.items():
+            f.write(f"#   {cmd_name}:\n")
+            f.write(f"#     * {cmd_data['raw_path']}\n")
+            for variant_path in cmd_data.get("raw_path_variants", []):
+                f.write(f"#       {variant_path}\n")
         f.write("\n")
         yaml.dump({"commands": commands_data}, f)
 
