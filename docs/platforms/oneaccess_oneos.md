@@ -18,10 +18,7 @@
 
 ### term len 0
 
-**Output:**
-```
-
-```
+**Output:** None
 
 **Help:** disable paging
 
@@ -44,10 +41,7 @@ error: unknown command
 
 ### stty columns 255
 
-**Output:**
-```
-
-```
+**Output:** None
 
 **Help:** set terminal width (ONEOS5 fallback)
 
@@ -2179,10 +2173,7 @@ No SFP module present
 
 ### show voice voip-call active all
 
-**Output:**
-```
-
-```
+**Output:** None
 
 **Help:** execute the command "show voice voip-call active all"
 

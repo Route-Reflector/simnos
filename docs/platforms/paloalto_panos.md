@@ -11,7 +11,7 @@
 
 **Output:**
 ```
-{base_prompt}> set cli scripting-mode on
+paloalto_panos> set cli scripting-mode on
 ```
 
 **Help:** enable scripting mode
