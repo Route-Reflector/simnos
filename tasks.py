@@ -85,7 +85,7 @@ def gen_docs_platform_commands(ctx):
                 if not isinstance(prompts, list):
                     prompts = [prompts]
                 for prompt in prompts:
-                    platforms_file.write(f"- {prompt.format(base_prompt=platform)}\n")
+                    platforms_file.write(f"- {prompt.replace('{base_prompt}', platform)}\n")
                 platforms_file.write("\n")
 
 
