@@ -4767,3 +4767,326 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  show bfd neighbors:
+    output: "OurAddr         NeighAddr       LD/RD                 RH/RS         \
+      \  Holdown(mult)     State       Int                   Vrf                 \
+      \             Type\n172.23.0.18     172.23.0.19     1090540255/1090566886 Up\
+      \              862(3)            Up          Eth1/10               default \
+      \                         SH\n172.23.0.22     172.23.0.23     1090540256/1090561429
+      Up              647(3)            Up          Eth1/12               default\
+      \                          SH\n172.23.0.20     172.23.0.21     1090540257/1090566968
+      Up              729(3)            Up          Eth1/11               default\
+      \                          SH\n"
+    help: execute the command "show bfd neighbors"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+  show fabricpath route:
+    output: "FabricPath Unicast Route Table\n'a/b/c' denotes ftag/switch-id/subswitch-id\n\
+      '[x/y]' denotes [admin distance/metric]\nftag 0 is local ftag\nsubswitch-id
+      0 is default subswitch-id\nFabricPath Unicast Route Table for Topology-Default\n\
+      0/10/0, number of next-hops: 0\n  via ----, [60/0], 5 day/s 11:35:56, local\n\
+      1/20/0, number of next-hops: 1\n  via Po2, [115/40], 5 day/s 11:35:23, isis_l2mp-default\n\
+      \  via Eth7/2, [115/40], 5 day/s 11:35:28, isis_l2mp-default\n1/35/0, number
+      of next-hops: 0\n  via ----, [60/0], 5 day/s 11:35:26, local\n"
+    help: execute the command "show fabricpath route"
+    prompt: *id001
+  show interface breakout:
+    output: "\n--------------------------------------------------------------------------------\n\
+      Parent                     Breakout Map    Breakout Ports\n--------------------------------------------------------------------------------\n\
+      Eth1/2                     10g-4x          Eth1/2/1-4\nEth1/3              \
+      \       10g-4x          Eth1/3/1-4\nEth1/4                     10g-4x      \
+      \    Eth1/4/1-4\nEth1/5                     10g-4x          Eth1/5/1-4\nEth1/6\
+      \                     10g-4x          Eth1/6/1-4\nEth1/11                  \
+      \  10g-4x          Eth1/11/1-4\nEth1/13                    10g-4x          Eth1/13/1-4\n\
+      Eth1/14                    10g-4x          Eth1/14/1-4\nEth1/16            \
+      \        10g-4x          Eth1/16/1-4\nEth1/19                    10g-4x    \
+      \      Eth1/19/1-4\nEth1/22                    10g-4x          Eth1/22/1-4\n"
+    help: execute the command "show interface breakout"
+    prompt: *id001
+  show interface capabilities:
+    output: "Ethernet1/1\n  Model:                 N5600-48Q-12Q-FIX\n  Type (SFP
+      capable):    QSFP-40G-SR-BD\n  Speed:                 40000\n  Duplex:     \
+      \           full\n  Trunk encap. type:     802.1Q\n  Channel:              \
+      \ yes\n  Broadcast suppression: no\n  Flowcontrol:           rx-(off/on),tx-(off/on)\n\
+      \  Rate mode:             none\n  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)\n\
+      \  CoS rewrite:           no\n  ToS rewrite:           no\n  SPAN:         \
+      \         yes\n  UDLD:                  yes\n  MDIX:                  no\n \
+      \ Link Debounce:         yes\n  Link Debounce Time:    yes\n  dot1Q-tunnel mode:\
+      \     yes\n  Pvlan Trunk capable:   yes\n  TDR capable:           no\n  FabricPath
+      capable:    yes\n  Port mode:             Switched\n  FEX Fabric:          \
+      \  yes\n\nEthernet101/1/23\n  Model:                 N2K-C2348TQ-10G-E\n  Type
+      (Non SFP):        1G/10G\n  Speed:                 100,1000,10000,auto\n  Duplex:\
+      \                full\n  Trunk encap. type:     802.1Q\n  Channel:         \
+      \      yes\n  Broadcast suppression: no\n  Flowcontrol:           rx-(off/on),tx-(off/on)\n\
+      \  Rate mode:             none\n  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)\n\
+      \  CoS rewrite:           no\n  ToS rewrite:           no\n  SPAN:         \
+      \         yes\n  UDLD:                  no\n  MDIX:                  no\n  Link
+      Debounce:         yes\n  Link Debounce Time:    yes\n  dot1Q-tunnel mode:  \
+      \   yes\n  Pvlan Trunk capable:   yes\n  TDR capable:           no\n  FabricPath
+      capable:    no\n  Port mode:             Switched\n  FEX Fabric:           \
+      \ no\n\n"
+    help: execute the command "show interface capabilities"
+    prompt: *id001
+    output_variants:
+    - "Ethernet1/1\n  Model:                 N77-F348XP-23\n  Type (SFP capable):\
+      \    10Gbase-(unknown)\n  Speed:                 1000,10000\n  Duplex:     \
+      \           full\n  Trunk encap. type:     802.1Q\n  FabricPath capable:   \
+      \ yes\n  Channel:               yes\n  Broadcast suppression: percentage(0-100)\n\
+      \  Flowcontrol:           rx-(off/on),tx-(off/on)\n  Rate mode:            \
+      \ dedicated\n  Port mode:             Routed,Switched\n  QOS scheduling:   \
+      \     rx-(4q1t),tx-(1p7q1t)\n                         rx-(4q1t),tx-(3p5q1t)\n\
+      \                         rx-(4q1t),tx-(2p6q1t)\n  CoS rewrite:           yes\n\
+      \  ToS rewrite:           yes\n  SPAN:                  yes\n  UDLD:       \
+      \           yes\n  MDIX:                  yes\n  TDR capable:           no\n\
+      \  Link Debounce:         yes\n  Link Debounce Time:    yes\n  FEX Fabric: \
+      \           yes\n  dot1Q-tunnel mode:     yes\n  EFP:                   yes\n\
+      \  Num Rewrites Allowed:  104\n  Pvlan Trunk capable:   yes\n  Port Group Members:\
+      \    1-8\n  EEE (efficient-eth):   no\n  PFC capable:           yes\n  Breakout
+      capable:      no\n  Link Up Debounce:      yes\n  FEC capable:           no\n\
+      \n"
+  show interface status err-disabled:
+    output: "--------------------------------------------------------------------------------\n\
+      Port         Name               Status             Reason\n--------------------------------------------------------------------------------\n\
+      Eth1         tenGigE 0/0/2/0 as linkFlapErr        linkFlapErrDisabled\nEth2\
+      \         --                 linkFlapErr        linkFlapErrDisabled\nEth3  \
+      \       --                 err-disabled       Error disabled\nEth4         SD
+      180848 OFFER EM linkFlapErr        linkFlapErrDisabled\n"
+    help: execute the command "show interface status err-disabled"
+    prompt: *id001
+  show interface switchport:
+    output: "Name: Ethernet1/1\n  Switchport: Enabled\n  Switchport Monitor: Not enabled\n\
+      \  Switchport Isolated : Not enabled\n  Switchport Block Multicast: Not enabled\n\
+      \  Switchport Block Unicast: Not enabled\n  Operational Mode: access\n  Access
+      Mode VLAN: 3 (Vlan not created)\n  Trunking Native Mode VLAN: 1 (default)\n\
+      \  Trunking VLANs Allowed: 1-4094\n  Voice VLAN: none\n  Extended Trust State
+      : not trusted [COS = 0]\n  Administrative private-vlan primary host-association:
+      none\n  Administrative private-vlan secondary host-association: none\n  Administrative
+      private-vlan primary mapping: none\n  Administrative private-vlan secondary
+      mapping: none\n  Administrative private-vlan trunk native VLAN: none\n  Administrative
+      private-vlan trunk encapsulation: dot1q\n  Administrative private-vlan trunk
+      normal VLANs: none\n  Administrative private-vlan trunk private VLANs: none\n\
+      \  Operational private-vlan: none\nName: Ethernet1/2\n  Switchport: Enabled\n\
+      \  Switchport Monitor: Not enabled\n  Switchport Isolated : Not enabled\n  Switchport
+      Block Multicast: Not enabled\n  Switchport Block Unicast: Not enabled\n  Operational
+      Mode: trunk\n  Access Mode VLAN: 1 (default)\n  Trunking Native Mode VLAN: 5
+      (Vlan not created)\n  Trunking VLANs Allowed: 1-4094\n  Voice VLAN: none\n \
+      \ Extended Trust State : not trusted [COS = 0]\n  Administrative private-vlan
+      primary host-association: none\n  Administrative private-vlan secondary host-association:
+      none\n  Administrative private-vlan primary mapping: none\n  Administrative
+      private-vlan secondary mapping: none\n  Administrative private-vlan trunk native
+      VLAN: none\n  Administrative private-vlan trunk encapsulation: dot1q\n  Administrative
+      private-vlan trunk normal VLANs: none\n  Administrative private-vlan trunk private
+      VLANs: none\n  Operational private-vlan: none\nName: Ethernet1/3\n  Switchport:
+      Enabled\n  Switchport Monitor: Not enabled\n  Switchport Isolated : Not enabled\n\
+      \  Switchport Block Multicast: Not enabled\n  Switchport Block Unicast: Not
+      enabled\n  Operational Mode: trunk\n  Access Mode VLAN: 1 (default)\n  Trunking
+      Native Mode VLAN: 1 (default)\n  Trunking VLANs Allowed: 1-4094\n  Voice VLAN:
+      none\n  Extended Trust State : not trusted [COS = 0]\n  Administrative private-vlan
+      primary host-association: none\n  Administrative private-vlan secondary host-association:
+      none\n  Administrative private-vlan primary mapping: none\n  Administrative
+      private-vlan secondary mapping: none\n  Administrative private-vlan trunk native
+      VLAN: none\n  Administrative private-vlan trunk encapsulation: dot1q\n  Administrative
+      private-vlan trunk normal VLANs: none\n  Administrative private-vlan trunk private
+      VLANs: none\n  Operational private-vlan: none\n"
+    help: execute the command "show interface switchport"
+    prompt: *id001
+    output_variants:
+    - "Name: Ethernet1/36\n  Switchport: Enabled\n  Switchport Monitor: Enabled \n\
+      \  Switchport Block Multicast: Not enabled \n  Switchport Block Unicast: Not
+      enabled \n  Operational Mode: access\n  Access Mode VLAN: 1 (default)\n  Trunking
+      Native Mode VLAN: 1 (default)\n  Trunking VLANs Allowed: 1-4094\n  Administrative
+      private-vlan primary host-association: none\n  Administrative private-vlan secondary
+      host-association: none\n  Administrative private-vlan primary mapping: none\n\
+      \  Administrative private-vlan secondary mapping: none\n  Administrative private-vlan
+      trunk native VLAN: none\n  Administrative private-vlan trunk encapsulation:
+      dot1q\n  Administrative private-vlan trunk normal VLANs: none\n  Administrative
+      private-vlan trunk private VLANs: none\n  Operational private-vlan: none\n \
+      \ Virtual Ethernet Bridge Forwarding : Disabled\nName: port-channel24\n  Switchport:
+      Enabled\n  Switchport Monitor: Not enabled \n  Switchport Block Multicast: Not
+      enabled \n  Switchport Block Unicast: Not enabled \n  Operational Mode: trunk\n\
+      \  Access Mode VLAN: 1 (default)\n  Trunking Native Mode VLAN: 1 (default)\n\
+      \  Trunking VLANs Allowed: 120,134,501,800,804\n  Administrative private-vlan
+      primary host-association: none\n  Administrative private-vlan secondary host-association:
+      none\n  Administrative private-vlan primary mapping: none\n  Administrative
+      private-vlan secondary mapping: none\n  Administrative private-vlan trunk native
+      VLAN: none\n  Administrative private-vlan trunk encapsulation: dot1q\n  Administrative
+      private-vlan trunk normal VLANs: none\n  Administrative private-vlan trunk private
+      VLANs: none\n  Operational private-vlan: none\n  Virtual Ethernet Bridge Forwarding
+      : Disabled\n"
+    - "Name: Ethernet1/1\n  Switchport: Enabled\n  Switchport Monitor: Not enabled\n\
+      \  Switchport Isolated : Not enabled\n  Switchport Block Multicast: Not enabled\n\
+      \  Switchport Block Unicast: Not enabled\n  Operational Mode: access\n  Access
+      Mode VLAN: 3 (Vlan not created)\n  Trunking Native Mode VLAN: 1 (default)\n\
+      \  Trunking VLANs Allowed: 1-4094\n  Voice VLAN: none\n  Extended Trust State
+      : not trusted [COS = 0]\n  Administrative private-vlan primary host-association:
+      none\n  Administrative private-vlan secondary host-association: none\n  Administrative
+      private-vlan primary mapping: none\n  Administrative private-vlan secondary
+      mapping: none\n  Administrative private-vlan trunk native VLAN: none\n  Administrative
+      private-vlan trunk encapsulation: dot1q\n  Administrative private-vlan trunk
+      normal VLANs: none\n  Administrative private-vlan trunk private VLANs: none\n\
+      \  Operational private-vlan: none\nName: Ethernet1/2\n  Switchport: Enabled\n\
+      \  Switchport Monitor: Not enabled\n  Switchport Isolated : Not enabled\n  Switchport
+      Block Multicast: Not enabled\n  Switchport Block Unicast: Not enabled\n  Operational
+      Mode: trunk\n  Access Mode VLAN: 1 (default)\n  Trunking Native Mode VLAN: 5
+      (Vlan not created)\n  Trunking VLANs Allowed: 1-4094\n  Voice VLAN: none\n \
+      \ Extended Trust State : not trusted [COS = 0]\n  Administrative private-vlan
+      primary host-association: none\n  Administrative private-vlan secondary host-association:
+      none\n  Administrative private-vlan primary mapping: none\n  Administrative
+      private-vlan secondary mapping: none\n  Administrative private-vlan trunk native
+      VLAN: none\n  Administrative private-vlan trunk encapsulation: dot1q\n  Administrative
+      private-vlan trunk normal VLANs: none\n  Administrative private-vlan trunk private
+      VLANs: none\n  Operational private-vlan: none\nName: Ethernet1/3\n  Switchport:
+      Enabled\n  Switchport Monitor: Not enabled\n  Switchport Isolated : Not enabled\n\
+      \  Switchport Block Multicast: Not enabled\n  Switchport Block Unicast: Not
+      enabled\n  Operational Mode: trunk\n  Access Mode VLAN: 1 (default)\n  Trunking
+      Native Mode VLAN: 1 (default)\n  Trunking VLANs Allowed: 1-4094\n  Voice VLAN:
+      none\n  Extended Trust State : not trusted [COS = 0]\n  Administrative private-vlan
+      primary host-association: none\n  Administrative private-vlan secondary host-association:
+      none\n  Administrative private-vlan primary mapping: none\n  Administrative
+      private-vlan secondary mapping: none\n  Administrative private-vlan trunk native
+      VLAN: none\n  Administrative private-vlan trunk encapsulation: dot1q\n  Administrative
+      private-vlan trunk normal VLANs: none\n  Administrative private-vlan trunk private
+      VLANs: none\n  Operational private-vlan: none\n"
+  show ip arp detail vrf all:
+    output: "Flags: * - Adjacencies learnt on non-active FHRP router\n       + - Adjacencies
+      synced via CFSoE\n       # - Adjacencies Throttled for Glean\n       CP - Added
+      via L2RIB, Control plane Adjacencies\n       PS - Added via L2RIB, Peer Sync\n\
+      \       RO - Re-Originated Peer Sync Entry\n\nIP ARP Table for all contexts\n\
+      Total number of entries: 350\nAddress         Age       MAC Address     Interface\
+      \        Physical Interface  Flags    VRF Name\n10.255.0.2      00:09:24  14a2.a070.52a7\
+      \  Vlan666          port-channel1000             default\n10.255.0.1      00:17:20\
+      \  14a2.a070.52a0  mgmt0            mgmt0                        management\n\
+      172.23.5.8      00:06:48  b8a3.771c.255b  Ethernet1/49     Ethernet1/49    \
+      \             default\n172.23.5.10     00:06:50  d477.98e9.c6bf  Ethernet1/50\
+      \     Ethernet1/50                 default\n10.233.6.3      00:14:55  14a2.a070.52a7\
+      \  Vlan3            port-channel1000             PRIMARY\n10.233.6.5      00:11:24\
+      \  c8e7.f0fb.d6a7  Vlan3            Ethernet1/8                  PRIMARY\n10.233.6.6\
+      \      00:14:04  d0d0.fd61.ecc1  Vlan3            Ethernet1/9         +    \
+      \    PRIMARY\n10.233.6.7      00:12:05  44aa.502f.c150  Vlan3            Ethernet1/13\
+      \                 PRIMARY\n10.233.6.8      00:07:12  8418.88ac.9741  Vlan3 \
+      \           port-channel12               PRIMARY\n10.233.6.9      00:13:41 \
+      \ 8418.88aa.c641  Vlan3            port-channel13               PRIMARY\n10.233.6.10\
+      \     00:05:29  0881.f4ae.4841  Vlan3            port-channel14            \
+      \   PRIMARY\n10.233.6.11     00:10:51  b0a8.6e03.ce81  Vlan3            port-channel11\
+      \               PRIMARY\n10.233.6.12     00:04:35  2c21.7299.8ac1  Vlan3   \
+      \         Ethernet1/6                  PRIMARY\n10.233.6.13     00:13:25  78fe.3d35.7b41\
+      \  Vlan3            Ethernet1/21                 PRIMARY\n10.233.6.14     00:09:43\
+      \  8071.1fe7.f041  Vlan3            Ethernet1/29                 PRIMARY\n10.233.6.15\
+      \     00:06:38  8071.1fe7.ef41  Vlan3            Ethernet1/28              \
+      \   PRIMARY\n10.233.6.16     00:17:54  3c61.04f9.6bc1  Vlan3            Ethernet1/12\
+      \                 PRIMARY\n10.233.6.18     00:13:17  2c21.7298.8b41  Vlan3 \
+      \           Ethernet1/10                 PRIMARY\n10.233.6.19     00:11:53 \
+      \ 2c21.7299.8e81  Vlan3            Ethernet1/11                 PRIMARY\n10.233.6.20\
+      \     00:00:01  28c0.da35.dc01  Vlan3            Ethernet1/16              \
+      \   PRIMARY\n10.233.6.21     00:01:08  c8e7.f0fb.c487  Vlan3            port-channel10\
+      \               PRIMARY\n10.233.6.30     00:09:24  7819.f79a.82c1  Vlan3   \
+      \         Ethernet1/2                  PRIMARY\n10.233.6.31     00:01:54  2c21.728a.0581\
+      \  Vlan3            Ethernet1/22                 PRIMARY\n10.233.6.32     00:02:05\
+      \  78fe.3d35.a101  Vlan3            Ethernet1/1         +        PRIMARY\n10.233.6.33\
+      \     00:05:25  2c21.7296.b501  Vlan3            Ethernet1/3               \
+      \   PRIMARY\n10.233.6.34     00:16:36  2c21.7296.8c81  Vlan3            Ethernet1/23\
+      \                 PRIMARY\n10.233.6.35     00:08:06  2c21.7293.a401  Vlan3 \
+      \           Ethernet1/24                 PRIMARY\n10.233.6.36     00:14:56 \
+      \ 2c21.7296.9081  Vlan3            Ethernet1/4                  PRIMARY\n10.233.6.37\
+      \     00:12:56  7819.f79b.8801  Vlan3            Ethernet1/25              \
+      \   PRIMARY\n10.233.6.38     00:14:49  2c21.7296.a401  Vlan3            Ethernet1/26\
+      \                 PRIMARY\n10.233.6.39     00:17:42  2c21.3111.0701  Vlan3 \
+      \           port-channel18               PRIMARY\n10.233.6.48     00:08:50 \
+      \ 7c25.8629.ab83  Vlan3            Ethernet1/15                 PRIMARY\n10.233.6.50\
+      \     00:13:21  f8c0.01c9.e501  Vlan3            port-channel15            \
+      \   PRIMARY\n10.233.6.60     00:05:02  8418.88ac.9ec1  Vlan3            port-channel16\
+      \      +        PRIMARY\n10.233.6.70     00:12:04  8418.88ac.a0c1  Vlan3   \
+      \         port-channel17               PRIMARY\n10.233.6.193    00:03:29  2829.862b.0dfc\
+      \  Vlan3            port-channel13               PRIMARY\n10.233.6.194    00:02:38\
+      \  2829.863f.5708  Vlan3            Ethernet1/2                  PRIMARY\n10.233.6.196\
+      \    00:02:15  2829.8615.4bd3  Vlan3            Ethernet1/4                \
+      \  PRIMARY\n10.233.6.197    00:08:54  2829.8617.5b14  Vlan3            Ethernet1/21\
+      \                 PRIMARY\n10.233.6.1         -      0000.5e00.0101  Vlan9 \
+      \           -\n"
+    help: execute the command "show ip arp detail vrf all"
+    prompt: *id001
+  show ip eigrp neighbors:
+    output: "IP-EIGRP neighbors for process 65535 VRF default\nH Address Interface
+      Hold Uptime SRTT RTO Q Seq\n(sec) (ms) Cnt Num\n7 10.20.150.2 Po2001 12 03:44:02
+      20 200 0 10331\n6 10.20.200.2 Po2000 14 03:44:02 13 200 0 158157\n5 10.40.1.1
+      Eth1/26 13 03:44:14 16 200 0 158164\n4 10.50.2.1 Eth2/5 12 03:44:14 16 200 0
+      158166\n3 10.50.1.1 Eth2/6 13 03:44:15 16 200 0 158165\n2 10.50.3.1 Eth2/7 11
+      03:44:15 13 200 0 158167\n1 10.20.5.2 Eth3/11 14 03:44:16 18 200 0 158158\n\
+      0 10.20.6.2 Eth3/12 11 03:44:17 14 200 0 158163\n"
+    help: execute the command "show ip eigrp neighbors"
+    prompt: *id001
+  show nve vni interface nve 1 detail:
+    output: "VNI: 100036\n  NVE-Interface       : nve1\n  Mcast-Addr          : 239.1.1.1\n\
+      \  VNI State           : Up\n  Mode                : control-plane\n  VNI Type\
+      \            : L2 [36]\n  VNI Flags           : SA\n  Provision State     :
+      vni-add-complete\n  Vlan-BD             : 36\n  SVI State           : n/a\n\
+      VNI: 31473\n  NVE-Interface       : nve1\n  Mcast-Addr          : 239.1.1.19\n\
+      \  VNI State           : Down\n  Mode                : control-plane\n  VNI
+      Type            : L2 [UC]\n  VNI Flags           : SA\n  Provision State   \
+      \  : vni-init\n  Vlan-BD             : 0\n  SVI State           : n/a\nVNI:
+      10498\n  NVE-Interface       : nve1\n  Mcast-Addr          : 239.1.1.26\n  VNI
+      State           : Up\n  Mode                : control-plane\n  VNI Type    \
+      \        : L2 [498]\n  VNI Flags           : SA\n  Provision State     : vni-add-complete\n\
+      \  Vlan-BD             : 498\n  SVI State           : n/a\nVNI: 10446\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.153\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [446]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 446\n  SVI State           : n/a\nVNI: 10404\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.23\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [404]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 404\n  SVI State           : n/a\nVNI: 10400\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.23\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [400]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 400\n  SVI State           : n/a\nVNI: 10374\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.23\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [374]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 374\n  SVI State           : n/a\nVNI: 10370\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : UnicastBGP\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [370]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 370\n  SVI State           : n/a\nVNI: 10230\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.1\n  VNI State           : Up\n\
+      \  Mode                : control-plane\n  VNI Type            : L2 [230]\n \
+      \ VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 230\n  SVI State           : n/a\nVNI: 10222\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.2.222\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [222]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 222\n  SVI State           : n/a\nVNI: 10191\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.21\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [191]\n\
+      \  VNI Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD\
+      \             : 191\n  SVI State           : n/a\nVNI: 10077\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : n/a\n  VNI State           : Up\n  Mode\
+      \                : control-plane\n  VNI Type            : L3 [TENANT77]\n  VNI
+      Flags           :\n  Provision State     : vni-add-complete\n  Vlan-BD     \
+      \        : 77\n  SVI State           : UP [vrf-id: 3]\nVNI: 10060\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.5\n  VNI State           : Up\n\
+      \  Mode                : control-plane\n  VNI Type            : L2 [60]\n  VNI
+      Flags           : SA\n  Provision State     : vni-add-complete\n  Vlan-BD  \
+      \           : 60\n  SVI State           : n/a\nVNI: 10026\n  NVE-Interface \
+      \      : nve1\n  Mcast-Addr          : n/a\n  VNI State           : Up\n  Mode\
+      \                : control-plane\n  VNI Type            : L3 [blobber]\n  VNI
+      Flags           :\n  Provision State     : vni-add-complete\n  Vlan-BD     \
+      \        : 2\n  SVI State           : UP [vrf-id: 4]\nVNI: 603008\n  NVE-Interface\
+      \       : nve1\n  Mcast-Addr          : 239.1.1.33\n  VNI State           :
+      Up\n  Mode                : control-plane\n  VNI Type            : L2 [3008]\n\
+      \  VNI Flags           : SA\n  DCI Mcast-Addr      : Unconfigured\n  Provision
+      State     : vni-add-complete\n  Vlan-BD             : 3008\n  SVI State    \
+      \       : DOWN [vrf-id: 0] [L3VNI: 0]\nVNI: 603007\n  NVE-Interface       :
+      nve1\n  Mcast-Addr          : 239.1.1.34\n  VNI State           : Up\n  Mode\
+      \                : control-plane\n  VNI Type            : L2 [3007]\n  VNI Flags\
+      \           : SA\n  DCI Mcast-Addr      : Unconfigured\n  Provision State  \
+      \   : vni-add-complete\n  Vlan-BD             : 3007\n  SVI State          \
+      \ : DOWN [vrf-id: 0] [L3VNI: 0]\nVNI: 603006\n  NVE-Interface       : nve1\n\
+      \  Mcast-Addr          : 239.1.1.35\n  VNI State           : Up\n  Mode    \
+      \            : control-plane\n  VNI Type            : L2 [3006]\n  VNI Flags\
+      \           : SA\n  DCI Mcast-Addr      : Unconfigured\n  Provision State  \
+      \   : vni-add-complete\n  Vlan-BD             : 3006\n  SVI State          \
+      \ : DOWN [vrf-id: 0] [L3VNI: 0]\n\n"
+    help: execute the command "show nve vni interface nve 1 detail"
+    prompt: *id001
