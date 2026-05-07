@@ -413,3 +413,1452 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  display location:
+    output: "  -----------------------------------------------------------------------\n\
+      \   SRV-P BUNDLE TYPE MAC            MAC TYPE F /S /P   VPI  VCI   VLAN ID\n\
+      \   INDEX INDEX\n  -----------------------------------------------------------------------\n\
+      \      99     -  gpon aaaa-aaaa-aaaa dynamic  0 /1 /0   0    1           1\n\
+      \  -----------------------------------------------------------------------\n\
+      \  Note: F--Frame, S--Slot, P--Port, F/S/P indicates PW Index for PW,\n    \
+      \    A--The MAC address is learned or configured on the aggregation port,\n\
+      \        VPI indicates ONT ID for PON, VCI indicates GEM index for GPON,\n \
+      \       v/e--vlan/encap, pritag--priority-tagged,\n        ppp--pppoe, ip--ipoe,
+      ip4--ipv4oe, ip6--ipv6oe\n"
+    help: execute the command "display location"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+  display location aaaa-aaaa-aaaa ont:
+    output: "{{ <cr>||<K> }}:\n\n  Command:\n          display location aaaa-aaaa-aaaa
+      ont\n  It will take several minutes, please wait or press CTRL_C to break\n\
+      \  Are you sure to query MAC address location ? (y/n)[n]:y\n  ----------------------------------------------------------------------\n\
+      \  MAC             MAC TYPE  F/S/P    ONT ID  Port ID  Port Type  VLAN\n  ----------------------------------------------------------------------\n\
+      \  aaaa-aaaa-aaaa  DYNAMIC   0/ 1/0        0        1  ETH           1\n  ----------------------------------------------------------------------\n"
+    help: execute the command "display location aaaa-aaaa-aaaa ont"
+    prompt: *id001
+  display mac-address:
+    output: "  It will take some time, please wait...\n  -----------------------------------------------------------------------\n\
+      \   SRV-P BUNDLE TYPE MAC            MAC TYPE F /S /P   VPI  VCI   VLAN ID\n\
+      \   INDEX INDEX\n  -----------------------------------------------------------------------\n\
+      \       1     -  gpon aaaa-aaaa-aaaa static   0 /1 /0   1    1           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \       -     -  eth  aaaa-aaaa-aaaa dynamic  0 /1 /1   -    -           1\n\
+      \  -----------------------------------------------------------------------\n\
+      \  Total: 10\n  Note: F--Frame, S--Slot, P--Port, F/S/P indicates PW Index for
+      PW,\n        A--The MAC address is learned or configured on the aggregation
+      \nport,\n        VPI indicates ONT ID for PON, VCI indicates GEM index for GPON,\n\
+      \        v/e--vlan/encap, pritag--priority-tagged,\n        ppp--pppoe, ip--ipoe,
+      ip4--ipv4oe, ip6--ipv6oe\n"
+    help: execute the command "display mac-address"
+    prompt: *id001
+  display mac-address ont 0 1 2 0:
+    output: " ---------------------------------------------------------------\n F/S/P\
+      \   ONTID    ONT        ONT       MAC-ADDRESS        VLAN\n                \
+      \   port-type  port-ID\n ---------------------------------------------------------------\n
+      0/ 2/6      2    ETH              1   805e-0c5c-4277       80\n 0/ 2/6     \
+      \ 2    ETH              1   84a9-3845-d603     1003\n 0/ 2/6      2    ETH \
+      \             2   0026-73f9-5a63     1003 \n ---------------------------------------------------------------\n
+      Total: 3\n"
+    help: execute the command "display mac-address ont 0 1 2 0"
+    prompt: *id001
+    output_variants:
+    - " ---------------------------------------------------------------\n F/S/P  \
+      \ ONTID    ONT        ONT       MAC-ADDRESS        VLAN\n                  port-type\
+      \  port-ID\n ---------------------------------------------------------------\n
+      0/ 1/0      0    WLAN             4   aaaa-aaaa-aaaa        -\n ---------------------------------------------------------------\n
+      Total: 1\n Note: When the ONT port-type is WLAN, the ONT port-ID indicates WLAN
+      SSID index\n"
+  display ont capability all:
+    output: "  During the course of print ,press CTRL_C to break\n  --------------------------------------------------------------------------
+      \n  ONT Hardware Capability / Status Information                           \
+      \    \n  --------------------------------------------------------------------------
+      \n  F/S/P:                              0/1/0\n  ONT description:          \
+      \          ONU_1\n  ONT ID:                             0\n  Equipment ID: \
+      \                      A123B\n  Number of uplink PON ports:         1\n  Number
+      of POTS ports:               1\n  Number of ETH ports:                1\n  Number
+      of VDSL ports:               -\n  Number of TDM ports:                -\n  Number
+      of MOCA ports:               -\n  Number of CATV ANI ports:           -\n  Number
+      of CATV UNI ports:           -\n  Number of GEM ports:                32\n \
+      \ IP configuration:                   support\n  Number of Traffic Schedulers:\
+      \       8\n  Number of T-CONTs:                  8\n  The type of flow control:\
+      \           GEMPORT CAR\n  ONT optical module power              \n  control
+      capability:                 support\n  ONT type:                           HGU\n\
+      \  Extended OMCI message format:       support\n  VoIP configuration method:\
+      \          OMCI/Configuration file/TR069\n  VoIP signalling protocol:      \
+      \     SIP/H.248\n  ETHOAM:                             not support\n  Single
+      ring check:                  support\n  Multi channel:                     \
+      \ -\n  Fit AP:                             not support\n  --------------------------------------------------------------------------
+      \n  Number of PQs in T-CONT   0:          8\n  Number of PQs in T-CONT   1:\
+      \          8\n  Number of PQs in T-CONT   2:          8\n  Number of PQs in
+      T-CONT   3:          8\n  Number of PQs in T-CONT   4:          8\n  Number
+      of PQs in T-CONT   5:          8\n  Number of PQs in T-CONT   6:          8\n\
+      \  Number of PQs in T-CONT   7:          8\n  --------------------------------------------------------------------------
+      \n  F/S/P:                              0/1/0\n  ONT description:          \
+      \          ONT_NO_DESCRIPTION\n  ONT ID:                             1\n  Equipment
+      ID:                       A123B-A10\n  Number of uplink PON ports:         1\n\
+      \  Number of POTS ports:               -\n  Number of ETH ports:           \
+      \     4\n  Number of VDSL ports:               -\n  Number of TDM ports:   \
+      \             -\n  Number of MOCA ports:               -\n  Number of CATV ANI
+      ports:           -\n  Number of CATV UNI ports:           -\n  Number of GEM
+      ports:                32\n  IP configuration:                   support\n  Number
+      of Traffic Schedulers:       8\n  Number of T-CONTs:                  8\n  The
+      type of flow control:           GEMPORT CAR\n  ONT optical module power    \
+      \          \n  control capability:                 support\n  ONT type:    \
+      \                       HGU\n  Extended OMCI message format:       support\n\
+      \  VoIP configuration method:          -\n  VoIP signalling protocol:      \
+      \     -\n  ETHOAM:                             not support\n  Single ring check:\
+      \                  support\n  Multicast encrypt:                  support\n\
+      \  Multi channel:                      -\n  Fit AP:                        \
+      \     not support\n  --------------------------------------------------------------------------
+      \n  Number of PQs in T-CONT   0:          8\n  Number of PQs in T-CONT   1:\
+      \          8\n  Number of PQs in T-CONT   2:          8\n  Number of PQs in
+      T-CONT   3:          8\n  Number of PQs in T-CONT   4:          8\n  Number
+      of PQs in T-CONT   5:          8\n  Number of PQs in T-CONT   6:          8\n\
+      \  Number of PQs in T-CONT   7:          8\n  --------------------------------------------------------------------------
+      \n  The total of online ONTs are: 2\n  -------------------------------------------------------------------------- "
+    help: execute the command "display ont capability all"
+    prompt: *id001
+  display ont gemport 0 ontid 0:
+    output: "  F/S/P: 0/0/0     ONT ID: 5                                        \
+      \            \n  ------------------------------------------------------------------------------
+      \n  GEM port  T-CONT  Service  Encrypt  Up  Down  Traffic                  \
+      \       \n   ID       ID      type              PQ  PQ    table index      \
+      \               \n  ------------------------------------------------------------------------------\n\
+      \  126       4       ETHERNET off      -   adapt -\n  ------------------------------------------------------------------------------\n\
+      \  Notes: Run the display traffic table ip command to query                \
+      \      \n         traffic table configuration                              \
+      \              \n  ------------------------------------------------------------------------------\
+      \  \n  The number of GEM ports is: 1\n"
+    help: execute the command "display ont gemport 0 ontid 0"
+    prompt: *id001
+  display ont info 0:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side
+      \n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0    0  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    1  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    2  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    3  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    4  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    5  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    6  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    7  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    8  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    9  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   10  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   11  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   12  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   13  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   14  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   15  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   16  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   17  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   18  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   19  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   20  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   21  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   22  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   23  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   24  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   25  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   26  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   27  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   28  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   29  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   30  1234567890ABCDEF  active      online   normal   match    no
+      \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P       ONT  Description  \n              ID  \n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0       0   Generic_description\n  0/ 1/0       1   Generic_description\n\
+      \  0/ 1/0       2   Generic_description\n  0/ 1/0       3   Generic_description\n\
+      \  0/ 1/0       4   Generic_description\n  0/ 1/0       5   Generic_description\n\
+      \  0/ 1/0       6   Generic_description\n  0/ 1/0       7   Generic_description\n\
+      \  0/ 1/0       8   Generic_description\n  0/ 1/0       9   Generic_description\n\
+      \  0/ 1/0      10   Generic_description\n  0/ 1/0      11   Generic_description\n\
+      \  0/ 1/0      12   Generic_description\n  0/ 1/0      13   Generic_description\n\
+      \  0/ 1/0      14   Generic_description\n  0/ 1/0      15   Generic_description\n\
+      \  0/ 1/0      16   Generic_description\n  0/ 1/0      17   Generic_description\n\
+      \  0/ 1/0      18   Generic_description\n  0/ 1/0      19   Generic_description\n\
+      \  0/ 1/0      20   Generic_description\n  0/ 1/0      21   Generic_description\n\
+      \  0/ 1/0      22   Generic_description\n  0/ 1/0      23   Generic_description\n\
+      \  0/ 1/0      24   Generic_description\n  0/ 1/0      25   Generic_description\n\
+      \  0/ 1/0      26   Generic_description\n  0/ 1/0      27   Generic_description\n\
+      \  0/ 1/0      28   Generic_description\n  0/ 1/0      29   Generic_description\n\
+      \  0/ 1/0      30   Generic_description\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 1/0 , the total of ONTs are: 31, online: 31\n  -----------------------------------------------------------------------------"
+    help: execute the command "display ont info 0"
+    prompt: *id001
+    output_variants:
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  0/ 2/0    0  46VBSM4LFW7QLGAV  active      offline  online   initial  no\
+      \     \n  0/ 2/0    1  PBFGXVIPMQZN0E1T  configuring online   online   mismatch
+      yes    \n  0/ 2/0    2  X64PWIUVU5TGONE1  active      offline  normal   mismatch
+      yes    \n  0/ 2/0    3  ZD53TVQMSXNLUFE3  configuring online   online   mismatch
+      yes    \n  0/ 2/0    4  E8CFIM0QRWMY1YJV  active      offline  online   mismatch
+      no     \n  0/ 2/0    5  APWLB7QEY4Y64H11  configuring online   normal   initial\
+      \  yes    \n  0/ 2/0    6  B141LLHVQ18P6AK4  configuring offline  normal   initial\
+      \  no     \n  0/ 2/0    7  02GVAXHK3LXSZB4B  configuring online   normal   match\
+      \    no     \n  0/ 2/0    8  DZE8P8SY4R8G0I4P  active      offline  failing\
+      \  match    yes    \n  0/ 2/0    9  EITYLTDDY2V5ESD6  configuring online   normal\
+      \   match    yes    \n  0/ 2/0   10  50HVGRGSETKS72UH  active      online  \
+      \ failing  mismatch yes    \n  0/ 2/0   11  6YN1YJYTJZIOLM9Z  active      offline\
+      \  failing  match    yes    \n  0/ 2/0   12  Q5P60X5F3EEJ60RA  active      online\
+      \   online   mismatch no     \n  0/ 2/0   13  T5LNUJTG0HPTJ91W  active     \
+      \ offline  normal   initial  no     \n  0/ 2/0   14  E2ZSGR9G6JZRPZDF  active\
+      \      online   failing  match    no     \n  0/ 2/0   15  1OJNON01PVSX1ZV3 \
+      \ configuring offline  normal   initial  no     \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 2/0       0   The boiling consignment budgets.\n  0/ 2/0       1   The
+      fretful sweatshop promotes.\n  0/ 2/0       2   The damaging nerve nests.  \
+      \    \n  0/ 2/0       3   The macho quart blinks.        \n  0/ 2/0       4\
+      \   The industrious bumper kicks.  \n  0/ 2/0       5   The understood deviance
+      remembers.\n  0/ 2/0       6   The wandering elf assists.     \n  0/ 2/0   \
+      \    7   The deranged echidna glues.    \n  0/ 2/0       8   The ancient hunter
+      reinforces. \n  0/ 2/0       9   The brawny honeydew deserts.   \n  0/ 2/0 \
+      \     10   The fanatical twine finances.  \n  0/ 2/0      11   The overconfident
+      dinner heats.\n  0/ 2/0      12   The rotten census sounds.      \n  0/ 2/0\
+      \      13   The lavish gun strengthens.    \n  0/ 2/0      14   The gusty sari
+      coordinates.    \n  0/ 2/0      15   The acrid shallot extends.     \n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 2/0, the total number of ONTs is: 16, online: 8, offline: 8\n\
+      \  -----------------------------------------------------------------------------"
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  0/ 0/0    0  F6JO2SI8TTKDYDRC  active      offline  initial  initial  no\n\
+      \  0/ 0/0    1  R2PQNML2L0SI92ZN  active      offline  initial  initial  no\n\
+      \  0/ 0/0    2  0LZ7H0PCJOH4UGCH  active      online   normal   match    no\n\
+      \  0/ 0/0    3  NRDJVRAI8Z3V4I4W  active      offline  initial  initial  no\n\
+      \  0/ 0/0    4  PVDWI3METQ3PRRLV  active      -        -        -        yes\n\
+      \  0/ 0/0    5  MLA9MZJ0281C0XLK  active      online   normal   mismatch no\n\
+      \  0/ 0/0    6  MU94N3374BXT31PC  active      online   normal   mismatch no\n\
+      \  0/ 0/0    7  3MBM04QWXCCENRGH  active      online   normal   mismatch no\n\
+      \  0/ 0/0    8  9KYC0LNT1AWTMFRP  active      online   normal   match    no\n\
+      \  0/ 0/0    9  1SY4IU9PRO1G00N7  active      online   normal   mismatch no\n\
+      \  0/ 0/0   10  CT0VHHH2FDI2UQLX  active      offline  initial  initial  no\n\
+      \  0/ 0/0   11  PT8P24IDSRLOGMHS  active      offline  initial  initial  no\n\
+      \  0/ 0/0   12  A5N97LH1IWH4YG96  active      online   normal   mismatch no\n\
+      \  0/ 0/0   13  X8ZIIV5P0F6XJJQD  active      online   normal   match    no\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 0/0       0   The quiet rifle stinks.\n  0/ 0/0       1   The barbarous
+      take-out rolls.\n  0/ 0/0       2   The tender handmaiden places.\n  0/ 0/0\
+      \       3   The husky elongation types.\n  0/ 0/0       4   The wise emanate
+      snows.\n  0/ 0/0       5   The stereotyped eddy analyzes.\n  0/ 0/0       6\
+      \   The painful pancreas presents.\n  0/ 0/0       7   The unadvised gopher
+      keeps.\n  0/ 0/0       8   The threatening media keeps.\n  0/ 0/0       9  \
+      \ The possessive beetle memorizes.\n  0/ 0/0      10   The cautious hand-holding
+      zips.\n  0/ 0/0      11   The shaggy parsnip informs.\n  0/ 0/0      12   The
+      alluring rank slinks.\n  0/ 0/0      13   The precious penny touches.\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 0/0, the total number of ONTs are: 14, online: 8, offline: 5\n\
+      \  -----------------------------------------------------------------------------"
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0    0  46VBSM4LFW7QLGAV  active      online   normal   match    no\
+      \  \n  ------------------------------- ----------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0       0   The boiling consignment budgets.\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 1/0, the total of ONTs are: 1, online: 1\n  -----------------------------------------------------------------------------\n\
+      \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side
+      \n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/2    0  1234567890ABCDEF  active      online   normal   match    no
+      \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/2       0   ONT_NO_DESCRIPTION\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 1/2 , the total of ONTs are: 1, online: 1\n  -----------------------------------------------------------------------------\n"
+  display ont info 0 1:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/ 0/6\n  ONT-ID                  : 2\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  ONT LLID       \
+      \         : -\n  ONT distance(m)         : 47\n  ONT last distance(m)    : 39\n\
+      \  ONT RTT(TQ)             : -\n  Memory occupation       : 44\n  CPU occupation\
+      \          : 84\n  Temperature             : 57\n  Authentic type          :
+      SN-auth\n  SN                      : 8XN7J0FFL8NL6I3W\n  Management mode   \
+      \      : OMCI\n  Software work mode      : normal\n  Multicast mode        \
+      \  : IGMP-Snooping\n  Description             : New_link\n  Last down cause\
+      \         : dying-gasp\n  Last up time            : 2023-01-05 08:56:12+08:00\n\
+      \  Last down time          : 2023-01-05 08:55:28+08:00\n  Last dying gasp time\
+      \    : 2023-01-05 08:55:28+08:00\n  ONT online duration     : 0 day(s), 0 hour(s),
+      3 minute(s), 0 second(s)\n  Type D support          : Not support\n  Isolation
+      state         : normal\n  ONT NNI type            : auto\n  ONT actual NNI type\
+      \     : auto\n  Last ONT actual NNI type: auto\n  Interoperability-mode   :
+      unknown\n  FEC upstream state      :\n  VS-ID                   : 0\n  VS name\
+      \                 : admin-vs\n  Global ONT-ID           : 93\n  Fiber route\
+      \             : none\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 500\n  Line profile name    : new_link\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable\n  OMCC Encrypt switch :On\n  Qos mode     \
+      \       :Pq\n  Mapping mode        :Vlan\n  Tr069 management    :Disable\n \
+      \ -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  -----------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:2\n\
+      \  <T-CONT   4>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 500\n  Service profile name : new_link\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          4\n  ETH           4\n  TDM           0\n  MOCA          0\n\
+      \  CATV          0\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : enable\n  ONT transparent
+      function switch   : disable\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      None\n  Downstream PQ color policy        : None\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0\n  ETH       2       0\n  ETH       3       0\n  ETH\
+      \       4       0\n  IPHOST    1       0\n  -----------------------------------------------------------------------------\n\
+      \  Port   Port   Service-type Index S-VLAN S-PRI C-VLAN C-PRI ENCAP      S-PRI\n\
+      \  type   ID                                                             POLICY\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH    1      Translation  1     500    -     500    -     -          -\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates transparent attribute of the vlan\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------"
+    help: execute the command "display ont info 0 1"
+    prompt: *id001
+    output_variants:
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/1/1\n  ONT-ID                  : 131\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  DBA type       \
+      \         : SR\n  ONT distance(m)         : 100\n  ONT last distance(m)    :
+      100\n  ONT battery state       : not support\n  ONT power type          : -\n\
+      \  Memory occupation       : 23%\n  CPU occupation          : 30%\n  Temperature\
+      \             : 70(C)\n  Authentic type          : SN-auth\n  SN           \
+      \           : 123456789123AB12AB (HWTC-12AB12AB)\n  Management mode        \
+      \ : OMCI\n  Software work mode      : normal\n  Isolation state         : normal\n\
+      \  ONT IP 0 address/mask   : 192.168.0.1/24\n  ONT IP 1 address/mask   : 192.168.0.1/24\n\
+      \  Description             : ABCD\n  Last down cause         : dying-gasp\n\
+      \  Last up time            : 09/02/2019 01:58:52+00:00\n  Last down time   \
+      \       : 22/01/2019 01:57:55+00:00\n  Last dying gasp time    : 22/01/2019
+      01:57:55+00:00\n  Last restart reason     : -\n  ONT online duration     : 22
+      day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  ONT system up duration  :
+      22 day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  Type C support        \
+      \  : Not support\n  Interoperability-mode   : ITU-T\n  Power reduction status\
+      \  : -\n  FEC upstream state      : use-profile-config\n  VS-ID            \
+      \       : 0\n  VS name                 : admin-vs\n  Global ONT-ID         \
+      \  : 131\n  -----------------------------------------------------------------------------\n\
+      \  VoIP configure method   : Default\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 100\n  Line profile name    : ftth\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable \n  OMCC encrypt switch :On\n  Qos mode    \
+      \        :PQ\n  Mapping mode        :VLAN\n  TR069 management    :Enable   \
+      \     \n  TR069 IP index      :0\n  ------------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  ------------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:100\n\
+      \   <Gem Index 1>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       40    -        -       -     -       -     -          \n    1 \
+      \      41    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   2>          DBA Profile-ID:101\n   <Gem Index 2>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       42    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   3>          DBA Profile-ID:102\n   <Gem Index 3>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       1     -        -       -     -       -     -          \n    1 \
+      \      2     -        -       -     -       -     -          \n    2       3\
+      \     -        -       -     -       -     -          \n    3       4     -\
+      \        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   4>          DBA Profile-ID:103\n   <Gem Index 4>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       8     -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:104\n   <Gem Index 5>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \  ------------------------------------------------------------------------------\n\
+      \  Notes: Run the display traffic table ip command to query \n         traffic
+      table configuration\n  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 100\n  Service profile name : ftth\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number     Max-adaptive-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          adaptive        32\n  ETH           adaptive        8\n  VDSL\
+      \          0               -\n  TDM           0               -    \n  MOCA\
+      \          0               -\n  CATV          adaptive        8\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : Enable\n  ONT transparent
+      function switch   : Disable\n  Ring check switch                 : Enable\n\
+      \  Ring port auto-shutdown           : Enable\n  Ring detect frequency     \
+      \        : 8 (pps)\n  Ring resume interval              : 240 (s)\n  Ring detect
+      period                : 0 (s)\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      -\n  Downstream PQ color policy        : -\n  Monitor link                 \
+      \     : Unconcern\n  MTU(byte)                         : Unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  ETH       5       unconcern
+      unconcern      unconcern   unconcern\n  ETH       6       unconcern unconcern\
+      \      unconcern   unconcern\n  ETH       7       unconcern unconcern      unconcern\
+      \   unconcern\n  ETH       8       unconcern unconcern      unconcern   unconcern\n\
+      \  IPHOST    1       unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile,\n         run
+      the display traffic table ip command to query\n         traffic table configuration.\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID  DownstreamMode  MismatchPolicy\n  -----------------------------------------------------------------------------\n\
+      \  ETH             1  operation       discard       \n  ETH             2  operation\
+      \       discard       \n  ETH             3  operation       discard       \n\
+      \  ETH             4  operation       discard       \n  ETH             5  operation\
+      \       discard       \n  ETH             6  operation       discard       \n\
+      \  ETH             7  operation       discard       \n  ETH             8  operation\
+      \       discard       \n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index Classification-profile-id\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0                        -        \n  ETH       2     \
+      \  0                        -        \n  ETH       3       0               \
+      \         -        \n  ETH       4       0                        -        \n\
+      \  ETH       5       0                        -        \n  ETH       6     \
+      \  0                        -        \n  ETH       7       0               \
+      \         -        \n  ETH       8       0                        -        \n\
+      \  IPHOST    1       0                        -\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  ETH              5    -                         -         -      Unlimited\n\
+      \  ETH              6    -                         -         -      Unlimited\n\
+      \  ETH              7    -                         -         -      Unlimited\n\
+      \  ETH              8    -                         -         -      Unlimited\n\
+      \  IPHOST           1    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID   Traffic-suppress   Traffic-suppress   Traffic-suppress\n\
+      \                      unicast(kbps)      multicast(kpbs)    broadcast(kbps)\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH             1   -                  -                  -             \
+      \  \n  ETH             2   -                  -                  -         \
+      \      \n  ETH             3   -                  -                  -     \
+      \          \n  ETH             4   -                  -                  - \
+      \              \n  ETH             5   -                  -                \
+      \  -               \n  ETH             6   -                  -            \
+      \      -               \n  ETH             7   -                  -        \
+      \          -               \n  ETH             8   -                  -    \
+      \              -               \n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID  L2-isolate\n  -----------------------------------------------------------------------------\n\
+      \  ETH              1  unconcern           \n  ETH              2  unconcern\
+      \           \n  ETH              3  unconcern           \n  ETH            \
+      \  4  unconcern           \n  ETH              5  unconcern           \n  ETH\
+      \              6  unconcern           \n  ETH              7  unconcern    \
+      \       \n  ETH              8  unconcern           \n  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  TR069 server profile ID      : 1\n  TR069 server profile name    : tr069-server-profile_1\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  The number of required ONTs     : 1\n  -----------------------------------------------------------------------------"
+  display ont info 0 1 2:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side
+      \n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0    0  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    1  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    2  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    3  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    4  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    5  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    6  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    7  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    8  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0    9  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   10  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   11  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   12  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   13  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   14  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   15  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   16  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   17  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   18  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   19  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   20  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   21  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   22  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   23  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   24  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   25  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   26  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   27  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   28  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   29  1234567890ABCDEF  active      online   normal   match    no
+      \n  0/ 1/0   30  1234567890ABCDEF  active      online   normal   match    no
+      \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P       ONT  Description  \n              ID  \n  -----------------------------------------------------------------------------\n\
+      \  0/ 1/0       0   Generic_description\n  0/ 1/0       1   Generic_description\n\
+      \  0/ 1/0       2   Generic_description\n  0/ 1/0       3   Generic_description\n\
+      \  0/ 1/0       4   Generic_description\n  0/ 1/0       5   Generic_description\n\
+      \  0/ 1/0       6   Generic_description\n  0/ 1/0       7   Generic_description\n\
+      \  0/ 1/0       8   Generic_description\n  0/ 1/0       9   Generic_description\n\
+      \  0/ 1/0      10   Generic_description\n  0/ 1/0      11   Generic_description\n\
+      \  0/ 1/0      12   Generic_description\n  0/ 1/0      13   Generic_description\n\
+      \  0/ 1/0      14   Generic_description\n  0/ 1/0      15   Generic_description\n\
+      \  0/ 1/0      16   Generic_description\n  0/ 1/0      17   Generic_description\n\
+      \  0/ 1/0      18   Generic_description\n  0/ 1/0      19   Generic_description\n\
+      \  0/ 1/0      20   Generic_description\n  0/ 1/0      21   Generic_description\n\
+      \  0/ 1/0      22   Generic_description\n  0/ 1/0      23   Generic_description\n\
+      \  0/ 1/0      24   Generic_description\n  0/ 1/0      25   Generic_description\n\
+      \  0/ 1/0      26   Generic_description\n  0/ 1/0      27   Generic_description\n\
+      \  0/ 1/0      28   Generic_description\n  0/ 1/0      29   Generic_description\n\
+      \  0/ 1/0      30   Generic_description\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 1/0 , the total of ONTs are: 31, online: 31\n  -----------------------------------------------------------------------------"
+    help: execute the command "display ont info 0 1 2"
+    prompt: *id001
+    output_variants:
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  0/ 2/0    0  46VBSM4LFW7QLGAV  active      offline  online   initial  no\
+      \     \n  0/ 2/0    1  PBFGXVIPMQZN0E1T  configuring online   online   mismatch
+      yes    \n  0/ 2/0    2  X64PWIUVU5TGONE1  active      offline  normal   mismatch
+      yes    \n  0/ 2/0    3  ZD53TVQMSXNLUFE3  configuring online   online   mismatch
+      yes    \n  0/ 2/0    4  E8CFIM0QRWMY1YJV  active      offline  online   mismatch
+      no     \n  0/ 2/0    5  APWLB7QEY4Y64H11  configuring online   normal   initial\
+      \  yes    \n  0/ 2/0    6  B141LLHVQ18P6AK4  configuring offline  normal   initial\
+      \  no     \n  0/ 2/0    7  02GVAXHK3LXSZB4B  configuring online   normal   match\
+      \    no     \n  0/ 2/0    8  DZE8P8SY4R8G0I4P  active      offline  failing\
+      \  match    yes    \n  0/ 2/0    9  EITYLTDDY2V5ESD6  configuring online   normal\
+      \   match    yes    \n  0/ 2/0   10  50HVGRGSETKS72UH  active      online  \
+      \ failing  mismatch yes    \n  0/ 2/0   11  6YN1YJYTJZIOLM9Z  active      offline\
+      \  failing  match    yes    \n  0/ 2/0   12  Q5P60X5F3EEJ60RA  active      online\
+      \   online   mismatch no     \n  0/ 2/0   13  T5LNUJTG0HPTJ91W  active     \
+      \ offline  normal   initial  no     \n  0/ 2/0   14  E2ZSGR9G6JZRPZDF  active\
+      \      online   failing  match    no     \n  0/ 2/0   15  1OJNON01PVSX1ZV3 \
+      \ configuring offline  normal   initial  no     \n  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 2/0       0   The boiling consignment budgets.\n  0/ 2/0       1   The
+      fretful sweatshop promotes.\n  0/ 2/0       2   The damaging nerve nests.  \
+      \    \n  0/ 2/0       3   The macho quart blinks.        \n  0/ 2/0       4\
+      \   The industrious bumper kicks.  \n  0/ 2/0       5   The understood deviance
+      remembers.\n  0/ 2/0       6   The wandering elf assists.     \n  0/ 2/0   \
+      \    7   The deranged echidna glues.    \n  0/ 2/0       8   The ancient hunter
+      reinforces. \n  0/ 2/0       9   The brawny honeydew deserts.   \n  0/ 2/0 \
+      \     10   The fanatical twine finances.  \n  0/ 2/0      11   The overconfident
+      dinner heats.\n  0/ 2/0      12   The rotten census sounds.      \n  0/ 2/0\
+      \      13   The lavish gun strengthens.    \n  0/ 2/0      14   The gusty sari
+      coordinates.    \n  0/ 2/0      15   The acrid shallot extends.     \n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 2/0, the total number of ONTs is: 16, online: 8, offline: 8\n\
+      \  -----------------------------------------------------------------------------"
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT         SN         Control     Run      Config   Match    Protect\n\
+      \          ID                     flag        state    state    state    side\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  0/ 0/0    0  F6JO2SI8TTKDYDRC  active      offline  initial  initial  no\n\
+      \  0/ 0/0    1  R2PQNML2L0SI92ZN  active      offline  initial  initial  no\n\
+      \  0/ 0/0    2  0LZ7H0PCJOH4UGCH  active      online   normal   match    no\n\
+      \  0/ 0/0    3  NRDJVRAI8Z3V4I4W  active      offline  initial  initial  no\n\
+      \  0/ 0/0    4  PVDWI3METQ3PRRLV  active      -        -        -        yes\n\
+      \  0/ 0/0    5  MLA9MZJ0281C0XLK  active      online   normal   mismatch no\n\
+      \  0/ 0/0    6  MU94N3374BXT31PC  active      online   normal   mismatch no\n\
+      \  0/ 0/0    7  3MBM04QWXCCENRGH  active      online   normal   mismatch no\n\
+      \  0/ 0/0    8  9KYC0LNT1AWTMFRP  active      online   normal   match    no\n\
+      \  0/ 0/0    9  1SY4IU9PRO1G00N7  active      online   normal   mismatch no\n\
+      \  0/ 0/0   10  CT0VHHH2FDI2UQLX  active      offline  initial  initial  no\n\
+      \  0/ 0/0   11  PT8P24IDSRLOGMHS  active      offline  initial  initial  no\n\
+      \  0/ 0/0   12  A5N97LH1IWH4YG96  active      online   normal   mismatch no\n\
+      \  0/ 0/0   13  X8ZIIV5P0F6XJJQD  active      online   normal   match    no\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  F/S/P   ONT-ID   Description\n  -----------------------------------------------------------------------------\n\
+      \  0/ 0/0       0   The quiet rifle stinks.\n  0/ 0/0       1   The barbarous
+      take-out rolls.\n  0/ 0/0       2   The tender handmaiden places.\n  0/ 0/0\
+      \       3   The husky elongation types.\n  0/ 0/0       4   The wise emanate
+      snows.\n  0/ 0/0       5   The stereotyped eddy analyzes.\n  0/ 0/0       6\
+      \   The painful pancreas presents.\n  0/ 0/0       7   The unadvised gopher
+      keeps.\n  0/ 0/0       8   The threatening media keeps.\n  0/ 0/0       9  \
+      \ The possessive beetle memorizes.\n  0/ 0/0      10   The cautious hand-holding
+      zips.\n  0/ 0/0      11   The shaggy parsnip informs.\n  0/ 0/0      12   The
+      alluring rank slinks.\n  0/ 0/0      13   The precious penny touches.\n  -----------------------------------------------------------------------------\n\
+      \  In port 0/ 0/0, the total number of ONTs are: 14, online: 8, offline: 5\n\
+      \  -----------------------------------------------------------------------------"
+  display ont info 0 1 2 3:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/ 0/6\n  ONT-ID                  : 2\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  ONT LLID       \
+      \         : -\n  ONT distance(m)         : 47\n  ONT last distance(m)    : 39\n\
+      \  ONT RTT(TQ)             : -\n  Memory occupation       : 44\n  CPU occupation\
+      \          : 84\n  Temperature             : 57\n  Authentic type          :
+      SN-auth\n  SN                      : 8XN7J0FFL8NL6I3W\n  Management mode   \
+      \      : OMCI\n  Software work mode      : normal\n  Multicast mode        \
+      \  : IGMP-Snooping\n  Description             : New_link\n  Last down cause\
+      \         : dying-gasp\n  Last up time            : 2023-01-05 08:56:12+08:00\n\
+      \  Last down time          : 2023-01-05 08:55:28+08:00\n  Last dying gasp time\
+      \    : 2023-01-05 08:55:28+08:00\n  ONT online duration     : 0 day(s), 0 hour(s),
+      3 minute(s), 0 second(s)\n  Type D support          : Not support\n  Isolation
+      state         : normal\n  ONT NNI type            : auto\n  ONT actual NNI type\
+      \     : auto\n  Last ONT actual NNI type: auto\n  Interoperability-mode   :
+      unknown\n  FEC upstream state      :\n  VS-ID                   : 0\n  VS name\
+      \                 : admin-vs\n  Global ONT-ID           : 93\n  Fiber route\
+      \             : none\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 500\n  Line profile name    : new_link\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable\n  OMCC Encrypt switch :On\n  Qos mode     \
+      \       :Pq\n  Mapping mode        :Vlan\n  Tr069 management    :Disable\n \
+      \ -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  -----------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:2\n\
+      \  <T-CONT   4>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 500\n  Service profile name : new_link\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          4\n  ETH           4\n  TDM           0\n  MOCA          0\n\
+      \  CATV          0\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : enable\n  ONT transparent
+      function switch   : disable\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      None\n  Downstream PQ color policy        : None\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0\n  ETH       2       0\n  ETH       3       0\n  ETH\
+      \       4       0\n  IPHOST    1       0\n  -----------------------------------------------------------------------------\n\
+      \  Port   Port   Service-type Index S-VLAN S-PRI C-VLAN C-PRI ENCAP      S-PRI\n\
+      \  type   ID                                                             POLICY\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH    1      Translation  1     500    -     500    -     -          -\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates transparent attribute of the vlan\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------"
+    help: execute the command "display ont info 0 1 2 3"
+    prompt: *id001
+    output_variants:
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/1/1\n  ONT-ID                  : 131\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  DBA type       \
+      \         : SR\n  ONT distance(m)         : 100\n  ONT last distance(m)    :
+      100\n  ONT battery state       : not support\n  ONT power type          : -\n\
+      \  Memory occupation       : 23%\n  CPU occupation          : 30%\n  Temperature\
+      \             : 70(C)\n  Authentic type          : SN-auth\n  SN           \
+      \           : 123456789123AB12AB (HWTC-12AB12AB)\n  Management mode        \
+      \ : OMCI\n  Software work mode      : normal\n  Isolation state         : normal\n\
+      \  ONT IP 0 address/mask   : 192.168.0.1/24\n  ONT IP 1 address/mask   : 192.168.0.1/24\n\
+      \  Description             : ABCD\n  Last down cause         : dying-gasp\n\
+      \  Last up time            : 09/02/2019 01:58:52+00:00\n  Last down time   \
+      \       : 22/01/2019 01:57:55+00:00\n  Last dying gasp time    : 22/01/2019
+      01:57:55+00:00\n  Last restart reason     : -\n  ONT online duration     : 22
+      day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  ONT system up duration  :
+      22 day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  Type C support        \
+      \  : Not support\n  Interoperability-mode   : ITU-T\n  Power reduction status\
+      \  : -\n  FEC upstream state      : use-profile-config\n  VS-ID            \
+      \       : 0\n  VS name                 : admin-vs\n  Global ONT-ID         \
+      \  : 131\n  -----------------------------------------------------------------------------\n\
+      \  VoIP configure method   : Default\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 100\n  Line profile name    : ftth\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable \n  OMCC encrypt switch :On\n  Qos mode    \
+      \        :PQ\n  Mapping mode        :VLAN\n  TR069 management    :Enable   \
+      \     \n  TR069 IP index      :0\n  ------------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  ------------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:100\n\
+      \   <Gem Index 1>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       40    -        -       -     -       -     -          \n    1 \
+      \      41    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   2>          DBA Profile-ID:101\n   <Gem Index 2>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       42    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   3>          DBA Profile-ID:102\n   <Gem Index 3>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       1     -        -       -     -       -     -          \n    1 \
+      \      2     -        -       -     -       -     -          \n    2       3\
+      \     -        -       -     -       -     -          \n    3       4     -\
+      \        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   4>          DBA Profile-ID:103\n   <Gem Index 4>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       8     -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:104\n   <Gem Index 5>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \  ------------------------------------------------------------------------------\n\
+      \  Notes: Run the display traffic table ip command to query \n         traffic
+      table configuration\n  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 100\n  Service profile name : ftth\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number     Max-adaptive-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          adaptive        32\n  ETH           adaptive        8\n  VDSL\
+      \          0               -\n  TDM           0               -    \n  MOCA\
+      \          0               -\n  CATV          adaptive        8\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : Enable\n  ONT transparent
+      function switch   : Disable\n  Ring check switch                 : Enable\n\
+      \  Ring port auto-shutdown           : Enable\n  Ring detect frequency     \
+      \        : 8 (pps)\n  Ring resume interval              : 240 (s)\n  Ring detect
+      period                : 0 (s)\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      -\n  Downstream PQ color policy        : -\n  Monitor link                 \
+      \     : Unconcern\n  MTU(byte)                         : Unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  ETH       5       unconcern
+      unconcern      unconcern   unconcern\n  ETH       6       unconcern unconcern\
+      \      unconcern   unconcern\n  ETH       7       unconcern unconcern      unconcern\
+      \   unconcern\n  ETH       8       unconcern unconcern      unconcern   unconcern\n\
+      \  IPHOST    1       unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile,\n         run
+      the display traffic table ip command to query\n         traffic table configuration.\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID  DownstreamMode  MismatchPolicy\n  -----------------------------------------------------------------------------\n\
+      \  ETH             1  operation       discard       \n  ETH             2  operation\
+      \       discard       \n  ETH             3  operation       discard       \n\
+      \  ETH             4  operation       discard       \n  ETH             5  operation\
+      \       discard       \n  ETH             6  operation       discard       \n\
+      \  ETH             7  operation       discard       \n  ETH             8  operation\
+      \       discard       \n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index Classification-profile-id\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0                        -        \n  ETH       2     \
+      \  0                        -        \n  ETH       3       0               \
+      \         -        \n  ETH       4       0                        -        \n\
+      \  ETH       5       0                        -        \n  ETH       6     \
+      \  0                        -        \n  ETH       7       0               \
+      \         -        \n  ETH       8       0                        -        \n\
+      \  IPHOST    1       0                        -\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  ETH              5    -                         -         -      Unlimited\n\
+      \  ETH              6    -                         -         -      Unlimited\n\
+      \  ETH              7    -                         -         -      Unlimited\n\
+      \  ETH              8    -                         -         -      Unlimited\n\
+      \  IPHOST           1    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID   Traffic-suppress   Traffic-suppress   Traffic-suppress\n\
+      \                      unicast(kbps)      multicast(kpbs)    broadcast(kbps)\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH             1   -                  -                  -             \
+      \  \n  ETH             2   -                  -                  -         \
+      \      \n  ETH             3   -                  -                  -     \
+      \          \n  ETH             4   -                  -                  - \
+      \              \n  ETH             5   -                  -                \
+      \  -               \n  ETH             6   -                  -            \
+      \      -               \n  ETH             7   -                  -        \
+      \          -               \n  ETH             8   -                  -    \
+      \              -               \n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID  L2-isolate\n  -----------------------------------------------------------------------------\n\
+      \  ETH              1  unconcern           \n  ETH              2  unconcern\
+      \           \n  ETH              3  unconcern           \n  ETH            \
+      \  4  unconcern           \n  ETH              5  unconcern           \n  ETH\
+      \              6  unconcern           \n  ETH              7  unconcern    \
+      \       \n  ETH              8  unconcern           \n  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  TR069 server profile ID      : 1\n  TR069 server profile name    : tr069-server-profile_1\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  The number of required ONTs     : 1\n  -----------------------------------------------------------------------------"
+  display ont info by-sn ABC:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/ 0/6\n  ONT-ID                  : 2\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  ONT LLID       \
+      \         : -\n  ONT distance(m)         : 47\n  ONT last distance(m)    : 39\n\
+      \  ONT RTT(TQ)             : -\n  Memory occupation       : 44\n  CPU occupation\
+      \          : 84\n  Temperature             : 57\n  Authentic type          :
+      SN-auth\n  SN                      : 8XN7J0FFL8NL6I3W\n  Management mode   \
+      \      : OMCI\n  Software work mode      : normal\n  Multicast mode        \
+      \  : IGMP-Snooping\n  Description             : New_link\n  Last down cause\
+      \         : dying-gasp\n  Last up time            : 2023-01-05 08:56:12+08:00\n\
+      \  Last down time          : 2023-01-05 08:55:28+08:00\n  Last dying gasp time\
+      \    : 2023-01-05 08:55:28+08:00\n  ONT online duration     : 0 day(s), 0 hour(s),
+      3 minute(s), 0 second(s)\n  Type D support          : Not support\n  Isolation
+      state         : normal\n  ONT NNI type            : auto\n  ONT actual NNI type\
+      \     : auto\n  Last ONT actual NNI type: auto\n  Interoperability-mode   :
+      unknown\n  FEC upstream state      :\n  VS-ID                   : 0\n  VS name\
+      \                 : admin-vs\n  Global ONT-ID           : 93\n  Fiber route\
+      \             : none\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 500\n  Line profile name    : new_link\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable\n  OMCC Encrypt switch :On\n  Qos mode     \
+      \       :Pq\n  Mapping mode        :Vlan\n  Tr069 management    :Disable\n \
+      \ -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  -----------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:2\n\
+      \  <T-CONT   4>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:5\n    <Gem Index 126>\n    ------------------------------------------------------------------------\n\
+      \    |Serv-Type:ETH |Encrypt:off |Cascade:off |GEM-CAR:-            |\n    |Upstream-priority-queue:-\
+      \  |Downstream-priority-queue:-       |\n    ------------------------------------------------------------------------\n\
+      \     Mapping VLAN  Priority Port   Port  Bundle  Flow  Transparent\n     index\
+      \                  type   ID    ID      CAR\n    ------------------------------------------------------------------------\n\
+      \     0       500   -        -      -     -       -     -\n    ------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 500\n  Service profile name : new_link\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          4\n  ETH           4\n  TDM           0\n  MOCA          0\n\
+      \  CATV          0\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : enable\n  ONT transparent
+      function switch   : disable\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      None\n  Downstream PQ color policy        : None\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0\n  ETH       2       0\n  ETH       3       0\n  ETH\
+      \       4       0\n  IPHOST    1       0\n  -----------------------------------------------------------------------------\n\
+      \  Port   Port   Service-type Index S-VLAN S-PRI C-VLAN C-PRI ENCAP      S-PRI\n\
+      \  type   ID                                                             POLICY\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH    1      Translation  1     500    -     500    -     -          -\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates transparent attribute of the vlan\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------"
+    help: execute the command "display ont info by-sn ABC"
+    prompt: *id001
+    output_variants:
+    - "  -----------------------------------------------------------------------------\n\
+      \  F/S/P                   : 0/1/1\n  ONT-ID                  : 131\n  Control
+      flag            : active\n  Run state               : online\n  Config state\
+      \            : normal\n  Match state             : match\n  DBA type       \
+      \         : SR\n  ONT distance(m)         : 100\n  ONT last distance(m)    :
+      100\n  ONT battery state       : not support\n  ONT power type          : -\n\
+      \  Memory occupation       : 23%\n  CPU occupation          : 30%\n  Temperature\
+      \             : 70(C)\n  Authentic type          : SN-auth\n  SN           \
+      \           : 123456789123AB12AB (HWTC-12AB12AB)\n  Management mode        \
+      \ : OMCI\n  Software work mode      : normal\n  Isolation state         : normal\n\
+      \  ONT IP 0 address/mask   : 192.168.0.1/24\n  ONT IP 1 address/mask   : 192.168.0.1/24\n\
+      \  Description             : ABCD\n  Last down cause         : dying-gasp\n\
+      \  Last up time            : 09/02/2019 01:58:52+00:00\n  Last down time   \
+      \       : 22/01/2019 01:57:55+00:00\n  Last dying gasp time    : 22/01/2019
+      01:57:55+00:00\n  Last restart reason     : -\n  ONT online duration     : 22
+      day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  ONT system up duration  :
+      22 day(s), 1 hour(s), 23 minute(s), 23 second(s) \n  Type C support        \
+      \  : Not support\n  Interoperability-mode   : ITU-T\n  Power reduction status\
+      \  : -\n  FEC upstream state      : use-profile-config\n  VS-ID            \
+      \       : 0\n  VS name                 : admin-vs\n  Global ONT-ID         \
+      \  : 131\n  -----------------------------------------------------------------------------\n\
+      \  VoIP configure method   : Default\n  -----------------------------------------------------------------------------\n\
+      \  Line profile ID      : 100\n  Line profile name    : ftth\n  -----------------------------------------------------------------------------\n\
+      \  FEC upstream switch :Disable \n  OMCC encrypt switch :On\n  Qos mode    \
+      \        :PQ\n  Mapping mode        :VLAN\n  TR069 management    :Enable   \
+      \     \n  TR069 IP index      :0\n  ------------------------------------------------------------------------------\n\
+      \  Notes: * indicates Discrete TCONT(TCONT Unbound)\n  ------------------------------------------------------------------------------\n\
+      \  <T-CONT   0>          DBA Profile-ID:1\n  <T-CONT   1>          DBA Profile-ID:100\n\
+      \   <Gem Index 1>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       40    -        -       -     -       -     -          \n    1 \
+      \      41    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   2>          DBA Profile-ID:101\n   <Gem Index 2>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       42    -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   3>          DBA Profile-ID:102\n   <Gem Index 3>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       1     -        -       -     -       -     -          \n    1 \
+      \      2     -        -       -     -       -     -          \n    2       3\
+      \     -        -       -     -       -     -          \n    3       4     -\
+      \        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   4>          DBA Profile-ID:103\n   <Gem Index 4>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \    Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent\n    index\
+      \                  type    ID    ID      CAR   \n   --------------------------------------------------------------------\n\
+      \    0       8     -        -       -     -       -     -          \n   --------------------------------------------------------------------\n\
+      \  <T-CONT   5>          DBA Profile-ID:104\n   <Gem Index 5>\n   --------------------------------------------------------------------\n\
+      \   |Serv-Type:ETH |Encrypt:on  |Cascade:off |GEM-CAR:-            |\n   |Upstream-priority-queue:0\
+      \  |Downstream-priority-queue:-       |\n   --------------------------------------------------------------------\n\
+      \  ------------------------------------------------------------------------------\n\
+      \  Notes: Run the display traffic table ip command to query \n         traffic
+      table configuration\n  -----------------------------------------------------------------------------\n\
+      \  Service profile ID   : 100\n  Service profile name : ftth\n  -----------------------------------------------------------------------------\n\
+      \  Port-type     Port-number     Max-adaptive-number\n  -----------------------------------------------------------------------------\n\
+      \  POTS          adaptive        32\n  ETH           adaptive        8\n  VDSL\
+      \          0               -\n  TDM           0               -    \n  MOCA\
+      \          0               -\n  CATV          adaptive        8\n  -----------------------------------------------------------------------------\n\
+      \  TDM port type                     : E1\n  TDM service type              \
+      \    : TDMoGem\n  MAC learning function switch      : Enable\n  ONT transparent
+      function switch   : Disable\n  Ring check switch                 : Enable\n\
+      \  Ring port auto-shutdown           : Enable\n  Ring detect frequency     \
+      \        : 8 (pps)\n  Ring resume interval              : 240 (s)\n  Ring detect
+      period                : 0 (s)\n  Multicast forward mode            : Unconcern\n\
+      \  Multicast forward VLAN            : -\n  Multicast mode                 \
+      \   : Unconcern\n  Upstream IGMP packet forward mode : Unconcern\n  Upstream
+      IGMP packet forward VLAN : -\n  Upstream IGMP packet priority     : -\n  Native
+      VLAN option                : Concern\n  Upstream PQ color policy          :
+      -\n  Downstream PQ color policy        : -\n  Monitor link                 \
+      \     : Unconcern\n  MTU(byte)                         : Unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID QinQmode  PriorityPolicy Inbound     Outbound\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       unconcern unconcern      unconcern   unconcern\n  ETH \
+      \      2       unconcern unconcern      unconcern   unconcern\n  ETH       3\
+      \       unconcern unconcern      unconcern   unconcern\n  ETH       4      \
+      \ unconcern unconcern      unconcern   unconcern\n  ETH       5       unconcern
+      unconcern      unconcern   unconcern\n  ETH       6       unconcern unconcern\
+      \      unconcern   unconcern\n  ETH       7       unconcern unconcern      unconcern\
+      \   unconcern\n  ETH       8       unconcern unconcern      unconcern   unconcern\n\
+      \  IPHOST    1       unconcern unconcern      unconcern   unconcern\n  -----------------------------------------------------------------------------\n\
+      \  Notes: * indicates the discretely configured traffic profile,\n         run
+      the display traffic table ip command to query\n         traffic table configuration.\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID  DownstreamMode  MismatchPolicy\n  -----------------------------------------------------------------------------\n\
+      \  ETH             1  operation       discard       \n  ETH             2  operation\
+      \       discard       \n  ETH             3  operation       discard       \n\
+      \  ETH             4  operation       discard       \n  ETH             5  operation\
+      \       discard       \n  ETH             6  operation       discard       \n\
+      \  ETH             7  operation       discard       \n  ETH             8  operation\
+      \       discard       \n  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID Dscp-mapping-table-index Classification-profile-id\n  -----------------------------------------------------------------------------\n\
+      \  ETH       1       0                        -        \n  ETH       2     \
+      \  0                        -        \n  ETH       3       0               \
+      \         -        \n  ETH       4       0                        -        \n\
+      \  ETH       5       0                        -        \n  ETH       6     \
+      \  0                        -        \n  ETH       7       0               \
+      \         -        \n  ETH       8       0                        -        \n\
+      \  IPHOST    1       0                        -\n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH              1    -                         -         -      Unlimited\n\
+      \  ETH              2    -                         -         -      Unlimited\n\
+      \  ETH              3    -                         -         -      Unlimited\n\
+      \  ETH              4    -                         -         -      Unlimited\n\
+      \  ETH              5    -                         -         -      Unlimited\n\
+      \  ETH              6    -                         -         -      Unlimited\n\
+      \  ETH              7    -                         -         -      Unlimited\n\
+      \  ETH              8    -                         -         -      Unlimited\n\
+      \  IPHOST           1    -                         -         -      Unlimited\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Port-type Port-ID   Traffic-suppress   Traffic-suppress   Traffic-suppress\n\
+      \                      unicast(kbps)      multicast(kpbs)    broadcast(kbps)\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  ETH             1   -                  -                  -             \
+      \  \n  ETH             2   -                  -                  -         \
+      \      \n  ETH             3   -                  -                  -     \
+      \          \n  ETH             4   -                  -                  - \
+      \              \n  ETH             5   -                  -                \
+      \  -               \n  ETH             6   -                  -            \
+      \      -               \n  ETH             7   -                  -        \
+      \          -               \n  ETH             8   -                  -    \
+      \              -               \n  -----------------------------------------------------------------------------\n\
+      \  Port-type  Port-ID  L2-isolate\n  -----------------------------------------------------------------------------\n\
+      \  ETH              1  unconcern           \n  ETH              2  unconcern\
+      \           \n  ETH              3  unconcern           \n  ETH            \
+      \  4  unconcern           \n  ETH              5  unconcern           \n  ETH\
+      \              6  unconcern           \n  ETH              7  unconcern    \
+      \       \n  ETH              8  unconcern           \n  -----------------------------------------------------------------------------\n\
+      \  Alarm policy profile ID      : 0\n  Alarm policy profile name    : alarm-policy_0\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  TR069 server profile ID      : 1\n  TR069 server profile name    : tr069-server-profile_1\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  The number of required ONTs     : 1\n  -----------------------------------------------------------------------------"
+  display ont optical-info 0 all:
+    output: "  -----------------------------------------------------------------------------
+      \n  ONT  Rx power  Tx power  OLT Rx ONT  Temperature  Voltage  Current  Distance\
+      \  \n  ID   (dBm)     (dBm)     power(dBm)  (C)          (V)      (mA)     (m)\
+      \       \n  -----------------------------------------------------------------------------
+      \n    0  -24.68    3.68      -22.68      38           3.200    6        171\
+      \       \n    1  -24.68    3.86      -23.02      31           3.220    8   \
+      \     170       \n    2  -25.68    3.62      -23.77      32           3.200\
+      \    8        170       \n    3  -25.37    3.91      -22.45      31        \
+      \   3.180    7        170       \n    4  -25.37    3.76      -22.22      30\
+      \           3.200    7        170       \n    5  -26.57    3.96      -23.88\
+      \      38           3.220    8        170       \n    6  -24.68    3.53    \
+      \  -23.47      36           3.260    8        170       \n    7  -25.37    3.71\
+      \      -23.88      38           3.220    9        170       \n    8  -25.37\
+      \    3.66      -22.93      30           3.180    5        170       \n    9\
+      \  -24.43    3.72      -23.77      38           3.200    8        170    \n\
+      \  -----------------------------------------------------------------------------\n"
+    help: execute the command "display ont optical-info 0 all"
+    prompt: *id001
+  display ont port state 0 1 eth-port:
+    output: "  --------------------------------------------------------------------------\n\
+      \  ONT-ID   ONT      ONT       Speed(Mbps)   Duplex   LinkState  RingStatus\n\
+      \           port-ID  Port-type    \n  --------------------------------------------------------------------------\n\
+      \       1         1         GE 1000          full     up         noloop    \n\
+      \       1         2         GE -             -        down       noloop    \n\
+      \       1         3        ETH -             -        -          -         \n\
+      \  --------------------------------------------------------------------------\n"
+    help: execute the command "display ont port state 0 1 eth-port"
+    prompt: *id001
+  display ont port vlan 0 1 byport eth 0:
+    output: "  --------------------------------------------------------------------\n\
+      \  Port   Port C-VLAN C-PRI ETH-type   VLAN-type   S-VLAN S-PRI  S-PRI\n  type\
+      \   ID                                                     POLICY\n  --------------------------------------------------------------------\n\
+      \  eth    1    -      2     -          Translation 1      7      -\n  eth  \
+      \  2    -      2     -          Translation 1      7      -\n  --------------------------------------------------------------------\n\
+      \  Native VLAN     : 1\n  Default priority: 0\n  Downstream mode : operation\n\
+      \  Mismatch policy : discard\n  --------------------------------------------------------------------\n\
+      \  Notes: IPoE indicates IPv4-IPoE,  * indicates transparent attribute of\n\
+      \  the vlan, In the Ethernet encapsulation list, the hexadecimal digits\n  indicate
+      the user-defined Ethernet encapsulation type\n"
+    help: execute the command "display ont port vlan 0 1 byport eth 0"
+    prompt: *id001
+  display ont port vlan 0 1 byvlan 0:
+    output: "  --------------------------------------------------------------------\n\
+      \  C-VLAN C-PRI ETH-type   VLAN-type   Port   Port S-VLAN S-PRI  S-PRI\n   \
+      \                                   type   ID                 POLICY\n  --------------------------------------------------------------------\n\
+      \  100    -     IPoE       QINQ        ETH    2    20     3        DSCP\n  100\
+      \    -     0x6321     QINQ        ETH    4    70     -        -\n  --------------------------------------------------------------------\n\
+      \  Notes: IPoE indicates IPv4-IPoE, * indicates transparent attribute of\n \
+      \ the vlan, In the Ethernet encapsulation list, the hexadecimal digits\n  indicate
+      the user-defined Ethernet encapsulation type\n"
+    help: execute the command "display ont port vlan 0 1 byvlan 0"
+    prompt: *id001
+  display ont snmp-profile 0 all:
+    output: "  --------------------------------------------------------------------\n\
+      \  ONT ID     SNMP profile ID     SNMP profile name\n  --------------------------------------------------------------------\n\
+      \       1              1          snmp-profile_1\n       2              1  \
+      \        snmp-profile_1\n  --------------------------------------------------------------------\n"
+    help: execute the command "display ont snmp-profile 0 all"
+    prompt: *id001
+  display ont version summary 0:
+    output: "  During the course of print ,press CTRL_C to break\n  -----------------------------------------------------------------------------\n\
+      \  The number of configured ONT   :6\n  The number of online ONT       :6\n\
+      \  The number of offline ONT      :0\n  The number of no registered ONT:0\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  Access Vendor  ONT Model                Software          Online   Offline\n\
+      \  Type   ID                               Version           Number   Number\n\
+      \  -----------------------------------------------------------------------------\n\
+      \  GPON   HWTC    A123-G                  A1A012A01A012     2        0    \n\
+      \  GPON   HWTC    A123B                   A1A012A01A013     3        0    \n\
+      \  GPON   HWTC    A123A                   A1A012A01A014     1        0    \n\
+      \  -----------------------------------------------------------------------------"
+    help: execute the command "display ont version summary 0"
+    prompt: *id001
+  display ont wan-info 0 1 2 0:
+    output: "  ---------------------------------------------------------------------\n\
+      \  F/S/P                      : 0/1/0\n  ONT ID                     : 0    \
+      \ \n  ---------------------------------------------------------------------\n\
+      \  Index                      : 1\n  Name                       : OLT_1\n  Service
+      type               : Tr069\n  Connection type            : IP routed\n  IPv4
+      Connection status     : Connected\n  IPv4 access type           : Static\n \
+      \ IPv4 address               : 1.1.1.1\n  Subnet mask                : 255.255.254.0\n\
+      \  Default gateway            : 1.1.1.2\n  Primary DNS                : 8.8.8.8\n\
+      \  Secondary DNS              : 8.8.4.4\n  Manage VLAN                : 1000\n\
+      \  Manage priority            : 5\n  Multicast VLAN             : -\n  NAT switch\
+      \                 : Disable\n  Option60                   : No\n  Switch   \
+      \                  : Enable\n  MAC address                : AAAA-AAAA-AAAA\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\
+      \  \n  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -\n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      Connection status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary
+      DNS           : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN \
+      \       : -\n  IPv6 address status        : Invalid\n  IPv6 address access mode\
+      \   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time \
+      \   : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address    \
+      \   : -\n  ---------------------------------------------------------------------\n\
+      \  Index                      : 2\n  Name                       : OLT_2\n  Service
+      type               : Voip\n  Connection type            : IP routed\n  IPv4
+      Connection status     : Connected\n  IPv4 access type           : Static\n \
+      \ IPv4 address               : 2.2.2.2\n  Subnet mask                : 3.3.3.3\n\
+      \  Default gateway            : 5.5.5.5\n  Primary DNS                : 8.8.8.8\n\
+      \  Secondary DNS              : 8.8.4.4\n  Manage VLAN                : 3000\n\
+      \  Manage priority            : 5\n  Multicast VLAN             : -\n  NAT switch\
+      \                 : Disable\n  Option60                   : No\n  Switch   \
+      \                  : Enable\n  MAC address                : AAAA-AAAA-AAAA\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\n\
+      \  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -\n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      Connection status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary
+      DNS           : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN \
+      \       : -     \n  IPv6 address status        : Invalid\n  IPv6 address access
+      mode   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time\
+      \    : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address   \
+      \    : -\n  ---------------------------------------------------------------------\n\
+      \  Index                      : 3\n  Name                       : PATATA\n \
+      \ Service type               : Internet\n  Connection type            : IP bridged\n\
+      \  IPv4 Connection status     : Connected\n  IPv4 access type           : Invalid\n\
+      \  IPv4 address               : -\n  Subnet mask                : -\n  Default
+      gateway            : -\n  Primary DNS                : -\n  Secondary DNS  \
+      \            : -\n  Manage VLAN                : 3002\n  Manage priority   \
+      \         : 0\n  Multicast VLAN             : -\n  NAT switch              \
+      \   : Disable\n  Option60                   : No\n  Switch                 \
+      \    : Enable\n  MAC address                : --------------\n  Priority policy\
+      \            : Specified\n  L2 encap-type              : IPoE\n  IPv4 switch\
+      \                : Enable\n  IPv6 switch                : Disable\n  Prefix\
+      \                     : -\n  Prefix access mode         : Invalid\n  Prefix
+      preferred time      : -\n  Prefix valid time          : -\n  IPv6 Connection
+      status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary DNS \
+      \          : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN    \
+      \    : -\n  IPv6 address status        : Invalid\n  IPv6 address access mode\
+      \   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time \
+      \   : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address    \
+      \   : -\n  ---------------------------------------------------------------------\n\
+      \  Index                      : 4\n  Name                       : PATATA_2\n\
+      \  Service type               : Internet\n  Connection type            : IP
+      bridged\n  IPv4 Connection status     : Connected\n  IPv4 access type      \
+      \     : Invalid\n  IPv4 address               : -\n  Subnet mask           \
+      \     : -\n  Default gateway            : -\n  Primary DNS                :
+      -\n  Secondary DNS              : -\n  Manage VLAN                : 3003\n \
+      \ Manage priority            : 0\n  Multicast VLAN             : -\n  NAT switch\
+      \                 : Disable\n  Option60                   : No\n  Switch   \
+      \                  : Enable\n  MAC address                : --------------\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\n\
+      \  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -\n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      Connection status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary
+      DNS           : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN \
+      \       : -\n  IPv6 address status        : Invalid\n  IPv6 address access mode\
+      \   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time \
+      \   : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address    \
+      \   : -\n  ---------------------------------------------------------------------\n\
+      \  Index                      : 5\n  Name                       : INTERNET_5\n\
+      \  Service type               : Internet\n  Connection type            : IP
+      bridged\n  IPv4 Connection status     : Connected\n  IPv4 access type      \
+      \     : Invalid\n  IPv4 address               : -\n  Subnet mask           \
+      \     : -\n  Default gateway            : -\n  Primary DNS                :
+      -\n  Secondary DNS              : -\n  Manage VLAN                : 3001\n \
+      \ Manage priority            : 0     \n  Multicast VLAN             : -\n  NAT
+      switch                 : Disable\n  Option60                   : No\n  Switch\
+      \                     : Enable\n  MAC address                : --------------\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\n\
+      \  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -\n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      Connection status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary
+      DNS           : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN \
+      \       : -\n  IPv6 address status        : Invalid\n  IPv6 address access mode\
+      \   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time \
+      \   : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address    \
+      \   : -     \n  ---------------------------------------------------------------------\n\
+      \  Index                      : 6\n  Name                       : INTERNET_7\n\
+      \  Service type               : Internet\n  Connection type            : IP
+      bridged\n  IPv4 Connection status     : Connected\n  IPv4 access type      \
+      \     : Invalid\n  IPv4 address               : -\n  Subnet mask           \
+      \     : -\n  Default gateway            : -\n  Primary DNS                :
+      -\n  Secondary DNS              : -\n  Manage VLAN                : 3005\n \
+      \ Manage priority            : 0\n  Multicast VLAN             : -\n  NAT switch\
+      \                 : Disable\n  Option60                   : No\n  Switch   \
+      \                  : Enable\n  MAC address                : --------------\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\n\
+      \  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -     \n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      Connection status     : Invalid\n  IPv6 address               : -\n  IPv6 Primary
+      DNS           : -\n  IPv6 Secondary DNS         : -\n  IPv6 Multicast VLAN \
+      \       : -\n  IPv6 address status        : Invalid\n  IPv6 address access mode\
+      \   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid time \
+      \   : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address    \
+      \   : -\n  ---------------------------------------------------------------------\n"
+    help: execute the command "display ont wan-info 0 1 2 0"
+    prompt: *id001
+    output_variants:
+    - "  ---------------------------------------------------------------------\n \
+      \ F/S/P                      : 0/0/1\n  ONT ID                     : 0     \n\
+      \  ---------------------------------------------------------------------\n \
+      \ Index                      : 1\n  Name                       : OLT_C_1_TR069_R_VID_1000\n\
+      \  Service type               : Tr069\n  Connection type            : IP routed\n\
+      \  Connection status          : Connected\n  IP access type             : DHCP\n\
+      \  IP                         : 1.1.2.2\n  Subnet mask                : 255.255.0.0\n\
+      \  Default gateway            : 1.1.1.1\n  Manage VLAN                : 1111\n\
+      \  Manage priority            : 6\n  Option60                   : Yes\n  Switch\
+      \                     : Enable\n  MAC address                : AAAA-AAAA-AAAA\n\
+      \  Priority policy            : Specified\n  L2 encap-type              : IPoE\n\
+      \  IPv4 switch                : Enable\n  IPv6 switch                : Disable\n\
+      \  Prefix                     : -\n  Prefix access mode         : Invalid\n\
+      \  Prefix preferred time      : -\n  Prefix valid time          : -\n  IPv6
+      address               : -\n  IPv6 address status        : Invalid\n  IPv6 address
+      access mode   : Invalid\n  IPv6 address preferred time: -\n  IPv6 address valid
+      time    : -\n  DS-Lite Mode               : Invalid\n  DS-Lite peer address\
+      \       : -\n  ---------------------------------------------------------------------\n"
+  display ont wlan-info 0 1 2 0:
+    output: "  ------------------------------------------------------------------------------\n\
+      \  F/S/P                    : 0/1/2\n  ONT ID                   : 0\n  The total
+      number of SSID : 2\n  ------------------------------------------------------------------------------\n\
+      \  SSID Index               : 1\n  SSID                     : TEST_2_4G\n  Wireless
+      Standard        : IEEE 802.11b/g/n\n  Administrative state     : enable\n  Operational
+      state        : up\n  Maximum associate number : 64\n  Current associate number
+      : 2\n  ------------------------------------------------------------------------------\n\
+      \  SSID Index               : 5\n  SSID                     : TEST_5_G\n  Wireless
+      Standard        : IEEE 802.11ac\n  Administrative state     : enable\n  Operational
+      state        : up\n  Maximum associate number : 64\n  Current associate number
+      : 0\n  ------------------------------------------------------------------------------\n"
+    help: execute the command "display ont wlan-info 0 1 2 0"
+    prompt: *id001
+  display ont wlan-status 0 1:
+    output: "  Command is being executed. Please wait\n  -----------------------------------------------------------------------------
+      \n  Channel Information:\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 1\n  AP ID                           :
+      ONU\n  AP Number                       : 1\n  Interference degree          \
+      \   : 33\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 2\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 36\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 3\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 48\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 4\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 47\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 5\n  AP ID                           :
+      ONU\n  AP Number                       : 3\n  Interference degree          \
+      \   : 41\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 6\n  AP ID                           :
+      ONU\n  AP Number                       : 1\n  Interference degree          \
+      \   : 37\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 7\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 49\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 8\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 48\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 9\n  AP ID                           :
+      ONU\n  AP Number                       : 3\n  Interference degree          \
+      \   : 127\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 10\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 144\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 11\n  AP ID                           :
+      ONU\n  AP Number                       : 16\n  Interference degree         \
+      \    : 149\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 12\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 109\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 13\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 78\n  -----------------------------------------------------------------------------
+      \n  Statistics of SSID:\n  -----------------------------------------------------------------------------
+      \n  AP ID                           : ONU\n  SSID Index                    \
+      \  : 1\n  SSID                            : Test\n  Sent Packets           \
+      \         : 0\n  Sent Error Packets              : 0\n  Sent Discard Packets\
+      \            : 0\n  Received Packets                : 0\n  Received Error Packets\
+      \          : 0\n  Received Discard Packets        : 0\n  Transmission Quality
+      Level      : Good\n  -----------------------------------------------------------------------------
+      \n  STA Information:\n  -----------------------------------------------------------------------------
+      \n  AP ID                           : ONU\n  SSID Index                    \
+      \  : 1\n  SSID                            : Test\n  STA Mac Address        \
+      \         : 0000-1111-2222\n  TxRate                          : 0\n  RxRate\
+      \                          : 0\n  RSSI                            : 0\n  SNR\
+      \                             : 0\n  Signal Quality Level            : Good\n
+      ------------------------------------------------------------------------------ "
+    help: execute the command "display ont wlan-status 0 1"
+    prompt: *id001
+    output_variants:
+    - "  Command is being executed. Please wait\n  -----------------------------------------------------------------------------
+      \n  Channel Information:\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 1\n  AP ID                           :
+      ONU\n  AP Number                       : 1\n  Interference degree          \
+      \   : 33\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 2\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 36\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 3\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 48\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 4\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 47\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 5\n  AP ID                           :
+      ONU\n  AP Number                       : 3\n  Interference degree          \
+      \   : 41\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 6\n  AP ID                           :
+      ONU\n  AP Number                       : 1\n  Interference degree          \
+      \   : 37\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 7\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 49\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 8\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 48\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 9\n  AP ID                           :
+      ONU\n  AP Number                       : 3\n  Interference degree          \
+      \   : 127\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 10\n  AP ID                           :
+      ONU\n  AP Number                       : 2\n  Interference degree          \
+      \   : 144\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 11\n  AP ID                           :
+      ONU\n  AP Number                       : 16\n  Interference degree         \
+      \    : 149\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 12\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 109\n  -----------------------------------------------------------------------------\n\
+      \  Channel Num                     : 13\n  AP ID                           :
+      ONU\n  AP Number                       : 0\n  Interference degree          \
+      \   : 78\n  -----------------------------------------------------------------------------
+      \n  Statistics of SSID:\n  -----------------------------------------------------------------------------
+      \n  AP ID                           : ONU\n  SSID Index                    \
+      \  : 1\n  SSID                            : Test\n  Sent Packets           \
+      \         : 0\n  Sent Error Packets              : 0\n  Sent Discard Packets\
+      \            : 0\n  Received Packets                : 0\n  Received Error Packets\
+      \          : 0\n  Received Discard Packets        : 0\n  Transmission Quality
+      Level      : Good\n  -----------------------------------------------------------------------------
+      \n  STA Information:\n  -----------------------------------------------------------------------------
+      \n  AP ID                           : ONU\n  SSID Index                    \
+      \  : 1\n  SSID                            : Test\n  STA Mac Address        \
+      \         : 0000-1111-2222\n  TxRate(Mbps)                    : 0\n  RxRate(Mbps)\
+      \                    : 0\n  RSSI(dBm)                       : 0\n  SNR(dB) \
+      \                        : 0\n  Signal Quality Level            : Good\n ------------------------------------------------------------------------------ "
+    - "  Command is being executed. Please wait\n  Statistics of SSID:\n  -----------------------------------------------------------------------------\n\
+      \  AP ID                           : ONU\n  SSID Index                     \
+      \ : 1\n  SSID                            : HUAWEI-2.4G-11TA(2.4G)\n  Sent Packets\
+      \                    : 0\n  Sent Error Packets              : 0\n  Sent Discard
+      Packets            : 0\n  Received Packets                : 0\n  Received Error
+      Packets          : 0\n  Received Discard Packets        : 0\n  Transmission
+      Quality Level      : Good\n  -----------------------------------------------------------------------------\n\
+      \  AP ID                           : ONU\n  SSID Index                     \
+      \ : 5\n  SSID                            : HUAWEI-5G-11TA(5G)\n  Sent Packets\
+      \                    : 763\n  Sent Error Packets              : 0\n  Sent Discard
+      Packets            : 0\n  Received Packets                : 0\n  Received Error
+      Packets          : 0\n  Received Discard Packets        : 0\n  Transmission
+      Quality Level      : Good\n  -----------------------------------------------------------------------------\n"
+  display ont-lineprofile gpon all:
+    output: "  ------------------------------------------------------------------------------\n\
+      \  Profile-ID  Profile-name                                Binding times\n \
+      \ ------------------------------------------------------------------------------\n\
+      \  0           line-profile_default_0                      0           \n  429\
+      \         example                                     12            \n  ------------------------------------------------------------------------------\n\
+      \  Total: 2"
+    help: execute the command "display ont-lineprofile gpon all"
+    prompt: *id001
+  display ont-srvprofile gpon all:
+    output: "  -----------------------------------------------------------------------------\n\
+      \  Profile-ID  Profile-name                                Binding times\n \
+      \ -----------------------------------------------------------------------------\n\
+      \  0           srv-profile_default_0                       0            \n \
+      \ 1           20221019172007514                           0            \n  -----------------------------------------------------------------------------\n\
+      \  Total: 2\n"
+    help: execute the command "display ont-srvprofile gpon all"
+    prompt: *id001
+  display service-port all:
+    output: "Switch-Oriented Flow List\n  -----------------------------------------------------------------------------\n\
+      \   INDEX VLAN VLAN     PORT F/ S/ P VPI  VCI   FLOW  FLOW       RX   TX   STATE\n\
+      \         ID   ATTR     TYPE                    TYPE  PARA\n  -----------------------------------------------------------------------------\n\
+      \    5827 2    common   gpon 0/1 /0  0    1     vlan  2          -    -    up\
+      \   \n  -----------------------------------------------------------------------------\n\
+      \   Total : 1  (Up/Down :    1/0)\n   Note : F--Frame, S--Slot, P--Port,\n \
+      \         VPI indicates ONT ID for PON, VCI indicates GEM index for GPON,\n\
+      \          v/e--vlan/encap, pritag--priority-tagged,\n          ppp--pppoe,
+      ip--ipoe, ip4--ipv4oe, ip6--ipv6oe, vxl--vxlan.\n          When FLOW TYPE is
+      plist, the value of FLOW PARA is a byte in\n          hexadecimal format and
+      indicates a priority list. Eight bits\n          of its binary value indicate
+      priorities 0-7 from the least\n          significant bit to the most significant
+      bit. Value 1 indicates\n          that the priority is used. For example, if
+      FLOW PARA is 0x23 and\n          its binary format is 0010 0011, priorities
+      0, 1 and 5 are used"
+    help: execute the command "display service-port all"
+    prompt: *id001
+  ont add:
+    output: "  Number of ONTs that can be added: 1, success: 1\n  PortID :6, ONTID
+      :2"
+    help: execute the command "ont add"
+    prompt: *id001
+  port vlan:
+    output: "Set ONT port(s) VLAN configuration, success: 1, failed: 0\n"
+    help: execute the command "port vlan"
+    prompt: *id001
