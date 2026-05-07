@@ -4967,3 +4967,15 @@ commands:
       default-policy-tag                default policy-tag\n"
     help: execute the command "show wireless tag policy summary"
     prompt: *id001
+  # ----- Manually maintained (ansible compat) -----
+  # These commands are NOT sourced from NTC Templates. They are added so
+  # ansible's `cisco.ios.ios` cliconf does not see "% Invalid input" responses
+  # when it auto-runs sanity-check commands during connection. Re-runs of
+  # `sync_ntc_commands.py` will not affect this section.
+  show privilege:
+    output: "Current privilege level is 15\n"
+    help: Execute the command show privilege. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
