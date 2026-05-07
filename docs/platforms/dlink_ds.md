@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -51,3 +49,4 @@ Total Entries: 4
 
 **Prompt:**
 - dlink_ds#
+

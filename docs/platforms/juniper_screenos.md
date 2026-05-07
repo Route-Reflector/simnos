@@ -5,18 +5,7 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
-
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- juniper_screenos>
 
 ### set console page 0
 
@@ -25,8 +14,7 @@
 **Help:** set the terminal width to maximum
 
 **Prompt:**
-- juniper_screenos>
-- juniper_screenos#
+- juniper_screenos->
 
 ### get route
 
@@ -53,5 +41,5 @@ IPv4 Dest-Routes for <trust-vr> (4 entries)
 **Help:** execute the command "get route"
 
 **Prompt:**
-- juniper_screenos>
-- juniper_screenos#
+- juniper_screenos->
+

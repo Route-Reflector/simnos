@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -30,10 +28,7 @@
 
 ### ex
 
-**Output:**
-```
-True
-```
+**Output:** None
 
 **Help:** exit the terminal
 
@@ -179,7 +174,7 @@ x e100.100.100.104/30 10.10.2.1                                      0 64102 640
 ```
 
 -------------------------------------------------------------------------------
-Interface                Description
+Interface                Description                                            
 -------------------------------------------------------------------------------
 mgmt0                    --
 
@@ -260,7 +255,7 @@ Eth6/47       eth    10G     This is a description on line card 6
 Eth6/48       eth    10G     This is a description on line card 6
 
 -------------------------------------------------------------------------------
-Interface                Description
+Interface                Description                                            
 -------------------------------------------------------------------------------
 Po10                     This is a portchannel
 Po20                     This is a portchannel
@@ -268,7 +263,7 @@ Po25                     This is a portchannel
 Po300                    This is a portchannel
 
 -------------------------------------------------------------------------------
-Interface                Description
+Interface                Description                                            
 -------------------------------------------------------------------------------
 Lo0                      This is a loopback
 Lo1                      This is a loopback
@@ -330,14 +325,14 @@ Mod  Ports  Module-Type                      Model              Status
 6    0      Supervisor Module-2              N7K-SUP1           ha-standby
 
 
-Mod  Power-Status  Reason
+Mod  Power-Status  Reason 
 ---  ------------  ---------------------------
 4    powered-dn     Configured Power down
 
 Mod  Sw              Hw
 ---  --------------  ------
-3    4.1(3)          0.202
-4    4.1(3)          0.805
+3    4.1(3)          0.202   
+4    4.1(3)          0.805   
 
 Mod  MAC-Address(es)                         Serial-Num
 ---  --------------------------------------  ----------
@@ -355,13 +350,13 @@ Xbar Ports  Module-Type                      Model              Status
 
 Xbar Sw              Hw
 ---  --------------  ------
-1    NA              0.101
+1    NA              0.101   
 
 Xbar MAC-Address(es)                         Serial-Num
 ---  --------------------------------------  ----------
 1    NA                                      JAF1225AGHJ
 
-* this terminal session
+* this terminal session 
 
 ```
 
@@ -377,9 +372,9 @@ Xbar MAC-Address(es)                         Serial-Num
 ```
 CTS Information for Interfaces:
 --------- -------- ---------- ------------------ -------------
-Interface CTS Mode IFC State    SGT Assignment   Propagate SGT
+Interface CTS Mode IFC State    SGT Assignment   Propagate SGT 
 --------- -------- ---------- ------------------ -------------
-Eth4/1    MANUAL   OPEN           0, Not Trusted Disabled
+Eth4/1    MANUAL   OPEN           0, Not Trusted Disabled 
 
 ```
 
@@ -395,9 +390,9 @@ Eth4/1    MANUAL   OPEN           0, Not Trusted Disabled
 ```
 Configured switching mode: Store and Forward
 
-Module Number     Operational Mode
+Module Number     Operational Mode 
      1            Store and Forward
-     2            Cut-Through
+     2            Cut-Through 
 ```
 
 **Help:** execute the command "show switching-mode"
@@ -443,9 +438,9 @@ VRF-Name: LAB, VRF-ID: 11, State: Up
 
 **Output:**
 ```
-----------------------------------------------------------------------
-Message Type             Rx              Tx           Drops
-----------------------------------------------------------------------
+---------------------------------------------------------------------- 
+Message Type             Rx              Tx           Drops  
+---------------------------------------------------------------------- 
 Discover                 10              10              10
 Offer                    20              20              20
 Request                  30              30              30
@@ -454,9 +449,9 @@ Release                  50              50              50
 Decline                  60              60              60
 Inform                   70              70              70
 Nack                     80              80              80
-----------------------------------------------------------------------
+---------------------------------------------------------------------- 
 Total                  5000            5000            5000
-----------------------------------------------------------------------
+---------------------------------------------------------------------- 
 DHCP L2 Forwarding:
 Total Packets Forwarded                          :       100
 Total Packets Received                           :       200
@@ -510,13 +505,13 @@ Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
 
 **Output:**
 ```
-Interface Peer-IP                                 State LearnType Uptime   Router-Mac
+Interface Peer-IP                                 State LearnType Uptime   Router-Mac      
 --------- --------------------------------------  ----- --------- -------- -----------------
-nve1      192.168.111.41                          Up    CP        2y11w    0200.c0a8.5422
-nve1      192.168.111.47                          Up    CP        2y11w    2416.9dd1.4117
-nve1      192.168.111.48                          Up    CP        2y11w    cc7f.76a5.3a77
-nve1      192.168.111.52                          Up    CP        2y11w    2416.9dd1.8137
-nve1      192.168.111.81                          Up    CP        2y11w    0200.c0a8.545b
+nve1      192.168.111.41                          Up    CP        2y11w    0200.c0a8.5422   
+nve1      192.168.111.47                          Up    CP        2y11w    2416.9dd1.4117  
+nve1      192.168.111.48                          Up    CP        2y11w    cc7f.76a5.3a77  
+nve1      192.168.111.52                          Up    CP        2y11w    2416.9dd1.8137  
+nve1      192.168.111.81                          Up    CP        2y11w    0200.c0a8.545b  
 
 ```
 
@@ -586,13 +581,13 @@ Power                              Actual        Total
 Supply    Model                    Output     Capacity    Status
                                  (Watts )     (Watts )
 -------  -------------------  -----------  -----------  --------------
-1        N7K-AC-3KW                 407 W       3000 W     Ok
-2        N7K-AC-3KW                 370 W       3000 W     Ok
+1        N7K-AC-3KW                 407 W       3000 W     Ok        
+2        N7K-AC-3KW                 370 W       3000 W     Ok              
 
 
-                                  Actual        Power
+                                  Actual        Power      
 Module    Model                     Draw    Allocated    Status
-                                 (Watts )     (Watts )
+                                 (Watts )     (Watts )     
 -------  -------------------  -----------  -----------  --------------
 1        N7K-SUP2E                  125 W        265 W    Powered-Up
 2        N7K-SUP2E                  125 W        265 W    Powered-Up
@@ -626,40 +621,40 @@ Fan:
 ------------------------------------------------------
 Fan             Model                Hw         Status
 ------------------------------------------------------
-Fan1(sys_fan1)  N7K-C7004-FAN        1.0        Ok
-Fan_in_PS1      --                   --         Ok
-Fan_in_PS2      --                   --         Ok
+Fan1(sys_fan1)  N7K-C7004-FAN        1.0        Ok  
+Fan_in_PS1      --                   --         Ok             
+Fan_in_PS2      --                   --         Ok                      
 Fan Zone Speed: Zone 1: 0x7f
 
 
 Temperature:
 --------------------------------------------------------------------
 Module   Sensor        MajorThresh   MinorThres   CurTemp     Status
-                       (Celsius)     (Celsius)    (Celsius)
+                       (Celsius)     (Celsius)    (Celsius)         
 --------------------------------------------------------------------
-1        Inlet  (s1)     60              42          25         Ok
-
-1        PMFPGA (s2)     80              60          36         Ok
-
-1        Crossbar(s3)    105             95          41         Ok
-
-2        Inlet  (s1)     60              42          25         Ok
-
-2        PMFPGA (s2)     80              60          35         Ok
-
-2        Crossbar(s3)    105             95          40         Ok
-
-3        MAC0Sn0(s2)     115             105         42         Ok
-
-3        MAC0Sn1(s3)     115             105         43         Ok
-
-3        MAC0-Buf0(s4)   115             105         35         Ok
-
-4        MAC0Sn0(s2)     115             105         35         Ok
-
-4        MAC0Sn1(s3)     115             105         36         Ok
-
-4        MAC0-Buf0(s4)   115             105         46         Ok
+1        Inlet  (s1)     60              42          25         Ok         
+    
+1        PMFPGA (s2)     80              60          36         Ok         
+    
+1        Crossbar(s3)    105             95          41         Ok              
+    
+2        Inlet  (s1)     60              42          25         Ok         
+    
+2        PMFPGA (s2)     80              60          35         Ok         
+    
+2        Crossbar(s3)    105             95          40         Ok            
+    
+3        MAC0Sn0(s2)     115             105         42         Ok         
+    
+3        MAC0Sn1(s3)     115             105         43         Ok         
+    
+3        MAC0-Buf0(s4)   115             105         35         Ok          
+    
+4        MAC0Sn0(s2)     115             105         35         Ok         
+    
+4        MAC0Sn1(s3)     115             105         36         Ok         
+    
+4        MAC0-Buf0(s4)   115             105         46         Ok         
 
 ```
 
@@ -682,7 +677,7 @@ Bigsur port sup1 card-config info:
         asic_eport         : 0
         logical_port       : 0
         front_port         : 0
-        state              : va swi hw1 hw2 hwf
+        state              : va swi hw1 hw2 hwf 
         bigsur eport       : 0
         port_type          : sup-hi(1)
         type               : 5
@@ -736,7 +731,7 @@ Force QSFP removal         : 0
 Force QSFP insertion       : 0
 Force QSFP fiber type      : 0
 Force QSFP copper type     : 0
-
+ 
 
 SBus addresses:
         Serdes             : 47 (2fh)
@@ -748,7 +743,7 @@ SBus addresses:
         FI block lock 3h: f
 
 MAC statistics:
- MAC Statistic                  | Value
+ MAC Statistic                  | Value                             
 -------------------------------+-----------------------------------
 TX_PKT_SIZE_LT_64              | 0
 TX_PKT_SIZE_IS_64              | 0
@@ -805,7 +800,7 @@ RX_PKT_PER_PRIORITY_PAUSE      | 0
 TX_PKT_GOOD_OCTETS             | 4246363466864
 RX_PKT_GOOD_OCTETS             | 3784988
 Done.
-
+ 
 Bigsur port sup0 card-config info:
         if_index           : 0x15020000
         instance index     : 0
@@ -814,7 +809,7 @@ Bigsur port sup0 card-config info:
         asic_eport         : 1
         logical_port       : 1
         front_port         : 0
-        state              : va swi hw1 hw2 hwf
+        state              : va swi hw1 hw2 hwf 
         bigsur eport       : 1
         port_type          : sup-lo(2)
         type               : 5
@@ -868,7 +863,7 @@ Force QSFP removal         : 0
 Force QSFP insertion       : 0
 Force QSFP fiber type      : 0
 Force QSFP copper type     : 0
-
+ 
 
 SBus addresses:
         Serdes             : 49 (31h)
@@ -880,7 +875,7 @@ SBus addresses:
         FI block lock 3h: f
 
 MAC statistics:
- MAC Statistic                  | Value
+ MAC Statistic                  | Value                             
 -------------------------------+-----------------------------------
 TX_PKT_SIZE_LT_64              | 0
 TX_PKT_SIZE_IS_64              | 0
@@ -946,7 +941,7 @@ Bigsur port 40gb1/1 card-config info:
         asic_eport         : 0
         logical_port       : 0
         front_port         : 0
-        state              : va swi hw1 hw2 hwf
+        state              : va swi hw1 hw2 hwf 
         bigsur eport       : 0
         port_type          : 40gbe(12)
         type               : 6
@@ -1003,7 +998,7 @@ Force QSFP copper type     : 0
 
 
 SBus addresses:
-        Serdes lanes 0-3   : 47 (2fh), 49 (31h), 51 (33h), 53 (35h)
+        Serdes lanes 0-3   : 47 (2fh), 49 (31h), 51 (33h), 53 (35h) 
         DFE Tune result   :
                 Lane 0:
                 <0 0.ln0>:DFE A: 92 0x 0 0-2 1 1 41 -2
@@ -1028,7 +1023,7 @@ SBus addresses:
         FI block lock 3h: f
 
 MAC statistics:
-MAC Statistic                  | Value
+MAC Statistic                  | Value                             
 -------------------------------+-----------------------------------
 TX_PKT_SIZE_LT_64              | 0
 TX_PKT_SIZE_IS_64              | 18664463
@@ -1179,7 +1174,7 @@ Bigsur port 40gb1/2 card-config info:
         asic_eport         : 1
         logical_port       : 1
         front_port         : 1
-        state              : va swi hw1 hw2 hwf
+        state              : va swi hw1 hw2 hwf 
         bigsur eport       : 1
         port_type          : 40gbe(12)
         type               : 6
@@ -1236,7 +1231,7 @@ Force QSFP copper type     : 0
 
 
 SBus addresses:
-        Serdes lanes 0-3   : 55 (37h), 57 (39h), 59 (3bh), 61 (3dh)
+        Serdes lanes 0-3   : 55 (37h), 57 (39h), 59 (3bh), 61 (3dh) 
         DFE Tune result   :
                 Lane 0:
                 <0 0.ln4>:DFE A: 97 0x-3 0-1 0 0 40 -2
@@ -1261,7 +1256,7 @@ SBus addresses:
         FI block lock 3h: f
 
 MAC statistics:
-MAC Statistic                  | Value
+MAC Statistic                  | Value                             
 -------------------------------+-----------------------------------
 TX_PKT_SIZE_LT_64              | 0
 TX_PKT_SIZE_IS_64              | 0
@@ -1317,7 +1312,7 @@ RX_PKT_802.3x_PAUSE            | 0
 RX_PKT_PER_PRIORITY_PAUSE      | 0
 TX_PKT_GOOD_OCTETS             | 2423284879835690
 RX_PKT_GOOD_OCTETS             | 2287031285388567
-
+ 
 
 XCVR port info:
 Card Config info
@@ -1387,7 +1382,7 @@ TX enable signal is on
 Debounce timeout: 0.030 seconds
 
 Linkup Debounce timeout: 0.000 seconds
-
+ 
 Link up : 294003 usecs after Sun Oct 27 06:14:53 2019
 Link dn debounce start : 0 usecs after Thu Jan  1 00:00:00 1970
 Link debounce end : 0 usecs after Thu Jan  1 00:00:00 1970
@@ -1419,7 +1414,7 @@ Done.
 Capability codes:
   (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
   (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
- Device ID            Local Intf      Hold-time  Capability  Port ID
+ Device ID            Local Intf      Hold-time  Capability  Port ID  
 
 Chassis id: 0014.1c57.a48b
 Port id: Fa1/0/9
@@ -1835,22 +1830,22 @@ next-hop         rewrite info    interface    Origin AS  Peer AS  Neighbor
 
 **Output:**
 ```
-router1# sh ip ospf neighbors vrf all
+router1# sh ip ospf neighbors vrf all 
  OSPF Process ID 1111 VRF CUSTVRF1
  Total number of neighbors: 3
  Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.1          1 FULL/ -          8w6d     11.11.11.11     Vlan999
- 10.0.0.2          1 FULL/ -          5w6d     22.22.22.22     Po1
- 10.0.0.3          1 FULL/ -          5w6d     44.44.44.44     Po2
+ 10.0.0.1          1 FULL/ -          8w6d     11.11.11.11     Vlan999 
+ 10.0.0.2          1 FULL/ -          5w6d     22.22.22.22     Po1 
+ 10.0.0.3          1 FULL/ -          5w6d     44.44.44.44     Po2 
  OSPF Process ID 2222 VRF CUSTVRF2
  Total number of neighbors: 1
  Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.4          1 FULL/ -          8w6d     55.55.55.55     Vlan1000
+ 10.0.0.4          1 FULL/ -          8w6d     55.55.55.55     Vlan1000 
  OSPF Process ID 3333 VRF CUSTVRF2
  Total number of neighbors: 2
  Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.5          1 FULL/ -          7w2d     66.66.66.66     Po3
- 10.0.0.6          1 INIT/DROTHER     -        77.77.77.77     Po4
+ 10.0.0.5          1 FULL/ -          7w2d     66.66.66.66     Po3 
+ 10.0.0.6          1 INIT/DROTHER     -        77.77.77.77     Po4 
 
 ```
 
@@ -1865,96 +1860,96 @@ router1# sh ip ospf neighbors vrf all
 **Output:**
 ```
 BGP summary information for VRF AMB, address family IPv4 Unicast
-
+ 
  BGP summary information for VRF AMB, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF BLU, address family IPv4 Unicast
 BGP router identifier 172.16.101.101, local AS number 65161
 BGP table version is 2301549, IPv4 Unicast config peers 1, capable peers 1
 827 network entries and 1406 paths using 105308 bytes of memory
 BGP attribute entries [107/18404], BGP AS path entries [26/272]
  BGP community entries [0/0], BGP clusterlist entries [6/24]
-
+ 
 Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.25.113.1     4 65001 21968368 22451737  2301549    0    0    24w2d 0
-
+10.25.113.1     4 65001 21968368 22451737  2301549    0    0    24w2d 0        
+ 
 BGP summary information for VRF BLU, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF GRN, address family IPv4 Unicast
-
+ 
 BGP summary information for VRF GRN, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF GRY, address family IPv4 Unicast
-
+ 
 BGP summary information for VRF GRY, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF NPE, address family IPv4 Unicast
-
+ 
 BGP summary information for VRF NPE, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF RED, address family IPv4 Unicast
-
+ 
 BGP summary information for VRF RED, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF TRI, address family IPv4 Unicast
 BGP router identifier 172.16.101.123, local AS number 65161
 BGP table version is 8526, IPv4 Unicast config peers 1, capable peers 1
 55 network entries and 102 paths using 9940 bytes of memory
  BGP attribute entries [11/1892], BGP AS path entries [8/80]
 BGP community entries [0/0], BGP clusterlist entries [6/24]
-
+ 
 Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.23.1.74      4 65171 3078819 3074406     8526    0    0     2w5d 24
-
+10.23.1.74      4 65171 3078819 3074406     8526    0    0     2w5d 24    
+ 
 BGP summary information for VRF TRI, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF default, address family IPv4 Unicast
 BGP router identifier 172.16.101.37, local AS number 65161
 BGP table version is 14450, IPv4 Unicast config peers 5, capable peers 5
 36 network entries and 56 paths using 11184 bytes of memory
 BGP attribute entries [24/4128], BGP AS path entries [13/102]
 BGP community entries [0/0], BGP clusterlist entries [6/24]
-
+ 
 Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-172.16.14.2     4 65164 8429603 8531693    14450    0    0    1d08h 2
-172.16.31.1     4 65191 8081582 8260415    14450    0    0     1w0d 2
-172.16.31.17    4 65193 8167842 8348036    14450    0    0     1w0d 2
-172.16.102.2    4 65161 1166456 1165743    14450    0    0     2y0w 28
-172.16.151.2    4 65162 1074723 1073151    14450    0    0     1w1d 18
-
+172.16.14.2     4 65164 8429603 8531693    14450    0    0    1d08h 2        
+172.16.31.1     4 65191 8081582 8260415    14450    0    0     1w0d 2        
+172.16.31.17    4 65193 8167842 8348036    14450    0    0     1w0d 2        
+172.16.102.2    4 65161 1166456 1165743    14450    0    0     2y0w 28       
+172.16.151.2    4 65162 1074723 1073151    14450    0    0     1w1d 18       
+ 
 BGP summary information for VRF default, address family IPv6 Unicast
-
+ 
 BGP summary information for VRF default, address family VPNv4 Unicast
-
+ 
 BGP summary information for VRF default, address family VPNv6 Unicast
-
+ 
 BGP summary information for VRF default, address family IPv4 MVPN
-
+ 
 BGP summary information for VRF default, address family IPv6 MVPN
-
+ 
 BGP summary information for VRF default, address family L2VPN EVPN
 BGP router identifier 172.16.101.37, local AS number 65161
 BGP table version is 63025110, L2VPN EVPN config peers 7, capable peers 7
 4630 network entries and 8017 paths using 1210960 bytes of memory
 BGP attribute entries [796/136912], BGP AS path entries [31/334]
 BGP community entries [0/0], BGP clusterlist entries [6/24]
-
+ 
 Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-172.23.129.240  4 65191 8081498 8246843 63025110    0    0     1w0d 6
-172.23.133.240  4 65193 8167863 8334538 63025110    0    0     1w0d 6
-172.16.101.33   4 65161 40997672 23273121 63025110    0    0    2y11w 1782
-172.16.101.34   4 65161 40992491 23273008 63025110    0    0    2y11w 1782
-172.16.201.37   4 65162 23261970 26520909 63025110    0    0     1w1d 698
-172.16.201.38   4 65162 23309853 26564632 63025110    0    0     2y2w 698
-172.16.255.42   4 65164 20901792 21346308 63025110    0    0    1d08h 14
-
-Neighbor        T    AS PfxRcd     Type-2     Type-3     Type-4     Type-5
-172.23.129.240  I 65191 6          0          0          0          6
-172.23.133.240  I 65193 6          0          0          0          6
-172.16.101.33   I 65161 1782       1434       14         0          334
-172.16.101.34   I 65161 1782       1434       14         0          334
-172.16.201.37   E 65162 698        481        7          0          210
-172.16.201.38   E 65162 698        481        7          0          210
+172.23.129.240  4 65191 8081498 8246843 63025110    0    0     1w0d 6        
+172.23.133.240  4 65193 8167863 8334538 63025110    0    0     1w0d 6        
+172.16.101.33   4 65161 40997672 23273121 63025110    0    0    2y11w 1782     
+172.16.101.34   4 65161 40992491 23273008 63025110    0    0    2y11w 1782     
+172.16.201.37   4 65162 23261970 26520909 63025110    0    0     1w1d 698      
+172.16.201.38   4 65162 23309853 26564632 63025110    0    0     2y2w 698      
+172.16.255.42   4 65164 20901792 21346308 63025110    0    0    1d08h 14       
+ 
+Neighbor        T    AS PfxRcd     Type-2     Type-3     Type-4     Type-5   
+172.23.129.240  I 65191 6          0          0          0          6        
+172.23.133.240  I 65193 6          0          0          0          6        
+172.16.101.33   I 65161 1782       1434       14         0          334      
+172.16.101.34   I 65161 1782       1434       14         0          334      
+172.16.201.37   E 65162 698        481        7          0          210      
+172.16.201.38   E 65162 698        481        7          0          210      
 172.16.255.42   I 65164 14         0          0          0          14
 
 
@@ -2017,11 +2012,11 @@ Number    Description      State            Model            Serial
 Temperature
 -------------------------------------------------------------------------
 Module  Sensor             MajorThresh   MinorThres   CurTemp     Status
-                            (Celsius)     (Celsius)   (Celsius)
+                            (Celsius)     (Celsius)   (Celsius)         
 -------------------------------------------------------------------------
-1       ASIC                101           95           52          ok
-1       Front-Middle(D1)    62            56           38          ok
-1       Front-Left  (D2)    52            44           33          ok
+1       ASIC                101           95           52          ok          
+1       Front-Middle(D1)    62            56           38          ok          
+1       Front-Left  (D2)    52            44           33          ok          
 1       Back        (D3)    48            42           28          ok
 
 ```
@@ -2091,7 +2086,7 @@ Primary  Secondary  Type             Ports
 
 **Output:**
 ```
-n9k1
+n9k1 
 
 ```
 
@@ -2110,7 +2105,7 @@ Interface            IP Address      Interface Status
 
 IP Interface Status for VRF "management"(2)
 Interface            IP Address      Interface Status
-mgmt0                10.205.143.20   protocol-up/link-up/admin-up
+mgmt0                10.205.143.20   protocol-up/link-up/admin-up       
 
 ```
 
@@ -2146,22 +2141,22 @@ management                              2 Up      --
 **Output:**
 ```
 OSPF Router with ID (50.50.50.50) (Process ID p1)
-
+ 
 Router Link States (Area 0)
-
+ 
 Link ID ADV Router Age Seq# Checksum Link Count
 40.40.40.40 40.40.40.40 930 0x80000004 0x2ea1 3
 50.50.50.50 50.50.50.50 935 0x80000002 0x8b52 1
 60.60.60.60 60.60.60.60 943 0x800003c5 0x9854 2
-
+ 
 Network Link States (Area 0)
-
+ 
 Link ID ADV Router Age Seq# Checksum
 209.165.201.3 60.60.60.60 944 0x80000001 0x7179
  192.0.2.1 50.50.50.50 935 0x80000001 0x516a
-
+ 
 Summary Network Link States (Area 0)
-
+ 
 Link ID ADV Router Age Seq# Checksum
 209.165.201.1 40.40.40.40 929 0x80000001 0x2498
 209.165.201.1 50.50.50.50 928 0x80000001 0x5b2f
@@ -2181,71 +2176,71 @@ Link ID ADV Router Age Seq# Checksum
 
 **Output:**
 ```
-route-map RM-TEST-OUT, permit, sequence 10
+route-map RM-TEST-OUT, permit, sequence 10 
   Match clauses:
-    as-path (as-path filter): AS-TEST
+    as-path (as-path filter): AS-TEST 
   Set clauses:
-route-map RM-BGP-TO-OSPF, deny, sequence 10
+route-map RM-BGP-TO-OSPF, deny, sequence 10 
   Match clauses:
     tag: 12345
   Set clauses:
-route-map RM-BGP-TO-OSPF, permit, sequence 20
+route-map RM-BGP-TO-OSPF, permit, sequence 20 
   Match clauses:
   Set clauses:
-route-map RM-ISP1-IN, permit, sequence 1000
+route-map RM-ISP1-IN, permit, sequence 1000 
   Match clauses:
   Set clauses:
     local-preference 300
-route-map RM-ISP1-OUT, permit, sequence 1000
+route-map RM-ISP1-OUT, permit, sequence 1000 
   Match clauses:
-    as-path (as-path filter): AS-ISP2
+    as-path (as-path filter): AS-ISP2 
   Set clauses:
-route-map RM-ISP1-MAITENANCE, permit, sequence 10
+route-map RM-ISP1-MAITENANCE, permit, sequence 10 
   Match clauses:
   Set clauses:
     local-preference 50
-route-map RM-FW-LP, permit, sequence 10
+route-map RM-FW-LP, permit, sequence 10 
   Match clauses:
   Set clauses:
     local-preference 25
-route-map RM-FW-MAITENANCE, permit, sequence 10
+route-map RM-FW-MAITENANCE, permit, sequence 10 
   Match clauses:
   Set clauses:
-route-map RM-FW-OUTBOUND, permit, sequence 10
+route-map RM-FW-OUTBOUND, permit, sequence 10 
   Match clauses:
-    as-path (as-path filter): TEST-AS-FW
+    as-path (as-path filter): TEST-AS-FW 
   Set clauses:
 
-route-map RM-X-SIDE-INTERNAL, permit, sequence 10
+route-map RM-X-SIDE-INTERNAL, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PF-PATH-X-INTERNAL
+    ip address prefix-lists: PF-PATH-X-INTERNAL 
   Set clauses:
-route-map RM-Z-SIDE-INTERNAL, permit, sequence 10
+route-map RM-Z-SIDE-INTERNAL, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PF-PATH-Z-INTERNAL
+    ip address prefix-lists: PF-PATH-Z-INTERNAL 
   Set clauses:
- route-map RM-FILTER-IN, permit, sequence 10
+ route-map RM-FILTER-IN, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PL-PERMIT-IN
+    ip address prefix-lists: PL-PERMIT-IN 
   Set clauses:
-route-map TEST_THIS, permit, sequence 10
+route-map TEST_THIS, permit, sequence 10 
   Match clauses:
-    ip address (access-lists): AL_TEST_TEST
+    ip address (access-lists): AL_TEST_TEST 
   Set clauses:
-    ip next-hop 2.2.2.2
-route-map RM-N3K1-TO-N3K2, permit, sequence 10
+    ip next-hop 2.2.2.2 
+route-map RM-N3K1-TO-N3K2, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PF-N3K1-TO-N3K2
+    ip address prefix-lists: PF-N3K1-TO-N3K2 
   Set clauses:
     extcommunity RT:100:1
-route-map RM-N3K2-TO-N3K1, permit, sequence 10
+route-map RM-N3K2-TO-N3K1, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PF-N3K2-TO-N3K1
+    ip address prefix-lists: PF-N3K2-TO-N3K1 
   Set clauses:
     extcommunity RT:200:1
-route-map RM-PATH-A-DEFAULT-ROUTE, permit, sequence 10
+route-map RM-PATH-A-DEFAULT-ROUTE, permit, sequence 10 
   Match clauses:
-    ip address prefix-lists: PF-A-DEFAULT-ROUTE
+    ip address prefix-lists: PF-A-DEFAULT-ROUTE 
   Set clauses:
 
 ```
@@ -2348,65 +2343,65 @@ Vlan142   --                                      up     --
 --------------------------------------------------------------------------------
 Port          Name               Status    Vlan      Duplex  Speed   Type
 --------------------------------------------------------------------------------
-mgmt0         --                 notconnec routed    auto    auto    --
+mgmt0         --                 notconnec routed    auto    auto    --         
 
 --------------------------------------------------------------------------------
 Port          Name               Status    Vlan      Duplex  Speed   Type
 --------------------------------------------------------------------------------
-Eth1/1        --                 connected trunk     full    1000    1000base-T
-Eth1/2        --                 xcvrAbsen 1         auto    auto    --
-Eth1/3        --                 xcvrAbsen 1         auto    auto    --
-Eth1/4        --                 xcvrAbsen 1         auto    auto    --
-Eth1/5        --                 xcvrAbsen 1         auto    auto    --
-Eth1/6        --                 xcvrAbsen 1         auto    auto    --
-Eth1/7        --                 xcvrAbsen 1         auto    auto    --
-Eth1/8        --                 xcvrAbsen 1         auto    auto    --
-Eth1/9        --                 xcvrAbsen 1         auto    auto    --
-Eth1/10       --                 xcvrAbsen 1         auto    auto    --
-Eth1/11       --                 xcvrAbsen 1         auto    auto    --
-Eth1/12       --                 xcvrAbsen 1         auto    auto    --
-Eth1/13       --                 xcvrAbsen 1         auto    auto    --
-Eth1/14       --                 xcvrAbsen 1         auto    auto    --
-Eth1/15       --                 xcvrAbsen 1         auto    auto    --
-Eth1/16       --                 xcvrAbsen 1         auto    auto    --
-Eth1/17       --                 xcvrAbsen 1         auto    auto    --
-Eth1/18       --                 xcvrAbsen 1         auto    auto    --
-Eth1/19       --                 xcvrAbsen 1         auto    auto    --
-Eth1/20       --                 xcvrAbsen 1         auto    auto    --
-Eth1/21       --                 xcvrAbsen 1         auto    auto    --
-Eth1/22       --                 xcvrAbsen 1         auto    auto    --
-Eth1/23       --                 xcvrAbsen 1         auto    auto    --
-Eth1/24       --                 xcvrAbsen 1         auto    auto    --
-Eth1/25       --                 xcvrAbsen 1         auto    auto    --
-Eth1/26       --                 xcvrAbsen 1         auto    auto    --
-Eth1/27       --                 xcvrAbsen 1         auto    auto    --
-Eth1/28       --                 xcvrAbsen 1         auto    auto    --
-Eth1/29       --                 xcvrAbsen 1         auto    auto    --
-Eth1/30       --                 xcvrAbsen 1         auto    auto    --
-Eth1/31       --                 xcvrAbsen 1         auto    auto    --
-Eth1/32       --                 xcvrAbsen 1         auto    auto    --
-Eth1/33       --                 xcvrAbsen 1         auto    auto    --
-Eth1/34       --                 xcvrAbsen 1         auto    auto    --
-Eth1/35       --                 xcvrAbsen 1         auto    auto    --
-Eth1/36       --                 xcvrAbsen 1         auto    auto    --
-Eth1/37       --                 xcvrAbsen 1         auto    auto    --
-Eth1/38       --                 xcvrAbsen 1         auto    auto    --
-Eth1/39       --                 xcvrAbsen 1         auto    auto    --
-Eth1/40       --                 xcvrAbsen 1         auto    auto    --
-Eth1/41       --                 xcvrAbsen 1         auto    auto    --
-Eth1/42       --                 xcvrAbsen 1         auto    auto    --
-Eth1/43       --                 xcvrAbsen 1         auto    auto    --
-Eth1/44       --                 xcvrAbsen 1         auto    auto    --
-Eth1/45       --                 xcvrAbsen 1         auto    auto    --
-Eth1/46       --                 xcvrAbsen 1         auto    auto    --
-Eth1/47       --                 xcvrAbsen 1         auto    auto    --
-Eth1/48       --                 xcvrAbsen 1         auto    auto    --
-Eth1/49       --                 xcvrAbsen 1         auto    auto    --
-Eth1/50       --                 xcvrAbsen 1         auto    auto    --
-Eth1/51       --                 xcvrAbsen 1         auto    auto    --
-Eth1/52       --                 xcvrAbsen 1         auto    auto    --
-Eth1/53       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --
-Eth1/54       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --
+Eth1/1        --                 connected trunk     full    1000    1000base-T 
+Eth1/2        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/3        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/4        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/5        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/6        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/7        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/8        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/9        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/10       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/11       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/12       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/13       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/14       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/15       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/16       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/17       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/18       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/19       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/20       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/21       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/22       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/23       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/24       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/25       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/26       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/27       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/28       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/29       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/30       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/31       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/32       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/33       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/34       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/35       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/36       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/37       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/38       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/39       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/40       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/41       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/42       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/43       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/44       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/45       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/46       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/47       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/48       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/49       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/50       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/51       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/52       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/53       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
+Eth1/54       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
 
 ```
 
@@ -2426,7 +2421,7 @@ IP Multicast Routing Table for VRF "default"
   Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
   Outgoing interface list: (count: 1)
     Ethernet1/3, uptime: 2w3d, igmp
-
+ 
 
 (10.1.13.10/32, 225.1.0.1/32), uptime: 06:33:34, ip mrib pim
   Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
@@ -2460,7 +2455,7 @@ Holdtime: 61 sec
 
 Version:
 6.47.10 (long-term)
-
+ 
 Advertisement Version: 1
 Local Interface MAC: b1:81:d1:d1:a1:11
 Remote Interface MAC: 00:00:00:00:00:00
@@ -2556,8 +2551,8 @@ ospf                   13         enabled (not-running)
 ```
 Vlan100 - Group 100 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 3 sec, holdtime 10 sec
   Next hello sent in 2.676000 sec(s)
   Virtual IP address is 192.168.100.1 (Cfged)
@@ -2573,8 +2568,8 @@ Vlan100 - Group 100 (HSRP-V2) (IPv4)
 
 Vlan200 - Group 200 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.448000 sec(s)
   Virtual IP address is 172.11.4.254 (Cfged)
@@ -2587,8 +2582,8 @@ Vlan200 - Group 200 (HSRP-V2) (IPv4)
 
 Vlan201 - Group 201 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.484000 sec(s)
   Virtual IP address is 172.11.5.30 (Cfged)
@@ -2598,11 +2593,11 @@ Vlan201 - Group 201 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fd49 (Default MAC)
   2 state changes, last state change 1y0w
   IP redundancy name is hsrp-Vlan201-201 (default)
-
+ 
 Vlan210 - Group 210 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.420000 sec(s)
   Virtual IP address is 172.12.9.254 (Cfged)
@@ -2612,11 +2607,11 @@ Vlan210 - Group 210 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fdb6 (Default MAC)
   2 state changes, last state change 1y0w
   IP redundancy name is hsrp-Vlan210-210 (default)
-
+ 
 Vlan211 - Group 211 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.695000 sec(s)
   Virtual IP address is 172.12.10.62 (Cfged)
@@ -2626,11 +2621,11 @@ Vlan211 - Group 211 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fdb7 (Default MAC)
   2 state changes, last state change 1y0w
   IP redundancy name is hsrp-Vlan211-211 (default)
-
+ 
 Vlan220 - Group 220 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.484000 sec(s)
   Virtual IP address is 172.13.12.254 (Cfged)
@@ -2640,11 +2635,11 @@ Vlan220 - Group 220 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fe24 (Default MAC)
   2 state changes, last state change 1y0w
   IP redundancy name is hsrp-Vlan220-220 (default)
-
+ 
 Vlan221 - Group 221 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.614000 sec(s)
   Virtual IP address is 172.13.13.30 (Cfged)
@@ -2654,11 +2649,11 @@ Vlan221 - Group 221 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fe25 (Default MAC)
   2 state changes, last state change 1y0w
   IP redundancy name is hsrp-Vlan221-221 (default)
-
+ 
 Vlan300 - Group 300 (HSRP-V2) (IPv4)
   Local state is Active, priority 250 (Cfged 250), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 250
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 250 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.448000 sec(s)
   Virtual IP address is 172.16.0.254 (Cfged)
@@ -2668,16 +2663,16 @@ Vlan300 - Group 300 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.fed8 (Default MAC)
   14 state changes, last state change 1y2w
   IP redundancy name is hsrp-Vlan300-300 (default)
-
+ 
 Vlan416 - Group 416 (HSRP-V2) (IPv4)
   Local state is Standby, priority 130 (Cfged 130), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 130
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 130 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.231000 sec(s)
   Virtual IP address is 172.17.1.1 (Cfged)
   Active router is 172.17.1.2, priority 150 expires in 0.661000 sec(s)
-  Standby router is local
+  Standby router is local 
   Authentication MD5, key-string "core-hsrp"
   Virtual mac address is 0000.0c9f.ff4c (Default MAC)
   105 state changes, last state change 21w5d
@@ -2685,13 +2680,13 @@ Vlan416 - Group 416 (HSRP-V2) (IPv4)
 
 Vlan417 - Group 417 (HSRP-V2) (IPv4)
   Local state is Standby, priority 130 (Cfged 130), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 130
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 130 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.610000 sec(s)
   Virtual IP address is 172.17.1.17 (Cfged)
   Active router is 172.17.1.18, priority 150 expires in 1.531000 sec(s)
-  Standby router is local
+  Standby router is local 
   Authentication MD5, key-string "core-hsrp"
   Virtual mac address is 0000.0c9f.ff4d (Default MAC)
   418 state changes, last state change 21w5d
@@ -2699,13 +2694,13 @@ Vlan417 - Group 417 (HSRP-V2) (IPv4)
 
 Vlan418 - Group 418 (HSRP-V2) (IPv4)
   Local state is Standby, priority 130 (Cfged 130), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 130
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 130 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.422000 sec(s)
   Virtual IP address is 172.17.1.33 (Cfged)
   Active router is 172.17.1.2, priority 150 expires in 0.081000 sec(s)
-  Standby router is local
+  Standby router is local 
   Authentication MD5, key-string "core-hsrp"
   Virtual mac address is 0000.0c9f.ff4e (Default MAC)
   102 state changes, last state change 21w5d
@@ -2713,13 +2708,13 @@ Vlan418 - Group 418 (HSRP-V2) (IPv4)
 
 Vlan419 - Group 419 (HSRP-V2) (IPv4)
   Local state is Standby, priority 130 (Cfged 130), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 130
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 130 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.886000 sec(s)
   Virtual IP address is 172.17.1.49 (Cfged)
   Active router is 172.17.1.50, priority 150 expires in 2.281000 sec(s)
-  Standby router is local
+  Standby router is local 
   Authentication MD5, key-string "core-hsrp"
   Virtual mac address is 0000.0c9f.ff4f (Default MAC)
   448 state changes, last state change 21w5d
@@ -2727,13 +2722,13 @@ Vlan419 - Group 419 (HSRP-V2) (IPv4)
 
 Vlan420 - Group 420 (HSRP-V2) (IPv4)
   Local state is Standby, priority 130 (Cfged 130), may preempt
-    Forwarding threshold(for vPC), lower: 1 upper: 130
-  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60
+    Forwarding threshold(for vPC), lower: 1 upper: 130 
+  Preemption Delay (Seconds) Reload:120 Minimum:60 Sync:60 
   Hellotime 1 sec, holdtime 3 sec
   Next hello sent in 0.301000 sec(s)
   Virtual IP address is 172.17.1.65 (Cfged)
   Active router is 172.17.1.66, priority 150 expires in 0.081000 sec(s)
-  Standby router is local
+  Standby router is local 
   Authentication MD5, key-string "core-hsrp"
   Virtual mac address is 0000.0c9f.ff50 (Default MAC)
   103 state changes, last state change 21w5d
@@ -2756,7 +2751,7 @@ PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
 
 NAME: "Slot 1",  DESCR: "1/10G SFP+ Ethernet Module"
 PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
-
+ 
 NAME: "Slot 2",  DESCR: "40G Ethernet Expansion Module"
 PID: N9K-M12PQ           ,  VID: V01 ,  SN: SAL1815QCJE
 
@@ -2765,7 +2760,7 @@ PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07E
 
 NAME: "Power Supply 2",  DESCR: "Nexus9000 C9396PX Chassis Power Supply"
 PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07H
-
+ 
 NAME: "Fan 1",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
 PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
 
@@ -2777,10 +2772,10 @@ PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
 
 NAME: "Slot 33", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
 PID: N7K-AC-6.0KW, VID: V01, SN: DTM141600XT
-
+ 
 NAME: "Slot 34", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
 PID: N7K-AC-6.0KW, VID: V01, SN: DTM1414007T
-
+ 
 NAME: "Slot 35", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Fan Module"
 PID: N7K-C7009-FAN, VID: V00, SN: JAF1433DDEJ
 
@@ -2789,7 +2784,7 @@ PID: 10Gbase-SR          ,  VID: SFBR-709SMZ-CS1,  SN: AVD42309ABD
 
 NAME: Ethernet1/47,  DESCR: CISCO
 PID: 1000base-LH         ,  VID: RTXM191-404-C88,  SN: ACW315000AD
-
+ 
 NAME: Ethernet1/48,  DESCR: CISCO-AVAGO
 PID: 10Gbase-LR          ,  VID: SFCT-739SMZ,  SN: AVD2219K9AO
 
@@ -2808,10 +2803,10 @@ PID: 10Gbase-LR          ,  VID: SFCT-739SMZ,  SN: AVD2219K9AO
 Ethernet3/1
     transceiver is present
     type is 10Gbase-SR
-    name is CISCO-FINISAR
+    name is CISCO-FINISAR   
     part number is FTLX8571D3BCL-C2
-    revision is A
-    serial number is FNS18510TXL
+    revision is A   
+    serial number is FNS18510TXL     
     nominal bitrate is 10300 MBit/sec
     Link length supported for 50/125um OM2 fiber is 82 m
     Link length supported for 62.5/125um fiber is 26 m
@@ -2819,8 +2814,8 @@ Ethernet3/1
     cisco id is --
     cisco extended id number is 4
     cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR
-    cisco vendor id is V03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
     number of lanes 1
 
            SFP Detail Diagnostics Information (internal calibration)
@@ -2840,10 +2835,10 @@ Ethernet3/1
 Ethernet3/2
     transceiver is present
     type is 10Gbase-SR
-    name is CISCO-FINISAR
+    name is CISCO-FINISAR   
     part number is FTLX8571D3BCL-C2
-    revision is A
-    serial number is FNS18510TXV
+    revision is A   
+    serial number is FNS18510TXV     
     nominal bitrate is 10300 MBit/sec
     Link length supported for 50/125um OM2 fiber is 82 m
     Link length supported for 62.5/125um fiber is 26 m
@@ -2851,8 +2846,8 @@ Ethernet3/2
     cisco id is --
     cisco extended id number is 4
     cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR
-    cisco vendor id is V03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
     number of lanes 1
 
            SFP Detail Diagnostics Information (internal calibration)
@@ -2872,10 +2867,10 @@ Ethernet3/2
 Ethernet3/3
     transceiver is present
     type is 10Gbase-SR
-    name is CISCO-FINISAR
+    name is CISCO-FINISAR   
     part number is FTLX8571D3BCL-C2
-    revision is A
-    serial number is FNS18510TYD
+    revision is A   
+    serial number is FNS18510TYD     
     nominal bitrate is 10300 MBit/sec
     Link length supported for 50/125um OM2 fiber is 82 m
     Link length supported for 62.5/125um fiber is 26 m
@@ -2883,8 +2878,8 @@ Ethernet3/3
     cisco id is --
     cisco extended id number is 4
     cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR
-    cisco vendor id is V03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
     number of lanes 1
 
            SFP Detail Diagnostics Information (internal calibration)
@@ -2904,17 +2899,17 @@ Ethernet3/3
 Ethernet4/1
     transceiver is present
     type is CFP-100G-LR4
-    name is CISCO
-    part number is SCF1001L4CNC101
+    name is CISCO           
+    part number is SCF1001L4CNC101 
     revision is 11
-    serial number is ECL190200BA
+    serial number is ECL190200BA     
     nominal bitrate is 129 MBit/sec per channel
     Link length supported for 9/125um fiber is 10 km
     cisco id is --
     cisco extended id number is 85
     cisco part number is 10-2549-02
-    cisco product id is CFP-100G-LR4
-    cisco vendor id is V02
+    cisco product id is CFP-100G-LR4    
+    cisco vendor id is V02 
     number of lanes 3
 
 Lane Number:1 Common Diagnostic Information
@@ -2997,8 +2992,8 @@ Ethernet106/1/1 is down (Link not connected)
   auto-duplex, auto-speed
   Beacon is turned off
   Input flow-control is off, output flow-control is on
-  Switchport monitor is off
-  EtherType is 0x8100
+  Switchport monitor is off 
+  EtherType is 0x8100 
   Last link flapped 14week(s) 5day(s)
   Last clearing of "show interface" counters never
   9 interface resets
@@ -3037,7 +3032,7 @@ Ethernet106/1/1 is down (Link not connected)
 ```
 IP Interface Status for VRF "default"
 Vlan156, Interface status: protocol-down/link-down/admin-up, iod: 2,
-  IP address: 155.155.155.1, IP subnet: 155.155.155.0/30 route-preference: 0, tag: 0
+  IP address: 155.155.155.1, IP subnet: 155.155.155.0/30 route-preference: 0, tag: 0 
   IP broadcast address: 255.255.255.255
   IP multicast groups locally joined: none
   IP MTU: 1500 bytes (using link MTU)
@@ -3046,12 +3041,12 @@ Vlan156, Interface status: protocol-down/link-down/admin-up, iod: 2,
   IP Local Proxy ARP : disabled
   IP multicast routing: disabled
   IP icmp redirects: enabled
-  IP directed-broadcast: disabled
-  IP Forwarding: disabled
+  IP directed-broadcast: disabled 
+  IP Forwarding: disabled 
   IP icmp unreachables (except port): disabled
   IP icmp port-unreachable: enabled
   IP unicast reverse path forwarding: none
-  IP load sharing: none
+  IP load sharing: none 
   IP interface statistics last reset: never
   IP interface software stats: (sent/received/forwarded/originated/consumed)
     Unicast packets    : 0/0/0/0/0
@@ -3063,7 +3058,7 @@ Vlan156, Interface status: protocol-down/link-down/admin-up, iod: 2,
     Labeled packets    : 0/0/0/0/0
     Labeled bytes      : 0/0/0/0/0
 Ethernet1/5, Interface status: protocol-down/link-down/admin-up, iod: 15,
-  IP address: 10.1.0.1, IP subnet: 10.1.0.0/30 route-preference: 0, tag: 0
+  IP address: 10.1.0.1, IP subnet: 10.1.0.0/30 route-preference: 0, tag: 0 
   IP broadcast address: 255.255.255.255
   IP multicast groups locally joined: none
   IP MTU: 1500 bytes (using link MTU)
@@ -3072,12 +3067,12 @@ Ethernet1/5, Interface status: protocol-down/link-down/admin-up, iod: 15,
   IP Local Proxy ARP : disabled
   IP multicast routing: disabled
   IP icmp redirects: enabled
-  IP directed-broadcast: disabled
-  IP Forwarding: disabled
+  IP directed-broadcast: disabled 
+  IP Forwarding: disabled 
   IP icmp unreachables (except port): disabled
   IP icmp port-unreachable: enabled
   IP unicast reverse path forwarding: none
-  IP load sharing: none
+  IP load sharing: none 
   IP interface statistics last reset: never
   IP interface software stats: (sent/received/forwarded/originated/consumed)
     Unicast packets    : 0/0/0/0/0
@@ -3110,7 +3105,7 @@ Flags: (0x8000002) (high32 00000000) on xmit-list, is not in urib, is not in HW
   AS-Path: NONE, path locally originated
     0.0.0.0 (metric 0) from 0.0.0.0 (10.0.1.1)
       Origin IGP, MED not set, localpref 100, weight 32768
-
+ 
 
 BGP routing table information for VRF default, address family IPv4 Unicast
  BGP routing table entry for 0.0.0.0/0, version 461888
@@ -3122,7 +3117,7 @@ Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib rou
   AS-Path: 65111.1233 65111.4566 65111.7899 12345 , path sourced external to AS
     10.2.2.252 (metric 0) from 10.2.2.252 (10.12.2.100)
       Origin IGP, MED not set, localpref 5000, weight 0
-      Community: 12345:1111 3000:4444 44444:1111
+      Community: 12345:1111 3000:4444 44444:1111 
 
   Path type: external, path is valid, not best reason: Local Preference, no labeled nexthop
   AS-Path: 65111.1233 65111.4566 65111.7899 22222 , path sourced external to AS
@@ -3131,7 +3126,7 @@ Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib rou
       Community: 12345:1111 3000:4444 44444:2222
 
   Path-id 1 advertised to peers:
-    172.16.251.13
+    172.16.251.13  
 BGP routing table entry for 2.22.22.0/27, version 98
 Paths: (1 available, best #1)
 Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
@@ -3141,10 +3136,10 @@ Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib rou
   AS-Path: 65222.1111 653333 , path sourced external to AS
     10.3.3.252 (metric 0) from 10.3.3.252 (10.9.1.200)
       Origin IGP, MED 100, localpref 5000, weight 0
-      Community: 10104:10030 20311:0 41000:11501
+      Community: 10104:10030 20311:0 41000:11501 
 
   Path-id 1 advertised to peers:
-    10.3.10.123        10.3.9.234        172.16.10.123
+    10.3.10.123        10.3.9.234        172.16.10.123  
 BGP routing table entry for 10.10.10.0/24, version 336212
 Paths: (3 available, best #1)
 Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
@@ -3175,7 +3170,7 @@ Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib rou
       Extcommunity: RT:33333:2222
 
   Path-id 1 advertised to peers:
-    172.16.251.13
+    172.16.251.13  
 BGP routing table entry for 10.13.13.0/22, version 450373
 Paths: (2 available, best #1)
 Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
@@ -3186,17 +3181,17 @@ Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib rou
     10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
       Origin IGP, MED not set, localpref 5000, weight 0
       Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
-      Community: 10308:10030 30006:0 41000:11501
+      Community: 10308:10030 30006:0 41000:11501 
 
   Path type: external, path is valid, received only, no labeled nexthop
   AS-Path: 65100.30037 65100.30032 2222 2222 2222 , path sourced external to AS
     10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
       Origin IGP, MED not set, localpref 100, weight 0
       Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
-      Community: 10308:10030 30006:0 41000:11501
+      Community: 10308:10030 30006:0 41000:11501 
 
   Path-id 1 advertised to peers:
-    10.19.10.253
+    10.19.10.253 
 
 ```
 
@@ -3743,7 +3738,7 @@ Ethernet1/49
     type is QSFP-100G-LR4
     name is OEM
     part number is BZ-QSFP28-100G-E
-    revision is A
+    revision is A 
     serial number is GS2008105001
     nominal bitrate is 25500 MBit/sec
     Link length supported for 9/125um fiber is 40 km
@@ -4637,7 +4632,7 @@ BGP neighbor is 134.81.203.129,  remote AS 64563, ebgp link,  Peer index 4
   Local host: 27.27.246.137, Local port: 29341
   Foreign host: 121.155.249.169, Foreign port: 179
   fd = 77
-
+ 
 BGP neighbor is 87.209.8.85,  remote AS 64564, ebgp link,  Peer index 5
   Inherits peer configuration from peer-template Standard-Leg
   Description: from monkey to foo
@@ -4985,7 +4980,7 @@ BGP neighbor is 135.138.128.239,  remote AS 64522, ebgp link,  Peer index 8
   Local host: 46.95.207.194, Local port: 30808
   Foreign host: 249.173.131.89, Foreign port: 179
   fd = 102
-
+ 
 BGP neighbor is 88.158.245.249,  remote AS 64524, ebgp link,  Peer index 11
   Inherits peer configuration from peer-template Standard-Leg
   Description: from bing to monkey
@@ -5491,7 +5486,7 @@ BGP neighbor is 113.9.147.198,  remote AS 64517, ebgp link,  Peer index 22
   Threshold for warning messages 75%
 
   No established BGP session with peer
-
+ 
 BGP neighbor is 212.164.170.242,  remote AS 63000, ebgp link,  Peer index 24
   Inherits peer configuration from peer-template Standard-Leg
   Description: from bing to monkey
@@ -5549,7 +5544,7 @@ BGP neighbor is 212.164.170.242,  remote AS 63000, ebgp link,  Peer index 24
   Local host: 42.49.226.128, Local port: 30976
   Foreign host: 187.198.29.137, Foreign port: 179
   fd = 112
-
+ 
 BGP neighbor is 162.55.172.94,  remote AS 65205, ebgp link,  Peer index 25
   Inherits peer configuration from peer-template Standard-Leg
   Description: from boo to foo
@@ -5666,7 +5661,7 @@ BGP neighbor is 117.185.189.71,  remote AS 64519, ebgp link,  Peer index 26
   Local host: 222.163.71.138, Local port: 179
   Foreign host: 60.17.163.56, Foreign port: 35869
   fd = 78
-
+ 
 BGP neighbor is 11.17.141.125,  remote AS 64980, ebgp link,  Peer index 27
   Inherits peer configuration from peer-template Standard-Leg
   Description: from baz to frog
@@ -6014,7 +6009,7 @@ BGP neighbor is 16.114.168.33,  remote AS 64542, ebgp link,  Peer index 31
   Local host: 99.240.42.174, Local port: 28790
   Foreign host: 235.228.253.157, Foreign port: 179
   fd = 66
-
+ 
 BGP neighbor is 131.175.74.157,  remote AS 65155, ebgp link,  Peer index 33
   Inherits peer configuration from peer-template Standard-Leg
   Description: from donkey to donkey
@@ -7541,21 +7536,21 @@ Standard Community List ROUTES_CL2
 
 **Output:**
 ```
-Codes: CP - Control Plane        DP - Data Plane
-       UC - Unconfigured         SA - Suppress ARP
+Codes: CP - Control Plane        DP - Data Plane         
+       UC - Unconfigured         SA - Suppress ARP       
        SU - Suppress Unknown Unicast
-       Xconn - Crossconnect
+       Xconn - Crossconnect     
        MS-IR - Multisite Ingress Replication
 Interface VNI      Multicast-group   State Mode Type [BD/VRF]      Flags
 --------- -------- ----------------- ----- ---- ------------------ -----
-nve1      1006    UnicastBGP          Up    CP   L2 [6]             SA
-nve1      1105    UnicastBGP          Up    CP   L2 [1105]          SA
-nve1      2111    UnicastBGP          Up    CP   L2 [111]           SA
-nve1      3098    UnicastBGP          Up    CP   L2 [98]            SA
-nve1      10301 n/a                   Up    CP   L3 [BLU]
-nve1      10302 n/a                   Up    CP   L3 [GRN]
-nve1      10303 n/a                   Up    CP   L3 [AMB]
-nve1      10306 n/a                   Up    CP   L3 [GRY]
+nve1      1006    UnicastBGP          Up    CP   L2 [6]             SA   
+nve1      1105    UnicastBGP          Up    CP   L2 [1105]          SA  
+nve1      2111    UnicastBGP          Up    CP   L2 [111]           SA  
+nve1      3098    UnicastBGP          Up    CP   L2 [98]            SA  
+nve1      10301 n/a                   Up    CP   L3 [BLU]               
+nve1      10302 n/a                   Up    CP   L3 [GRN]               
+nve1      10303 n/a                   Up    CP   L3 [AMB]                              
+nve1      10306 n/a                   Up    CP   L3 [GRY]               
 
 ```
 
@@ -7621,23 +7616,23 @@ Input/output error
 IP Interface Status for VRF "default"
 loopback0, Interface status: protocol-up/link-up/admin-up, iod: 50,
 Unnumbered interfaces of loopback0: first iod 69
-mti19: mti6: mti10: mti4: mti14: mti13: mti7: mti3: mti20: mti17: mti15: mti16: mti18: mti8: mti12: mti11: mti9:
-  IP address: 172.21.128.112, IP subnet: 172.21.128.112/32 route-preference: 0, tag: 0
+mti19: mti6: mti10: mti4: mti14: mti13: mti7: mti3: mti20: mti17: mti15: mti16: mti18: mti8: mti12: mti11: mti9: 
+  IP address: 172.21.128.112, IP subnet: 172.21.128.112/32 route-preference: 0, tag: 0 
   IP broadcast address: 255.255.255.255
-  IP multicast groups locally joined:
-      224.0.0.22  224.0.0.2  224.0.0.1  224.0.0.13
+  IP multicast groups locally joined: 
+      224.0.0.22  224.0.0.2  224.0.0.1  224.0.0.13  
   IP MTU: 1500 bytes (using link MTU)
   IP primary address route-preference: 0, tag: 0
   IP proxy ARP : disabled
   IP Local Proxy ARP : disabled
   IP multicast routing: enabled
   IP icmp redirects: enabled
-  IP directed-broadcast: disabled
-  IP Forwarding: disabled
+  IP directed-broadcast: disabled 
+  IP Forwarding: disabled 
   IP icmp unreachables (except port): disabled
   IP icmp port-unreachable: enabled
   IP unicast reverse path forwarding: none
-  IP load sharing: none
+  IP load sharing: none 
   IP interface statistics last reset: never
   IP interface software stats: (sent/received/forwarded/originated/consumed)
     Unicast packets    : 0/0/0/2/319819115
@@ -7735,15 +7730,15 @@ Capability Codes: R - Router, T - Trans-Bridge, B - Source-Route-Bridge
 
 Device-ID             Local Intrfce Hldtme Capability  Platform         Port ID
 my-dc1-mgt-sw1(FOC213230KP)
-                   mgmt0          138    R S I s   N3K-C3172PQ-XL     Eth1/48
+                   mgmt0          138    R S I s   N3K-C3172PQ-XL     Eth1/48       
 lx-dc1-server01.mynetwork.com
-                   Eth1/1/1       109    H         Linux              eth9
+                   Eth1/1/1       109    H         Linux              eth9          
 lx-dc1-server02.mynetwork.com
-                   Eth1/1/2       106    H         Linux              eth9
+                   Eth1/1/2       106    H         Linux              eth9          
 lx-dc1-server03.mynetwork.com
-                   Eth1/1/3       91     H         Linux              eth9
+                   Eth1/1/3       91     H         Linux              eth9          
 lx-dc1-server04.mynetwork.com
-                   Eth1/1/4       112    H         Linux              eth9
+                   Eth1/1/4       112    H         Linux              eth9          
 lx-dc1-server05.mynetwork.com
                    Eth1/2/1       100    H         Linux              eth9
 
@@ -7777,7 +7772,7 @@ IP Route Table for VRF "management"
 '**' denotes best mcast next-hop
 '[x/y]' denotes [preference/metric]
 '%<string>' in via output denotes VRF <string>
-
+ 
 0.0.0.0/0, ubest/mbest: 1/0 time
     *via 172.16.170.193, [1/0], 1y16w, static
 
@@ -7796,17 +7791,17 @@ IP Route Table for VRF "management"
  OSPF Process ID BLU1 VRF BLU
  Total number of interface: 1
  Interface               ID     Area            Cost   State    Neighbors Status
- Vlan10                  1      0.0.0.10        10     DR       2         up
-
+ Vlan10                  1      0.0.0.10        10     DR       2         up 
+ 
  OSPF Process ID DC_UNDERLAY VRF default
  Total number of interface: 6
  Interface               ID     Area            Cost   State    Neighbors Status
- Vlan2                   3      0.0.0.0         100    P2P      1         up
- Lo1                     1      0.0.0.0         1      LOOPBACK 0         up
- Lo2                     2      0.0.0.0         1      LOOPBACK 0         up
- Lo3                     4      0.0.0.0         1      LOOPBACK 0         up
- Eth1/1                  6      0.0.0.0         1      P2P      1         up
- Eth1/2                  5      0.0.0.0         1      P2P      1         up
+ Vlan2                   3      0.0.0.0         100    P2P      1         up 
+ Lo1                     1      0.0.0.0         1      LOOPBACK 0         up 
+ Lo2                     2      0.0.0.0         1      LOOPBACK 0         up 
+ Lo3                     4      0.0.0.0         1      LOOPBACK 0         up 
+ Eth1/1                  6      0.0.0.0         1      P2P      1         up 
+ Eth1/2                  5      0.0.0.0         1      P2P      1         up 
 
 ```
 
@@ -8228,33 +8223,33 @@ CTS Information for Interface Ethernet1/2:
       Peer Identity:        MyDevice2
       Peer is:              Unknown in manual mode
       802.1X role:          CTS_ROLE_UNKNOWN
-      Last Re-Authentication:
+      Last Re-Authentication: 
     Authorization Status:   CTS_AUTHZ_INIT
       PEER SGT:             0
       Peer SGT assignment:  Not Trusted
     SAP Status:             CTS_SAP_INIT
-      Configured pairwise ciphers:
-      Replay protection:
-      Replay protection mode:
-      Selected cipher:
+      Configured pairwise ciphers: 
+      Replay protection: 
+      Replay protection mode: 
+      Selected cipher: 
     Propagate SGT: Enabled
 
 CTS Information for Interface Ethernet1/3:
     CTS is enabled, mode:   CTS_MODE_MANUAL
     IFC state:              Unknown
     Authentication Status:  CTS_AUTHC_INIT
-      Peer Identity:
+      Peer Identity:        
       Peer is:              Unknown in manual mode
       802.1X role:          CTS_ROLE_UNKNOWN
-      Last Re-Authentication:
+      Last Re-Authentication: 
     Authorization Status:   CTS_AUTHZ_SKIPPED_CONFIG
       PEER SGT:             2
       Peer SGT assignment:  Not Trusted
     SAP Status:             CTS_SAP_INIT
-      Configured pairwise ciphers:
-      Replay protection:
-      Replay protection mode:
-      Selected cipher:
+      Configured pairwise ciphers: 
+      Replay protection: 
+      Replay protection mode: 
+      Selected cipher: 
     Propagate SGT: Enabled
 
 
@@ -8273,12 +8268,12 @@ CTS Information for Interface Ethernet1/3:
 Capability codes:
   (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
   (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
- Device ID            Local Intf      Hold-time  Capability  Port ID
+ Device ID            Local Intf      Hold-time  Capability  Port ID  
 nx-osv9000-3-long-name.com
-                     Eth1/1          120        BR          Ethernet1/1
+                     Eth1/1          120        BR          Ethernet1/1   
 nx-osv9000-4-extremely-long-name
-                     Eth1/2          120        BR          Ethernet1/1
-nx-osv9000-2         Eth1/3          120        BR          Ethernet1/3
+                     Eth1/2          120        BR          Ethernet1/1   
+nx-osv9000-2         Eth1/3          120        BR          Ethernet1/3   
 Total entries displayed: 3
 
 ```
@@ -8303,15 +8298,15 @@ http://www.gnu.org/licenses/gpl.html.
 
 Software
   BIOS:      version 3.6.0
-  Power Sequencer Firmware:
+  Power Sequencer Firmware: 
              Module 1: v7.0
              Module 1: v1.0
              Module 2: v1.0
              Module 3: v1.0
   Microcontroller Firmware:        version v1.0.0.2
-  QSFP Microcontroller Firmware:
+  QSFP Microcontroller Firmware:   
              Module not detected
-  CXP Microcontroller Firmware:
+  CXP Microcontroller Firmware:   
              Module not detected
   kickstart: version 7.1(4)N1(1)
   system:    version 7.1(4)N1(1)
@@ -8336,7 +8331,7 @@ Last reset at 958444 usecs after  Wed Nov  1 21:20:35 2017
 
   Reason: Disruptive upgrade
   System version: 7.0(7)N1(1)
-  Service:
+  Service: 
 
 plugin
   Core Plugin, Ethernet Plugin, Fc Plugin
@@ -8358,3 +8353,508 @@ plugin
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
+
+### show bfd neighbors
+
+**Output:**
+```
+OurAddr         NeighAddr       LD/RD                 RH/RS           Holdown(mult)     State       Int                   Vrf                              Type
+172.23.0.18     172.23.0.19     1090540255/1090566886 Up              862(3)            Up          Eth1/10               default                          SH
+172.23.0.22     172.23.0.23     1090540256/1090561429 Up              647(3)            Up          Eth1/12               default                          SH
+172.23.0.20     172.23.0.21     1090540257/1090566968 Up              729(3)            Up          Eth1/11               default                          SH
+
+```
+
+**Help:** execute the command "show bfd neighbors"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show fabricpath route
+
+**Output:**
+```
+FabricPath Unicast Route Table
+'a/b/c' denotes ftag/switch-id/subswitch-id
+'[x/y]' denotes [admin distance/metric]
+ftag 0 is local ftag
+subswitch-id 0 is default subswitch-id
+FabricPath Unicast Route Table for Topology-Default
+0/10/0, number of next-hops: 0
+  via ----, [60/0], 5 day/s 11:35:56, local
+1/20/0, number of next-hops: 1
+  via Po2, [115/40], 5 day/s 11:35:23, isis_l2mp-default
+  via Eth7/2, [115/40], 5 day/s 11:35:28, isis_l2mp-default
+1/35/0, number of next-hops: 0
+  via ----, [60/0], 5 day/s 11:35:26, local
+
+```
+
+**Help:** execute the command "show fabricpath route"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface breakout
+
+**Output:**
+```
+
+--------------------------------------------------------------------------------
+Parent                     Breakout Map    Breakout Ports
+--------------------------------------------------------------------------------
+Eth1/2                     10g-4x          Eth1/2/1-4
+Eth1/3                     10g-4x          Eth1/3/1-4
+Eth1/4                     10g-4x          Eth1/4/1-4
+Eth1/5                     10g-4x          Eth1/5/1-4
+Eth1/6                     10g-4x          Eth1/6/1-4
+Eth1/11                    10g-4x          Eth1/11/1-4
+Eth1/13                    10g-4x          Eth1/13/1-4
+Eth1/14                    10g-4x          Eth1/14/1-4
+Eth1/16                    10g-4x          Eth1/16/1-4
+Eth1/19                    10g-4x          Eth1/19/1-4
+Eth1/22                    10g-4x          Eth1/22/1-4
+
+```
+
+**Help:** execute the command "show interface breakout"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface capabilities
+
+**Output:**
+```
+Ethernet1/1
+  Model:                 N5600-48Q-12Q-FIX
+  Type (SFP capable):    QSFP-40G-SR-BD
+  Speed:                 40000
+  Duplex:                full
+  Trunk encap. type:     802.1Q
+  Channel:               yes
+  Broadcast suppression: no
+  Flowcontrol:           rx-(off/on),tx-(off/on)
+  Rate mode:             none
+  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
+  CoS rewrite:           no
+  ToS rewrite:           no
+  SPAN:                  yes
+  UDLD:                  yes
+  MDIX:                  no
+  Link Debounce:         yes
+  Link Debounce Time:    yes
+  dot1Q-tunnel mode:     yes
+  Pvlan Trunk capable:   yes
+  TDR capable:           no
+  FabricPath capable:    yes
+  Port mode:             Switched
+  FEX Fabric:            yes
+
+Ethernet101/1/23
+  Model:                 N2K-C2348TQ-10G-E
+  Type (Non SFP):        1G/10G
+  Speed:                 100,1000,10000,auto
+  Duplex:                full
+  Trunk encap. type:     802.1Q
+  Channel:               yes
+  Broadcast suppression: no
+  Flowcontrol:           rx-(off/on),tx-(off/on)
+  Rate mode:             none
+  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
+  CoS rewrite:           no
+  ToS rewrite:           no
+  SPAN:                  yes
+  UDLD:                  no
+  MDIX:                  no
+  Link Debounce:         yes
+  Link Debounce Time:    yes
+  dot1Q-tunnel mode:     yes
+  Pvlan Trunk capable:   yes
+  TDR capable:           no
+  FabricPath capable:    no
+  Port mode:             Switched
+  FEX Fabric:            no
+
+
+```
+
+**Help:** execute the command "show interface capabilities"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface status err-disabled
+
+**Output:**
+```
+--------------------------------------------------------------------------------
+Port         Name               Status             Reason
+--------------------------------------------------------------------------------
+Eth1         tenGigE 0/0/2/0 as linkFlapErr        linkFlapErrDisabled
+Eth2         --                 linkFlapErr        linkFlapErrDisabled
+Eth3         --                 err-disabled       Error disabled
+Eth4         SD 180848 OFFER EM linkFlapErr        linkFlapErrDisabled
+
+```
+
+**Help:** execute the command "show interface status err-disabled"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface switchport
+
+**Output:**
+```
+Name: Ethernet1/1
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: access
+  Access Mode VLAN: 3 (Vlan not created)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/2
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 5 (Vlan not created)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/3
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+
+```
+
+**Help:** execute the command "show interface switchport"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip arp detail vrf all
+
+**Output:**
+```
+Flags: * - Adjacencies learnt on non-active FHRP router
+       + - Adjacencies synced via CFSoE
+       # - Adjacencies Throttled for Glean
+       CP - Added via L2RIB, Control plane Adjacencies
+       PS - Added via L2RIB, Peer Sync
+       RO - Re-Originated Peer Sync Entry
+
+IP ARP Table for all contexts
+Total number of entries: 350
+Address         Age       MAC Address     Interface        Physical Interface  Flags    VRF Name
+10.255.0.2      00:09:24  14a2.a070.52a7  Vlan666          port-channel1000             default
+10.255.0.1      00:17:20  14a2.a070.52a0  mgmt0            mgmt0                        management
+172.23.5.8      00:06:48  b8a3.771c.255b  Ethernet1/49     Ethernet1/49                 default
+172.23.5.10     00:06:50  d477.98e9.c6bf  Ethernet1/50     Ethernet1/50                 default
+10.233.6.3      00:14:55  14a2.a070.52a7  Vlan3            port-channel1000             PRIMARY
+10.233.6.5      00:11:24  c8e7.f0fb.d6a7  Vlan3            Ethernet1/8                  PRIMARY
+10.233.6.6      00:14:04  d0d0.fd61.ecc1  Vlan3            Ethernet1/9         +        PRIMARY
+10.233.6.7      00:12:05  44aa.502f.c150  Vlan3            Ethernet1/13                 PRIMARY
+10.233.6.8      00:07:12  8418.88ac.9741  Vlan3            port-channel12               PRIMARY
+10.233.6.9      00:13:41  8418.88aa.c641  Vlan3            port-channel13               PRIMARY
+10.233.6.10     00:05:29  0881.f4ae.4841  Vlan3            port-channel14               PRIMARY
+10.233.6.11     00:10:51  b0a8.6e03.ce81  Vlan3            port-channel11               PRIMARY
+10.233.6.12     00:04:35  2c21.7299.8ac1  Vlan3            Ethernet1/6                  PRIMARY
+10.233.6.13     00:13:25  78fe.3d35.7b41  Vlan3            Ethernet1/21                 PRIMARY
+10.233.6.14     00:09:43  8071.1fe7.f041  Vlan3            Ethernet1/29                 PRIMARY
+10.233.6.15     00:06:38  8071.1fe7.ef41  Vlan3            Ethernet1/28                 PRIMARY
+10.233.6.16     00:17:54  3c61.04f9.6bc1  Vlan3            Ethernet1/12                 PRIMARY
+10.233.6.18     00:13:17  2c21.7298.8b41  Vlan3            Ethernet1/10                 PRIMARY
+10.233.6.19     00:11:53  2c21.7299.8e81  Vlan3            Ethernet1/11                 PRIMARY
+10.233.6.20     00:00:01  28c0.da35.dc01  Vlan3            Ethernet1/16                 PRIMARY
+10.233.6.21     00:01:08  c8e7.f0fb.c487  Vlan3            port-channel10               PRIMARY
+10.233.6.30     00:09:24  7819.f79a.82c1  Vlan3            Ethernet1/2                  PRIMARY
+10.233.6.31     00:01:54  2c21.728a.0581  Vlan3            Ethernet1/22                 PRIMARY
+10.233.6.32     00:02:05  78fe.3d35.a101  Vlan3            Ethernet1/1         +        PRIMARY
+10.233.6.33     00:05:25  2c21.7296.b501  Vlan3            Ethernet1/3                  PRIMARY
+10.233.6.34     00:16:36  2c21.7296.8c81  Vlan3            Ethernet1/23                 PRIMARY
+10.233.6.35     00:08:06  2c21.7293.a401  Vlan3            Ethernet1/24                 PRIMARY
+10.233.6.36     00:14:56  2c21.7296.9081  Vlan3            Ethernet1/4                  PRIMARY
+10.233.6.37     00:12:56  7819.f79b.8801  Vlan3            Ethernet1/25                 PRIMARY
+10.233.6.38     00:14:49  2c21.7296.a401  Vlan3            Ethernet1/26                 PRIMARY
+10.233.6.39     00:17:42  2c21.3111.0701  Vlan3            port-channel18               PRIMARY
+10.233.6.48     00:08:50  7c25.8629.ab83  Vlan3            Ethernet1/15                 PRIMARY
+10.233.6.50     00:13:21  f8c0.01c9.e501  Vlan3            port-channel15               PRIMARY
+10.233.6.60     00:05:02  8418.88ac.9ec1  Vlan3            port-channel16      +        PRIMARY
+10.233.6.70     00:12:04  8418.88ac.a0c1  Vlan3            port-channel17               PRIMARY
+10.233.6.193    00:03:29  2829.862b.0dfc  Vlan3            port-channel13               PRIMARY
+10.233.6.194    00:02:38  2829.863f.5708  Vlan3            Ethernet1/2                  PRIMARY
+10.233.6.196    00:02:15  2829.8615.4bd3  Vlan3            Ethernet1/4                  PRIMARY
+10.233.6.197    00:08:54  2829.8617.5b14  Vlan3            Ethernet1/21                 PRIMARY
+10.233.6.1         -      0000.5e00.0101  Vlan9            -
+
+```
+
+**Help:** execute the command "show ip arp detail vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip eigrp neighbors
+
+**Output:**
+```
+IP-EIGRP neighbors for process 65535 VRF default
+H Address Interface Hold Uptime SRTT RTO Q Seq
+(sec) (ms) Cnt Num
+7 10.20.150.2 Po2001 12 03:44:02 20 200 0 10331
+6 10.20.200.2 Po2000 14 03:44:02 13 200 0 158157
+5 10.40.1.1 Eth1/26 13 03:44:14 16 200 0 158164
+4 10.50.2.1 Eth2/5 12 03:44:14 16 200 0 158166
+3 10.50.1.1 Eth2/6 13 03:44:15 16 200 0 158165
+2 10.50.3.1 Eth2/7 11 03:44:15 13 200 0 158167
+1 10.20.5.2 Eth3/11 14 03:44:16 18 200 0 158158
+0 10.20.6.2 Eth3/12 11 03:44:17 14 200 0 158163
+
+```
+
+**Help:** execute the command "show ip eigrp neighbors"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show nve vni interface nve 1 detail
+
+**Output:**
+```
+VNI: 100036
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.1
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [36]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 36
+  SVI State           : n/a
+VNI: 31473
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.19
+  VNI State           : Down
+  Mode                : control-plane
+  VNI Type            : L2 [UC]
+  VNI Flags           : SA
+  Provision State     : vni-init
+  Vlan-BD             : 0
+  SVI State           : n/a
+VNI: 10498
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.26
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [498]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 498
+  SVI State           : n/a
+VNI: 10446
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.153
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [446]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 446
+  SVI State           : n/a
+VNI: 10404
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.23
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [404]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 404
+  SVI State           : n/a
+VNI: 10400
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.23
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [400]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 400
+  SVI State           : n/a
+VNI: 10374
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.23
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [374]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 374
+  SVI State           : n/a
+VNI: 10370
+  NVE-Interface       : nve1
+  Mcast-Addr          : UnicastBGP
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [370]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 370
+  SVI State           : n/a
+VNI: 10230
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.1
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [230]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 230
+  SVI State           : n/a
+VNI: 10222
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.2.222
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [222]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 222
+  SVI State           : n/a
+VNI: 10191
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.21
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [191]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 191
+  SVI State           : n/a
+VNI: 10077
+  NVE-Interface       : nve1
+  Mcast-Addr          : n/a
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L3 [TENANT77]
+  VNI Flags           :
+  Provision State     : vni-add-complete
+  Vlan-BD             : 77
+  SVI State           : UP [vrf-id: 3]
+VNI: 10060
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.5
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [60]
+  VNI Flags           : SA
+  Provision State     : vni-add-complete
+  Vlan-BD             : 60
+  SVI State           : n/a
+VNI: 10026
+  NVE-Interface       : nve1
+  Mcast-Addr          : n/a
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L3 [blobber]
+  VNI Flags           :
+  Provision State     : vni-add-complete
+  Vlan-BD             : 2
+  SVI State           : UP [vrf-id: 4]
+VNI: 603008
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.33
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [3008]
+  VNI Flags           : SA
+  DCI Mcast-Addr      : Unconfigured
+  Provision State     : vni-add-complete
+  Vlan-BD             : 3008
+  SVI State           : DOWN [vrf-id: 0] [L3VNI: 0]
+VNI: 603007
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.34
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [3007]
+  VNI Flags           : SA
+  DCI Mcast-Addr      : Unconfigured
+  Provision State     : vni-add-complete
+  Vlan-BD             : 3007
+  SVI State           : DOWN [vrf-id: 0] [L3VNI: 0]
+VNI: 603006
+  NVE-Interface       : nve1
+  Mcast-Addr          : 239.1.1.35
+  VNI State           : Up
+  Mode                : control-plane
+  VNI Type            : L2 [3006]
+  VNI Flags           : SA
+  DCI Mcast-Addr      : Unconfigured
+  Provision State     : vni-add-complete
+  Vlan-BD             : 3006
+  SVI State           : DOWN [vrf-id: 0] [L3VNI: 0]
+
+
+```
+
+**Help:** execute the command "show nve vni interface nve 1 detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+

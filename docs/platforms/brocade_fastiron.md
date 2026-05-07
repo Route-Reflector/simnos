@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -17,6 +15,16 @@
 
 **Prompt:**
 - brocade_fastiron>
+
+### skip-page-display
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
 
 ### configure terminal
 
@@ -51,7 +59,7 @@ Monitored Port 16
 
 **Output:**
 ```
-GigabitEthernet1 is up, line protocol is up
+GigabitEthernet1 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2000 (bia 001b.ed6b.2000)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDI
@@ -74,9 +82,9 @@ GigabitEthernet1 is up, line protocol is up
   0 runts, 0 giants
   1011812222301 packets output, 722190810166867 bytes, 0 underruns
   Transmitted 8889886882 broadcasts, 3251477712 multicasts, 999670857707 unicasts
-  0 output errors, 0 collisions
+  0 output errors, 0 collisions                                   
   Relay Agent Information option: Disabled
-GigabitEthernet2 is up, line protocol is up
+GigabitEthernet2 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2001 (bia 001b.ed6b.2001)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -101,7 +109,7 @@ GigabitEthernet2 is up, line protocol is up
   Transmitted 18098146569 broadcasts, 6209711839 multicasts, 5789591651014 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet3 is disabled, line protocol is down
+GigabitEthernet3 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.2002 (bia 001b.ed6b.2002)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -120,13 +128,13 @@ GigabitEthernet3 is disabled, line protocol is down
   300 second output rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
   33390937805 packets input, 24077492513601 bytes, 0 no buffer
   Received 17757401 broadcasts, 159518105 multicasts, 33213662299 unicasts
-  0 input errors, 0 CRC, 0 frame, 0 ignored
+  0 input errors, 0 CRC, 0 frame, 0 ignored                       
   0 runts, 0 giants
   397596845452 packets output, 196556265907165 bytes, 0 underruns
   Transmitted 88287163 broadcasts, 1149908125 multicasts, 396358650164 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet4 is disabled, line protocol is down
+GigabitEthernet4 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.2003 (bia 001b.ed6b.2003)
   Configured speed 1Gbit, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -143,7 +151,7 @@ GigabitEthernet4 is disabled, line protocol is down
   IP MTU 10240 bytes
   30 second input rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
   30 second output rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
-  17293294617 packets input, 6427258200678 bytes, 0 no buffer
+  17293294617 packets input, 6427258200678 bytes, 0 no buffer     
   Received 559796 broadcasts, 44454276 multicasts, 17248280545 unicasts
   6 input errors, 0 CRC, 0 frame, 0 ignored
   0 runts, 0 giants
@@ -151,7 +159,7 @@ GigabitEthernet4 is disabled, line protocol is down
   Transmitted 38137232 broadcasts, 276213 multicasts, 16295635268 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet5 is disabled, line protocol is down
+GigabitEthernet5 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.2004 (bia 001b.ed6b.2004)
   Configured speed 100Mbit, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -176,7 +184,7 @@ GigabitEthernet5 is disabled, line protocol is down
   Transmitted 4375536 broadcasts, 363833 multicasts, 374176279 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet6 is disabled, line protocol is down
+GigabitEthernet6 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.2005 (bia 001b.ed6b.2005)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -189,7 +197,7 @@ GigabitEthernet6 is disabled, line protocol is down
   Not member of any active trunks
   Not member of any configured trunks
   No port name
-  IPG MII 96 bits-time, IPG GMII 96 bits-time
+  IPG MII 96 bits-time, IPG GMII 96 bits-time                     
   IP MTU 10240 bytes
   30 second input rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
   30 second output rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
@@ -201,7 +209,7 @@ GigabitEthernet6 is disabled, line protocol is down
   Transmitted 38604580 broadcasts, 33427120 multicasts, 118048961128 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet7 is up, line protocol is up
+GigabitEthernet7 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2006 (bia 001b.ed6b.2006)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -212,7 +220,7 @@ GigabitEthernet7 is up, line protocol is up
   Flow Control is config enabled, oper enabled, negotiation disabled
   Mirror disabled, Monitor disabled
   Not member of any active trunks
-  Not member of any configured trunks
+  Not member of any configured trunks                             
   Port name is ms1a (4B-7)
   IPG MII 96 bits-time, IPG GMII 96 bits-time
   IP MTU 10240 bytes
@@ -226,7 +234,7 @@ GigabitEthernet7 is up, line protocol is up
   Transmitted 5149342419 broadcasts, 432774605 multicasts, 190831731408 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet8 is disabled, line protocol is down
+GigabitEthernet8 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.2007 (bia 001b.ed6b.2007)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -235,7 +243,7 @@ GigabitEthernet8 is disabled, line protocol is down
   Link Error Dampening is Disabled
   STP configured to ON, priority is level0
   Flow Control is config enabled, oper disabled, negotiation disabled
-  Mirror disabled, Monitor disabled
+  Mirror disabled, Monitor disabled                               
   Not member of any active trunks
   Not member of any configured trunks
   No port name
@@ -251,14 +259,14 @@ GigabitEthernet8 is disabled, line protocol is down
   Transmitted 811305665 broadcasts, 359636667 multicasts, 31855790260 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet9 is up, line protocol is up
+GigabitEthernet9 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2008 (bia 001b.ed6b.2008)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
   Member of L2 VLAN ID 450, port is untagged, port state is FORWARDING
   BPDU guard is Disabled, ROOT protect is Disabled
   Link Error Dampening is Disabled
-  STP configured to ON, priority is level0
+  STP configured to ON, priority is level0                        
   Flow Control is config enabled, oper enabled, negotiation disabled
   Mirror disabled, Monitor disabled
   Not member of any active trunks
@@ -276,12 +284,12 @@ GigabitEthernet9 is up, line protocol is up
   Transmitted 5967219873 broadcasts, 704148686 multicasts, 28060975873 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet10 is up, line protocol is up
+GigabitEthernet10 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2009 (bia 001b.ed6b.2009)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDI
   Member of L2 VLAN ID 152, port is untagged, port state is FORWARDING
-  BPDU guard is Disabled, ROOT protect is Disabled
+  BPDU guard is Disabled, ROOT protect is Disabled                
   Link Error Dampening is Disabled
   STP configured to ON, priority is level0
   Flow Control is config enabled, oper enabled, negotiation disabled
@@ -301,10 +309,10 @@ GigabitEthernet10 is up, line protocol is up
   Transmitted 50386350 broadcasts, 50385910 multicasts, 437515431653 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet11 is up, line protocol is up
+GigabitEthernet11 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.200a (bia 001b.ed6b.200a)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
-  Configured mdi mode AUTO, actual MDIX
+  Configured mdi mode AUTO, actual MDIX                           
   Member of 69 L2 VLANs, port is dual mode in Vlan 1, port state is FORWARDING
   BPDU guard is Disabled, ROOT protect is Disabled
   Link Error Dampening is Disabled
@@ -326,7 +334,7 @@ GigabitEthernet11 is up, line protocol is up
   Transmitted 5852894414 broadcasts, 5681533710 multicasts, 6078259182384 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet12 is disabled, line protocol is down
+GigabitEthernet12 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.200b (bia 001b.ed6b.200b)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -350,8 +358,8 @@ GigabitEthernet12 is disabled, line protocol is down
   44453437300 packets output, 10271900455982 bytes, 0 underruns
   Transmitted 18130416 broadcasts, 5920878 multicasts, 44429386006 unicasts
   0 output errors, 0 collisions
-  Relay Agent Information option: Disabled
-GigabitEthernet13 is disabled, line protocol is down
+  Relay Agent Information option: Disabled                        
+GigabitEthernet13 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.200c (bia 001b.ed6b.200c)
   Configured speed 1Gbit, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -376,7 +384,7 @@ GigabitEthernet13 is disabled, line protocol is down
   Transmitted 148790455 broadcasts, 1158554078 multicasts, 306121067859 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet14 is down, line protocol is down
+GigabitEthernet14 is down, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.200d (bia 001b.ed6b.200d)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -396,12 +404,12 @@ GigabitEthernet14 is down, line protocol is down
   4007809813 packets input, 2598671668225 bytes, 0 no buffer
   Received 732505 broadcasts, 796397 multicasts, 4006280911 unicasts
   61 input errors, 30 CRC, 0 frame, 0 ignored
-  0 runts, 0 giants
+  0 runts, 0 giants                                               
   4281434344 packets output, 3069521551725 bytes, 0 underruns
   Transmitted 35488631 broadcasts, 7395902 multicasts, 4238549811 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet15 is disabled, line protocol is down
+GigabitEthernet15 is disabled, line protocol is down 
   Hardware is GigabitEthernet, address is 001b.ed6b.200e (bia 001b.ed6b.200e)
   Configured speed auto, actual unknown, configured duplex fdx, actual unknown
   Configured mdi mode AUTO, actual unknown
@@ -426,7 +434,7 @@ GigabitEthernet15 is disabled, line protocol is down
   Transmitted 1195449599 broadcasts, 636407794 multicasts, 65595008846 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet16 is up, line protocol is up
+GigabitEthernet16 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.200f (bia 001b.ed6b.200f)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDI
@@ -451,7 +459,7 @@ GigabitEthernet16 is up, line protocol is up
   Transmitted 183579591 broadcasts, 46484853 multicasts, 523513293098 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
- GigabitEthernet17 is up, line protocol is up
+ GigabitEthernet17 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2010 (bia 001b.ed6b.2010)
   Configured speed 100Mbit, actual 100Mbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDI
@@ -465,7 +473,7 @@ GigabitEthernet16 is up, line protocol is up
   Not member of any configured trunks
   Port name is Memory Book INET
   IPG MII 96 bits-time, IPG GMII 96 bits-time
-  IP MTU 10240 bytes
+  IP MTU 10240 bytes                                              
   30 second input rate: 163104 bits/sec, 287 packets/sec, 0.20% utilization
   30 second output rate: 6878392 bits/sec, 590 packets/sec, 6.96% utilization
   67457723991 packets input, 65859234276036 bytes, 0 no buffer
@@ -476,7 +484,7 @@ GigabitEthernet16 is up, line protocol is up
   Transmitted 20614211 broadcasts, 1422508 multicasts, 51818484249 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet18 is up, line protocol is up
+GigabitEthernet18 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2011 (bia 001b.ed6b.2011)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -488,7 +496,7 @@ GigabitEthernet18 is up, line protocol is up
   Mirror enabled, Monitor disabled
   Not member of any active trunks
   Not member of any configured trunks
-  Port name is voipmon1-p1p2
+  Port name is voipmon1-p1p2                                      
   IPG MII 96 bits-time, IPG GMII 96 bits-time
   IP MTU 10240 bytes
   30 second input rate: 0 bits/sec, 0 packets/sec, 0.00% utilization
@@ -501,7 +509,7 @@ GigabitEthernet18 is up, line protocol is up
   Transmitted 1026021322 broadcasts, 434328968 multicasts, 1379850840900 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet19 is up, line protocol is up
+GigabitEthernet19 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2012 (bia 001b.ed6b.2012)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -511,7 +519,7 @@ GigabitEthernet19 is up, line protocol is up
   STP configured to ON, priority is level0
   Flow Control is config enabled, oper enabled, negotiation disabled
   Mirror disabled, Monitor disabled
-  Not member of any active trunks
+  Not member of any active trunks                                 
   Not member of any configured trunks
   Port name is vmail1.voip
   IPG MII 96 bits-time, IPG GMII 96 bits-time
@@ -526,7 +534,7 @@ GigabitEthernet19 is up, line protocol is up
   Transmitted 42232043 broadcasts, 8108467 multicasts, 9758848065 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet20 is up, line protocol is up
+GigabitEthernet20 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2013 (bia 001b.ed6b.2013)
   Configured speed 100Mbit, actual 100Mbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -551,13 +559,13 @@ GigabitEthernet20 is up, line protocol is up
   Transmitted 58935076 broadcasts, 36437328 multicasts, 31730558235 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet21 is up, line protocol is up
+GigabitEthernet21 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2014 (bia 001b.ed6b.2014)
   Configured speed 100Mbit, actual 100Mbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
   Member of L2 VLAN ID 149, port is untagged, port state is FORWARDING
   BPDU guard is Disabled, ROOT protect is Disabled
-  Link Error Dampening is Disabled
+  Link Error Dampening is Disabled                                
   STP configured to ON, priority is level0
   Flow Control is config enabled, oper enabled, negotiation disabled
   Mirror disabled, Monitor disabled
@@ -576,11 +584,11 @@ GigabitEthernet21 is up, line protocol is up
   Transmitted 241311821 broadcasts, 47443808 multicasts, 19383893109 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
- GigabitEthernet22 is up, line protocol is up
+ GigabitEthernet22 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2015 (bia 001b.ed6b.2015)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDI
-  Member of 1 L2 VLANs, port is tagged, port state is FORWARDING
+  Member of 1 L2 VLANs, port is tagged, port state is FORWARDING  
   BPDU guard is Disabled, ROOT protect is Disabled
   Link Error Dampening is Disabled
   STP configured to ON, priority is level0
@@ -601,7 +609,7 @@ GigabitEthernet21 is up, line protocol is up
   Transmitted 5149570277 broadcasts, 432776444 multicasts, 112853519400 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet23 is up, line protocol is up
+GigabitEthernet23 is up, line protocol is up 
   Hardware is GigabitEthernet, address is 001b.ed6b.2016 (bia 001b.ed6b.2016)
   Configured speed auto, actual 1Gbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -626,7 +634,7 @@ GigabitEthernet23 is up, line protocol is up
   Transmitted 369728855 broadcasts, 1376474576 multicasts, 37702557600 unicasts
   0 output errors, 0 collisions
   Relay Agent Information option: Disabled
-GigabitEthernet24 is up, line protocol is up
+GigabitEthernet24 is up, line protocol is up                      
   Hardware is GigabitEthernet, address is 001b.ed6b.2017 (bia 001b.ed6b.2017)
   Configured speed auto, actual 100Mbit, configured duplex fdx, actual fdx
   Configured mdi mode AUTO, actual MDIX
@@ -649,7 +657,7 @@ GigabitEthernet24 is up, line protocol is up
   0 runts, 0 giants
   9148279772 packets output, 3489842845205 bytes, 0 underruns
   Transmitted 5954167784 broadcasts, 678793901 multicasts, 2515318087 unicasts
-  0 output errors, 0 collisions
+  0 output errors, 0 collisions                                   
   Relay Agent Information option: Disabled
 
 ```
@@ -688,7 +696,7 @@ Local port: 1/1/2
       Advertised capabilities: fdxSPause, fdxBPause
       Operational MAU type   : 1000BaseT-FD
     + Link aggregation: aggregated (aggregated port ifIndex: 257)
-    + Maximum frame size: 10200 octets
+    + Maximum frame size: 10200 octets                            
     + Port VLAN ID: none
     + Management address (IPv4): 10.255.13.22
 
@@ -711,7 +719,7 @@ Local port: 1/3/1
 Local port: 1/3/2
   Neighbor: 609c.9f44.bc14, TTL 113 seconds
     + Chassis ID (MAC address): cc4e.24c5.57fc
-    + Port ID (MAC address): 609c.9f44.bc14
+    + Port ID (MAC address): 609c.9f44.bc14                       
     + Time to live: 120 seconds
     + System name         : "switch2.clmamoxi"
     + Port description    : "10GigabitEthernet2/3/2"
@@ -734,13 +742,13 @@ Local port: 2/1/1
     + System capabilities : bridge
       Enabled capabilities: bridge
     + 802.3 MAC/PHY          : auto-negotiation enabled
-      Advertised capabilities:
+      Advertised capabilities:                                    
       Operational MAU type   : 1000BaseT-FD
     + Link aggregation: aggregated (aggregated port ifIndex: 1)
     + Maximum frame size: 10200 octets
     + Port VLAN ID: none
     + Management address (IPv4): 10.255.13.2
-
+ 
 Local port: 2/3/1
   Neighbor: cc4e.24c7.af6f, TTL 112 seconds
     + Chassis ID (MAC address): cc4e.24c7.ccd4
@@ -757,7 +765,7 @@ Local port: 2/3/1
     + Port VLAN ID: none
     + Management address (IPv4): 10.255.13.2
 
-Local port: 2/3/2
+Local port: 2/3/2                                                 
   Neighbor: cc4e.24c7.af71, TTL 112 seconds
     + Chassis ID (MAC address): cc4e.24c7.ccd4
     + Port ID (MAC address): cc4e.24c7.af71
@@ -810,52 +818,52 @@ vlan 1 name DEFAULT-VLAN by port
  no spanning-tree
 !
 vlan 10 name CLMAMO-RING-1 by port
- tagged ethe 2 ethe 11
+ tagged ethe 2 ethe 11 
  no spanning-tree
  metro-ring 10
   ring-interfaces  ethernet 11  ethernet 2
   enable
 !
 vlan 13 name SocketPublicWifi by port
- tagged ethe 1 to 2
+ tagged ethe 1 to 2 
  no spanning-tree
 !
 vlan 14 name CLMAMOFW-Ring by port
- tagged ethe 1 to 2
+ tagged ethe 1 to 2 
  no spanning-tree
  metro-ring 14
   ring-interfaces  ethernet 1  ethernet 2
   enable
 !
 vlan 100 by port
- tagged ethe 1 to 2
- no spanning-tree
+ tagged ethe 1 to 2 
+ no spanning-tree                                                 
 !
  vlan 146 name LabSBC-External by port
- tagged ethe 2 ethe 11
+ tagged ethe 2 ethe 11 
  no spanning-tree
  !
 vlan 149 name SBC-External by port
- tagged ethe 2 ethe 11
- untagged ethe 16 ethe 21
+ tagged ethe 2 ethe 11 
+ untagged ethe 16 ethe 21 
  no spanning-tree
 !
 vlan 151 name LabSBC-Internal by port
- tagged ethe 2 ethe 11
+ tagged ethe 2 ethe 11 
  no spanning-tree
 !
 vlan 152 name SBC-Inside by port
- tagged ethe 2 ethe 11
- untagged ethe 10 ethe 20
+ tagged ethe 2 ethe 11 
+ untagged ethe 10 ethe 20 
  no spanning-tree
 !
 vlan 154 name SocketVoIP-Svr by port
- tagged ethe 2 ethe 11 ethe 19
- untagged ethe 14
- no spanning-tree
+ tagged ethe 2 ethe 11 ethe 19 
+ untagged ethe 14 
+ no spanning-tree                                                 
 !
  vlan 175 name CLMAMO10G-to-FW by port
- tagged ethe 1 to 2
+ tagged ethe 1 to 2 
  no spanning-tree
  metro-ring 176
   ring-interfaces  ethernet 1  ethernet 2
@@ -908,13 +916,13 @@ Hw Trunk ID: 1
 Ports_Configured: 2
 Primary Port Monitored: Jointly
 
-Ports         5       23
-Port Names    none    none
-Port_Status   enable  enable
-Monitor       off     off
-Rx Mirr Port  N/A     N/A
-Tx Mirr Port  N/A     N/A
- Monitor Dir   N/A     N/A
+Ports         5       23      
+Port Names    none    none    
+Port_Status   enable  enable  
+Monitor       off     off     
+Rx Mirr Port  N/A     N/A     
+Tx Mirr Port  N/A     N/A     
+ Monitor Dir   N/A     N/A     
 
 Operational trunks:
 
@@ -923,13 +931,13 @@ Hw Trunk ID: 1
 Duplex: Full
 Speed: 1G
 Tag: Yes
-Priority: level0
+Priority: level0                                                  
 Active Ports: 2
 
-Ports         5       23
-Link_Status   active  active
-port_state    Forward Forward
-LACP_Status   ready   ready
+Ports         5       23      
+Link_Status   active  active  
+port_state    Forward Forward 
+LACP_Status   ready   ready   
 
 ```
 
@@ -945,22 +953,22 @@ LACP_Status   ready   ready
 **Output:**
 ```
 
-Port    Link    State   Dupl Speed Trunk Tag Pvid Pri MAC            Name
+Port    Link    State   Dupl Speed Trunk Tag Pvid Pri MAC            Name      
 1       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2000  to MLX1-
 2       Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.2001  switch1b
-3       Disable None    None None  None  No  1    0   001b.ed6b.2002
+3       Disable None    None None  None  No  1    0   001b.ed6b.2002          
 4       Disable None    None None  None  No  2033 0   001b.ed6b.2003  Boyce&By
-5       Disable None    None None  None  No  1    0   001b.ed6b.2004
-6       Disable None    None None  None  No  1    0   001b.ed6b.2005
+5       Disable None    None None  None  No  1    0   001b.ed6b.2004          
+6       Disable None    None None  None  No  1    0   001b.ed6b.2005          
 7       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2006  ms1a (4B
-8       Disable None    None None  None  No  1    0   001b.ed6b.2007
+8       Disable None    None None  None  No  1    0   001b.ed6b.2007          
 9       Up      Forward Full 1G    None  No  450  0   001b.ed6b.2008  warehous
 10      Up      Forward Full 1G    None  No  152  0   001b.ed6b.2009  sbc1.voi
 11      Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.200a  OPTI1-MS
-12      Disable None    None None  None  No  1    0   001b.ed6b.200b
-13      Disable None    None None  None  No  1    0   001b.ed6b.200c
+12      Disable None    None None  None  No  1    0   001b.ed6b.200b          
+13      Disable None    None None  None  No  1    0   001b.ed6b.200c          
 14      Down    None    None None  None  No  154  0   001b.ed6b.200d  SocketVo
-15      Disable None    None None  None  No  1    0   001b.ed6b.200e
+15      Disable None    None None  None  No  1    0   001b.ed6b.200e          
 16      Up      Forward Full 1G    None  No  149  0   001b.ed6b.200f  sbc1.voi
 17      Up      Forward Full 100M  None  No  2277 0   001b.ed6b.2010  Memory B
 18      Up      Forward Full 1G    None  No  1    0   001b.ed6b.2011  voipmon1
@@ -994,20 +1002,20 @@ Topology Group 10
  member-vlan 2277 2325 to 2326 2340 2342 2349 to 2351 2360 2367 2414 to 2415
  member-vlan 2442 2895 3008 3840 4001
 
- Common control ports           L2 protocol
- ethernet 1/1/24                MRP
- ethernet 2/1/1                 MRP
- Per vlan free ports
- ethernet 1/1/3                  Vlan 10
- ethernet 1/1/4                  Vlan 10
- ethernet 1/1/5                  Vlan 10
- ethernet 1/1/7                  Vlan 10
- ethernet 1/1/8                  Vlan 10
- ethernet 1/1/2                  Vlan 400
- ethernet 2/1/2                  Vlan 400
- ethernet 1/1/2                  Vlan 2342
- ethernet 2/1/2                  Vlan 2342
-
+ Common control ports           L2 protocol         
+ ethernet 1/1/24                MRP                 
+ ethernet 2/1/1                 MRP                 
+ Per vlan free ports                                
+ ethernet 1/1/3                  Vlan 10            
+ ethernet 1/1/4                  Vlan 10            
+ ethernet 1/1/5                  Vlan 10            
+ ethernet 1/1/7                  Vlan 10            
+ ethernet 1/1/8                  Vlan 10            
+ ethernet 1/1/2                  Vlan 400           
+ ethernet 2/1/2                  Vlan 400           
+ ethernet 1/1/2                  Vlan 2342          
+ ethernet 2/1/2                  Vlan 2342          
+                                                                  
 Topology Group 13
 =================
  master-vlan 513
@@ -1025,81 +1033,81 @@ Topology Group 13
  member-vlan 2453 to 2456 2460 2466 to 2470 2472 2475 2483 2571 2575 to 2576
  member-vlan 2718 2766 3004 3006 to 3007
 
- Common control ports           L2 protocol
- ethernet 1/3/1                 MRP
- ethernet 1/3/2                 MRP
- ethernet 2/3/1                 MRP
- ethernet 2/3/2                 MRP
- Per vlan free ports
- ethernet 1/1/2                  Vlan 330
- ethernet 1/1/6                  Vlan 330
- ethernet 2/1/2                  Vlan 330
- ethernet 1/1/2                  Vlan 331
- ethernet 2/1/2                  Vlan 331
- ethernet 1/1/24                 Vlan 360
- ethernet 2/1/1                  Vlan 360
- ethernet 1/1/2                  Vlan 2006
- ethernet 2/1/2                  Vlan 2006
- ethernet 1/1/2                  Vlan 2058
- ethernet 2/1/2                  Vlan 2058
- ethernet 2/1/1                  Vlan 2063
- ethernet 1/1/2                  Vlan 2282
- ethernet 2/1/2                  Vlan 2282
- ethernet 1/1/2                  Vlan 2352
- ethernet 2/1/2                  Vlan 2352
- ethernet 1/1/24                 Vlan 2403
- ethernet 2/1/1                  Vlan 2403
+ Common control ports           L2 protocol         
+ ethernet 1/3/1                 MRP                 
+ ethernet 1/3/2                 MRP                 
+ ethernet 2/3/1                 MRP                 
+ ethernet 2/3/2                 MRP                 
+ Per vlan free ports                                              
+ ethernet 1/1/2                  Vlan 330           
+ ethernet 1/1/6                  Vlan 330           
+ ethernet 2/1/2                  Vlan 330           
+ ethernet 1/1/2                  Vlan 331           
+ ethernet 2/1/2                  Vlan 331           
+ ethernet 1/1/24                 Vlan 360           
+ ethernet 2/1/1                  Vlan 360           
+ ethernet 1/1/2                  Vlan 2006          
+ ethernet 2/1/2                  Vlan 2006          
+ ethernet 1/1/2                  Vlan 2058          
+ ethernet 2/1/2                  Vlan 2058          
+ ethernet 2/1/1                  Vlan 2063          
+ ethernet 1/1/2                  Vlan 2282          
+ ethernet 2/1/2                  Vlan 2282          
+ ethernet 1/1/2                  Vlan 2352          
+ ethernet 2/1/2                  Vlan 2352          
+ ethernet 1/1/24                 Vlan 2403          
+ ethernet 2/1/1                  Vlan 2403          
 
 Topology Group 60
 =================
  master-vlan 60
- member-vlan 2371 2481
+ member-vlan 2371 2481                                            
 
- Common control ports           L2 protocol
- ethernet 1/3/1                 MRP
- ethernet 1/3/2                 MRP
- ethernet 2/3/1                 MRP
- ethernet 2/3/2                 MRP
- Per vlan free ports
+ Common control ports           L2 protocol         
+ ethernet 1/3/1                 MRP                 
+ ethernet 1/3/2                 MRP                 
+ ethernet 2/3/1                 MRP                 
+ ethernet 2/3/2                 MRP                 
+ Per vlan free ports                                
 
 Topology Group 170
 =================
  master-vlan 170
  member-vlan 144 to 145 220 454 2040 2191 2422 2459
 
- Common control ports           L2 protocol
- ethernet 1/3/1                 MRP
- ethernet 1/3/2                 MRP
- ethernet 2/3/1                 MRP
- ethernet 2/3/2                 MRP
- Per vlan free ports
+ Common control ports           L2 protocol         
+ ethernet 1/3/1                 MRP                 
+ ethernet 1/3/2                 MRP                 
+ ethernet 2/3/1                 MRP                 
+ ethernet 2/3/2                 MRP                 
+ Per vlan free ports                                
 
 Topology Group 175
 =================
- master-vlan 175
+ master-vlan 175                                                  
  member-vlan 100 450 850 2206 2752 to 2753
 
- Common control ports           L2 protocol
- ethernet 1/3/1                 MRP
- ethernet 1/3/2                 MRP
- ethernet 2/3/1                 MRP
- ethernet 2/3/2                 MRP
- Per vlan free ports
- ethernet 1/1/2                  Vlan 850
- ethernet 2/1/1                  Vlan 850
- ethernet 2/1/2                  Vlan 850
+ Common control ports           L2 protocol         
+ ethernet 1/3/1                 MRP                 
+ ethernet 1/3/2                 MRP                 
+ ethernet 2/3/1                 MRP                 
+ ethernet 2/3/2                 MRP                 
+ Per vlan free ports                                
+ ethernet 1/1/2                  Vlan 850           
+ ethernet 2/1/1                  Vlan 850           
+ ethernet 2/1/2                  Vlan 850           
 
 Topology Group 215
 =================
  master-vlan 215
  member-vlan none
 
- Common control ports           L2 protocol
- ethernet 1/3/1                 MRP
- ethernet 2/3/1                 MRP
- Per vlan free ports
- ethernet 1/3/2                  Vlan 215
- ethernet 2/3/2                  Vlan 215
+ Common control ports           L2 protocol         
+ ethernet 1/3/1                 MRP                 
+ ethernet 2/3/1                 MRP                 
+ Per vlan free ports                                
+ ethernet 1/3/2                  Vlan 215           
+ ethernet 2/3/2                  Vlan 215     
 
 ```
 
@@ -1118,72 +1126,72 @@ Topology Group 215
 STP instance owned by VLAN 1
 
 Global STP (IEEE 802.1D) Parameters:
-
-VLAN Root             Root Root   Prio Max He- Ho- Fwd Last    Chg Bridge
- ID   ID              Cost Port   rity Age llo ld  dly Chang   cnt Address
-                                  Hex  sec sec sec sec sec
+ 
+VLAN Root             Root Root   Prio Max He- Ho- Fwd Last    Chg Bridge      
+ ID   ID              Cost Port   rity Age llo ld  dly Chang   cnt Address     
+                                  Hex  sec sec sec sec sec                     
    1 8000cc4e2415015e 0    Root   8000 20  2   1   15  265591169   cc4e2415015e
 
 Port STP Parameters:
 
-Port   Prio Path  State       Fwd    Design  Designated       Designated
-Num    rity Cost              Trans  Cost    Root             Bridge
-       Hex
-1/1/1  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-1/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/1/24 80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000
-2/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000
+Port   Prio Path  State       Fwd    Design  Designated       Designated       
+Num    rity Cost              Trans  Cost    Root             Bridge           
+       Hex                                                                     
+1/1/1  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/24 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
 
 Spanning-tree is not configured on port-vlan 385
 
 Spanning-tree is not configured on port-vlan 10
-
+                                                                  
 Spanning-tree is not configured on port-vlan 94
 
 Spanning-tree is not configured on port-vlan 144
@@ -1239,9 +1247,9 @@ Ring       State      Ring       Master     Topo       Hello      Prefwing
 id                    role       vlan       group      time(ms)   time(ms)
 10         enabled    member     10         10         100        300
 
-Ring interfaces Interface role Forwarding state Active interface interface type
-ethernet 11     primary        forwarding       ethernet 11      regular
-ethernet 2      secondary      forwarding       ethernet 2       regular
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ethernet 11     primary        forwarding       ethernet 11      regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
 
 RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
 0                    1432850207           7970                 154
@@ -1253,9 +1261,9 @@ Ring       State      Ring       Master     Topo       Hello      Prefwing
 id                    role       vlan       group      time(ms)   time(ms)
 14         enabled    member     14         14         100        300
 
-Ring interfaces Interface role Forwarding state Active interface interface type
- ethernet 1      primary        forwarding       ethernet 1       regular
-ethernet 2      secondary      forwarding       ethernet 2       regular
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ ethernet 1      primary        forwarding       ethernet 1       regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
 
 RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
 0                    1441064488           1728                 86
@@ -1267,9 +1275,9 @@ Ring       State      Ring       Master     Topo       Hello      Prefwing
 id                    role       vlan       group      time(ms)   time(ms)
 176        enabled    member     175        175        100        300
 
-Ring interfaces Interface role Forwarding state Active interface interface type
- ethernet 1      primary        forwarding       ethernet 1       regular
-ethernet 2      secondary      forwarding       ethernet 2       regular
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ ethernet 1      primary        forwarding       ethernet 1       regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
 
 RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
 0                    355056325            689                  9
@@ -1404,3 +1412,4 @@ The system started at 15:56:16 Pacific Fri Jul 08 2016
 - brocade_fastiron>
 - brocade_fastiron#
 - brocade_fastiron(config)#
+

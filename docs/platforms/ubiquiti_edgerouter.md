@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -16,22 +14,22 @@
 **Help:** enter enable mode
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
+- ubiquiti_edgerouter~$
 
 ### show interfaces
 
 **Output:**
 ```
 Codes: S - State, L - Link, u - Up, D - Down, A - Admin Down
-Interface    IP Address                        S/L  Description
----------    ----------                        ---  -----------
+Interface    IP Address                        S/L  Description                 
+---------    ----------                        ---  -----------                 
 eth0         -                                 u/u  Port
 eth1         192.168.1.1/24                    u/u  Eth 1
              2a05:c100:1d::1/64
 eth2         -                                 u/D  Port
 eth3         -                                 u/D  Port
 lo           127.0.0.1/8                       u/u
-             ::1/128
+             ::1/128      
 eth4         192.168.1.1/24                    u/u  datas
 eth4.2900    -                                 u/u
 eth5         2a05:c100:1d::1/64                u/u
@@ -42,8 +40,8 @@ switch0.1    192.168.10.251/24                 u/u  vl1-siege-serveurs
 **Help:** execute the command "show interfaces"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show arp
 
@@ -63,8 +61,8 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 **Help:** execute the command "show arp"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show dhcp leases
 
@@ -80,15 +78,15 @@ Warning: leased IP address [2886804252] not in any of the pools
 Warning: leased IP address [2886804305] not in any of the pools
 IP address      Hardware Address   Lease expiration     Pool       Client Name
 ----------      ----------------   ----------------     ----       -----------
-125.125.15.12   00:0a:95:9d:68:16  Sep 18, 2021         5          HOSTNAME
+125.125.15.12   00:0a:95:9d:68:16  Sep 18, 2021         5          HOSTNAME  
 
 ```
 
 **Help:** execute the command "show dhcp leases"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show dhcpv6 server leases
 
@@ -110,8 +108,8 @@ IPv6 Address                            Expiration          State
 **Help:** execute the command "show dhcpv6 server leases"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show ipv6 neighbors
 
@@ -137,8 +135,8 @@ fe80::d093:e5ff:fe8e:8427 lladdr d2:93:e5:8e:84:27 STALE
 **Help:** execute the command "show ipv6 neighbors"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show interfaces ethernet physical
 
@@ -155,8 +153,8 @@ Settings for eth0:
 **Help:** execute the command "show interfaces ethernet physical"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show ipv6 route
 
@@ -184,8 +182,8 @@ C      fe80::/64 via ::, eth1, 01:11:25
 **Help:** execute the command "show ipv6 route"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show nat rules
 
@@ -194,30 +192,30 @@ C      fe80::/64 via ::, eth1, 01:11:25
 Type Codes:  SRC - source, DST - destination, MASQ - masquerade
               X at the front of rule implies rule is excluded
 
-rule   type  intf     translation
-----   ----  ----     -----------
-1      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.100
-    proto-tcp         dport 8080 to 80
+rule   type  intf     translation                                               
+----   ----  ----     -----------                                               
+1      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.100                      
+    proto-tcp         dport 8080 to 80                                              
 
-2      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.231
-    proto-tcp         dport 65001 to 3389
+2      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.231                      
+    proto-tcp         dport 65001 to 3389                                           
 
-3      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.2
-    proto-tcp         dport 6666 to 6666
+3      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.2                        
+    proto-tcp         dport 6666 to 6666                                            
 
-4      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.111
-    proto-tcp_udp     dport 83 to 83
+4      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.111                      
+    proto-tcp_udp     dport 83 to 83                                                
 
-5      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.110
-    proto-tcp_udp     dport 80 to 80
+5      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.110                      
+    proto-tcp_udp     dport 80 to 80                                                
 
-6      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.1
-    proto-tcp_udp     dport 81 to 81
+6      DST   pppoe4   daddr 23.90.233.198 to 192.168.1.1                        
+    proto-tcp_udp     dport 81 to 81                                                
 
-5001   MASQ  pppoe4   saddr 192.168.1.0/24 to 23.90.233.198
-    proto-all         sport ANY
+5001   MASQ  pppoe4   saddr 192.168.1.0/24 to 23.90.233.198                     
+    proto-all         sport ANY                                                     
 
-5002   MASQ  pppoe4   saddr 192.168.42.0/24 to 23.90.233.198
+5002   MASQ  pppoe4   saddr 192.168.42.0/24 to 23.90.233.198                    
     proto-all         sport ANY
 
 ```
@@ -225,8 +223,8 @@ rule   type  intf     translation
 **Help:** execute the command "show nat rules"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show ip route
 
@@ -254,8 +252,8 @@ S    *> 192.100.111.0/24 [1/0] via 192.168.1.25 (recursive is directly connected
 **Help:** execute the command "show ip route"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### show version
 
@@ -274,8 +272,8 @@ Uptime:       16:17:57 up 11 days,  6:15,  1 user,  load average: 0.09, 0.06, 0.
 **Help:** execute the command "show version"
 
 **Prompt:**
-- ubiquiti@ubiquiti:~$
-- ubiquiti@ubiquiti:#
+- ubiquiti_edgerouter~$
+- ubiquiti_edgerouter#
 
 ### terminal length 0
 
@@ -284,7 +282,7 @@ Uptime:       16:17:57 up 11 days,  6:15,  1 user,  load average: 0.09, 0.06, 0.
 **Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
 
 **Prompt:**
-- ubiquiti_edgerouter>
+- ubiquiti_edgerouter~$
 - ubiquiti_edgerouter#
 
 ### terminal width 512
@@ -294,5 +292,6 @@ Uptime:       16:17:57 up 11 days,  6:15,  1 user,  load average: 0.09, 0.06, 0.
 **Help:** Execute the command terminal width 512. This automatically generated. Feel free to change it!
 
 **Prompt:**
-- ubiquiti_edgerouter>
+- ubiquiti_edgerouter~$
 - ubiquiti_edgerouter#
+

@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -341,61 +339,61 @@ Address       Interface             Mode    Neighbor  Hello  DR   DR Address    
 
 **Output:**
 ```
-Flags
--------------------------- ----------------------------- -------------------------
-   a - LACP Active            p - LACP Passive           * - static fallback
-   F - Fallback enabled       f - Fallback configured    ^ - individual fallback
-   U - In Use                 D - Down
-   + - In-Sync                - - Out-of-Sync            i - incompatible with agg
-   P - bundled in Po          s - suspended              G - Aggregable
-   I - Individual             S - ShortTimeout           w - wait for agg
+Flags                                                            
+-------------------------- ----------------------------- ------------------------- 
+   a - LACP Active            p - LACP Passive           * - static fallback       
+   F - Fallback enabled       f - Fallback configured    ^ - individual fallback   
+   U - In Use                 D - Down                                             
+   + - In-Sync                - - Out-of-Sync            i - incompatible with agg 
+   P - bundled in Po          s - suspended              G - Aggregable            
+   I - Individual             S - ShortTimeout           w - wait for agg          
 
 Number of channels in use: 1
 Number of aggregators: 1
 
-   Port-Channel       Protocol     Ports
- ------------------ --------------- --------------------------------
-   Po105(D)           LACP(aF*)    Et5(D)
-   Po106(D)           LACP(aF*)    Et6(D)
-   Po107(D)           LACP(aF*)    Et7(D)
-   Po108(D)           LACP(aF*)    Et8(D)
-   Po109(D)           LACP(aF*)    Et9(D)
-   Po110(D)           LACP(aF*)    Et10(D)
-   Po111(D)           LACP(aF*)    Et11(D)
-   Po112(D)           LACP(aF*)    Et12(D)
-   Po113(D)           LACP(aF*)    Et13(D)
-   Po114(D)           LACP(aF*)    Et14(D)
-   Po115(D)           LACP(aF*)    Et15(D)
-   Po116(D)           LACP(aF*)    Et16(D)
-   Po117(D)           LACP(aF*)    Et17(D)
-   Po118(D)           LACP(aF*)    Et18(D)
-   Po119(D)           LACP(aF*)    Et19(D)
-   Po120(D)           LACP(aF*)    Et20(D)
-   Po121(D)           LACP(aF*)    Et21(D)
-   Po122(D)           LACP(aF*)    Et22(D)
-   Po123(D)           LACP(aF*)    Et23(D)
-   Po124(D)           LACP(aF*)    Et24(D)
-   Po125(D)           LACP(aF*)    Et25(D)
-   Po126(D)           LACP(aF*)    Et26(D)
-   Po127(D)           LACP(aF*)    Et27(D)
-   Po128(D)           LACP(aF*)    Et28(D)
-   Po129(D)           LACP(aF*)    Et29(D)
-   Po130(D)           LACP(aF*)    Et30(D)
-   Po131(D)           LACP(aF*)    Et31(D)
-   Po132(D)           LACP(aF*)    Et32(D)
-   Po133(D)           LACP(aF*)    Et33(D)
-   Po134(D)           LACP(aF*)    Et34(D)
-   Po135(D)           LACP(aF*)    Et35(D)
-   Po136(D)           LACP(aF*)    Et36(D)
-   Po137(D)           LACP(aF*)    Et37(D)
-   Po138(D)           LACP(aF*)    Et38(D)
-   Po139(D)           LACP(aF*)    Et39(D)
-   Po140(D)           LACP(aF*)    Et40(D)
-   Po141(D)           LACP(aF*)    Et41(D)
-   Po142(D)           LACP(aF*)    Et42(D)
-   Po146(D)           LACP(aF*)    Et43(D) Et44(D) Et45(D) Et46(D)
-                                   Et47(D)
-   Po2000(U)          LACP(a)      Et54/1(PG+)
+   Port-Channel       Protocol     Ports                            
+ ------------------ --------------- -------------------------------- 
+   Po105(D)           LACP(aF*)    Et5(D)                           
+   Po106(D)           LACP(aF*)    Et6(D)                           
+   Po107(D)           LACP(aF*)    Et7(D)                           
+   Po108(D)           LACP(aF*)    Et8(D)                           
+   Po109(D)           LACP(aF*)    Et9(D)                           
+   Po110(D)           LACP(aF*)    Et10(D)                          
+   Po111(D)           LACP(aF*)    Et11(D)                          
+   Po112(D)           LACP(aF*)    Et12(D)                          
+   Po113(D)           LACP(aF*)    Et13(D)                          
+   Po114(D)           LACP(aF*)    Et14(D)                          
+   Po115(D)           LACP(aF*)    Et15(D)                          
+   Po116(D)           LACP(aF*)    Et16(D)                          
+   Po117(D)           LACP(aF*)    Et17(D)                          
+   Po118(D)           LACP(aF*)    Et18(D)                          
+   Po119(D)           LACP(aF*)    Et19(D)                          
+   Po120(D)           LACP(aF*)    Et20(D)                          
+   Po121(D)           LACP(aF*)    Et21(D)                          
+   Po122(D)           LACP(aF*)    Et22(D)                          
+   Po123(D)           LACP(aF*)    Et23(D)                          
+   Po124(D)           LACP(aF*)    Et24(D)                          
+   Po125(D)           LACP(aF*)    Et25(D)                          
+   Po126(D)           LACP(aF*)    Et26(D)                          
+   Po127(D)           LACP(aF*)    Et27(D)                          
+   Po128(D)           LACP(aF*)    Et28(D)                          
+   Po129(D)           LACP(aF*)    Et29(D)                          
+   Po130(D)           LACP(aF*)    Et30(D)                          
+   Po131(D)           LACP(aF*)    Et31(D)                          
+   Po132(D)           LACP(aF*)    Et32(D)                          
+   Po133(D)           LACP(aF*)    Et33(D)                          
+   Po134(D)           LACP(aF*)    Et34(D)                          
+   Po135(D)           LACP(aF*)    Et35(D)                          
+   Po136(D)           LACP(aF*)    Et36(D)                          
+   Po137(D)           LACP(aF*)    Et37(D)                          
+   Po138(D)           LACP(aF*)    Et38(D)                          
+   Po139(D)           LACP(aF*)    Et39(D)                          
+   Po140(D)           LACP(aF*)    Et40(D)                          
+   Po141(D)           LACP(aF*)    Et41(D)                          
+   Po142(D)           LACP(aF*)    Et42(D)                          
+   Po146(D)           LACP(aF*)    Et43(D) Et44(D) Et45(D) Et46(D)  
+                                   Et47(D)                          
+   Po2000(U)          LACP(a)      Et54/1(PG+)   
 ```
 
 **Help:** execute the command "show port-channel summary"
@@ -411,15 +409,15 @@ Number of aggregators: 1
 If device is externally calibrated, only calibrated values are printed.
  N/A: not applicable, Tx: transmit, Rx: receive.
 mA: milliamperes, dBm: decibels (milliwatts).
-                               Bias      Optical   Optical
-          Temp       Voltage   Current   Tx Power  Rx Power
-Port      (Celsius)  (Volts)   (mA)      (dBm)     (dBm)     Last Update
+                               Bias      Optical   Optical                
+          Temp       Voltage   Current   Tx Power  Rx Power               
+Port      (Celsius)  (Volts)   (mA)      (dBm)     (dBm)     Last Update  
 -----     ---------  --------  --------  --------  --------  -------------------
 Et3/1/1    27.92      3.23      19.94     N/A      -2.39     0:00:06 ago
 Et3/17/1   35.61      3.21      36.64    1.51      -0.10     0:00:03 ago
 Et3/17/2   35.61      3.21      36.94    -0.20     -0.20     0:00:03 ago
 Et3/17/3   35.61      3.21      37.42    1.65      -0.72     0:00:03 ago
-Et5/29/1   N/A        N/A       N/A       N/A       N/A      N/A
+Et5/29/1   N/A        N/A       N/A       N/A       N/A      N/A       
 
 ```
 
@@ -446,11 +444,11 @@ Interface Ethernet1 detected 1 LLDP neighbors:
   - System Description: "Arista Networks EOS version 4.15.2F running on an Arista Networks vEOS"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: Ethernet
+  - Management Address Subtype: Ethernet 
     Management Address        : 2cc2.6081.eaf9
     Interface Number Subtype  : Unknown (1)
     Interface Number          : 0
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 1
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Capable, Disabled (0x01)
@@ -470,11 +468,11 @@ Interface Ethernet2 detected 1 LLDP neighbors:
   - System Description: "Arista Networks EOS version 4.15.2F running on an Arista Networks vEOS"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: Ethernet
+  - Management Address Subtype: Ethernet 
     Management Address        : 2cc2.6081.eaf9
     Interface Number Subtype  : Unknown (1)
     Interface Number          : 0
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 1
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Capable, Disabled (0x01)
@@ -494,17 +492,17 @@ Interface Ethernet3 detected 1 LLDP neighbors:
   - System Description: "Arista Networks EOS version 4.15.2F running on an Arista Networks vEOS"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: Ethernet
+  - Management Address Subtype: Ethernet 
     Management Address        : 2cc2.6081.eaf9
     Interface Number Subtype  : Unknown (1)
     Interface Number          : 0
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 1
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Capable, Disabled (0x01)
     Port ID                : 0
   - IEEE802.3 Maximum Frame Size: 9236 bytes
-
+ 
 Interface Ethernet4 detected 1 LLDP neighbors:
 
   Neighbor 2cc2.6081.eaf9/"Ethernet4", age 12 seconds
@@ -518,11 +516,11 @@ Interface Ethernet4 detected 1 LLDP neighbors:
   - System Description: "Arista Networks EOS version 4.15.2F running on an Arista Networks vEOS"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: Ethernet
+  - Management Address Subtype: Ethernet 
     Management Address        : 2cc2.6081.eaf9
     Interface Number Subtype  : Unknown (1)
     Interface Number          : 0
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 1
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Capable, Disabled (0x01)
@@ -530,7 +528,7 @@ Interface Ethernet4 detected 1 LLDP neighbors:
   - IEEE802.3 Maximum Frame Size: 9236 bytes
 
 Interface Ethernet5 detected 0 LLDP neighbors:
-
+ 
 Interface Ethernet6 detected 0 LLDP neighbors:
 
 Interface Ethernet7 detected 0 LLDP neighbors:
@@ -549,7 +547,7 @@ Interface Management1 detected 2 LLDP neighbors:
   - System Description: "Juniper Networks, Inc. vmx internet router, kernel JUNOS 15.1F4.15, Build date: 2015-12-23 19:22:55 UTC Copyright (c) 1996-2015 Juniper Networks, Inc."
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: IPv4
+  - Management Address Subtype: IPv4 
     Management Address        : 10.0.0.31
     Interface Number Subtype  : ifIndex (2)
     Interface Number          : 1
@@ -580,11 +578,11 @@ Interface Management1 detected 2 LLDP neighbors:
   - System Description: "Arista Networks EOS version 4.15.2F running on an Arista Networks vEOS"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge, Router
-  - Management Address Subtype: Ethernet
+  - Management Address Subtype: Ethernet 
     Management Address        : 2cc2.6081.eaf9
     Interface Number Subtype  : Unknown (1)
     Interface Number          : 0
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 0
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Not Capable (0x00)
@@ -608,7 +606,7 @@ Interface Ethernet8 detected 3 LLDP neighbors:
       Management Address        : 172.16.2.141
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 999001
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 0
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Not Capable (0x00)
@@ -630,7 +628,7 @@ Interface Ethernet8 detected 3 LLDP neighbors:
       Management Address        : 172.16.2.142
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 999001
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 1
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Disabled (0x01)
@@ -652,7 +650,7 @@ Interface Ethernet8 detected 3 LLDP neighbors:
       Management Address        : 172.16.2.142
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 999001
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 0
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Not Capable (0x00)
@@ -677,7 +675,7 @@ Interface Ethernet9 detected 1 LLDP neighbors:
       Management Address        : 7c0e.cecb.659b
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 83886080
-      OID String                :
+      OID String                : 
     - Unknown organizationally-defined TLV (OUI 00-01-42, subtype 201):
           01
     - Unknown organizationally-defined TLV (OUI 00-01-42, subtype 202):
@@ -728,7 +726,7 @@ Interface Ethernet10 detected 1 LLDP neighbors:
       Management Address        : 7c0e.cecb.659c
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 83886080
-      OID String                :
+      OID String                : 
     - Unknown organizationally-defined TLV (OUI 00-01-42, subtype 201):
           01
     - Unknown organizationally-defined TLV (OUI 00-01-42, subtype 202):
@@ -774,7 +772,7 @@ Interface Ethernet15 detected 0 LLDP neighbors:
 Interface Ethernet16 detected 0 LLDP neighbors:
 
 Interface Ethernet17 detected 0 LLDP neighbors:
-
+ 
 Interface Ethernet18 detected 0 LLDP neighbors:
 
 Interface Ethernet19 detected 0 LLDP neighbors:
@@ -820,7 +818,7 @@ Interface Ethernet24 detected 0 LLDP neighbors:
 Interface Ethernet25 detected 0 LLDP neighbors:
 
 Interface Ethernet26 detected 0 LLDP neighbors:
-
+ 
 Interface Ethernet27 detected 0 LLDP neighbors:
 
 Interface Ethernet28 detected 0 LLDP neighbors:
@@ -850,7 +848,7 @@ Interface Ethernet33 detected 4 LLDP neighbors:
       Management Address        : 172.16.2.143
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 999001
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 0
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Not Capable (0x00)
@@ -872,7 +870,7 @@ Interface Ethernet33 detected 4 LLDP neighbors:
       Management Address        : 172.16.2.143
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 999001
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 1
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Disabled (0x01)
@@ -895,12 +893,12 @@ Interface Ethernet33 detected 4 LLDP neighbors:
       Management Address        : 172.16.2.222
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2
-      OID String                :
+      OID String                : 
     - Management Address Subtype: IPv6 (2)
       Management Address        : fe80::250:56ff:feac:4cd9
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2
-      OID String                :
+      OID String                : 
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Disabled (0x01)
       Port ID                : 0
@@ -925,12 +923,12 @@ Interface Ethernet33 detected 4 LLDP neighbors:
       Management Address        : 172.16.2.221
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2
-      OID String                :
+      OID String                : 
     - Management Address Subtype: IPv6 (2)
       Management Address        : fe80::250:56ff:feac:4e29
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2
-      OID String                :
+      OID String                : 
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Disabled (0x01)
       Port ID                : 0
@@ -940,7 +938,7 @@ Interface Ethernet33 detected 4 LLDP neighbors:
       Operational MAU Type   : 10GBASE-R (33)
 
 Interface Ethernet34 detected 0 LLDP neighbors:
-
+ 
 Interface Ethernet35 detected 0 LLDP neighbors:
 
 Interface Ethernet36 detected 0 LLDP neighbors:
@@ -956,7 +954,7 @@ Interface Ethernet40 detected 0 LLDP neighbors:
 Interface Ethernet41 detected 0 LLDP neighbors:
 
 Interface Ethernet42 detected 0 LLDP neighbors:
-
+ 
 Interface Ethernet43 detected 0 LLDP neighbors:
 
 Interface Ethernet44 detected 0 LLDP neighbors:
@@ -987,7 +985,7 @@ Interface Ethernet49/1 detected 1 LLDP neighbors:
       Management Address        : 2.2.2.2
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 5000000
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 1
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Enabled (0x03)
@@ -1026,7 +1024,7 @@ Interface Ethernet51/1 detected 1 LLDP neighbors:
       Management Address        : 172.16.1.3
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2000201
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 1
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Enabled (0x03)
@@ -1057,7 +1055,7 @@ Interface Ethernet52/1 detected 1 LLDP neighbors:
       Management Address        : 172.16.1.3
       Interface Number Subtype  : ifIndex (2)
       Interface Number          : 2000201
-      OID String                :
+      OID String                : 
     - IEEE802.1 Port VLAN ID: 1
     - IEEE802.1/IEEE802.3 Link Aggregation
       Link Aggregation Status: Capable, Enabled (0x03)
@@ -1082,11 +1080,11 @@ Interface Management1 detected 1 LLDP neighbors:
   - System Name: "test-host.domain.com"
   - System Capabilities : Bridge, Router
     Enabled Capabilities: Bridge
-  - Management Address Subtype: IPv4
+  - Management Address Subtype: IPv4 
     Management Address        : 172.16.208.5
     Interface Number Subtype  : ifIndex (2)
     Interface Number          : 999001
-    OID String                :
+    OID String                : 
   - IEEE802.1 Port VLAN ID: 0
   - IEEE802.1/IEEE802.3 Link Aggregation
     Link Aggregation Status: Not Capable (0x00)
@@ -1110,7 +1108,7 @@ Community access: read-only
 Community name: TEST_AGAIN
 Community access: read-only
 Community view: TEST (non-existent)
-
+ 
 Community name: TEST_ONE_MORE
 Community access: read-only
 Access list: TEST_ACL (non-existent)
@@ -1182,14 +1180,14 @@ Directory of flash:/
 
 **Output:**
 ```
-Interface       SCI                       Controlled Port      Key in Use
-Ethernet4/15/1  ch:99:3h:69:76:cc::661    True                 changed77f1j42e246kf05b:45
-Ethernet5/13/1  ch:99:3h:69:72:d4::803    True                 changedf1e9j62b5a9keac3:45
-Ethernet5/14/1  ch:99:3h:69:72:d8::807    True                 changeda62bjb9cdadk246e:45
-Ethernet5/16/1  ch:99:3h:69:72:e0::815    True                 changede693j033b28k810e:56
-Ethernet5/17/1  ch:99:3h:69:72:e4::819    True                 changed5778j794bf3k611c:45
-Ethernet5/18/1  ch:99:3h:69:72:e8::823    True                 changed532dj3307f2k610e:45
-Ethernet5/19/1  ch:99:3h:69:72:ec::827    True                 changed046bjdb206eka327:45
+Interface       SCI                       Controlled Port      Key in Use          
+Ethernet4/15/1  ch:99:3h:69:76:cc::661    True                 changed77f1j42e246kf05b:45   
+Ethernet5/13/1  ch:99:3h:69:72:d4::803    True                 changedf1e9j62b5a9keac3:45   
+Ethernet5/14/1  ch:99:3h:69:72:d8::807    True                 changeda62bjb9cdadk246e:45   
+Ethernet5/16/1  ch:99:3h:69:72:e0::815    True                 changede693j033b28k810e:56   
+Ethernet5/17/1  ch:99:3h:69:72:e4::819    True                 changed5778j794bf3k611c:45   
+Ethernet5/18/1  ch:99:3h:69:72:e8::823    True                 changed532dj3307f2k610e:45   
+Ethernet5/19/1  ch:99:3h:69:72:ec::827    True                 changed046bjdb206eka327:45   
 Ethernet5/20/1  ch:99:3h:69:72:f0::831    True                 changedd888jc35359kbd0c:39
 ```
 
@@ -1205,7 +1203,7 @@ Ethernet5/20/1  ch:99:3h:69:72:f0::831    True                 changedd888jc3535
 ```
           mac Address Table
 ------------------------------------------------------------------
-
+ 
 Vlan    mac Address       Type        Ports      Moves   Last Move
 ----    -----------       ----        -----      -----   ---------
    3    0012.3694.03ec    STATIC      Et7
@@ -1228,10 +1226,10 @@ Vlan    mac Address       Type        Ports      Moves   Last Move
 3992    001c.8220.1319    STATIC      Po1
 3992    001c.8221.07b9    DYNAMIC     Po6        1       4 days, 15:13:15 ago
 Total mac Addresses for this criterion: 24
-
+ 
           Multicast mac Address Table
 ------------------------------------------------------------------
-
+ 
 Vlan    mac Address       Type        Ports
 ----    -----------       ----        -----
    4    c867.3057.8423    STATIC      Po10 Po123
@@ -1251,18 +1249,18 @@ Total mac Addresses for this criterion: 1
 
 **Output:**
 ```
-Interface       Rx Success      Rx Failure      Tx Success      Tx Failure
-Ethernet4/13/1  0               0               0               0
-Ethernet4/14/1  0               0               0               0
-Ethernet4/15/1  79688           0               79858           0
-Ethernet4/16/1  0               0               0               0
-Ethernet5/13/1  79788           0               79854           0
-Ethernet5/14/1  79878           0               79853           0
-Ethernet5/15/1  0               0               0               0
-Ethernet5/16/1  64246           0               79850           0
-Ethernet5/17/1  79749           0               79848           0
-Ethernet5/18/1  79756           0               79846           0
-Ethernet5/19/1  79842           0               79845           0
+Interface       Rx Success      Rx Failure      Tx Success      Tx Failure     
+Ethernet4/13/1  0               0               0               0              
+Ethernet4/14/1  0               0               0               0              
+Ethernet4/15/1  79688           0               79858           0              
+Ethernet4/16/1  0               0               0               0              
+Ethernet5/13/1  79788           0               79854           0              
+Ethernet5/14/1  79878           0               79853           0              
+Ethernet5/15/1  0               0               0               0              
+Ethernet5/16/1  64246           0               79850           0              
+Ethernet5/17/1  79749           0               79848           0              
+Ethernet5/18/1  79756           0               79846           0              
+Ethernet5/19/1  79842           0               79845           0              
 Ethernet5/20/1  68225           0               68188           0
 ```
 
@@ -1681,7 +1679,7 @@ Ma1 notconnect routed a-half a-10M 10/100/1000
 
 Instance  VRF      System Id            Type Interface       SNPA              State Hold time   Circuit Id
 1         default  3333.3333.3333       L2   Ethernet2       50:0:0:3:0:3      UP    30          4444.4444.4444.0e
-1         default  2222.2222.2222       L2   Ethernet3       50:0:0:2:0:2      UP    30          0F
+1         default  2222.2222.2222       L2   Ethernet3       50:0:0:2:0:2      UP    30          0F                 
 
 ```
 
@@ -1696,20 +1694,20 @@ Instance  VRF      System Id            Type Interface       SNPA              S
 **Output:**
 ```
             OSPF Router with ID(10.168.103.1) (Process ID 1) (VRF default)
-
+ 
                  Router Link States (Area 0.0.0.2)
-
+ 
 Link ID         ADV Router      Age         Seq#       Checksum Link count
 10.168.103.1   10.168.103.1   00:29:08    0x80000031 0x001D5F 1
 10.168.104.2   10.168.104.2   00:29:09    0x80000066 0x00A49B 1
-
+ 
                  Net Link States (Area 0.0.0.2)
-
+ 
 Link ID         ADV Router      Age         Seq#       Checksum
 10.168.2.1     10.168.103.1   00:29:08    0x80000001 0x00B89D
-
+ 
                  Summary Net Link States (Area 0.0.0.2)
-
+ 
 Link ID         ADV Router      Age         Seq#       Checksum
 10.168.0.0     10.168.103.1   00:13:20    0x80000028 0x0008C8
 10.168.0.0     10.168.104.2   00:09:16    0x80000054 0x00A2FF
@@ -1721,7 +1719,7 @@ Link ID         ADV Router      Age         Seq#       Checksum
 10.168.104.0   10.168.103.1   00:13:20    0x80000028 0x00EF6E
 
                  Type-5 AS External Link States
-
+ 
 Link ID         ADV Router      Age         Seq#         Checksum Tag
 10.24.238.238   10.26.0.31     678         0x800003d2   0x8acf   0
 10.24.238.244   10.26.0.31     678         0x800003d2   0x4e06   0
@@ -1822,47 +1820,47 @@ mA: milliamperes, dBm: decibels (milliwatts), NA or N/A: not applicable.
  ++ : high alarm, +  : high warning, -  : low warning, -- : low alarm.
 A2D readouts (if they differ), are reported in parentheses.
 The threshold values are calibrated.
-                         High Alarm  High Warn   Low Alarm   Low Warn
-           Temperature   Threshold   Threshold   Threshold   Threshold
-Port       (Celsius)     (Celsius)   (Celsius)   (Celsius)   (Celsius)
--------    ------------  ----------  ----------  ----------  ----------
-Et6/1      27.48         80.00       75.00       -5.00       0.00
-Et6/2      27.48         80.00       75.00       -5.00       0.00
-Et6/3      27.48         80.00       75.00       -5.00       0.00
-Et6/4      27.48         80.00       75.00       -5.00       0.00
-                         High Alarm  High Warn   Low Alarm   Low Warn
-           Voltage       Threshold   Threshold   Threshold   Threshold
-Port       (Volts)       (Volts)     (Volts)     (Volts)     (Volts)
--------    ------------  ----------  ----------  ----------  ----------
-Et6/1      3.30          3.60        3.50        3.00        3.10
-Et6/2      3.30          3.60        3.50        3.00        3.10
-Et6/3      3.30          3.60        3.50        3.00        3.10
-Et6/4      3.30          3.60        3.50        3.00        3.10
-                         High Alarm  High Warn   Low Alarm   Low Warn
-           Current       Threshold   Threshold   Threshold   Threshold
-Port       (mA)          (mA)        (mA)        (mA)        (mA)
--------    ------------  ----------  ----------  ----------  ----------
-Et29/1     21.90         38.30       37.35       0.00        0.00
-Et29/2     21.90         38.30       37.35       0.00        0.00
-Et29/3     21.90         38.30       37.35       0.00        0.00
-Et29/4     21.90         38.30       37.35       0.00        0.00
-                         High Alarm  High Warn   Low Alarm   Low Warn
-           Tx Power      Threshold   Threshold   Threshold   Threshold
-Port       (dBm)         (dBm)       (dBm)       (dBm)       (dBm)
--------    ------------  ----------  ----------  ----------  ----------
-Et6/1      -2.39         4.40        3.40        -9.60       -8.60
-Et6/2      -2.33         4.40        3.40        -9.60       -8.60
-Et6/3      -0.78         4.40        3.40        -9.60       -8.60
-Et6/4      -0.93         4.40        3.40        -9.60       -8.60
-                         High Alarm  High Warn   Low Alarm   Low Warn
-           Rx Power      Threshold   Threshold   Threshold   Threshold
-Port       (dBm)         (dBm)       (dBm)       (dBm)       (dBm)
--------    ------------  ----------  ----------  ----------  ----------
-Et6/1      -0.90         4.40        3.40        -11.50      -10.50
-Et6/2      -0.94         4.40        3.40        -11.50      -10.50
-Et6/3      -1.00         4.40        3.40        -11.50      -10.50
-Et6/4      -0.83         4.40        3.40        -11.50      -10.50
-Et7/1      -1.15         4.40        3.40        -11.50      -10.50
+                         High Alarm  High Warn   Low Alarm   Low Warn    
+           Temperature   Threshold   Threshold   Threshold   Threshold   
+Port       (Celsius)     (Celsius)   (Celsius)   (Celsius)   (Celsius)   
+-------    ------------  ----------  ----------  ----------  ----------  
+Et6/1      27.48         80.00       75.00       -5.00       0.00        
+Et6/2      27.48         80.00       75.00       -5.00       0.00        
+Et6/3      27.48         80.00       75.00       -5.00       0.00        
+Et6/4      27.48         80.00       75.00       -5.00       0.00           
+                         High Alarm  High Warn   Low Alarm   Low Warn    
+           Voltage       Threshold   Threshold   Threshold   Threshold   
+Port       (Volts)       (Volts)     (Volts)     (Volts)     (Volts)     
+-------    ------------  ----------  ----------  ----------  ----------  
+Et6/1      3.30          3.60        3.50        3.00        3.10        
+Et6/2      3.30          3.60        3.50        3.00        3.10        
+Et6/3      3.30          3.60        3.50        3.00        3.10        
+Et6/4      3.30          3.60        3.50        3.00        3.10            
+                         High Alarm  High Warn   Low Alarm   Low Warn    
+           Current       Threshold   Threshold   Threshold   Threshold   
+Port       (mA)          (mA)        (mA)        (mA)        (mA)        
+-------    ------------  ----------  ----------  ----------  ----------  
+Et29/1     21.90         38.30       37.35       0.00        0.00        
+Et29/2     21.90         38.30       37.35       0.00        0.00        
+Et29/3     21.90         38.30       37.35       0.00        0.00        
+Et29/4     21.90         38.30       37.35       0.00        0.00             
+                         High Alarm  High Warn   Low Alarm   Low Warn    
+           Tx Power      Threshold   Threshold   Threshold   Threshold   
+Port       (dBm)         (dBm)       (dBm)       (dBm)       (dBm)       
+-------    ------------  ----------  ----------  ----------  ----------  
+Et6/1      -2.39         4.40        3.40        -9.60       -8.60       
+Et6/2      -2.33         4.40        3.40        -9.60       -8.60       
+Et6/3      -0.78         4.40        3.40        -9.60       -8.60       
+Et6/4      -0.93         4.40        3.40        -9.60       -8.60               
+                         High Alarm  High Warn   Low Alarm   Low Warn    
+           Rx Power      Threshold   Threshold   Threshold   Threshold   
+Port       (dBm)         (dBm)       (dBm)       (dBm)       (dBm)       
+-------    ------------  ----------  ----------  ----------  ----------  
+Et6/1      -0.90         4.40        3.40        -11.50      -10.50      
+Et6/2      -0.94         4.40        3.40        -11.50      -10.50      
+Et6/3      -1.00         4.40        3.40        -11.50      -10.50      
+Et6/4      -0.83         4.40        3.40        -11.50      -10.50      
+Et7/1      -1.15         4.40        3.40        -11.50      -10.50           
 
 ```
 
@@ -2026,7 +2024,7 @@ Max LSAs: 12000, Total LSAs: 6
 Type-5 Ext LSAs: 3
 ID               Type   Intf   Nbrs (full) RTR LSA NW LSA  SUM LSA ASBR LSA TYPE-7 LSA
 0.0.0.10         normal 6      2    (2   ) 3       0       0       0       0
-
+ 
 OSPF instance 2 with ID 192.168.28.193, VRF mgmtVrf, ASBR
 Time since last SPF: 1673 s
 Max LSAs: 12000, Total LSAs: 357
@@ -2046,12 +2044,12 @@ ID               Type   Intf   Nbrs (full) RTR LSA NW LSA  SUM LSA ASBR LSA TYPE
 **Output:**
 ```
 VRF: default
-Codes: C - connected, S - static, K - kernel,
+Codes: C - connected, S - static, K - kernel, 
        O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1,
        E2 - OSPF external type 2, N1 - OSPF NSSA external type 1,
        N2 - OSPF NSSA external type2, B I - iBGP, B E - eBGP,
        R - RIP, I - ISIS, A B - BGP Aggregate, A O - OSPF Summary,
-       NG - Nexthop Group Static Route
+       NG - Nexthop Group Static Route 
 
 Gateway of last resort is not set
 
@@ -2078,12 +2076,12 @@ Gateway of last resort is not set
 
 
 VRF: RED
-Codes: C - connected, S - static, K - kernel,
+Codes: C - connected, S - static, K - kernel, 
        O - OSPF, IA - OSPF inter area, E1 - OSPF external type 1,
        E2 - OSPF external type 2, N1 - OSPF NSSA external type 1,
        N2 - OSPF NSSA external type2, B I - iBGP, B E - eBGP,
        R - RIP, I - ISIS, A B - BGP Aggregate, A O - OSPF Summary,
-       NG - Nexthop Group Static Route
+       NG - Nexthop Group Static Route 
 
 Gateway of last resort is not set
 
@@ -2226,7 +2224,7 @@ timezone is US/Central
 ```
 IP Access List TEST_1
         10 permit ip host 10.0.0.1 10.0.0.0/24
-
+ 
 IP Access List default-control-plane-acl [readonly]
         statistics per-entry
         10 permit icmp any any
@@ -2235,11 +2233,11 @@ IP Access List default-control-plane-acl [readonly]
         50 permit tcp any any eq ssh telnet www snmp bgp https msdp
         60 permit udp any any eq bootps bootpc snmp rip ntp
         70 permit tcp any any range 5900 5910
-
+        
 IP Access List test2
         10 permit ip 1.1.1.0/30 any fragments log
         20 permit tcp 111.11.11.0/24 eq www z39-50 10.0.0.0/24 urg ttl eq 30
-
+        
 IP Access List test3
         10 permit tcp any range www ups any ack
         20 permit tcp any eq www ups telnet time tunnel uucp vmnet host 10.10.10.10 ack
@@ -2282,8 +2280,8 @@ Ma1/1      dc1-rack11-tor1.sjc            1/1                        120
 **Output:**
 ```
 Arista vEOS
-Hardware version:
-Serial number:
+Hardware version:    
+Serial number:       
 System MAC address:  2803.829a.1347
 
 Software image version: 4.14.7M
@@ -2302,3 +2300,239 @@ Free memory:            301240 kB
 **Prompt:**
 - arista_eos>
 - arista_eos#
+
+### dir
+
+**Output:**
+```
+Directory of extension:/
+
+No files in directory
+
+4093313024 bytes total (3029774336 bytes free)
+
+```
+
+**Help:** execute the command "dir"
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
+### show environment power
+
+**Output:**
+```
+Power              Input Output Output
+Supply Model      Capacity Current Current Power Status      Uptime
+------ --------------- -------- ------- ------- ------ ------ ----------------
+1   PWR-1011-AC-RED  1000W  0.70A 11.58A 139.0W Ok   68 days, 0:11:28
+2   PWR-1011-AC-RED  1000W  0.68A 11.31A 134.0W Ok   68 days, 0:11:29
+Total --         2000W   --   -- 273.0W --          --
+
+```
+
+**Help:** execute the command "show environment power"
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
+### show interfaces transceiver hardware
+
+**Output:**
+```
+Name: Et1
+Media type: 1000BASE-T
+Maximum module power (W): 0.0
+Maximum slot power (W): N/A
+
+Name: Et49
+Media type: 10GBASE-CR
+Maximum module power (W): 1.0
+Maximum slot power (W): N/A
+
+Name: Et51
+Media type: 1000BASE-LX
+Maximum module power (W): 1.0
+Maximum slot power (W): N/A
+Wavelength (nm): 1310
+
+Name: Ethernet96
+Media type: 5GBASE-T
+
+Name: Ethernet97/1
+Module presence: not detected
+Maximum slot power (W): N/A
+
+Name: Ethernet88
+Media type: 2.5GBASE-T
+
+Name: Ethernet76
+Media type: 2.5GBASE-T
+
+```
+
+**Help:** execute the command "show interfaces transceiver hardware"
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
+### show ip mroute vrf all detail
+
+**Output:**
+```
+VRF:default
+PIM Bidirectional Mode Multicast Routing Table
+RPF route: U - From unicast routing table
+           M - From multicast routing table
+PIM Sparse Mode Multicast Routing Table
+Flags: E - Entry forwarding on the RPT, J - Joining to the SPT
+    R - RPT bit is set, S - SPT bit is set, L - Source is attached
+    W - Wildcard entry, X - External component interest
+    I - SG Include Join alert rcvd, P - Programmed in hardware
+    H - Joining SPT due to policy, D - Joining SPT due to protocol
+    Z - Entry marked for deletion, C - Learned from a DR via a register
+    A - Learned via Anycast RP Router, M - Learned via MSDP
+    N - May notify MSDP, K - Keepalive timer not running
+    T - Switching Incoming Interface, B - Learned via Border Router
+    V - Source is reachable via Evpn Tenant Domain
+    F - Learned via MVPN
+RPF route: U - From unicast routing table
+           M - From multicast routing table
+* - Interface has EVPN information available in the 'detail' command output
+224.0.1.129
+  169.254.132.172, 118d18h, flags: PE
+    Incoming interface: Null
+    Upstream joined state: upNotJoined
+    Upstream RPT joined state: upRptNotJoined
+    State summarization macros:
+      Could register (S,G): False
+      Register stop (S,G): True
+      Join desired (S,G): False
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): True
+      No interfaces in inherited olist (S,G): True
+224.0.23.192
+  0.0.0.0, 38d14h, RP 204.14.0.136, flags: W
+    Incoming interface: Register
+    Outgoing interface list:
+      Ethernet2/1
+      Ethernet2/2
+    Upstream joined state: upJoined
+    Upstream RPT joined state: upRptNotJoined
+    State summarization macros:
+      Join desired (*,G): True
+      Join desired (*,*,RP): False
+      RPT join desired (*,G): True
+      No interfaces in immediate olist (*,G): False
+      No interfaces in immediate olist (*,*,G): True
+  192.26.98.17, 8:57:21, flags: PE
+    Incoming interface: Register
+    Outgoing interface list:
+      Ethernet2/1
+    Upstream joined state: upNotJoined
+    Upstream RPT joined state: upRptNotPruned
+    State summarization macros:
+      Could register (S,G): False
+      Register stop (S,G): False
+      Join desired (S,G): False
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): True
+      No interfaces in inherited olist (S,G): False
+  192.168.98.17, 8:57:21, flags: SP
+    Incoming interface: Ethernet10
+    RPF route: [U] 192.168.98.0/27 [20/0] via 10.100.10.6
+    Outgoing interface list:
+      Ethernet2/1
+    Upstream joined state: upNotJoined
+    Upstream RPT joined state: upRptNotPruned
+    State summarization macros:
+      Could register (S,G): False
+      Register stop (S,G): True
+      Join desired (S,G): True
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): False
+      No interfaces in inherited olist (S,G): False
+224.0.23.190
+  0.0.0.0, 38d14h, RP 204.14.0.136, flags: W
+    Incoming interface: Register
+    Outgoing interface list:
+      Ethernet0/1
+    Upstream joined state: upJoined
+    Upstream RPT joined state: upRptNotJoined
+    State summarization macros:
+      Join desired (*,G): True
+      Join desired (*,*,RP): False
+      RPT join desired (*,G): True
+      No interfaces in immediate olist (*,G): False
+      No interfaces in immediate olist (*,*,G): True
+  10.205.227.165, 38d14h, flags: SBNP
+    Incoming interface: Ethernet32
+    Outgoing interface list:
+      Ethernet2/1
+    Interfaces not in OIL:
+      Ethernet0/1: Not DR, RPT Pruned
+    Upstream joined state: upJoined
+    Upstream RPT joined state: upRptNotPruned
+    State summarization macros:
+      Could register (S,G): True
+      Register stop (S,G): True
+      Join desired (S,G): True
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): False
+      No interfaces in inherited olist (S,G): False
+  10.205.227.166, 18d7h, RP 204.14.0.136, flags: SBNP
+    Incoming interface: Ethernet32
+    Outgoing interface list:
+      Ethernet0/1
+      Ethernet2/1
+    Upstream joined state: upJoined
+    Upstream RPT joined state: upRptNotPruned
+    State summarization macros:
+      Could register (S,G): True
+      Register stop (S,G): True
+      Join desired (S,G): True
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): False
+      No interfaces in inherited olist (S,G): False
+VRF:FOO
+PIM Bidirectional Mode Multicast Routing Table
+RPF route: U - From unicast routing table
+           M - From multicast routing table
+PIM Sparse Mode Multicast Routing Table
+Flags: E - Entry forwarding on the RPT, J - Joining to the SPT
+    R - RPT bit is set, S - SPT bit is set, L - Source is attached
+    W - Wildcard entry, X - External component interest
+    I - SG Include Join alert rcvd, P - Programmed in hardware
+    H - Joining SPT due to policy, D - Joining SPT due to protocol
+    Z - Entry marked for deletion, C - Learned from a DR via a register
+    A - Learned via Anycast RP Router, M - Learned via MSDP
+    N - May notify MSDP, K - Keepalive timer not running
+    T - Switching Incoming Interface, B - Learned via Border Router
+    V - Source is reachable via Evpn Tenant Domain
+    F - Learned via MVPN
+RPF route: U - From unicast routing table
+           M - From multicast routing table
+224.0.1.130
+  169.254.132.173, 1d18h, flags: PE
+    Incoming interface: Null
+    Upstream joined state: upNotJoined
+    Upstream RPT joined state: upRptNotJoined
+    State summarization macros:
+      Could register (S,G): False
+      Register stop (S,G): True
+      Join desired (S,G): False
+      Prune desired (S,G,Rpt): False
+      No interfaces in immediate olist (S,G): True
+      No interfaces in inherited olist (S,G): True
+
+```
+
+**Help:** execute the command "show ip mroute vrf all detail"
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+

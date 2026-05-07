@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -55,12 +50,12 @@ Q: U - Untagged, T - Tagged
 *   1      Inactive                                  U Te 0/42-43
                                                      U Fo 0/48,56,60
     12     Inactive                                  U Te 0/0-9,45-47
-    13     Inactive  myvlan13
-    14     Inactive
+    13     Inactive  myvlan13                        
+    14     Inactive                                  
     100    Inactive  pixelrebel is awesome           T Te 0/30
                                                      U Te 0/40-41,44
                                                      U Fo 0/52
-    200    Inactive
+    200    Inactive                                  
     330    Inactive  tagged example                  T Te 0/30,35-37
                                                      U Te 0/31-34,38-39
     351    Inactive  dev 351 vlan                    U Te 0/10-19
@@ -145,14 +140,14 @@ Port-channel 128              unassigned      YES None   up                    u
 
 **Output:**
 ```
-VLAN Name                             STG   MAC Aging IP Address
----- -------------------------------- ----  --------- ------------------
-1                                     0     1800      unassigned
-12                                    0     1800      10.10.10.254/24
-13   thirteen                         0     1800      192.168.100.0/22
-14   fourteen                         0     1800      unassigned
-15   fifteen                          0     1800      unassigned
-67   sixty seven                      0     1800      unassigned
+VLAN Name                             STG   MAC Aging IP Address         
+---- -------------------------------- ----  --------- ------------------ 
+1                                     0     1800      unassigned         
+12                                    0     1800      10.10.10.254/24    
+13   thirteen                         0     1800      192.168.100.0/22         
+14   fourteen                         0     1800      unassigned         
+15   fifteen                          0     1800      unassigned         
+67   sixty seven                      0     1800      unassigned         
 
 ```
 
@@ -211,3 +206,4 @@ Control Processor: Freescale QorIQ P2020 with 2 Gbytes (2147483648 bytes) of mem
 **Prompt:**
 - dell_force10>
 - dell_force10#
+

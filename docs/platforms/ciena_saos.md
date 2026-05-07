@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -130,7 +128,7 @@
 | 800|Mgmt                            |x                      x|
 |1001|RVID_1001                       |x                      x|
 +----+--------------------------------+------------------------+
-
+ 
 +----------------------------- CROSS CONNECTION TABLE ------------------------------+
  | OVID | IVID |                           Port-A |                           Port-B |
 +------+------+----------------------------------+----------------------------------+
@@ -262,7 +260,7 @@
  | Key Status              | Generated                                        |
 | Key Fingerprint [MD5]   | 1a:1d:1c:1e:da:11:1d:1d:11:aa:11:11:11:a1:11:1c  |
 +-------------------------+--------------------------------------------------+
-
+ 
 +------------------------ SSH PUBLIC KEY AUTHENTICATION USERS ------------------------+
  | Username                         | Key Status                                       |
 +----------------------------------+--------------------------------------------------+
@@ -277,3 +275,4 @@
 **Prompt:**
 - ciena_saos>
 - ciena_saos#
+

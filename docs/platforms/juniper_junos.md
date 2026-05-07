@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -123,7 +118,7 @@ Physical interface: ip-0/0/0, Enabled, Physical link is Up
   Device flags   : Present Running
   Input rate     : 0 bps (0 pps)
   Output rate    : 0 bps (0 pps)
-
+ 
 Physical interface: lsq-0/0/0, Enabled, Physical link is Up
   Interface index: 141, SNMP ifIndex: 509
   Link-level type: LinkService, MTU: 1504
@@ -283,7 +278,7 @@ Aggregated interface: ae112
     LACP protocol:        Receive State  Transmit State          Mux State
       et-0/0/34                 Current   Fast periodic Collecting distributing
       et-0/0/35                 Current   Fast periodic Collecting distributing
-
+ 
 Aggregated interface: ae115
     LACP state:       Role   Exp   Def  Dist  Col  Syn  Aggr  Timeout  Activity
       et-0/0/25      Actor    No    No   Yes  Yes  Yes   Yes     Fast    Active
@@ -334,15 +329,15 @@ System control board     ROM        Juniper ROM Monitor Version 2.0i126Copyri
 FPC 5                    ROM        Juniper ROM Monitor Version 2.0i49Copyrig
                          O/S        Version 2.0i1 by root on Thu Jul 23 00:59
 
-FPC 2                    ROM        Juniper ROM Monitor Version 8.0b29
+FPC 2                    ROM        Juniper ROM Monitor Version 8.0b29         
                          O/S        Version 8.2B1 by builder on 2006-10-18 16:2
-FPC 3                    ROM        Juniper ROM Monitor Version 8.0b29
+FPC 3                    ROM        Juniper ROM Monitor Version 8.0b29         
                          O/S        Version 8.2B1 by builder on 2006-10-18 16:2
-FPC 4                    ROM        Juniper ROM Monitor Version 8.0b29
+FPC 4                    ROM        Juniper ROM Monitor Version 8.0b29         
                          O/S        Version 8.2B1 by builder on 2006-10-18 16:2
-FEB 3                    ROM        Juniper ROM Monitor Version 8.0b29
+FEB 3                    ROM        Juniper ROM Monitor Version 8.0b29         
                          O/S        Version 8.2B1 by builder on 2006-10-18 16:1
-FEB 4                    ROM        Juniper ROM Monitor Version 8.0b29
+FEB 4                    ROM        Juniper ROM Monitor Version 8.0b29         
                          O/S        Version 8.2B1 by builder on 2006-10-18 16:1
 
 Part                     Type       Version
@@ -358,29 +353,29 @@ Part                     Type       Version
                          O/S        Version 4.0I1 by tlim on 2000-02-29 11:56
 
 Part                     Type       Version
-FPC 0                    ROM        Juniper ROM Monitor Version 13.1b24
+FPC 0                    ROM        Juniper ROM Monitor Version 13.1b24       
                          O/S        Version 13.2-20130514.1 by builder on 2013-
-FPC 1                    ROM        Juniper ROM Monitor Version 13.1b24
+FPC 1                    ROM        Juniper ROM Monitor Version 13.1b24       
                          O/S        Version 13.2-20130514.1 by builder on 2013-
-FPC 2                    ROM        Juniper ROM Monitor Version 13.1b24
+FPC 2                    ROM        Juniper ROM Monitor Version 13.1b24       
                          O/S        Version 13.2-20130514.1 by builder on 2013-
-AFEB                     ROM        Juniper ROM Monitor Version 13.1b24
+AFEB                     ROM        Juniper ROM Monitor Version 13.1b24       
                          O/S        Version 13.2-20130514.1 by builder on 2013-
 
 Part                     Type       Version
-FPC 1                    ROM        Juniper ROM Monitor Version 8.3b1
+FPC 1                    ROM        Juniper ROM Monitor Version 8.3b1          
                          O/S        Version 9.0-20080103.0 by builder on 2008-0
-FPC 2                    ROM        Juniper ROM Monitor Version 8.3b1
+FPC 2                    ROM        Juniper ROM Monitor Version 8.3b1          
                          O/S        Version 9.0-20080103.0 by builder on 2008-0
 
 Part                     Type       Version
-FPC 1                    ROM        Juniper ROM Monitor Version 8.3b1
+FPC 1                    ROM        Juniper ROM Monitor Version 8.3b1          
                          O/S        Version 9.0-20070916.3 by builder on 2007-0
 
 Part                     Type       Version
-FPC 4                    ROM        Juniper ROM Monitor Version 8.0b8
+FPC 4                    ROM        Juniper ROM Monitor Version 8.0b8          
                          O/S        Version 8.2I59 by artem on 2006-10-31 19:22
-FPC 7                    ROM        Juniper ROM Monitor Version 8.2b1
+FPC 7                    ROM        Juniper ROM Monitor Version 8.2b1          
                          O/S        Version 8.2-20061026.1 by builder on 2006-1
 
 Part                     Type       Version
@@ -477,18 +472,18 @@ FPC 5                    U-Boot     U-Boot 1.1.6 (Mar 25 2009 - 06:13:12) 2.4.0
 FPC 7                    U-Boot     U-Boot 1.1.6 (Feb  6 2009 - 05:31:46) 2.4.0
                          loader     FreeBSD/PowerPC U-Boot bootstrap loader 2.2
 Routing Engine 0         U-Boot     U-Boot 1.1.6 (Mar 25 2009 - 06:13:12) 2.4.0
-                         loader     FreeBSD/PowerPC U-Boot bootstrap loader 2.2
+                         loader     FreeBSD/PowerPC U-Boot bootstrap loader 2.2                                                
 Routing Engine 1         U-Boot     U-Boot 1.1.6 (Mar 25 2009 - 06:13:12) 2.4.0
                          loader     FreeBSD/PowerPC U-Boot bootstrap loader 2.2
 
 lcc0-re0:
 --------------------------------------------------------------------------
 Part                     Type       Version
-FPC 1                    ROM        Juniper ROM Monitor Version 6.4b18
+FPC 1                    ROM        Juniper ROM Monitor Version 6.4b18         
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
-FPC 2                    ROM        Juniper ROM Monitor Version 6.4b20
+FPC 2                    ROM        Juniper ROM Monitor Version 6.4b20         
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
-SPMB 0                   ROM        Juniper ROM Monitor Version 6.4b18
+SPMB 0                   ROM        Juniper ROM Monitor Version 6.4b18         
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
 
@@ -527,7 +522,7 @@ reth1        Up          3
 reth2        Down        Not configured
 reth3        Down        Not configured
 reth4        Down        Not configured
-
+ 
 Redundant-pseudo-interface Information:
 Name         Status      Redundancy-group
 lo0          Up          0
@@ -691,7 +686,7 @@ JUNOS EX  Software Suite [13.2X51-D35.3]
 JUNOS Online Documentation [13.2X51-D35.3]
  JUNOS EX 4500 Software Suite [13.2X51-D35.3]
 JUNOS Web Management [13.2X51-D35.3]
-
+ 
 fpc1:
 --------------------------------------------------------------------------
  Hostname: lab
@@ -731,3 +726,221 @@ JUNOS Web Management [13.2X51-D35.3]
 **Prompt:**
 - juniper_junos>
 - juniper_junos#
+
+### show bgp summary
+
+**Output:**
+```
+Threading mode: BGP I/O
+Groups: 2 Peers: 6 Down peers: 0
+Peer                     AS      InPkt     OutPkt    OutQ   Flaps Last Up/Dwn State|#Active/Received/Accepted/Damped...
+192.0.2.254           64496    1165670    1238837       0       1 9w2d 5:23:37 Establ
+  wanTrusted.inet.0: 23/224/224/0
+192.0.2.252           64496     753373     783304       0      50 35w2d 3:57:43 Establ
+  wanTrusted.inet.0: 65/224/224/0
+198.51.100.100        64496     814804     865022       0      19 6w3d 13:02:17 Establ
+  wanTrusted.inet.0: 30/226/226/0
+198.51.100.200        64496     768547     816071       0      47 36w5d 12:18:32 Establ
+  wanUntrust.inet.0: 1/70/70/0
+203.0.113.0           64496     811361     865023       0      20 6w3d 13:02:22 Establ
+  wanUntrust.inet.0: 6/74/74/0
+203.0.113.0           64496    1162649    1238837       0       1 9w2d 5:23:33 Establ
+  wanUntrust.inet.0: 4/72/72/0
+```
+
+**Help:** execute the command "show bgp summary"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show ethernet-switching interfaces
+
+**Output:**
+```
+Interface    State  VLAN members        Tag   Tagging  Blocking 
+
+ae0.0        up      default                   untagged unblocked
+ge-0/0/2.0   up      vlan300            300    untagged blocked by RTG (rtggroup)
+ge-0/0/3.0   up      default                            blocked by STP      
+ge-0/0/4.0   down    default                            MAC limit exceeded
+ge-0/0/5.0   down    default                            MAC move limit exceeded
+ge-0/0/6.0   down    default                            Storm control in effect
+ge-0/0/7.0   down    default                            unblocked
+ge-0/0/13.0  up      default                   untagged unblocked
+ge-0/0/14.0  up      vlan100             100   tagged   unblocked
+                     vlan200             200   tagged   unblocked
+ge-0/0/15.0  up      vlan100             100   tagged   blocked by STP
+                     vlan200             200   tagged   blocked by STP
+ge-0/0/16.0  down    default                   untagged unblocked
+ge-0/0/17.0  down    vlan100             100   tagged   Disabled by bpdu-control
+                     vlan200             200   tagged   Disabled by bpdu-control
+
+```
+
+**Help:** execute the command "show ethernet-switching interfaces"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show route summary
+
+**Output:**
+```
+Autonomous system number: 65000
+Router ID: 129.250.0.2
+
+Highwater Mark (All time / Time averaged watermark)
+    RIB unique destination routes: 1221502 at 2000-01-01 00:00:00 / 1217389
+    RIB routes                   : 11101463 at 2000-01-01 00:00:00 / 10394871
+    FIB routes                   : 1207937 at 2000-01-01 00:00:00 / 1203820
+    VRF type routing instances   : 1 at 2000-01-01 00:00:00
+
+inet.0: 993427 destinations, 8574425 routes (992253 active, 13182 holddown, 1328663 hidden)
+              Direct:      8 routes,      7 active
+               Local:      7 routes,      7 active
+                 BGP: 8568064 routes, 985893 active
+              Static:      2 routes,      2 active
+               IS-IS:   6343 routes,   6343 active
+                 LDP:      1 routes,      1 active
+
+iso.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
+              Direct:      1 routes,      1 active
+
+mpls.0: 284 destinations, 284 routes (284 active, 0 holddown, 0 hidden)
+                MPLS:      6 routes,      6 active
+                RSVP:      4 routes,      4 active
+                 LDP:    274 routes,    274 active
+
+inet6.0: 214385 destinations, 1781556 routes (214292 active, 2700 holddown, 257364 hidden)
+              Direct:      4 routes,      4 active
+               Local:      4 routes,      4 active
+                 BGP: 1775906 routes, 208642 active
+              Static:      2 routes,      2 active
+               IS-IS:   5639 routes,   5639 active
+               INET6:      1 routes,      1 active
+
+l2circuit.0: 1 destinations, 1 routes (1 active, 0 holddown, 0 hidden)
+                 LDP:      1 routes,      1 active
+```
+
+**Help:** execute the command "show route summary"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show rsvp interface
+
+**Output:**
+```
+Warning: License key missing; requires 'rsvp' license
+
+RSVP interface: 5 active
+                          Active  Subscr- Static      Available   Reserved    Highwater
+Interface          State  resv    iption  BW          BW          BW          mark
+ae0.0                  Up      10    95%  400Gbps     380Gbps     200kbps     251kbps
+ae2.0                  Up      86    95%  200Gbps     189.999Gbps 1.49104Mbps 6.91527Mbps
+ae3.0                  Up      73    95%  100Gbps     94.9994Gbps 572.791kbps 1.78375Mbps
+ae4.0                  Up       0    95%  100Gbps     95Gbps      0bps        0bps
+ae5.0                  Up      54    95%  400Gbps     380Gbps     8.164kbps   22.649kbps
+
+```
+
+**Help:** execute the command "show rsvp interface"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show system configuration database usage
+
+**Output:**
+```
+Maximum size of the database: 1301.99 MB
+Current database size on disk: 4.00 MB
+Actual database usage: 3.92 MB
+Available database space: 1298.07 MB
+
+{{master}}
+
+
+```
+
+**Help:** execute the command "show system configuration database usage"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show system processes brief
+
+**Output:**
+```
+last pid: 98312;  load averages:  1.72,  1.70,  1.70  up 87+21:25:46    15:51:17
+302 processes: 5 running, 295 sleeping, 1 zombie, 1 waiting
+CPU: 14.7% user,  0.0% nice,  4.2% system,  0.2% interrupt, 80.9% idle
+Mem: 3532M Active, 33G Inact, 2458M Wired, 1046M Buf, 55G Free
+Swap: 12G Total, 12G Free
+
+```
+
+**Help:** execute the command "show system processes brief"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+
+### show system processes summary
+
+**Output:**
+```
+last pid: 24931;  load averages:  0.89,  0.94,  0.81  up 41+06:26:24    00:51:55
+545 threads:   9 running, 481 sleeping, 1 zombie, 54 waiting
+CPU: 14.7% user,  0.0% nice,  4.1% system,  0.2% interrupt, 81.0% idle
+Mem: 3977M Active, 14G Inact, 1815M Wired, 504M Buf, 74G Free
+Swap: 12G Total, 12G Free
+
+  PID USERNAME    PRI NICE   SIZE    RES STATE    C   TIME    WCPU COMMAND
+   11 root        155 ki31     0B   128K CPU7     7 787.8H  98.58% idle{{idle: cpu7}}
+   11 root        155 ki31     0B   128K CPU0     0 931.9H  98.39% idle{{idle: cpu0}}
+   11 root        155 ki31     0B   128K CPU2     2 783.0H  96.88% idle{{idle: cpu2}}
+   11 root        155 ki31     0B   128K RUN      5 787.6H  96.78% idle{{idle: cpu5}}
+   11 root        155 ki31     0B   128K CPU4     4 786.1H  96.68% idle{{idle: cpu4}}
+   11 root        155 ki31     0B   128K CPU6     6 787.6H  93.26% idle{{idle: cpu6}}
+   11 root        155 ki31     0B   128K CPU1     1 785.5H  91.70% idle{{idle: cpu1}}
+   11 root        155 ki31     0B   128K CPU3     3 785.6H  90.67% idle{{idle: cpu3}}
+19880 root         25    0   801M    74M select   2 132.6H  15.09% cosd
+19926 root         24    0   735M    27M select   7 113.5H  11.87% snmpd
+19929 root         22    0   805M    86M select   3  81.9H   9.28% mib2d
+19876 root         21    0    14G    13G kqread   3 938.4H   2.69% rpd{{rpd}}
+19876 root         21    0    14G    13G kqread   3  20.3H   2.69% rpd{{junos-bgpshard3}}
+19876 root         21    0    14G    13G kqread   4  20.3H   1.76% rpd{{junos-bgpshard0}}
+19876 root         20    0    14G    13G kqread   0  24.6H   1.46% rpd{{junos-bgpshard2}}
+19914 root         21    0   839M   118M select   5  18.4H   1.37% jinsightd{{jinsightd}}
+19876 root         20    0    14G    13G kqread   1  22.2H   1.27% rpd{{junos-bgpshard1}}
+   12 root        -60    -     0B   864K WAIT     0  69:18   1.17% intr{{swi4: clock (0)}}
+19315 root         21    0   880M    78M select   6 898:25   0.98% chassisd{{chassisd}}
+19921 root         20    0   131M    49M select   2 596:38   0.59% na-grpcd{{na-grpcd}}
+19876 root         20    0    14G    13G kqread   6 489:58   0.59% rpd{{bgp-updio-3}}
+24926 remote       20    0    95M    25M select   1   0:00   0.59% cli
+   12 root        -92    -     0B   864K WAIT     0 162:55   0.49% intr{{irq271: ixlv0:que 0}}
+24923 root         22    0   756M    13M select   7   0:00   0.29% sshd
+   12 root        -72    -     0B   864K WAIT     1 417:28   0.20% intr{{swi1: netisr 2}}
+19352 root         20    0   724M  8544K select   2 106:54   0.20% timingd{{ptp_stack}}
+24925 remote       20    0   756M    13M select   6   0:00   0.20% sshd
+19858 root        -16    -     0B    16K select   1 184:43   0.10% ppt_11_80000010
+19743 root        -16    -     0B    16K select   7 172:15   0.10% ppt_11_80000013
+21670 root        -16    -     0B    16K select   0 166:12   0.10% ppt_11_80000015
+    2 root        -16    -     0B    16K jfe_jo   2 138:19   0.10% jfe_job_0_0
+24931 root         20    0    14M  3636K CPU5     5   0:00   0.00% top
+
+```
+
+**Help:** execute the command "show system processes summary"
+
+**Prompt:**
+- juniper_junos>
+- juniper_junos#
+

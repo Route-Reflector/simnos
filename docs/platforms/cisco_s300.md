@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -257,7 +252,7 @@ Gvrp Status: disabled
 Ingress Filtering: true
 Acceptable Frame Type: admitAll
 Ingress UnTagged VLAN ( NATIVE ): 203
-
+ 
 Port is member in:
 
 Vlan               Name               Egress rule Port Membership Type
@@ -343,3 +338,4 @@ HW version    V02
 **Prompt:**
 - cisco_s300>
 - cisco_s300#
+

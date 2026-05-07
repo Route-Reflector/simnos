@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -213,3 +208,24 @@ Aging time is 300 sec
 **Prompt:**
 - dell_powerconnect>
 - dell_powerconnect#
+
+### terminal datadump
+
+**Output:** None
+
+**Help:** disable paging (Dell 34xx)
+
+**Prompt:**
+- dell_powerconnect>
+- dell_powerconnect#
+
+### terminal length 0
+
+**Output:** None
+
+**Help:** disable paging (Dell 7xxx)
+
+**Prompt:**
+- dell_powerconnect>
+- dell_powerconnect#
+

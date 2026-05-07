@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -16,7 +14,7 @@
 **Help:** enter enable mode
 
 **Prompt:**
-- vyatta@vyatta:~$
+- vyatta_vyos~$
 
 ### set terminal length 0
 
@@ -28,8 +26,8 @@ set terminal length 0
 **Help:** set the terminal to max width
 
 **Prompt:**
-- vyatta@vyatta:~$
-- vyatta@vyatta#
+- vyatta_vyos~$
+- vyatta_vyos#
 
 ### show interfaces
 
@@ -38,21 +36,21 @@ set terminal length 0
 Codes: S - State, L - Link, u - Up, D - Down, A - Admin Down
 Interface        IP Address                        S/L  Description
 ---------        ----------                        ---  -----------
-eth0             -                                 u/u
-eth0.40          123.123.120.123/27                u/u  OUTSIDE
-eth1             -                                 u/u
-eth1.204         123.123.123.81/28                 u/u  CUST-DS-LAN
-eth1.269         172.18.32.14/28                   u/u  CUST-COM
+eth0             -                                 u/u  
+eth0.40          123.123.120.123/27                u/u  OUTSIDE 
+eth1             -                                 u/u  
+eth1.204         123.123.123.81/28                 u/u  CUST-DS-LAN 
+eth1.269         172.18.32.14/28                   u/u  CUST-COM 
                  123.123.123.123/32
-eth1.437         123.123.116.169/29                u/u  CUST-VIDEO
-eth1.1753        172.18.161.196/29                 u/u  SERVICE-LINK
-eth2             -                                 u/u
-lo               127.0.0.1/8                       u/u
+eth1.437         123.123.116.169/29                u/u  CUST-VIDEO 
+eth1.1753        172.18.161.196/29                 u/u  SERVICE-LINK 
+eth2             -                                 u/u  
+lo               127.0.0.1/8                       u/u  
                  172.18.255.110/32
                  ::1/128
-vtun0            192.168.80.2                      u/u
+vtun0            192.168.80.2                      u/u  
 vtun1            192.168.80.4                      u/u   OpenVPN-TUNNEL1
-vtun2            192.168.80.6                      u/u
+vtun2            192.168.80.6                      u/u  
 
 
 ```
@@ -60,8 +58,8 @@ vtun2            192.168.80.6                      u/u
 **Help:** execute the command "show interfaces"
 
 **Prompt:**
-- vyatta@vyatta:~$
-- vyatta@vyatta#
+- vyatta_vyos~$
+- vyatta_vyos#
 
 ### show arp
 
@@ -80,8 +78,8 @@ Address                  HWtype  HWaddress           Flags Mask            Iface
 **Help:** execute the command "show arp"
 
 **Prompt:**
-- vyatta@vyatta:~$
-- vyatta@vyatta#
+- vyatta_vyos~$
+- vyatta_vyos#
 
 ### show ip bgp summary
 
@@ -106,5 +104,6 @@ Total number of neighbors 3
 **Help:** execute the command "show ip bgp summary"
 
 **Prompt:**
-- vyatta@vyatta:~$
-- vyatta@vyatta#
+- vyatta_vyos~$
+- vyatta_vyos#
+

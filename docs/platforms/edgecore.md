@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -16,109 +14,725 @@
 **Help:** enter enable mode
 
 **Prompt:**
-- {base_prompt}$
+- edgecore$
 
 ### show interfaces brief
 
 **Output:**
 ```
-'Interface Name               Status   PVID Pri Speed/Duplex  Type         Trunk\n--------- ------------------ -------- ---- --- ------------- ------------ -----\nEth 1/ 1  Mikrotik-11.22.33. Down        1   0 Auto          100TX        None\nEth 1/ 2  vl10_toTESTS-PC    Down        5   0 Auto          100TX        None\nEth 1/ 3  FortiGateLOL-vl10  Up        730   0 Auto-100full  100TX        None\nEth 1/ 4                     Down     3010   0 Auto          100TX        None\nEth 1/ 5                     Down      884   0 100full       100TX        None\nEth 1/ 6                     Down      884   0 Auto          100TX        None\nEth 1/ 7  Phone_Lollink_RNCB Up        222   0 Auto-100full  100TX        None\nEth 1/ 8                     Up        222   0 Auto-100full  100TX        None\nEth 1/ 9                     Up          1   0 Auto-1000full 1000T        None\nEth 1/10  Uplink             Up          1   0 Auto-1000full 1000Base SFP None\n'
+Interface Name               Status   PVID Pri Speed/Duplex  Type         Trunk
+--------- ------------------ -------- ---- --- ------------- ------------ -----
+Eth 1/ 1  Mikrotik-11.22.33. Down        1   0 Auto          100TX        None
+Eth 1/ 2  vl10_toTESTS-PC    Down        5   0 Auto          100TX        None
+Eth 1/ 3  FortiGateLOL-vl10  Up        730   0 Auto-100full  100TX        None
+Eth 1/ 4                     Down     3010   0 Auto          100TX        None
+Eth 1/ 5                     Down      884   0 100full       100TX        None
+Eth 1/ 6                     Down      884   0 Auto          100TX        None
+Eth 1/ 7  Phone_Lollink_RNCB Up        222   0 Auto-100full  100TX        None
+Eth 1/ 8                     Up        222   0 Auto-100full  100TX        None
+Eth 1/ 9                     Up          1   0 Auto-1000full 1000T        None
+Eth 1/10  Uplink             Up          1   0 Auto-1000full 1000Base SFP None
+
 ```
 
 **Help:** execute the command "show interfaces brief"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show interfaces status
 
 **Output:**
 ```
-'Information of Eth 1/1\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-00\n Configuration:\n  Name:                   PC1\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           100full\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Link Down Reason:       Port Admin\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/2\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-01\n Configuration:\n  Name:                   PC2\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/3\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-03\n Configuration:\n  Name:                   AH1100-DevTest\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/4\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-04\n Configuration:\n  Name:                   PC3\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/5\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-05\n Configuration:\n  Name:                   Client_part\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/6\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-06\n Configuration:\n  Name:                   LAB LAN to VM\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/7\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-07\n Configuration:\n  Name:                   Stand\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/8\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-08\n Configuration:\n  Name:                   Stand fa4\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             None\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Down\n  Operation Speed-duplex: 100full\n  Flow Control Type:      None\n\nInformation of Eth 1/9\n Basic Information:\n  Port Type:              1000T\n  Mac Address:            12-34-56-78-AA-09\n Configuration:\n  Name:                   PC4\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full, 1000full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             SFP preferred auto\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Up\n  Port Operation Status:  Up\n  Operation Speed-duplex: 1000full\n  Port Uptime:            1w  12d  11h   37m  14s (1078634 seconds)\n  Flow Control Type:      None\n\nInformation of Eth 1/10\n Basic Information:\n  Port Type:              1000T\n  Mac Address:            12-34-56-78-AA-10\n Configuration:\n  Name:                   Videowall-PC\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:           Auto\n  Capabilities:           10half, 10full, 100half, 100full, 1000full\n  Broadcast Storm:        Enabled\n  Broadcast Storm Limit:  64 Kbits/second\n  Multicast Storm:        Disabled\n  Multicast Storm Limit:  64 Kbits/second\n  UnknownUnicast Storm:        Disabled\n  UnknownUnicast Storm Limit:  64 Kbits/second\n  Flow Control:           Disabled\n  VLAN Trunking:          Disabled\n  LACP:                   Disabled\n  Port Security:          Disabled\n  Max MAC Count:          0\n  Port Security Action:   None\n  Media Type:             SFP preferred auto\n  Giga PHY mode: Auto preferred master\n Current Status:\n  Link Status:            Up\n  Port Operation Status:  Up\n  Operation Speed-duplex: 1000full\n  Port Uptime:            3w  22d  1h   15m  40s (1905340 seconds)\n  Flow Control Type:      None\n\nInformation of VLAN 1\n MAC Address:             12-34-56-78-90-00\n\nInformation of VLAN 150\n MAC Address:             12-34-56-78-90-00\n\nInformation of VLAN 203\n MAC Address:             12-34-56-78-90-00\n'
+Information of Eth 1/1
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-00
+ Configuration:
+  Name:                   PC1
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           100full
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Link Down Reason:       Port Admin
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/2
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-01
+ Configuration:
+  Name:                   PC2
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/3
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-03
+ Configuration:
+  Name:                   AH1100-DevTest
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/4
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-04
+ Configuration:
+  Name:                   PC3
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/5
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-05
+ Configuration:
+  Name:                   Client_part
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/6
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-06
+ Configuration:
+  Name:                   LAB LAN to VM
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/7
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-07
+ Configuration:
+  Name:                   Stand
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/8
+ Basic Information:
+  Port Type:              100TX
+  Mac Address:            12-34-56-78-AA-08
+ Configuration:
+  Name:                   Stand fa4
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             None
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Down
+  Operation Speed-duplex: 100full
+  Flow Control Type:      None
+
+Information of Eth 1/9
+ Basic Information:
+  Port Type:              1000T
+  Mac Address:            12-34-56-78-AA-09
+ Configuration:
+  Name:                   PC4
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full, 1000full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             SFP preferred auto
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Up
+  Port Operation Status:  Up
+  Operation Speed-duplex: 1000full
+  Port Uptime:            1w  12d  11h   37m  14s (1078634 seconds)
+  Flow Control Type:      None
+
+Information of Eth 1/10
+ Basic Information:
+  Port Type:              1000T
+  Mac Address:            12-34-56-78-AA-10
+ Configuration:
+  Name:                   Videowall-PC
+  Port Admin:             Up
+  MDIX mode:              Auto
+  Speed-duplex:           Auto
+  Capabilities:           10half, 10full, 100half, 100full, 1000full
+  Broadcast Storm:        Enabled
+  Broadcast Storm Limit:  64 Kbits/second
+  Multicast Storm:        Disabled
+  Multicast Storm Limit:  64 Kbits/second
+  UnknownUnicast Storm:        Disabled
+  UnknownUnicast Storm Limit:  64 Kbits/second
+  Flow Control:           Disabled
+  VLAN Trunking:          Disabled
+  LACP:                   Disabled
+  Port Security:          Disabled
+  Max MAC Count:          0
+  Port Security Action:   None
+  Media Type:             SFP preferred auto
+  Giga PHY mode: Auto preferred master
+ Current Status:
+  Link Status:            Up
+  Port Operation Status:  Up
+  Operation Speed-duplex: 1000full
+  Port Uptime:            3w  22d  1h   15m  40s (1905340 seconds)
+  Flow Control Type:      None
+
+Information of VLAN 1
+ MAC Address:             12-34-56-78-90-00
+
+Information of VLAN 150
+ MAC Address:             12-34-56-78-90-00
+
+Information of VLAN 203
+ MAC Address:             12-34-56-78-90-00
+
 ```
 
 **Help:** execute the command "show interfaces status"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show interfaces switchport
 
 **Output:**
 ```
-'Information of Eth 1/1\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Trunk\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   226\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                   222(t), 226(t),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/2\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Hybrid\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   1961\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                     1(u), 203(u), 222(t), 226(u),1961(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/3\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Trunk\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   1\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                     1(t), 222(t), 229(t), 730(t),1221(t),1501(t),\n                                3096(t),3099(t),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/4\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   226\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                   226(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/5\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   229\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                   229(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/6\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   3948\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                  3948(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/7\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   1024\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                  1024(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/8\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   884\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                   884(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/9\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 100000 Kbits per second\n Egress Rate Limit:             Disabled, 100000 Kbits per second\n VLAN Membership Mode:          Access\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   203\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                   203(u),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n\nInformation of Eth 1/10\n Broadcast Threshold:           Enabled, 64 Kbits/second\n Multicast Threshold:           Disabled\n Unknown-unicast Threshold:     Disabled\n LACP Status:                   Disabled\n Ingress Rate Limit:            Disabled, 1000000 Kbits per second\n Egress Rate Limit:             Disabled, 1000000 Kbits per second\n VLAN Membership Mode:          Trunk\n Ingress Rule:                  Enabled\n Acceptable Frame Type:         All frames\n Native VLAN:                   1\n Priority for Untagged Traffic: 0\n GVRP Status:                   Disabled\n Allowed VLAN:                     1(t), 203(t), 222(t), 226(t), 229(t), 243(t),\n                                 255(t), 362(t), 600(t), 730(t), 760(t), 761(t),\n                                 884(t),1024(t),1115(t),1221(t),1266(t),1381(t),\n                                1501(t),1961(t),2498(t),2704(t),3010(t),3030(t),\n                                3040(t),3096(t),3099(t),3948(t),\n Forbidden VLAN:\n Private-VLAN Mode:             NONE\n Private-VLAN host-association: NONE\n Private-VLAN Mapping:          NONE\n 802.1Q-tunnel Status:          Disable\n 802.1Q-tunnel Mode:            NORMAL\n 802.1Q-tunnel TPID:            8100(Hex)\n Layer 2 Protocol Tunnel       : None\n'
+Information of Eth 1/1
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Trunk
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   226
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                   222(t), 226(t),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/2
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Hybrid
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   1961
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                     1(u), 203(u), 222(t), 226(u),1961(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/3
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Trunk
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   1
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                     1(t), 222(t), 229(t), 730(t),1221(t),1501(t),
+                                3096(t),3099(t),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/4
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   226
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                   226(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/5
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   229
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                   229(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/6
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   3948
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                  3948(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/7
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   1024
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                  1024(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/8
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   884
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                   884(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/9
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 100000 Kbits per second
+ Egress Rate Limit:             Disabled, 100000 Kbits per second
+ VLAN Membership Mode:          Access
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   203
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                   203(u),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
+Information of Eth 1/10
+ Broadcast Threshold:           Enabled, 64 Kbits/second
+ Multicast Threshold:           Disabled
+ Unknown-unicast Threshold:     Disabled
+ LACP Status:                   Disabled
+ Ingress Rate Limit:            Disabled, 1000000 Kbits per second
+ Egress Rate Limit:             Disabled, 1000000 Kbits per second
+ VLAN Membership Mode:          Trunk
+ Ingress Rule:                  Enabled
+ Acceptable Frame Type:         All frames
+ Native VLAN:                   1
+ Priority for Untagged Traffic: 0
+ GVRP Status:                   Disabled
+ Allowed VLAN:                     1(t), 203(t), 222(t), 226(t), 229(t), 243(t),
+                                 255(t), 362(t), 600(t), 730(t), 760(t), 761(t),
+                                 884(t),1024(t),1115(t),1221(t),1266(t),1381(t),
+                                1501(t),1961(t),2498(t),2704(t),3010(t),3030(t),
+                                3040(t),3096(t),3099(t),3948(t),
+ Forbidden VLAN:
+ Private-VLAN Mode:             NONE
+ Private-VLAN host-association: NONE
+ Private-VLAN Mapping:          NONE
+ 802.1Q-tunnel Status:          Disable
+ 802.1Q-tunnel Mode:            NORMAL
+ 802.1Q-tunnel TPID:            8100(Hex)
+ Layer 2 Protocol Tunnel       : None
+
 ```
 
 **Help:** execute the command "show interfaces switchport"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show ip interface
 
 **Output:**
 ```
-' IP Address and Netmask:  10.255.5.55 255.255.0.0 on VLAN 255,\n Address Mode:            User specified\n'
+ IP Address and Netmask:  10.255.5.55 255.255.0.0 on VLAN 255,
+ Address Mode:            User specified
+
 ```
 
 **Help:** execute the command "show ip interface"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show system
 
 **Output:**
 ```
-'System Description: Layer2+ Fast Ethernet Standalone Switch ES3526XA\nSystem OID String: 1.3.6.1.4.1.259.8.1.5\nSystem Information\n System Up Time:          56 days, 21 hours, 46 minutes, and 56.65 seconds\n System Name:             DMIT-EdgeCore-near-side-0\n System Location:         1428 Elm Street\n System Contact:          [NONE]\n MAC Address (Unit1):     00-12-34-56-78-90\n Web Server:              Enabled\n Web Server Port:         80\n Web Secure Server:       Enabled\n Web Secure Server Port:  443\n Telnet Server:           Enable\n Telnet Server Port:      23\n Authentication Login:     Local RADIUS None\n Authentication Enabled:    Local RADIUS None\n Jumbo Frame:             Disabled\n\n POST Result:\nDUMMY Test 1 ................. PASS\nUART Loopback Test ........... PASS\nDRAM Test .................... PASS\nI2C Bus Initialization ....... PASS\n\nDone All Pass.\n'
+System Description: Layer2+ Fast Ethernet Standalone Switch ES3526XA
+System OID String: 1.3.6.1.4.1.259.8.1.5
+System Information
+ System Up Time:          56 days, 21 hours, 46 minutes, and 56.65 seconds
+ System Name:             DMIT-EdgeCore-near-side-0
+ System Location:         1428 Elm Street
+ System Contact:          [NONE]
+ MAC Address (Unit1):     00-12-34-56-78-90
+ Web Server:              Enabled
+ Web Server Port:         80
+ Web Secure Server:       Enabled
+ Web Secure Server Port:  443
+ Telnet Server:           Enable
+ Telnet Server Port:      23
+ Authentication Login:     Local RADIUS None
+ Authentication Enabled:    Local RADIUS None
+ Jumbo Frame:             Disabled
+
+ POST Result:
+DUMMY Test 1 ................. PASS
+UART Loopback Test ........... PASS
+DRAM Test .................... PASS
+I2C Bus Initialization ....... PASS
+
+Done All Pass.
+
 ```
 
 **Help:** execute the command "show system"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show version
 
 **Output:**
 ```
-' Serial Number:           A123456789\n Service Tag:\n Hardware Version:        R99\n EPLD Version:            1.23\n Number of Ports:         26\n Main Power Status:       Up\n Loader Version:          1.2.3.4\n Boot ROM Version:        1.2.3.5\n Operation Code Version:  1.2.3.6\n'
+ Serial Number:           A123456789
+ Service Tag:
+ Hardware Version:        R99
+ EPLD Version:            1.23
+ Number of Ports:         26
+ Main Power Status:       Up
+ Loader Version:          1.2.3.4
+ Boot ROM Version:        1.2.3.5
+ Operation Code Version:  1.2.3.6
+
 ```
 
 **Help:** execute the command "show version"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### show vlan
 
 **Output:**
 ```
-'Default VLAN ID : 1\n\n\nVLAN ID:               1\nType:                  Static\nName:                  DefaultVlan\nStatus:                Active\nPorts/Port Channels:   Eth1/ 2(S) Eth1/ 3(S) Eth1/10(S) Eth1/14(S) Eth1/20(S)\n                       Eth1/21(S) Eth1/22(S) Eth1/24(S) Eth1/25(S) Eth1/26(S)\n\n\nVLAN ID:               203\nType:                  Static\nName:                  Management\nStatus:                Active\nPorts/Port Channels:   Eth1/ 2(S) Eth1/ 9(S) Eth1/24(S) Eth1/25(S)\n\n\nVLAN ID:               226\nType:                  Static\nName:\nStatus:                Active\nPorts/Port Channels:   Eth1/ 1(S) Eth1/ 2(S) Eth1/ 4(S) Eth1/11(S) Eth1/23(S)\n                       Eth1/24(S) Eth1/25(S) Eth1/27(S)\n\n\nVLAN ID:               229\nType:                  Static\nName:\nStatus:                Active\nPorts/Port Channels:   Eth1/ 3(S) Eth1/ 5(S) Eth1/25(S)\n'
+Default VLAN ID : 1
+
+
+VLAN ID:               1
+Type:                  Static
+Name:                  DefaultVlan
+Status:                Active
+Ports/Port Channels:   Eth1/ 2(S) Eth1/ 3(S) Eth1/10(S) Eth1/14(S) Eth1/20(S)
+                       Eth1/21(S) Eth1/22(S) Eth1/24(S) Eth1/25(S) Eth1/26(S)
+
+
+VLAN ID:               203
+Type:                  Static
+Name:                  Management
+Status:                Active
+Ports/Port Channels:   Eth1/ 2(S) Eth1/ 9(S) Eth1/24(S) Eth1/25(S)
+
+
+VLAN ID:               226
+Type:                  Static
+Name:
+Status:                Active
+Ports/Port Channels:   Eth1/ 1(S) Eth1/ 2(S) Eth1/ 4(S) Eth1/11(S) Eth1/23(S)
+                       Eth1/24(S) Eth1/25(S) Eth1/27(S)
+
+
+VLAN ID:               229
+Type:                  Static
+Name:
+Status:                Active
+Ports/Port Channels:   Eth1/ 3(S) Eth1/ 5(S) Eth1/25(S)
+
 ```
 
 **Help:** execute the command "show vlan"
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 
 ### _default_
 
 **Output:**
 ```
-'% Invalid input detected'
+% Invalid input detected
 ```
 
 **Help:** default output for unknown commands
 
 **Prompt:**
-- {base_prompt}$
-- {base_prompt}#
+- edgecore$
+- edgecore#
 

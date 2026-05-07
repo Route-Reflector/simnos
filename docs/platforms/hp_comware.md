@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -30,10 +28,7 @@
 
 ### ex
 
-**Output:**
-```
-True
-```
+**Output:** None
 
 **Help:** exit the terminal
 
@@ -51,11 +46,11 @@ True
  Description: VLAN 0001
  Name: VLAN 0001
  Tagged ports:   None
- Untagged ports:
-    Bridge-Aggregation1           Bridge-Aggregation2
-    Bridge-Aggregation3           Bridge-Aggregation4
-    Ten-GigabitEthernet1/0/1
-    Ten-GigabitEthernet1/0/2
+ Untagged ports: 
+    Bridge-Aggregation1           Bridge-Aggregation2           
+    Bridge-Aggregation3           Bridge-Aggregation4           
+    Ten-GigabitEthernet1/0/1      
+    Ten-GigabitEthernet1/0/2      
 
  VLAN ID: 100
  VLAN type: Static
@@ -64,10 +59,10 @@ True
  IPv4 subnet mask: 255.255.255.0
  Description: User VLAN
  Name: VLAN_100
- Tagged ports:
-    Bridge-Aggregation5           Bridge-Aggregation6
-    Ten-GigabitEthernet1/0/1
-    Ten-GigabitEthernet1/0/3
+ Tagged ports:   
+    Bridge-Aggregation5           Bridge-Aggregation6           
+    Ten-GigabitEthernet1/0/1      
+    Ten-GigabitEthernet1/0/3      
  Untagged ports: None
 
  VLAN ID: 101
@@ -77,12 +72,12 @@ True
  IPv4 subnet mask: 255.255.255.0
  Description: VLAN 101
  Name: VLAN_101
- Tagged ports:
-    Bridge-Aggregation7           Bridge-Aggregation8
-    Ten-GigabitEthernet2/0/35
-    Ten-GigabitEthernet2/0/37
+ Tagged ports:   
+    Bridge-Aggregation7           Bridge-Aggregation8           
+    Ten-GigabitEthernet2/0/35     
+    Ten-GigabitEthernet2/0/37     
  Untagged ports:
-    Ten-GigabitEthernet1/0/46
+    Ten-GigabitEthernet1/0/46     
 
 ```
 
@@ -155,7 +150,7 @@ The operation is not supported on the specified power.
 Chassis ID : * -- -- Nearest nontpmr bridge neighbor
              # -- -- Nearest customer bridge neighbor
              Default -- -- Nearest bridge neighbor
-Local Interface Chassis ID      Port ID                    System Name
+Local Interface Chassis ID      Port ID                    System Name          
 XGE1/0/0/1      bcea-fa00-0033  Ten-GigabitEthernet1/0/47  SWITCH01
 XGE1/0/0/2      bcea-fa00-0033  Ten-GigabitEthernet2/0/47  SWITCH01
 
@@ -189,7 +184,7 @@ XGE1/0/0/2      bcea-fa00-0033  Ten-GigabitEthernet2/0/47  SWITCH01
 
 **Output:**
 ```
-<HS125X>dis ip routing-table
+<HS125X>dis ip routing-table 
 
 Destinations : 17604     Routes : 28601
 
@@ -377,10 +372,10 @@ LLDP neighbor-information of port 2[Ten-GigabitEthernet1/0/0/2]:
  Time to live        : 120
  Port description    : TO_CORE_2
  System name         : SW2
- System description  : H3C Comware Platform Software, Software Version 7.1.045,
+ System description  : H3C Comware Platform Software, Software Version 7.1.045, 
                        Release 1005P09
                        H3C S12510-X
-                       Copyright (c) 2004-2014 Hangzhou H3C Tech. Co., Ltd. All
+                       Copyright (c) 2004-2014 Hangzhou H3C Tech. Co., Ltd. All 
                        rights reserved.
  System capabilities supported : Bridge, Router, Customer Bridge, Service Bridge
  System capabilities enabled   : Bridge, Router, Customer Bridge
@@ -415,10 +410,10 @@ LLDP agent nearest-bridge:
  Time to live        : 120
  Port description    : TO_SPINE
  System name         : SW3
- System description  : H3C Comware Platform Software, Software Version 7.1.045,
+ System description  : H3C Comware Platform Software, Software Version 7.1.045, 
                        Release 1005P09
                        H3C S12510-X
-                       Copyright (c) 2004-2014 Hangzhou H3C Tech. Co., Ltd. All
+                       Copyright (c) 2004-2014 Hangzhou H3C Tech. Co., Ltd. All 
                        rights reserved.
  System capabilities supported : Bridge, Router, Customer Bridge, Service Bridge
  System capabilities enabled   : Bridge, Router, Customer Bridge
@@ -565,8 +560,8 @@ Last clearing of counters: Never
 Current system time:2022-12-04 09:59:42 EEST+03:00:00
 Last time when physical state changed to up:-
 Last time when physical state changed to down:2022-12-03 14:48:11 EEST+03:00:00
- Peak input rate: 0 bytes/sec, at 2022-12-03 14:48:40
-Peak output rate: 0 bytes/sec, at 2022-12-03 14:48:40
+ Peak input rate: 0 bytes/sec, at 2022-12-03 14:48:40 
+Peak output rate: 0 bytes/sec, at 2022-12-03 14:48:40 
 Last 300 seconds input: 0 packets/sec 0 bytes/sec -%
  Last 300 seconds output: 0 packets/sec 0 bytes/sec -%
 Input (total):  0 packets, 0 bytes
@@ -752,3 +747,4 @@ XGE6/0/52                46490              16009               7582           0
 **Prompt:**
 - hp_comware>
 - hp_comware#
+
