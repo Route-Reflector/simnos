@@ -294,3 +294,132 @@ commands:
       dropped          0\nmulticast packets received        0\n-------------------------------------------------------------------------------\n"
     help: execute the command "show interface management"
     prompt: "{base_prompt}>"
+  request license info:
+    output: "Current PDT Date: May 19, 2021\n\nLicense entry:\nFeature: WildFire License\n\
+      Description: WildFire signature feed, integrated WildFire logs, WildFire API\n\
+      Serial: 0000000xxxxxxxx\nIssued: January 13, 2020\nExpires: March 08, 2023\n\
+      Expired?: no\nBase license: PA-VM\n\nLicense entry:\nFeature: Premium\nDescription:
+      24 x 7 phone support; advanced replacement hardware service\nSerial: 0000000xxxxxxxx\n\
+      Issued: January 13, 2020\nExpires: January 09, 2023\nExpired?: no\nBase license:
+      PA-VM\n\nLicense entry:\nFeature: PAN-DB URL Filtering\nDescription: Palo Alto
+      Networks URL Filtering License\nSerial: 0000000xxxxxxxx\nIssued: January 13,
+      2020\nExpires: March 08, 2023\nExpired?: no\nBase license: PA-VM\n\nLicense
+      entry:\nFeature: GlobalProtect Portal\nDescription: GlobalProtect Portal License\n\
+      Serial: 0000000xxxxxxxx\nIssued: March 08, 2017\nExpires: Never\nExpired?: no\n\
+      Base license: PA-VM\n\nLicense entry:\nFeature: PA-VM\nDescription: Standard
+      VM-100\nSerial: 0000000xxxxxxxx\nIssued: March 08, 2017\nExpires: Never\nExpired?:
+      no\n\nLicense entry:\nFeature: Threat Prevention\nDescription: Threat Prevention\n\
+      Serial: 0000000xxxxxxxx\nIssued: January 13, 2020\nExpires: January 13, 2023\n\
+      Expired?: no\nBase license: PA-VM\n\nLicense entry:\nFeature: GlobalProtect
+      Gateway\nDescription: GlobalProtect Gateway License\nSerial: 0000000xxxxxxxx\n\
+      Issued: January 13, 2020\nExpires: March 08, 2023\nExpired?: no\nBase license:
+      PA-VM\nAuthcode: abc def\n"
+    help: execute the command "request license info"
+    prompt: '{base_prompt}>'
+  show high-availability path-monitoring:
+    output: "--------------------------------------------------------------------------------\n\
+      total paths monitored :                         2\nhold time to send probe packets
+      :               1000 ms\n  (after device becomes active)\n--------------------------------------------------------------------------------\n\
+      grp/name/type             destination     suc/total rtt min/max/avg (ms) probe
+      cnt/interval(ms)\n--------------------------------------------------------------------------------\n\
+      HA_PATH_NORTH/VR_HANDOFF/virtual-router 8.8.8.8         10/10     3.66/4.19/3.90\
+      \      10/1000    \nHA_PATH_NORTH/VR_HANDOFF/virtual-router 217.111.187.217
+      10/10     2.36/2.75/2.58      10/1000    \n--------------------------------------------------------------------------------"
+    help: execute the command "show high-availability path-monitoring"
+    prompt: '{base_prompt}>'
+  show routing protocol bgp summary:
+    output: "  ==========\n  router id:                     1.1.1.1\n  virtual router:\
+      \                VR_HANDOFF\n  reject default route:          no\n  redist default
+      route:          allow\n  Install BGP routes:            yes\n  Graceful Restart:\
+      \              supported\n  AS size:                       2\n  Local AS:  \
+      \                    65253\n  Local member AS:               0\n  Cluster id:\
+      \                    0.0.0.0\n  Default local preference:      100\n  Always
+      compare MED:            no\n  Aggregate regardless MED:      yes\n  Deterministic
+      MED processing:  yes\n  Accept ORF:                    no\n  Accept CISCO style
+      prefix:     yes\n  mp-bgp-enable:                 yes\n  afi-safi-ipv4-unicast:\
+      \         yes\n  rib-out entries:               current 46, peak 47 \n    peer
+      DC-N9K-BGW01 - BLU 301: AS 65253, Established, IP 192.168.1.1\n      bgpAfiIpv4/unicast
+      pfx:    Accepted pfx: 4, Advertised pfx: 4\n    peer DC-N9K-BGW02 - BLU 301:
+      AS 65301, Established, IP 192.168.1.2\n      bgpAfiIpv4/unicast pfx:    Accepted
+      pfx: 4, Advertised pfx: 4\n    peer DC-N9K-BGW01 - GRN 302: AS 65253, Established,
+      IP 192.168.2.9\n      bgpAfiIpv4/unicast pfx:    Accepted pfx: 3, Advertised
+      pfx: 4\n    peer DC-N9K-BGW02 - GRN 302: AS 65302, Established, IP 192.168.2.10\n\
+      \      bgpAfiIpv4/unicast pfx:    Accepted pfx: 3, Advertised pfx: 4\n    peer
+      DC-N9K-BGW01 - AMB 303: AS 65253, Established, IP 192.168.3.17\n      bgpAfiIpv4/unicast
+      pfx:    Accepted pfx: 2, Advertised pfx: 3\n    peer DC-N9K-BGW02 - AMB 303:
+      AS 65303, Established, IP 192.168.3.18\n      bgpAfiIpv4/unicast pfx:    Accepted
+      pfx: 2, Advertised pfx: 3\n"
+    help: execute the command "show routing protocol bgp summary"
+    prompt: '{base_prompt}>'
+  show routing resource:
+    output: "GLOBAL ROUTING RESOURCE USAGE:\n  ==========\n  All      Routes (total):\
+      \             18 \t(limit    10000)\n  All IPv4 Routes (total):            \
+      \ 18 \t(limit    10000)\n  All IPv6 Routes (total):              0 \t(limit\
+      \    10000)\n  All     Routes (active):             18\n  ==========\n  Static\
+      \   Routes (total):              5\n  Connect  Routes (total):             \
+      \ 4\n  BGP      Routes (total):              9\n  OSPF     Routes (total): \
+      \             0\n  RIP      Routes (total):              0"
+    help: execute the command "show routing resource"
+    prompt: '{base_prompt}>'
+  show routing route:
+    output: "flags: A:active, ?:loose, C:connect, H:host, S:static, ~:internal, R:rip,
+      O:ospf, B:bgp, \n       Oi:ospf intra-area, Oo:ospf inter-area, O1:ospf ext-type-1,
+      O2:ospf ext-type-2, E:ecmp, M:multicast\n\n  \nVIRTUAL ROUTER: VR_HANDOFF (id
+      3)\n  ==========\ndestination                                 nexthop      \
+      \                           metric flags      age   interface          next-AS\
+      \    \n0.0.0.0/0                                   192.168.2.49            \
+      \                       A?B        121661                    0          \n10.0.0.0/8\
+      \                                  discard                                 10\
+      \     A S                                            \n10.0.0.1/32         \
+      \                        192.168.2.44                                   A?B\
+      \        120738                    65213      \n10.0.0.2/32                \
+      \                 192.168.2.44                                   A?B       \
+      \ 120738                    65213           \n10.3.0.0/16                  \
+      \               discard                                 10     A S         \
+      \                                   \n10.3.0.0/20                          \
+      \       192.168.2.1                                    A?B        121661   \
+      \                 65213      \n10.3.0.0/21                                 192.168.2.1\
+      \                                    A?B        121661                    65213\
+      \          \n10.3.252.0/23                               192.168.2.49      \
+      \                             A?B        121661                    0       \
+      \   \n10.3.252.0/24                               192.168.2.49             \
+      \                      A?B        121661                    0          \n10.3.252.0/28\
+      \                               discard                                 10 \
+      \    A S                                            \n10.3.253.0/28        \
+      \                       discard                                 10     A S \
+      \                                           \n10.3.255.0/24                \
+      \               192.168.2.25                                   A?B        121661\
+      \                    65213      \n10.3.255.0/25                            \
+      \   192.168.2.25                                   A?B        121661       \
+      \             65213              \n172.16.0.0/12                           \
+      \    discard                                 10     A S                    \
+      \                        \n172.17.0.0/16                               discard\
+      \                                 10     A S                               \
+      \             \n172.17.0.0/17                               192.168.2.1    \
+      \                                A?B        121661                    65213\
+      \      \n172.17.128.0/18                             192.168.2.9           \
+      \                         A?B        121661                    65213       \
+      \  \n172.30.0.0/18                               192.168.2.49              \
+      \                     A?B        121661                    0          \n172.30.0.0/19\
+      \                               192.168.2.49                               \
+      \    A?B        121661                    0                  \n192.168.0.0/16\
+      \                              discard                                 10  \
+      \   A S                                            \n192.168.2.0/29        \
+      \                      192.168.2.3                             0      A C  \
+      \            ethernet1/8.3111              \n192.168.2.3/32                \
+      \              0.0.0.0                                 0      A H          \
+      \                                  \n192.168.2.8/29                        \
+      \      192.168.2.11                            0      A C              ethernet1/8.3112\
+      \              \n192.168.2.11/32                             0.0.0.0       \
+      \                          0      A H                                      \
+      \      \n192.168.2.16/29                             192.168.2.19          \
+      \                  0      A C              ethernet1/8.3113              \n\
+      192.168.2.19/32                             0.0.0.0                        \
+      \         0      A H                                                       \
+      \                       \n192.168.5.10/31                             192.168.2.41\
+      \                                   A?B        121661                    65213\
+      \      \n192.168.5.26/31                             192.168.2.41          \
+      \                         A?B        121661                    65213      \n\
+      total routes shown: 98"
+    help: execute the command "show routing route"
+    prompt: '{base_prompt}>'

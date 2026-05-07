@@ -1538,3 +1538,178 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  dir:
+    output: "Directory of extension:/\n\nNo files in directory\n\n4093313024 bytes
+      total (3029774336 bytes free)\n"
+    help: execute the command "dir"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    output_variants:
+    - "Directory of flash:/\n\n       -rwx   591941836            Aug 2  2017  EOS-4.18.3.1F.swi\n\
+      \       -rwx   609823300           Feb 14 02:03  EOS-4.19.5M.swi\n       -rwx\
+      \          29           Aug 23  2017  boot-config\n       drwx        4096 \
+      \          Aug 23  2017  debug\n       -rwx           0           Apr 15  2017\
+      \  enable3px\n       -rwx          19           Apr 15  2017  enable3px.key\n\
+      \       -rwx          31           Apr 15  2017  kickstart-config\n       drwx\
+      \        4096            Apr 3 10:29  persist\n       drwx        4096     \
+      \      Apr 15  2017  schedule\n       -rwx       20530           Jan 18 22:46\
+      \  startup-config\n       -rwx          13           Aug 23  2017  zerotouch-config\n\
+      \n3519041536 bytes total (1725112320 bytes free)\n"
+    - "Directory of flash:/\n\n       -rw-        1465           Feb 28 07:12  .CloudInitLogs\n\
+      \       -rw-           0           Sep 19  2022  .assetTags\n       -r--   509379353\
+      \           Sep 19  2022  .boot-image.swi\n       -rw-         250         \
+      \  Feb 28 07:13  .veos-config-internal\n       -rw-         250           Feb
+      28 06:56  .veos-config-internal.save\n       -rw-        1155           Feb
+      28 07:11  AsuFastPktTransmit.log\n       -rw-         710           Feb 28 07:11\
+      \  SsuRestore.log\n       -rw-         710           Feb 28 07:11  SsuRestoreLegacy.log\n\
+      \       -rw-        1186           Sep 19  2022  arista5-default.txt\n     \
+      \  -rw-          24           Apr 13  2022  boot-config\n       -rw-       \
+      \ 1251           Jul 21 04:15  rollback-0\n       -rw-        1418         \
+      \  Jul 21 04:15  startup-config\n       -rw-   509379353           Apr 13  2022\
+      \  vEOS-lab.swi\n       -rw-          13           Sep 19  2022  zerotouch-config\n\
+      \nDirectory of flash:/.checkpoints\n\n       -rw-        1486           Jul
+      13 08:02  ckp-20240713-5\n       -rw-        1416           Jul 15 10:17  ckp-20240715-0\n\
+      \       -rw-        1438           Jul 15 13:04  ckp-20240715-1\n       -rw-\
+      \        1508           Jul 15 13:05  ckp-20240715-2\n       -rw-        1507\
+      \           Jul 16 04:15  ckp-20240716-0\n       -rw-        1416          \
+      \ Jul 17 08:52  ckp-20240717-0\n       -rw-        1248           Jul 17 16:36\
+      \  ckp-20240717-1\n       -rw-        1275           Jul 17 16:36  ckp-20240717-2\n\
+      \       -rw-        1302           Jul 17 16:36  ckp-20240717-3\n       -rw-\
+      \        1329           Jul 17 16:36  ckp-20240717-4\n       -rw-        1356\
+      \           Jul 17 16:39  ckp-20240717-5\n       -rw-        1248          \
+      \ Jul 17 17:33  ckp-20240717-6\n       -rw-        1590           Jul 17 17:34\
+      \  ckp-20240717-7\n       -rw-        1248           Jul 17 21:34  ckp-20240717-8\n\
+      \       -rw-        1589           Jul 18 04:15  ckp-20240718-0\n       -rw-\
+      \        1416           Jul 20 06:32  ckp-20240720-0\n       -rw-        1590\
+      \           Jul 20 06:33  ckp-20240720-1\n       -rw-        1248          \
+      \ Jul 20 06:36  ckp-20240720-2\n       -rw-        1590           Jul 20 06:38\
+      \  ckp-20240720-3\n       -rw-        1247           Jul 21 04:15  ckp-20240721-0\n\
+      \nDirectory of flash:/.extensions\n\nNo files in directory\n\nDirectory of flash:/.managed-config\n\
+      \nNo files in directory\n\nDirectory of flash:/Fossil\n\nNo files in directory\n\
+      \nDirectory of flash:/debug\n\n       -rw-     3600958           Jan 12  2023\
+      \  pre_reload_logs.tgz\n       -rw-          89           Feb 28 07:13  reload_history\n\
+      \nDirectory of flash:/debug/proc\n\n       -r--        1885           Feb 28
+      07:11  modules\n\nDirectory of flash:/fastpkttx.backup\n\nNo files in directory\n\
+      \nDirectory of flash:/lost+found\n\nNo files in directory\n\nDirectory of flash:/persist\n\
+      \n       -rw-         288           Feb 28 07:11  AsuEvent.log\n       -rw-\
+      \        5120           Jul 23 02:15  local\n       -rw-           0       \
+      \    Jul 22 10:15  messages\n       -rw-       30720           Feb 28 07:13\
+      \  secure\n       -rw-        5120           Jul 23 04:30  sys\n\nDirectory
+      of flash:/persist/persistentRestartLog\n\nNo files in directory\n\nDirectory
+      of flash:/schedule\n\nDirectory of flash:/schedule/tech-support\n\n       -rw-\
+      \       71734           Jul 19 00:47  arista5_tech-support_2024-07-19.0047.log.gz\n\
+      \       -rw-       71774           Jul 19 01:47  arista5_tech-support_2024-07-19.0147.log.gz\n\
+      \                                                                          \
+      \                               \n4093313024 bytes total (3029774336 bytes free)\n"
+    - "Directory of system:/\n\n       -rw-        1349              <no date>  running-config\n\
+      \nNo space information available\n"
+  show environment power:
+    output: "Power              Input Output Output\nSupply Model      Capacity Current
+      Current Power Status      Uptime\n------ --------------- -------- ------- -------
+      ------ ------ ----------------\n1   PWR-1011-AC-RED  1000W  0.70A 11.58A 139.0W
+      Ok   68 days, 0:11:28\n2   PWR-1011-AC-RED  1000W  0.68A 11.31A 134.0W Ok  \
+      \ 68 days, 0:11:29\nTotal --         2000W   --   -- 273.0W --          --\n"
+    help: execute the command "show environment power"
+    prompt: *id001
+    output_variants:
+    - "Power                                  Input    Output   Output\nSupply  Model\
+      \                Capacity  Current  Current  Power    Status\n------- --------------------
+      --------- -------- -------- -------- -------------\n1       PWR-460AC-F    \
+      \           460W    0.00A    0.00A     0.0W Power Loss\n2       PWR-460AC-F\
+      \               460W    1.05A   10.38A   121.0W Ok\n"
+    - "Power                        Input  Output  Output\nSupply Model       Capacity
+      Current Current  Power Status              Uptime\n------ ----------- --------
+      ------- ------- ------ ------ -------------------\n1      PWR-500AC-R     500W\
+      \   0.35A   5.34A  64.8W Ok     1087 days, 21:24:36\n2      PWR-500AC-R    \
+      \ 500W   0.38A   5.77A  70.0W Ok       617 days, 8:39:45\nTotal  --        \
+      \     1000W      --      -- 134.8W --                      --\n"
+    - "% There seem to be no power supplies connected.\n"
+  show interfaces transceiver hardware:
+    output: "Name: Et1\nMedia type: 1000BASE-T\nMaximum module power (W): 0.0\nMaximum
+      slot power (W): N/A\n\nName: Et49\nMedia type: 10GBASE-CR\nMaximum module power
+      (W): 1.0\nMaximum slot power (W): N/A\n\nName: Et51\nMedia type: 1000BASE-LX\n\
+      Maximum module power (W): 1.0\nMaximum slot power (W): N/A\nWavelength (nm):
+      1310\n\nName: Ethernet96\nMedia type: 5GBASE-T\n\nName: Ethernet97/1\nModule
+      presence: not detected\nMaximum slot power (W): N/A\n\nName: Ethernet88\nMedia
+      type: 2.5GBASE-T\n\nName: Ethernet76\nMedia type: 2.5GBASE-T\n"
+    help: execute the command "show interfaces transceiver hardware"
+    prompt: *id001
+  show ip mroute vrf all detail:
+    output: "VRF:default\nPIM Bidirectional Mode Multicast Routing Table\nRPF route:
+      U - From unicast routing table\n           M - From multicast routing table\n\
+      PIM Sparse Mode Multicast Routing Table\nFlags: E - Entry forwarding on the
+      RPT, J - Joining to the SPT\n    R - RPT bit is set, S - SPT bit is set, L -
+      Source is attached\n    W - Wildcard entry, X - External component interest\n\
+      \    I - SG Include Join alert rcvd, P - Programmed in hardware\n    H - Joining
+      SPT due to policy, D - Joining SPT due to protocol\n    Z - Entry marked for
+      deletion, C - Learned from a DR via a register\n    A - Learned via Anycast
+      RP Router, M - Learned via MSDP\n    N - May notify MSDP, K - Keepalive timer
+      not running\n    T - Switching Incoming Interface, B - Learned via Border Router\n\
+      \    V - Source is reachable via Evpn Tenant Domain\n    F - Learned via MVPN\n\
+      RPF route: U - From unicast routing table\n           M - From multicast routing
+      table\n* - Interface has EVPN information available in the 'detail' command
+      output\n224.0.1.129\n  169.254.132.172, 118d18h, flags: PE\n    Incoming interface:
+      Null\n    Upstream joined state: upNotJoined\n    Upstream RPT joined state:
+      upRptNotJoined\n    State summarization macros:\n      Could register (S,G):
+      False\n      Register stop (S,G): True\n      Join desired (S,G): False\n  \
+      \    Prune desired (S,G,Rpt): False\n      No interfaces in immediate olist
+      (S,G): True\n      No interfaces in inherited olist (S,G): True\n224.0.23.192\n\
+      \  0.0.0.0, 38d14h, RP 204.14.0.136, flags: W\n    Incoming interface: Register\n\
+      \    Outgoing interface list:\n      Ethernet2/1\n      Ethernet2/2\n    Upstream
+      joined state: upJoined\n    Upstream RPT joined state: upRptNotJoined\n    State
+      summarization macros:\n      Join desired (*,G): True\n      Join desired (*,*,RP):
+      False\n      RPT join desired (*,G): True\n      No interfaces in immediate
+      olist (*,G): False\n      No interfaces in immediate olist (*,*,G): True\n \
+      \ 192.26.98.17, 8:57:21, flags: PE\n    Incoming interface: Register\n    Outgoing
+      interface list:\n      Ethernet2/1\n    Upstream joined state: upNotJoined\n\
+      \    Upstream RPT joined state: upRptNotPruned\n    State summarization macros:\n\
+      \      Could register (S,G): False\n      Register stop (S,G): False\n     \
+      \ Join desired (S,G): False\n      Prune desired (S,G,Rpt): False\n      No
+      interfaces in immediate olist (S,G): True\n      No interfaces in inherited
+      olist (S,G): False\n  192.168.98.17, 8:57:21, flags: SP\n    Incoming interface:
+      Ethernet10\n    RPF route: [U] 192.168.98.0/27 [20/0] via 10.100.10.6\n    Outgoing
+      interface list:\n      Ethernet2/1\n    Upstream joined state: upNotJoined\n\
+      \    Upstream RPT joined state: upRptNotPruned\n    State summarization macros:\n\
+      \      Could register (S,G): False\n      Register stop (S,G): True\n      Join
+      desired (S,G): True\n      Prune desired (S,G,Rpt): False\n      No interfaces
+      in immediate olist (S,G): False\n      No interfaces in inherited olist (S,G):
+      False\n224.0.23.190\n  0.0.0.0, 38d14h, RP 204.14.0.136, flags: W\n    Incoming
+      interface: Register\n    Outgoing interface list:\n      Ethernet0/1\n    Upstream
+      joined state: upJoined\n    Upstream RPT joined state: upRptNotJoined\n    State
+      summarization macros:\n      Join desired (*,G): True\n      Join desired (*,*,RP):
+      False\n      RPT join desired (*,G): True\n      No interfaces in immediate
+      olist (*,G): False\n      No interfaces in immediate olist (*,*,G): True\n \
+      \ 10.205.227.165, 38d14h, flags: SBNP\n    Incoming interface: Ethernet32\n\
+      \    Outgoing interface list:\n      Ethernet2/1\n    Interfaces not in OIL:\n\
+      \      Ethernet0/1: Not DR, RPT Pruned\n    Upstream joined state: upJoined\n\
+      \    Upstream RPT joined state: upRptNotPruned\n    State summarization macros:\n\
+      \      Could register (S,G): True\n      Register stop (S,G): True\n      Join
+      desired (S,G): True\n      Prune desired (S,G,Rpt): False\n      No interfaces
+      in immediate olist (S,G): False\n      No interfaces in inherited olist (S,G):
+      False\n  10.205.227.166, 18d7h, RP 204.14.0.136, flags: SBNP\n    Incoming interface:
+      Ethernet32\n    Outgoing interface list:\n      Ethernet0/1\n      Ethernet2/1\n\
+      \    Upstream joined state: upJoined\n    Upstream RPT joined state: upRptNotPruned\n\
+      \    State summarization macros:\n      Could register (S,G): True\n      Register
+      stop (S,G): True\n      Join desired (S,G): True\n      Prune desired (S,G,Rpt):
+      False\n      No interfaces in immediate olist (S,G): False\n      No interfaces
+      in inherited olist (S,G): False\nVRF:FOO\nPIM Bidirectional Mode Multicast Routing
+      Table\nRPF route: U - From unicast routing table\n           M - From multicast
+      routing table\nPIM Sparse Mode Multicast Routing Table\nFlags: E - Entry forwarding
+      on the RPT, J - Joining to the SPT\n    R - RPT bit is set, S - SPT bit is set,
+      L - Source is attached\n    W - Wildcard entry, X - External component interest\n\
+      \    I - SG Include Join alert rcvd, P - Programmed in hardware\n    H - Joining
+      SPT due to policy, D - Joining SPT due to protocol\n    Z - Entry marked for
+      deletion, C - Learned from a DR via a register\n    A - Learned via Anycast
+      RP Router, M - Learned via MSDP\n    N - May notify MSDP, K - Keepalive timer
+      not running\n    T - Switching Incoming Interface, B - Learned via Border Router\n\
+      \    V - Source is reachable via Evpn Tenant Domain\n    F - Learned via MVPN\n\
+      RPF route: U - From unicast routing table\n           M - From multicast routing
+      table\n224.0.1.130\n  169.254.132.173, 1d18h, flags: PE\n    Incoming interface:
+      Null\n    Upstream joined state: upNotJoined\n    Upstream RPT joined state:
+      upRptNotJoined\n    State summarization macros:\n      Could register (S,G):
+      False\n      Register stop (S,G): True\n      Join desired (S,G): False\n  \
+      \    Prune desired (S,G,Rpt): False\n      No interfaces in immediate olist
+      (S,G): True\n      No interfaces in inherited olist (S,G): True\n"
+    help: execute the command "show ip mroute vrf all detail"
+    prompt: *id001
