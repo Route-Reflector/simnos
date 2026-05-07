@@ -74,7 +74,7 @@ def gen_docs_platform_commands(ctx):
             platforms_file.write("## Commands\n\n")
             for command, details in data["commands"].items():
                 platforms_file.write(f"### {command}\n\n")
-                output = details["output"]
+                output = details.get("output")
                 if output is None:
                     platforms_file.write("**Output:** None\n\n")
                 else:
