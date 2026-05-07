@@ -13,8 +13,6 @@ permissions:
 jobs:
   test:
     runs-on: "ubuntu-latest"
-    env:
-      INVOKE_LOCAL: "True"
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"

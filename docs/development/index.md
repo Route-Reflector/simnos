@@ -12,7 +12,7 @@ Although, we highly encourage to read the [conventions section](conventions.md),
 1. Fork the project.
 2. Develop the code: code + **tests**.
 3. Document the feature/change.
-4. To run the tests: `invoke tests`.
+4. To run the tests: `uv run pytest -n auto`.
 5. If everything went okay, submit it for code review.
 
 !!! tip
