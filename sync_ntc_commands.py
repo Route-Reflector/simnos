@@ -112,6 +112,23 @@ def select_primary_raw(platform: str, folder: str, raw_files: list[str]) -> str:
     return raw_files[0]
 
 
+def escape_format_braces(text: str) -> str:
+    """Double every ``{`` / ``}`` so the text survives ``str.format()`` unchanged.
+
+    NTC fixtures may contain literal ``{xxx}`` patterns (e.g. Juniper's
+    ``{master}`` routing-engine indicator, ``{rpd}`` / ``{junos-bgpshard*}``
+    process-thread names). simnos's runtime calls
+    ``output.format(base_prompt=...)`` on every command output, which would
+    otherwise interpret these as named placeholders and raise ``KeyError``.
+    Doubling the braces makes them literal under ``str.format()``.
+
+    NTC fixtures never contain simnos-specific placeholders like
+    ``{base_prompt}``, so a blanket replace is safe — anything that comes
+    from NTC is content meant to be displayed verbatim.
+    """
+    return text.replace("{", "{{").replace("}", "}}")
+
+
 def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     """Extract commands and outputs from NTC Templates test data.
 
@@ -144,7 +161,7 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         primary = select_primary_raw(platform, folder, raw_files)
         primary_path = os.path.join(folder_path, primary)
         with open(primary_path, encoding="utf-8") as f:
-            output = f.read()
+            output = escape_format_braces(f.read())
 
         variant_outputs: list[str] = []
         variant_paths: list[str] = []
@@ -153,7 +170,7 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
                 continue
             variant_path = os.path.join(folder_path, variant)
             with open(variant_path, encoding="utf-8") as f:
-                variant_outputs.append(f.read())
+                variant_outputs.append(escape_format_braces(f.read()))
             variant_paths.append(variant_path)
 
         command_name = folder.replace("_", " ")
