@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -28,16 +23,16 @@ null
  Internet (IP) Service
 
 
-  Default Gateway : 10.11.11.254
-  Default TTL     : 64
-  Arp Age         : 20
-  Domain Suffix   :
-  DNS server      :
+  Default Gateway : 10.11.11.254   
+  Default TTL     : 64   
+  Arp Age         : 20  
+  Domain Suffix   :                               
+  DNS server      :                                         
 
-  VLAN                 | IP Config  IP Address      Subnet Mask
+  VLAN                 | IP Config  IP Address      Subnet Mask    
   -------------------- + ---------- --------------- ---------------
-  DEFAULT_VLAN         | Disabled
-  MGMTVLAN             | Manual     10.11.11.200    255.255.255.0
+  DEFAULT_VLAN         | Disabled 
+  MGMTVLAN             | Manual     10.11.11.200    255.255.255.0  
 ```
 
 **Help:** execute the command "show ip"
@@ -58,10 +53,7 @@ null
 
 ### logout
 
-**Output:**
-```
-True
-```
+**Output:** None
 
 **Help:** not implemented the exit
 
@@ -77,14 +69,14 @@ True
  LLDP Remote Device Information Detail
 
   Local Port   : 1
-  ChassisType  : mac-address
-  ChassisId    : 3821c7-c1cd00
-  PortType     : local
-  PortId       : 1
-  SysName      : 65432p-swi006-abcd-srvroom-4asd
+  ChassisType  : mac-address         
+  ChassisId    : 3821c7-c1cd00            
+  PortType     : local                                                     
+  PortId       : 1                                                         
+  SysName      : 65432p-swi006-abcd-srvroom-4asd 
   System Descr : Aruba JL357A 2540-48G-PoE+-4SFP+ Switch, revision YC.16.0...
-  PortDescr    : 1
-  Pvid         : 0
+  PortDescr    : 1                                                           
+  Pvid         : 0                        
 
   System Capabilities Supported  : bridge, router
   System Capabilities Enabled    : bridge
@@ -93,7 +85,7 @@ True
      Type    : ipv4
      Address : 192.168.130.100
 
-  Poe Plus Information Detail
+  Poe Plus Information Detail 
 
     Poe Device Type         : Type2 PSE
     Power Source            : Unknown
@@ -103,33 +95,33 @@ True
 
 ------------------------------------------------------------------------------
   Local Port   : 3
-  ChassisType  : mac-address
-  ChassisId    : 3ce1a1-2218f0
-  PortType     : mac-address
-  PortId       : 3c e1 a1 22 18 f0
-  SysName      :
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : 3ce1a1-2218f0            
+  PortType     : mac-address                                               
+  PortId       : 3c e1 a1 22 18 f0                                         
+  SysName      :                                 
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
-  System Capabilities Supported  :
-  System Capabilities Enabled    :
+  System Capabilities Supported  : 
+  System Capabilities Enabled    : 
 
   Remote Management Address
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
 
 ------------------------------------------------------------------------------
   Local Port   : 7
-  ChassisType  : mac-address
-  ChassisId    : bcf310-1f8b40
-  PortType     : interface-name
-  PortId       : mgt0
-  SysName      : AH-cust-AP21
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : bcf310-1f8b40            
+  PortType     : interface-name                                            
+  PortId       : mgt0                                                      
+  SysName      : AH-cust-AP21                    
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
   System Capabilities Supported  : bridge, wlan-access-point
   System Capabilities Enabled    : bridge, wlan-access-point
@@ -138,14 +130,14 @@ True
      Type    : ipv4
      Address : 192.168.100.55
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
     Poe Device Type        :PD
     Power Requested        :17.5 W
     Power Source           :From PSE
     Power Priority         :Critical
 
-  Poe Plus Information Detail
+  Poe Plus Information Detail 
 
     Poe Device Type         : Type2 PD
     Power Source            : Unknown
@@ -155,52 +147,52 @@ True
 
 ------------------------------------------------------------------------------
   Local Port   : 25
-  ChassisType  : mac-address
-  ChassisId    : d8cb8a-6d303c
-  PortType     : mac-address
-  PortId       : d8 cb 8a 6d 30 3c
-  SysName      :
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : d8cb8a-6d303c            
+  PortType     : mac-address                                               
+  PortId       : d8 cb 8a 6d 30 3c                                         
+  SysName      :                                 
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
-  System Capabilities Supported  :
-  System Capabilities Enabled    :
+  System Capabilities Supported  : 
+  System Capabilities Enabled    : 
 
   Remote Management Address
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
 
 ------------------------------------------------------------------------------
   Local Port   : 29
-  ChassisType  : mac-address
-  ChassisId    : 484d7e-e66c42
-  PortType     : mac-address
-  PortId       : 48 4d 7e e6 6c 42
-  SysName      :
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : 484d7e-e66c42            
+  PortType     : mac-address                                               
+  PortId       : 48 4d 7e e6 6c 42                                         
+  SysName      :                                 
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
-  System Capabilities Supported  :
-  System Capabilities Enabled    :
+  System Capabilities Supported  : 
+  System Capabilities Enabled    : 
 
   Remote Management Address
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
 
 ------------------------------------------------------------------------------
   Local Port   : 36
-  ChassisType  : mac-address
-  ChassisId    : 603197-7aa548
-  PortType     : local
-  PortId       : 1
-  SysName      : NAP203
-  System Descr : ZLD 6.00(###.8)B1 (cannon)
-  PortDescr    : UPLINK
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : 603197-7aa548            
+  PortType     : local                                                     
+  PortId       : 1                                                         
+  SysName      : NAP203                          
+  System Descr : ZLD 6.00(###.8)B1 (cannon)                                  
+  PortDescr    : UPLINK                                                      
+  Pvid         :                          
 
   System Capabilities Supported  : bridge, wlan-access-point, router
   System Capabilities Enabled    : bridge, wlan-access-point, router
@@ -209,7 +201,7 @@ True
      Type    : ipv4
      Address : 192.168.100.50
 
-  Poe Plus Information Detail
+  Poe Plus Information Detail 
 
     Poe Device Type         : Type2 PD
     Power Source            : Unknown
@@ -219,40 +211,40 @@ True
 
 ------------------------------------------------------------------------------
   Local Port   : 37
-  ChassisType  : mac-address
-  ChassisId    : b00cd1-359a98
-  PortType     : mac-address
-  PortId       : b0 0c d1 35 9a 98
-  SysName      :
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : b00cd1-359a98            
+  PortType     : mac-address                                               
+  PortId       : b0 0c d1 35 9a 98                                         
+  SysName      :                                 
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
-  System Capabilities Supported  :
-  System Capabilities Enabled    :
+  System Capabilities Supported  : 
+  System Capabilities Enabled    : 
 
   Remote Management Address
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
 
 ------------------------------------------------------------------------------
   Local Port   : 42
-  ChassisType  : mac-address
-  ChassisId    : d8cb8a-894644
-  PortType     : mac-address
-  PortId       : d8 cb 8a 89 46 44
-  SysName      :
-  System Descr :
-  PortDescr    :
-  Pvid         :
+  ChassisType  : mac-address         
+  ChassisId    : d8cb8a-894644            
+  PortType     : mac-address                                               
+  PortId       : d8 cb 8a 89 46 44                                         
+  SysName      :                                 
+  System Descr :                                                             
+  PortDescr    :                                                             
+  Pvid         :                          
 
-  System Capabilities Supported  :
-  System Capabilities Enabled    :
+  System Capabilities Supported  : 
+  System Capabilities Enabled    : 
 
   Remote Management Address
 
-  MED Information Detail
+  MED Information Detail 
     EndpointClass          :Class1
 
 
@@ -271,15 +263,15 @@ True
 ```
  Status and Counters - VLAN Information
 
-  Maximum VLANs to support : 256
+  Maximum VLANs to support : 256                  
   Primary VLAN : DEFAULT_VLAN
-  Management VLAN :
+  Management VLAN :             
 
   VLAN ID Name                             | Status     Voice Jumbo
   ------- -------------------------------- + ---------- ----- -----
-  1       DEFAULT_VLAN                     | Port-based No    No
-  10      Router Vlan                      | Port-based No    No
-  50      Voice                            | Port-based Yes   No
+  1       DEFAULT_VLAN                     | Port-based No    No   
+  10      Router Vlan                      | Port-based No    No   
+  50      Voice                            | Port-based Yes   No   
 
 ```
 
@@ -435,17 +427,17 @@ Status and Counters - Port Counters
 
  LLDP Remote Devices Information
 
-  LocalPort | ChassisId          PortId             PortDescr SysName
+  LocalPort | ChassisId          PortId             PortDescr SysName           
   --------- + ------------------ ------------------ --------- ------------------
   1         | 3821c7-c1cd00      1                  1         65432p-swi006-g...
-  3         | 3ce1a1-2218f0      3c e1 a1 22 18 f0
-  7         | bcf310-1f8b40      mgt0                         AH-cust-AP21
-  25        | d8cb8a-6d303c      d8 cb 8a 6d 30 3c
-  29        | 484d7e-e66c42      48 4d 7e e6 6c 42
-  36        | 603197-7aa548      1                  UPLINK    NAP203
-  37        | b00cd1-359a98      b0 0c d1 35 9a 98
-  42        | d8cb8a-894644      d8 cb 8a 89 46 44
-
+  3         | 3ce1a1-2218f0      3c e1 a1 22 18 f0                              
+  7         | bcf310-1f8b40      mgt0                         AH-cust-AP21      
+  25        | d8cb8a-6d303c      d8 cb 8a 6d 30 3c                              
+  29        | 484d7e-e66c42      48 4d 7e e6 6c 42                              
+  36        | 603197-7aa548      1                  UPLINK    NAP203            
+  37        | b00cd1-359a98      b0 0c d1 35 9a 98                              
+  42        | d8cb8a-894644      d8 cb 8a 89 46 44                              
+ 
 
 ```
 
@@ -481,11 +473,11 @@ Status and Counters - Port Counters
 
  Load Balancing Method:  L3-based (default)
 
-  Port   | Name                             Type       | Group Type
+  Port   | Name                             Type       | Group Type    
   ------ + -------------------------------- ---------- + ----- --------
-  49     | Uplink 65432p-swi001             1000LX     | Trk2  LACP
-  50     | Uplink 65432p-swi001             1000LX     | Trk2  LACP
-
+  49     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
+  50     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
+ 
 
 ```
 
@@ -509,7 +501,7 @@ Status and Counters - Port Counters
   3            100/1000T  | Yes       Yes     Down   1000FDx    Auto off  0
   4            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
   5            100/1000T  | No        No      Down   1000FDx    Auto off  0
-  6            100/1000T  | No        Yes     Down   1000FDx    Auto on   0
+  6            100/1000T  | No        Yes     Down   1000FDx    Auto on   0    
   7            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
   8            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
   9            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
@@ -576,7 +568,7 @@ Mgmt Module 2 went down in Active Mode
 timestamp:  03/08/16 00:04:11
 Crash msg:  Operator warm reload.
 -----
-
+ 
 
 Standby Management Module 1 Crash Log
 
@@ -584,7 +576,7 @@ Crash Log Uninitialized
 
 
 CRASHData
-
+ 
 Slot 1
 
 CRASHLogfileshow
@@ -616,16 +608,16 @@ MSGCOUNTERSshow
 
  slot a:
 -------
- txSeq        =      64295     rxSeq       =      42342
- rxAcks       =    1209122     txAcks      =    2151500
- retx         =          0     rxOutOfSeq  =          0
- rtx_pktcnt   =          0     rxSeqQcnt   =          0
- Max pktcnt   =         31     Max Qcnt    =          0
- Bad CRCs     =          0     dupSeq      =          3
+ txSeq        =      64295     rxSeq       =      42342 
+ rxAcks       =    1209122     txAcks      =    2151500 
+ retx         =          0     rxOutOfSeq  =          0 
+ rtx_pktcnt   =          0     rxSeqQcnt   =          0 
+ Max pktcnt   =         31     Max Qcnt    =          0 
+ Bad CRCs     =          0     dupSeq      =          3 
 
 
 MSGpoolStatsShow
-
+ 
 slot a:
 -------
              total   free  allocated  min-free  missed  corrupt
@@ -660,7 +652,7 @@ Allocation statistics for MSG buffer pool:
 Slot 2
 
 CRASHLogfileshow
-
+ 
 slot b:
 -------
 
@@ -688,16 +680,16 @@ MSGCOUNTERSshow
 
  slot b:
 -------
- txSeq        =      12101     rxSeq       =      44667
- rxAcks       =    1237277     txAcks      =    2131969
- retx         =          0     rxOutOfSeq  =          0
- rtx_pktcnt   =          0     rxSeqQcnt   =          0
- Max pktcnt   =         31     Max Qcnt    =          0
- Bad CRCs     =          0     dupSeq      =          1
+ txSeq        =      12101     rxSeq       =      44667 
+ rxAcks       =    1237277     txAcks      =    2131969 
+ retx         =          0     rxOutOfSeq  =          0 
+ rtx_pktcnt   =          0     rxSeqQcnt   =          0 
+ Max pktcnt   =         31     Max Qcnt    =          0 
+ Bad CRCs     =          0     dupSeq      =          1 
 
 
 MSGpoolStatsShow
-
+ 
 slot b:
 -------
              total   free  allocated  min-free  missed  corrupt
@@ -744,27 +736,27 @@ Allocation statistics for MSG buffer pool:
 
  Status and Counters - General System Information
 
-  System Name        : HP_Procurve-01
+  System Name        : HP_Procurve-01                           
   System Contact     : John Smith
   System Location    : Downtown DC2
 
-  MAC Age Time (sec) : 300
+  MAC Age Time (sec) : 300    
 
-  Time Zone          : -480
-  Daylight Time Rule : Continental-US-and-Canada
+  Time Zone          : -480 
+  Daylight Time Rule : Continental-US-and-Canada 
 
 
   Software revision  : K.15.06.0017         Base MAC Addr      : 7446a0-41a56f
-  ROM Version        : K.15.29              Serial Number      : AB12CDE3FG
+  ROM Version        : K.15.29              Serial Number      : AB12CDE3FG  
   Allow V1 Modules   : Yes
 
-  Up Time            : 15 days              Memory   - Total   : 128,380,928
-  CPU Util (%)       : 22                              Free    : 61,999,280
+  Up Time            : 15 days              Memory   - Total   : 128,380,928 
+  CPU Util (%)       : 22                              Free    : 61,999,280  
 
-  IP Mgmt  - Pkts Rx : 39,808,402           Packet   - Total   : 6750
-             Pkts Tx : 4,524,902            Buffers    Free    : 5086
-                                                       Lowest  : 3416
-                                                       Missed  : 0
+  IP Mgmt  - Pkts Rx : 39,808,402           Packet   - Total   : 6750        
+             Pkts Tx : 4,524,902            Buffers    Free    : 5086        
+                                                       Lowest  : 3416        
+                                                       Missed  : 0           
 
 
 ```
@@ -781,47 +773,47 @@ Allocation statistics for MSG buffer pool:
 ```
  CDP neighbors information
 
-  Port : 1
+  Port : 1   
   Device ID : AP01-Site
-  Address Type : IP
-  Address      : 10.11.11.16
-  Platform     : 5.9.1.5-001RAP-6521-60020-WR
-  Capability   : Router
-  Device Port  : ge1
-  Version      : 5.9.1.5-001RAP-6521-60020-WR
+  Address Type : IP          
+  Address      : 10.11.11.16                                                 
+  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
 
 ------------------------------------------------------------------------------
 
-  Port : 1
-  Device ID : 5c 0e 8b 11 11 11
-  Address Type : IP
-  Address      : 10.11.11.16
-  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R
-  Capability   : Router
-  Device Port  : ge1
-  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R
+  Port : 1   
+  Device ID : 5c 0e 8b 11 11 11                                             
+  Address Type : IP          
+  Address      : 10.11.11.16                                                 
+  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
 
 ------------------------------------------------------------------------------
 
-  Port : 2
-  Device ID : 5c 0e 8b 12 22 22
-  Address Type : IP
-  Address      : Unsupported format
-  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R
-  Capability   : Router
-  Device Port  : ge1
-  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R
+  Port : 2   
+  Device ID : 5c 0e 8b 12 22 22                                             
+  Address Type : IP          
+  Address      : Unsupported format                                          
+  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
 
 ------------------------------------------------------------------------------
 
-  Port : 2
+  Port : 2   
   Device ID : AP02-Site
-  Address Type : IP
-  Address      : 10.11.11.17
-  Platform     : 5.9.1.5-001RAP-6521-60020-WR
-  Capability   : Router
-  Device Port  : ge1
-  Version      : 5.9.1.5-001RAP-6521-60020-WR
+  Address Type : IP          
+  Address      : 10.11.11.17                                                 
+  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
 ```
 
 **Help:** execute the command "show cdp neighbors detail"
@@ -863,7 +855,7 @@ Allocation statistics for MSG buffer pool:
   0.0.0.0/0          10.11.11.254    1111 static               250        1
   10.11.11.0/24      mgmt            1111 connected            1          0
   127.0.0.0/8        reject               static               0          0
-  127.0.0.1/32                            connected            1          0
+  127.0.0.1/32                            connected            1          0    
 
 ```
 
@@ -942,3 +934,4 @@ Allocation statistics for MSG buffer pool:
 **Prompt:**
 - hp_procurve>
 - hp_procurve#
+

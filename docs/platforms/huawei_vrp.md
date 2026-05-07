@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -25,13 +20,13 @@ null
 
 **Output:**
 ```
-IP ADDRESS      MAC ADDRESS    EXPIRE(M) TYPE  INTERFACE           VLAN/CEVLAN
-------------------------------------------------------------------------------
-192.168.120.251 60de-4474-9640           I -   Vlanif1
-192.168.120.1   7054-f5df-9b40 3         D-0   GE0/0/0                1/-
-192.168.120.252 04f9-3895-8300 19        D-0   GE0/0/0                1/-
-------------------------------------------------------------------------------
-Total:3         Dynamic:2       Static:0     Interface:1
+IP ADDRESS      MAC ADDRESS    EXPIRE(M) TYPE  INTERFACE           VLAN/CEVLAN  
+------------------------------------------------------------------------------  
+192.168.120.251 60de-4474-9640           I -   Vlanif1                          
+192.168.120.1   7054-f5df-9b40 3         D-0   GE0/0/0                1/-       
+192.168.120.252 04f9-3895-8300 19        D-0   GE0/0/0                1/-       
+------------------------------------------------------------------------------  
+Total:3         Dynamic:2       Static:0     Interface:1  
 
 ```
 
@@ -48,24 +43,24 @@ Total:3         Dynamic:2       Static:0     Interface:1
  Total VPN-Instances configured      : 3
 
  VPN-Instance Name and ID : cftv, 1
-  Interface Number : 3
-  Interface list : Vlanif1823,
-                   Vlanif1847,
+  Interface Number : 3 
+  Interface list : Vlanif1823, 
+                   Vlanif1847, 
                    LoopBack5
 
  VPN-Instance Name and ID : met, 2
-  Interface Number : 5
-  Interface list : 40GE0/0/3,
-                   Vlanif1774,
-                   Vlanif1797,
-                   LoopBack2,
+  Interface Number : 5 
+  Interface list : 40GE0/0/3, 
+                   Vlanif1774, 
+                   Vlanif1797, 
+                   LoopBack2, 
                    Vlanif1769
 
  VPN-Instance Name and ID : tel, 3
-  Interface Number : 4
-  Interface list : Vlanif755,
-                   Vlanif773,
-                   Vlanif797,
+  Interface Number : 4 
+  Interface list : Vlanif755, 
+                   Vlanif773, 
+                   Vlanif797, 
                    LoopBack1
 
 ```
@@ -352,7 +347,7 @@ Secure FLAG  : SECURE                             Nickname  : -
 **Output:**
 ```
 -----------------------------------------------------------
-Interface                   Direction  AppliedRecord
+Interface                   Direction  AppliedRecord       
 -----------------------------------------------------------
 Vlanif1                     inbound    acl name ACL_Test
 Vlanif1                     outbound   ipv6 acl name MyACL_IPv6
@@ -360,15 +355,15 @@ Vlanif3                     inbound    acl 3998
 Vlanif3                     inbound    ipv6 acl name MyACL_IPv6
 Wlan-Bss0                   outbound   IPv4 ACL 4000
 Wlan-Bss1                   outbound   IPv4 ACL 4000
------------------------------------------------------------
-Total:6
------------------------------------------------------------
-Traffic profile             Direction  AppliedRecord
------------------------------------------------------------
-p1                          inbound    IPv4 ACL 3000
-p2                          outbound   IPv6 ACL 3001
------------------------------------------------------------
-Total:2
+-----------------------------------------------------------             
+Total:6                                                                         
+-----------------------------------------------------------             
+Traffic profile             Direction  AppliedRecord                    
+-----------------------------------------------------------             
+p1                          inbound    IPv4 ACL 3000                         
+p2                          outbound   IPv6 ACL 3001                    
+-----------------------------------------------------------             
+Total:2 
 
 ```
 
@@ -382,25 +377,25 @@ Total:2
 
 **Output:**
 ```
- Total quantity of nonempty ACL number is 3
+ Total quantity of nonempty ACL number is 3 
 
 Basic ACL 2000, 7 rules
 Acl's step is 5
  rule 5 permit source 85.14.167.234 0 (94 matches)
  rule 10 permit source 85.14.167.193 0 (26939 matches)
  rule 15 permit source 5.10.130.152 0.0.0.3 (24 matches)
- rule 20 permit source 185.48.254.19 0
- rule 25 permit source 10.0.0.0 0.255.255.255
- rule 30 permit source 172.0.0.0 0.15.255.255
- rule 35 permit source 192.168.0.0 0.0.255.255
+ rule 20 permit source 185.48.254.19 0 
+ rule 25 permit source 10.0.0.0 0.255.255.255 
+ rule 30 permit source 172.0.0.0 0.15.255.255 
+ rule 35 permit source 192.168.0.0 0.0.255.255 
 
 Basic ACL 2500, 1 rule
 Acl's step is 5
  rule 35 permit source 192.168.0.0 0.0.255.255 (5431 matches)
-
+ 
 Advanced ACL 3997, 1 rule
 Acl's step is 5
- rule 5 permit ip source 192.165.3.5 0
+ rule 5 permit ip source 192.165.3.5 0 
  rule 5 description "qsdqsdqsdqsdqsdqsdqs az"
 
 Advanced ACL REGLE_NAT 3998, 3 rules
@@ -461,7 +456,7 @@ Routing Table : Public
  Entry ID     : 2826122436                      EntryFlags   : 0x80010050
  Reference Cnt: 2                               Tag          : 0
  Priority     : high                            Age          : 93545sec
- IndirectID   : 0x0
+ IndirectID   : 0x0                             
  RelayNextHop : ::                              TunnelID     : 0x0
  Interface    : InLoopBack0                     Flags        : D
 
@@ -523,7 +518,7 @@ VLAN name of VLAN  1:VLAN 0001
 Auto-negotiation supported    :Yes
 Auto-negotiation enabled      :Yes
 OperMau   :speed(1000)/duplex(Full)
-
+ 
 Power port class            :PD
 PSE power supported         :No
 PSE power enabled           :No
@@ -553,21 +548,21 @@ Aggregation port ID      :0
   Interface  : Dialer1
     Global IP/Port     : current-interface/8080 (Real IP : 192.214.198.156)
     Inside IP/Port     : 192.168.1.24/80(www)
-    Protocol : 6(tcp)
-    VPN instance-name  : ----
+    Protocol : 6(tcp)   
+    VPN instance-name  : ----                            
     Acl number         : 2600
     Vrrp id            : ----
     Description : ----
 
     Global IP/Port     : current-interface/8080 (Real IP : 192.214.198.156)
     Inside IP/Port     : 192.168.1.24/80
-    Protocol : 17(udp)
-    VPN instance-name  : ----
+    Protocol : 17(udp)  
+    VPN instance-name  : ----                            
     Acl number         : 2600
     Vrrp id            : ----
     Description : ----
 
-  Interface  : Vlanif300
+  Interface  : Vlanif300                                                                                                            
     Global IP/Port     : current-interface/0(any) (Real IP : 2.2.2.2)
     Inside IP/Port     : 10.1.1.1/0(any)
     Protocol : 6(tcp)
@@ -626,7 +621,7 @@ EFGF      2   73   0    NORMAL  77    83    92    64   74   30
 EFGF      3   73   0    NORMAL  77    83    92    64   74   36
 
 SlotID25 :
-
+ 
 SlotID26 :
 
 SlotID27 :
@@ -668,9 +663,9 @@ SlotID31 : No temp sensors.
 ```
   ----------------------------------------------------------------------------
   ID      Name                            SSID
-  0       Livebox_5ad8                    Livebox_5ad8
-  1       Livebox_5ad8__5G                Livebox_5ad8
-  2       Profile_my_guest_wifi           my_guest_wifi
+  0       Livebox_5ad8                    Livebox_5ad8                     
+  1       Livebox_5ad8__5G                Livebox_5ad8                     
+  2       Profile_my_guest_wifi           my_guest_wifi                    
   ----------------------------------------------------------------------------
   Total: 3
 
@@ -686,7 +681,7 @@ SlotID31 : No temp sensors.
 
 **Output:**
 ```
-MainBoard:
+MainBoard: 
   Startup system software:                   flash:/AR610-V300R021C00SPC200.cc
   Next startup system software:              flash:/AR610-V300R021C00SPC200.cc
   Backup system software for next startup:   null
@@ -802,7 +797,7 @@ Last physical down time : 2022-10-13 09:35:55
  Current system time: 2022-10-13 13:12:04
 Port Mode: COMMON COPPER
 Speed : 1000,  Loopback: NONE
-Duplex: FULL,  Negotiation: ENABLE
+Duplex: FULL,  Negotiation: ENABLE        
 Mdi   : AUTO,  Clock   : -
 Last 300 seconds input rate 0 bits/sec, 0 packets/sec
 Last 300 seconds output rate 0 bits/sec, 0 packets/sec
@@ -877,7 +872,7 @@ Line protocol current state : DOWN
 Description:HUAWEI, AR Series, GigabitEthernet0/0/3 Interface
 Switch Port, PVID :    1, TPID : 8100(Hex), The Maximum Frame Length is 9596
 IP Sending Frames' Format is PKTFMT_ETHNT_2, Hardware address is fc73-fb9e-601c
-Last physical up time   : -
+Last physical up time   : -               
 Last physical down time : 2022-10-13 09:35:55
 Current system time: 2022-10-13 13:12:06
 Port Mode: COMMON COPPER
@@ -952,7 +947,7 @@ Output:  20762 packets, 2116014 bytes
     Output bandwidth utilization threshold: 100.00%
     Input bandwidth utilization  : 0.01%
     Output bandwidth utilization : 0.01%
-
+                                          
 GigabitEthernet0/0/5 current state : UP
 Line protocol current state : DOWN
 Description:VirtualPort
@@ -1030,7 +1025,7 @@ Output:  0 packets, 0 bytes
  -------------------------------------------------------------------------------
  b8d6-f6ff-7390 10/-/-                            XGE0/0/1            dynamic
  b8d6-f6ff-739b 10/-/-                            XGE0/0/1            dynamic
-
+ 
 -------------------------------------------------------------------------------
  Total items displayed = 2
 
@@ -1051,3 +1046,4 @@ Output:  0 packets, 0 bytes
 **Prompt:**
 - huawei_vrp>
 - huawei_vrp#
+

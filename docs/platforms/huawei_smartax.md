@@ -1,27 +1,10 @@
 # huawei_smartax
 
-Some commands have configurable outputs. This is indicated by the :gear: emoji. You can modify the output of these commands by changing the values in the `configurations` file. If you want to see the defaults look at `simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2`.
 
-## Specific devices
--  [Huawei OptiXaccess MA5800](
-https://e.huawei.com/es/products/optical-access/ma5800)
--  [Huawei SmartAX MA5801-FL16](
-https://e.huawei.com/es/products/optical-access/ma5801-fl16)
--  [Huawei OptiXaccess EA5801S-FL16](
-https://e.huawei.com/es/products/optical-access/optixaccess-ea5801s-fl16)
--  [Huawei OptiXaccess EA5801E-FL16](
-https://e.huawei.com/es/products/optical-access/optixaccess-ea5801e-fl16)
--  [Huawei OptiXaccess EA5801E-GP16](
-https://e.huawei.com/es/products/optical-access/optixaccess-ea5801e)
--  [Huawei OptiXaccess EA5801E-GP04](
-https://e.huawei.com/es/products/optical-access/optixaccess-ea5801e-gp04)
--  [Huawei OptiXaccess EA5801E-GP08](
-https://e.huawei.com/es/products/optical-access/optixaccess-ea5801e-gp08)
--  [Huawei OptiXaccess EA5800](
-https://e.huawei.com/es/products/optical-access/ea5800)
--  [Huawei OptiXaccess S1016-L](
-https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
-
+!!! warning
+    This is automatically generated. In case of any issues,
+    please refer to the source code or, even better,
+    open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
 ### enable
@@ -31,7 +14,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** enter enable mode
 
 **Prompt:**
-
 - huawei_smartax>
 
 ### undo smart
@@ -41,7 +23,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** undo the command completion mode (smart mode)
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -52,7 +33,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** disables the paging so the output is complete always
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -66,30 +46,28 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display cpu"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
-### display board :gear:
+### display board
 
 **Output:**
 ```
   -------------------------------------------------------------------------
   SlotID  BoardName  Status          SubType0 SubType1    Online/Offline
   -------------------------------------------------------------------------
-  0       A123ABCD   Normal
-  1
-  2       A123ABCDE  Normal
-  3       A123ABCDE  Active_normal   CPCF
-  4       A123ABCDE  Standby_failed  CPCF                 Offline
-  5
+  0       A123ABCD   Normal                           
+  1     
+  2       A123ABCDE  Normal                           
+  3       A123ABCDE  Active_normal   CPCF             
+  4       A123ABCDE  Standby_failed  CPCF                 Offline  
+  5     
   -------------------------------------------------------------------------
 ```
 
 **Help:** execute the command "display board"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -101,38 +79,37 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   VERSION : AB1234C342A123D23
   PATCH   : QEF227
   PRODUCT : MA5608T
-
-  Active Mainboard Running Area Information:
+ 
+  Active Mainboard Running Area Information: 
   --------------------------------------------------
-  Current Program Area : Area A
+  Current Program Area : Area A 
   Current Data Area : Area A
-
-  Program Area A Version : AB1234C342A123D23
+ 
+  Program Area A Version : AB1234C342A123D23 
   Program Area B Version : AB1234C342A123D23
-
-  Data Area A Version : AB1234C342A123D23
-  Data Area B Version : AB1234C342A123D23
+ 
+  Data Area A Version : AB1234C342A123D23 
+  Data Area B Version : AB1234C342A123D23 
   --------------------------------------------------
-
-  Standby Mainboard Running Area Information:
+ 
+  Standby Mainboard Running Area Information: 
   --------------------------------------------------
-  Current Program Area : Area A
+  Current Program Area : Area A 
   Current Data Area : Area A
-
-  Program Area A Version : AB1234C342A123D23
+ 
+  Program Area A Version : AB1234C342A123D23 
   Program Area B Version : AB1234C342A123D23
-
-  Data Area A Version : AB1234C342A123D23
-  Data Area B Version : AB1234C342A123D23
+ 
+  Data Area A Version : AB1234C342A123D23 
+  Data Area B Version : AB1234C342A123D23 
   --------------------------------------------------
-
+ 
   Uptime is 20 day(s), 23 hour(s), 19 minute(s), 16 second(s)
 ```
 
 **Help:** execute the command "display version"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -170,7 +147,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display sysman service state"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -240,7 +216,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display ont info summary ont"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -271,7 +246,7 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   Multichannel low latency                   Disable
   Optical module work mode                   Standard
   -----------------------------------------------------------
-  Channel 0 Information
+  Channel 0 Information              
   -----------------------------------------------------------
   Channel Type                               GPON
   Online ONT number threshold                Disable
@@ -281,7 +256,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display port info"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -311,7 +285,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display ont autofind"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -347,8 +320,8 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   Last down time          : 22/01/2019 01:57:55+00:00
   Last dying gasp time    : 22/01/2019 01:57:55+00:00
   Last restart reason     : -
-  ONT online duration     : 22 day(s), 1 hour(s), 23 minute(s), 23 second(s)
-  ONT system up duration  : 22 day(s), 1 hour(s), 23 minute(s), 23 second(s)
+  ONT online duration     : 22 day(s), 1 hour(s), 23 minute(s), 23 second(s) 
+  ONT system up duration  : 22 day(s), 1 hour(s), 23 minute(s), 23 second(s) 
   Type C support          : Not support
   Interoperability-mode   : ITU-T
   Power reduction status  : -
@@ -362,11 +335,11 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   Line profile ID      : 100
   Line profile name    : ftth
   -----------------------------------------------------------------------------
-  FEC upstream switch :Disable
+  FEC upstream switch :Disable 
   OMCC encrypt switch :On
   Qos mode            :PQ
   Mapping mode        :VLAN
-  TR069 management    :Enable
+  TR069 management    :Enable        
   TR069 IP index      :0
   ------------------------------------------------------------------------------
   Notes: * indicates Discrete TCONT(TCONT Unbound)
@@ -379,10 +352,10 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
    |Upstream-priority-queue:0  |Downstream-priority-queue:-       |
    --------------------------------------------------------------------
     Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent
-    index                  type    ID    ID      CAR
+    index                  type    ID    ID      CAR   
    --------------------------------------------------------------------
-    0       40    -        -       -     -       -     -
-    1       41    -        -       -     -       -     -
+    0       40    -        -       -     -       -     -          
+    1       41    -        -       -     -       -     -          
    --------------------------------------------------------------------
   <T-CONT   2>          DBA Profile-ID:101
    <Gem Index 2>
@@ -391,9 +364,9 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
    |Upstream-priority-queue:0  |Downstream-priority-queue:-       |
    --------------------------------------------------------------------
     Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent
-    index                  type    ID    ID      CAR
+    index                  type    ID    ID      CAR   
    --------------------------------------------------------------------
-    0       42    -        -       -     -       -     -
+    0       42    -        -       -     -       -     -          
    --------------------------------------------------------------------
   <T-CONT   3>          DBA Profile-ID:102
    <Gem Index 3>
@@ -402,12 +375,12 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
    |Upstream-priority-queue:0  |Downstream-priority-queue:-       |
    --------------------------------------------------------------------
     Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent
-    index                  type    ID    ID      CAR
+    index                  type    ID    ID      CAR   
    --------------------------------------------------------------------
-    0       1     -        -       -     -       -     -
-    1       2     -        -       -     -       -     -
-    2       3     -        -       -     -       -     -
-    3       4     -        -       -     -       -     -
+    0       1     -        -       -     -       -     -          
+    1       2     -        -       -     -       -     -          
+    2       3     -        -       -     -       -     -          
+    3       4     -        -       -     -       -     -          
    --------------------------------------------------------------------
   <T-CONT   4>          DBA Profile-ID:103
    <Gem Index 4>
@@ -416,9 +389,9 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
    |Upstream-priority-queue:0  |Downstream-priority-queue:-       |
    --------------------------------------------------------------------
     Mapping VLAN  Priority Port    Port  Bundle  Flow  Transparent
-    index                  type    ID    ID      CAR
+    index                  type    ID    ID      CAR   
    --------------------------------------------------------------------
-    0       8     -        -       -     -       -     -
+    0       8     -        -       -     -       -     -          
    --------------------------------------------------------------------
   <T-CONT   5>          DBA Profile-ID:104
    <Gem Index 5>
@@ -427,7 +400,7 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
    |Upstream-priority-queue:0  |Downstream-priority-queue:-       |
    --------------------------------------------------------------------
   ------------------------------------------------------------------------------
-  Notes: Run the display traffic table ip command to query
+  Notes: Run the display traffic table ip command to query 
          traffic table configuration
   -----------------------------------------------------------------------------
   Service profile ID   : 100
@@ -438,7 +411,7 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   POTS          adaptive        32
   ETH           adaptive        8
   VDSL          0               -
-  TDM           0               -
+  TDM           0               -    
   MOCA          0               -
   CATV          adaptive        8
   -----------------------------------------------------------------------------
@@ -481,25 +454,25 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   -----------------------------------------------------------------------------
   Port-type Port-ID  DownstreamMode  MismatchPolicy
   -----------------------------------------------------------------------------
-  ETH             1  operation       discard
-  ETH             2  operation       discard
-  ETH             3  operation       discard
-  ETH             4  operation       discard
-  ETH             5  operation       discard
-  ETH             6  operation       discard
-  ETH             7  operation       discard
-  ETH             8  operation       discard
+  ETH             1  operation       discard       
+  ETH             2  operation       discard       
+  ETH             3  operation       discard       
+  ETH             4  operation       discard       
+  ETH             5  operation       discard       
+  ETH             6  operation       discard       
+  ETH             7  operation       discard       
+  ETH             8  operation       discard       
   -----------------------------------------------------------------------------
   Port-type Port-ID Dscp-mapping-table-index Classification-profile-id
   -----------------------------------------------------------------------------
-  ETH       1       0                        -
-  ETH       2       0                        -
-  ETH       3       0                        -
-  ETH       4       0                        -
-  ETH       5       0                        -
-  ETH       6       0                        -
-  ETH       7       0                        -
-  ETH       8       0                        -
+  ETH       1       0                        -        
+  ETH       2       0                        -        
+  ETH       3       0                        -        
+  ETH       4       0                        -        
+  ETH       5       0                        -        
+  ETH       6       0                        -        
+  ETH       7       0                        -        
+  ETH       8       0                        -        
   IPHOST    1       0                        -
   -----------------------------------------------------------------------------
   Port-type  Port-ID    IGMP-mode         IGMP-VLAN  IGMP-PRI  Max-MAC-Count
@@ -517,25 +490,25 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
   Port-type Port-ID   Traffic-suppress   Traffic-suppress   Traffic-suppress
                       unicast(kbps)      multicast(kpbs)    broadcast(kbps)
   -----------------------------------------------------------------------------
-  ETH             1   -                  -                  -
-  ETH             2   -                  -                  -
-  ETH             3   -                  -                  -
-  ETH             4   -                  -                  -
-  ETH             5   -                  -                  -
-  ETH             6   -                  -                  -
-  ETH             7   -                  -                  -
-  ETH             8   -                  -                  -
+  ETH             1   -                  -                  -               
+  ETH             2   -                  -                  -               
+  ETH             3   -                  -                  -               
+  ETH             4   -                  -                  -               
+  ETH             5   -                  -                  -               
+  ETH             6   -                  -                  -               
+  ETH             7   -                  -                  -               
+  ETH             8   -                  -                  -               
   -----------------------------------------------------------------------------
   Port-type  Port-ID  L2-isolate
   -----------------------------------------------------------------------------
-  ETH              1  unconcern
-  ETH              2  unconcern
-  ETH              3  unconcern
-  ETH              4  unconcern
-  ETH              5  unconcern
-  ETH              6  unconcern
-  ETH              7  unconcern
-  ETH              8  unconcern
+  ETH              1  unconcern           
+  ETH              2  unconcern           
+  ETH              3  unconcern           
+  ETH              4  unconcern           
+  ETH              5  unconcern           
+  ETH              6  unconcern           
+  ETH              7  unconcern           
+  ETH              8  unconcern           
   -----------------------------------------------------------------------------
   Alarm policy profile ID      : 0
   Alarm policy profile name    : alarm-policy_0
@@ -551,7 +524,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display ont info by-sn sn"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -575,7 +547,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display temperature"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -589,7 +560,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display mem"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -598,21 +568,20 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Output:**
 ```
   -------------------------------------------------------------------------
-  Solt ID        Board Name         Serial Number
+  Solt ID        Board Name         Serial Number 
   -------------------------------------------------------------------------
-  0              A123ABCD           123ABC45D6789012
-  1
-  2              A123ABCDE          123ABC45D6789012
-  3              A123ABCDE          123456789123
-  4              A123ABCDE          --
-  5
+  0              A123ABCD           123ABC45D6789012                
+  1                                                                 
+  2              A123ABCDE          123ABC45D6789012                
+  3              A123ABCDE          123456789123                    
+  4              A123ABCDE          --                              
+  5                                                                 
   -------------------------------------------------------------------------
 ```
 
 **Help:** execute the command "display board serial-number"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -626,7 +595,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display sysuptime"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
 
@@ -636,42 +604,42 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 ```
   -----------------------------------------------------------------------------
   F/S/P   ONT         SN         Control     Run      Config   Match    Protect
-          ID                     flag        state    state    state    side
+          ID                     flag        state    state    state    side 
   -----------------------------------------------------------------------------
-  0/ 1/0    0  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    1  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    2  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    3  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    4  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    5  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    6  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    7  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    8  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0    9  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   10  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   11  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   12  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   13  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   14  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   15  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   16  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   17  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   18  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   19  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   20  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   21  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   22  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   23  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   24  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   25  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   26  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   27  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   28  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   29  1234567890ABCDEF  active      online   normal   match    no
-  0/ 1/0   30  1234567890ABCDEF  active      online   normal   match    no
+  0/ 1/0    0  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    1  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    2  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    3  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    4  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    5  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    6  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    7  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    8  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0    9  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   10  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   11  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   12  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   13  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   14  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   15  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   16  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   17  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   18  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   19  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   20  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   21  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   22  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   23  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   24  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   25  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   26  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   27  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   28  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   29  1234567890ABCDEF  active      online   normal   match    no 
+  0/ 1/0   30  1234567890ABCDEF  active      online   normal   match    no 
   -----------------------------------------------------------------------------
-  F/S/P       ONT  Description
-              ID
+  F/S/P       ONT  Description  
+              ID  
   -----------------------------------------------------------------------------
   0/ 1/0       0   Generic_description
   0/ 1/0       1   Generic_description
@@ -712,6 +680,6 @@ https://e.huawei.com/es/products/optical-access/optixaccess-s1016-l)
 **Help:** execute the command "display ont info fsp"
 
 **Prompt:**
-
 - huawei_smartax>
 - huawei_smartax#
+

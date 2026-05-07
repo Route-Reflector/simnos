@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -245,7 +243,7 @@ Interface lo
 Statistics:
     TX bytes:16669231829 packets:78838857 errors:0 dropped:0 overruns:0 carrier:0
     RX bytes:16669231829 packets:78838857 errors:0 dropped:0 overruns:0 frame:0
-
+ 
 
 Interface wrp128
     state on
@@ -326,9 +324,9 @@ C         10.1.1.0/24      is directly connected, eth1.111
 
 **Output:**
 ```
-IP Address               Type              Version
-1.1.1.1                  Primary           3
-2.2.2.2                  Secondary         3
+IP Address               Type              Version  
+1.1.1.1                  Primary           3        
+2.2.2.2                  Secondary         3   
 
 ```
 
@@ -381,12 +379,12 @@ localhost Example-Policy 19Oct2017 16:34:20 :  [>Mgmt] [<Mgmt] [>eth1-01.100] [<
 **Output:**
 ```
 DNS setup
-Name                  Value
+Name                  Value                 
 
-Domain                test.com
+Domain                test.com            
 DNS server            1.1.1.1
 DNS server            2.2.2.2
-DNS server
+DNS server              
 
 ```
 
@@ -410,3 +408,4 @@ IP Address : 192.168.0.100
 **Prompt:**
 - checkpoint_gaia>
 - checkpoint_gaia#
+

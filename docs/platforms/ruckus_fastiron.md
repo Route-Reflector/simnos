@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -56,7 +51,7 @@ null
   Relay Agent Information option: Disabled
   Protected: No
   MAC Port Security: Disabled
-
+ 
 UC Egress queues:
 Queue counters      Queued packets    Dropped Packets
          0                   0                   0
@@ -69,8 +64,8 @@ Queue counters      Queued packets    Dropped Packets
          7                   0                   0
          8                   0                   0
          9            11119857                   0
-
-
+ 
+ 
 MC Egress queues:
 Queue counters    Queued packets    Dropped Packets
          0                2480                   0
@@ -83,7 +78,7 @@ Queue counters    Queued packets    Dropped Packets
          7                   0                   0
          8                   0                   0
          9                   0                   0
-
+ 
 Oversubscribed ingress drop counters:
 High priority drop                     0
 Low priority drop                     0
@@ -119,7 +114,7 @@ Total drop                             0
   Relay Agent Information option: Disabled
   Protected: No
   MAC Port Security: Disabled
-
+ 
 UC Egress queues:
 Queue counters      Queued packets    Dropped Packets
          0                   0                   0
@@ -132,8 +127,8 @@ Queue counters      Queued packets    Dropped Packets
         7                   0                   0
          8                   0                   0
          9                   0                   0
-
-
+ 
+ 
 MC Egress queues:
 Queue counters    Queued packets    Dropped Packets
          0                   0                   0
@@ -146,7 +141,7 @@ Queue counters    Queued packets    Dropped Packets
          7                   0                   0
          8                   0                   0
          9                   0                   0
-
+ 
 Oversubscribed ingress drop counters:
  High priority drop                     0
 Low priority drop                     0
@@ -202,10 +197,10 @@ GigEthernetmgmt1 is up, line protocol is up
 **Output:**
 ```
 All ARPs: 3, maximum capacity: 4096
-No.   IP              MAC            Type     Age Port           Status VLAN
-1     10.103.3.1      70db.9862.224c Dynamic  0   1/2/1          Valid  1
-2     10.103.3.10     c81f.6603.c442 Dynamic  4   1/1/8          Valid  1
-3     10.103.3.4      f8bc.1294.dd30 Dynamic  4   1/1/6          Valid  1
+No.   IP              MAC            Type     Age Port           Status VLAN 
+1     10.103.3.1      70db.9862.224c Dynamic  0   1/2/1          Valid  1    
+2     10.103.3.10     c81f.6603.c442 Dynamic  4   1/1/8          Valid  1    
+3     10.103.3.4      f8bc.1294.dd30 Dynamic  4   1/1/6          Valid  1    
 Total ARP Entries : 3
 ```
 
@@ -313,7 +308,7 @@ PORT-VLAN 16, Name DVR_Access, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 17, Name Accounting_Rita_Access, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -453,7 +448,7 @@ PORT-VLAN 101, Name 001_OPS, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 102, Name 001_POS, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -463,7 +458,7 @@ PORT-VLAN 102, Name 001_POS, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 103, Name 001_Non-Store, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -473,7 +468,7 @@ PORT-VLAN 103, Name 001_Non-Store, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 104, Name P2PE_LAN, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -483,7 +478,7 @@ PORT-VLAN 104, Name P2PE_LAN, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 107, Name 001_SIPS, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -493,7 +488,7 @@ PORT-VLAN 107, Name 001_SIPS, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 108, Name 001_POS_Training, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -503,7 +498,7 @@ PORT-VLAN 108, Name 001_POS_Training, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 109, Name 001_Management, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -513,7 +508,7 @@ PORT-VLAN 109, Name 001_Management, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 110, Name 001_AP, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -523,7 +518,7 @@ PORT-VLAN 110, Name 001_AP, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 111, Name 001_901SIPS, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -533,7 +528,7 @@ PORT-VLAN 111, Name 001_901SIPS, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 112, Name 001_Customer_WiFi, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -543,7 +538,7 @@ PORT-VLAN 112, Name 001_Customer_WiFi, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 113, Name New_Store_SIPS, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -553,7 +548,7 @@ PORT-VLAN 113, Name New_Store_SIPS, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 122, Name 001_SYOD, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -563,7 +558,7 @@ PORT-VLAN 122, Name 001_SYOD, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 191, Name NWH_CCTV, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -573,7 +568,7 @@ PORT-VLAN 191, Name NWH_CCTV, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 200, Name 000_Dev_Store, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -583,7 +578,7 @@ PORT-VLAN 200, Name 000_Dev_Store, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 222, Name Conference, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -593,7 +588,7 @@ PORT-VLAN 222, Name Conference, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 225, Name Keyless_Entry, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -603,7 +598,7 @@ PORT-VLAN 225, Name Keyless_Entry, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 226, Name [None], Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -613,7 +608,7 @@ PORT-VLAN 226, Name [None], Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 254, Name Test_STore, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -623,7 +618,7 @@ PORT-VLAN 254, Name Test_STore, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 300, Name NetMgt, Priority level0, Off
  Untagged Ports: (U1/M1)  37  38
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -663,7 +658,7 @@ PORT-VLAN 303, Name HPB_Users, Priority level0, Off
    Tagged Ports: (LAG)    61  71
  Mac-Vlan Ports: None
      Monitoring: Disabled
-
+ 
 PORT-VLAN 306, Name VOICE, Priority level0, Off
  Untagged Ports: None
    Tagged Ports: (U1/M1)   1   2   3   4   5   6   7   8   9  10  11  12
@@ -890,104 +885,104 @@ ve4085     Up      N/A     N/A  N/A   None  N/A N/A  N/A c0c5.2050.a500
 ```
 
 Total active entries from all ports = 93
-MAC-Address     Port                 Type         VLAN
-70db.9895.73aa  1/2/1                Dynamic      3
-0010.20d0.b22b  1/1/2                Dynamic      10
-000f.7c0f.f387  2/1/11               Dynamic      3
-54bf.646f.d304  1/1/6                Dynamic      1
-000f.7c0f.f374  2/1/7                Dynamic      3
-70db.9895.73aa  1/2/1                Dynamic      5
-54bf.6479.a8de  1/1/22               Dynamic      2
-000f.7c0f.f385  2/1/18               Dynamic      3
-9890.96d9.f0ab  2/1/48               Dynamic      3
-e454.e85d.bfe1  1/1/48               Dynamic      4
-6c2b.59f8.ec1b  1/1/9                Dynamic      1
-000f.7c0f.f322  2/1/27               Dynamic      3
-0010.20ce.0655  1/1/2                Dynamic      10
-000f.7c0f.f320  2/1/28               Dynamic      3
-0010.20d1.1387  1/1/2                Dynamic      10
-184b.0d22.d780  1/1/5                Dynamic      5
-484d.7edb.1431  1/1/16               Dynamic      1
-0010.20d2.8b0d  1/1/2                Dynamic      10
-000f.7c0f.f324  2/1/30               Dynamic      3
-184b.0d22.48c0  1/1/1                Dynamic      5
-70db.9895.73ab  1/2/1                Dynamic      12
-MAC-Address     Port                 Type         VLAN
-0010.20d0.b23d  1/1/2                Dynamic      10
-0010.20d2.8afd  1/1/2                Dynamic      10
-184b.0d22.e2a0  1/1/2                Dynamic      5
-54bf.64a2.66c5  1/1/23               Dynamic      2
-6c2b.59ef.7457  1/1/27               Dynamic      1
-000f.7c15.7df0  2/1/38               Dynamic      3
-0010.20d0.b2a3  1/1/2                Dynamic      10
-000f.7c0f.f373  2/1/9                Dynamic      3
-000f.7c0f.f357  2/1/13               Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      666
-184b.0d22.4610  1/1/4                Dynamic      5
-000f.7c0f.f328  2/1/21               Dynamic      3
-0010.20cf.9f4d  1/1/2                Dynamic      10
-e454.e85d.9381  1/1/47               Dynamic      4
-000f.7c0f.f371  2/1/2                Dynamic      3
-000f.7c0f.f355  2/1/15               Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      1
-0010.20d2.8b2b  1/1/2                Dynamic      10
-6c2b.59e9.aa1c  1/1/20               Dynamic      2
-000f.7c0f.f382  2/1/12               Dynamic      3
-d89e.f344.6592  1/1/11               Dynamic      1
-000f.7c0f.f377  2/1/10               Dynamic      3
-MAC-Address     Port                 Type         VLAN
-184b.0d22.d920  1/1/3                Dynamic      5
-70db.9895.73aa  1/2/1                Dynamic      2
-000f.7c0f.f380  2/1/23               Dynamic      3
-000f.7c0f.f32c  2/1/31               Dynamic      3
-000f.7c10.683f  2/1/35               Dynamic      3
-000f.7c0f.f375  2/1/3                Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      5
-000f.7c0f.f386  2/1/14               Dynamic      3
-6400.6a01.18a6  1/1/18               Dynamic      1
-509a.4c4e.bb73  1/1/12               Dynamic      1
-000f.7c0f.f323  2/1/25               Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      7
-000f.7c0f.f384  2/1/22               Dynamic      3
-001a.ef5b.6804  1/1/4                Dynamic      10
-000f.7c15.7e23  2/1/34               Dynamic      3
-000f.7c15.7e07  2/1/37               Dynamic      3
-54bf.6474.f6bb  1/1/10               Dynamic      1
-d89e.f31b.48ea  1/1/17               Dynamic      1
-0010.40b3.a1de  1/1/2                Dynamic      10
-6c2b.59d6.b345  1/1/21               Dynamic      2
-000f.7c0f.f327  2/1/24               Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      11
-MAC-Address     Port                 Type         VLAN
-000f.7c0f.f325  2/1/29               Dynamic      3
-000f.7c0f.f352  2/1/19               Dynamic      3
-d89e.f344.64bc  1/1/46               Dynamic      4
-f8bc.128f.04ee  1/1/14               Dynamic      1
-000f.7c10.212e  2/1/32               Dynamic      3
-6c2b.59d6.9fcd  1/1/19               Dynamic      2
-6c2b.59dd.c6fa  1/1/8                Dynamic      1
-fa98.6b8a.a8b9  1/1/4                Dynamic      11
-d861.6240.f255  1/1/1                Dynamic      10
-54bf.6496.c555  1/1/7                Dynamic      1
-000f.7c0f.f372  2/1/4                Dynamic      3
-000f.7c14.fa31  2/1/26               Dynamic      3
-000f.7c0f.f356  2/1/33               Dynamic      3
-000f.7c0f.f383  2/1/8                Dynamic      3
-484d.7edb.1116  1/1/15               Dynamic      1
-000f.7c0f.f370  2/1/6                Dynamic      3
-000f.7c0f.f354  2/1/16               Dynamic      3
-000f.7c0f.16df  2/1/1                Dynamic      3
-70db.9895.73aa  1/2/1                Dynamic      1
-000f.7c0f.f381  2/1/17               Dynamic      3
-000f.7c0f.f32d  2/1/20               Dynamic      3
-000f.7c0f.f376  2/1/5                Dynamic      3
-MAC-Address     Port                 Type         VLAN
-70db.9895.73aa  1/2/1                Dynamic      10
-70db.9895.73aa  1/2/1                Dynamic      4
-70db.9895.73ab  1/2/1                Dynamic      10
-70db.9895.73ab  1/2/1                Dynamic      4
-70db.9895.73ab  1/2/1                Dynamic      3
-70db.9895.73ab  1/2/1                Dynamic      2
+MAC-Address     Port                 Type         VLAN 
+70db.9895.73aa  1/2/1                Dynamic      3    
+0010.20d0.b22b  1/1/2                Dynamic      10   
+000f.7c0f.f387  2/1/11               Dynamic      3    
+54bf.646f.d304  1/1/6                Dynamic      1    
+000f.7c0f.f374  2/1/7                Dynamic      3    
+70db.9895.73aa  1/2/1                Dynamic      5    
+54bf.6479.a8de  1/1/22               Dynamic      2    
+000f.7c0f.f385  2/1/18               Dynamic      3    
+9890.96d9.f0ab  2/1/48               Dynamic      3    
+e454.e85d.bfe1  1/1/48               Dynamic      4    
+6c2b.59f8.ec1b  1/1/9                Dynamic      1    
+000f.7c0f.f322  2/1/27               Dynamic      3    
+0010.20ce.0655  1/1/2                Dynamic      10   
+000f.7c0f.f320  2/1/28               Dynamic      3    
+0010.20d1.1387  1/1/2                Dynamic      10   
+184b.0d22.d780  1/1/5                Dynamic      5    
+484d.7edb.1431  1/1/16               Dynamic      1    
+0010.20d2.8b0d  1/1/2                Dynamic      10   
+000f.7c0f.f324  2/1/30               Dynamic      3    
+184b.0d22.48c0  1/1/1                Dynamic      5    
+70db.9895.73ab  1/2/1                Dynamic      12   
+MAC-Address     Port                 Type         VLAN 
+0010.20d0.b23d  1/1/2                Dynamic      10   
+0010.20d2.8afd  1/1/2                Dynamic      10   
+184b.0d22.e2a0  1/1/2                Dynamic      5    
+54bf.64a2.66c5  1/1/23               Dynamic      2    
+6c2b.59ef.7457  1/1/27               Dynamic      1    
+000f.7c15.7df0  2/1/38               Dynamic      3    
+0010.20d0.b2a3  1/1/2                Dynamic      10   
+000f.7c0f.f373  2/1/9                Dynamic      3    
+000f.7c0f.f357  2/1/13               Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      666  
+184b.0d22.4610  1/1/4                Dynamic      5    
+000f.7c0f.f328  2/1/21               Dynamic      3    
+0010.20cf.9f4d  1/1/2                Dynamic      10   
+e454.e85d.9381  1/1/47               Dynamic      4    
+000f.7c0f.f371  2/1/2                Dynamic      3    
+000f.7c0f.f355  2/1/15               Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      1    
+0010.20d2.8b2b  1/1/2                Dynamic      10   
+6c2b.59e9.aa1c  1/1/20               Dynamic      2    
+000f.7c0f.f382  2/1/12               Dynamic      3    
+d89e.f344.6592  1/1/11               Dynamic      1    
+000f.7c0f.f377  2/1/10               Dynamic      3    
+MAC-Address     Port                 Type         VLAN 
+184b.0d22.d920  1/1/3                Dynamic      5    
+70db.9895.73aa  1/2/1                Dynamic      2    
+000f.7c0f.f380  2/1/23               Dynamic      3    
+000f.7c0f.f32c  2/1/31               Dynamic      3    
+000f.7c10.683f  2/1/35               Dynamic      3    
+000f.7c0f.f375  2/1/3                Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      5    
+000f.7c0f.f386  2/1/14               Dynamic      3    
+6400.6a01.18a6  1/1/18               Dynamic      1    
+509a.4c4e.bb73  1/1/12               Dynamic      1    
+000f.7c0f.f323  2/1/25               Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      7    
+000f.7c0f.f384  2/1/22               Dynamic      3    
+001a.ef5b.6804  1/1/4                Dynamic      10   
+000f.7c15.7e23  2/1/34               Dynamic      3    
+000f.7c15.7e07  2/1/37               Dynamic      3    
+54bf.6474.f6bb  1/1/10               Dynamic      1    
+d89e.f31b.48ea  1/1/17               Dynamic      1    
+0010.40b3.a1de  1/1/2                Dynamic      10   
+6c2b.59d6.b345  1/1/21               Dynamic      2    
+000f.7c0f.f327  2/1/24               Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      11   
+MAC-Address     Port                 Type         VLAN 
+000f.7c0f.f325  2/1/29               Dynamic      3    
+000f.7c0f.f352  2/1/19               Dynamic      3    
+d89e.f344.64bc  1/1/46               Dynamic      4    
+f8bc.128f.04ee  1/1/14               Dynamic      1    
+000f.7c10.212e  2/1/32               Dynamic      3    
+6c2b.59d6.9fcd  1/1/19               Dynamic      2    
+6c2b.59dd.c6fa  1/1/8                Dynamic      1    
+fa98.6b8a.a8b9  1/1/4                Dynamic      11   
+d861.6240.f255  1/1/1                Dynamic      10   
+54bf.6496.c555  1/1/7                Dynamic      1    
+000f.7c0f.f372  2/1/4                Dynamic      3    
+000f.7c14.fa31  2/1/26               Dynamic      3    
+000f.7c0f.f356  2/1/33               Dynamic      3    
+000f.7c0f.f383  2/1/8                Dynamic      3    
+484d.7edb.1116  1/1/15               Dynamic      1    
+000f.7c0f.f370  2/1/6                Dynamic      3    
+000f.7c0f.f354  2/1/16               Dynamic      3    
+000f.7c0f.16df  2/1/1                Dynamic      3    
+70db.9895.73aa  1/2/1                Dynamic      1    
+000f.7c0f.f381  2/1/17               Dynamic      3    
+000f.7c0f.f32d  2/1/20               Dynamic      3    
+000f.7c0f.f376  2/1/5                Dynamic      3    
+MAC-Address     Port                 Type         VLAN 
+70db.9895.73aa  1/2/1                Dynamic      10   
+70db.9895.73aa  1/2/1                Dynamic      4    
+70db.9895.73ab  1/2/1                Dynamic      10   
+70db.9895.73ab  1/2/1                Dynamic      4    
+70db.9895.73ab  1/2/1                Dynamic      3    
+70db.9895.73ab  1/2/1                Dynamic      2    
 ```
 
 **Help:** execute the command "show mac-address"
@@ -1060,7 +1055,7 @@ Port       Supported Vendor               Type
 STACKID 1  system uptime is 24 day(s) 4 hour(s) 11 minute(s) 1 second(s)
 STACKID 2  system uptime is 24 day(s) 4 hour(s) 11 minute(s) 1 second(s)
 The system started at 18:28:15 Central Fri Dec 31 1999
-
+ 
 The system : started=cold start
 My stack unit ID = 1, bootup role = active
 
@@ -1072,3 +1067,4 @@ My stack unit ID = 1, bootup role = active
 **Prompt:**
 - ruckus_fastiron>
 - ruckus_fastiron#
+

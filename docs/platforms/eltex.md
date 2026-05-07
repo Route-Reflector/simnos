@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -30,10 +28,7 @@
 
 ### ex
 
-**Output:**
-```
-True
-```
+**Output:** None
 
 **Help:** exit the terminal
 
@@ -2231,11 +2226,11 @@ Vlan               Name               Egress rule     Added by
 130             Servers_OS              Tagged           S
 4094               NULL                Untagged          S
 
-
+ 
 Forbidden VLANS:
 Vlan               Name
 ---- --------------------------------
-
+ 
 
 Classification rules:
 
@@ -2255,3 +2250,4 @@ Mac based VLANs:
 **Prompt:**
 - eltex>
 - eltex#
+

@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -112,24 +110,24 @@ crypto map S2S_CMAP interface S2SVPN
 **Output:**
 ```
 Interface                  IP-Address      OK? Method Status                Protocol
-Virtual0                   127.1.0.1       YES unset  up                    up
-GigabitEthernet1/1         192.168.1.253   YES CONFIG up                    up
-GigabitEthernet1/2         unassigned      YES unset  up                    up
-GigabitEthernet1/3         unassigned      YES unset  up                    up
+Virtual0                   127.1.0.1       YES unset  up                    up  
+GigabitEthernet1/1         192.168.1.253   YES CONFIG up                    up  
+GigabitEthernet1/2         unassigned      YES unset  up                    up  
+GigabitEthernet1/3         unassigned      YES unset  up                    up  
 GigabitEthernet1/4         unassigned      YES unset  administratively down down
 GigabitEthernet1/5         unassigned      YES unset  administratively down down
 GigabitEthernet1/6         unassigned      YES unset  administratively down down
 GigabitEthernet1/7         unassigned      YES unset  administratively down down
 GigabitEthernet1/8         unassigned      YES unset  administratively down down
 Internal-Control1/1        unassigned      YES unset  up                    down
-Internal-Data1/1           unassigned      YES unset  up                    up
+Internal-Data1/1           unassigned      YES unset  up                    up  
 Internal-Data1/2           unassigned      YES unset  down                  down
-Internal-Data1/3           unassigned      YES unset  up                    up
-Internal-Data1/4           169.254.1.1     YES unset  up                    up
-Management1/1              10.10.12.2      YES CONFIG up                    up
-Port-channel1              unassigned      YES unset  up                    up
-Port-channel1.144          10.10.14.1      YES CONFIG up                    up
-Port-channel1.3101         10.10.54.2      YES CONFIG up                    up
+Internal-Data1/3           unassigned      YES unset  up                    up  
+Internal-Data1/4           169.254.1.1     YES unset  up                    up  
+Management1/1              10.10.12.2      YES CONFIG up                    up  
+Port-channel1              unassigned      YES unset  up                    up  
+Port-channel1.144          10.10.14.1      YES CONFIG up                    up  
+Port-channel1.3101         10.10.54.2      YES CONFIG up                    up  
 
 ```
 
@@ -183,7 +181,7 @@ Interface Policy 1
 Monitored Interfaces 4 of 250 maximum
 Version: Ours 7.2(0)55, Mate 7.2(0)55
 Last Failover at: 19:59:58 PST Apr 6 2006
-
+ 
 This host: Primary - Active
 Active time: 34 (sec)
 slot 0: ASA5505 hw/sw rev (1.0/7.2(0)55) status (Up Sys)
@@ -192,7 +190,7 @@ Interface outside (192.168.2.201): Normal
 Interface dmz (172.16.0.1): Normal
 Interface test (172.23.62.138): Normal
 slot 1: empty
-
+ 
 Other host: Secondary - Standby Ready
 Active time: 0 (sec)
 slot 0: ASA5505 hw/sw rev (1.0/7.2(0)55) status (Up Sys)
@@ -251,7 +249,7 @@ Rekey Call = 3
 VPN Filter = <none>
 
 VPN CTX  = 0x01155524
-
+ 
 Peer IP  = 10.11.200.23
 Pointer  = 0xCC05C8F0
 State    = UP
@@ -386,7 +384,7 @@ crypto ikev1 policy 60
  authentication pre-share
  encryption aes-256
  hash md5
- group 5
+ group 5      
  lifetime 86400
 
 ```
@@ -639,37 +637,37 @@ IKE:
   Rekey Int (T): 86400 Seconds          Rekey Left(T): 76776 Seconds
   D/H Group    : 2
   Filter Name  : TestFilter
-  IPv6 Filter  :
+  IPv6 Filter  : 
 
 IPsec:
   Tunnel ID    : 6539.2
   Local Addr   : 169.254.44.0/255.255.252.0/0/0
   Remote Addr  : 1.1.1.1/255.255.255.255/0/0
-  Encryption   : AES256                 Hashing      : SHA1
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 19174 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4586873 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes
-  Bytes Tx     : 3256642959             Bytes Rx     : 268532214
-  Pkts Tx      : 4539818                Pkts Rx      : 2958857
-
+  Encryption   : AES256                 Hashing      : SHA1                   
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 19174 Seconds          
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4586873 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes             
+  Bytes Tx     : 3256642959             Bytes Rx     : 268532214              
+  Pkts Tx      : 4539818                Pkts Rx      : 2958857                
+  
 IPsec:
   Tunnel ID    : 6539.3
   Local Addr   : 169.254.44.0/255.255.255.0/0/0
   Remote Addr  : 1.1.1.1/255.255.255.255/0/0
-  Encryption   : AES256                 Hashing      : SHA1
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 19482 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607988 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 23 Minutes
-  Bytes Tx     : 162882024              Bytes Rx     : 6897433
-  Pkts Tx      : 136730                 Pkts Rx      : 121906
-
+  Encryption   : AES256                 Hashing      : SHA1                   
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 19482 Seconds          
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607988 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 23 Minutes             
+  Bytes Tx     : 162882024              Bytes Rx     : 6897433                
+  Pkts Tx      : 136730                 Pkts Rx      : 121906                 
+  
 NAC:
   Reval Int (T): 0 Seconds              Reval Left(T): 0 Seconds
   SQ Int (T)   : 0 Seconds              EoU Age(T)   : 890906 Seconds
-  Hold Left (T): 0 Seconds              Posture Token:
-  Redirect URL :
+  Hold Left (T): 0 Seconds              Posture Token: 
+  Redirect URL : 
 
 Connection   : 169.254.104.1
 Index        : 7379                   IP Addr      : 169.254.104.1
@@ -690,37 +688,37 @@ IKE:
   Rekey Int (T): 28800 Seconds          Rekey Left(T): 20119 Seconds
   D/H Group    : 2
   Filter Name  : acl_SOURCE_MED
-  IPv6 Filter  :
+  IPv6 Filter  : 
 
 IPsec:
   Tunnel ID    : 7379.6
   Local Addr   : 169.254.32.0/255.255.252.0/0/0
   Remote Addr  : 172.20.8.183/255.255.255.255/0/0
-  Encryption   : AES256                 Hashing      : SHA1
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 6889 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607947 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes
-  Bytes Tx     : 140576                 Bytes Rx     : 79487
-  Pkts Tx      : 1520                   Pkts Rx      : 1509
-
+  Encryption   : AES256                 Hashing      : SHA1                   
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 6889 Seconds           
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607947 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes             
+  Bytes Tx     : 140576                 Bytes Rx     : 79487                  
+  Pkts Tx      : 1520                   Pkts Rx      : 1509                   
+  
 IPsec:
   Tunnel ID    : 7379.8
   Local Addr   : 169.254.20.23/255.255.252.0/0/0
   Remote Addr  : 172.20.8.98/255.255.255.255/0/0
-  Encryption   : AES256                 Hashing      : SHA1
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 25947 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 0 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes
-  Bytes Tx     : 102540                 Bytes Rx     : 0
-  Pkts Tx      : 1709                   Pkts Rx      : 0
-
+  Encryption   : AES256                 Hashing      : SHA1                   
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 25947 Seconds          
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 0 K-Bytes              
+  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes             
+  Bytes Tx     : 102540                 Bytes Rx     : 0                      
+  Pkts Tx      : 1709                   Pkts Rx      : 0                      
+  
 NAC:
   Reval Int (T): 0 Seconds              Reval Left(T): 0 Seconds
   SQ Int (T)   : 0 Seconds              EoU Age(T)   : 51881 Seconds
-  Hold Left (T): 0 Seconds              Posture Token:
-  Redirect URL :
+  Hold Left (T): 0 Seconds              Posture Token: 
+  Redirect URL : 
 
 Connection   : 169.254.99.1
 Index        : 79                     IP Addr      : 169.254.99.1
@@ -747,25 +745,25 @@ IPsec:
   Tunnel ID    : 79.3
   Local Addr   : 169.254.20.22/255.255.255.255/0/0
   Remote Addr  : 192.168.6.74/255.255.255.255/0/0
-  Encryption   : 3DES                   Hashing      : MD5
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 18904 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607926 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 28 Minutes
-  Bytes Tx     : 12721728               Bytes Rx     : 2387175
-  Pkts Tx      : 29085                  Pkts Rx      : 29509
-
+  Encryption   : 3DES                   Hashing      : MD5                    
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 18904 Seconds          
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607926 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 28 Minutes             
+  Bytes Tx     : 12721728               Bytes Rx     : 2387175                
+  Pkts Tx      : 29085                  Pkts Rx      : 29509                  
+  
 IPsec:
   Tunnel ID    : 79.71
   Local Addr   : 169.254.20.21/255.255.255.255/0/0
   Remote Addr  : 192.168.6.71/255.255.255.255/0/0
-  Encryption   : 3DES                   Hashing      : MD5
-  Encapsulation: Tunnel
-  Rekey Int (T): 28800 Seconds          Rekey Left(T): 25194 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607999 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 25 Minutes
-  Bytes Tx     : 519703                 Bytes Rx     : 437245
-  Pkts Tx      : 8681                   Pkts Rx      : 8677
+  Encryption   : 3DES                   Hashing      : MD5                    
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 28800 Seconds          Rekey Left(T): 25194 Seconds          
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607999 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 25 Minutes             
+  Bytes Tx     : 519703                 Bytes Rx     : 437245                 
+  Pkts Tx      : 8681                   Pkts Rx      : 8677                   
 
 Connection   : 169.254.44.1
 Index        : 5092                   IP Addr      : 169.254.44.1
@@ -792,13 +790,13 @@ IPsec:
   Tunnel ID    : 5092.2
   Local Addr   : 169.254.20.20/255.255.255.255/0/0
   Remote Addr  : 10.10.10.13/255.255.255.255/0/0
-  Encryption   : AES128                 Hashing      : SHA1
-  Encapsulation: Tunnel                 PFS Group    : 2
-  Rekey Int (T): 3600 Seconds           Rekey Left(T): 2132 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607009 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes
-  Bytes Tx     : 2994391497             Bytes Rx     : 337511800
-  Pkts Tx      : 3539590                Pkts Rx      : 2455325
+  Encryption   : AES128                 Hashing      : SHA1                   
+  Encapsulation: Tunnel                 PFS Group    : 2                      
+  Rekey Int (T): 3600 Seconds           Rekey Left(T): 2132 Seconds           
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607009 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 29 Minutes             
+  Bytes Tx     : 2994391497             Bytes Rx     : 337511800              
+  Pkts Tx      : 3539590                Pkts Rx      : 2455325                
 
 Connection   : 169.254.60.1
 Index        : 3908                   IP Addr      : 169.254.60.1
@@ -820,19 +818,19 @@ IKEv2:
   Encryption   : AES256                 Hashing      : SHA1
   Rekey Int (T): 86400 Seconds          Rekey Left(T): 21432 Seconds
   PRF          : SHA1                   D/H Group    : 5
-  Filter Name  :
+  Filter Name  : 
 
 IPsec:
   Tunnel ID    : 3908.2
   Local Addr   : 0.0.0.0/0.0.0.0/0/0
   Remote Addr  : 10.250.253.120/255.255.255.248/0/0
-  Encryption   : AES256                 Hashing      : SHA256
-  Encapsulation: Tunnel
-  Rekey Int (T): 3600 Seconds           Rekey Left(T): 3094 Seconds
-  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607999 K-Bytes
-  Idle Time Out: 30 Minutes             Idle TO Left : 27 Minutes
-  Bytes Tx     : 9993110                Bytes Rx     : 12080533
-  Pkts Tx      : 93673                  Pkts Rx      : 72095
+  Encryption   : AES256                 Hashing      : SHA256                 
+  Encapsulation: Tunnel                 
+  Rekey Int (T): 3600 Seconds           Rekey Left(T): 3094 Seconds           
+  Rekey Int (D): 4608000 K-Bytes        Rekey Left(D): 4607999 K-Bytes        
+  Idle Time Out: 30 Minutes             Idle TO Left : 27 Minutes             
+  Bytes Tx     : 9993110                Bytes Rx     : 12080533               
+  Pkts Tx      : 93673                  Pkts Rx      : 72095 
 
 ```
 
@@ -892,13 +890,13 @@ Gateway of last resort is 192.168.1.2 to network 0.0.0.0
 
 S*       0.0.0.0 0.0.0.0 [1/0] via 192.168.1.2, outside
 O E1     10.15.0.0 255.255.0.0 [110/21] via 192.168.2.1, 3w1d, inside
-O E1     172.23.100.0 255.255.254.0
+O E1     172.23.100.0 255.255.254.0 
            [110/50] via 192.168.2.1, 3w1d, inside
-O E1     172.23.42.0 255.255.254.0
+O E1     172.23.42.0 255.255.254.0 
            [110/11] via 172.17.13.52, 2w2d, routing
            [110/11] via 172.17.13.51, 7w0d, routing
 C        172.17.13.0 255.255.255.0 is directly connected, routing
-L        172.17.13.60 255.255.255.255 is directly connected, routing
+L        172.17.13.60 255.255.255.255 is directly connected, routing           
 C        192.168.1.0 255.255.255.0 is directly connected, outside
 L        192.168.1.108 255.255.255.255 is directly connected, outside
 C        192.168.2.0 255.255.255.0 is directly connected, inside
@@ -1098,7 +1096,7 @@ Duration     : 2h:21m:21s
 Inactivity   : 0h:00m:00s
 VLAN Mapping : N/A                    VLAN         : none
  Audt Sess ID : ac1063fe003fa0005e715555
-Security Grp : none
+Security Grp : none                   
 
 Username     : lee                    Index        : 1
 Assigned IP  : 192.168.246.1           Public IP    : 10.139.1.2
@@ -1113,7 +1111,7 @@ Duration     : 0h:00m:15s
 Inactivity   : 0h:00m:00s
 VLAN Mapping : N/A                    VLAN         : none
  Audt Sess ID : a31867c632efaeaad
-Security Grp : none
+Security Grp : none                   
 
 ```
 
@@ -1158,12 +1156,12 @@ NAT from inside:192.168.1.150 to outside:172.18.254.252 flags s idle 0:01:37 tim
 ```
 crypto map Standard-1 20 match address peer1
 crypto map Standard-1 20 set pfs group5
-crypto map Standard-1 20 set peer Peer-1
+crypto map Standard-1 20 set peer Peer-1 
 crypto map Standard-1 20 set ikev1 transform-set Standard-Transform
 crypto map Standard-1 20 set security-association lifetime seconds 28800
 crypto map Standard-1 25 match address peer2
 crypto map Standard-1 25 set pfs group2
-crypto map Standard-1 25 set peer Peer-2
+crypto map Standard-1 25 set peer Peer-2 
 crypto map Standard-1 25 set ikev1 transform-set Standard-Transform
  crypto map Standard-1 25 set security-association lifetime seconds 28800
 crypto map Standard-1 interface outside
@@ -1197,14 +1195,14 @@ PID: ASA5506-SSD       , VID: N/A     , SN:
 
 **Output:**
 ```
-crypto ipsec ikev1 transform-set AES-256_MD5 esp-aes-256 esp-md5-hmac
-crypto ipsec ikev1 transform-set AES-256_SHA esp-aes-256 esp-sha-hmac
-crypto ipsec ikev1 transform-set 3DES_MD5 esp-3des esp-md5-hmac
-crypto ipsec ikev1 transform-set 3DES_SHa esp-3des esp-sha-hmac
-crypto ipsec ikev1 transform-set AES_MD5 esp-aes esp-md5-hmac
-crypto ipsec ikev1 transform-set AES_SHA esp-aes esp-sha-hmac
-crypto ipsec ikev1 transform-set AES-192_MD5 esp-aes-192 esp-md5-hmac
-crypto ipsec ikev1 transform-set AES-192_SHA esp-aes-192 esp-sha-hmac
+crypto ipsec ikev1 transform-set AES-256_MD5 esp-aes-256 esp-md5-hmac 
+crypto ipsec ikev1 transform-set AES-256_SHA esp-aes-256 esp-sha-hmac 
+crypto ipsec ikev1 transform-set 3DES_MD5 esp-3des esp-md5-hmac 
+crypto ipsec ikev1 transform-set 3DES_SHa esp-3des esp-sha-hmac 
+crypto ipsec ikev1 transform-set AES_MD5 esp-aes esp-md5-hmac 
+crypto ipsec ikev1 transform-set AES_SHA esp-aes esp-sha-hmac 
+crypto ipsec ikev1 transform-set AES-192_MD5 esp-aes-192 esp-md5-hmac 
+crypto ipsec ikev1 transform-set AES-192_SHA esp-aes-192 esp-sha-hmac 
 crypto ipsec ikev2 ipsec-proposal IKE2
  protocol esp encryption aes-gcm-256 aes-gcm-192 aes-gcm aes-256 aes-192 aes 3des des aes-gmac-256 aes-gmac-192 aes-gmac
  protocol esp integrity sha-512 sha-384 sha-256 sha-1 md5
@@ -1212,8 +1210,8 @@ crypto ipsec ikev2 ipsec-proposal NEW_IKE2
  protocol esp encryption aes-gcm-256 aes-gcm-192 aes-gcm aes-256 aes-192 aes 3des des aes-gmac-256 aes-gmac-192 aes-gmac
 crypto ipsec ikev2 ipsec-proposal newer_ike2
  protocol esp integrity sha-512 sha-384 sha-256 sha-1 md5
-crypto ipsec ikev1 transform-set DES_MD5 esp-des esp-md5-hmac
-crypto ipsec ikev1 transform-set DES_SHA esp-des esp-sha-hmac
+crypto ipsec ikev1 transform-set DES_MD5 esp-des esp-md5-hmac 
+crypto ipsec ikev1 transform-set DES_SHA esp-des esp-sha-hmac 
 crypto ipsec ikev2 ipsec-proposal final_IKE2
  protocol esp encryption aes-gcm-256 aes-gcm-192 3des des aes-gmac-256 aes-gmac-192 aes-gmac
  protocol esp integrity sha-512 sha-1 md5
@@ -1517,7 +1515,7 @@ Directory of disk0:/
 132    -rwx  4102         07:07:44 Feb 12 2016  scp_f1
 133    -rwx  4102         07:09:04 Feb 12 2016  scp_f2
 134    -rwx  2595         07:20:42 Feb 12 2016  general.xml
-
+ 
 7859437568 bytes total (4417200128 bytes free)
 
 ```
@@ -1544,8 +1542,8 @@ BGP using 4000 total bytes of memory
  BGP activity 8/0 prefixes, 8/0 paths, scan interval 60 secs
 
 Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.10.254.1     4        65101 961788  961836         9    0    0 4w6d  5
-10.10.254.9     4        65101 961784  961836         9    0    0 4w6d  1
+10.10.254.1     4        65101 961788  961836         9    0    0 4w6d  5       
+10.10.254.9     4        65101 961784  961836         9    0    0 4w6d  1   
 ```
 
 **Help:** execute the command "show bgp summary"
@@ -1616,54 +1614,54 @@ object network internal-ipv6-subnet
 **Output:**
 ```
 access-list test; 51 elements; name hash: 0xcb4257a3
-access-list test line 1 extended permit ah any4 interface outside log informational interval 300 inactive (hitcnt=0) (inactive) 0x20db5032
-access-list test line 2 extended deny udp host 10.10.10.11 host 10.10.12.12 eq dnsix (hitcnt=0) 0xfe42d16f
- access-list test line 3 extended permit object svc1 object test1 object test2 log informational interval 300 (hitcnt=0) 0xb18beb2d
-  access-list test line 3 extended permit icmp fqdn test.com (unresolved) host 10.1.1.2 echo-reply 4 log informational interval 300 (inactive) 0x0397cac0
-access-list test line 4 extended permit tcp object-group grptest1 10.10.10.0 255.255.255.128 (hitcnt=0) 0x26e50070
-  access-list test line 4 extended permit tcp host 10.1.1.10 10.10.10.0 255.255.255.128 (hitcnt=0) 0x44aceee4
-  access-list test line 4 extended permit tcp fqdn test.com (unresolved) 10.10.10.0 255.255.255.128 (inactive) 0x27806b87
-  access-list test line 4 extended permit tcp 10.1.1.8 255.255.255.248 10.10.10.0 255.255.255.128 (hitcnt=0) 0xb65d6d2a
-access-list test line 5 extended permit object-group svcgrp1 object test2 object test3 (hitcnt=0) 0xffc8818e
-  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 eq 60 (hitcnt=0) 0x09fd553e
-  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 eq www (hitcnt=0) 0xc366785c
-  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 gt 100 (hitcnt=0) 0xc7a44ae8
-  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 range gopher 71 (hitcnt=0) 0x4db36dd4
-access-list test line 6 extended permit ip object-group grptest2 any4 (hitcnt=0) 0x1b9c9328
-  access-list test line 6 extended permit ip host 10.1.1.10 any4 (hitcnt=0) 0x9d5931ab
-  access-list test line 6 extended permit ip fqdn test.com (unresolved) any4 (inactive) 0x0268299f
-  access-list test line 6 extended permit ip 10.1.1.8 255.255.255.248 any4 (hitcnt=0) 0xa6f62ec7
-  access-list test line 6 extended permit ip host 10.10.10.10 any4 (hitcnt=0) 0xac0ce8e7
-access-list test line 7 extended permit object-group svcgrp4 object test3 object test2 (hitcnt=0) 0x866dbeab
-  access-list test line 7 extended permit tcp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq domain (hitcnt=0) 0xbef61d61
-  access-list test line 7 extended permit udp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq domain (hitcnt=0) 0x3f9b81a1
-  access-list test line 7 extended permit tcp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq 55 (hitcnt=0) 0x99a487f5
-  access-list test line 7 extended permit udp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq 55 (hitcnt=0) 0xcd700fb1
-access-list test line 8 extended permit tcp object test1 object test1 object-group svcgrp6 (hitcnt=0) 0xd76472ac
-  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq aol (inactive) 0x64af6768
-  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq www (inactive) 0x29864b9c
-  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq 84 (inactive) 0x1f80e564
-access-list test line 9 extended permit object-group prtgrp1 any4 any4 (hitcnt=0) 0x0d8479f0
-  access-list test line 9 extended permit esp any4 any4 (hitcnt=0) 0x79a30bff
-access-list test line 10 extended permit tcp object-group grptest1 object test1 object-group svcgrp8 (hitcnt=0) 0x0ca66136
-  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq aol (inactive) 0xd93c8317
-  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq www (inactive) 0x98d3e56f
-  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq 84 (inactive) 0x45e3cb59
-  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq aol (inactive) 0x64af6768
-  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq www (inactive) 0x29864b9c
-  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq 84 (inactive) 0x1f80e564
-  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq aol (inactive) 0xddad57f9
-  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq www (inactive) 0x38389426
-  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq 84 (inactive) 0x883a126a
-access-list test line 11 extended permit tcp object-group grptest1 object test1 object-group svcgrp7 (hitcnt=0) 0xb396512b
-  access-list test line 11 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq domain (inactive) 0x5637d648
-  access-list test line 11 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq domain (inactive) 0x3cd20161
-  access-list test line 11 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq domain (inactive) 0x69655129
-access-list test line 12 extended permit tcp 10.20.30.0 255.255.255.0 10.50.12.0 255.255.255.224 eq www (hitcnt=0) 0x3f0331e6
-access-list test line 13 extended permit object svc10 host 10.21.10.5 host 10.50.20.10 (hitcnt=0) 0xc766bdc7
-  access-list test line 13 extended permit tcp host 10.21.10.5 host 10.50.20.10 range www 88 (hitcnt=0) 0xc766bdc7
-access-list test line 14 extended permit tcp host 10.20.30.22 10.50.12.0 255.255.255.224 eq www (hitcnt=0) 0x3f0331e6
-access-list test line 15 remark explicit-deny
+access-list test line 1 extended permit ah any4 interface outside log informational interval 300 inactive (hitcnt=0) (inactive) 0x20db5032 
+access-list test line 2 extended deny udp host 10.10.10.11 host 10.10.12.12 eq dnsix (hitcnt=0) 0xfe42d16f 
+ access-list test line 3 extended permit object svc1 object test1 object test2 log informational interval 300 (hitcnt=0) 0xb18beb2d 
+  access-list test line 3 extended permit icmp fqdn test.com (unresolved) host 10.1.1.2 echo-reply 4 log informational interval 300 (inactive) 0x0397cac0 
+access-list test line 4 extended permit tcp object-group grptest1 10.10.10.0 255.255.255.128 (hitcnt=0) 0x26e50070 
+  access-list test line 4 extended permit tcp host 10.1.1.10 10.10.10.0 255.255.255.128 (hitcnt=0) 0x44aceee4 
+  access-list test line 4 extended permit tcp fqdn test.com (unresolved) 10.10.10.0 255.255.255.128 (inactive) 0x27806b87 
+  access-list test line 4 extended permit tcp 10.1.1.8 255.255.255.248 10.10.10.0 255.255.255.128 (hitcnt=0) 0xb65d6d2a 
+access-list test line 5 extended permit object-group svcgrp1 object test2 object test3 (hitcnt=0) 0xffc8818e 
+  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 eq 60 (hitcnt=0) 0x09fd553e 
+  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 eq www (hitcnt=0) 0xc366785c 
+  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 gt 100 (hitcnt=0) 0xc7a44ae8 
+  access-list test line 5 extended permit tcp host 10.1.1.2 range 10.1.1.3 10.1.1.8 range gopher 71 (hitcnt=0) 0x4db36dd4 
+access-list test line 6 extended permit ip object-group grptest2 any4 (hitcnt=0) 0x1b9c9328 
+  access-list test line 6 extended permit ip host 10.1.1.10 any4 (hitcnt=0) 0x9d5931ab 
+  access-list test line 6 extended permit ip fqdn test.com (unresolved) any4 (inactive) 0x0268299f 
+  access-list test line 6 extended permit ip 10.1.1.8 255.255.255.248 any4 (hitcnt=0) 0xa6f62ec7 
+  access-list test line 6 extended permit ip host 10.10.10.10 any4 (hitcnt=0) 0xac0ce8e7 
+access-list test line 7 extended permit object-group svcgrp4 object test3 object test2 (hitcnt=0) 0x866dbeab 
+  access-list test line 7 extended permit tcp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq domain (hitcnt=0) 0xbef61d61 
+  access-list test line 7 extended permit udp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq domain (hitcnt=0) 0x3f9b81a1 
+  access-list test line 7 extended permit tcp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq 55 (hitcnt=0) 0x99a487f5 
+  access-list test line 7 extended permit udp range 10.1.1.3 10.1.1.8 host 10.1.1.2 eq 55 (hitcnt=0) 0xcd700fb1 
+access-list test line 8 extended permit tcp object test1 object test1 object-group svcgrp6 (hitcnt=0) 0xd76472ac 
+  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq aol (inactive) 0x64af6768 
+  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq www (inactive) 0x29864b9c 
+  access-list test line 8 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq 84 (inactive) 0x1f80e564 
+access-list test line 9 extended permit object-group prtgrp1 any4 any4 (hitcnt=0) 0x0d8479f0 
+  access-list test line 9 extended permit esp any4 any4 (hitcnt=0) 0x79a30bff 
+access-list test line 10 extended permit tcp object-group grptest1 object test1 object-group svcgrp8 (hitcnt=0) 0x0ca66136 
+  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq aol (inactive) 0xd93c8317 
+  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq www (inactive) 0x98d3e56f 
+  access-list test line 10 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq 84 (inactive) 0x45e3cb59 
+  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq aol (inactive) 0x64af6768 
+  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq www (inactive) 0x29864b9c 
+  access-list test line 10 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq 84 (inactive) 0x1f80e564 
+  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq aol (inactive) 0xddad57f9 
+  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq www (inactive) 0x38389426 
+  access-list test line 10 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq 84 (inactive) 0x883a126a 
+access-list test line 11 extended permit tcp object-group grptest1 object test1 object-group svcgrp7 (hitcnt=0) 0xb396512b 
+  access-list test line 11 extended permit tcp host 10.1.1.10 fqdn test.com (unresolved) eq domain (inactive) 0x5637d648 
+  access-list test line 11 extended permit tcp fqdn test.com (unresolved) fqdn test.com (unresolved) eq domain (inactive) 0x3cd20161 
+  access-list test line 11 extended permit tcp 10.1.1.8 255.255.255.248 fqdn test.com (unresolved) eq domain (inactive) 0x69655129 
+access-list test line 12 extended permit tcp 10.20.30.0 255.255.255.0 10.50.12.0 255.255.255.224 eq www (hitcnt=0) 0x3f0331e6 
+access-list test line 13 extended permit object svc10 host 10.21.10.5 host 10.50.20.10 (hitcnt=0) 0xc766bdc7 
+  access-list test line 13 extended permit tcp host 10.21.10.5 host 10.50.20.10 range www 88 (hitcnt=0) 0xc766bdc7 
+access-list test line 14 extended permit tcp host 10.20.30.22 10.50.12.0 255.255.255.224 eq www (hitcnt=0) 0x3f0331e6 
+access-list test line 15 remark explicit-deny 
 access-list test line 16 extended deny ip any4 any (hitcnt=0) 0x60edeab9
 access-list test line 17 remark ************ Allow ICMP *************
 access-list test line 18 extended permit icmp any any time-exceeded log informational interval 300 (hitcnt=31778) 0x6c633843
@@ -1684,15 +1682,15 @@ access-list test line 32 extended permit icmp any4 169.254.151.0 255.255.0.0 ech
 access-list test line 33 extended permit icmp any4 169.254.151.0 255.255.0.0 unreachable (hitcnt=0) 0x7887741b
 access-list test line 34 extended permit icmp any4 169.254.151.0 255.255.0.0 time-exceeded (hitcnt=0) 0x480bef5c
 access-list test line 35 extended deny icmp any any (hitcnt=3) 0xff7fd0ca
-access-list test line 36 extended permit tcp object-group test_gr object-group test_gr_02 eq ftp-data (hitcnt=0) 0x05e8add7
-  access-list test line 36 extended permit tcp host 212.179.71.34 host 10.2.74.35 eq ftp-data (hitcnt=0) 0x9fb86c39
-access-list test line 37 extended permit tcp object network-172.16.0.0 object aps03-aps04_gaibu_vip eq ssh inactive (hitcnt=0) (inactive) 0xcc9741b2
-  access-list test line 37 extended permit tcp 172.16.0.0 255.240.0.0 host 10.2.66.237 eq ssh inactive (hitcnt=0) (inactive) 0xcc9741b2
-access-list test line 38 extended permit tcp object ClientPC object-group NETWORK_100 inactive (hitcnt=0) (inactive) 0xc47bdfe9
-  access-list test line 38 extended permit tcp host 172.31.168.7 host 10.2.88.104 inactive (hitcnt=0) (inactive) 0x7e7a99ef
-  access-list test line 38 extended permit tcp host 172.31.168.7 host 10.2.88.100 inactive (hitcnt=0) (inactive) 0x4094da11
-access-list test line 39 extended permit tcp object-group NETWORK_88 object aps0506_VIP_10.2.66.53 eq 6991 log disable (hitcnt=55) 0xe547ccd6
-  access-list test line 39 extended permit tcp 10.0.247.0 255.255.255.0 host 10.2.66.53 eq 6991 log disable (hitcnt=40) 0xea52300b
+access-list test line 36 extended permit tcp object-group test_gr object-group test_gr_02 eq ftp-data (hitcnt=0) 0x05e8add7 
+  access-list test line 36 extended permit tcp host 212.179.71.34 host 10.2.74.35 eq ftp-data (hitcnt=0) 0x9fb86c39 
+access-list test line 37 extended permit tcp object network-172.16.0.0 object aps03-aps04_gaibu_vip eq ssh inactive (hitcnt=0) (inactive) 0xcc9741b2 
+  access-list test line 37 extended permit tcp 172.16.0.0 255.240.0.0 host 10.2.66.237 eq ssh inactive (hitcnt=0) (inactive) 0xcc9741b2 
+access-list test line 38 extended permit tcp object ClientPC object-group NETWORK_100 inactive (hitcnt=0) (inactive) 0xc47bdfe9 
+  access-list test line 38 extended permit tcp host 172.31.168.7 host 10.2.88.104 inactive (hitcnt=0) (inactive) 0x7e7a99ef 
+  access-list test line 38 extended permit tcp host 172.31.168.7 host 10.2.88.100 inactive (hitcnt=0) (inactive) 0x4094da11 
+access-list test line 39 extended permit tcp object-group NETWORK_88 object aps0506_VIP_10.2.66.53 eq 6991 log disable (hitcnt=55) 0xe547ccd6 
+  access-list test line 39 extended permit tcp 10.0.247.0 255.255.255.0 host 10.2.66.53 eq 6991 log disable (hitcnt=40) 0xea52300b 
 
 ```
 
@@ -1720,8 +1718,8 @@ tunnel-group tun01 general-attributes
  authenticated-session-username secondary
  default-group-policy default_gpol
  ipv6-address-pool (outside) v6pool
- nat-assigned-to-public-ip outside
- scep-enrollment enable
+ nat-assigned-to-public-ip outside 
+ scep-enrollment enable 
  secondary-authentication-server-group (outside) aaa LOCAL use-primary-username
  secondary-username-from-certificate C CN no-certificate-fallback cert
  username-from-certificate C CN
@@ -1744,7 +1742,7 @@ tunnel-group tun01 webvpn-attributes
  saml identity-provider idp
  secondary pre-fill-username clientless hide
  secondary pre-fill-username ssl-client
- without-csd anyconnect
+ without-csd anyconnect 
 tunnel-group tun01 ipsec-attributes
  ikev1 pre-shared-key *****
  chain
@@ -1931,33 +1929,33 @@ fw002 up 114 days 18 hours
 failover cluster up 700 days 16 hours
 
 Hardware:   FPR4K-SM-12
-
+ 
 License mode: Smart Licensing
 
 Licensed features for this user context:
-Failover                          : Active/Active
-Encryption-DES                    : Enabled
-Encryption-3DES-AES               : Enabled
-Carrier                           : Disabled
-AnyConnect Premium Peers          : 0
-Other VPN Peers                   : 500
-AnyConnect for Mobile             : Enabled
-AnyConnect for Cisco VPN Phone    : Enabled
-Advanced Endpoint Assessment      : Enabled
-Cluster                           : Enabled
-
+Failover                          : Active/Active  
+Encryption-DES                    : Enabled        
+Encryption-3DES-AES               : Enabled        
+Carrier                           : Disabled       
+AnyConnect Premium Peers          : 0              
+Other VPN Peers                   : 500            
+AnyConnect for Mobile             : Enabled        
+AnyConnect for Cisco VPN Phone    : Enabled        
+Advanced Endpoint Assessment      : Enabled        
+Cluster                           : Enabled        
+              
 
 Failover cluster licensed features for this user context:
-Failover                          : Active/Active
-Encryption-DES                    : Enabled
-Encryption-3DES-AES               : Enabled
-Carrier                           : Disabled
-AnyConnect Premium Peers          : 0
-Other VPN Peers                   : 500
-AnyConnect for Mobile             : Enabled
-AnyConnect for Cisco VPN Phone    : Enabled
-Advanced Endpoint Assessment      : Enabled
-Cluster                           : Enabled
+Failover                          : Active/Active  
+Encryption-DES                    : Enabled        
+Encryption-3DES-AES               : Enabled        
+Carrier                           : Disabled       
+AnyConnect Premium Peers          : 0              
+Other VPN Peers                   : 500            
+AnyConnect for Mobile             : Enabled        
+AnyConnect for Cisco VPN Phone    : Enabled        
+Advanced Endpoint Assessment      : Enabled        
+Cluster                           : Enabled        
 
  Configuration last modified by thatperson at 09:15:45.959 EST Mon Dec 12 2018
 ```
@@ -2078,3 +2076,239 @@ Flow drop:
 **Prompt:**
 - cisco_asa>
 - cisco_asa#
+
+### show access-list brief
+
+**Output:**
+```
+access-list global-acl-test-show-acl-brief; 3 elements; name hash: 0xccfef45c
+06228509 d0a2680b 00006049 6178289f
+4c8c760a d0a2680b 00000cf5 6245930b
+179f5b95 00000000 00000003 61695d26
+
+```
+
+**Help:** execute the command "show access-list brief"
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+
+### show running-config access-group
+
+**Output:**
+```
+access-group INSIDE_acl in interface inside
+access-group dmz1_acl in interface dmz1
+access-group dmz2_acl in interface dmz2
+access-group dmz3_acl in interface dmz3
+access-group dmz4 in interface dmz4
+access-group dmz5 in interface dmz5
+access-group OUTSIDE_acl in interface outside
+
+```
+
+**Help:** execute the command "show running-config access-group"
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+
+### show running-config object service
+
+**Output:**
+```
+object service one
+ description test one
+ service tcp source eq 8000 destination eq 9000
+object service two
+ description test two
+ service udp source eq 8000 destination gt 9000
+object service three
+ description test three
+ service tcp source eq 8000 destination lt 9000
+object service four
+ description test four
+ service tcp source eq 8000 destination range 9000 9999
+object service five
+ description test five
+ service tcp source gt 8000 destination eq 9000
+object service six
+ description test six
+ service udp source gt 8000 destination gt 9000
+object service seven
+ description test seven
+ service tcp source gt 8000 destination lt 9000
+object service eight
+ description test eight
+ service tcp source gt 8000 destination range 9000 9999
+object service nine
+ description test nine
+ service tcp source lt 8000 destination eq 9000
+object service ten
+ description test ten
+ service udp source lt 8000 destination gt 9000
+object service eleven
+ description test eleven
+ service tcp source lt 8000 destination lt 9000
+object service twelve
+ description test twelve
+ service tcp source lt 8000 destination range 9000 9999
+object service thirteen
+ description test thirteen
+ service tcp source range 8000 8999 destination eq 9000
+object service fourteen
+ description test fourteen
+ service udp source range 8000 8999 destination gt 9000
+object service fifteen
+ description test fifteen
+ service tcp source range 8000 8999 destination lt 9000
+object service sixteen
+ description test sixteen
+ service tcp source range 8000 8999 destination range 9000 9999
+object service seventeen
+ description test seventeen
+ service tcp source eq 8000
+object service eighteen
+ description test eighteen
+ service tcp source gt 8000
+object service nineteen
+ description test nineteen
+ service udp source lt 8000
+object service twenty
+ description test twenty
+ service tcp source range 8000 8999
+object service twenty-one
+ description test twenty-one
+ service tcp destination eq 8000
+object service twenty-two
+ description test twenty-two
+ service tcp destination gt 8000
+object service twenty-three
+ description test twenty-three
+ service tcp destination lt 8000
+object service twenty-four
+ service udp destination range 8000 8999
+object service twenty-five
+ service tcp source range 1 1024 destination eq https
+object service twenty-six
+ service tcp destination eq http
+object service twenty-seven
+ service tcp source eq ssh
+object service twenty-eight
+ service icmp echo
+object service twenty-nine
+ service icmp
+object service thirty
+ service icmp 9 16
+object service thirty-one
+ description Except for IRC-based botnet C&C traffic
+ service tcp destination neq 6667
+object service thirty-two
+ description Numeric protocol
+ service 137
+
+```
+
+**Help:** execute the command "show running-config object service"
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+
+### show running-config object-group service
+
+**Output:**
+```
+object-group service one
+ description TEST ONE
+ service-object object alpha 
+ service-object object bravo 
+ service-object icmp echo 0
+ service-object icmp echo
+object-group service two
+ description TEST TWO
+ service-object object charlie
+ service-object tcp destination eq ftp 
+ service-object tcp destination eq 5666 
+ service-object icmp
+ service-object 137 
+object-group service three
+ description TEST THREE
+ service-object udp destination range 48129 48137 
+ service-object udp source range 48129 48137 
+ service-object udp source eq 48129 destination eq 48137 
+ service-object udp source range 48129 48137 destination eq 48137 
+ service-object udp source gt 1023 destination lt 40000 
+object-group service four
+ description TEST FOUR
+ group-object three
+object-group service five tcp
+ port-object eq 445
+ port-object eq netbios-ssn
+
+```
+
+**Help:** execute the command "show running-config object-group service"
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+
+### show curpriv
+
+**Output:**
+```
+Username : enable_15
+Current privilege level : 15
+Current Mode/s : P_PRIV
+
+```
+
+**Help:** Execute the command show curpriv. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+- cisco_asa(config)#
+
+### terminal pager 0
+
+**Output:** None
+
+**Help:** Execute the command terminal pager 0. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+- cisco_asa(config)#
+
+### terminal width 511
+
+**Output:** None
+
+**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+- cisco_asa(config)#
+
+### configure terminal
+
+**Output:** None
+
+**Help:** enter configuration mode
+
+**Prompt:**
+- cisco_asa#
+
+### end
+
+**Output:** None
+
+**Help:** exit configuration mode
+
+**Prompt:**
+- cisco_asa(config)#
+

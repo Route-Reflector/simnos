@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -194,7 +189,7 @@ R3                       L2    Up    19   R1_R3                         0,2
  SDP Using
 ===============================================================================
 SvcId      SdpId              Type   Far End              Opr   I.Label E.Label
-                                                          State
+                                                          State         
 -------------------------------------------------------------------------------
 200        31:200             Spok   10.10.10.1           Up    524281  524283
 200        34:200             Mesh   10.10.10.4           Down  None    None
@@ -247,20 +242,20 @@ R1_R3                            L1    21      Down         10/1000
  MPLS LSPs (Originating)
 ===============================================================================
  LSP Name                                            Tun     Fastfail  Adm  Opr
-  To                                                Id      Config
+  To                                                Id      Config         
 -------------------------------------------------------------------------------
 TO_IOSXR                                            1       Yes       Up   Up
-  10.10.10.8
+  10.10.10.8                                                               
 TO_R1                                               2       Yes       Up   Up
-  10.10.10.1
+  10.10.10.1                                                               
 TO_R2                                               3       Yes       Up   Dwn
-  10.10.10.2
+  10.10.10.2                                                               
 TO_R4                                               4       Yes       Up   Dwn
-  10.10.10.4
+  10.10.10.4                                                               
 Full-Mesh-10.10.10.8-61441                          61441   Yes       Up   Up
-  10.10.10.8
+  10.10.10.8                                                               
 Full-Mesh-10.10.10.1-65240                          65240   Yes       Up   Up
-  10.10.10.1
+  10.10.10.1                                                               
 -------------------------------------------------------------------------------
  LSPs : 6
 ===============================================================================
@@ -331,10 +326,10 @@ Lag-id         Adm     Opr     Weighted Threshold Up-Count MC Act/Stdby
 **Output:**
 ```
 ===============================================================================
- Service Access Points
+ Service Access Points 
 ===============================================================================
 PortId                          SvcId      Ing.  Ing.    Egr.  Egr.   Adm  Opr
-                                           QoS   Fltr    QoS   Fltr
+                                           QoS   Fltr    QoS   Fltr        
 -------------------------------------------------------------------------------
 lag-21:300                      1          11130 none    11140 none   Up   Up
 lag-22:300                      1          11130 ip4     11140 none   Up   Up
@@ -410,23 +405,23 @@ Seq Node-id                                                    Path     RTT
  Service Basic Information
 ===============================================================================
  Service Id        : 1099                Vpn Id            : 0
-Service Type      : VPLS
+Service Type      : VPLS                
 Name              : (Not Specified)
 Description       : this_is_a_description
-Customer Id       : 4
- Last Status Change: 10/31/2016 14:44:10
-Last Mgmt Change  : 11/01/2016 11:04:36
+Customer Id       : 4                   
+ Last Status Change: 10/31/2016 14:44:10 
+Last Mgmt Change  : 11/01/2016 11:04:36 
 Admin State       : Up                  Oper State        : Down
 MTU               : 5000                Def. Mesh VC Id   : 1099
 SAP Count         : 1                   SDP Bind Count    : 1
 Snd Flush on Fail : Disabled            Host Conn Verify  : Disabled
 Propagate MacFlush: Disabled            Per Svc Hashing   : Disabled
-Allow IP Intf Bind: Disabled
-Def. Gateway IP   : None
-Def. Gateway MAC  : None
+Allow IP Intf Bind: Disabled            
+Def. Gateway IP   : None                
+Def. Gateway MAC  : None                
 Temp Flood Time   : Disabled            Temp Flood        : Inactive
-Temp Flood Chg Cnt: 0
-
+Temp Flood Chg Cnt: 0                   
+ 
 -------------------------------------------------------------------------------
  Service Access & Destination Points
 -------------------------------------------------------------------------------
@@ -578,10 +573,10 @@ System                                   52,774           5.27%           2.63%
 VRRP                                        227           0.02%           0.01%
  WEB Redirect                                107           0.01%          ~0.00%
 -------------------------------------------------------------------------------
-Total                                 1,001,337         100.00%
-   Idle                                 865,143          86.39%
-   Usage                                136,194          13.60%
-Busiest Core Utilization                136,194          13.60%
+Total                                 1,001,337         100.00%                
+   Idle                                 865,143          86.39%                
+   Usage                                136,194          13.60%                
+Busiest Core Utilization                136,194          13.60%                
 ===============================================================================
 
 ```
@@ -600,7 +595,7 @@ Busiest Core Utilization                136,194          13.60%
  RSVP Interfaces
 ===============================================================================
 Interface                        Total    Active    Total BW  Resv BW   Adm Opr
-                                 Sessions Sessions  (Mbps)    (Mbps)
+                                 Sessions Sessions  (Mbps)    (Mbps)        
 -------------------------------------------------------------------------------
 system                           -        -         -         -         Up  Up
 TO_IOSXR                         0        0         10000     0         Dwn Dwn
@@ -623,7 +618,7 @@ TO_R4                            0        0         10000     0         Up  Up
 **Output:**
 ```
 ===============================================================================
- BGP Router ID:192.0.2.1        AS:65500       Local AS:65500
+ BGP Router ID:192.0.2.1        AS:65500       Local AS:65500      
 ===============================================================================
  Legend -
  Status codes  : u - used, s - suppressed, h - history, d - decayed, * - valid
@@ -635,14 +630,14 @@ TO_R4                            0        0         10000     0         Up  Up
 ===============================================================================
 Flag  Network                                            LocalPref   MED
       Nexthop (Router)                                   Path-Id     Label
-      As-Path
+      As-Path                                                        
 -------------------------------------------------------------------------------
 *>i   65500:11:192.0.2.4/32                              100         None
       10.11.5.5                                          None        262132
-      No As-Path
+      No As-Path                                                      
 u*>i  65500:11:192.0.2.14/32                             100         None
       192.0.2.2                                          None        262132
-      No As-Path
+      No As-Path                                                      
 -------------------------------------------------------------------------------
  Routes : 2
 ===============================================================================
@@ -950,3 +945,4 @@ TO_R4                 0.0.0.0         0.0.0.0         0.0.0.0         Up   PToP
 **Prompt:**
 - alcatel_sros>
 - alcatel_sros#
+

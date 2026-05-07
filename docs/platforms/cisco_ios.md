@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
--
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -69,10 +64,10 @@ Outgoing interface flags: H - Hardware switched, A - Assert winner
 **Output:**
 ```
 BGP table version is 17, local router ID is 10.0.0.0
-Status codes: s suppressed, d damped, h history, * valid, > best, i - internal,
-              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter,
-              x best-external, a additional-path, c RIB-compressed,
-              t secondary path,
+Status codes: s suppressed, d damped, h history, * valid, > best, i - internal, 
+              r RIB-failure, S Stale, m multipath, b backup-path, f RT-Filter, 
+              x best-external, a additional-path, c RIB-compressed, 
+              t secondary path, 
 Origin codes: i - IGP, e - EGP, ? - incomplete
  RPKI validation codes: V valid, I invalid, N Not found
 
@@ -98,10 +93,10 @@ Origin codes: i - IGP, e - EGP, ? - incomplete
 
 **Output:**
 ```
-Switch  Ports    Model                Serial No.   MAC address     Hw Ver.       Sw Ver.
+Switch  Ports    Model                Serial No.   MAC address     Hw Ver.       Sw Ver. 
 ------  -----   ---------             -----------  --------------  -------       --------
- 1       28     C9200L-24T-4G-E       3YEEQEY2MND  dc8c.5322.19c6  V01           16.12.6
- 2       28     C9200L-24T-4G-E       CBC7DQFNB7F  dc8c.aaa0.1b77  V01           16.12.6
+ 1       28     C9200L-24T-4G-E       3YEEQEY2MND  dc8c.5322.19c6  V01           16.12.6  
+ 2       28     C9200L-24T-4G-E       CBC7DQFNB7F  dc8c.aaa0.1b77  V01           16.12.6  
 
 ```
 
@@ -119,7 +114,7 @@ Certificate
   Status: Available
   Certificate Serial Number (hex): 1234567890ABCDEFGHIJK
   Certificate Usage: General Purpose
-  Issuer:
+  Issuer: 
     e=email.address@domain.com
     cn=CommonName
     ou=OrganizationalUnit
@@ -132,20 +127,20 @@ Certificate
     Serial Number: 1234ABCD
     hostname=ROUTERNAME.domain.com
     serialNumber=1234ABCD
-  CRL Distribution Points:
+  CRL Distribution Points: 
     http://cdp.domain.com/crl/issuing-ca.crl
-  Validity Date:
+  Validity Date: 
     start date: 09:17:52 UTC Jun 22 2022
     end   date: 09:17:52 UTC Jun 22 2023
     renew date: 09:19:52 UTC Apr 10 2023
-  Associated Trustpoints: caserver.domain.com
+  Associated Trustpoints: caserver.domain.com 
   Storage: nvram:certfile.cer
 
 CA Certificate
   Status: Available
   Certificate Serial Number (hex): ABCDEFGHIJK1234567890
   Certificate Usage: Signature
-  Issuer:
+  Issuer: 
     e=email.address@domain.com
     cn=CommonName
     ou=OrganizationalUnit
@@ -153,7 +148,7 @@ CA Certificate
     l=Locality
     st=StateOrProvinceName
     c=CountryName
-  Subject:
+  Subject: 
     e=email.address@domain.com
     cn=CommonName
     ou=OrganizationalUnit
@@ -161,9 +156,9 @@ CA Certificate
     l=Locality
     st=StateOrProvinceName
     c=CountryName
-  CRL Distribution Points:
+  CRL Distribution Points: 
     http://cdp.domain.com/crl/issuing-ca.crl
-  Validity Date:
+  Validity Date: 
     start date: 00:00:00 UTC Nov 9 2018
     end   date: 00:00:00 UTC Nov 9 2028
   Associated Trustpoints: caserver.domain.com
@@ -173,7 +168,7 @@ CA Certificate
   Status: Available
   Certificate Serial Number (hex): 12345ABCDEFGHIJK67890
   Certificate Usage: Signature
-  Issuer:
+  Issuer: 
     e=email.address@domain.com
     cn=CommonName
     ou=OrganizationalUnit
@@ -181,7 +176,7 @@ CA Certificate
     l=Locality
     st=StateOrProvinceName
     c=CountryName
-  Subject:
+  Subject: 
     e=email.address@domain.com
     cn=CommonName
     ou=OrganizationalUnit
@@ -189,10 +184,10 @@ CA Certificate
     l=Locality
     st=StateOrProvinceName
     c=CountryName
-  Validity Date:
+  Validity Date: 
     start date: 00:00:00 UTC Nov 5 2018
     end   date: 00:00:00 UTC Nov 5 2038
-  Associated Trustpoints: ROOT-CA
+  Associated Trustpoints: ROOT-CA 
   Storage: nvram:certfile.cer
 
 ```
@@ -362,7 +357,7 @@ VRF Management (VRF Id = 1); default RD <not set>; default VPNID <not set>
   Old CLI format, supports IPv4 only
   Flags: 0x8
   Interfaces:
-    Gi1
+    Gi1                     
 Address family ipv4 unicast (Table ID = 0x1):
   Flags: 0x0
   No Export VPN route-target communities
@@ -383,10 +378,10 @@ VRF testr (VRF Id = 2); default RD 65000:42; default VPNID <not set>
 Address family ipv4 unicast (Table ID = 0x2):
   Flags: 0x0
   Export VPN route-target communities
-    RT:65000:42
+    RT:65000:42             
   Import VPN route-target communities
-    RT:65000:43
-    RT:65000:44
+    RT:65000:43 
+    RT:65000:44             
   No import route-map
   No global export route-map
   No export route-map
@@ -604,9 +599,9 @@ GigabitEthernet0/0/1.3062 (3062)
 
 **Output:**
 ```
-FastEthernet1 is down, line protocol is down
+FastEthernet1 is down, line protocol is down 
   Hardware is RP management port, address is 6c41.6aba.b47f (bia 6c41.6aba.b47f)
-  MTU 1500 bytes, BW 10000 Kbit/sec, DLY 1000 usec,
+  MTU 1500 bytes, BW 10000 Kbit/sec, DLY 1000 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -621,7 +616,7 @@ FastEthernet1 is down, line protocol is down
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes
      Received 0 broadcasts (0 IP multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 watchdog
      0 input packets with dribble condition detected
@@ -631,15 +626,15 @@ FastEthernet1 is down, line protocol is down
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/1 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/1 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b440 (bia 6c41.6aba.b440)
   Description: vss
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 10Gb/s, link type is auto, media type is QSFP-10G 1M
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input never, output never, output hang never
   Last clearing of "show interface" counters never
@@ -650,7 +645,7 @@ TenGigabitEthernet1/1/1 is up, line protocol is up (connected)
   5 minute output rate 38000 bits/sec, 33 packets/sec
      4035758153 packets input, 2783400652228 bytes, 0 no buffer
      Received 160702941 broadcasts (60693400 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      956714742 packets output, 377708181830 bytes, 0 underruns
@@ -659,15 +654,15 @@ TenGigabitEthernet1/1/1 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/2 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/2 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b441 (bia 6c41.6aba.b441)
   Description: fast hello
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 10Gb/s, link type is auto, media type is QSFP-10G 1M
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input 00:00:21, output never, output hang never
   Last clearing of "show interface" counters never
@@ -678,7 +673,7 @@ TenGigabitEthernet1/1/2 is up, line protocol is up (connected)
   5 minute output rate 6000 bits/sec, 10 packets/sec
      237748374 packets input, 16820309764 bytes, 0 no buffer
      Received 383456 broadcasts (383456 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      237747059 packets output, 16820212146 bytes, 0 underruns
@@ -687,15 +682,15 @@ TenGigabitEthernet1/1/2 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/3 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/3 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b442 (bia 6c41.6aba.b442)
   Description: vss
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 10Gb/s, link type is auto, media type is QSFP-10G 1M
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input never, output never, output hang never
   Last clearing of "show interface" counters never
@@ -706,7 +701,7 @@ TenGigabitEthernet1/1/3 is up, line protocol is up (connected)
   5 minute output rate 11000 bits/sec, 16 packets/sec
      9594383489 packets input, 7302479029074 bytes, 0 no buffer
      Received 66218427 broadcasts (60570610 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      814075627 packets output, 479172141396 bytes, 0 underruns
@@ -715,15 +710,15 @@ TenGigabitEthernet1/1/3 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/4 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/4 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b443 (bia 6c41.6aba.b443)
   Description: wan
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 1000Mb/s, link type is auto, media type is 1000BaseT
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input 00:00:00, output never, output hang never
   Last clearing of "show interface" counters never
@@ -734,7 +729,7 @@ TenGigabitEthernet1/1/4 is up, line protocol is up (connected)
   5 minute output rate 1582000 bits/sec, 261 packets/sec
      21777507643 packets input, 11789825980301 bytes, 0 no buffer
      Received 23753204 broadcasts (23750450 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      37553221421 packets output, 35764893203339 bytes, 0 underruns
@@ -743,9 +738,9 @@ TenGigabitEthernet1/1/4 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/5 is administratively down, line protocol is down (disabled)
+TenGigabitEthernet1/1/5 is administratively down, line protocol is down (disabled) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b444 (bia 6c41.6aba.b444)
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -761,7 +756,7 @@ TenGigabitEthernet1/1/5 is administratively down, line protocol is down (disable
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -770,10 +765,10 @@ TenGigabitEthernet1/1/5 is administratively down, line protocol is down (disable
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/6 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/6 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b445 (bia 6c41.6aba.b445)
   Description: wireless
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -789,7 +784,7 @@ TenGigabitEthernet1/1/6 is up, line protocol is up (connected)
   5 minute output rate 1582000 bits/sec, 200 packets/sec
      9295308398 packets input, 6075966632228 bytes, 0 no buffer
      Received 23393246 broadcasts (20908873 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      8107505603 packets output, 6210024688013 bytes, 0 underruns
@@ -798,10 +793,10 @@ TenGigabitEthernet1/1/6 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/7 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/7 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b446 (bia 6c41.6aba.b446)
   Description: wireless
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -817,7 +812,7 @@ TenGigabitEthernet1/1/7 is up, line protocol is up (connected)
   5 minute output rate 0 bits/sec, 0 packets/sec
      169728331 packets input, 129190060864 bytes, 0 no buffer
      Received 13015669 broadcasts (10933489 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      242553619 packets output, 112374124403 bytes, 0 underruns
@@ -826,15 +821,15 @@ TenGigabitEthernet1/1/7 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/8 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/8 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b447 (bia 6c41.6aba.b447)
   Description: nas
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 1000Mb/s, link type is auto, media type is 1000BaseT
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input 00:00:08, output never, output hang never
   Last clearing of "show interface" counters never
@@ -845,7 +840,7 @@ TenGigabitEthernet1/1/8 is up, line protocol is up (connected)
   5 minute output rate 0 bits/sec, 0 packets/sec
      15804107 packets input, 9120651162 bytes, 0 no buffer
      Received 345932 broadcasts (345113 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      13861965 packets output, 1342553433 bytes, 0 underruns
@@ -854,9 +849,9 @@ TenGigabitEthernet1/1/8 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/9 is administratively down, line protocol is down (disabled)
+TenGigabitEthernet1/1/9 is administratively down, line protocol is down (disabled) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b448 (bia 6c41.6aba.b448)
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -872,7 +867,7 @@ TenGigabitEthernet1/1/9 is administratively down, line protocol is down (disable
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -881,9 +876,9 @@ TenGigabitEthernet1/1/9 is administratively down, line protocol is down (disable
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/10 is administratively down, line protocol is down (disabled)
+TenGigabitEthernet1/1/10 is administratively down, line protocol is down (disabled) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b449 (bia 6c41.6aba.b449)
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -899,7 +894,7 @@ TenGigabitEthernet1/1/10 is administratively down, line protocol is down (disabl
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -908,15 +903,15 @@ TenGigabitEthernet1/1/10 is administratively down, line protocol is down (disabl
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/11 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/11 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44a (bia 6c41.6aba.b44a)
   Description: shop access
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 10Gb/s, link type is auto, media type is QSFP-10G 5M
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input 00:00:03, output never, output hang never
   Last clearing of "show interface" counters never
@@ -927,7 +922,7 @@ TenGigabitEthernet1/1/11 is up, line protocol is up (connected)
   5 minute output rate 7166000 bits/sec, 714 packets/sec
      33070723737 packets input, 27913140863803 bytes, 0 no buffer
      Received 102530192 broadcasts (91747041 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      36245627794 packets output, 35298352607317 bytes, 0 underruns
@@ -936,10 +931,10 @@ TenGigabitEthernet1/1/11 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/12 is down, line protocol is down (notconnect)
+TenGigabitEthernet1/1/12 is down, line protocol is down (notconnect) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44b (bia 6c41.6aba.b44b)
   Description: shop floor
-  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 1000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -955,7 +950,7 @@ TenGigabitEthernet1/1/12 is down, line protocol is down (notconnect)
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -964,15 +959,15 @@ TenGigabitEthernet1/1/12 is down, line protocol is down (notconnect)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/13 is up, line protocol is up (connected)
+TenGigabitEthernet1/1/13 is up, line protocol is up (connected) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44c (bia 6c41.6aba.b44c)
   Description: shop access
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
   Full-duplex, 10Gb/s, link type is auto, media type is 10GBase-SR
-  input flow-control is on, output flow-control is on
+  input flow-control is on, output flow-control is on 
   ARP type: ARPA, ARP Timeout 04:00:00
   Last input 00:00:03, output never, output hang never
   Last clearing of "show interface" counters never
@@ -983,7 +978,7 @@ TenGigabitEthernet1/1/13 is up, line protocol is up (connected)
   5 minute output rate 897000 bits/sec, 126 packets/sec
      2706943013 packets input, 593239780527 bytes, 0 no buffer
      Received 10407156 broadcasts (9275413 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      5030894569 packets output, 4585304759149 bytes, 0 underruns
@@ -992,9 +987,9 @@ TenGigabitEthernet1/1/13 is up, line protocol is up (connected)
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/14 is administratively down, line protocol is down (disabled)
+TenGigabitEthernet1/1/14 is administratively down, line protocol is down (disabled) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44d (bia 6c41.6aba.b44d)
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -1010,7 +1005,7 @@ TenGigabitEthernet1/1/14 is administratively down, line protocol is down (disabl
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -1019,9 +1014,9 @@ TenGigabitEthernet1/1/14 is administratively down, line protocol is down (disabl
      0 babbles, 0 late collision, 0 deferred
      0 lost carrier, 0 no carrier
      0 output buffer failures, 0 output buffers swapped out
-TenGigabitEthernet1/1/15 is administratively down, line protocol is down (disabled)
+TenGigabitEthernet1/1/15 is administratively down, line protocol is down (disabled) 
   Hardware is Ten Gigabit Ethernet Port, address is 6c41.6aba.b44e (bia 6c41.6aba.b44e)
-  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec,
+  MTU 1500 bytes, BW 10000000 Kbit/sec, DLY 10 usec, 
      reliability 255/255, txload 1/255, rxload 1/255
   Encapsulation ARPA, loopback not set
   Keepalive set (10 sec)
@@ -1037,7 +1032,7 @@ TenGigabitEthernet1/1/15 is administratively down, line protocol is down (disabl
   5 minute output rate 0 bits/sec, 0 packets/sec
      0 packets input, 0 bytes, 0 no buffer
      Received 0 broadcasts (0 multicasts)
-     0 runts, 0 giants, 0 throttles
+     0 runts, 0 giants, 0 throttles 
      0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored
      0 input packets with dribble condition detected
      0 packets output, 0 bytes, 0 underruns
@@ -1066,9 +1061,9 @@ Legend: Attrb --> S - Static, D - Dynamic, I - Incomplete
         NHS Status: E --> Expecting Replies, R --> Responding, W --> Waiting
         UpDn Time --> Up or Down Time for a Tunnel
 ==========================================================================
-
-Interface: Tunnel100, IPv4 NHRP Details
-Type:Spoke, NHRP Peers:2,
+ 
+Interface: Tunnel100, IPv4 NHRP Details 
+Type:Spoke, NHRP Peers:2, 
 
  # Ent  Peer NBMA Addr Peer Tunnel Add State  UpDn Tm Attrb
  ----- --------------- --------------- ----- -------- -----
@@ -1088,64 +1083,64 @@ Type:Spoke, NHRP Peers:2,
 
 **Output:**
 ```
-T1 0/2/0 is up.
-  Applique type is Channelized T1
-  Cablelength is long gain36 0db
-  No alarms detected.
-  alarm-trigger is not set
-  Soaking time: 3, Clearance time: 10
-  AIS State:Clear  LOS State:Clear  LOF State:Clear
-  Framing is ESF, Line Code is B8ZS, Clock Source is Line Primary.
+T1 0/2/0 is up.        
+  Applique type is Channelized T1        
+  Cablelength is long gain36 0db        
+  No alarms detected.        
+  alarm-trigger is not set        
+  Soaking time: 3, Clearance time: 10        
+  AIS State:Clear  LOS State:Clear  LOF State:Clear         
+  Framing is ESF, Line Code is B8ZS, Clock Source is Line Primary.        
   Data in current interval (190 seconds elapsed):
-     0 Line Code Violations, 0 Path Code Violations
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-  Total Data (last 64 15 minute intervals):
-     0 Line Code Violations, 0 Path Code Violations,
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-T1 0/2/1 is up.
-  Applique type is Channelized T1
-  Cablelength is long gain36 0db
-  No alarms detected.
-  alarm-trigger is not set
-  Soaking time: 3, Clearance time: 10
-  AIS State:Clear  LOS State:Clear  LOF State:Clear
-  Framing is ESF, Line Code is B8ZS, Clock Source is Line.
-  Data in current interval (189 seconds elapsed):
-     0 Line Code Violations, 0 Path Code Violations
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-  Total Data (last 64 15 minute intervals):
-     0 Line Code Violations, 0 Path Code Violations,
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-T1 0/3/0 is up.
-  Applique type is Channelized T1
-  Cablelength is long gain36 0db
-  No alarms detected.
-  alarm-trigger is not set
-  Soaking time: 3, Clearance time: 10
-  AIS State:Clear  LOS State:Clear  LOF State:Clear
-  Framing is ESF, Line Code is B8ZS, Clock Source is Line.
-  Data in current interval (429 seconds elapsed):
-     0 Line Code Violations, 0 Path Code Violations
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-  Total Data (last 65 15 minute intervals):
-     0 Line Code Violations, 0 Path Code Violations,
-     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,
-     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs
-T1 0/3/1 is down.
-  Applique type is Channelized T1
-  Cablelength is long gain36 0db
-  Transmitter is sending remote alarm.
+     0 Line Code Violations, 0 Path Code Violations        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+  Total Data (last 64 15 minute intervals):        
+     0 Line Code Violations, 0 Path Code Violations,        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+T1 0/2/1 is up.        
+  Applique type is Channelized T1        
+  Cablelength is long gain36 0db        
+  No alarms detected.        
+  alarm-trigger is not set        
+  Soaking time: 3, Clearance time: 10        
+  AIS State:Clear  LOS State:Clear  LOF State:Clear         
+  Framing is ESF, Line Code is B8ZS, Clock Source is Line.        
+  Data in current interval (189 seconds elapsed):        
+     0 Line Code Violations, 0 Path Code Violations        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+  Total Data (last 64 15 minute intervals):        
+     0 Line Code Violations, 0 Path Code Violations,        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+T1 0/3/0 is up.        
+  Applique type is Channelized T1        
+  Cablelength is long gain36 0db        
+  No alarms detected.        
+  alarm-trigger is not set        
+  Soaking time: 3, Clearance time: 10        
+  AIS State:Clear  LOS State:Clear  LOF State:Clear         
+  Framing is ESF, Line Code is B8ZS, Clock Source is Line.        
+  Data in current interval (429 seconds elapsed):        
+     0 Line Code Violations, 0 Path Code Violations        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+  Total Data (last 65 15 minute intervals):        
+     0 Line Code Violations, 0 Path Code Violations,        
+     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,        
+     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 0 Unavail Secs        
+T1 0/3/1 is down.        
+  Applique type is Channelized T1        
+  Cablelength is long gain36 0db        
+  Transmitter is sending remote alarm.        
   Receiver has loss of signal.
   alarm-trigger is not set
   Soaking time: 3, Clearance time: 10
-  AIS State:Clear  LOS State:Failure LOF State:Clear
+  AIS State:Clear  LOS State:Failure LOF State:Clear   
   Framing is ESF, Line Code is B8ZS, Clock Source is Line.
-  Data in current interval (428 seconds elapsed):
+  Data in current interval (428 seconds elapsed):      
      0 Line Code Violations, 0 Path Code Violations
      0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins
      0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 428 Unavail Secs
@@ -1166,8 +1161,8 @@ T1 0/3/1 is down.
 
 **Output:**
 ```
-Chassis type: ASR1004
- Slot: 0, ASR1000-SIP10
+Chassis type: ASR1004 
+ Slot: 0, ASR1000-SIP10 
  Running state               : ok
  Internal state              : online
  Internal operational state  : ok
@@ -1188,7 +1183,7 @@ Chassis type: ASR1004
    Physical insert detect time : 00:00:36 (4d22h ago)
    Logical insert detect time  : 00:02:23 (4d22h ago)
 
- Slot: R0, ASR1000-RP1
+ Slot: R0, ASR1000-RP1         
    Running state               : ok
    Internal state              : online
    Internal operational state  : ok
@@ -1197,16 +1192,16 @@ Chassis type: ASR1004
    CPLD version                : 07062111
    Firmware version            : 12.2(33r)XNB
 
- Sub-slot: R0/0,
+ Sub-slot: R0/0, 
    Running state               : ok, active
    Logical insert detect time  : 00:00:48 (4d22h ago)
    Became HA Active time       : 00:04:56 (4d22h ago)
 
- Sub-slot: R0/1,
+ Sub-slot: R0/1, 
    Running state               : ok, standby
    Logical insert detect time  : 00:02:50 (4d22h ago)
 
- Slot: F0, ASR1000-ESP10
+ Slot: F0, ASR1000-ESP10       
    Running state               : ok, active
    Internal state              : online
    Internal operational state  : ok
@@ -1361,13 +1356,13 @@ MED Information:
 **Output:**
 ```
 Interface              IP            Tunnel   BGP Static Operational
-TenGigabitEthernet1/1  Yes (ldp)     No       No  No     Yes
-TenGigabitEthernet1/5  Yes (ldp)     No       No  No     Yes
-TenGigabitEthernet1/9  Yes (ldp)     No       No  No     Yes
-TenGigabitEthernet1/11 Yes (ldp)     No       No  No     Yes
-TenGigabitEthernet1/13 Yes (ldp)     No       No  No     Yes
-TenGigabitEthernet1/15 Yes (ldp)     No       No  No     Yes
-Vlan101                Yes (ldp)     No       No  No     Yes
+TenGigabitEthernet1/1  Yes (ldp)     No       No  No     Yes     
+TenGigabitEthernet1/5  Yes (ldp)     No       No  No     Yes     
+TenGigabitEthernet1/9  Yes (ldp)     No       No  No     Yes     
+TenGigabitEthernet1/11 Yes (ldp)     No       No  No     Yes     
+TenGigabitEthernet1/13 Yes (ldp)     No       No  No     Yes     
+TenGigabitEthernet1/15 Yes (ldp)     No       No  No     Yes     
+Vlan101                Yes (ldp)     No       No  No     Yes     
 
 ```
 
@@ -1383,7 +1378,7 @@ Vlan101                Yes (ldp)     No       No  No     Yes
 ```
 Number of APs: 1
 
-AP Name                            Slots    AP Model  Ethernet MAC    Radio MAC       Location                          Country     IP Address                                 State
+AP Name                            Slots    AP Model  Ethernet MAC    Radio MAC       Location                          Country     IP Address                                 State         
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 device-name                         2      9120AXI   0000.0000.000a  000a.000a.0000  default location                  US          1.1.1.1                            Registered
 
@@ -1478,7 +1473,7 @@ Tracing the route to 10.225.2.1
 VRF info: (vrf in name/id, vrf out name/id)
   1 10.180.140.150 1 msec 1 msec 1 msec
   2 172.17.10.225 169 msec 142 msec 135 msec
-  3 108.170.246.129 13 msec *  *  *  *  *  *  *  *  *
+  3 108.170.246.129 13 msec *  *  *  *  *  *  *  *  * 
   4 74.125.242.97 14 msec
     216.239.63.218 12 msec
     172.253.68.212 13 msec
@@ -1630,20 +1625,20 @@ Global Errors :
 ```
 Switch/Stack Mac Address : 4c4e.3573.ac00
                                            H/W   Current
-Switch#  Role   Mac Address     Priority Version  State
+Switch#  Role   Mac Address     Priority Version  State 
 ----------------------------------------------------------
-*1       Master 4c4e.3573.ac00     15     3       Ready
- 2       Member 4c4e.3573.7b00     8      3       Ready
- 3       Member 4c4e.3573.ac80     7      3       Ready
+*1       Master 4c4e.3573.ac00     15     3       Ready               
+ 2       Member 4c4e.3573.7b00     8      3       Ready               
+ 3       Member 4c4e.3573.ac80     7      3       Ready               
 
 
 
-         Stack Port Status             Neighbors
-Switch#  Port 1     Port 2           Port 1   Port 2
+         Stack Port Status             Neighbors     
+Switch#  Port 1     Port 2           Port 1   Port 2 
 --------------------------------------------------------
-  1        Ok         Ok                3        2
-  2        Ok         Ok                1        3
-  3        Ok         Ok                2        1
+  1        Ok         Ok                3        2 
+  2        Ok         Ok                1        3 
+  3        Ok         Ok                2        1 
 
 ```
 
@@ -1692,19 +1687,19 @@ Processor Pool Total:  919638648 Used:  236752096 Free:  682886552
  lsmpi_io Pool Total:    6295128 Used:    6294296 Free:        832
 
  PID TTY  Allocated      Freed    Holding    Getbufs    Retbufs Process
-   0   0  209299480   13474544  178205704          0          0 *Init*
-  78   0 2569666688    1554280   27061536          0          0 IOSD ipc task
-   0   0  607956496  428619384    6374592   17503559          0 *Dead*
- 365   0    3946896       5680    3983160     849828          0 EEM ED Syslog
-   1   0    1583728       3472    1613672          0          0 Chunk Manager
- 382   0    1510464      33704    1506704          0          0 EEM Server
+   0   0  209299480   13474544  178205704          0          0 *Init*          
+  78   0 2569666688    1554280   27061536          0          0 IOSD ipc task   
+   0   0  607956496  428619384    6374592   17503559          0 *Dead*          
+ 365   0    3946896       5680    3983160     849828          0 EEM ED Syslog   
+   1   0    1583728       3472    1613672          0          0 Chunk Manager   
+ 382   0    1510464      33704    1506704          0          0 EEM Server      
  165   0    2957736      12304    1112904          0          0 CWAN OIR Handler
-   0   0          0          0     657856          0          0 *MallocLite*
+   0   0          0          0     657856          0          0 *MallocLite*    
    4   0     525856      23256     458696          0          0 RF Slave Main Th
- 366   0     381680       5680     417944      72316          0 EEM ED Generic
- 338   0     309184       1640     361488          0          0 Crypto IKEv2
- 480   0     167752        448     221248          0          0 MRIB Process
-  10   0 4096314696 4096430632     215576 3914231834 3914277834 Pool Manager
+ 366   0     381680       5680     417944      72316          0 EEM ED Generic  
+ 338   0     309184       1640     361488          0          0 Crypto IKEv2    
+ 480   0     167752        448     221248          0          0 MRIB Process    
+  10   0 4096314696 4096430632     215576 3914231834 3914277834 Pool Manager    
 
 342936032 Total
 
@@ -1729,7 +1724,7 @@ Vl51        1    120 P Init    unknown         unknown         10.1.51.1
 Vl51        6    120 P Init    unknown         unknown         FE80::DEF
 Vl500       1    120 P Active  local           10.1.5.3      10.1.5.1
 Vl500       6    120 P Active  local           FE80::B         FE80::DEF
-Vl4010
+Vl4010 
      1    120 P Active  local           10.1.254.3    10.1.254.1
 
 ```
@@ -1804,7 +1799,7 @@ No Inactive Message Discriminator.
     Exception Logging: size (8192 bytes)
     Count and timestamp logging messages: disabled
     Persistent logging: disabled
-
+ 
 No active filter modules.
 
     Trap logging: level debugging, 10180 message lines logged
@@ -1902,66 +1897,66 @@ Tacacs+ Server -  public  :
 
 **Output:**
 ```
-Index 1 Feature: appxk9
+Index 1 Feature: appxk9                         
         Period left: Life time
         License Type: Permanent
         License State: Active, In Use
         License Count: Non-Counted
         License Priority: Medium
- Index 2 Feature: uck9
+ Index 2 Feature: uck9                           
         Period left: Not Activated
         Period Used: 0  minute  0  second
         License Type: EvalRightToUse
         License State: Active, Not in Use, EULA not accepted
         License Count: Non-Counted
         License Priority: None
-Index 3 Feature: securityk9
+Index 3 Feature: securityk9                     
         Period left: Life time
         License Type: Permanent
         License State: Active, In Use
         License Count: Non-Counted
         License Priority: Medium
-Index 4 Feature: ipbasek9
+Index 4 Feature: ipbasek9                       
         Period left: Life time
         License Type: Permanent
         License State: Active, In Use
         License Count: Non-Counted
         License Priority: Medium
-Index 5 Feature: FoundationSuiteK9
+Index 5 Feature: FoundationSuiteK9              
         Period left: Not Activated
         Period Used: 0  minute  0  second
         License Type: EvalRightToUse
         License State: Active, Not in Use, EULA not accepted
         License Count: Non-Counted
         License Priority: None
-Index 6 Feature: AdvUCSuiteK9
+Index 6 Feature: AdvUCSuiteK9                   
         Period left: Not Activated
         Period Used: 0  minute  0  second
         License Type: EvalRightToUse
         License State: Active, Not in Use, EULA not accepted
         License Count: Non-Counted
         License Priority: None
-Index 7 Feature: cme-srst
+Index 7 Feature: cme-srst                       
         Period left: Not Activated
         Period Used: 0  minute  0  second
         License Type: EvalRightToUse
         License State: Active, Not in Use, EULA not accepted
         License Count: 0/0  (In-use/Violation)
         License Priority: None
-Index 8 Feature: hseck9
+Index 8 Feature: hseck9                         
         Period left: Life time
         License Type: Permanent
         License State: Active, In Use
         License Count: Non-Counted
         License Priority: Medium
-Index 9 Feature: throughput
+Index 9 Feature: throughput                     
         Period left: Not Activated
         Period Used: 0  minute  0  second
         License Type: EvalRightToUse
         License State: Active, Not in Use, EULA not accepted
         License Count: Non-Counted
         License Priority: None
-Index 10 Feature: internal_service
+Index 10 Feature: internal_service              
 
 ```
 
@@ -1976,51 +1971,51 @@ Index 10 Feature: internal_service
 **Output:**
 ```
 Crypto session current status
-
-Code: C - IKE Configuration mode, D - Dead Peer Detection
-K - Keepalives, N - NAT-traversal, T - cTCP encapsulation
+ 
+Code: C - IKE Configuration mode, D - Dead Peer Detection    
+K - Keepalives, N - NAT-traversal, T - cTCP encapsulation    
 X - IKE Extended Authentication, F - IKE Fragmentation
 R - IKE Auto Reconnect
-
+ 
 Interface: Tunnel1201
 Session status: DOWN-NEGOTIATING
 Peer: 10.161.255.14 port 500 fvrf: (none) ivrf: (none)
       Desc: (none)
       Phase1_id: (none)
-  Session ID: 0
+  Session ID: 0 
   IKEv1 SA: local 10.175.200.116/500 remote 10.161.255.14/500 Inactive
           Capabilities:(none) connid:0 lifetime:0
-  Session ID: 0
+  Session ID: 0 
   IKEv1 SA: local 10.175.200.116/500 remote 10.161.255.14/500 Inactive
           Capabilities:(none) connid:0 lifetime:0
   IPSEC FLOW: permit 47 host 10.175.200.116 host 10.161.255.14
         Active SAs: 0, origin: crypto map
         Inbound:  #pkts dec'ed 0 drop 0 life (KB/Sec) 0/0
         Outbound: #pkts enc'ed 0 drop 0 life (KB/Sec) 0/0
-
+ 
 Interface: Tunnel1101
 Uptime: 7w0d
- Session status: UP-ACTIVE
+ Session status: UP-ACTIVE    
 Peer: 192.168.0.1 port 4500 fvrf: (none) ivrf: (none)
       Phase1_id: SOME_DEVICE1234.1pc.com
       Desc: (none)
-  Session ID: 0
+  Session ID: 0 
   IKEv1 SA: local 169.0.1.1/4500 remote 192.168.0.1/4500 Active
           Capabilities:DN connid:2913 lifetime:09:03:41
   IPSEC FLOW: permit 47 host 169.0.1.1 host 192.168.0.1
         Active SAs: 2, origin: crypto map
         Inbound:  #pkts dec'ed 15344097 drop 0 life (KB/Sec) 4236992/615
         Outbound: #pkts enc'ed 18074395 drop 0 life (KB/Sec) 4236962/615
-
+ 
 Interface: Tunnel2201
 Session status: DOWN-NEGOTIATING
 Peer: 10.163.255.14 port 500 fvrf: (none) ivrf: (none)
       Desc: (none)
       Phase1_id: (none)
-  Session ID: 0
+  Session ID: 0 
   IKEv1 SA: local 10.175.200.116/500 remote 10.163.255.14/500 Inactive
           Capabilities:(none) connid:0 lifetime:0
-  Session ID: 0
+  Session ID: 0 
   IKEv1 SA: local 10.175.200.116/500 remote 10.163.255.14/500 Inactive
           Capabilities:(none) connid:0 lifetime:0
   IPSEC FLOW: permit 47 host 10.175.200.116 host 10.163.255.14
@@ -2040,46 +2035,46 @@ Peer: 10.163.255.14 port 500 fvrf: (none) ivrf: (none)
 
 **Output:**
 ```
-groupname: GROUP1                           security model:v3 priv
+groupname: GROUP1                           security model:v3 priv 
  contextname: <no context specified>         storage-type: nonvolatile
-readview : g1readview                       writeview: <no writeview specified>
-notifyview: g1notifyview
+readview : g1readview                       writeview: <no writeview specified>        
+notifyview: g1notifyview                     
 row status: active      access-list: snmp-acl-name
 
-groupname: ILMI                             security model:v1
+groupname: ILMI                             security model:v1 
 contextname: <no context specified>         storage-type: permanent
-readview : *ilmi                            writeview: *ilmi
-notifyview: <no notifyview specified>
+readview : *ilmi                            writeview: *ilmi                           
+notifyview: <no notifyview specified>       
 row status: active
 
-groupname: ILMI                             security model:v2c
+groupname: ILMI                             security model:v2c 
 contextname: <no context specified>         storage-type: permanent
-readview : *ilmi                            writeview: *ilmi
-notifyview: <no notifyview specified>
+readview : *ilmi                            writeview: *ilmi                           
+notifyview: <no notifyview specified>       
 row status: active
 
-groupname: GROUP2                           security model:v1
+groupname: GROUP2                           security model:v1 
 contextname: <no context specified>         storage-type: nonvolatile
-readview : v1default                        writeview: <no writeview specified>
-notifyview: <no notifyview specified>
+readview : v1default                        writeview: <no writeview specified>        
+notifyview: <no notifyview specified>       
 row status: active      access-list: snmp-acl-name
-
-groupname: GROUP2                           security model:v2c
+ 
+groupname: GROUP2                           security model:v2c 
 contextname: <no context specified>         storage-type: nonvolatile
-readview : v1default                        writeview: <no writeview specified>
-notifyview: <no notifyview specified>
+readview : v1default                        writeview: <no writeview specified>        
+notifyview: <no notifyview specified>       
 row status: active      access-list: snmp-acl-name
-
-groupname: GROUP3                           security model:v1
+ 
+groupname: GROUP3                           security model:v1 
 contextname: <no context specified>         storage-type: nonvolatile
-readview : v1default                        writeview: <no writeview specified>
-notifyview: <no notifyview specified>
+readview : v1default                        writeview: <no writeview specified>        
+notifyview: <no notifyview specified>       
 row status: active      access-list: snmp-acl-name
-
-groupname: GROUP3                           security model:v2c
+ 
+groupname: GROUP3                           security model:v2c 
 contextname: <no context specified>         storage-type: nonvolatile
-readview : v1default                        writeview: <no writeview specified>
-notifyview: <no notifyview specified>
+readview : v1default                        writeview: <no writeview specified>        
+notifyview: <no notifyview specified>       
 row status: active      access-list: snmp-acl-name
 ```
 
@@ -2105,7 +2100,7 @@ Tu10                   1        0/0       0/0          97       1/45         433
   Un/reliable mcasts: 0/0  Un/reliable ucasts: 14237/1554
   Mcast exceptions: 0  CR packets: 0  ACKs suppressed: 298
   Retransmissions sent: 662  Out-of-sequence rcvd: 738
-  Topology-ids on interface - 0
+  Topology-ids on interface - 0 
   Authentication mode is not set
   Topologies advertised on this interface:  base
   Topologies not advertised on this interface:
@@ -2119,7 +2114,7 @@ Tu20                   1        0/0       0/0          88       1/45         397
   Un/reliable mcasts: 0/0  Un/reliable ucasts: 17661/1561
   Mcast exceptions: 0  CR packets: 0  ACKs suppressed: 713
   Retransmissions sent: 701  Out-of-sequence rcvd: 2865
-  Topology-ids on interface - 0
+  Topology-ids on interface - 0 
   Authentication mode is not set
   Topologies advertised on this interface:  base
   Topologies not advertised on this interface:
@@ -2175,7 +2170,7 @@ interface: Tunnel1
         Status: ACTIVE(ACTIVE)
 
      inbound ah sas:
-
+          
      inbound pcp sas:
 
      outbound esp sas:
@@ -2259,21 +2254,21 @@ interface: Tunnel2
 
 **Output:**
 ```
-Displaying capability information for all available features:
-L3VPN Inter-AS Hybrid: Enabled
-L3VPN PE-CE Link Protection: Enabled
-OSPF nssa-only: Enabled
-OSPF Connected prefix suppression: Enabled
-OSPF support of RFC3101: Enabled
-OSPF prefix priority: Enabled
-OSPFv3 IPsec auth/encr: Enabled
- OSPFv3 BFD: Enabled
-OSPFv3 Graceful Restart: Enabled
-OSPFv3 Address Families: Enabled
-OSPFv3 PE-CE: Enabled
-OSPFv3 external path preference: Enabled
- OSPFv3 Stub Router Advertisement: Enabled
-OSPFv3 support of RFC3101: Enabled
+Displaying capability information for all available features: 
+L3VPN Inter-AS Hybrid: Enabled 
+L3VPN PE-CE Link Protection: Enabled 
+OSPF nssa-only: Enabled 
+OSPF Connected prefix suppression: Enabled 
+OSPF support of RFC3101: Enabled 
+OSPF prefix priority: Enabled 
+OSPFv3 IPsec auth/encr: Enabled 
+ OSPFv3 BFD: Enabled 
+OSPFv3 Graceful Restart: Enabled 
+OSPFv3 Address Families: Enabled 
+OSPFv3 PE-CE: Enabled 
+OSPFv3 external path preference: Enabled 
+ OSPFv3 Stub Router Advertisement: Enabled 
+OSPFv3 support of RFC3101: Enabled 
 
 ```
 
@@ -2288,7 +2283,7 @@ OSPFv3 support of RFC3101: Enabled
 **Output:**
 ```
 OurAddr       NeighAddr      LD/RD  RH/RS    Holdown(mult)  State     Int
-172.16.1.1    172.16.1.3     5/3    1(RH)    150 (3 )       Up   Fa0/1
+172.16.1.1    172.16.1.3     5/3    1(RH)    150 (3 )       Up   Fa0/1       
 Session state is UP and not using echo function.
 Local Diag: 0, Demand mode: 0, Poll bit: 0
 MinTxInt: 50000, MinRxInt: 50000, Multiplier: 3
@@ -2307,7 +2302,7 @@ Last packet: Version: 0            - Diagnostic: 0
              Min Echo interval: 0
 
 OurAddr       NeighAddr     LD/RD  RH/RS   Holdown(mult)  State     Int
-172.16.1.1    172.16.1.2     6/1    Up        0    (3 )   Up        Fa0/1
+172.16.1.1    172.16.1.2     6/1    Up        0    (3 )   Up        Fa0/1       
 Session state is UP and using echo function with 50 ms interval.
 Local Diag: 0, Demand mode: 0, Poll bit: 0
 MinTxInt: 1000000, MinRxInt: 1000000, Multiplier: 3
@@ -2465,30 +2460,30 @@ Yellow Threshold : 105 Degree Celsius
 VLAN Name                             Status    Ports
 ---- -------------------------------- --------- -------------------------------
 1    default                          active    Gi0/1
-10   Management                       active
+10   Management                       active    
 50   VLan50                           active    Fa0/1, Fa0/2, Fa0/3, Fa0/4, Fa0/5, Fa0/6, Fa0/7, Fa0/8, Fa0/9
                                                 Fa0/10, Fa0/11, Fa0/12
 60   VLan60                           active    Fa0/13, Fa0/14, Fa0/15, Fa0/16, Fa0/17, Fa0/18, Fa0/19, Fa0/20
                                                 Fa0/21, Fa0/22, Fa0/23, Fa0/24
-1002 fddi-default                     act/unsup
-1003 token-ring-default               act/unsup
-1004 fddinet-default                  act/unsup
-1005 trnet-default                    act/unsup
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
 
 VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
 ---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
-1    enet  100001     1500  -      -      -        -    -        0      0
-10   enet  100010     1500  -      -      -        -    -        0      0
-50   enet  100050     1500  -      -      -        -    -        0      0
-60   enet  100060     1500  -      -      -        -    -        0      0
-1002 fddi  101002     1500  -      -      -        -    -        0      0
-1003 tr    101003     1500  -      -      -        -    srb      0      0
-1004 fdnet 101004     1500  -      -      -        ieee -        0      0
-1005 trnet 101005     1500  -      -      -        ibm  -        0      0
+1    enet  100001     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+50   enet  100050     1500  -      -      -        -    -        0      0   
+60   enet  100060     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    srb      0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
 
 Remote SPAN VLANs
 ------------------------------------------------------------------------------
-
+ 
 
 Primary Secondary Type              Ports
 ------- --------- ----------------- ------------------------------------------
@@ -2550,10 +2545,10 @@ Number of neighbors: 4
 
 AP Name                          AP IP                                     Neighbor Name                              Neighbor IP        Neighbor Port
 -------------------------------------------------------------------------------------------------------------------------------------------------------------
-AP-INDOOR-01                     192.0.2.1                                 sw-test-123.local.lan                      192.0.2.101       GigabitEthernet1/0/1
-AP-INDOOR-02                     192.0.2.2                                 sw_test                                    192.0.2.103       Ethernet1/1
-AP-OUTDOOR-01                    192.0.2.3                                 sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45
-AP-OUTDOOR-02                    2001:db8:abc:def::1234                    sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45
+AP-INDOOR-01                     192.0.2.1                                 sw-test-123.local.lan                      192.0.2.101       GigabitEthernet1/0/1     
+AP-INDOOR-02                     192.0.2.2                                 sw_test                                    192.0.2.103       Ethernet1/1     
+AP-OUTDOOR-01                    192.0.2.3                                 sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45     
+AP-OUTDOOR-02                    2001:db8:abc:def::1234                    sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45     
 
 ```
 
@@ -2591,7 +2586,7 @@ Loopback0                  10.0.1.2        YES NVRAM  up                    up
   OOB-MGMT                         <not set>             ipv4        Gi0/3
   vpn21                            65201:21              ipv4,ipv6   Gi0/0.21
                                                                      Gi0/1.21
-  vpn22                            65201:22              ipv4
+  vpn22                            65201:22              ipv4        
 
 ```
 
@@ -2780,7 +2775,7 @@ Gi1/0/1      001a.12cd.3402 mab     DATA    Auth      0A0A1DFE0000164F6A0101FF
 Gi1/0/10     848a.12cd.35ec mab     VOICE   Auth      0A0A1DFE00000FC5000101FF
 Gi1/0/39     24da.12cd.3b4f mab     VOICE   Auth      0A0A1DFE000010EF7C0101FF
 Gi1/0/29     8c8a.12cd.3943 dot1x   DATA    Auth      0A0A1DFE0000202C3F0101FF
-
+ 
 Session count = 41
 
 Key to Session Events Blocked Status Flags:
@@ -3108,7 +3103,7 @@ Gi1/0/1      001a.12cd.3402 mab     DATA    Auth      0A0A1DFE0000164F6A0101FF
 Gi1/0/10     848a.12cd.35ec mab     VOICE   Auth      0A0A1DFE00000FC5000101FF
 Gi1/0/39     24da.12cd.3b4f mab     VOICE   Auth      0A0A1DFE000010EF7C0101FF
 Gi1/0/29     8c8a.12cd.3943 dot1x   DATA    Auth      0A0A1DFE0000202C3F0101FF
-
+ 
 Session count = 41
 
 Key to Session Events Blocked Status Flags:
@@ -3208,8 +3203,8 @@ VTP Operating Mode                : Server
 Maximum VLANs supported locally   : 1005
 Number of existing VLANs          : 20
 Configuration Revision            : 38
-MD5 digest                        : 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF
-                                    0x89 0x07 0xE4 0x53 0xBA 0xB1 0x1C 0xC1
+MD5 digest                        : 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 
+                                    0x89 0x07 0xE4 0x53 0xBA 0xB1 0x1C 0xC1 
 
 ```
 
@@ -3399,7 +3394,7 @@ advertisement version: 2
 VTP Management Domain: ''
 Duplex: full
 Management address(es):
-
+ 
 -------------------------
 Device ID: server
 Entry address(es):
@@ -3464,7 +3459,7 @@ Duplex: full
       Acct Session ID:  0x00000027
                Handle:  0xe0000025
        Current Policy:  PMAP_DefaultWiredDot1xClosedAuth_1X
-
+ 
 Local Policies:
 
 Server Policies:
@@ -3512,22 +3507,22 @@ Technical Support: http://www.cisco.com/techsupport
  Copyright (c) 1986-2019 by Cisco Systems, Inc.
 Compiled Mon 02-Sep-19 07:17 by prod_rel_team
                           BOOT = bootdisk:s2t54-adventerprisek9-mz.SPA.155-1.SY4.bin,1;
-                   CONFIG_FILE =
-                       BOOTLDR =
+                   CONFIG_FILE = 
+                       BOOTLDR = 
         Configuration register = 0x2102
 
 Peer Processor Information :
 ----------------------------
               Standby Location = slot 2/5
-        Current Software state = STANDBY HOT
+        Current Software state = STANDBY HOT 
        Uptime in current state = 19 minutes
                  Image Version = Cisco IOS Software, s2t54 Software (s2t54-ADVENTERPRISEK9-M), Version 15.5(1)SY4, RELEASE SOFTWARE (fc4)
 Technical Support: http://www.cisco.com/techsupport
  Copyright (c) 1986-2019 by Cisco Systems, Inc.
 Compiled Mon 02-Sep-19 07:17 by prod_rel_team
                           BOOT = bootdisk:s2t54-adventerprisek9-mz.SPA.155-1.SY4.bin,1;
-                   CONFIG_FILE =
-                       BOOTLDR =
+                   CONFIG_FILE = 
+                       BOOTLDR = 
         Configuration register = 0x2102
 ```
 
@@ -3574,7 +3569,7 @@ PID:                   , VID: 0xFF, SN: FF1045C5
 
 NAME: "One port Fastethernet TX", DESCR: "One port Fastethernet TX"
 PID: NM-1FE-TX=        , VID: 1.0, SN: 7720321
-
+ 
 NAME: "One port Fastethernet TX", DESCR: "One port Fastethernet TX"
  PID: NM-1FE-TX=        , VID: 1.0, SN: 7720321
 
@@ -3605,12 +3600,12 @@ BGP neighbor is 10.255.11.4,  vrf VRF11,  remote AS 65514,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -3620,7 +3615,7 @@ BGP neighbor is 10.255.11.4,  vrf VRF11,  remote AS 65514,  local AS 65534, exte
     Total:              32794      32808
   Do log neighbor state changes (via global configuration)
   Default minimum time between advertisement runs is 0 seconds
-
+ 
  For address family: VPNv4 Unicast
   Translates address family IPv4 Unicast for VRF VRF11
   Session: 10.255.11.4
@@ -3676,7 +3671,7 @@ BGP neighbor is 10.255.11.4,  vrf VRF11,  remote AS 65514,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.11.204, Local port: 33514
 Foreign host: 10.255.11.4, Foreign port: 179
@@ -3697,7 +3692,7 @@ PmtuAger      1781782    1781781     0x4AE069986
 DeadWait            0          0             0x0
 Linger              0          0             0x0
 ProcessQ            0          0             0x0
-
+ 
 iss: 2115004957  snduna: 2115628086  sndnxt: 2115628086
 irs: 3296319032  rcvnxt: 3296942468
 
@@ -3706,7 +3701,7 @@ rcvwnd:  15396  scale:      0  delrcvwnd:    988
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 22 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788576610 ms, Sent idletime: 35652 ms, Receive idletime: 35428 ms
+uptime: 1788576610 ms, Sent idletime: 35652 ms, Receive idletime: 35428 ms 
 Status Flags: active open
 Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
@@ -3717,8 +3712,8 @@ Sent: 65477 (retransmit: 10, fastretransmit: 0, partialack: 0, Second Congestion
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F1747D2ACD0  FREE
-
+TCP Semaphore      0x7F1747D2ACD0  FREE 
+          
 BGP neighbor is 10.255.11.9,  vrf VRF11,  remote AS 65519,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.250.6
   BGP state = Established, up for 2w6d
@@ -3730,12 +3725,12 @@ BGP neighbor is 10.255.11.9,  vrf VRF11,  remote AS 65519,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -3801,7 +3796,7 @@ BGP neighbor is 10.255.11.9,  vrf VRF11,  remote AS 65519,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.11.204, Local port: 38993
 Foreign host: 10.255.11.9, Foreign port: 179
@@ -3831,19 +3826,19 @@ rcvwnd:  15073  scale:      0  delrcvwnd:   1311
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 9 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788574963 ms, Sent idletime: 9426 ms, Receive idletime: 9216 ms
+uptime: 1788574963 ms, Sent idletime: 9426 ms, Receive idletime: 9216 ms 
 Status Flags: active open
  Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
-
+ 
 Datagrams (max data segment is 1360 bytes):
 Rcvd: 65523 (out of order: 0), with data: 32823, total data bytes: 623758
 Sent: 65522 (retransmit: 1, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 32815, total data bytes: 623527
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F174807D408  FREE
-
+TCP Semaphore      0x7F174807D408  FREE 
+          
 BGP neighbor is 10.255.12.4,  vrf VRF12,  remote AS 65514,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.255.6
   BGP state = Established, up for 2w6d
@@ -3855,12 +3850,12 @@ BGP neighbor is 10.255.12.4,  vrf VRF12,  remote AS 65514,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -3870,7 +3865,7 @@ BGP neighbor is 10.255.12.4,  vrf VRF12,  remote AS 65514,  local AS 65534, exte
     Total:              32910      32810
   Do log neighbor state changes (via global configuration)
   Default minimum time between advertisement runs is 0 seconds
-
+ 
  For address family: VPNv4 Unicast
   Translates address family IPv4 Unicast for VRF VRF12
   Session: 10.255.12.4
@@ -3926,7 +3921,7 @@ BGP neighbor is 10.255.12.4,  vrf VRF12,  remote AS 65514,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.12.204, Local port: 41858
 Foreign host: 10.255.12.4, Foreign port: 179
@@ -3956,7 +3951,7 @@ rcvwnd:  15187  scale:      0  delrcvwnd:   1197
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 22 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788571400 ms, Sent idletime: 20201 ms, Receive idletime: 19977 ms
+uptime: 1788571400 ms, Sent idletime: 20201 ms, Receive idletime: 19977 ms 
 Status Flags: active open
 Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
@@ -3967,8 +3962,8 @@ Sent: 65558 (retransmit: 4, fastretransmit: 0, partialack: 0, Second Congestion:
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F174807D4D8  FREE
-
+TCP Semaphore      0x7F174807D4D8  FREE 
+          
 BGP neighbor is 10.255.12.9,  vrf VRF12,  remote AS 65519,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.250.6
   BGP state = Established, up for 2w6d
@@ -3980,12 +3975,12 @@ BGP neighbor is 10.255.12.9,  vrf VRF12,  remote AS 65519,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -4051,7 +4046,7 @@ BGP neighbor is 10.255.12.9,  vrf VRF12,  remote AS 65519,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.12.204, Local port: 54769
 Foreign host: 10.255.12.9, Foreign port: 179
@@ -4081,19 +4076,19 @@ rcvwnd:  15073  scale:      0  delrcvwnd:   1311
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 9 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788571028 ms, Sent idletime: 6514 ms, Receive idletime: 6304 ms
+uptime: 1788571028 ms, Sent idletime: 6514 ms, Receive idletime: 6304 ms 
 Status Flags: active open
  Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
-
+ 
 Datagrams (max data segment is 1360 bytes):
 Rcvd: 65566 (out of order: 0), with data: 32817, total data bytes: 623775
 Sent: 65578 (retransmit: 3, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 32877, total data bytes: 635322
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F174807D5A8  FREE
-
+TCP Semaphore      0x7F174807D5A8  FREE 
+          
 BGP neighbor is 10.255.13.4,  vrf VRF13,  remote AS 65514,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.255.6
   BGP state = Established, up for 2w6d
@@ -4105,12 +4100,12 @@ BGP neighbor is 10.255.13.4,  vrf VRF13,  remote AS 65514,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -4120,7 +4115,7 @@ BGP neighbor is 10.255.13.4,  vrf VRF13,  remote AS 65514,  local AS 65534, exte
     Total:              32784      32816
   Do log neighbor state changes (via global configuration)
   Default minimum time between advertisement runs is 0 seconds
-
+ 
  For address family: VPNv4 Unicast
   Translates address family IPv4 Unicast for VRF VRF13
   Session: 10.255.13.4
@@ -4176,7 +4171,7 @@ BGP neighbor is 10.255.13.4,  vrf VRF13,  remote AS 65514,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.13.204, Local port: 39746
 Foreign host: 10.255.13.4, Foreign port: 179
@@ -4206,7 +4201,7 @@ rcvwnd:  16384  scale:      0  delrcvwnd:      0
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 22 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788579756 ms, Sent idletime: 906 ms, Receive idletime: 683 ms
+uptime: 1788579756 ms, Sent idletime: 906 ms, Receive idletime: 683 ms 
 Status Flags: active open
 Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
@@ -4217,8 +4212,8 @@ Sent: 65499 (retransmit: 8, fastretransmit: 0, partialack: 0, Second Congestion:
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F1744DF0BD0  FREE
-
+TCP Semaphore      0x7F1744DF0BD0  FREE 
+          
 BGP neighbor is 10.255.13.9,  vrf VRF13,  remote AS 65519,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.250.6
   BGP state = Established, up for 2w6d
@@ -4230,12 +4225,12 @@ BGP neighbor is 10.255.13.9,  vrf VRF13,  remote AS 65519,  local AS 65534, exte
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -4301,7 +4296,7 @@ BGP neighbor is 10.255.13.9,  vrf VRF13,  remote AS 65519,  local AS 65534, exte
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 10.255.13.204, Local port: 12197
 Foreign host: 10.255.13.9, Foreign port: 179
@@ -4331,19 +4326,19 @@ rcvwnd:  15852  scale:      0  delrcvwnd:    532
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 9 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788579142 ms, Sent idletime: 3724 ms, Receive idletime: 3924 ms
+uptime: 1788579142 ms, Sent idletime: 3724 ms, Receive idletime: 3924 ms 
 Status Flags: active open
  Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
-
+ 
 Datagrams (max data segment is 1360 bytes):
 Rcvd: 65550 (out of order: 0), with data: 32841, total data bytes: 624324
 Sent: 65518 (retransmit: 1, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 32805, total data bytes: 623337
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F173C61CF30  FREE
-
+TCP Semaphore      0x7F173C61CF30  FREE 
+          
 BGP neighbor is 172.16.0.4,  vrf VRF10,  remote AS 65514,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.255.6
   BGP state = Established, up for 2w6d
@@ -4355,12 +4350,12 @@ BGP neighbor is 172.16.0.4,  vrf VRF10,  remote AS 65514,  local AS 65534, exter
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -4370,7 +4365,7 @@ BGP neighbor is 172.16.0.4,  vrf VRF10,  remote AS 65514,  local AS 65534, exter
     Total:              32812      32800
   Do log neighbor state changes (via global configuration)
   Default minimum time between advertisement runs is 0 seconds
-
+ 
  For address family: VPNv4 Unicast
   Translates address family IPv4 Unicast for VRF VRF10
   Session: 172.16.0.4
@@ -4426,7 +4421,7 @@ BGP neighbor is 172.16.0.4,  vrf VRF10,  remote AS 65514,  local AS 65534, exter
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 172.16.0.141, Local port: 32322
 Foreign host: 172.16.0.4, Foreign port: 179
@@ -4456,7 +4451,7 @@ rcvwnd:  15548  scale:      0  delrcvwnd:    836
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 22 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788578957 ms, Sent idletime: 16417 ms, Receive idletime: 16617 ms
+uptime: 1788578957 ms, Sent idletime: 16417 ms, Receive idletime: 16617 ms 
 Status Flags: active open
 Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
@@ -4467,8 +4462,8 @@ Sent: 65531 (retransmit: 5, fastretransmit: 0, partialack: 0, Second Congestion:
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x7F174807D678  FREE
-
+TCP Semaphore      0x7F174807D678  FREE 
+          
 BGP neighbor is 172.16.0.9,  vrf VRF10,  remote AS 65519,  local AS 65534, external link
   BGP version 4, remote router ID 10.255.250.6
   BGP state = Established, up for 2w6d
@@ -4480,12 +4475,12 @@ BGP neighbor is 172.16.0.9,  vrf VRF10,  remote AS 65519,  local AS 65534, exter
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -4551,7 +4546,7 @@ BGP neighbor is 172.16.0.9,  vrf VRF10,  remote AS 65519,  local AS 65534, exter
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   SSO is disabled
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 172.16.0.141, Local port: 49926
 Foreign host: 172.16.0.9, Foreign port: 179
@@ -4581,11 +4576,11 @@ rcvwnd:  15301  scale:      0  delrcvwnd:   1083
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 9 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: 1788585645 ms, Sent idletime: 14322 ms, Receive idletime: 14522 ms
+uptime: 1788585645 ms, Sent idletime: 14322 ms, Receive idletime: 14522 ms 
 Status Flags: active open
  Option Flags: VRF id set, nagle, path mtu capable
 IP Precedence value : 6
-
+ 
 Datagrams (max data segment is 1360 bytes):
 Rcvd: 65496 (out of order: 0), with data: 32811, total data bytes: 623526
 Sent: 65520 (retransmit: 1, fastretransmit: 0, partialack: 0, Second Congestion: 0), with data: 32808, total data bytes: 623394
@@ -4634,11 +4629,11 @@ Legend: * - primary entry
 **Output:**
 ```
 Interface              IP-Address      VRF                              Protocol
-Vl1100                 192.168.100.1   BYOD-Guest                       up
-Vl1200                 192.168.200.1   BYOD-Guest                       up
-Vl1832                 10.255.0.10     BYOD-Guest                       up
-Gi0/0                  unassigned      Mgmt-vrf                         down
-Vl520                  172.31.2.253    SP-INET                          up
+Vl1100                 192.168.100.1   BYOD-Guest                       up      
+Vl1200                 192.168.200.1   BYOD-Guest                       up      
+Vl1832                 10.255.0.10     BYOD-Guest                       up      
+Gi0/0                  unassigned      Mgmt-vrf                         down    
+Vl520                  172.31.2.253    SP-INET                          up      
 Vl1836                 10.255.0.18     SP-INET                          up
 ```
 
@@ -5022,17 +5017,17 @@ Gi0/10.30                      reset          down     Garbage
 ```
 HTTP server status: Enabled
 HTTP server port: 80
-HTTP server active supplementary listener ports: 21111
+HTTP server active supplementary listener ports: 21111  
 HTTP server authentication method: local
  HTTP server auth-retry 0 time-window 0
 HTTP server digest algorithm: md5
  HTTP server access class: 0
 HTTP server IPv4 access class: None
 HTTP server IPv6 access class: None
-HTTP server base path:
+HTTP server base path: 
 HTTP File Upload status: Disabled
- HTTP server upload path:
-HTTP server help root:
+ HTTP server upload path: 
+HTTP server help root: 
 Maximum number of concurrent server connections allowed: 300
 Maximum number of secondary server connections allowed: 50
 Server idle time-out: 180 seconds
@@ -5052,7 +5047,7 @@ HTTP secure server client authentication: Disabled
  HTTP secure server PIV authentication: Disabled
 HTTP secure server PIV authorization only: Disabled
 HTTP secure server trustpoint: TP-self-signed-4212509801
-HTTP secure server peer validation trustpoint:
+HTTP secure server peer validation trustpoint: 
 HTTP secure server ECDHE curve: secp256r1
 HTTP secure server active session modules: ALL
 
@@ -5104,10 +5099,10 @@ mA: milliamperes, dBm: decibels (milliwatts).
            Temperature  Voltage  Tx Power  Rx Power
 Port       (Celsius)    (Volts)  (dBm)     (dBm)
 ---------  -----------  -------  --------  --------
-Te1/49       23.1       3.29      -2.2      -3.0
-Te1/50       23.4       3.31      -2.2      -2.6
-Te1/51       21.5       3.29      -2.2      -2.1
-Te1/52       23.5       3.29      -2.4      -2.8
+Te1/49       23.1       3.29      -2.2      -3.0   
+Te1/50       23.4       3.31      -2.2      -2.6   
+Te1/51       21.5       3.29      -2.2      -2.1   
+Te1/52       23.5       3.29      -2.4      -2.8  
 
 ```
 
@@ -5136,12 +5131,12 @@ BGP neighbor is 175.135.172.146,  vrf DEV, remote AS 65180, internal link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -5195,7 +5190,7 @@ BGP neighbor is 175.135.172.146,  vrf DEV, remote AS 65180, internal link
   Last reset never
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 255
 Local host: 47.101.28.250, Local port: 1039
 Foreign host: 90.58.27.224, Foreign port: 179
@@ -5225,7 +5220,7 @@ rcvwnd:  16156  scale:      0  delrcvwnd:    228
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1690 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 830 ms, Receive idletime: 1030 ms
+uptime: -1 ms, Sent idletime: 830 ms, Receive idletime: 1030 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -5236,7 +5231,7 @@ Sent: 8840238 (retransmit: 5, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x38C42C38  FREE
+TCP Semaphore      0x38C42C38  FREE 
 
 BGP neighbor is 42.116.171.166,  remote AS 65182, external link
  Description: nsxe-lan-rtr1
@@ -5253,12 +5248,12 @@ BGP neighbor is 42.116.171.166,  remote AS 65182, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -5315,7 +5310,7 @@ BGP neighbor is 42.116.171.166,  remote AS 65182, external link
   Last reset never
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 39.236.86.64, Local port: 179
 Foreign host: 85.15.185.206, Foreign port: 28912
@@ -5345,7 +5340,7 @@ rcvwnd:  15567  scale:      0  delrcvwnd:    817
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1690 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 590 ms, Receive idletime: 790 ms
+uptime: -1 ms, Sent idletime: 590 ms, Receive idletime: 790 ms 
 Status Flags: passive open, gen tcbs
 Option Flags: nagle, path mtu capable, md5, Retrans timeout
  IP Precedence value : 6
@@ -5356,7 +5351,7 @@ Rcvd: 8750829 (out of order: 0), with data: 4574238, total data bytes: 88591576
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DC1BAEC  FREE
+TCP Semaphore      0x3DC1BAEC  FREE 
 
 BGP neighbor is 5.233.102.244,  remote AS 65181, external link
  Description: nsxe-vndr-rtr1
@@ -5373,12 +5368,12 @@ BGP neighbor is 5.233.102.244,  remote AS 65181, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -5439,7 +5434,7 @@ BGP neighbor is 5.233.102.244,  remote AS 65181, external link
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   TCP session must be opened actively
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 253, Outgoing TTL 255
 Local host: 216.31.37.199, Local port: 10158
 Foreign host: 58.98.25.93, Foreign port: 179
@@ -5469,7 +5464,7 @@ rcvwnd:  15776  scale:      0  delrcvwnd:    608
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 110 ms, Receive idletime: 310 ms
+uptime: -1 ms, Sent idletime: 110 ms, Receive idletime: 310 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -5480,7 +5475,7 @@ Sent: 1892826 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DD686A8  FREE
+TCP Semaphore      0x3DD686A8  FREE 
 
 BGP neighbor is 191.113.218.187,  remote AS 65181, external link
  Description: nsxe-vndr-rtr2
@@ -5543,7 +5538,7 @@ BGP neighbor is 191.113.218.187,  remote AS 65181, external link
   Graceful-Restart is disabled
   TCP session must be opened actively
   No active TCP connection
-
+ 
 BGP neighbor is 50.231.89.165,  remote AS 65183, external link
  Description: nsxe-aws-rtr1
  Member of peer-group AWS for session parameters
@@ -5559,12 +5554,12 @@ BGP neighbor is 50.231.89.165,  remote AS 65183, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -5626,7 +5621,7 @@ BGP neighbor is 50.231.89.165,  remote AS 65183, external link
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   TCP session must be opened actively
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 253, Outgoing TTL 255
 Local host: 87.243.6.230, Local port: 10156
 Foreign host: 211.76.120.22, Foreign port: 179
@@ -5647,7 +5642,7 @@ PmtuAger            1          1             0x0
 DeadWait            0          0             0x0
 Linger              0          0             0x0
 ProcessQ            0          0             0x0
-
+ 
 iss: 3081669307  snduna: 3100105984  sndnxt: 3100105984
 irs:  682628929  rcvnxt:  701010163
 
@@ -5656,7 +5651,7 @@ rcvwnd:  15035  scale:      0  delrcvwnd:   1349
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 2470 ms, Receive idletime: 2670 ms
+uptime: -1 ms, Sent idletime: 2470 ms, Receive idletime: 2670 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -5667,7 +5662,7 @@ Sent: 1898490 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DD68658  FREE
+TCP Semaphore      0x3DD68658  FREE 
 
 BGP neighbor is 121.216.88.225,  remote AS 65183, external link
  Description: nsxe-aws-rtr2
@@ -5684,12 +5679,12 @@ BGP neighbor is 121.216.88.225,  remote AS 65183, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -5749,13 +5744,13 @@ BGP neighbor is 121.216.88.225,  remote AS 65183, external link
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   TCP session must be opened actively
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 253, Outgoing TTL 255
 Local host: 69.201.247.212, Local port: 10153
 Foreign host: 201.3.14.224, Foreign port: 179
 Connection tableid (VRF): 0
 Maximum output segment queue size: 50
-
+ 
 Enqueued packets for retransmit: 0, input: 0  mis-ordered: 0 (0 bytes)
 
  Event Timers (current time is 0x56F2E07A6):
@@ -5779,7 +5774,7 @@ rcvwnd:  15434  scale:      0  delrcvwnd:    950
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 1090 ms, Receive idletime: 1290 ms
+uptime: -1 ms, Sent idletime: 1090 ms, Receive idletime: 1290 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -5790,7 +5785,7 @@ Sent: 1893869 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DD68748  FREE
+TCP Semaphore      0x3DD68748  FREE 
 
 BGP neighbor is 71.163.23.191,  remote AS 65184, external link
  Description: nsxe-merge-rtr1
@@ -5853,7 +5848,7 @@ BGP neighbor is 71.163.23.191,  remote AS 65184, external link
   Graceful-Restart is disabled
   TCP session must be opened actively
   No active TCP connection
-
+ 
 BGP neighbor is 87.90.154.72,  remote AS 65004, external link
  Description: nsxe-ent-l3ce1 (CASR1001-ET-01 gm73688) direct
  Member of peer-group L3-CE-SEC for session parameters
@@ -5865,7 +5860,7 @@ BGP neighbor is 87.90.154.72,  remote AS 65004, external link
     0 active, is not multisession capable (disabled)
     Stateful switchover support enabled: NO
   Default minimum time between advertisement runs is 30 seconds
-
+ 
  For address family: IPv4 Unicast
   BGP table version 55515, neighbor version 1/55515
   Output queue size : 0
@@ -5990,12 +5985,12 @@ BGP neighbor is 13.167.37.139,  remote AS 64514, external link
     Address family IPv4 Unicast: advertised and received
     Address family IPv6 Unicast: received
     Enhanced Refresh Capability: advertised
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -6056,7 +6051,7 @@ BGP neighbor is 13.167.37.139,  remote AS 64514, external link
   Last reset 5w6d, due to Active open failed
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
-Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
 Connection is ECN Disabled, Mininum incoming TTL 0, Outgoing TTL 1
 Local host: 203.2.115.150, Local port: 10926
 Foreign host: 152.83.67.150, Foreign port: 179
@@ -6086,7 +6081,7 @@ rcvwnd:  15928  scale:      0  delrcvwnd:    456
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: -704633926 ms, Sent idletime: 1840 ms, Receive idletime: 1840 ms
+uptime: -704633926 ms, Sent idletime: 1840 ms, Receive idletime: 1840 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable
 IP Precedence value : 6
@@ -6097,7 +6092,7 @@ Sent: 1496482 (retransmit: 6, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DC1B9FC  FREE
+TCP Semaphore      0x3DC1B9FC  FREE 
 
 BGP neighbor is 72.37.28.119,  remote AS 18830, external link
  Description: nsxe-int-rtr1
@@ -6114,12 +6109,12 @@ BGP neighbor is 72.37.28.119,  remote AS 18830, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -6181,7 +6176,7 @@ BGP neighbor is 72.37.28.119,  remote AS 18830, external link
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   TCP session must be opened actively
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 253, Outgoing TTL 255
 Local host: 98.13.124.95, Local port: 10160
 Foreign host: 29.194.88.38, Foreign port: 179
@@ -6211,7 +6206,7 @@ rcvwnd:  15016  scale:      0  delrcvwnd:   1368
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1000 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 2880 ms, Receive idletime: 2680 ms
+uptime: -1 ms, Sent idletime: 2880 ms, Receive idletime: 2680 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -6222,7 +6217,7 @@ Sent: 1885160 (retransmit: 0, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DD68568  FREE
+TCP Semaphore      0x3DD68568  FREE 
 
 BGP neighbor is 201.93.188.161,  remote AS 18830, external link
  Description: nsxe-int-rtr2
@@ -6239,12 +6234,12 @@ BGP neighbor is 201.93.188.161,  remote AS 18830, external link
     Four-octets ASN Capability: advertised and received
     Address family IPv4 Unicast: advertised and received
     Enhanced Refresh Capability: advertised and received
-    Multisession Capability:
+    Multisession Capability: 
     Stateful switchover support enabled: NO for session 1
   Message statistics:
     InQ depth is 0
     OutQ depth is 0
-
+    
                          Sent       Rcvd
     Opens:                  1          1
     Notifications:          0          0
@@ -6305,13 +6300,13 @@ BGP neighbor is 201.93.188.161,  remote AS 18830, external link
   Transport(tcp) path-mtu-discovery is enabled
   Graceful-Restart is disabled
   TCP session must be opened actively
- Connection state is ESTAB, I/O status: 1, unread input bytes: 0
+ Connection state is ESTAB, I/O status: 1, unread input bytes: 0            
  Connection is ECN Disabled, Mininum incoming TTL 253, Outgoing TTL 255
 Local host: 125.0.195.99, Local port: 10159
 Foreign host: 84.229.16.220, Foreign port: 179
 Connection tableid (VRF): 0
 Maximum output segment queue size: 50
-
+ 
 Enqueued packets for retransmit: 0, input: 0  mis-ordered: 0 (0 bytes)
 
  Event Timers (current time is 0x56F2E07CE):
@@ -6335,7 +6330,7 @@ rcvwnd:  16346  scale:      0  delrcvwnd:     38
 
 SRTT: 1000 ms, RTTO: 1003 ms, RTV: 3 ms, KRTT: 0 ms
 minRTT: 0 ms, maxRTT: 1010 ms, ACK hold: 200 ms
-uptime: -1 ms, Sent idletime: 2890 ms, Receive idletime: 2690 ms
+uptime: -1 ms, Sent idletime: 2890 ms, Receive idletime: 2690 ms 
 Status Flags: active open
 Option Flags: nagle, path mtu capable, md5
 IP Precedence value : 6
@@ -6346,7 +6341,7 @@ Sent: 1925273 (retransmit: 1, fastretransmit: 0, partialack: 0, Second Congestio
 
  Packets received in fast path: 0, fast processed: 0, slow path: 0
  fast lock acquisition failures: 0, slow path: 0
-TCP Semaphore      0x3DD685B8  FREE
+TCP Semaphore      0x3DD685B8  FREE 
 
 ```
 
@@ -6363,13 +6358,13 @@ TCP Semaphore      0x3DD685B8  FREE
 Power                                             Fan      Inline
 Supply  Model No          Type       Status       Sensor   Status
 ------  ----------------  ---------  -----------  -------  -------
-PS1     PWR-C45-4200ACV   AC 4200W   good         good     good
-PS1-1                         220V   good
-PS1-2                         220V   good
-PS2     PWR-C45-4200ACV   AC 4200W   err-disable  good     good
-PS2-1                                off
-PS2-2                         220V   good
-
+PS1     PWR-C45-4200ACV   AC 4200W   good         good     good   
+PS1-1                         220V   good         
+PS1-2                         220V   good         
+PS2     PWR-C45-4200ACV   AC 4200W   err-disable  good     good   
+PS2-1                                off          
+PS2-2                         220V   good         
+ 
 *** Power Supplies of different type have been detected***
 
 ```
@@ -6409,7 +6404,7 @@ Neighbor        V           AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State
 10.0.0.7        4        65006 12245684 9181569 512185203    0    0 1y10w          82
 10.0.0.8        4        65007 12250936 9181571 512185203    0    0 1y10w          82
 10.0.0.9        4        65008  222146 14368489 512185203    0    0 22w0d           0
-10.0.0.10       4        65009 26930508  942614 512185203    0    0 1y10w     Idle (Admin)
+10.0.0.10       4        65009 26930508  942614 512185203    0    0 1y10w     Idle (Admin) 
 
 ```
 
@@ -6427,7 +6422,7 @@ Sysauthcontrol             Disabled
 Dot1x Protocol Version            2
 Critical Recovery Delay         100
 Critical EAPOL             Disabled
-
+ 
 Dot1x Info for Ethernet1/0
 -----------------------------------
 PAE                       = AUTHENTICATOR
@@ -6473,11 +6468,11 @@ RateLimitPeriod           = 0
 
 **Output:**
 ```
-Interface  VNI        Multicast-group VNI state  Mode  BD    cfg vrf
-nve1       10306   N/A             Up         L3CP  306  CLI GRY
-nve1       10303   N/A             Up         L3CP  303  CLI AMB
-nve1       10302   N/A             Up         L3CP  302  CLI GRN
-nve1       10301   N/A             Up         L3CP  301  CLI BLU
+Interface  VNI        Multicast-group VNI state  Mode  BD    cfg vrf                                         
+nve1       10306   N/A             Up         L3CP  306  CLI GRY                     
+nve1       10303   N/A             Up         L3CP  303  CLI AMB                     
+nve1       10302   N/A             Up         L3CP  302  CLI GRN                                         
+nve1       10301   N/A             Up         L3CP  301  CLI BLU  
 ```
 
 **Help:** execute the command "show nve vni"
@@ -6544,7 +6539,7 @@ SEP00124362C4D2   Gig 1/0/42    147          H P        IP Phone   Port 1
 Tue May 22 22:32:30.765 UTC
 
 Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area 
        N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
        E1 - OSPF external type 1, E2 - OSPF external type 2
        i - IS-IS, su - IS-IS summary, L1 - IS-IS level-1, L2 - IS-IS level-2
@@ -6624,7 +6619,7 @@ Flags:  D - down        P/bndl - bundled in port-channel
         u - unsuitable for bundling
         w - waiting to be aggregated
         d - default port
-
+ 
 
 Number of channel-groups in use: 1
 Number of aggregators:           1
@@ -7038,7 +7033,7 @@ Internet  172.16.233.218       -              0000.0c07.ac00    ARPA      Ethern
 Internet  172.16.233.19        -              0000.0c63.1300    ARPA      Ethernet0/0
 Internet  172.16.233.209       -              0000.0c36.6965    ARPA      Ethernet0/0
 Internet  172.16.168.11        -              0000.0c63.1300    ARPA      Ethernet0/0
-Internet  172.16.168.254       9              0000.0c36.6965    ARPA      Ethernet0/0
+Internet  172.16.168.254       9              0000.0c36.6965    ARPA      Ethernet0/0 
 Internet  10.0.0.0             -              aabb.cc03.8200    SRP-A
 
 
@@ -7167,8 +7162,8 @@ Access Mode VLAN: 1 (default)
  Trunking Native Mode VLAN: 1 (default)
 Administrative Native VLAN tagging: disabled
 Voice VLAN: none
-Administrative private-vlan host-association: none
-Administrative private-vlan mapping: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
 Administrative private-vlan trunk native VLAN: none
 Administrative private-vlan trunk Native VLAN tagging: enabled
  Administrative private-vlan trunk encapsulation: dot1q
@@ -7187,7 +7182,7 @@ Unknown unicast blocked: disabled
  Unknown multicast blocked: disabled
 Vepa Enabled: false
 Appliance trust: none
-
+ 
 Name: Te5/0/2
 Switchport: Enabled
 Administrative Mode: trunk
@@ -7199,8 +7194,8 @@ Access Mode VLAN: 1 (default)
  Trunking Native Mode VLAN: 1 (default)
 Administrative Native VLAN tagging: disabled
 Voice VLAN: none
-Administrative private-vlan host-association: none
-Administrative private-vlan mapping: none
+Administrative private-vlan host-association: none 
+Administrative private-vlan mapping: none 
 Administrative private-vlan trunk native VLAN: none
 Administrative private-vlan trunk Native VLAN tagging: enabled
  Administrative private-vlan trunk encapsulation: dot1q
@@ -7593,7 +7588,7 @@ Extended IP access list test2
 Capability codes:
     (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
     (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
-
+ 
 Device ID           Local Intf     Hold-time  Capability      Port ID
 S2                  Fa0/13         120        B               Gi0/13
 Cisco-switch-1      Gi1/0/7        120                        Gi0/1
@@ -7627,7 +7622,7 @@ rtr-01 uptime is 1 week, 3 days, 16 hours, 11 minutes
 System returned to ROM by reload
 System image file is "flash0:/vios-adventerprisek9-m"
 Last reload reason: Unknown reason
-
+ 
 
 
 This product contains cryptographic features and is subject to United
@@ -7638,13 +7633,13 @@ Importers, exporters, distributors and users are responsible for
 compliance with U.S. and local country laws. By using this product you
 agree to comply with applicable laws and regulations. If you are unable
 to comply with U.S. and local laws, return this product immediately.
-
+ 
 A summary of U.S. laws governing Cisco cryptographic products may be found at:
 http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
 
 If you require further assistance please contact us by sending email to
 export@cisco.com.
-
+ 
 Cisco IOSv (revision 1.0) with  with 460137K/62464K bytes of memory.
 Processor board ID 991UCMIHG4UAJ1J010CQG
 4 Gigabit Ethernet interfaces
@@ -7685,3 +7680,749 @@ Configuration register is 0x0
 **Prompt:**
 - cisco_ios>
 - cisco_ios#
+
+### show arp
+
+**Output:**
+```
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  10.100.88.1             -   c4f7.d564.b716  ARPA   Vlan10
+Internet  10.100.88.199           0   Incomplete      ARPA
+Internet  10.152.1.229            0   488f.5a5a.87ea  ARPA   Vlan1
+Internet  1.2.3.4                 0   c4ad.3425.b7be  ARPA   FastEthernet4
+Internet  1.2.3.5                 -   c4f7.d564.b71a  ARPA   FastEthernet4
+
+```
+
+**Help:** execute the command "show arp"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show cts credentials
+
+**Output:**
+```
+No CTS credentials exist.
+```
+
+**Help:** execute the command "show cts credentials"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show cts pacs
+
+**Output:**
+```
+AID: 0123456789ABCDEF0123456789ABCDEF
+PAC-Info:
+  PAC-type = Cisco Trustsec
+  AID: 0123456789ABCDEF0123456789ABCDEF
+  I-ID: switch0001
+  A-ID-Info: Identity Services Engine
+  Credential Lifetime: 20:42:42 CEST Wed Jun 08 2024
+PAC-Opaque: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF01234567
+Refresh timer is set for 00:00:24
+Refresh delayed for 4286610 seconds waiting for server address information.
+```
+
+**Help:** execute the command "show cts pacs"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show endpoint-tracker
+
+**Output:**
+```
+Interface                    Record Name            Status          RTT in msecs    Probe ID        Next Hop
+GigabitEthernet1             trk_umbrella           Up              2               1               10.44.22.1
+GigabitEthernet2             trk_goolge             Up              2               1               10.2.2.1
+```
+
+**Help:** execute the command "show endpoint-tracker"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show endpoint-tracker tracker-group
+
+**Output:**
+```
+Tracker Name                     Element trackers name              Status                       RTT in msec      Probe ID
+trkgrp_grp1                      trk_google-web, trk_umbrella       UP(UP OR UP)                 16, 3            5, 6
+trkgrp_endpoint                  trk_google-web1, trk_umbrella1     UP(UP AND UP)                16, 3            5, 6
+```
+
+**Help:** execute the command "show endpoint-tracker tracker-group"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show interfaces status err-disabled
+
+**Output:**
+```
+Port      Name               Status       Reason
+Eth1      EM PM              err-disabled  psecure-violation
+Eth2                         err-disabled  bpduguard
+Eth3                         err-disabled  loopback
+
+```
+
+**Help:** execute the command "show interfaces status err-disabled"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show ip dhcp binding
+
+**Output:**
+```
+Bindings from all pools not associated with VRF:
+IP address          Client-ID/              Lease expiration        Type
+                    Hardware address/
+                    User name
+10.100.88.26        01aa.aaaa.aaaa.aa       Infinite                Manual
+10.100.88.197       01dd.dddd.dddd.dd       Infinite                Manual
+
+```
+
+**Help:** execute the command "show ip dhcp binding"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show ip dhcp snooping binding
+
+**Output:**
+```
+  MacAddress          IpAddress        Lease(sec)  Type           VLAN  Interface
+  ------------------  ---------------  ----------  -------------  ----  --------------------
+  4A:20:93:E5:FA:23   172.16.92.198    1512        dhcp-snooping   1     GigabitEthernet0/5
+  14:21:4E:F4:87:5B   172.16.92.217    1765        dhcp-snooping   1     GigabitEthernet0/24
+  B8:6E:07:ED:86:55   172.16.92.209    1598        dhcp-snooping   1     GigabitEthernet0/16
+  E9:DD:6C:F8:D1:DE   172.16.92.197    1520        dhcp-snooping   1     GigabitEthernet0/4
+  5E:00:34:5E:16:E7   172.16.92.206    1767        dhcp-snooping   1     GigabitEthernet0/13
+  0E:46:62:44:76:AB   172.16.92.199    1572        dhcp-snooping   1     GigabitEthernet0/6
+  08:00:E1:75:DF:68   172.16.92.211    1569        dhcp-snooping   1     GigabitEthernet0/18
+  B2:D4:79:F2:DE:9A   172.16.92.195    1703        dhcp-snooping   1     GigabitEthernet0/2
+  8A:8B:5E:72:2D:D4   172.16.92.212    1766        dhcp-snooping   1     GigabitEthernet0/19
+  52:6F:62:C9:56:76   172.16.92.201    1706        dhcp-snooping   1     GigabitEthernet0/8
+  82:8E:29:BC:11:90   172.16.92.196    1514        dhcp-snooping   1     GigabitEthernet0/3
+  D2:DC:D1:80:D0:E6   172.16.92.213    1569        dhcp-snooping   1     GigabitEthernet0/20
+  5E:CB:5B:39:98:29   172.16.92.216    1575        dhcp-snooping   1     GigabitEthernet0/23
+  DA:C3:77:3F:E3:36   172.16.92.202    1653        dhcp-snooping   1     GigabitEthernet0/9
+  3E:20:22:8A:7C:A2   172.16.92.205    1766        dhcp-snooping   1     GigabitEthernet0/12
+  B0:B8:68:1B:22:D9   172.16.92.210    1653        dhcp-snooping   1     GigabitEthernet0/17
+  E2:2A:F2:38:EF:68   172.16.92.220    1765        dhcp-snooping   1     GigabitEthernet0/27
+  38:25:96:B4:88:22   172.16.92.200    1767        dhcp-snooping   1     GigabitEthernet0/7
+  54:36:63:96:D7:4C   172.16.92.204    1686        dhcp-snooping   1     GigabitEthernet0/11
+  1A:AD:FE:27:06:F8   172.16.92.214    1571        dhcp-snooping   1     GigabitEthernet0/21
+  8C:A9:83:87:FD:6A   172.16.92.207    1766        dhcp-snooping   1     GigabitEthernet0/14
+  73:73:60:35:EC:65   172.16.92.194    1687        dhcp-snooping   1     GigabitEthernet0/1
+  FC:AA:2D:97:0A:95   172.16.92.215    1569        dhcp-snooping   1     GigabitEthernet0/22
+  8C:13:7D:5C:24:AA   172.16.92.203    1571        dhcp-snooping   1     GigabitEthernet0/10
+  AA:3B:E3:12:41:9B   172.16.92.218    1688        dhcp-snooping   1     GigabitEthernet0/25
+  BA:DF:39:2C:9A:85   172.16.92.208    1768        dhcp-snooping   1     GigabitEthernet0/15
+  10:85:9B:DA:04:09   172.16.92.219    1765        dhcp-snooping   1     GigabitEthernet0/26
+  Total number of bindings: 27
+
+```
+
+**Help:** execute the command "show ip dhcp snooping binding"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show ip eigrp neighbors detail
+
+**Output:**
+```
+EIGRP-IPv4 Neighbors for AS(215)
+H   Address                 Interface              Hold Uptime   SRTT   RTO  Q  Seq
+                                                   (sec)         (ms)       Cnt Num
+1   81.211.127.255          Tu5                      13 18:52:46   55   330  0  1042408760
+   Version 25.0/2.0, Retrans: 1, Retries: 0, Prefixes: 952
+   Topology-ids from peer - 0
+0   83.151.157.254          Tu5                      12 6d08h      50   300  0  564418354
+   Version 25.0/2.0, Retrans: 6, Retries: 0, Prefixes: 952
+   Topology-ids from peer - 0
+Max Nbrs: 0, Current Nbrs: 0
+
+```
+
+**Help:** execute the command "show ip eigrp neighbors detail"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show ip ospf neighbor detail
+
+**Output:**
+```
+Neighbor 192.168.5.2, interface address 10.225.200.28
+    In the area 0 via interface GigabitEthernet1/0/0
+    Neighbor priority is 1, State is FULL, 6 state changes
+    DR is 10.225.200.28 BDR is 10.225.200.30
+    Options is 0x42
+    LLS Options is 0x1 (LR), last OOB-Resync 00:03:08 ago
+    Dead timer due in 00:00:36
+    Neighbor is up for 00:09:46
+   Index 1/1, retransmission queue length 0, number of retransmission 1
+    First 0x0(0)/0x0(0) Next 0x0(0)/0x0(0)
+    Last retransmission scan length is 1, maximum is 1
+    Last retransmission scan time is 0 msec, maximum is 0 msec
+
+Neighbor 10.0.0.2, interface address 10.0.0.2
+    In the area 0 via interface FastEthernet0/0
+    Neighbor priority is 1, State is FULL, 6 state changes
+    DR is 10.0.0.1 BDR is 10.0.0.2
+    Options is 0x52
+    Dead timer due in 00:00:39
+    Neighbor is up for 00:03:15
+    Index 1/1, retransmission queue length 0, number of retransmission 1
+    First 0x0(0)/0x0(0) Next 0x0(0)/0x0(0)
+    Last retransmission scan length is 1, maximum is 1
+    Last retransmission scan time is 0 msec, maximum is 0 msec
+
+```
+
+**Help:** execute the command "show ip ospf neighbor detail"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show license status
+
+**Output:**
+```
+Smart Licensing is ENABLED
+
+Utility:
+  Status: DISABLED
+
+Data Privacy:
+  Sending Hostname: yes
+    Callhome hostname privacy: DISABLED
+    Smart Licensing hostname privacy: DISABLED
+  Version privacy: DISABLED
+
+Transport:
+  Type: Callhome
+
+Registration:
+  Status: REGISTERED
+  Smart Account: ACME Corporation
+  Virtual Account: Wile E. Coyote
+  Export-Controlled Functionality: ALLOWED
+  Initial Registration: SUCCEEDED on Aug 22 18:58:03 2022 UTC
+  Last Renewal Attempt: None
+  Next Renewal Attempt: Feb 18 18:58:03 2023 UTC
+  Registration Expires: Aug 22 18:52:49 2023 UTC
+
+License Authorization: 
+  Status: OUT OF COMPLIANCE on Aug 22 18:58:17 2022 UTC
+  Last Communication Attempt: SUCCEEDED on Aug 22 18:58:17 2022 UTC
+  Next Communication Attempt: Aug 23 06:58:17 2022 UTC
+  Communication Deadline: Nov 20 18:53:16 2022 UTC
+
+Export Authorization Key:
+  Features Authorized:
+    <none>
+
+```
+
+**Help:** execute the command "show license status"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show mpls l2transport vc
+
+**Output:**
+```
+Local intf     Local circuit      Dest address    VC ID      Status
+-------------  ------------------ --------------- ---------- ----------
+Se5/0          FR DLCI 55         10.0.0.1        55         UP
+AT4/0          ATM AAL5 0/100     10.0.0.1        100        UP
+AT4/0.300      ATM AAL5 0/300     10.0.0.1        300        UP
+
+```
+
+**Help:** execute the command "show mpls l2transport vc"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show platform
+
+**Output:**
+```
+Switch  Ports    Model                Serial No.   MAC address     Hw Ver.       Sw Ver.
+------  -----   ---------             -----------  --------------  -------       --------
+ 1       65     C9300-48P             J111111111a  f000.f000.f000  V03           16.12.4
+ 2       65     C9300-48P             J222222222b  f000.f000.f001  V03           16.12.4
+
+```
+
+**Help:** execute the command "show platform"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show policy-map
+
+**Output:**
+```
+  Policy Map vpn-bandwidths
+    Class internet-private
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy internet-private_class
+    Class systems-m2m
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy systems-m2m_class
+    Class internal-office
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy internal-office_class
+    Class db-net-lst
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy db-net-lst_class
+    Class db-systems-abc
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy db-systems-abc_class
+    Class iot-systems
+      bandwidth remaining ratio 5 account user-defined 4
+      service-policy iot-systems_class
+    Class class-default
+      bandwidth remaining ratio 6 account user-defined 4
+      service-policy db-systems-net_class
+
+  Policy Map db-systems-abc_class
+    Class premium
+      bandwidth remaining ratio 10 account user-defined 1
+      queue-limit 50 ms
+    Class classic
+      bandwidth remaining ratio 20 account user-defined 2
+      queue-limit 50 ms
+    Class class-default
+      bandwidth remaining ratio 60 account user-defined 3
+      queue-limit 50 ms
+
+```
+
+**Help:** execute the command "show policy-map"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show power inline
+
+**Output:**
+```
+
+Module   Available     Used     Remaining
+          (Watts)     (Watts)    (Watts)
+------   ---------   --------   ---------
+1           740.0      330.0       410.0
+Interface Admin  Oper       Power   Device              Class Max
+                            (Watts)
+--------- ------ ---------- ------- ------------------- ----- ----
+Gi1/0/1   auto   on         30.0    AIR-AP1562I-E-K9    4     30.0
+Gi1/0/2   auto   on         30.0    AIR-AP1562I-E-K9    4     30.0
+Gi1/0/3   auto   on         30.0    AIR-AP1562I-E-K9    4     30.0
+Gi1/0/4   auto   off        0.0    
+Gi1/0/5   auto   faulty     0.0     n/a                 n/a   30.0
+Gi1/0/10  auto   on         23.2    C9120AXE-E          4     30.0
+Gi1/0/11  auto   on         30.0    AIR-AP1562I-E-K9    4     30.0
+Gi1/0/12  auto   off        0.0     n/a                 n/a   30.0
+Gi1/0/13  auto   off        0.0     n/a                 n/a   30.0
+--------- ------ ---------- ---------- ---------- ------ -----
+Totals:          11   on    330.0
+
+
+```
+
+**Help:** execute the command "show power inline"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show power used
+
+**Output:**
+```
+system power used =      2255.76 Watts (43.38 Amps @ 52V)
+
+```
+
+**Help:** execute the command "show power used"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show running-config interface
+
+**Output:**
+```
+Building configuration...
+
+Current configuration : 440 bytes
+!
+interface GigabitEthernet2/0/4.223415
+ description DISTRIBUTION  | 2048K
+ bandwidth 2048
+ encapsulation dot1Q 2234 second-dot1q 15
+ vrf forwarding CLIENT_VOIP:1234
+ ip address 10.30.33.161 255.255.255.252
+ no ip proxy-arp
+ ip verify unicast source reachable-via rx allow-default allow-self-ping
+ service-policy input VIPSIP_POLICY_2048_V1
+ service-policy output VIPSIP_POLICY_2048_OUT
+!
+interface GigabitEthernet2/0/4.223427
+ description PEOPLE | 100M
+ bandwidth 100000
+ encapsulation dot1Q 2234 second-dot1q 27
+ vrf forwarding CLIENT_VOIP:1234
+ ip address 10.53.8.241 255.255.255.252
+ no ip proxy-arp
+ ip verify unicast source reachable-via rx allow-default allow-self-ping
+ service-policy input DATA_POLICY_100M_V1
+ service-policy output DATA_POLICY_100M_OUT
+!
+interface GigabitEthernet2/0/4.223436
+ description AVENIDA | 100M
+ bandwidth 2048
+ encapsulation dot1Q 2234 second-dot1q 36
+ vrf forwarding CLIENT_VOIP:1234
+ ip address 10.39.246.29 255.255.255.252
+ no ip proxy-arp
+ ip verify unicast source reachable-via rx allow-default allow-self-ping
+ ip access-group oACL out
+ ip access-group iACL in
+ service-policy input VIPSIP_POLICY_2048_V1
+ service-policy output VIPSIP_POLICY_2048_OUT
+!
+interface GigabitEthernet2/0/4.223449
+ description MONTE EVEREST | 1500K
+ bandwidth 2048
+ encapsulation dot1Q 2234 second-dot1q 49
+ vrf forwarding CLIENT_VOIP:1234
+ ip address 10.30.33.41 255.255.255.252
+ no ip proxy-arp
+ ip verify unicast source reachable-via tx allow-default allow-self-ping
+ ip access-group iACL in
+ ip access-group ACL_OUTPUT out
+ service-policy input VIPSIP_POLICY_2048_V1
+ service-policy output VIPSIP_POLICY_2048_OUT
+!
+interface GigabitEthernet2/0/4.223478
+ description TEST PASS| 100M
+ mtu 9096
+ bandwidth 1000
+ encapsulation dot1Q 2234 second-dot1q 1011
+ ip vrf forwarding CLIENT_VOIP:1234
+ ip address 10.39.18.217 255.255.255.252
+ ipv6 address FE80:A8::2DA::1689/126
+ ip flow monitor IPV4_MONITOR_MAP sampler FNF_SAMPLER_MAP input
+ no ip proxy-arp
+ no negotiation
+ ip verify unicast source reachable-via rx allow-default allow-self-ping
+ ip access-group ACL_INPUT in
+ service-policy input VIPSIP_POLICY_1000_V1
+ service-policy output VIPSIP_POLICY_1000_OUT
+!
+interface GigabitEthernet2/0/4.22341020
+ description BLUE | 800K
+ mtu 1546
+ bandwidth 800
+ encapsulation dot1Q 2234 second-dot1q 1020
+ vrf forwarding CLIENT_VOIP:1234
+ ip flow monitor IPV4_MONITOR_MAP sampler FNF_SAMPLER_MAP input
+ ip address 10.30.33.197 255.255.255.252
+ no ip proxy-arp
+ ip verify unicast source reachable-via rx allow-default allow-self-ping
+ ip access-group oACL out
+ service-policy input VIPSIP_POLICY_800_V1
+ service-policy output VIPSIP_POLICY_800_OUT
+!
+
+```
+
+**Help:** execute the command "show running-config interface"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show sdwan bfd sessions table
+
+**Output:**
+```
+                                     SRC    DST                   SITE   LOCAL                      DETECT      TX
+SRC IP       DST IP           PROTO  PORT   PORT   SYSTEM IP      ID     COLOR     COLOR     STATE  MULTIPLIER  INTERVAL  UPTIME       TRANSITIONS
+----------------------------------------------------------------------------------------------------------------------------------------------------
+10.11.22.4   44.117.23.0      ipsec  12346  12346  10.9.255.1     65222  gold      gold      up     7           1000      17:00:15:23  4
+10.11.22.36  10.2.242.36      ipsec  12346  12346  10.9.255.1     65222  private6  private6  up     7           1000      2:06:48:29   64
+10.11.22.4   30.114.33.32     ipsec  12346  12346  10.9.255.6     65222  gold      silver    up     7           1000      17:00:15:23  5
+10.11.22.36  10.2.242.37      ipsec  12346  12346  10.9.255.6     65222  private6  private6  up     7           1000      17:00:15:23  2
+10.11.22.4   25.117.111.208   ipsec  12346  12346  10.66.255.1    65211  gold      gold      up     7           1000      17:00:15:23  2
+10.11.22.36  10.51.242.36     ipsec  12346  12346  10.66.255.1    65211  private6  private6  down   7           1000      NA           0
+10.11.22.4   51.142.56.212    ipsec  12346  12386  10.94.2.247    145    gold      gold      up     7           1000      17:00:15:23  1
+10.11.22.4   17.69.229.192    ipsec  12346  12386  10.94.3.247    305    gold      gold      up     7           1000      17:00:15:23  1
+10.11.22.4   242.135.190.254  ipsec  12346  12386  172.47.255.1   65003  gold      silver    up     7           1000      17:00:15:23  24
+10.11.22.4   237.111.137.218  ipsec  12346  12346  172.47.255.1   65003  gold      gold      up     7           1000      17:00:15:23  10
+10.11.22.4   84.169.24.206    ipsec  12346  12386  172.47.255.6   65003  gold      gold      up     7           1000      17:00:15:23  6
+10.11.22.4   242.105.174.58   ipsec  12346  12386  172.47.255.6   65003  gold      silver    up     7           1000      17:00:15:23  2
+```
+
+**Help:** execute the command "show sdwan bfd sessions table"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show sdwan bfd summary
+
+**Output:**
+```
+sessions-total         24
+sessions-up            23
+sessions-max           25
+sessions-flap          444
+poll-interval          123400
+
+```
+
+**Help:** execute the command "show sdwan bfd summary"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show sdwan control connections
+
+**Output:**
+```
+                                                                                       PEER                                          PEER                                          CONTROLLER 
+PEER    PEER PEER            SITE       DOMAIN PEER                                    PRIV  PEER                                    PUB                                           GROUP      
+TYPE    PROT SYSTEM IP       ID         ID     PRIVATE IP                              PORT  PUBLIC IP                               PORT  ORGANIZATION            LOCAL COLOR     PROXY STATE UPTIME      ID         
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+vsmart  dtls 10.14.2.250     102        1      10.14.2.71                              12346 21.254.56.204                           12346 network-SDWAN           gold            No    up     110:18:17:060           
+vsmart  dtls 10.14.3.250     202        1      10.14.3.70                              12346 30.238.57.220                           12346 network-SDWAN           gold            No    up     59:12:26:430           
+vbond   dtls 0.0.0.0         0          0      24.254.21.185                           12346 24.254.21.185                           12346 network-SDWAN           gold            -     up     110:18:34:340           
+vmanage dtls 10.14.2.248     100        0      10.14.2.70                              12346 40.117.123.18                           12346 network-SDWAN           gold            No    up     110:18:39:240   
+```
+
+**Help:** execute the command "show sdwan control connections"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show sdwan omp peers
+
+**Output:**
+```
+R -> routes received
+I -> routes installed
+S -> routes sent
+
+TENANT                             DOMAIN    OVERLAY   SITE      REGION
+ID        PEER             TYPE    ID        ID        ID        ID        STATE    UPTIME           R/I/S
+-----------------------------------------------------------------------------------------------------------------
+0         10.94.2.240      vsmart  1         1         142       None      up       16:23:52:59      520/383/30
+0         10.94.3.240      vsmart  1         1         242       None      up       16:23:52:59      520/0/30
+```
+
+**Help:** execute the command "show sdwan omp peers"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show sdwan tunnel statistics table
+
+**Output:**
+```
+                                                                                                                                                       TCP
+TUNNEL                                  SOURCE  DEST                  LOCAL     REMOTE    TUNNEL                                                      MSS                                                                                                                                                     
+PROTOCOL  SOURCE IP    DEST IP          PORT    PORT   SYSTEM IP      COLOR     COLOR     MTU     tx-pkts    tx-octets     rx-pkts     rx-octets      ADJUST  ipv6-tx-pkts  ipv6-tx-octets  ipv6-rx-pkts  ipv6-rx-octets  tx-ipv4-mcast-pkts  tx-ipv4-mcast-octets  rx-ipv4-mcast-pkts  rx-ipv4-mcast-octets  
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ipsec     10.11.42.4   13.69.209.192    12346   12386  10.94.3.247    gold      gold      1438    3675069    394034058     3633540     441945296      1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.0.90.144      12346   12346  172.19.215.21  gold      gold      1438    60181998   33872433281   50457920    18667139551    1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.0.90.145      12346   65088  172.19.215.26  gold      gold      1438    51559237   35211660410   49788888    18447910988    1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.117.33.0      12346   12346  10.21.55.1     gold      gold      1438    524507811  275129936987  658493052   523115960007   1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.117.33.32     12346   12346  10.21.55.6     gold      silver    1438    893005796  406705382612  739625917   614172474866   1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.117.210.152   12346   12346  172.29.155.26  gold      silver    1438    56613126   30012090793   51120016    17386139057    1358    0             0               0             0               0                   0                     0                   0                     
+ipsec     10.11.42.4   20.117.210.153   12346   12386  172.29.155.21  gold      silver    1438    50210316   27862783665   51447748    18414059862    1358    0             0               0             0               0                   0                     0                   0                                        
+ipsec     10.11.42.36  10.21.42.36     12346   12346  10.21.55.1     private6  private6  1438    439400369  213633937560  1379033146  1252855204172  1358    0             0               0             0               0                   0                     0                   0                     
+
+```
+
+**Help:** execute the command "show sdwan tunnel statistics table"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show spanning-tree root
+
+**Output:**
+```
+                                        Root    Hello Max Fwd
+Vlan                   Root ID          Cost    Time  Age Dly  Root Port
+---------------- -------------------- --------- ----- --- ---  ------------
+VLAN0001         11175 5c6e.f0a7.a0b0         0    2   20  15                  
+VLAN0002         11185 5c6e.f0a7.a0b0         0    2   20  15                  
+VLAN0003         11195 5c6e.f0a7.a0b0         0    2   20  15  Po34
+
+```
+
+**Help:** execute the command "show spanning-tree root"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show stack-power
+
+**Output:**
+```
+    Power Stack                      Stack   Stack    Total   Rsvd    Alloc   Sw_Avail Num  Num
+    Name                             Mode    Topolgy  Pwr(W)  Pwr(W)  Pwr(W)   Pwr(W)  SW   PS
+    --------------------             ------  -------  ------  ------  ------  ------  ----- -----
+    Powerstack-1                     SP-PS   Stndaln  1430    0       340     1090      1    2   
+
+
+```
+
+**Help:** execute the command "show stack-power"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show switch virtual
+
+**Output:**
+```
+Executing the command on VSS member switch role = VSS Active, id = 1
+ 
+ 
+Switch mode                  : Virtual Switch
+Virtual switch domain number : 100
+Local switch number          : 1
+Local switch operational role: Virtual Switch Active
+Peer switch number           : 2
+Peer switch operational role : Virtual Switch Standby
+ 
+Executing the command on VSS member switch role = VSS Standby, id = 2
+ 
+ 
+Switch mode                  : Virtual Switch
+Virtual switch domain number : 100
+Local switch number          : 2
+Local switch operational role: Virtual Switch Standby
+Peer switch number           : 1
+Peer switch operational role : Virtual Switch Active
+```
+
+**Help:** execute the command "show switch virtual"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show users
+
+**Output:**
+```
+    Line       User       Host(s)              Idle       Location
+* 10 vty 0     arm        idle                 00:00:00   1.2.3.4
+
+  Interface    User               Mode         Idle     Peer Address
+
+```
+
+**Help:** execute the command "show users"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show vlan group
+
+**Output:**
+```
+vlan group VLAN_NAME_1 : 1
+vlan group VLAN2 : 2
+vlan group VLAN_TEST_123 : 123
+vlan group MULTI_VLAN_TEST_1 : 5, 66
+vlan group MULTI_VLAN_TEST_2 : 761-763, 197, 200, 208
+```
+
+**Help:** execute the command "show vlan group"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show wireless tag policy summary
+
+**Output:**
+```
+
+Number of Policy Tags: 10
+
+Policy Tag Name                   Description
+------------------------------------------------------------------------
+PT_VIP                            PT_VIP
+PT_Test                           PT_Test
+PT_Mgmt
+PT_Media                          PT_Media
+PT_Default                        PT_Default
+PT_Extra
+PT_Hallway                        PT_Hallway
+default-policy-tag                default policy-tag
+
+```
+
+**Help:** execute the command "show wireless tag policy summary"
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### show privilege
+
+**Output:**
+```
+Current privilege level is 15
+
+```
+
+**Help:** Execute the command show privilege. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+

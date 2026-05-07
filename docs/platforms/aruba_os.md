@@ -5,16 +5,11 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
 
-**Output:**
-```
-null
-```
+**Output:** None
 
 **Help:** enter enable mode
 
@@ -165,11 +160,11 @@ cluster (cluster role): U-UAC, A-AAC, sU-Standby UAC, sA-Standby AAC
 **Output:**
 ```
 Interface                   IP Address / IP Netmask        Admin   Protocol
- vlan 93                    162.25.53.4 / 255.255.255.192   up      up
-vlan 1                      unassigned / unassigned        up      up
-vlan 69                    162.25.53.9 / 255.255.255.192   up      up
-vlan 999                 162.21.33.196 / 255.255.255.240   up      up
-loopback                    unassigned / unassigned        up      up
+ vlan 93                    162.25.53.4 / 255.255.255.192   up      up  
+vlan 1                      unassigned / unassigned        up      up  
+vlan 69                    162.25.53.9 / 255.255.255.192   up      up  
+vlan 999                 162.21.33.196 / 255.255.255.240   up      up  
+loopback                    unassigned / unassigned        up      up  
 
 
 ```
@@ -242,3 +237,4 @@ loopback                    [  up/up  ]
 **Prompt:**
 - aruba_os>
 - aruba_os#
+

@@ -5,8 +5,6 @@
     This is automatically generated. In case of any issues,
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
-## Platforms:
-
 ## Commands
 
 ### enable
@@ -16,668 +14,4357 @@
 **Help:** enter enable mode
 
 **Prompt:**
-- {base_prompt}>
+- oneaccess_oneos>
 
 ### term len 0
 
-**Output:**
-```
-''
-```
+**Output:** None
 
 **Help:** disable paging
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### screen-width 512
 
 **Output:**
 ```
-'error: unknown command'
+error: unknown command
 ```
 
 **Help:** set terminal width (ONEOS6, returns error to trigger ONEOS5 fallback)
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### stty columns 255
 
-**Output:**
-```
-''
-```
+**Output:** None
 
 **Help:** set terminal width (ONEOS5 fallback)
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### cat bsa bsaboot.inf
 
 **Output:**
 ```
-'flash:/BSA/binaries/OneOs\nflash:/BSA/config/bsaStart.cfg\n'
+flash:/BSA/binaries/OneOs
+flash:/BSA/config/bsaStart.cfg
+
 ```
 
 **Help:** execute the command "cat bsa bsaboot.inf"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### hostname
 
 **Output:**
 ```
-'dops-lab-02\n'
+dops-lab-02
+
 ```
 
 **Help:** execute the command "hostname"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### ls
 
 **Output:**
 ```
-'Listing the directory /BSA/binaries\n.                                       0\n..                                      0\nOneOs                            15896363\nONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593\n'
+Listing the directory /BSA/binaries
+.                                       0
+..                                      0
+OneOs                            15896363
+ONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593
+
 ```
 
 **Help:** execute the command "ls"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show cellular-radio context
 
 **Output:**
 ```
-' Context 1\n =========\n\n  Cellular controller: 0\n  Internal context Id: 1\n  Interface          : Virtual-Ethernet 1, USB-Path: /sys/class/net/wwan0\n  Cellular profile   : 1\n\n  rxSpeed/max                    : 0/0\n  txSpeed/max                    : 0/0\n\n  Call manager state             : _connected\n  Mtu                            : 1500\n  Data bearer technology         : LTE\n\n  Ipv4 connection\n   Address                       : 101.194.59.47\n   Subnet                        : 255.255.255.224\n   Gateway                       : 101.194.59.48\n   Primary Dns                   : 2.2.2.90\n   Secondary Dns                 : 2.2.2.94\n   Packet data connection        : Connected\n   Last call end reason          : <not available>\n   Data statistics               : \n    Tx packets                   : 603031\n    Rx packets                   : 572105\n    Tx packet errors             : 0\n    Rx packet errors             : 0\n    Tx packet overflows          : 0\n    Rx packet overflows          : 0\n    Tx bytes                     : 83925324\n    Rx bytes                     : 87179616\n\n  Ipv6 connection\n   Address                       : <not available>\n   Gateway                       : <not available>\n   Primary Dns                   : <not available>\n   Secondary Dns                 : <not available>\n   Packet data connection        : <not available>\n   Last call end reason          : <not available>\n   Data statistics               : <not available>\n'
+ Context 1
+ =========
+
+  Cellular controller: 0
+  Internal context Id: 1
+  Interface          : Virtual-Ethernet 1, USB-Path: /sys/class/net/wwan0
+  Cellular profile   : 1
+
+  rxSpeed/max                    : 0/0
+  txSpeed/max                    : 0/0
+
+  Call manager state             : _connected
+  Mtu                            : 1500
+  Data bearer technology         : LTE
+
+  Ipv4 connection
+   Address                       : 101.194.59.47
+   Subnet                        : 255.255.255.224
+   Gateway                       : 101.194.59.48
+   Primary Dns                   : 2.2.2.90
+   Secondary Dns                 : 2.2.2.94
+   Packet data connection        : Connected
+   Last call end reason          : <not available>
+   Data statistics               : 
+    Tx packets                   : 603031
+    Rx packets                   : 572105
+    Tx packet errors             : 0
+    Rx packet errors             : 0
+    Tx packet overflows          : 0
+    Rx packet overflows          : 0
+    Tx bytes                     : 83925324
+    Rx bytes                     : 87179616
+
+  Ipv6 connection
+   Address                       : <not available>
+   Gateway                       : <not available>
+   Primary Dns                   : <not available>
+   Secondary Dns                 : <not available>
+   Packet data connection        : <not available>
+   Last call end reason          : <not available>
+   Data statistics               : <not available>
+
 ```
 
 **Help:** execute the command "show cellular-radio context"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show cellular-radio equipment
 
 **Output:**
 ```
-' Cellular Radio Modem Information\n  Manufacturer identification                          : Sierra Wireless, Incorporated\n  Equipment information                                : MC7455\n  Boot revision identification                         : SWI9X30C_02.20.03.00 r6691 CARMD-EV-FRMWR2 2016/06/30 10:54:05\n  Revision identification                              : SWI9X30C_02.20.03.00 r6691 CARMD-EV-FRMWR2 2016/06/30 10:54:05\n  Equipment information (IMEI)                         : 359022065533630\n\n SIM Card Information\n  SIM card status                                      : SIM card is present\n  SIM International Mobile Subscriber Identity IMSI    : 211104500225982\n  Integrated Circuit Card ID                           : 89320269140114098260\n\n PIN Information\n  PIN code status                                      : entered OK \n'
+ Cellular Radio Modem Information
+  Manufacturer identification                          : Sierra Wireless, Incorporated
+  Equipment information                                : MC7455
+  Boot revision identification                         : SWI9X30C_02.20.03.00 r6691 CARMD-EV-FRMWR2 2016/06/30 10:54:05
+  Revision identification                              : SWI9X30C_02.20.03.00 r6691 CARMD-EV-FRMWR2 2016/06/30 10:54:05
+  Equipment information (IMEI)                         : 359022065533630
+
+ SIM Card Information
+  SIM card status                                      : SIM card is present
+  SIM International Mobile Subscriber Identity IMSI    : 211104500225982
+  Integrated Circuit Card ID                           : 89320269140114098260
+
+ PIN Information
+  PIN code status                                      : entered OK 
+
 ```
 
 **Help:** execute the command "show cellular-radio equipment"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show cellular-radio network
 
 **Output:**
 ```
-' Current selected operator                            :  Dummy Provider\n Signal strength                                      :  Good\n Total Ec/Io                                          :  <not available>\n RSSI                                                 :  -58 dBm\n RSRQ                                                 :  -9 dB\n RSRP                                                 :  -91 dBm\n SNR                                                  :  23 dB\n Current radio access technology                      :  4G\n Circuit-switched register state                      :  Registered\n Packet-switched attach state                         :  Attached\n\nStatistics: \n Reset on loss of GPRS registration                   :  1\n Reset on failed initial registration                 :  0\n Hardware reset of modem                              :  0\n Unknown reset of modem                               :  505\n Toggle w_disable of modem                            :  0\n\nDetails: \n Location Area Code (LAC)                             :  <not available>\n Cell ID                                              :  18224898\n Tracking Area Code (TAC)                             :  18300\n Current Public Land Mobile Network (PLMN = MCC+MNC)  :  20610\n'
+ Current selected operator                            :  Dummy Provider
+ Signal strength                                      :  Good
+ Total Ec/Io                                          :  <not available>
+ RSSI                                                 :  -58 dBm
+ RSRQ                                                 :  -9 dB
+ RSRP                                                 :  -91 dBm
+ SNR                                                  :  23 dB
+ Current radio access technology                      :  4G
+ Circuit-switched register state                      :  Registered
+ Packet-switched attach state                         :  Attached
+
+Statistics: 
+ Reset on loss of GPRS registration                   :  1
+ Reset on failed initial registration                 :  0
+ Hardware reset of modem                              :  0
+ Unknown reset of modem                               :  505
+ Toggle w_disable of modem                            :  0
+
+Details: 
+ Location Area Code (LAC)                             :  <not available>
+ Cell ID                                              :  18224898
+ Tracking Area Code (TAC)                             :  18300
+ Current Public Land Mobile Network (PLMN = MCC+MNC)  :  20610
+
 ```
 
 **Help:** execute the command "show cellular-radio network"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show helpers
 
 **Output:**
 ```
-'ip forward-protocol udp 137\nip forward-protocol udp 138\nip forward-protocol udp 67\nip forward-protocol udp 68\nip forward-protocol udp 69\nip forward-protocol udp 37\nip forward-protocol udp 42\nip forward-protocol udp 49\nip forward-protocol udp 53\nBvi 1: 0 broadcasts forwarded\n  10.1.0.151  10.2.0.20  10.88.1.11\nBvi 2: 0 broadcasts forwarded\n  10.2.0.20  10.1.0.151  10.88.1.11\nBvi 3: 0 broadcasts forwarded\n  10.1.0.151  10.2.0.20  10.88.1.11\n'
+ip forward-protocol udp 137
+ip forward-protocol udp 138
+ip forward-protocol udp 67
+ip forward-protocol udp 68
+ip forward-protocol udp 69
+ip forward-protocol udp 37
+ip forward-protocol udp 42
+ip forward-protocol udp 49
+ip forward-protocol udp 53
+Bvi 1: 0 broadcasts forwarded
+  10.1.0.151  10.2.0.20  10.88.1.11
+Bvi 2: 0 broadcasts forwarded
+  10.2.0.20  10.1.0.151  10.88.1.11
+Bvi 3: 0 broadcasts forwarded
+  10.1.0.151  10.2.0.20  10.88.1.11
+
 ```
 
 **Help:** execute the command "show helpers"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show interfaces
 
 **Output:**
 ```
-"GigabitEthernet 0/0 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 111\n  Promiscuous mode active\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Up-time 396d21h16m, status change count 3\n  Hardware address is 70:fc:8c:02:bb:4f, ARP timeout 7200 sec\n  Auto-negotiation, full-duplex, flowcontrol disabled\n  Line speed 1000000 kbps\n  Mean input/output rate 504776/397392 bits/s, 226/198 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.050/0.039 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 1\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  Reliability: 255/255\n  IN:  4578563266 packets, 2133875155484 bytes, 0 queue drops\n       735617600 broadcasts, 136187244 multicasts, 0 errors, 164 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 3838465524 packets, 2752454327149 bytes, 3357 queue drops\n       20941718 broadcasts, 0 multicasts, 0 errors, 1 discards, 0 collisions\nGigabitEthernet 0/1 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 112\n  Promiscuous mode active\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Up-time 11d21h45m, status change count 31\n  Hardware address is 70:fc:8c:06:bb:4f, ARP timeout 7200 sec\n  Auto-negotiation, full-duplex, flowcontrol disabled\n  Line speed 1000000 kbps\n  Mean input/output rate 243736/256456 bits/s, 152/114 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.024/0.025 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 2\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  Reliability: 255/255\n  IN:  1125009328 packets, 189632230943 bytes, 0 queue drops\n       745390714 broadcasts, 123018268 multicasts, 0 errors, 887632010 discards, 0 mac acl discards\n       887631923 unknown protocols\n  OUT: 351229701 packets, 302436379177 bytes, 23658 queue drops\n       2298782 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions\nGigabitEthernet 0/2 is up, line protocol is down\n  Flags: (0x8023) BROADCAST MULTICAST ARP, interface index is 113\n  Promiscuous mode active\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Down-time 448d10h36m, status change count 0\n  Hardware address is 70:fc:8c:0a:bb:4f, ARP timeout 7200 sec\n  Line speed unknown\n  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 1\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  Reliability: 255/255\n  IN:  0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols            \n  OUT: 0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions\nGigabitEthernet 0/3 is up, line protocol is down\n  Flags: (0x8023) BROADCAST MULTICAST ARP, interface index is 114\n  Promiscuous mode active\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Down-time 448d10h36m, status change count 0\n  Hardware address is 70:fc:8c:0e:bb:4f, ARP timeout 7200 sec\n  Line speed unknown\n  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 1\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  Reliability: 255/255\n  IN:  0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions\nFastEthernet 1/0 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 106\n  Description: *** WAN INTERFACE ***\n  Encapsulation: Ethernet v2, MTU 1546 bytes\n  Up-time 448d10h36m, status change count 1\n  Hardware address is 70:fc:8c:12:bb:4f, ARP timeout 7200 sec\n  Auto-negotiation, full-duplex, flowcontrol enabled\n  Line speed 100000 kbps\n  Media-type rj45\n  Mean input/output rate 229312/237176 bits/s, 104/102 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.229/0.237 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: cbq\n  Reliability: 255/255\n  IN:  3777818556 packets, 2813130486707 bytes, 0 queue drops\n       608769 broadcasts, 0 multicasts, 0 errors, 608769 discards, 0 mac acl discards\n       608769 unknown protocols\n  OUT: 3537518750 packets, 1904299986411 bytes, 1944226 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 114820 discards, 0 collisions\nFastEthernet 1/0.10 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 22017\n  Description: *** VDSL2 SHARED VLAN ***\n  Encapsulation: 802.1Q Virtual LAN, VLAN ID 10, MTU 1500 bytes\n  Up-time 448d10h36m, status change count 1\n  Hardware address is 70:fc:8c:12:bb:4f, ARP timeout 7200 sec\n  Line speed 100000 kbps\n  Mean input/output rate 229312/237176 bits/s, 104/102 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.229/0.237 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  Reliability: 255/255\n  IN:  3777209791 packets, 2812914388764 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 3539577808 packets, 1907203054251 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 3 errors, 0 discards, 0 collisions\nDialer 1 is up, line protocol is up\n  Flags: (0x90f1) POINT-TO-POINT MULTICAST, interface index is 11101\n  Description: *** VT096413 - GS99999941512 - IP-VPN - ['VDSL2 SHARED VLAN'] - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK\n  Encapsulation: Point-to-Point Protocol, MTU 1492 bytes\n  Up-time 196d20h26m, status change count 7\n  Internet address is 94.105.238.194/32, destination address is 94.105.238.193\n  Line speed 100000 kbps, bandwidth limit 70000 kbps\n  Mean input/output rate 240208/217472 bits/s, 104/102 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.240/0.310 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: fifo+shaper, output queue length/depth 0/126\n  Shaper: packets dequeued -763131925, burst(current/max) 874602/875000\n  Reliability: 255/255\n  IN:  3769467815 packets, 2899812744256 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 3531835372 packets, 1821912521847 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards\nLoopback 0 is up, line protocol is up\n  Flags: (0x80e9) LOOPBACK MULTICAST, interface index is 9902\n  MTU 32768 bytes\n  Up-time 448d10h36m, status change count 0\n  Internet address is 127.0.0.1/32\n  IPv6 address is ::1/128\n  IPv6 address is fe80::1/64\n  Line speed unknown\n  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  IN:  1749 packets, 164332 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 1749 packets, 164332 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards\nLoopback 1 is up, line protocol is up\n  Flags: (0x80e9) LOOPBACK MULTICAST, interface index is 9903\n  Firewall zone: management\n  Description: *** VT096413 - GS99999941512 ***\n  MTU 32768 bytes\n  Up-time 448d10h36m, status change count 0\n  Internet address is 94.105.25.111/32\n  Line speed unknown\n  Mean input/output rate 6280/6280 bits/s, 9/9 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  IN:  6346421 packets, 472102678 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols            \n  OUT: 6346427 packets, 472103054 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards\nBvi 1 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 9501\n  Description: Connection to Customer LAN\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Up-time 396d21h16m, status change count 3\n  Hardware address is 70:fc:8c:02:bb:4f, ARP timeout 7200 sec\n  Internet address is 192.168.5.1/24, broadcast address is 192.168.5.255\n  Line speed 1000000 kbps\n  Mean input/output rate 504776/397352 bits/s, 226/198 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 1\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  IN:  4578208775 packets, 2133846516522 bytes, 0 queue drops\n       735617627 broadcasts, 136187246 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       683928098 unknown protocols\n  OUT: 3814474945 packets, 2750982891198 bytes, 0 queue drops\n       20941724 broadcasts, 0 multicasts, 1 errors, 22341208 discards\nBvi 55 is up, line protocol is up\n  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 9555\n  Encapsulation: Ethernet v2, MTU 1500 bytes\n  Up-time 11d21h45m, status change count 31\n  Hardware address is 70:fc:8c:06:bb:4f, ARP timeout 7200 sec\n  Internet address is 192.168.55.1/24, broadcast address is 192.168.55.255\n  Line speed 1000000 kbps\n  Mean input/output rate 186144/256456 bits/s, 113/114 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Bridged to group 2\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  IN:  237375069 packets, 58811387749 bytes, 0 queue drops\n       182857 broadcasts, 19575274 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       18243239 unknown protocols\n  OUT: 351253527 packets, 302442538460 bytes, 0 queue drops\n       2298786 broadcasts, 0 multicasts, 1 errors, 2496554 discards\nNull 0 is up, line protocol is up\n  Flags: (0x80e1) MULTICAST, interface index is 9901\n  MTU 32768 bytes\n  Up-time 448d10h36m, status change count 0\n  Line speed unknown\n  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)\n  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)\n  Congestion Management Dropped packets: RX:0, CPU:0, Total:0\n  Output queuing strategy: fifo, output queue length/depth 0/126\n  IN:  0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards\n       0 unknown protocols\n  OUT: 0 packets, 0 bytes, 0 queue drops\n       0 broadcasts, 0 multicasts, 0 errors, 0 discards\n"
+GigabitEthernet 0/0 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 111
+  Promiscuous mode active
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Up-time 396d21h16m, status change count 3
+  Hardware address is 70:fc:8c:02:bb:4f, ARP timeout 7200 sec
+  Auto-negotiation, full-duplex, flowcontrol disabled
+  Line speed 1000000 kbps
+  Mean input/output rate 504776/397392 bits/s, 226/198 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.050/0.039 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 1
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  Reliability: 255/255
+  IN:  4578563266 packets, 2133875155484 bytes, 0 queue drops
+       735617600 broadcasts, 136187244 multicasts, 0 errors, 164 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 3838465524 packets, 2752454327149 bytes, 3357 queue drops
+       20941718 broadcasts, 0 multicasts, 0 errors, 1 discards, 0 collisions
+GigabitEthernet 0/1 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 112
+  Promiscuous mode active
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Up-time 11d21h45m, status change count 31
+  Hardware address is 70:fc:8c:06:bb:4f, ARP timeout 7200 sec
+  Auto-negotiation, full-duplex, flowcontrol disabled
+  Line speed 1000000 kbps
+  Mean input/output rate 243736/256456 bits/s, 152/114 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.024/0.025 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 2
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  Reliability: 255/255
+  IN:  1125009328 packets, 189632230943 bytes, 0 queue drops
+       745390714 broadcasts, 123018268 multicasts, 0 errors, 887632010 discards, 0 mac acl discards
+       887631923 unknown protocols
+  OUT: 351229701 packets, 302436379177 bytes, 23658 queue drops
+       2298782 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions
+GigabitEthernet 0/2 is up, line protocol is down
+  Flags: (0x8023) BROADCAST MULTICAST ARP, interface index is 113
+  Promiscuous mode active
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Down-time 448d10h36m, status change count 0
+  Hardware address is 70:fc:8c:0a:bb:4f, ARP timeout 7200 sec
+  Line speed unknown
+  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 1
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  Reliability: 255/255
+  IN:  0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols            
+  OUT: 0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions
+GigabitEthernet 0/3 is up, line protocol is down
+  Flags: (0x8023) BROADCAST MULTICAST ARP, interface index is 114
+  Promiscuous mode active
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Down-time 448d10h36m, status change count 0
+  Hardware address is 70:fc:8c:0e:bb:4f, ARP timeout 7200 sec
+  Line speed unknown
+  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 1
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  Reliability: 255/255
+  IN:  0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 collisions
+FastEthernet 1/0 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 106
+  Description: *** WAN INTERFACE ***
+  Encapsulation: Ethernet v2, MTU 1546 bytes
+  Up-time 448d10h36m, status change count 1
+  Hardware address is 70:fc:8c:12:bb:4f, ARP timeout 7200 sec
+  Auto-negotiation, full-duplex, flowcontrol enabled
+  Line speed 100000 kbps
+  Media-type rj45
+  Mean input/output rate 229312/237176 bits/s, 104/102 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.229/0.237 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: cbq
+  Reliability: 255/255
+  IN:  3777818556 packets, 2813130486707 bytes, 0 queue drops
+       608769 broadcasts, 0 multicasts, 0 errors, 608769 discards, 0 mac acl discards
+       608769 unknown protocols
+  OUT: 3537518750 packets, 1904299986411 bytes, 1944226 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 114820 discards, 0 collisions
+FastEthernet 1/0.10 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 22017
+  Description: *** VDSL2 SHARED VLAN ***
+  Encapsulation: 802.1Q Virtual LAN, VLAN ID 10, MTU 1500 bytes
+  Up-time 448d10h36m, status change count 1
+  Hardware address is 70:fc:8c:12:bb:4f, ARP timeout 7200 sec
+  Line speed 100000 kbps
+  Mean input/output rate 229312/237176 bits/s, 104/102 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.229/0.237 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  Reliability: 255/255
+  IN:  3777209791 packets, 2812914388764 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 3539577808 packets, 1907203054251 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 3 errors, 0 discards, 0 collisions
+Dialer 1 is up, line protocol is up
+  Flags: (0x90f1) POINT-TO-POINT MULTICAST, interface index is 11101
+  Description: *** VT096413 - GS99999941512 - IP-VPN - ['VDSL2 SHARED VLAN'] - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK
+  Encapsulation: Point-to-Point Protocol, MTU 1492 bytes
+  Up-time 196d20h26m, status change count 7
+  Internet address is 94.105.238.194/32, destination address is 94.105.238.193
+  Line speed 100000 kbps, bandwidth limit 70000 kbps
+  Mean input/output rate 240208/217472 bits/s, 104/102 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.240/0.310 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: fifo+shaper, output queue length/depth 0/126
+  Shaper: packets dequeued -763131925, burst(current/max) 874602/875000
+  Reliability: 255/255
+  IN:  3769467815 packets, 2899812744256 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 3531835372 packets, 1821912521847 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards
+Loopback 0 is up, line protocol is up
+  Flags: (0x80e9) LOOPBACK MULTICAST, interface index is 9902
+  MTU 32768 bytes
+  Up-time 448d10h36m, status change count 0
+  Internet address is 127.0.0.1/32
+  IPv6 address is ::1/128
+  IPv6 address is fe80::1/64
+  Line speed unknown
+  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  IN:  1749 packets, 164332 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 1749 packets, 164332 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards
+Loopback 1 is up, line protocol is up
+  Flags: (0x80e9) LOOPBACK MULTICAST, interface index is 9903
+  Firewall zone: management
+  Description: *** VT096413 - GS99999941512 ***
+  MTU 32768 bytes
+  Up-time 448d10h36m, status change count 0
+  Internet address is 94.105.25.111/32
+  Line speed unknown
+  Mean input/output rate 6280/6280 bits/s, 9/9 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  IN:  6346421 packets, 472102678 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols            
+  OUT: 6346427 packets, 472103054 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards
+Bvi 1 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 9501
+  Description: Connection to Customer LAN
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Up-time 396d21h16m, status change count 3
+  Hardware address is 70:fc:8c:02:bb:4f, ARP timeout 7200 sec
+  Internet address is 192.168.5.1/24, broadcast address is 192.168.5.255
+  Line speed 1000000 kbps
+  Mean input/output rate 504776/397352 bits/s, 226/198 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 1
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  IN:  4578208775 packets, 2133846516522 bytes, 0 queue drops
+       735617627 broadcasts, 136187246 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       683928098 unknown protocols
+  OUT: 3814474945 packets, 2750982891198 bytes, 0 queue drops
+       20941724 broadcasts, 0 multicasts, 1 errors, 22341208 discards
+Bvi 55 is up, line protocol is up
+  Flags: (0x8063) BROADCAST MULTICAST ARP, interface index is 9555
+  Encapsulation: Ethernet v2, MTU 1500 bytes
+  Up-time 11d21h45m, status change count 31
+  Hardware address is 70:fc:8c:06:bb:4f, ARP timeout 7200 sec
+  Internet address is 192.168.55.1/24, broadcast address is 192.168.55.255
+  Line speed 1000000 kbps
+  Mean input/output rate 186144/256456 bits/s, 113/114 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Bridged to group 2
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  IN:  237375069 packets, 58811387749 bytes, 0 queue drops
+       182857 broadcasts, 19575274 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       18243239 unknown protocols
+  OUT: 351253527 packets, 302442538460 bytes, 0 queue drops
+       2298786 broadcasts, 0 multicasts, 1 errors, 2496554 discards
+Null 0 is up, line protocol is up
+  Flags: (0x80e1) MULTICAST, interface index is 9901
+  MTU 32768 bytes
+  Up-time 448d10h36m, status change count 0
+  Line speed unknown
+  Mean input/output rate 0/0 bits/s, 0/0 packets/s (over the last 4 seconds)
+  Mean input/output load percentage 0.000/0.000 percent (over the last 4 seconds)
+  Congestion Management Dropped packets: RX:0, CPU:0, Total:0
+  Output queuing strategy: fifo, output queue length/depth 0/126
+  IN:  0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards, 0 mac acl discards
+       0 unknown protocols
+  OUT: 0 packets, 0 bytes, 0 queue drops
+       0 broadcasts, 0 multicasts, 0 errors, 0 discards
+
 ```
 
 **Help:** execute the command "show interfaces"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip access-lists
 
 **Output:**
 ```
-'interface Bvi 20, inbound IP access list GUEST_WIFI_IN\n\nIP access list extended GRE-Tunnel21\npermit gre host 10.94.55.207 host 94.105.25.2 log (0 matches)\n\nIP access list extended GRE-Tunnel11\npermit gre host 10.94.55.207 host 94.105.25.9 log (0 matches)\n\nIP access list extended GUEST_WIFI_IN\ndeny any 10.0.0.0 0.255.255.255 (0 matches)\ndeny any 172.16.0.0 0.15.255.255 (0 matches)\ndeny any 192.168.0.0 0.0.255.255 (0 matches)\npermit any any (5164438 matches)\n\nIP access list standard 52\npermit 91.208.220.0 0.0.0.255 any (4519825 matches)\n\nIP access list extended MANAGEMENT_IN\npermit tcp 91.208.220.0 0.0.0.255 any eq ssh (2896 matches)\npermit tcp 91.208.220.0 0.0.0.255 any eq telnet (0 matches)\npermit tcp 94.104.18.0 0.0.1.255 any eq ssh (0 matches)\npermit tcp 94.104.18.0 0.0.1.255 any eq telnet (0 matches)\npermit tcp 192.4.21.0 0.0.0.255 any eq ssh (0 matches)\npermit tcp 192.4.21.0 0.0.0.255 any eq telnet (0 matches)\npermit tcp 192.4.91.0 0.0.0.255 any eq ssh (0 matches)\npermit tcp 192.4.91.0 0.0.0.255 any eq telnet (0 matches)\npermit tcp host 10.0.96.16 10.110.0.0 0.0.255.255 eq telnet (0 matches)\npermit tcp 192.0.2.0 0.0.0.255 any eq ssh (0 matches)\npermit tcp 192.0.2.0 0.0.0.255 any eq telnet (0 matches)\ndeny any any (0 matches)\n\nFor info on ACLs used by IPSEC, please refer to show crypto acl [detail <name>] command. \n'
+interface Bvi 20, inbound IP access list GUEST_WIFI_IN
+
+IP access list extended GRE-Tunnel21
+permit gre host 10.94.55.207 host 94.105.25.2 log (0 matches)
+
+IP access list extended GRE-Tunnel11
+permit gre host 10.94.55.207 host 94.105.25.9 log (0 matches)
+
+IP access list extended GUEST_WIFI_IN
+deny any 10.0.0.0 0.255.255.255 (0 matches)
+deny any 172.16.0.0 0.15.255.255 (0 matches)
+deny any 192.168.0.0 0.0.255.255 (0 matches)
+permit any any (5164438 matches)
+
+IP access list standard 52
+permit 91.208.220.0 0.0.0.255 any (4519825 matches)
+
+IP access list extended MANAGEMENT_IN
+permit tcp 91.208.220.0 0.0.0.255 any eq ssh (2896 matches)
+permit tcp 91.208.220.0 0.0.0.255 any eq telnet (0 matches)
+permit tcp 94.104.18.0 0.0.1.255 any eq ssh (0 matches)
+permit tcp 94.104.18.0 0.0.1.255 any eq telnet (0 matches)
+permit tcp 192.4.21.0 0.0.0.255 any eq ssh (0 matches)
+permit tcp 192.4.21.0 0.0.0.255 any eq telnet (0 matches)
+permit tcp 192.4.91.0 0.0.0.255 any eq ssh (0 matches)
+permit tcp 192.4.91.0 0.0.0.255 any eq telnet (0 matches)
+permit tcp host 10.0.96.16 10.110.0.0 0.0.255.255 eq telnet (0 matches)
+permit tcp 192.0.2.0 0.0.0.255 any eq ssh (0 matches)
+permit tcp 192.0.2.0 0.0.0.255 any eq telnet (0 matches)
+deny any any (0 matches)
+
+For info on ACLs used by IPSEC, please refer to show crypto acl [detail <name>] command. 
+
 ```
 
 **Help:** execute the command "show ip access-lists"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip as-path-access-list
 
 **Output:**
 ```
-'AS path access list 102\n    permit ^$\n'
+AS path access list 102
+    permit ^$
+
 ```
 
 **Help:** execute the command "show ip as-path-access-list"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip bgp summary
 
 **Output:**
 ```
-'BGP router identifier 194.5.12.148, local AS number 65000, vrf (null)\n6 BGP AS-PATH entries\n0 BGP community entries\n\nNeighbor        V     AS     MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd\n194.5.163.29   4      14737   13360   12237       34    0    0 4d05h57m       28\n\nTotal number of neighbors 1\n'
+BGP router identifier 194.5.12.148, local AS number 65000, vrf (null)
+6 BGP AS-PATH entries
+0 BGP community entries
+
+Neighbor        V     AS     MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+194.5.163.29   4      14737   13360   12237       34    0    0 4d05h57m       28
+
+Total number of neighbors 1
+
 ```
 
 **Help:** execute the command "show ip bgp summary"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip interface brief
 
 **Output:**
 ```
-'Interface              IP-Address      OK? Status                Protocol Description         \nGigabitEthernet 0/0       <unassigned>    YES up                    up      *** PBXPLUG 212 - BACKUP TEST - 94.105.1.119 ***\nGigabitEthernet 0/1       <unassigned>    YES up                    up      *** PBXPLUG 401 - BACKUP TEST - 94.105.34.2 ***\nGigabitEthernet 0/2       <unassigned>    YES up                    down    *IPERF*\nGigabitEthernet 0/3       <unassigned>    YES up                    down    \nFastEthernet 1/0          <unassigned>    YES up                    up      *** WAN INTERFACE ***\nFastEthernet 1/0.1        192.168.1.2     YES up                    up      *** management A-modem (modem ip = 192.168.1.1) ***\nFastEthernet 1/0.10       <unassigned>    YES up                    up      *** VT096910 - GS20170330107 - IP-VPN - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - Loopback503941 ***\nDialer 1                  94.105.163.30   YES up                    up      *** VT096910 - GS20170330107 - IP-VPN - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - Loopback503941\nDialer 2                  <unassigned>    NO  administratively down down    *** VT108085 - GS20190640686 - CI - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK 503899 ***\nDialer 3                  94.104.254.138  YES up                    up      *** DATA VDSL shared VLAN - GSID0004_MAIN - CI TEST - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK 500000***\nLoopback 0                127.0.0.1       YES up                    up      \nLoopback 1                94.105.12.148   YES up                    up      *** VT096910 - GS20170330107 ***\nLoopback 777              94.107.245.249  YES up                    up      \nBvi 10                    192.168.10.1    YES up                    up      *** VT108085 - GS20190640686 - CI ACCESS ***\nBvi 100                   192.168.100.1   YES up                    up      *** TEST MAARTEN - BACKUP SCRIPT PBXPLUG ***\nBvi 200                   94.105.16.129   YES up                    down    *IPERF*\ndot11radio 0/0.1          <unassigned>    YES up                    up      \ndot11radio 0/0.2          <unassigned>    YES up                    up      \nNull 0                    <unassigned>    YES up                    up      \ndot11radio 0/0            <unassigned>    YES up                    up      \n'
+Interface              IP-Address      OK? Status                Protocol Description         
+GigabitEthernet 0/0       <unassigned>    YES up                    up      *** PBXPLUG 212 - BACKUP TEST - 94.105.1.119 ***
+GigabitEthernet 0/1       <unassigned>    YES up                    up      *** PBXPLUG 401 - BACKUP TEST - 94.105.34.2 ***
+GigabitEthernet 0/2       <unassigned>    YES up                    down    *IPERF*
+GigabitEthernet 0/3       <unassigned>    YES up                    down    
+FastEthernet 1/0          <unassigned>    YES up                    up      *** WAN INTERFACE ***
+FastEthernet 1/0.1        192.168.1.2     YES up                    up      *** management A-modem (modem ip = 192.168.1.1) ***
+FastEthernet 1/0.10       <unassigned>    YES up                    up      *** VT096910 - GS20170330107 - IP-VPN - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - Loopback503941 ***
+Dialer 1                  94.105.163.30   YES up                    up      *** VT096910 - GS20170330107 - IP-VPN - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - Loopback503941
+Dialer 2                  <unassigned>    NO  administratively down down    *** VT108085 - GS20190640686 - CI - VDSL2 SHARED VLAN - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK 503899 ***
+Dialer 3                  94.104.254.138  YES up                    up      *** DATA VDSL shared VLAN - GSID0004_MAIN - CI TEST - NOS-EMLP-01/ANT-EMLP-01 - LOOPBACK 500000***
+Loopback 0                127.0.0.1       YES up                    up      
+Loopback 1                94.105.12.148   YES up                    up      *** VT096910 - GS20170330107 ***
+Loopback 777              94.107.245.249  YES up                    up      
+Bvi 10                    192.168.10.1    YES up                    up      *** VT108085 - GS20190640686 - CI ACCESS ***
+Bvi 100                   192.168.100.1   YES up                    up      *** TEST MAARTEN - BACKUP SCRIPT PBXPLUG ***
+Bvi 200                   94.105.16.129   YES up                    down    *IPERF*
+dot11radio 0/0.1          <unassigned>    YES up                    up      
+dot11radio 0/0.2          <unassigned>    YES up                    up      
+Null 0                    <unassigned>    YES up                    up      
+dot11radio 0/0            <unassigned>    YES up                    up      
+
 ```
 
 **Help:** execute the command "show ip interface brief"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip prefix-list
 
 **Output:**
 ```
-'RIP: ip prefix-list DENY-BGP: 3 entries\n   Description: ** do not advertise to BGP neighbors **\n   seq 5 permit 192.4.21.0/24 le 32\n   seq 10 permit 192.4.91.0/24 le 32\n   seq 15 deny any\nOSPF: ip prefix-list DENY-BGP: 3 entries\n   Description: ** do not advertise to BGP neighbors **\n   seq 5 permit 192.4.21.0/24 le 32\n   seq 10 permit 192.4.91.0/24 le 32\n   seq 15 deny any\nBGP: ip prefix-list DENY-BGP: 3 entries\n   Description: ** do not advertise to BGP neighbors **\n   seq 5 permit 192.4.21.0/24 le 32\n   seq 10 permit 192.4.91.0/24 le 32\n   seq 15 deny any\n'
+RIP: ip prefix-list DENY-BGP: 3 entries
+   Description: ** do not advertise to BGP neighbors **
+   seq 5 permit 192.4.21.0/24 le 32
+   seq 10 permit 192.4.91.0/24 le 32
+   seq 15 deny any
+OSPF: ip prefix-list DENY-BGP: 3 entries
+   Description: ** do not advertise to BGP neighbors **
+   seq 5 permit 192.4.21.0/24 le 32
+   seq 10 permit 192.4.91.0/24 le 32
+   seq 15 deny any
+BGP: ip prefix-list DENY-BGP: 3 entries
+   Description: ** do not advertise to BGP neighbors **
+   seq 5 permit 192.4.21.0/24 le 32
+   seq 10 permit 192.4.91.0/24 le 32
+   seq 15 deny any
+
 ```
 
 **Help:** execute the command "show ip prefix-list"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip ssh
 
 **Output:**
 ```
-'SSH Enabled\nAuthentication timeout 30 secs, retries 3\nSession timeout 900 secs\nAuthentication method: all\nMaximum number of sessions 5\nMaximum number of channels per session 10\nAuthorized public keys:\nnone\nKey fingerprint:\nssh-rsa 4096 bc:f8:c3:67:8f:de:f3:ec:5c:29:b5:a4:e4:25:de:7a\nSCP server enabled\n'
+SSH Enabled
+Authentication timeout 30 secs, retries 3
+Session timeout 900 secs
+Authentication method: all
+Maximum number of sessions 5
+Maximum number of channels per session 10
+Authorized public keys:
+none
+Key fingerprint:
+ssh-rsa 4096 bc:f8:c3:67:8f:de:f3:ec:5c:29:b5:a4:e4:25:de:7a
+SCP server enabled
+
 ```
 
 **Help:** execute the command "show ip ssh"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show ip vrf brief
 
 **Output:**
 ```
-' VRF Name                          VRF Id                    Interfaces\n MODEM                             1                         FastEthernet 1/0.1\n INTERNET                          2                         Dialer 2\n                                                             Dialer 3\n                                                             Loopback 777\n                                                             Bvi 10\n TEST                              3\n'
+ VRF Name                          VRF Id                    Interfaces
+ MODEM                             1                         FastEthernet 1/0.1
+ INTERNET                          2                         Dialer 2
+                                                             Dialer 3
+                                                             Loopback 777
+                                                             Bvi 10
+ TEST                              3
+
 ```
 
 **Help:** execute the command "show ip vrf brief"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show isdn active
 
 **Output:**
 ```
-'                               ISDN ACTIVE CALLS                                \n--------------------------------------------------------------------------------\nApp.  Call         Calling           Called   Call   Port BChan Call-ref call-id\n      Type          Number           Number Duration                            \n--------------------------------------------------------------------------------\nno isdn active calls...\n--------------------------------------------------------------------------------\n'
+                               ISDN ACTIVE CALLS                                
+--------------------------------------------------------------------------------
+App.  Call         Calling           Called   Call   Port BChan Call-ref call-id
+      Type          Number           Number Duration                            
+--------------------------------------------------------------------------------
+no isdn active calls...
+--------------------------------------------------------------------------------
+
 ```
 
 **Help:** execute the command "show isdn active"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show isdn led-status
 
 **Output:**
 ```
-' Status of VOIP service\n\n 1 Dial-peer pots up.\n 1 Dial-peer voip up.\n\n Sip-gateway status is no shutdown,\n -> is registered\n    1/1 ep is registered with registrar sip.blabla.be:5060\n -> IF loopback 1 [1.2.3.4] is up.\n\n No Sip-server,\n\n no voice com...\n\nvoice led track-conditions\n voice-gw   any\n voice-port no\n\nSys LEDs\nSYS LED VoIP color= GREEN , state=ON\nSYS LED COM  color=     - , state=OFF\nSYS LED Maintenance color=     - , state=OFF\n'
+ Status of VOIP service
+
+ 1 Dial-peer pots up.
+ 1 Dial-peer voip up.
+
+ Sip-gateway status is no shutdown,
+ -> is registered
+    1/1 ep is registered with registrar sip.blabla.be:5060
+ -> IF loopback 1 [1.2.3.4] is up.
+
+ No Sip-server,
+
+ no voice com...
+
+voice led track-conditions
+ voice-gw   any
+ voice-port no
+
+Sys LEDs
+SYS LED VoIP color= GREEN , state=ON
+SYS LED COM  color=     - , state=OFF
+SYS LED Maintenance color=     - , state=OFF
+
 ```
 
 **Help:** execute the command "show isdn led-status"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show isdn status all
 
 **Output:**
 ```
-'\tisdn line                       5/0\n\t\tphysical type                  E1\n\t\tprotocol descriptor            E1_PRI\n\t\t linecode                      hdb3\n\t\t framing                       DF\n\t\tconfig state                   up\n\t\tloop state                     down \n\t\t-layer 1 status                deactivated\n\t\tAlarm Indication Signal (AIS)  OFF\n\t\tLoss Off Signal (LOS)          ON\n\t\tRemote Indication Signal (RAI) OFF\n\t\tpri AIS occurrence(s)          0\n\t\tpri LOS occurrence(s)          1\n\t\tpri RDI occurrence(s)          0\n\t\t-layer 2 status                deactivated\n\t\tTx frames on D channel         0\n\t\tRx frames on D channel         0\n\t\t-layer 3 status\n\t\t    no active call\n\n\tisdn line                       5/1\n\t\tprotocol descriptor     BRI_NT\n\t\tconfig state            down\n\t\t-layer 1 status         deactivated\n\t\t-layer 2 status         deactivated\n\t\tTx frames on D channel  0\n\t\tRx frames on D channel  0\n\t\t-layer 3 status\n\t\t    no active call\n\n\tisdn line                       5/2\n\t\tprotocol descriptor     BRI_NT\n\t\tconfig state            down\n\t\t-layer 1 status         deactivated\n\t\t-layer 2 status         deactivated\n\t\tTx frames on D channel  0\n\t\tRx frames on D channel  0\n\t\t-layer 3 status\n\t\t    no active call\n'
+	isdn line                       5/0
+		physical type                  E1
+		protocol descriptor            E1_PRI
+		 linecode                      hdb3
+		 framing                       DF
+		config state                   up
+		loop state                     down 
+		-layer 1 status                deactivated
+		Alarm Indication Signal (AIS)  OFF
+		Loss Off Signal (LOS)          ON
+		Remote Indication Signal (RAI) OFF
+		pri AIS occurrence(s)          0
+		pri LOS occurrence(s)          1
+		pri RDI occurrence(s)          0
+		-layer 2 status                deactivated
+		Tx frames on D channel         0
+		Rx frames on D channel         0
+		-layer 3 status
+		    no active call
+
+	isdn line                       5/1
+		protocol descriptor     BRI_NT
+		config state            down
+		-layer 1 status         deactivated
+		-layer 2 status         deactivated
+		Tx frames on D channel  0
+		Rx frames on D channel  0
+		-layer 3 status
+		    no active call
+
+	isdn line                       5/2
+		protocol descriptor     BRI_NT
+		config state            down
+		-layer 1 status         deactivated
+		-layer 2 status         deactivated
+		Tx frames on D channel  0
+		Rx frames on D channel  0
+		-layer 3 status
+		    no active call
+
 ```
 
 **Help:** execute the command "show isdn status all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show memory
 
 **Output:**
 ```
-'===============================================\n| Memory status report  |   Kbytes  |         |\n===============================================\n| Ram size              |  262 144  |         |\n| :..Program            |   41 171  |         |\n| :  :..code            |   30 715  |         |\n| :  :..data            |   10 455  |         |\n| :..Static buffers     |      192  |         |\n| :..Dynamic total      |  213 604  |         |\n| :  :       used       |   46 847  |  21.9%  |\n| :  :       free       |  166 757  |  78.0%  |\n| :  :..System total    |  213 604  |         |\n| :            used     |   46 847  |  21.9%  |\n| :            free     |  166 757  |  78.0%  |\n| :..Ram disk total     |    1 011  |         |\n|             used      |       74  |   7.4%  |\n|             free      |      937  |  92.7%  |\n|                       |           |         |\n| Flash size            |    2 048  |         |\n| :..Boot               |    1 024  |         |\n| :..Static areas       |      200  |         |\n|                       |           |         |\n| Extended Flash size   |   65 536  |         |\n| :..Flash disk total   |   64 688  |         |\n|               used    |   31 176  |  48.1%  |\n|               free    |   33 512  |  51.8%  |\n===============================================\n'
+===============================================
+| Memory status report  |   Kbytes  |         |
+===============================================
+| Ram size              |  262 144  |         |
+| :..Program            |   41 171  |         |
+| :  :..code            |   30 715  |         |
+| :  :..data            |   10 455  |         |
+| :..Static buffers     |      192  |         |
+| :..Dynamic total      |  213 604  |         |
+| :  :       used       |   46 847  |  21.9%  |
+| :  :       free       |  166 757  |  78.0%  |
+| :  :..System total    |  213 604  |         |
+| :            used     |   46 847  |  21.9%  |
+| :            free     |  166 757  |  78.0%  |
+| :..Ram disk total     |    1 011  |         |
+|             used      |       74  |   7.4%  |
+|             free      |      937  |  92.7%  |
+|                       |           |         |
+| Flash size            |    2 048  |         |
+| :..Boot               |    1 024  |         |
+| :..Static areas       |      200  |         |
+|                       |           |         |
+| Extended Flash size   |   65 536  |         |
+| :..Flash disk total   |   64 688  |         |
+|               used    |   31 176  |  48.1%  |
+|               free    |   33 512  |  51.8%  |
+===============================================
+
 ```
 
 **Help:** execute the command "show memory"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show policy-interface output
 
 **Output:**
 ```
-"FastEthernet 1/0: service-policy output L3VPN_SHARED_VLAN_SHAPE_CE_OUT\ntraffic statistics:\n  Class 'CLASS_ANY':\n    705455781 packets, 202655648081 bytes, 0 dscp remarked, mean input rate 76250 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n    Service-policy L3VPN_SHARED_QOS_CE_OUT :\n      Class 'REAL-TIME': color-blind mode\n        82440 packets, 22296428 bytes, mean input rate 0 bits/s\n        cir 512 kbits/s, cbs 6400 bytes\n        conformed 79705 packets, 20216566 bytes; action: set-dscp-transmit 46\n        exceeded 2735 packets, 2079862 bytes; action: drop\n      Class 'MANAGEMENT':\n        3881496 packets, 352515276 bytes, 0 dscp remarked, mean input rate 76250 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'ROUTING':\n        94685677 packets, 20577282182 bytes, 0 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'PREMIUM':\n        866614 packets, 336167380 bytes, 17 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'GOLD':\n        45391 packets, 15054274 bytes, 111 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'SILVER':\n        5160082 packets, 2081326098 bytes, 968 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'BRONZE':\n        76569 packets, 28162916 bytes, 70513 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n      Class 'class-default':\n        600657514 packets, 179242844271 bytes, 0 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n  Class 'class-default':\n    0 packets, 0 bytes, 0 dscp remarked, mean input rate 0 bits/s\n     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 \n\noutput queuing statistics:\n  Class 'CLASS_ANY': medium priority (no excess allowed)\n    bandwidth 33250 kb/s, burst 81872 bytes\n    mean input rate 73400 bits/s, mean output rate 73400 bits/s\n    packets output 700594742, packets dropped 707805 (0%)\n    bytes output 222578689918, bytes dropped 939630669 (0%)\n    Service-policy L3VPN_SHARED_QOS_CE_OUT :\n      Class 'REAL-TIME': high priority\n        bandwidth 512 kb/s, burst 32249 bytes, queue length/limit 0/50\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 79705, packets dropped 0 (0%)\n        bytes output 22607716, bytes dropped 0 (0%)\n      Class 'MANAGEMENT': medium priority\n        bandwidth 9 kb/s, burst 1870 bytes, queue length/limit 0/50\n        mean input rate 73200 bits/s, mean output rate 73200 bits/s\n        packets output 3881341, packets dropped 0 (0%)\n        bytes output 468946094, bytes dropped 0 (0%)\n        remaining-bandwidth share 1, excess-rate-priority 0, excess packets sent 222911\n      Class 'ROUTING': medium priority\n        bandwidth 9 kb/s, burst 1870 bytes, queue length/limit 0/50\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 94685677, packets dropped 0 (0%)\n        bytes output 23417852492, bytes dropped 0 (0%)\n        remaining-bandwidth share 1, excess-rate-priority 0, excess packets sent 83405404\n      Class 'PREMIUM': medium priority\n        bandwidth 11452 kb/s, burst 28624 bytes, queue length/limit 0/60\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 866614, packets dropped 0 (0%)\n        bytes output 362165800, bytes dropped 0 (0%)\n        remaining-bandwidth share 34, excess-rate-priority 0, excess packets sent 279\n        weight random early detection:\n          exponential weight: 9\n\n         Dscp   Random drop         Tail drop             Min/Max      Mark\n                   pkts               pkts               threshold  probability\n           0        0                  0                   30/60       1/10\n           1        0                  0                   33/60       1/10\n           2        0                  0                   36/60       1/10\n           3        0                  0                   39/60       1/10\n           4        0                  0                   42/60       1/10\n           5        0                  0                   45/60       1/10\n           6        0                  0                   48/60       1/10\n           7        0                  0                   51/60       1/10\n           8        0                  0                   33/60       1/10\n           9        0                  0                   33/60       1/10\n           10       0                  0                   36/60       1/10\n           11       0                  0                   39/60       1/10\n           12       0                  0                   42/60       1/10\n           13       0                  0                   45/60       1/10\n           14       0                  0                   48/60       1/10\n           15       0                  0                   51/60       1/10\n           16       0                  0                   36/60       1/10\n           17       0                  0                   33/60       1/10\n           18       0                  0                   36/60       1/10\n           19       0                  0                   39/60       1/10\n           20       0                  0                   42/60       1/10\n           21       0                  0                   45/60       1/10\n           22       0                  0                   48/60       1/10\n           23       0                  0                   51/60       1/10\n           24       0                  0                   39/60       1/10\n           25       0                  0                   33/60       1/10\n           26       0                  0                   36/60       1/10\n           27       0                  0                   39/60       1/10\n           28       0                  0                   42/60       1/10\n           29       0                  0                   45/60       1/10\n           30       0                  0                   48/60       1/10\n           31       0                  0                   51/60       1/10\n           32       0                  0                   42/60       1/10\n           33       0                  0                   33/60       1/10\n           34       0                  0                   36/60       1/10\n           35       0                  0                   39/60       1/10\n           36       0                  0                   42/60       1/10\n           37       0                  0                   45/60       1/10\n           38       0                  0                   48/60       1/10\n           39       0                  0                   51/60       1/10\n           40       0                  0                   45/60       1/10\n           41       0                  0                   33/60       1/10\n           42       0                  0                   36/60       1/10\n           43       0                  0                   39/60       1/10\n           44       0                  0                   42/60       1/10\n           45       0                  0                   45/60       1/10\n           46       0                  0                   48/60       1/10\n           47       0                  0                   51/60       1/10\n           48       0                  0                   48/60       1/10\n           49       0                  0                   33/60       1/10\n           50       0                  0                   36/60       1/10\n           51       0                  0                   39/60       1/10\n           52       0                  0                   42/60       1/10\n           53       0                  0                   45/60       1/10\n           54       0                  0                   48/60       1/10\n           55       0                  0                   51/60       1/10\n           56       0                  0                   51/60       1/10\n           57       0                  0                   33/60       1/10\n           58       0                  0                   36/60       1/10\n           59       0                  0                   39/60       1/10\n           60       0                  0                   42/60       1/10\n           61       0                  0                   45/60       1/10\n           62       0                  0                   48/60       1/10\n           63       0                  0                   51/60       1/10\n      Class 'GOLD': medium priority\n        bandwidth 8180 kb/s, burst 29750 bytes, queue length/limit 0/60\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 45391, packets dropped 0 (0%)\n        bytes output 16416004, bytes dropped 0 (0%)\n        remaining-bandwidth share 24, excess-rate-priority 0, excess packets sent 0\n        weight random early detection:\n          exponential weight: 9\n\n         Dscp   Random drop         Tail drop             Min/Max      Mark\n                   pkts               pkts               threshold  probability\n           0        0                  0                   30/60       1/10\n           1        0                  0                   33/60       1/10\n           2        0                  0                   36/60       1/10\n           3        0                  0                   39/60       1/10\n           4        0                  0                   42/60       1/10\n           5        0                  0                   45/60       1/10\n           6        0                  0                   48/60       1/10\n           7        0                  0                   51/60       1/10\n           8        0                  0                   33/60       1/10\n           9        0                  0                   33/60       1/10\n           10       0                  0                   36/60       1/10\n           11       0                  0                   39/60       1/10\n           12       0                  0                   42/60       1/10\n           13       0                  0                   45/60       1/10\n           14       0                  0                   48/60       1/10\n           15       0                  0                   51/60       1/10\n           16       0                  0                   36/60       1/10\n           17       0                  0                   33/60       1/10\n           18       0                  0                   36/60       1/10\n           19       0                  0                   39/60       1/10\n           20       0                  0                   42/60       1/10\n           21       0                  0                   45/60       1/10\n           22       0                  0                   48/60       1/10\n           23       0                  0                   51/60       1/10\n           24       0                  0                   39/60       1/10\n           25       0                  0                   33/60       1/10\n           26       0                  0                   36/60       1/10\n           27       0                  0                   39/60       1/10\n           28       0                  0                   42/60       1/10\n           29       0                  0                   45/60       1/10\n           30       0                  0                   48/60       1/10\n           31       0                  0                   51/60       1/10\n           32       0                  0                   42/60       1/10\n           33       0                  0                   33/60       1/10\n           34       0                  0                   36/60       1/10\n           35       0                  0                   39/60       1/10\n           36       0                  0                   42/60       1/10\n           37       0                  0                   45/60       1/10\n           38       0                  0                   48/60       1/10\n           39       0                  0                   51/60       1/10\n           40       0                  0                   45/60       1/10\n           41       0                  0                   33/60       1/10\n           42       0                  0                   36/60       1/10\n           43       0                  0                   39/60       1/10\n           44       0                  0                   42/60       1/10\n           45       0                  0                   45/60       1/10\n           46       0                  0                   48/60       1/10\n           47       0                  0                   51/60       1/10\n           48       0                  0                   48/60       1/10\n           49       0                  0                   33/60       1/10\n           50       0                  0                   36/60       1/10\n           51       0                  0                   39/60       1/10\n           52       0                  0                   42/60       1/10\n           53       0                  0                   45/60       1/10\n           54       0                  0                   48/60       1/10\n           55       0                  0                   51/60       1/10\n           56       0                  0                   51/60       1/10\n           57       0                  0                   33/60       1/10\n           58       0                  0                   36/60       1/10\n           59       0                  0                   39/60       1/10\n           60       0                  0                   42/60       1/10\n           61       0                  0                   45/60       1/10\n           62       0                  0                   48/60       1/10\n           63       0                  0                   51/60       1/10\n      Class 'SILVER': medium priority\n        bandwidth 4908 kb/s, burst 30749 bytes, queue length/limit 0/60\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 5160082, packets dropped 0 (0%)\n        bytes output 2236128558, bytes dropped 0 (0%)\n        remaining-bandwidth share 14, excess-rate-priority 0, excess packets sent 42\n        weight random early detection:\n          exponential weight: 9\n\n         Dscp   Random drop         Tail drop             Min/Max      Mark\n                   pkts               pkts               threshold  probability\n           0        0                  0                   30/60       1/10\n           1        0                  0                   33/60       1/10\n           2        0                  0                   36/60       1/10\n           3        0                  0                   39/60       1/10\n           4        0                  0                   42/60       1/10\n           5        0                  0                   45/60       1/10\n           6        0                  0                   48/60       1/10\n           7        0                  0                   51/60       1/10\n           8        0                  0                   33/60       1/10\n           9        0                  0                   33/60       1/10\n           10       0                  0                   36/60       1/10\n           11       0                  0                   39/60       1/10\n           12       0                  0                   42/60       1/10\n           13       0                  0                   45/60       1/10\n           14       0                  0                   48/60       1/10\n           15       0                  0                   51/60       1/10\n           16       0                  0                   36/60       1/10\n           17       0                  0                   33/60       1/10\n           18       0                  0                   36/60       1/10\n           19       0                  0                   39/60       1/10\n           20       0                  0                   42/60       1/10\n           21       0                  0                   45/60       1/10\n           22       0                  0                   48/60       1/10\n           23       0                  0                   51/60       1/10\n           24       0                  0                   39/60       1/10\n           25       0                  0                   33/60       1/10\n           26       0                  0                   36/60       1/10\n           27       0                  0                   39/60       1/10\n           28       0                  0                   42/60       1/10\n           29       0                  0                   45/60       1/10\n           30       0                  0                   48/60       1/10\n           31       0                  0                   51/60       1/10\n           32       0                  0                   42/60       1/10\n           33       0                  0                   33/60       1/10\n           34       0                  0                   36/60       1/10\n           35       0                  0                   39/60       1/10\n           36       0                  0                   42/60       1/10\n           37       0                  0                   45/60       1/10\n           38       0                  0                   48/60       1/10\n           39       0                  0                   51/60       1/10\n           40       0                  0                   45/60       1/10\n           41       0                  0                   33/60       1/10\n           42       0                  0                   36/60       1/10\n           43       0                  0                   39/60       1/10\n           44       0                  0                   42/60       1/10\n           45       0                  0                   45/60       1/10\n           46       0                  0                   48/60       1/10\n           47       0                  0                   51/60       1/10\n           48       0                  0                   48/60       1/10\n           49       0                  0                   33/60       1/10\n           50       0                  0                   36/60       1/10\n           51       0                  0                   39/60       1/10\n           52       0                  0                   42/60       1/10\n           53       0                  0                   45/60       1/10\n           54       0                  0                   48/60       1/10\n           55       0                  0                   51/60       1/10\n           56       0                  0                   51/60       1/10\n           57       0                  0                   33/60       1/10\n           58       0                  0                   36/60       1/10\n           59       0                  0                   39/60       1/10\n           60       0                  0                   42/60       1/10\n           61       0                  0                   45/60       1/10\n           62       0                  0                   48/60       1/10\n           63       0                  0                   51/60       1/10\n      Class 'BRONZE': medium priority\n        bandwidth 3272 kb/s, burst 31249 bytes, queue length/limit 0/60\n        mean input rate 0 bits/s, mean output rate 0 bits/s\n        packets output 76493, packets dropped 76 (0%)\n        bytes output 30364562, bytes dropped 95424 (0%)\n        remaining-bandwidth share 9, excess-rate-priority 0, excess packets sent 10772\n        weight random early detection:\n          exponential weight: 7\n\n         Dscp   Random drop         Tail drop             Min/Max      Mark\n                   pkts               pkts               threshold  probability\n           0        0                  0                   30/60       1/10\n           1        0                  0                   33/60       1/10\n           2        0                  0                   36/60       1/10\n           3        0                  0                   39/60       1/10\n           4        0                  0                   42/60       1/10\n           5        0                  0                   45/60       1/10\n           6        0                  0                   48/60       1/10\n           7        0                  0                   51/60       1/10\n           8        0                  0                   33/60       1/10\n           9        0                  0                   33/60       1/10\n           10       0                  0                   36/60       1/10\n           11       0                  0                   39/60       1/10\n           12       0                  0                   42/60       1/10\n           13       0                  0                   45/60       1/10\n           14       0                  0                   48/60       1/10\n           15       0                  0                   51/60       1/10\n           16       0                  0                   36/60       1/10\n           17       0                  0                   33/60       1/10\n           18       0                  0                   36/60       1/10\n           19       0                  0                   39/60       1/10\n           20       0                  0                   42/60       1/10\n           21       0                  0                   45/60       1/10\n           22       0                  0                   48/60       1/10\n           23       0                  0                   51/60       1/10\n           24       0                  0                   39/60       1/10\n           25       0                  0                   33/60       1/10\n           26       0                  0                   36/60       1/10\n           27       0                  0                   39/60       1/10\n           28       0                  0                   42/60       1/10\n           29       0                  0                   45/60       1/10\n           30       0                  0                   48/60       1/10\n           31       0                  0                   51/60       1/10\n           32       0                  0                   42/60       1/10\n           33       0                  0                   33/60       1/10\n           34       0                  0                   36/60       1/10\n           35       0                  0                   39/60       1/10\n           36       0                  0                   42/60       1/10\n           37       0                  0                   45/60       1/10\n           38       0                  0                   48/60       1/10\n           39       0                  0                   51/60       1/10\n           40       0                  0                   45/60       1/10\n           41       0                  0                   33/60       1/10\n           42       0                  0                   36/60       1/10\n           43       0                  0                   39/60       1/10\n           44       0                  0                   42/60       1/10\n           45       0                  0                   45/60       1/10\n           46       0                  0                   48/60       1/10\n           47       0                  0                   51/60       1/10\n           48       0                  0                   48/60       1/10\n           49       0                  0                   33/60       1/10\n           50       0                  0                   36/60       1/10\n           51       0                  0                   39/60       1/10\n           52       0                  0                   42/60       1/10\n           53       0                  0                   45/60       1/10\n           54       0                  0                   48/60       1/10\n           55       0                  0                   51/60       1/10\n           56       0                  0                   51/60       1/10\n           57       0                  0                   33/60       1/10\n           58       0                  0                   36/60       1/10\n           59       0                  0                   39/60       1/10\n           60       0                  0                   42/60       1/10\n           61       0                  0                   45/60       1/10\n           62       0                  0                   48/60       1/10\n           63       0                  0                   51/60       1/10\n      Class 'class-default': medium priority\n        bandwidth 4908 kb/s, burst 30749 bytes, queue length/limit 0/60\n        mean input rate 96 bits/s, mean output rate 96 bits/s\n        packets output 595799441, packets dropped 707729 (0%)\n        bytes output 196024209496, bytes dropped 939535245 (0%)\n        remaining-bandwidth share 14, excess-rate-priority 0, excess packets sent 52266475\n        weight random early detection:\n          exponential weight: 9\n\n         Dscp   Random drop         Tail drop             Min/Max      Mark\n                   pkts               pkts               threshold  probability\n           0        119931             0                   30/60       1/10\n           1        0                  0                   33/60       1/10\n           2        41                 0                   36/60       1/10\n           3        0                  0                   39/60       1/10\n           4        3                  0                   42/60       1/10\n           5        0                  0                   45/60       1/10\n           6        0                  0                   48/60       1/10\n           7        0                  0                   51/60       1/10\n           8        0                  0                   33/60       1/10\n           9        0                  0                   33/60       1/10\n           10       0                  0                   36/60       1/10\n           11       0                  0                   39/60       1/10\n           12       0                  0                   42/60       1/10\n           13       0                  0                   45/60       1/10\n           14       0                  0                   48/60       1/10\n           15       0                  0                   51/60       1/10\n           16       0                  0                   36/60       1/10\n           17       0                  0                   33/60       1/10\n           18       0                  0                   36/60       1/10\n           19       0                  0                   39/60       1/10\n           20       0                  0                   42/60       1/10\n           21       0                  0                   45/60       1/10\n           22       0                  0                   48/60       1/10\n           23       0                  0                   51/60       1/10\n           24       0                  0                   39/60       1/10\n           25       0                  0                   33/60       1/10\n           26       0                  0                   36/60       1/10\n           27       0                  0                   39/60       1/10\n           28       0                  0                   42/60       1/10\n           29       0                  0                   45/60       1/10\n           30       0                  0                   48/60       1/10\n           31       0                  0                   51/60       1/10\n           32       0                  0                   42/60       1/10\n           33       0                  0                   33/60       1/10\n           34       0                  0                   36/60       1/10\n           35       0                  0                   39/60       1/10\n           36       0                  0                   42/60       1/10\n           37       0                  0                   45/60       1/10\n           38       0                  0                   48/60       1/10\n           39       0                  0                   51/60       1/10\n           40       0                  0                   45/60       1/10\n           41       0                  0                   33/60       1/10\n           42       0                  0                   36/60       1/10\n           43       0                  0                   39/60       1/10\n           44       0                  0                   42/60       1/10\n           45       0                  0                   45/60       1/10\n           46       0                  0                   48/60       1/10\n           47       0                  0                   51/60       1/10\n           48       0                  0                   48/60       1/10\n           49       0                  0                   33/60       1/10\n           50       0                  0                   36/60       1/10\n           51       0                  0                   39/60       1/10\n           52       0                  0                   42/60       1/10\n           53       0                  0                   45/60       1/10\n           54       0                  0                   48/60       1/10\n           55       0                  0                   51/60       1/10\n           56       2                  0                   51/60       1/10\n           57       0                  0                   33/60       1/10\n           58       0                  0                   36/60       1/10\n           59       0                  0                   39/60       1/10\n           60       0                  0                   42/60       1/10\n           61       0                  0                   45/60       1/10\n           62       0                  0                   48/60       1/10\n           63       0                  0                   51/60       1/10\n  Class 'class-default': medium priority\n    bandwidth 66750 kb/s, burst 163868 bytes, queue length/limit 0/50\n    mean input rate 0 bits/s, mean output rate 0 bits/s\n    packets output 0, packets dropped 0 (0%)\n    bytes output 0, bytes dropped 0 (0%)\n    remaining-bandwidth share 66, excess-rate-priority 0, excess packets sent 0\n  Interface total:\n    bandwidth 100000 kb/s\n    mean input rate 104400 bits/s, mean output rate 104400 bits/s\n    packets output 704745364, packets dropped 707805 (0%)\n    bytes output 222877578682, bytes dropped 939630669 (0%)\n"
+FastEthernet 1/0: service-policy output L3VPN_SHARED_VLAN_SHAPE_CE_OUT
+traffic statistics:
+  Class 'CLASS_ANY':
+    705455781 packets, 202655648081 bytes, 0 dscp remarked, mean input rate 76250 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+    Service-policy L3VPN_SHARED_QOS_CE_OUT :
+      Class 'REAL-TIME': color-blind mode
+        82440 packets, 22296428 bytes, mean input rate 0 bits/s
+        cir 512 kbits/s, cbs 6400 bytes
+        conformed 79705 packets, 20216566 bytes; action: set-dscp-transmit 46
+        exceeded 2735 packets, 2079862 bytes; action: drop
+      Class 'MANAGEMENT':
+        3881496 packets, 352515276 bytes, 0 dscp remarked, mean input rate 76250 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'ROUTING':
+        94685677 packets, 20577282182 bytes, 0 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'PREMIUM':
+        866614 packets, 336167380 bytes, 17 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'GOLD':
+        45391 packets, 15054274 bytes, 111 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'SILVER':
+        5160082 packets, 2081326098 bytes, 968 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'BRONZE':
+        76569 packets, 28162916 bytes, 70513 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+      Class 'class-default':
+        600657514 packets, 179242844271 bytes, 0 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+  Class 'class-default':
+    0 packets, 0 bytes, 0 dscp remarked, mean input rate 0 bits/s
+     Packets dropped by Congestion Management: CPU:0 Rx:0 Total:0 
+
+output queuing statistics:
+  Class 'CLASS_ANY': medium priority (no excess allowed)
+    bandwidth 33250 kb/s, burst 81872 bytes
+    mean input rate 73400 bits/s, mean output rate 73400 bits/s
+    packets output 700594742, packets dropped 707805 (0%)
+    bytes output 222578689918, bytes dropped 939630669 (0%)
+    Service-policy L3VPN_SHARED_QOS_CE_OUT :
+      Class 'REAL-TIME': high priority
+        bandwidth 512 kb/s, burst 32249 bytes, queue length/limit 0/50
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 79705, packets dropped 0 (0%)
+        bytes output 22607716, bytes dropped 0 (0%)
+      Class 'MANAGEMENT': medium priority
+        bandwidth 9 kb/s, burst 1870 bytes, queue length/limit 0/50
+        mean input rate 73200 bits/s, mean output rate 73200 bits/s
+        packets output 3881341, packets dropped 0 (0%)
+        bytes output 468946094, bytes dropped 0 (0%)
+        remaining-bandwidth share 1, excess-rate-priority 0, excess packets sent 222911
+      Class 'ROUTING': medium priority
+        bandwidth 9 kb/s, burst 1870 bytes, queue length/limit 0/50
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 94685677, packets dropped 0 (0%)
+        bytes output 23417852492, bytes dropped 0 (0%)
+        remaining-bandwidth share 1, excess-rate-priority 0, excess packets sent 83405404
+      Class 'PREMIUM': medium priority
+        bandwidth 11452 kb/s, burst 28624 bytes, queue length/limit 0/60
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 866614, packets dropped 0 (0%)
+        bytes output 362165800, bytes dropped 0 (0%)
+        remaining-bandwidth share 34, excess-rate-priority 0, excess packets sent 279
+        weight random early detection:
+          exponential weight: 9
+
+         Dscp   Random drop         Tail drop             Min/Max      Mark
+                   pkts               pkts               threshold  probability
+           0        0                  0                   30/60       1/10
+           1        0                  0                   33/60       1/10
+           2        0                  0                   36/60       1/10
+           3        0                  0                   39/60       1/10
+           4        0                  0                   42/60       1/10
+           5        0                  0                   45/60       1/10
+           6        0                  0                   48/60       1/10
+           7        0                  0                   51/60       1/10
+           8        0                  0                   33/60       1/10
+           9        0                  0                   33/60       1/10
+           10       0                  0                   36/60       1/10
+           11       0                  0                   39/60       1/10
+           12       0                  0                   42/60       1/10
+           13       0                  0                   45/60       1/10
+           14       0                  0                   48/60       1/10
+           15       0                  0                   51/60       1/10
+           16       0                  0                   36/60       1/10
+           17       0                  0                   33/60       1/10
+           18       0                  0                   36/60       1/10
+           19       0                  0                   39/60       1/10
+           20       0                  0                   42/60       1/10
+           21       0                  0                   45/60       1/10
+           22       0                  0                   48/60       1/10
+           23       0                  0                   51/60       1/10
+           24       0                  0                   39/60       1/10
+           25       0                  0                   33/60       1/10
+           26       0                  0                   36/60       1/10
+           27       0                  0                   39/60       1/10
+           28       0                  0                   42/60       1/10
+           29       0                  0                   45/60       1/10
+           30       0                  0                   48/60       1/10
+           31       0                  0                   51/60       1/10
+           32       0                  0                   42/60       1/10
+           33       0                  0                   33/60       1/10
+           34       0                  0                   36/60       1/10
+           35       0                  0                   39/60       1/10
+           36       0                  0                   42/60       1/10
+           37       0                  0                   45/60       1/10
+           38       0                  0                   48/60       1/10
+           39       0                  0                   51/60       1/10
+           40       0                  0                   45/60       1/10
+           41       0                  0                   33/60       1/10
+           42       0                  0                   36/60       1/10
+           43       0                  0                   39/60       1/10
+           44       0                  0                   42/60       1/10
+           45       0                  0                   45/60       1/10
+           46       0                  0                   48/60       1/10
+           47       0                  0                   51/60       1/10
+           48       0                  0                   48/60       1/10
+           49       0                  0                   33/60       1/10
+           50       0                  0                   36/60       1/10
+           51       0                  0                   39/60       1/10
+           52       0                  0                   42/60       1/10
+           53       0                  0                   45/60       1/10
+           54       0                  0                   48/60       1/10
+           55       0                  0                   51/60       1/10
+           56       0                  0                   51/60       1/10
+           57       0                  0                   33/60       1/10
+           58       0                  0                   36/60       1/10
+           59       0                  0                   39/60       1/10
+           60       0                  0                   42/60       1/10
+           61       0                  0                   45/60       1/10
+           62       0                  0                   48/60       1/10
+           63       0                  0                   51/60       1/10
+      Class 'GOLD': medium priority
+        bandwidth 8180 kb/s, burst 29750 bytes, queue length/limit 0/60
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 45391, packets dropped 0 (0%)
+        bytes output 16416004, bytes dropped 0 (0%)
+        remaining-bandwidth share 24, excess-rate-priority 0, excess packets sent 0
+        weight random early detection:
+          exponential weight: 9
+
+         Dscp   Random drop         Tail drop             Min/Max      Mark
+                   pkts               pkts               threshold  probability
+           0        0                  0                   30/60       1/10
+           1        0                  0                   33/60       1/10
+           2        0                  0                   36/60       1/10
+           3        0                  0                   39/60       1/10
+           4        0                  0                   42/60       1/10
+           5        0                  0                   45/60       1/10
+           6        0                  0                   48/60       1/10
+           7        0                  0                   51/60       1/10
+           8        0                  0                   33/60       1/10
+           9        0                  0                   33/60       1/10
+           10       0                  0                   36/60       1/10
+           11       0                  0                   39/60       1/10
+           12       0                  0                   42/60       1/10
+           13       0                  0                   45/60       1/10
+           14       0                  0                   48/60       1/10
+           15       0                  0                   51/60       1/10
+           16       0                  0                   36/60       1/10
+           17       0                  0                   33/60       1/10
+           18       0                  0                   36/60       1/10
+           19       0                  0                   39/60       1/10
+           20       0                  0                   42/60       1/10
+           21       0                  0                   45/60       1/10
+           22       0                  0                   48/60       1/10
+           23       0                  0                   51/60       1/10
+           24       0                  0                   39/60       1/10
+           25       0                  0                   33/60       1/10
+           26       0                  0                   36/60       1/10
+           27       0                  0                   39/60       1/10
+           28       0                  0                   42/60       1/10
+           29       0                  0                   45/60       1/10
+           30       0                  0                   48/60       1/10
+           31       0                  0                   51/60       1/10
+           32       0                  0                   42/60       1/10
+           33       0                  0                   33/60       1/10
+           34       0                  0                   36/60       1/10
+           35       0                  0                   39/60       1/10
+           36       0                  0                   42/60       1/10
+           37       0                  0                   45/60       1/10
+           38       0                  0                   48/60       1/10
+           39       0                  0                   51/60       1/10
+           40       0                  0                   45/60       1/10
+           41       0                  0                   33/60       1/10
+           42       0                  0                   36/60       1/10
+           43       0                  0                   39/60       1/10
+           44       0                  0                   42/60       1/10
+           45       0                  0                   45/60       1/10
+           46       0                  0                   48/60       1/10
+           47       0                  0                   51/60       1/10
+           48       0                  0                   48/60       1/10
+           49       0                  0                   33/60       1/10
+           50       0                  0                   36/60       1/10
+           51       0                  0                   39/60       1/10
+           52       0                  0                   42/60       1/10
+           53       0                  0                   45/60       1/10
+           54       0                  0                   48/60       1/10
+           55       0                  0                   51/60       1/10
+           56       0                  0                   51/60       1/10
+           57       0                  0                   33/60       1/10
+           58       0                  0                   36/60       1/10
+           59       0                  0                   39/60       1/10
+           60       0                  0                   42/60       1/10
+           61       0                  0                   45/60       1/10
+           62       0                  0                   48/60       1/10
+           63       0                  0                   51/60       1/10
+      Class 'SILVER': medium priority
+        bandwidth 4908 kb/s, burst 30749 bytes, queue length/limit 0/60
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 5160082, packets dropped 0 (0%)
+        bytes output 2236128558, bytes dropped 0 (0%)
+        remaining-bandwidth share 14, excess-rate-priority 0, excess packets sent 42
+        weight random early detection:
+          exponential weight: 9
+
+         Dscp   Random drop         Tail drop             Min/Max      Mark
+                   pkts               pkts               threshold  probability
+           0        0                  0                   30/60       1/10
+           1        0                  0                   33/60       1/10
+           2        0                  0                   36/60       1/10
+           3        0                  0                   39/60       1/10
+           4        0                  0                   42/60       1/10
+           5        0                  0                   45/60       1/10
+           6        0                  0                   48/60       1/10
+           7        0                  0                   51/60       1/10
+           8        0                  0                   33/60       1/10
+           9        0                  0                   33/60       1/10
+           10       0                  0                   36/60       1/10
+           11       0                  0                   39/60       1/10
+           12       0                  0                   42/60       1/10
+           13       0                  0                   45/60       1/10
+           14       0                  0                   48/60       1/10
+           15       0                  0                   51/60       1/10
+           16       0                  0                   36/60       1/10
+           17       0                  0                   33/60       1/10
+           18       0                  0                   36/60       1/10
+           19       0                  0                   39/60       1/10
+           20       0                  0                   42/60       1/10
+           21       0                  0                   45/60       1/10
+           22       0                  0                   48/60       1/10
+           23       0                  0                   51/60       1/10
+           24       0                  0                   39/60       1/10
+           25       0                  0                   33/60       1/10
+           26       0                  0                   36/60       1/10
+           27       0                  0                   39/60       1/10
+           28       0                  0                   42/60       1/10
+           29       0                  0                   45/60       1/10
+           30       0                  0                   48/60       1/10
+           31       0                  0                   51/60       1/10
+           32       0                  0                   42/60       1/10
+           33       0                  0                   33/60       1/10
+           34       0                  0                   36/60       1/10
+           35       0                  0                   39/60       1/10
+           36       0                  0                   42/60       1/10
+           37       0                  0                   45/60       1/10
+           38       0                  0                   48/60       1/10
+           39       0                  0                   51/60       1/10
+           40       0                  0                   45/60       1/10
+           41       0                  0                   33/60       1/10
+           42       0                  0                   36/60       1/10
+           43       0                  0                   39/60       1/10
+           44       0                  0                   42/60       1/10
+           45       0                  0                   45/60       1/10
+           46       0                  0                   48/60       1/10
+           47       0                  0                   51/60       1/10
+           48       0                  0                   48/60       1/10
+           49       0                  0                   33/60       1/10
+           50       0                  0                   36/60       1/10
+           51       0                  0                   39/60       1/10
+           52       0                  0                   42/60       1/10
+           53       0                  0                   45/60       1/10
+           54       0                  0                   48/60       1/10
+           55       0                  0                   51/60       1/10
+           56       0                  0                   51/60       1/10
+           57       0                  0                   33/60       1/10
+           58       0                  0                   36/60       1/10
+           59       0                  0                   39/60       1/10
+           60       0                  0                   42/60       1/10
+           61       0                  0                   45/60       1/10
+           62       0                  0                   48/60       1/10
+           63       0                  0                   51/60       1/10
+      Class 'BRONZE': medium priority
+        bandwidth 3272 kb/s, burst 31249 bytes, queue length/limit 0/60
+        mean input rate 0 bits/s, mean output rate 0 bits/s
+        packets output 76493, packets dropped 76 (0%)
+        bytes output 30364562, bytes dropped 95424 (0%)
+        remaining-bandwidth share 9, excess-rate-priority 0, excess packets sent 10772
+        weight random early detection:
+          exponential weight: 7
+
+         Dscp   Random drop         Tail drop             Min/Max      Mark
+                   pkts               pkts               threshold  probability
+           0        0                  0                   30/60       1/10
+           1        0                  0                   33/60       1/10
+           2        0                  0                   36/60       1/10
+           3        0                  0                   39/60       1/10
+           4        0                  0                   42/60       1/10
+           5        0                  0                   45/60       1/10
+           6        0                  0                   48/60       1/10
+           7        0                  0                   51/60       1/10
+           8        0                  0                   33/60       1/10
+           9        0                  0                   33/60       1/10
+           10       0                  0                   36/60       1/10
+           11       0                  0                   39/60       1/10
+           12       0                  0                   42/60       1/10
+           13       0                  0                   45/60       1/10
+           14       0                  0                   48/60       1/10
+           15       0                  0                   51/60       1/10
+           16       0                  0                   36/60       1/10
+           17       0                  0                   33/60       1/10
+           18       0                  0                   36/60       1/10
+           19       0                  0                   39/60       1/10
+           20       0                  0                   42/60       1/10
+           21       0                  0                   45/60       1/10
+           22       0                  0                   48/60       1/10
+           23       0                  0                   51/60       1/10
+           24       0                  0                   39/60       1/10
+           25       0                  0                   33/60       1/10
+           26       0                  0                   36/60       1/10
+           27       0                  0                   39/60       1/10
+           28       0                  0                   42/60       1/10
+           29       0                  0                   45/60       1/10
+           30       0                  0                   48/60       1/10
+           31       0                  0                   51/60       1/10
+           32       0                  0                   42/60       1/10
+           33       0                  0                   33/60       1/10
+           34       0                  0                   36/60       1/10
+           35       0                  0                   39/60       1/10
+           36       0                  0                   42/60       1/10
+           37       0                  0                   45/60       1/10
+           38       0                  0                   48/60       1/10
+           39       0                  0                   51/60       1/10
+           40       0                  0                   45/60       1/10
+           41       0                  0                   33/60       1/10
+           42       0                  0                   36/60       1/10
+           43       0                  0                   39/60       1/10
+           44       0                  0                   42/60       1/10
+           45       0                  0                   45/60       1/10
+           46       0                  0                   48/60       1/10
+           47       0                  0                   51/60       1/10
+           48       0                  0                   48/60       1/10
+           49       0                  0                   33/60       1/10
+           50       0                  0                   36/60       1/10
+           51       0                  0                   39/60       1/10
+           52       0                  0                   42/60       1/10
+           53       0                  0                   45/60       1/10
+           54       0                  0                   48/60       1/10
+           55       0                  0                   51/60       1/10
+           56       0                  0                   51/60       1/10
+           57       0                  0                   33/60       1/10
+           58       0                  0                   36/60       1/10
+           59       0                  0                   39/60       1/10
+           60       0                  0                   42/60       1/10
+           61       0                  0                   45/60       1/10
+           62       0                  0                   48/60       1/10
+           63       0                  0                   51/60       1/10
+      Class 'class-default': medium priority
+        bandwidth 4908 kb/s, burst 30749 bytes, queue length/limit 0/60
+        mean input rate 96 bits/s, mean output rate 96 bits/s
+        packets output 595799441, packets dropped 707729 (0%)
+        bytes output 196024209496, bytes dropped 939535245 (0%)
+        remaining-bandwidth share 14, excess-rate-priority 0, excess packets sent 52266475
+        weight random early detection:
+          exponential weight: 9
+
+         Dscp   Random drop         Tail drop             Min/Max      Mark
+                   pkts               pkts               threshold  probability
+           0        119931             0                   30/60       1/10
+           1        0                  0                   33/60       1/10
+           2        41                 0                   36/60       1/10
+           3        0                  0                   39/60       1/10
+           4        3                  0                   42/60       1/10
+           5        0                  0                   45/60       1/10
+           6        0                  0                   48/60       1/10
+           7        0                  0                   51/60       1/10
+           8        0                  0                   33/60       1/10
+           9        0                  0                   33/60       1/10
+           10       0                  0                   36/60       1/10
+           11       0                  0                   39/60       1/10
+           12       0                  0                   42/60       1/10
+           13       0                  0                   45/60       1/10
+           14       0                  0                   48/60       1/10
+           15       0                  0                   51/60       1/10
+           16       0                  0                   36/60       1/10
+           17       0                  0                   33/60       1/10
+           18       0                  0                   36/60       1/10
+           19       0                  0                   39/60       1/10
+           20       0                  0                   42/60       1/10
+           21       0                  0                   45/60       1/10
+           22       0                  0                   48/60       1/10
+           23       0                  0                   51/60       1/10
+           24       0                  0                   39/60       1/10
+           25       0                  0                   33/60       1/10
+           26       0                  0                   36/60       1/10
+           27       0                  0                   39/60       1/10
+           28       0                  0                   42/60       1/10
+           29       0                  0                   45/60       1/10
+           30       0                  0                   48/60       1/10
+           31       0                  0                   51/60       1/10
+           32       0                  0                   42/60       1/10
+           33       0                  0                   33/60       1/10
+           34       0                  0                   36/60       1/10
+           35       0                  0                   39/60       1/10
+           36       0                  0                   42/60       1/10
+           37       0                  0                   45/60       1/10
+           38       0                  0                   48/60       1/10
+           39       0                  0                   51/60       1/10
+           40       0                  0                   45/60       1/10
+           41       0                  0                   33/60       1/10
+           42       0                  0                   36/60       1/10
+           43       0                  0                   39/60       1/10
+           44       0                  0                   42/60       1/10
+           45       0                  0                   45/60       1/10
+           46       0                  0                   48/60       1/10
+           47       0                  0                   51/60       1/10
+           48       0                  0                   48/60       1/10
+           49       0                  0                   33/60       1/10
+           50       0                  0                   36/60       1/10
+           51       0                  0                   39/60       1/10
+           52       0                  0                   42/60       1/10
+           53       0                  0                   45/60       1/10
+           54       0                  0                   48/60       1/10
+           55       0                  0                   51/60       1/10
+           56       2                  0                   51/60       1/10
+           57       0                  0                   33/60       1/10
+           58       0                  0                   36/60       1/10
+           59       0                  0                   39/60       1/10
+           60       0                  0                   42/60       1/10
+           61       0                  0                   45/60       1/10
+           62       0                  0                   48/60       1/10
+           63       0                  0                   51/60       1/10
+  Class 'class-default': medium priority
+    bandwidth 66750 kb/s, burst 163868 bytes, queue length/limit 0/50
+    mean input rate 0 bits/s, mean output rate 0 bits/s
+    packets output 0, packets dropped 0 (0%)
+    bytes output 0, bytes dropped 0 (0%)
+    remaining-bandwidth share 66, excess-rate-priority 0, excess packets sent 0
+  Interface total:
+    bandwidth 100000 kb/s
+    mean input rate 104400 bits/s, mean output rate 104400 bits/s
+    packets output 704745364, packets dropped 707805 (0%)
+    bytes output 222877578682, bytes dropped 939630669 (0%)
+
 ```
 
 **Help:** execute the command "show policy-interface output"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show product-info-area
 
 **Output:**
 ```
-'+----------------------------------------------------------------+\n|                       Product Info Area                        |\n+------------------------------+---------------------------------+\n| Key                          | Value                           |\n+------------------------------+---------------------------------+\n| mac0                         | 70:FC:8C:07:22:CC               |\n+------------------------------+---------------------------------+\n| mac1                         | 70:FC:8C:0B:22:CC               |\n+------------------------------+---------------------------------+\n| mac2                         | 70:FC:8C:0F:22:CC               |\n+------------------------------+---------------------------------+\n| mac3                         | 70:FC:8C:13:22:CC               |\n+------------------------------+---------------------------------+\n| mac4                         | 70:FC:8C:17:22:CC               |\n+------------------------------+---------------------------------+\n| mac5                         | 70:FC:8C:1B:22:CC               |\n+------------------------------+---------------------------------+\n| mac6                         | 70:FC:8C:1F:22:CC               |\n+------------------------------+---------------------------------+\n| mac7                         | 70:FC:8C:23:22:CC               |\n+------------------------------+---------------------------------+\n| Manufacturing File Reference | 1000 00 N 0046230A00 AH         |\n+------------------------------+---------------------------------+\n| Motherboard Type             | MB420SAVad0UFPE0BNW             |\n+------------------------------+---------------------------------+\n| Manufacturing Location       | TOAB                            |\n+------------------------------+---------------------------------+\n| Manufacturing Date           | 18/01/2017                      |\n+------------------------------+---------------------------------+\n| Serial Number                | T1703006230033175               |\n+------------------------------+---------------------------------+\n| Product name                 | LBB_140                         |\n+------------------------------+---------------------------------+\n| Commercial name              | LBB 140                         |\n+------------------------------+---------------------------------+\n| Mreturn1                     |                                 |\n+------------------------------+---------------------------------+\n| Mreturn2                     |                                 |\n+------------------------------+---------------------------------+\n| Mreturn3                     |                                 |\n+------------------------------+---------------------------------+\n| Mreturn4                     |                                 |\n+------------------------------+---------------------------------+\n'
++----------------------------------------------------------------+
+|                       Product Info Area                        |
++------------------------------+---------------------------------+
+| Key                          | Value                           |
++------------------------------+---------------------------------+
+| mac0                         | 70:FC:8C:07:22:CC               |
++------------------------------+---------------------------------+
+| mac1                         | 70:FC:8C:0B:22:CC               |
++------------------------------+---------------------------------+
+| mac2                         | 70:FC:8C:0F:22:CC               |
++------------------------------+---------------------------------+
+| mac3                         | 70:FC:8C:13:22:CC               |
++------------------------------+---------------------------------+
+| mac4                         | 70:FC:8C:17:22:CC               |
++------------------------------+---------------------------------+
+| mac5                         | 70:FC:8C:1B:22:CC               |
++------------------------------+---------------------------------+
+| mac6                         | 70:FC:8C:1F:22:CC               |
++------------------------------+---------------------------------+
+| mac7                         | 70:FC:8C:23:22:CC               |
++------------------------------+---------------------------------+
+| Manufacturing File Reference | 1000 00 N 0046230A00 AH         |
++------------------------------+---------------------------------+
+| Motherboard Type             | MB420SAVad0UFPE0BNW             |
++------------------------------+---------------------------------+
+| Manufacturing Location       | TOAB                            |
++------------------------------+---------------------------------+
+| Manufacturing Date           | 18/01/2017                      |
++------------------------------+---------------------------------+
+| Serial Number                | T1703006230033175               |
++------------------------------+---------------------------------+
+| Product name                 | LBB_140                         |
++------------------------------+---------------------------------+
+| Commercial name              | LBB 140                         |
++------------------------------+---------------------------------+
+| Mreturn1                     |                                 |
++------------------------------+---------------------------------+
+| Mreturn2                     |                                 |
++------------------------------+---------------------------------+
+| Mreturn3                     |                                 |
++------------------------------+---------------------------------+
+| Mreturn4                     |                                 |
++------------------------------+---------------------------------+
+
 ```
 
 **Help:** execute the command "show product-info-area"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show reboot counters
 
 **Output:**
 ```
-'\n\nReboot status for device LBB_154 S/N T2047008177055804\n\nLast Reboot Cause : Software requested / System defense - reboot after crash\n\nReboot Counters :\nReboot on hardware reset                         : 0\nPower Fail detection                             : 9\nTotal Software Requested Reboots                 : 7\n  System defense - reboot after crash            : 6\n  Administrator requested delayed reboot         : 1\n'
+
+
+Reboot status for device LBB_154 S/N T2047008177055804
+
+Last Reboot Cause : Software requested / System defense - reboot after crash
+
+Reboot Counters :
+Reboot on hardware reset                         : 0
+Power Fail detection                             : 9
+Total Software Requested Reboots                 : 7
+  System defense - reboot after crash            : 6
+  Administrator requested delayed reboot         : 1
+
 ```
 
 **Help:** execute the command "show reboot counters"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show route-map
 
 **Output:**
 ```
-'route-map BGP-MAP-OUT permit 10\n match as-path 102\n set origin igp\n set metric 50\nexit\nroute-map BGP_SECONDARY_OUT permit 10\n set as-path prepend 65000 65000 65000\n set origin       igp\n set local-preference 50\n set metric       100\nexit\nroute-map CONNECTED-BGP deny 5\n match ip address prefix-list DENY-BGP\nexit\nroute-map CONNECTED-BGP permit 10\n set origin       igp\n set local-preference 100\n set metric       50\nexit\n'
+route-map BGP-MAP-OUT permit 10
+ match as-path 102
+ set origin igp
+ set metric 50
+exit
+route-map BGP_SECONDARY_OUT permit 10
+ set as-path prepend 65000 65000 65000
+ set origin       igp
+ set local-preference 50
+ set metric       100
+exit
+route-map CONNECTED-BGP deny 5
+ match ip address prefix-list DENY-BGP
+exit
+route-map CONNECTED-BGP permit 10
+ set origin       igp
+ set local-preference 100
+ set metric       50
+exit
+
 ```
 
 **Help:** execute the command "show route-map"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show running-config aaa
 
 **Output:**
 ```
-'aaa group server tacacs TACGROUP\naaa authentication login default TACGROUP\naaa authentication login console TACGROUP\naaa authentication enable default TACGROUP\naaa authentication enable console TACGROUP\naaa authorization command 15 TACGROUP none\naaa authorization command 7 TACGROUP none\naaa authorization command 1 TACGROUP none\naaa authorization command 0 TACGROUP none\naaa authorization network group TACGROUP\naaa accounting exec default start-stop group TACGROUP\naaa accounting commands 15 default stop-only group TACGROUP\naaa accounting system default start-stop group TACGROUP\naaa accounting commands 7 default stop-only group TACGROUP\naaa accounting commands 1 default stop-only group TACGROUP\naaa accounting commands 0 default stop-only group TACGROUP\naaa authentication banner sequence 1 *-TACACS SERVER UNAVAILABLE-*\n'
+aaa group server tacacs TACGROUP
+aaa authentication login default TACGROUP
+aaa authentication login console TACGROUP
+aaa authentication enable default TACGROUP
+aaa authentication enable console TACGROUP
+aaa authorization command 15 TACGROUP none
+aaa authorization command 7 TACGROUP none
+aaa authorization command 1 TACGROUP none
+aaa authorization command 0 TACGROUP none
+aaa authorization network group TACGROUP
+aaa accounting exec default start-stop group TACGROUP
+aaa accounting commands 15 default stop-only group TACGROUP
+aaa accounting system default start-stop group TACGROUP
+aaa accounting commands 7 default stop-only group TACGROUP
+aaa accounting commands 1 default stop-only group TACGROUP
+aaa accounting commands 0 default stop-only group TACGROUP
+aaa authentication banner sequence 1 *-TACACS SERVER UNAVAILABLE-*
+
 ```
 
 **Help:** execute the command "show running-config aaa"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show running-config bind
 
 **Output:**
 ```
-'bind ssh acl MANAGEMENT_IN_SSH\nbind ssh loopback 1\nbind ssh loopback 21\nbind ssh loopback 91\nbind ssh tunnel 21\nbind ssh tunnel 91\nbind ssh virtual-ethernet 1\nbind ssh vrf UNTRUST-SSH\nbind ssh vrf default-router\nbind telnet acl MANAGEMENT_IN_TELNET\nbind telnet loopback 1\nbind telnet loopback 21\nbind telnet loopback 91\nbind telnet tunnel 21\nbind telnet tunnel 91\nbind telnet virtual-ethernet 1\nbind telnet vrf UNTRUST-TELNET\nbind telnet vrf default-router\n'
+bind ssh acl MANAGEMENT_IN_SSH
+bind ssh loopback 1
+bind ssh loopback 21
+bind ssh loopback 91
+bind ssh tunnel 21
+bind ssh tunnel 91
+bind ssh virtual-ethernet 1
+bind ssh vrf UNTRUST-SSH
+bind ssh vrf default-router
+bind telnet acl MANAGEMENT_IN_TELNET
+bind telnet loopback 1
+bind telnet loopback 21
+bind telnet loopback 91
+bind telnet tunnel 21
+bind telnet tunnel 91
+bind telnet virtual-ethernet 1
+bind telnet vrf UNTRUST-TELNET
+bind telnet vrf default-router
+
 ```
 
 **Help:** execute the command "show running-config bind"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show running-config ip dhcp
 
 **Output:**
 ```
-'ip dhcp vrf INTERNET excluded-address 192.168.10.1\nip dhcp pool DHCP_LBB                \n vrf INTERNET\n lease 0 8 0\ndefault-router 192.168.10.1\ndns-server 212.224.255.252 212.224.255.254\nnetwork 192.168.10.0 255.255.255.0\nexit\nip dhcp pool OrangeShopWifi-VLAN20\nlease 0 8 0\ndomain-name  OrangeShopWifi\ndefault-router 10.32.60.1\ndns-server 212.224.129.90 212.224.129.94\nnetwork 10.32.60.0 255.255.255.0\nexit\nip dhcp pool OrangeShopDigitalSignage-VLAN30\nlease 0 8 0\ndefault-router 10.42.60.1\ndomain-name  OrangeShopDigitalSignage\ndns-server 212.224.129.90 212.224.129.94\nnetwork 10.42.60.0 255.255.255.0\nexit\nip dhcp pool OrangeShopSecurity-VLAN40\nlease 0 8 0\ndefault-router 10.52.60.1\ndomain-name  OrangeShopSecurity\ndns-server 212.224.129.90 212.224.129.94\nnetwork 10.52.60.0 255.255.255.0\nexit\nip dhcp pool TEST-MAARTEN\ndns-server 10.200.19.4 10.200.19.5\nexit\nip dhcp pool TEST-FEDERALE-WOUTER\ndns-server 10.20.25.6 10.0.1.228 172.20.64.13\ndomain-name  federale.be\nexit\nip dhcp pool TEST1\ndns-server 1.1.1.1 192.168.50.20 192.168.50.30 2.2.2.2 3.3.3.3\nexit\n!\n'
+ip dhcp vrf INTERNET excluded-address 192.168.10.1
+ip dhcp pool DHCP_LBB                
+ vrf INTERNET
+ lease 0 8 0
+default-router 192.168.10.1
+dns-server 212.224.255.252 212.224.255.254
+network 192.168.10.0 255.255.255.0
+exit
+ip dhcp pool OrangeShopWifi-VLAN20
+lease 0 8 0
+domain-name  OrangeShopWifi
+default-router 10.32.60.1
+dns-server 212.224.129.90 212.224.129.94
+network 10.32.60.0 255.255.255.0
+exit
+ip dhcp pool OrangeShopDigitalSignage-VLAN30
+lease 0 8 0
+default-router 10.42.60.1
+domain-name  OrangeShopDigitalSignage
+dns-server 212.224.129.90 212.224.129.94
+network 10.42.60.0 255.255.255.0
+exit
+ip dhcp pool OrangeShopSecurity-VLAN40
+lease 0 8 0
+default-router 10.52.60.1
+domain-name  OrangeShopSecurity
+dns-server 212.224.129.90 212.224.129.94
+network 10.52.60.0 255.255.255.0
+exit
+ip dhcp pool TEST-MAARTEN
+dns-server 10.200.19.4 10.200.19.5
+exit
+ip dhcp pool TEST-FEDERALE-WOUTER
+dns-server 10.20.25.6 10.0.1.228 172.20.64.13
+domain-name  federale.be
+exit
+ip dhcp pool TEST1
+dns-server 1.1.1.1 192.168.50.20 192.168.50.30 2.2.2.2 3.3.3.3
+exit
+!
+
 ```
 
 **Help:** execute the command "show running-config ip dhcp"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show running-config ip route
 
 **Output:**
 ```
-'ip route 94.105.1.119 255.255.255.255 192.168.100.2\nip route 94.105.16.130 255.255.255.255 Bvi 200\nip route 94.105.34.2 255.255.255.255 192.168.100.3\n'
+ip route 94.105.1.119 255.255.255.255 192.168.100.2
+ip route 94.105.16.130 255.255.255.255 Bvi 200
+ip route 94.105.34.2 255.255.255.255 192.168.100.3
+
 ```
 
 **Help:** execute the command "show running-config ip route"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show snmp community
 
 **Output:**
 ```
-'SNMP write community: Kl3t5k0p\nSNMP access control lists :52\nSNMP read community: 5pr1t5\nSNMP access control lists :52\n'
+SNMP write community: Kl3t5k0p
+SNMP access control lists :52
+SNMP read community: 5pr1t5
+SNMP access control lists :52
+
 ```
 
 **Help:** execute the command "show snmp community"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show sntp
 
 **Output:**
 ```
-'server                                  source                                  stratum  version   last     receive\n101.208.220.147                          Loopback 1                              \n10.208.220.19                           Loopback 1                                 5       1      00:00:39   synced\n\nbroadcast client mode is not enabled\nSNTP Authentication is not enabled\n'
+server                                  source                                  stratum  version   last     receive
+101.208.220.147                          Loopback 1                              
+10.208.220.19                           Loopback 1                                 5       1      00:00:39   synced
+
+broadcast client mode is not enabled
+SNTP Authentication is not enabled
+
 ```
 
 **Help:** execute the command "show sntp"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show soft-file info
 
 **Output:**
 ```
-'Binary file informations : \n  file name              = /BSA/binaries/OneOs\n  software version       = ONEOS92-DUAL_FT-V5.2R2E7_HA8\n  software creation date = 04/08/20 17:31:55\n  file size              = 13852345 (0xD35EB9)\n  header checksum        = 0xD920F600\n  computed checksum      = 0xD920F600\n  target device          = One92\nfile is OK\n'
+Binary file informations : 
+  file name              = /BSA/binaries/OneOs
+  software version       = ONEOS92-DUAL_FT-V5.2R2E7_HA8
+  software creation date = 04/08/20 17:31:55
+  file size              = 13852345 (0xD35EB9)
+  header checksum        = 0xD920F600
+  computed checksum      = 0xD920F600
+  target device          = One92
+file is OK
+
 ```
 
 **Help:** execute the command "show soft-file info"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show software-image
 
 **Output:**
 ```
-'--------------- Active bank ---------------\nSoftware version : OneOS-pCPE-ARM_pi1-6.8.4\nCreation date    : 2022-08-02 16:59:01\nHeader checksum  : 0x16368E60\n\n-------------- Alternate bank -------------\nSoftware version : OneOS-pCPE-ARM_pi1-6.6.1m3\nCreation date    : 2021-03-26 11:13:54\nHeader checksum  : 0x73ED8876\n'
+--------------- Active bank ---------------
+Software version : OneOS-pCPE-ARM_pi1-6.8.4
+Creation date    : 2022-08-02 16:59:01
+Header checksum  : 0x16368E60
+
+-------------- Alternate bank -------------
+Software version : OneOS-pCPE-ARM_pi1-6.6.1m3
+Creation date    : 2021-03-26 11:13:54
+Header checksum  : 0x73ED8876
+
 ```
 
 **Help:** execute the command "show software-image"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show system hardware
 
 **Output:**
 ```
-' HARDWARE DESCRIPTION\n\n  Device   : LBB_150\n  CPU      : BCM63136 - ARMv7 Processor rev 1 (v7l)\n\n Core Freq : 1000MHz   DDR Freq : 800MHz (1600 MT/s data rate) \n Physical Ram size :   1GiB  \n Nand Flash size : 512MiB  \n\n\n Secure Boot protection : yes\n\n\n Local   : x Uplink : x Radio :      Usb :     \n\n Local   : GIGABIT ETHERNET + SFP ETHERNET + SWITCH ETHERNET / 4 ports\n Uplink  : AVDSL/1 Pair POTS \n Wlan 0 : BCM43602 - 2,4GHz - 3x3\n Wlan 1 : BCM4366 - 5GHz - 4x4\n'
+ HARDWARE DESCRIPTION
+
+  Device   : LBB_150
+  CPU      : BCM63136 - ARMv7 Processor rev 1 (v7l)
+
+ Core Freq : 1000MHz   DDR Freq : 800MHz (1600 MT/s data rate) 
+ Physical Ram size :   1GiB  
+ Nand Flash size : 512MiB  
+
+
+ Secure Boot protection : yes
+
+
+ Local   : x Uplink : x Radio :      Usb :     
+
+ Local   : GIGABIT ETHERNET + SFP ETHERNET + SWITCH ETHERNET / 4 ports
+ Uplink  : AVDSL/1 Pair POTS 
+ Wlan 0 : BCM43602 - 2,4GHz - 3x3
+ Wlan 1 : BCM4366 - 5GHz - 4x4
+
 ```
 
 **Help:** execute the command "show system hardware"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show system secure-crashlog
 
 **Output:**
 ```
-"coredump_00011_2022-02-25T2003_tExcTask-6-1668-0-0.txt\n------------------------------------------------------\nCrash caused by     : Program terminated with signal SIGABRT, Aborted.\nCrash time          : 2022-02-25 2003\nCrash filename      : /BSA/dump/coredump_00011_2022-02-25T2003_tExcTask-6-1668-0-0.xz\nDevice identifier   : PBXPLUG_103 S/N T2137008344020891\n\nSoftware version    : OneOS-pCPE-ARM_pi2-6.7.1m2 (integci_r1_1pa290b4_dev_photo116)\nSoftware created on : 2021-10-08 15:30:45\nBoot version        : BOOT-ARM_hw2-3.1.3 (integ_r1_1pa4b1_dev_b313std (CFE r1_3pa4))\nBoot created on     : 2019-05-27 11:12:53\nRecovery version    : OneOs-RCY-ARM_pi2-1.3.6 (integ_r1_1pa19b1_dev_b136std)\nRecovery created on : 2019-10-11 09:21:48\n\nSystem started      : 2022-01-28 03:00:51\nStart caused by     : Generic software reboot request\nSys Up time         : 28d 17h 4m 3s\nCore was generated by '/usr/bin/cp_voice'\n* Backtrace\n*\n#0  0xb55a9ab4 in raise () from /lib/libc.so.6\nNo symbol table info available.\n#1  0xb55ad774 in abort () from /lib/libc.so.6\nNo symbol table info available.\n#2  0xb55a259c in __assert_fail_base () from /lib/libc.so.6\nNo symbol table info available.\n#3  0xb55a2678 in __assert_fail () from /lib/libc.so.6\nNo symbol table info available.\n#4  0xb56c2e4c in pthread_mutex_lock () from /lib/libpthread.so.0\nNo symbol table info available.\n#5  0xb54a034c in wdog_valid () from /usr/lib/libv2lin.so\nNo symbol table info available.\n#6  0xb54a0434 in process_tick_for () from /usr/lib/libv2lin.so\nNo symbol table info available.\n#7  0xb54a068c in process_timer_list () from /usr/lib/libv2lin.so\nNo symbol table info available.\n#8  0xb5494774 in exception_task () from /usr/lib/libv2lin.so\nNo symbol table info available.\n#9  0xb549524c in task_wrapper () from /usr/lib/libv2lin.so\nNo symbol table info available.\n#10 0xb56bff20 in start_thread () from /lib/libpthread.so.0\nNo symbol table info available.\n#11 0xb5651e30 in ?? () from /lib/libc.so.6\n*\n* Registers\n*\nr0             0x0      0\nr1             0x708    1800\nr2             0x6      6\nr3             0xb48678b0       3028711600\nr4             0x2      2\nr5             0xb56b70a4       3043717284\nr6             0xb48673f0       3028710384\nr7             0x10c    268\nr8             0x0      0\nr9             0xb4866864       3028707428\nr10            0x1      1\nr11            0x134170 1261936\nr12            0x0      0\nsp             0xb486685c       0xb486685c\nlr             0xb55ad774       3042629492\npc             0xb55a9ab4       0xb55a9ab4 <raise+52>\ncpsr           0x20030010       537067536\n*\n* Current instructions\n*\n=> 0xb55a9ab4 <raise+52>:       cmn     r0, #4096       ; 0x1000\n   0xb55a9ab8 <raise+56>:       pop     {r7}            ; (ldr r7, [sp], #4)\n   0xb55a9abc <raise+60>:       ldrhi   r2, [pc, #44]   ; 0xb55a9af0 <raise+112>\n   0xb55a9ac0 <raise+64>:       rsbhi   r1, r0, #0\n   0xb55a9ac4 <raise+68>:       mvnhi   r0, #0\n   0xb55a9ac8 <raise+72>:       ldrhi   r2, [pc, r2]\n   0xb55a9acc <raise+76>:       strhi   r1, [r3, r2]\n   0xb55a9ad0 <raise+80>:       bx      lr\n   0xb55a9ad4 <raise+84>:       cmp     r0, #0\n   0xb55a9ad8 <raise+88>:       bgt     0xb55a9aac <raise+44>\n   0xb55a9adc <raise+92>:       bic     r12, r0, #-2147483648   ; 0x80000000\n   0xb55a9ae0 <raise+96>:       cmp     r12, #0\n   0xb55a9ae4 <raise+100>:      rsbne   r0, r0, #0\n   0xb55a9ae8 <raise+104>:      moveq   r0, r1\n   0xb55a9aec <raise+108>:      b       0xb55a9aac <raise+44>\n   0xb55a9af0 <raise+112>:      andseq  r12, r0, r12, ror #11\n\n*\n* End of file\n*\n"
+coredump_00011_2022-02-25T2003_tExcTask-6-1668-0-0.txt
+------------------------------------------------------
+Crash caused by     : Program terminated with signal SIGABRT, Aborted.
+Crash time          : 2022-02-25 2003
+Crash filename      : /BSA/dump/coredump_00011_2022-02-25T2003_tExcTask-6-1668-0-0.xz
+Device identifier   : PBXPLUG_103 S/N T2137008344020891
+
+Software version    : OneOS-pCPE-ARM_pi2-6.7.1m2 (integci_r1_1pa290b4_dev_photo116)
+Software created on : 2021-10-08 15:30:45
+Boot version        : BOOT-ARM_hw2-3.1.3 (integ_r1_1pa4b1_dev_b313std (CFE r1_3pa4))
+Boot created on     : 2019-05-27 11:12:53
+Recovery version    : OneOs-RCY-ARM_pi2-1.3.6 (integ_r1_1pa19b1_dev_b136std)
+Recovery created on : 2019-10-11 09:21:48
+
+System started      : 2022-01-28 03:00:51
+Start caused by     : Generic software reboot request
+Sys Up time         : 28d 17h 4m 3s
+Core was generated by '/usr/bin/cp_voice'
+* Backtrace
+*
+#0  0xb55a9ab4 in raise () from /lib/libc.so.6
+No symbol table info available.
+#1  0xb55ad774 in abort () from /lib/libc.so.6
+No symbol table info available.
+#2  0xb55a259c in __assert_fail_base () from /lib/libc.so.6
+No symbol table info available.
+#3  0xb55a2678 in __assert_fail () from /lib/libc.so.6
+No symbol table info available.
+#4  0xb56c2e4c in pthread_mutex_lock () from /lib/libpthread.so.0
+No symbol table info available.
+#5  0xb54a034c in wdog_valid () from /usr/lib/libv2lin.so
+No symbol table info available.
+#6  0xb54a0434 in process_tick_for () from /usr/lib/libv2lin.so
+No symbol table info available.
+#7  0xb54a068c in process_timer_list () from /usr/lib/libv2lin.so
+No symbol table info available.
+#8  0xb5494774 in exception_task () from /usr/lib/libv2lin.so
+No symbol table info available.
+#9  0xb549524c in task_wrapper () from /usr/lib/libv2lin.so
+No symbol table info available.
+#10 0xb56bff20 in start_thread () from /lib/libpthread.so.0
+No symbol table info available.
+#11 0xb5651e30 in ?? () from /lib/libc.so.6
+*
+* Registers
+*
+r0             0x0      0
+r1             0x708    1800
+r2             0x6      6
+r3             0xb48678b0       3028711600
+r4             0x2      2
+r5             0xb56b70a4       3043717284
+r6             0xb48673f0       3028710384
+r7             0x10c    268
+r8             0x0      0
+r9             0xb4866864       3028707428
+r10            0x1      1
+r11            0x134170 1261936
+r12            0x0      0
+sp             0xb486685c       0xb486685c
+lr             0xb55ad774       3042629492
+pc             0xb55a9ab4       0xb55a9ab4 <raise+52>
+cpsr           0x20030010       537067536
+*
+* Current instructions
+*
+=> 0xb55a9ab4 <raise+52>:       cmn     r0, #4096       ; 0x1000
+   0xb55a9ab8 <raise+56>:       pop     {{r7}}            ; (ldr r7, [sp], #4)
+   0xb55a9abc <raise+60>:       ldrhi   r2, [pc, #44]   ; 0xb55a9af0 <raise+112>
+   0xb55a9ac0 <raise+64>:       rsbhi   r1, r0, #0
+   0xb55a9ac4 <raise+68>:       mvnhi   r0, #0
+   0xb55a9ac8 <raise+72>:       ldrhi   r2, [pc, r2]
+   0xb55a9acc <raise+76>:       strhi   r1, [r3, r2]
+   0xb55a9ad0 <raise+80>:       bx      lr
+   0xb55a9ad4 <raise+84>:       cmp     r0, #0
+   0xb55a9ad8 <raise+88>:       bgt     0xb55a9aac <raise+44>
+   0xb55a9adc <raise+92>:       bic     r12, r0, #-2147483648   ; 0x80000000
+   0xb55a9ae0 <raise+96>:       cmp     r12, #0
+   0xb55a9ae4 <raise+100>:      rsbne   r0, r0, #0
+   0xb55a9ae8 <raise+104>:      moveq   r0, r1
+   0xb55a9aec <raise+108>:      b       0xb55a9aac <raise+44>
+   0xb55a9af0 <raise+112>:      andseq  r12, r0, r12, ror #11
+
+*
+* End of file
+*
+
 ```
 
 **Help:** execute the command "show system secure-crashlog"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show system status
 
 **Output:**
 ```
-'System Information for device MB420SAVad0UFPE0BNW S/N T1703006230033175\n\nSoftware version    : ONEOS16-MONO_FT-V5.2R2E7_HA8\nSoftware created on : 04/08/20 18:14:48\nLicense token       : None\nBoot version        : BOOT16-SEC-V3.4R3E40C\nBoot created on     : 14/06/16 09:34:31\n\nBoot Flags          : 0x00000008\n\nCurrent system time : 29/09/22 13:41:52\nSystem started      : 02/07/22 16:20:10\nStart caused by     : Power Fail detection\nSys Up time         : 88d 21h 21m 42s\nSystem clock ticks  : 384072819\n\nCurrent CPU load    : 16.1%\nCurrent Critical Tasks CPU load           : 14.4%\nCurrent Non Critical Tasks CPU load       : 1.7%\nAverage CPU load (5 / 60 Minutes)         : 15.8% / 15.6%\n\nFree / Max RAM      :  163,04 /  208,59 MB\n'
+System Information for device MB420SAVad0UFPE0BNW S/N T1703006230033175
+
+Software version    : ONEOS16-MONO_FT-V5.2R2E7_HA8
+Software created on : 04/08/20 18:14:48
+License token       : None
+Boot version        : BOOT16-SEC-V3.4R3E40C
+Boot created on     : 14/06/16 09:34:31
+
+Boot Flags          : 0x00000008
+
+Current system time : 29/09/22 13:41:52
+System started      : 02/07/22 16:20:10
+Start caused by     : Power Fail detection
+Sys Up time         : 88d 21h 21m 42s
+System clock ticks  : 384072819
+
+Current CPU load    : 16.1%
+Current Critical Tasks CPU load           : 14.4%
+Current Non Critical Tasks CPU load       : 1.7%
+Average CPU load (5 / 60 Minutes)         : 15.8% / 15.6%
+
+Free / Max RAM      :  163,04 /  208,59 MB
+
 ```
 
 **Help:** execute the command "show system status"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show tacacs
 
 **Output:**
 ```
-' TACACS+ SERVER Statistics\n --------------------------\n  Tacacs+ Server  Address     : 91.208.220.142\n  Server port                 : 49\n  Number of sockets open      : 14196\n  Number of sockets closed    : 13677\n  Number of sockets aborted   : 0\n  Number of sockets error     : 0\n  Number of sockets timeout   : 0\n  Number of connect fails     : 4\n  Number of packets sent      : 14590\n  Number of packets received  : 14590\n\n  Tacacs+ Server  Address     : 1.2.3.4\n  Server port                 : 49\n  Number of sockets open      : 5124\n  Number of sockets closed    : 4933\n  Number of sockets aborted   : 0\n  Number of sockets error     : 0\n  Number of sockets timeout   : 0\n  Number of connect fails     : 0\n  Number of packets sent      : 5264\n  Number of packets received  : 5264\n\n  Tacacs+ Server  Address     : 11.22.33.44\n  Server port                 : 49\n  Number of sockets open      : 126\n  Number of sockets closed    : 119\n  Number of sockets aborted   : 0\n  Number of sockets error     : 0\n  Number of sockets timeout   : 0\n  Number of connect fails     : 21\n  Number of packets sent      : 105\n  Number of packets received  : 105\n'
+ TACACS+ SERVER Statistics
+ --------------------------
+  Tacacs+ Server  Address     : 91.208.220.142
+  Server port                 : 49
+  Number of sockets open      : 14196
+  Number of sockets closed    : 13677
+  Number of sockets aborted   : 0
+  Number of sockets error     : 0
+  Number of sockets timeout   : 0
+  Number of connect fails     : 4
+  Number of packets sent      : 14590
+  Number of packets received  : 14590
+
+  Tacacs+ Server  Address     : 1.2.3.4
+  Server port                 : 49
+  Number of sockets open      : 5124
+  Number of sockets closed    : 4933
+  Number of sockets aborted   : 0
+  Number of sockets error     : 0
+  Number of sockets timeout   : 0
+  Number of connect fails     : 0
+  Number of packets sent      : 5264
+  Number of packets received  : 5264
+
+  Tacacs+ Server  Address     : 11.22.33.44
+  Server port                 : 49
+  Number of sockets open      : 126
+  Number of sockets closed    : 119
+  Number of sockets aborted   : 0
+  Number of sockets error     : 0
+  Number of sockets timeout   : 0
+  Number of connect fails     : 21
+  Number of packets sent      : 105
+  Number of packets received  : 105
+
 ```
 
 **Help:** execute the command "show tacacs"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show tacacs-server
 
 **Output:**
 ```
-'----- List of TACACS+ server -----\n\n  IP address      Port      Secret Key                     Source address     VRF\n 1.1.1.1   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1\n  2.2.2.2   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1\n  3.3.3.3   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1\n'
+----- List of TACACS+ server -----
+
+  IP address      Port      Secret Key                     Source address     VRF
+ 1.1.1.1   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+  2.2.2.2   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+  3.3.3.3   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+
 ```
 
 **Help:** execute the command "show tacacs-server"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show track all
 
 **Output:**
 ```
-'\n Track 1 \n\n   interface GigabitEthernet 0/0 ip-routing \n\n   Ip-routing is UP \n\n   1 Change, Last Change 12:48:41 \n\n   Up Delay 2, Down Delay 2\n\n   Poll Interval (in msec) 1000 \n\n\n Track 2 \n\n   interface GigabitEthernet 0/1 ip-routing \n\n   Ip-routing is UP \n\n   1 Change, Last Change 12:48:41 \n\n   Up Delay 2, Down Delay 2\n\n   Poll Interval (in msec) 1000 \n\n\n Track 3 \n\n   interface GigabitEthernet 0/2 ip-routing \n\n   Ip-routing is UP \n\n   1 Change, Last Change 12:48:41 \n\n   Up Delay 2, Down Delay 2\n\n   Poll Interval (in msec) 1000 \n\n\n Track 4 \n\n   VRRP Id 4 vrf ORANGE_APN_WGKAIOT_0001 \n\n   Vrrp is UP \n\n   3 Change, Last Change 09:14:18 \n\n   Up Delay 2, Down Delay 2\n\n   Poll Interval (in msec) 3000 \n'
+
+ Track 1 
+
+   interface GigabitEthernet 0/0 ip-routing 
+
+   Ip-routing is UP 
+
+   1 Change, Last Change 12:48:41 
+
+   Up Delay 2, Down Delay 2
+
+   Poll Interval (in msec) 1000 
+
+
+ Track 2 
+
+   interface GigabitEthernet 0/1 ip-routing 
+
+   Ip-routing is UP 
+
+   1 Change, Last Change 12:48:41 
+
+   Up Delay 2, Down Delay 2
+
+   Poll Interval (in msec) 1000 
+
+
+ Track 3 
+
+   interface GigabitEthernet 0/2 ip-routing 
+
+   Ip-routing is UP 
+
+   1 Change, Last Change 12:48:41 
+
+   Up Delay 2, Down Delay 2
+
+   Poll Interval (in msec) 1000 
+
+
+ Track 4 
+
+   VRRP Id 4 vrf ORANGE_APN_WGKAIOT_0001 
+
+   Vrrp is UP 
+
+   3 Change, Last Change 09:14:18 
+
+   Up Delay 2, Down Delay 2
+
+   Poll Interval (in msec) 3000 
+
 ```
 
 **Help:** execute the command "show track all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show transceiver equipment
 
 **Output:**
 ```
-'\nNo SFP module present\n'
+
+No SFP module present
+
 ```
 
 **Help:** execute the command "show transceiver equipment"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice dial-peer voice voip all
 
 **Output:**
 ```
-'\tDial Peer\t\t\t\t\t\t0\n\tConfig state\t\t\t\t\t\tup\n\tOperstatus\t\t\t\t\t\tup\n\tRegistration status\t\t\t\t\tunused\n\tCurrent protocol\t\t\t\t\tsip  (UDP)\n\tlastOK \t\t\t\t\t\t\t0\n\tUser Agent\t\t\t\t\t\t(null)\n\t Bandwidth really used/CAC value/unused\t\t\t0 / 0/ 2147483647 bps\n\tCurrent sip-protocol-mode\t\t\t\tipv4  (config : ipv4)\n\tCurrent Calls\t\t\t\t\t\t0\n\t\t\t\tOutgoing Calls\n\t\tOutgoing Calls\t\t\t\t\t0\n\t\tBandwidth really used/CAC value/unused\t\t0 / 0/ 2147483647 bps\n\t\tOutgoing calls failures\t\t\t\t0\n\t\tQ931 Call failures\t\t\t\t0\n\t\t\tCause Class 0 (normal event)\t\t0\n\t\t\tCause Class 1 (normal event)\t\t0\n\t\t\t\tNormal Cause (16)\t\t0\n\t\t\t\tUser busy (17)\t\t\t0\n\t\t\t\tNo answer (18)\t\t\t0\n\t\t\tCause Class 2 (unavailable resources)\t0\n\t\t\tCause Class 3 (unavailable service)\t0\n\t\t\tCause Class 4 (service not provided)\t0\n\t\t\tCause Class 5 (invalid message)\t\t0\n\t\t\tCause Class 6 (protocol error)\t\t0\n\t\t\tCause Class 7 (interworking)\t\t0\n\t\tSIP Call failures\t\t\t\t0\n\t\t\tIncompatible capabilities\t\t0\n\t\t\tProtocol errors\t\t\t\t0\n\t\tInternal call failures\t\t\t\t0\n\t \t\tDSP unavailable\t\t\t\t0\n\t\t\tMax-bandwidth exceeded\t\t\t0\n\t\t\tMax-connection exceeded\t\t\t0\n\t\t\tRTP dynamic-payload error\t\t0\n\t\t\tNot specified\t\t\t\t0\n\t\t\t\tIncoming Calls\n\t\tIncoming calls\t\t\t\t\t0\n\t\tBandwidth really used/CAC value/unused\t\t0 / 0/ 2147483647 bps\n\t\tIncoming calls failures\t\t\t\t0\n\t\tLocal Port Call failures\t\t\t0\n\t\tSIP Call failures\t\t\t\t0\n\t\t\tIncompatible capabilities\t\t0\n\t\t\tProtocol errors\t\t\t\t0\n\t\t Internal call failures\t\t\t\t0\n\t\t\tDSP unavailable\t\t\t\t0\n\t\t\tUnknown number\t\t\t\t0\n\t\t\tChannel / port unavailable\t\t0\n\t\t\tMax-bandwidth exceeded\t\t\t0\n\t\t\tMax-connection exceeded\t\t\t0\n\t\t\tRTP dynamic-payload error\t\t0\n\t\t\tNot specified\t\t\t\t0\n\t\t\t\tVoice & Fax statistics\n\t \tNumber of real dsp switching\t\t\t0\n\tRTP statistics\n\t\tNumber of transmitted packets\t\t\t0\n\t\tNumber of received packets\t\t\t0\n\t\tNumber of transmitted bytes\t\t\t0\n\t\tNumber of received bytes\t\t\t0\n\t\tNumber of excessive jitter events\t\t0\n\t\tNumber of lost packets\t\t\t\t0\n\t\tNumber of invalid packets\t\t\t0\n\tNumber of calls with frame error rate\n\t\t total <0.01%  <0.1%  <0.5%    <1%    <5%   >=5%\n\t\t     0      0      0      0      0      0      0\n\tModem passthrough\n\t\tNumber of switching to modem mode\t\t0\n\tT38 FAX Calls\n\t\tNumber of outgoing fax\t\t\t\t0\n\t\tNumber of incoming fax\t\t\t\t0\n\t \tNumber of failures\t\t\t\t0\n\t\t\tRequest Mode failure\t\t\t0\n\t\t\tPre-message procedure failure\t\t0\n\t\t\tPage failure\t\t\t\t0\n\t\tNumber of transmitted packets\t\t\t0\n\t\tNumber of received packets\t\t\t0\n\t\tNumber of transmitted bytes\t\t\t0\n\t\tNumber of received bytes\t\t\t0\n\t\tNumber of lost packets\t\t\t\t0\n '
+	Dial Peer						0
+	Config state						up
+	Operstatus						up
+	Registration status					unused
+	Current protocol					sip  (UDP)
+	lastOK 							0
+	User Agent						(null)
+	 Bandwidth really used/CAC value/unused			0 / 0/ 2147483647 bps
+	Current sip-protocol-mode				ipv4  (config : ipv4)
+	Current Calls						0
+				Outgoing Calls
+		Outgoing Calls					0
+		Bandwidth really used/CAC value/unused		0 / 0/ 2147483647 bps
+		Outgoing calls failures				0
+		Q931 Call failures				0
+			Cause Class 0 (normal event)		0
+			Cause Class 1 (normal event)		0
+				Normal Cause (16)		0
+				User busy (17)			0
+				No answer (18)			0
+			Cause Class 2 (unavailable resources)	0
+			Cause Class 3 (unavailable service)	0
+			Cause Class 4 (service not provided)	0
+			Cause Class 5 (invalid message)		0
+			Cause Class 6 (protocol error)		0
+			Cause Class 7 (interworking)		0
+		SIP Call failures				0
+			Incompatible capabilities		0
+			Protocol errors				0
+		Internal call failures				0
+	 		DSP unavailable				0
+			Max-bandwidth exceeded			0
+			Max-connection exceeded			0
+			RTP dynamic-payload error		0
+			Not specified				0
+				Incoming Calls
+		Incoming calls					0
+		Bandwidth really used/CAC value/unused		0 / 0/ 2147483647 bps
+		Incoming calls failures				0
+		Local Port Call failures			0
+		SIP Call failures				0
+			Incompatible capabilities		0
+			Protocol errors				0
+		 Internal call failures				0
+			DSP unavailable				0
+			Unknown number				0
+			Channel / port unavailable		0
+			Max-bandwidth exceeded			0
+			Max-connection exceeded			0
+			RTP dynamic-payload error		0
+			Not specified				0
+				Voice & Fax statistics
+	 	Number of real dsp switching			0
+	RTP statistics
+		Number of transmitted packets			0
+		Number of received packets			0
+		Number of transmitted bytes			0
+		Number of received bytes			0
+		Number of excessive jitter events		0
+		Number of lost packets				0
+		Number of invalid packets			0
+	Number of calls with frame error rate
+		 total <0.01%  <0.1%  <0.5%    <1%    <5%   >=5%
+		     0      0      0      0      0      0      0
+	Modem passthrough
+		Number of switching to modem mode		0
+	T38 FAX Calls
+		Number of outgoing fax				0
+		Number of incoming fax				0
+	 	Number of failures				0
+			Request Mode failure			0
+			Pre-message procedure failure		0
+			Page failure				0
+		Number of transmitted packets			0
+		Number of received packets			0
+		Number of transmitted bytes			0
+		Number of received bytes			0
+		Number of lost packets				0
+ 
 ```
 
 **Help:** execute the command "show voice dial-peer voice voip all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice mos
 
 **Output:**
 ```
-'     ------------------------- Call Quality -------------------------\n\n     ------------------------- Current hour -------------------------\n         Number of Call       : 0 \n         Average of MOS       : 0.00 \n         Minimum MOS          : 0.00 \n         Maximum MOS          : 0.00 \n         Average of ERL       : 0 \n         Average of ACOM      : 0 \n         Average of loss-rate : 0 \n         Average of jitter    : 0 \n         Average of Max delay : 0 \n         Average Pdd          : 0 \n\n     ------------------------- Previous hour ------------------------\n         Number of Call       : 1 \n         Average of MOS       : 4.34 \n         Minimum MOS          : 4.34 \n         Maximum MOS          : 4.34 \n         Average of ERL       : 14 \n         Average of ACOM      : 43 \n         Average of loss-rate : 0 \n         Average of jitter    : 0 \n         Average of Max delay : 3 \n         Average Pdd          : 0 \n\n     ----------------------------------------------------------------\n'
+     ------------------------- Call Quality -------------------------
+
+     ------------------------- Current hour -------------------------
+         Number of Call       : 0 
+         Average of MOS       : 0.00 
+         Minimum MOS          : 0.00 
+         Maximum MOS          : 0.00 
+         Average of ERL       : 0 
+         Average of ACOM      : 0 
+         Average of loss-rate : 0 
+         Average of jitter    : 0 
+         Average of Max delay : 0 
+         Average Pdd          : 0 
+
+     ------------------------- Previous hour ------------------------
+         Number of Call       : 1 
+         Average of MOS       : 4.34 
+         Minimum MOS          : 4.34 
+         Maximum MOS          : 4.34 
+         Average of ERL       : 14 
+         Average of ACOM      : 43 
+         Average of loss-rate : 0 
+         Average of jitter    : 0 
+         Average of Max delay : 3 
+         Average Pdd          : 0 
+
+     ----------------------------------------------------------------
+
 ```
 
 **Help:** execute the command "show voice mos"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice sip-gateway
 
 **Output:**
 ```
-'\tSip-Gateway statistics : \n\tGateway state\t\t\t\tup\n\tOperstatus\t\t\t\tup\n\tSIP-GW entity opened sockets:\n\t  UDP sockets:\n\t\tSockidx: 0, 1.2.3.4:5060\n\tRegistration state\t\t\tregistered\n\tRTP monitoring\t\t\t\tdisable\n\tNb Registered endpoints/Max to register/Registrar server:\n\t\t[1/1]\t\t\t\tblabla:5060\n\tBandwidth really used/CAC value/unused\t0 / 0/ 2147483647 bps \n\tThreshold of bandwidth to switch\tunused\n\tMax Bandwidth exceeded\t\t\t0\n\tNumber of lower switching\t\t0\n\tRegistration errors\t\t\t0\n\n\tCurrent sip-protocol-mode\t\tipv4  (config : ipv4)\n\tCurrent call\t\t\t\t0\n\tCalls released by rtp monitoring\t0\n\n\tAuthentication Rejects\t\t\t0\n\n\tDropped packets\t\t\t\t0\n\t\tdue to rate limitation\t\t0\n\t\tdue to memory limitation\t0\n\t\tdue to CPU limitation\t\t0\n\t\tdue to denied by acl\t\t0\n\t\tdue to unknown proxy\t\t0\n'
+	Sip-Gateway statistics : 
+	Gateway state				up
+	Operstatus				up
+	SIP-GW entity opened sockets:
+	  UDP sockets:
+		Sockidx: 0, 1.2.3.4:5060
+	Registration state			registered
+	RTP monitoring				disable
+	Nb Registered endpoints/Max to register/Registrar server:
+		[1/1]				blabla:5060
+	Bandwidth really used/CAC value/unused	0 / 0/ 2147483647 bps 
+	Threshold of bandwidth to switch	unused
+	Max Bandwidth exceeded			0
+	Number of lower switching		0
+	Registration errors			0
+
+	Current sip-protocol-mode		ipv4  (config : ipv4)
+	Current call				0
+	Calls released by rtp monitoring	0
+
+	Authentication Rejects			0
+
+	Dropped packets				0
+		due to rate limitation		0
+		due to memory limitation	0
+		due to CPU limitation		0
+		due to denied by acl		0
+		due to unknown proxy		0
+
 ```
 
 **Help:** execute the command "show voice sip-gateway"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice voice-port all
 
 **Output:**
 ```
-'\tport :  0   lp :  0   sense : PRI         if-state : noShutdown  (vp-state : noShutdown)               \n\tport :  1   lp :  0   sense : BRI         if-state : Shutdown    (vp-state : noShutdown)               \n\tport :  2   lp :  1   sense : BRI         if-state : Shutdown    (vp-state : noShutdown)               \n\tport :  3   lp :  0   sense : POTS [FXS]  vp-state : noShutdown               \n\tport :  4   lp :  1   sense : POTS [FXS]  vp-state : noShutdown               \n\tport :  5   lp :  2   sense : POTS [FXS]  vp-state : noShutdown               \n\tport :  6   lp :  3   sense : POTS [FXS]  vp-state : noShutdown               \n'
+	port :  0   lp :  0   sense : PRI         if-state : noShutdown  (vp-state : noShutdown)               
+	port :  1   lp :  0   sense : BRI         if-state : Shutdown    (vp-state : noShutdown)               
+	port :  2   lp :  1   sense : BRI         if-state : Shutdown    (vp-state : noShutdown)               
+	port :  3   lp :  0   sense : POTS [FXS]  vp-state : noShutdown               
+	port :  4   lp :  1   sense : POTS [FXS]  vp-state : noShutdown               
+	port :  5   lp :  2   sense : POTS [FXS]  vp-state : noShutdown               
+	port :  6   lp :  3   sense : POTS [FXS]  vp-state : noShutdown               
+
 ```
 
 **Help:** execute the command "show voice voice-port all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice voice-port pri all
 
 **Output:**
 ```
-'\tvoice port\t\t\t\t5/0\n\t\tphysical type\t\t\tE1\n\t\tprotocol descriptor\t\tE1_PRI\n\t\tconfig state\t\t\tup\n\t\tloop state\t\t\tdown \n\t\tframing\t\t\t\tDF\n\t\tlayer 1 status\t\t\tdeactivated\n\t\t Alarm Indication Signal (AIS)\tOFF\n\t\t Loss Off Signal (LOS)\t\tON\n\t\t Remote Alarm Indication (RAI)\tOFF\n\t\t pri AIS occurrence(s)\t\t0\n\t\t pri LOS occurrence(s)\t\t1\n\t\t pri RAI occurrence(s)\t\t0\n\t\tlayer 2 status\t\t\tdeactivated\n\t\tattached voip dial peer\t\t0\n\t\tnumber of voice communication\t0\n\t\tChannel(s) used\t\t\t\n \n\t\tOutgoing calls\t\t\t\t0\n\t\tOutgoing calls failures\t\t\t0\n\t \t\tPhysical Interface down\t\t\t0\n\t\t\tCause Class 0 (normal event)\t\t0\n\t\t\tCause Class 1 (normal event)\t\t0\n\t\t\t\tNormal Cause (16)\t\t0\n\t\t \t\tUser busy (17)\t\t\t0\n\t\t\t\tNo answer (18)\t\t\t0\n\t\t\tCause Class 2 (unavailable resources)\t0\n\t\t\tCause Class 3 (unavailable service)\t0\n\t\t\tCause Class 4 (service not provided)\t0\n\t\t\tCause Class 5 (invalid message)\t\t0\n\t\t\tCause Class 6 (protocol error)\t\t0\n\t\t\tCause Class 7 (interworking)\t\t0\n \n\t\tIncoming calls\t\t\t\t0\n\t\tIncoming calls backup invoked\t\t0\n\t\tIncoming calls failures\t\t\t0\n\t\t\tRemote failure\t\t\t\t0\n\t\t\tUnknown number\t\t\t\t0\n\t\t\tDSP unavailable\t\t\t\t0\n\t\t\tNo VoIP resource available\t\t0\n\t\t\tNot specified\t\t\t\t0\n'
+	voice port				5/0
+		physical type			E1
+		protocol descriptor		E1_PRI
+		config state			up
+		loop state			down 
+		framing				DF
+		layer 1 status			deactivated
+		 Alarm Indication Signal (AIS)	OFF
+		 Loss Off Signal (LOS)		ON
+		 Remote Alarm Indication (RAI)	OFF
+		 pri AIS occurrence(s)		0
+		 pri LOS occurrence(s)		1
+		 pri RAI occurrence(s)		0
+		layer 2 status			deactivated
+		attached voip dial peer		0
+		number of voice communication	0
+		Channel(s) used			
+ 
+		Outgoing calls				0
+		Outgoing calls failures			0
+	 		Physical Interface down			0
+			Cause Class 0 (normal event)		0
+			Cause Class 1 (normal event)		0
+				Normal Cause (16)		0
+		 		User busy (17)			0
+				No answer (18)			0
+			Cause Class 2 (unavailable resources)	0
+			Cause Class 3 (unavailable service)	0
+			Cause Class 4 (service not provided)	0
+			Cause Class 5 (invalid message)		0
+			Cause Class 6 (protocol error)		0
+			Cause Class 7 (interworking)		0
+ 
+		Incoming calls				0
+		Incoming calls backup invoked		0
+		Incoming calls failures			0
+			Remote failure				0
+			Unknown number				0
+			DSP unavailable				0
+			No VoIP resource available		0
+			Not specified				0
+
 ```
 
 **Help:** execute the command "show voice voice-port pri all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice voice-port pri all histo
 
 **Output:**
 ```
-'\tvoice port\t\t\t\t5/0\n\t\tphysical type\t\t\tE1\n\t\tprotocol descriptor\t\tE1_PRI\n\t\tattached voip dial peer\t\t0\n\t\tdate of last reset\t\t28/12/2022 03:05\n\t\tmax channel(s) used\t\t0/30\n\t\tdaily occupancy of B channels\n\t\t  %\n\t\t100 |                                                                                               \n\t\t 90 |                                                                                               \n\t\t 80 |                                                                                               \n\t\t 70 |                                                                                               \n\t\t 60 |                                                                                               \n\t\t 50 |                                                                                               \n\t\t 40 |                                                                                               \n\t\t 30 |                                                                                               \n\t\t 20 |                                                                                               \n\t\t 10 |                                                                                               \n\t\t  0 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+\n\t\t      00  01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  21  22  23   H.\n'
+	voice port				5/0
+		physical type			E1
+		protocol descriptor		E1_PRI
+		attached voip dial peer		0
+		date of last reset		28/12/2022 03:05
+		max channel(s) used		0/30
+		daily occupancy of B channels
+		  %
+		100 |                                                                                               
+		 90 |                                                                                               
+		 80 |                                                                                               
+		 70 |                                                                                               
+		 60 |                                                                                               
+		 50 |                                                                                               
+		 40 |                                                                                               
+		 30 |                                                                                               
+		 20 |                                                                                               
+		 10 |                                                                                               
+		  0 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
+		      00  01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  21  22  23   H.
+
 ```
 
 **Help:** execute the command "show voice voice-port pri all histo"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice voip-call active all
 
-**Output:**
-```
-''
-```
+**Output:** None
 
 **Help:** execute the command "show voice voip-call active all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show voice voip-call any all
 
 **Output:**
 ```
-'\n 1 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 151 (390) \n     calling : 490446941, called : 55335275\n     setup time:  11/01/23 21h52m53s\n     connexion time: 11/01/23 21h53m07s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:02:31\n     PDD duration: 283 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:23394\n     Play time (voice) : 00h02m31s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 7544 / 7531\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 14 dB\n     ACOM  : 43 dB\n\n\n 2 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 150 (389) \n     calling : 490446941, called : 55335275\n     setup time:  11/01/23 21h27m06s\n     connexion time: 11/01/23 21h27m33s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:36\n     PDD duration: 270 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:23492\n     Play time (voice) : 00h01m36s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 4814 / 4807\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 13 dB\n     ACOM  : 40 dB\n\n\n 3 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 149 (388) \n     calling : 488313757, called : 55337751\n     setup time:  11/01/23 20h25m09s\n     connexion time: 11/01/23 20h25m09s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:05\n     PDD duration: 102 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:23440\n     Play time (voice) : 00h00m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 244 / 245\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 4 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 148 (387) \n     calling : 488313757, called : 55337751\n     setup time:  11/01/23 20h24m56s\n     connexion time: 11/01/23 20h24m56s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:06\n     PDD duration: 155 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:23418\n     Play time (voice) : 00h00m06s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 272 / 273\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 5 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 147 (386) \n     calling : 3255335278, called : 3250703433\n     setup time:  11/01/23 16h33m08s\n     connexion time: 11/01/23 16h33m09s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:02:11\n     PDD duration: 847 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:23192\n     Play time (voice) : 00h02m11s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6529 / 6529\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 13 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.33 / 4.39 \n     ERL   : 40 dB\n     ACOM  : 66 dB\n\n\n 6 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 144 (383) \n     calling : 3255335278, called : 3250703433\n     setup time:  11/01/23 16h15m11s\n     connexion time: 11/01/23 16h15m12s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:13:29\n     PDD duration: 708 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:23156\n     Play time (voice) : 00h13m29s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 40459 / 40459\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 37 dB\n     ACOM  : 64 dB\n\n\n 7 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 146 (385) \n     calling : 32491169975, called : 32490661143\n     setup time:  11/01/23 16h22m35s\n     connexion time: 11/01/23 16h22m39s\n         B channel (from B1..) : B3\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:02:48\n     PDD duration: 599 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:23196\n     Play time (voice) : 00h02m48s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 8567 / 8567\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 73 dB\n\n\n 8 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 145 (384) \n     calling : 491169975, called : 55337505\n     setup time:  11/01/23 16h22m35s\n     connexion time: 11/01/23 16h22m39s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:02:48\n     PDD duration: 852 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:23180\n     Play time (voice) : 00h02m48s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 8390 / 8382\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 32 dB\n     ACOM  : 58 dB\n\n\n 9 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 143 (382) \n     calling : 492819960, called : 55335206\n     setup time:  11/01/23 16h06m05s\n     connexion time: 11/01/23 16h06m08s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:19\n     PDD duration: 377 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:23128\n     Play time (voice) : 00h00m19s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 943 / 929\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 42 dB\n     ACOM  : 67 dB\n\n\n 10 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 142 (381) \n     calling : 3255335346, called : 32490661137\n     setup time:  11/01/23 16h04m09s\n     connexion time: 11/01/23 16h04m17s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:10\n     PDD duration: 2088 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:23122\n     Play time (voice) : 00h00m10s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 801 / 801\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 28 dB\n     ACOM  : 51 dB\n\n\n 11 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 141 (380) \n     calling : 3255335241, called : 32498178799\n     setup time:  11/01/23 15h59m31s\n     connexion time: 11/01/23 15h59m55s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:02\n     PDD duration: 1422 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:23074\n     Play time (voice) : 00h00m02s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1182 / 1199\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 66 dB\n     ACOM  : 90 dB\n\n\n 12 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 140 (379) \n     calling : 3255335278, called : 32492819960\n     setup time:  11/01/23 15h42m36s\n     connexion time: 11/01/23 15h43m00s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:04\n     PDD duration: 967 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:23008\n     Play time (voice) : 00h00m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1318 / 1334\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 67 dB\n     ACOM  : 91 dB\n\n\n 13 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 139 (378) \n     calling : 3255335278, called : 32492819960\n     setup time:  11/01/23 15h41m50s\n     connexion time: 11/01/23 15h42m14s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:05\n     PDD duration: 1041 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:23006\n     Play time (voice) : 00h00m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1379 / 1391\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 67 dB\n     ACOM  : 91 dB\n\n\n 14 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 138 (377) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 15h10m36s\n     connexion time: 11/01/23 15h10m48s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:17\n     PDD duration: 1464 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:22878\n     Play time (voice) : 00h00m17s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1356 / 1373\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 54 dB\n\n\n 15 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 137 (376) \n     calling : 3255337739, called : 32491169927\n     setup time:  11/01/23 15h07m19s\n     connexion time: 11/01/23 15h07m43s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:07\n     PDD duration: 1515 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:22890\n     Play time (voice) : 00h00m07s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1458 / 1462\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 41 dB\n     ACOM  : 71 dB\n\n\n 16 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 136 (375) \n     calling : 490661133, called : 55335206\n     setup time:  11/01/23 15h02m05s\n     connexion time: 11/01/23 15h02m07s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:04\n     PDD duration: 361 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:22866\n     Play time (voice) : 00h01m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 3199 / 3187\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 38 dB\n     ACOM  : 65 dB\n\n\n 17 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 135 (374) \n     calling : 495914834, called : 55335241\n     setup time:  11/01/23 14h58m35s\n     connexion time: 11/01/23 14h58m38s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:02:05\n     PDD duration: 321 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:22838\n     Play time (voice) : 00h02m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6214 / 6200\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 18 dB\n     ACOM  : 42 dB\n\n\n 18 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 134 (373) \n     calling : 3255337758, called : 32490661150\n     setup time:  11/01/23 14h54m36s\n     connexion time: 11/01/23 14h54m49s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:51\n     PDD duration: 3148 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:22826\n     Play time (voice) : 00h01m51s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6031 / 6066\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.38 / 4.39 \n     ERL   : 40 dB\n     ACOM  : 59 dB\n\n\n 19 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 133 (372) \n     calling : 32499172658, called : 32490446941\n     setup time:  11/01/23 14h53m42s\n     connexion time: 11/01/23 14h54m06s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:12\n     PDD duration: 1136 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:22808\n     Play time (voice) : 00h00m12s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1758 / 1760\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 28 dB\n     ACOM  : 66 dB\n\n\n 20 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 132 (371) \n     calling : 499172658, called : 55335361\n     setup time:  11/01/23 14h53m42s\n     connexion time: 11/01/23 14h54m06s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:12\n     PDD duration: 1393 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:22802\n     Play time (voice) : 00h00m12s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 598 / 602\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 20 dB\n     ACOM  : 75 dB\n\n\n 21 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 131 (370) \n     calling : 3255335346, called : 32490661134\n     setup time:  11/01/23 14h41m09s\n     connexion time: 11/01/23 14h41m21s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:30\n     PDD duration: 2115 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16412 /Dest ip :212.224.167.110 rtp:22776\n     Play time (voice) : 00h00m30s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2003 / 2004\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 53 dB\n\n\n 22 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 130 (369) \n     calling : 32490661150, called : 32479844827\n     setup time:  11/01/23 14h12m45s\n     connexion time: 11/01/23 14h12m46s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:23\n     PDD duration: 1109 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16410 /Dest ip :212.224.167.110 rtp:22630\n     Play time (voice) : 00h00m23s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1140 / 1141\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 2\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 48 dB\n     ACOM  : 77 dB\n\n\n 23 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 129 (368) \n     calling : 490661150, called : 55337758\n     setup time:  11/01/23 14h12m45s\n     connexion time: 11/01/23 14h12m46s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:22\n     PDD duration: 1401 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 24 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 128 (367) \n     calling : 495504138, called : 55335211\n     setup time:  11/01/23 14h07m36s\n     connexion time: 11/01/23 14h07m43s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:02:20\n     PDD duration: 263 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16408 /Dest ip :212.224.167.110 rtp:22634\n     Play time (voice) : 00h02m20s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 7005 / 7003\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.33 / 4.39 \n     ERL   : 44 dB\n     ACOM  : 68 dB\n\n\n 25 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 127 (366) \n     calling : 475453097, called : 55335278\n     setup time:  11/01/23 13h31m44s\n     connexion time: 11/01/23 13h31m51s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:05:38\n     PDD duration: 254 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16406 /Dest ip :212.224.167.110 rtp:22452\n     Play time (voice) : 00h05m38s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 16865 / 16867\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 46 dB\n     ACOM  : 73 dB\n\n\n 26 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 126 (365) \n     calling : 3255337741, called : 32492819960\n     setup time:  11/01/23 13h18m28s\n     connexion time: 11/01/23 13h18m38s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:33\n     PDD duration: 899 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16404 /Dest ip :212.224.167.110 rtp:22392\n     Play time (voice) : 00h00m33s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2118 / 2136\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 20 dB\n     ACOM  : 52 dB\n\n\n 27 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 125 (364) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 13h16m15s\n     connexion time: 11/01/23 13h16m27s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:14\n     PDD duration: 1409 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16402 /Dest ip :212.224.167.110 rtp:22348\n     Play time (voice) : 00h00m15s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1217 / 1234\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 47 dB\n     ACOM  : 78 dB\n\n\n 28 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 123 (362) \n     calling : 32039693, called : 55337755\n     setup time:  11/01/23 12h36m17s\n     connexion time: 11/01/23 12h36m22s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:48\n     PDD duration: 1241 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16400 /Dest ip :212.224.167.110 rtp:22232\n     Play time (voice) : 00h00m48s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2365 / 2362\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.33 / 4.39 \n     ERL   : 30 dB\n     ACOM  : 54 dB\n\n\n 29 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 124 (363) \n     calling : 3232039693, called : 32495914860\n     setup time:  11/01/23 12h36m17s\n     connexion time: 11/01/23 12h36m22s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:48\n     PDD duration: 1020 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16398 /Dest ip :212.224.167.110 rtp:22160\n     Play time (voice) : 00h00m48s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2574 / 2574\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 30 dB\n     ACOM  : 57 dB\n\n\n 30 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 122 (361) \n     calling : 3255335206, called : 32492136378\n     setup time:  11/01/23 12h11m38s\n     connexion time: 11/01/23 12h11m52s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:12\n     PDD duration: 3277 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16396 /Dest ip :212.224.167.110 rtp:22132\n     Play time (voice) : 00h00m12s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1107 / 1112\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 39 dB\n     ACOM  : 62 dB\n\n\n 31 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 121 (360) \n     calling : 3255335206, called : 32495914834\n     setup time:  11/01/23 12h10m24s\n     connexion time: 11/01/23 12h10m27s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:27\n     PDD duration: 1219 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16394 /Dest ip :212.224.167.110 rtp:22136\n     Play time (voice) : 00h00m27s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1444 / 1444\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 37 dB\n     ACOM  : 63 dB\n\n\n 32 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 120 (359) \n     calling : 3255335206, called : 32490661154\n     setup time:  11/01/23 12h09m51s\n     connexion time: 11/01/23 12h10m18s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:03\n     PDD duration: 3375 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16392 /Dest ip :212.224.167.110 rtp:22142\n     Play time (voice) : 00h00m03s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1287 / 1290\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 60 dB\n     ACOM  : 89 dB\n\n\n 33 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 119 (358) \n     calling : 3255335241, called : 32491169975\n     setup time:  11/01/23 12h02m16s\n     connexion time: 11/01/23 12h02m24s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:19\n     PDD duration: 1208 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16390 /Dest ip :212.224.167.110 rtp:22090\n     Play time (voice) : 00h00m19s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1323 / 1323\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 21 dB\n     ACOM  : 41 dB\n\n\n 34 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 118 (357) \n     calling : 3255337741, called : 32470635841\n     setup time:  11/01/23 11h48m06s\n     connexion time: 11/01/23 11h48m16s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:55\n     PDD duration: 1406 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16388 /Dest ip :212.224.167.110 rtp:21946\n     Play time (voice) : 00h01m55s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6164 / 6170\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 25 dB\n     ACOM  : 47 dB\n\n\n 35 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 117 (356) \n     calling : 470635841, called : 55335211\n     setup time:  11/01/23 11h46m22s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 258 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 36 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 116 (355) \n     calling : 495914834, called : 55335395\n     setup time:  11/01/23 11h41m18s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 343 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 37 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 115 (354) \n     calling : 495914834, called : 55335395\n     setup time:  11/01/23 11h41m15s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: -\n     advice-of-charge: free\n     call priority: 100\n \n\n 38 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 114 (353) \n     calling : 495914834, called : 55335395\n     setup time:  11/01/23 11h38m56s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 302 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 39 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 113 (352) \n     calling : 495914834, called : 55335395\n     setup time:  11/01/23 11h36m21s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 356 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 40 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 111 (350) \n     calling : 476215202, called : 55335234\n     setup time:  11/01/23 11h30m51s\n     connexion time: 11/01/23 11h31m03s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:13\n     PDD duration: 3942 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16386 /Dest ip :212.224.167.110 rtp:21918\n     Play time (voice) : 00h00m13s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 646 / 644\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 52 dB\n\n\n 41 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 112 (351) \n     calling : 32476215202, called : 32490661131\n     setup time:  11/01/23 11h30m51s\n     connexion time: 11/01/23 11h31m03s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:13\n     PDD duration: 3646 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16384 /Dest ip :212.224.167.110 rtp:21936\n     Play time (voice) : 00h00m13s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1060 / 1065\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 41 dB\n     ACOM  : 65 dB\n\n\n 42 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 110 (349) \n     calling : 490661150, called : 55335241\n     setup time:  11/01/23 11h23m17s\n     connexion time: 11/01/23 11h23m44s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:02\n     PDD duration: 301 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16454 /Dest ip :212.224.167.110 rtp:21848\n     Play time (voice) : 00h00m02s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 76 / 62\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : 27 dB\n     ACOM  : 82 dB\n\n\n 43 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 109 (348) \n     calling : 55218750, called : 55335241\n     setup time:  11/01/23 11h21m13s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 355 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 44 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 108 (347) \n     calling : 3255335334, called : 32475638295\n     setup time:  11/01/23 11h17m51s\n     connexion time: 11/01/23 11h17m57s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:24\n     PDD duration: 814 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:21814\n     Play time (voice) : 00h01m24s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 4463 / 4464\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 20 dB\n     ACOM  : 53 dB\n\n\n 45 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 107 (346) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 11h16m33s\n     connexion time: 11/01/23 11h16m46s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:11\n     PDD duration: 900 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:21764\n     Play time (voice) : 00h00m11s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1159 / 1177\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 40 dB\n     ACOM  : 64 dB\n\n\n 46 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 106 (345) \n     calling : 3255335278, called : 32492819960\n     setup time:  11/01/23 11h13m41s\n     connexion time: 11/01/23 11h13m51s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:58\n     PDD duration: 1332 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:21776\n     Play time (voice) : 00h01m58s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6322 / 6335\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 57 dB\n\n\n 47 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 104 (343) \n     calling : 3255335241, called : 32491169975\n     setup time:  11/01/23 11h09m16s\n     connexion time: 11/01/23 11h09m21s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:03:01\n     PDD duration: 1464 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:21738\n     Play time (voice) : 00h03m01s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 9207 / 9207\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 25 dB\n     ACOM  : 62 dB\n\n\n 48 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 105 (344) \n     calling : 3255335278, called : 32474810035\n     setup time:  11/01/23 11h10m19s\n     connexion time: 11/01/23 11h10m26s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:38\n     PDD duration: 1209 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:21724\n     Play time (voice) : 00h01m38s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 5201 / 5202\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 31 dB\n     ACOM  : 61 dB\n\n\n 49 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 103 (342) \n     calling : 55218750, called : 55335241\n     setup time:  11/01/23 11h05m39s\n     connexion time: 11/01/23 11h06m06s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:03\n     PDD duration: 350 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:21744\n     Play time (voice) : 00h00m03s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 102 / 106\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : 28 dB\n     ACOM  : 83 dB\n\n\n 50 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 102 (341) \n     calling : 3255335278, called : 32479790455\n     setup time:  11/01/23 11h04m18s\n     connexion time: 11/01/23 11h04m30s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:04\n     PDD duration: 1099 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:21706\n     Play time (voice) : 00h00m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 732 / 761\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 25 dB\n     ACOM  : 53 dB\n\n\n 51 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 101 (340) \n     calling : 3255335241, called : 3255218750\n     setup time:  11/01/23 11h03m15s\n     connexion time: 11/01/23 11h03m15s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:43\n     PDD duration: 554 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:21686\n     Play time (voice) : 00h00m43s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2131 / 2148\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 2\n     MOS-CQ / MOS-LQ   : 4.33 / 4.39 \n     ERL   : 48 dB\n     ACOM  : 71 dB\n\n\n 52 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 100 (339) \n     calling : 3255335241, called : 32495914834\n     setup time:  11/01/23 11h01m29s\n     connexion time: 11/01/23 11h01m33s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:24\n     PDD duration: 1491 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:21718\n     Play time (voice) : 00h01m24s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 4315 / 4315\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 32 dB\n     ACOM  : 64 dB\n\n\n 53 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 98 (337) \n     calling : 3255335241, called : 32486141517\n     setup time:  11/01/23 10h59m16s\n     connexion time: 11/01/23 10h59m30s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:53\n     PDD duration: 1433 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:21672\n     Play time (voice) : 00h01m53s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 6280 / 6281\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 43 dB\n     ACOM  : 77 dB\n\n\n 54 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 99 (338) \n     calling : 3255335275, called : 32495914834\n     setup time:  11/01/23 11h00m11s\n     connexion time: 11/01/23 11h00m15s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:22\n     PDD duration: 998 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:21662\n     Play time (voice) : 00h00m22s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1256 / 1256\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 14 dB\n     ACOM  : 53 dB\n\n\n 55 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 97 (336) \n     calling : 3255335241, called : 3255235858\n     setup time:  11/01/23 10h58m23s\n     connexion time: 11/01/23 10h58m25s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:41\n     PDD duration: 1643 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:21684\n     Play time (voice) : 00h00m41s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2053 / 2080\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 7 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.32 / 4.38 \n     ERL   : 45 dB\n     ACOM  : 76 dB\n\n\n 56 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 96 (335) \n     calling : 3255335241, called : 32495914834\n     setup time:  11/01/23 10h57m17s\n     connexion time: 11/01/23 10h57m21s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:40\n     PDD duration: 1310 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:21618\n     Play time (voice) : 00h00m40s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2136 / 2136\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 54 dB\n     ACOM  : 88 dB\n\n\n 57 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 95 (334) \n     calling : 3255335241, called : 3256303372\n     setup time:  11/01/23 10h54m14s\n     connexion time: 11/01/23 10h54m16s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:02:57\n     PDD duration: 1601 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:21642\n     Play time (voice) : 00h02m57s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 8815 / 8872\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 14 dB\n     ACOM  : 40 dB\n\n\n 58 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 93 (332) \n     calling : 3255335334, called : 32475638295\n     setup time:  11/01/23 10h52m58s\n     connexion time: 11/01/23 10h53m22s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:03:03\n     PDD duration: 1153 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:21632\n     Play time (voice) : 00h03m03s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 10275 / 10276\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 29 dB\n     ACOM  : 54 dB\n\n\n 59 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 94 (333) \n     calling : 3255337755, called : 32474718109\n     setup time:  11/01/23 10h53m32s\n     connexion time: 11/01/23 10h53m36s\n         B channel (from B1..) : B3\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:06\n     PDD duration: 1327 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:21612\n     Play time (voice) : 00h01m06s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 3428 / 3428\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 33 dB\n     ACOM  : 59 dB\n\n\n 60 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 92 (331) \n     calling : 3255335241, called : 3256627111\n     setup time:  11/01/23 10h52m03s\n     connexion time: 11/01/23 10h52m05s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:57\n     PDD duration: 649 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:21634\n     Play time (voice) : 00h01m57s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 5846 / 5893\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 2.87 / 4.39 \n     ERL   : 49 dB\n     ACOM  : 76 dB\n\n\n 61 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 91 (330) \n     calling : 3255335241, called : 3255218750\n     setup time:  11/01/23 10h47m31s\n     connexion time: 11/01/23 10h47m31s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:04:05\n     PDD duration: 566 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:21590\n     Play time (voice) : 00h04m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 12176 / 12215\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 10786 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 1.00 / 1.00 \n     ERL   : 37 dB\n     ACOM  : 65 dB\n\n\n 62 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 90 (329) \n     calling : 3255335346, called : 32490661135\n     setup time:  11/01/23 10h47m26s\n     connexion time: 11/01/23 10h47m36s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:37\n     PDD duration: 1731 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:21586\n     Play time (voice) : 00h00m37s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2283 / 2283\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 31 dB\n     ACOM  : 55 dB\n\n\n 63 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 89 (328) \n     calling : 3255335346, called : 32490661135\n     setup time:  11/01/23 10h44m55s\n     connexion time: 11/01/23 10h44m58s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:03\n     PDD duration: 2197 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:21574\n     Play time (voice) : 00h00m03s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 166 / 168\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 64 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 88 (327) \n     calling : 3255337741, called : 31228355612\n     setup time:  11/01/23 10h39m59s\n     connexion time: 11/01/23 10h40m06s\n         B channel (from B1..) : B3\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:09\n     PDD duration: 1017 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16412 /Dest ip :212.224.167.110 rtp:21570\n     Play time (voice) : 00h01m09s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 3717 / 3723\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.29 / 4.39 \n     ERL   : 35 dB\n     ACOM  : 61 dB\n\n\n 65 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 87 (326) \n     calling : 32491169975, called : 32490661134\n     setup time:  11/01/23 10h37m30s\n     connexion time: 11/01/23 10h37m41s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:03:14\n     PDD duration: 2045 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16408 /Dest ip :212.224.167.110 rtp:21544\n     Play time (voice) : 00h03m14s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 10140 / 10141\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 18 dB\n     ACOM  : 44 dB\n\n\n 66 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 86 (325) \n     calling : 491169975, called : 55335341\n     setup time:  11/01/23 10h37m30s\n     connexion time: 11/01/23 10h37m41s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:03:14\n     PDD duration: 2247 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16410 /Dest ip :212.224.167.110 rtp:21532\n     Play time (voice) : 00h03m14s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 9688 / 9681\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 20 dB\n     ACOM  : 48 dB\n\n\n 67 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 84 (323) \n     calling : 3255218750, called : 32495914836\n     setup time:  11/01/23 10h32m20s\n     connexion time: 11/01/23 10h32m35s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:18\n     PDD duration: 1840 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16402 /Dest ip :212.224.167.110 rtp:21520\n     Play time (voice) : 00h00m18s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1560 / 1561\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 51 dB\n     ACOM  : 75 dB\n\n\n 68 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 83 (322) \n     calling : 55218750, called : 55335241\n     setup time:  11/01/23 10h32m20s\n     connexion time: 11/01/23 10h32m35s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:18\n     PDD duration: 2104 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16406 /Dest ip :212.224.167.110 rtp:21528\n     Play time (voice) : 00h00m18s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 884 / 896\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 42 dB\n     ACOM  : 73 dB\n\n\n 69 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 85 (324) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 10h32m23s\n     connexion time: 11/01/23 10h32m31s\n         B channel (from B1..) : B3\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:10\n     PDD duration: 931 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16404 /Dest ip :212.224.167.110 rtp:21542\n     Play time (voice) : 00h00m10s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 817 / 835\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 36 dB\n     ACOM  : 64 dB\n\n\n 70 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 82 (321) \n     calling : 3255335334, called : 32490661126\n     setup time:  11/01/23 10h31m03s\n     connexion time: 11/01/23 10h31m16s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:07\n     PDD duration: 3170 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16400 /Dest ip :212.224.167.110 rtp:21498\n     Play time (voice) : 00h00m07s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 811 / 847\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 34 dB\n     ACOM  : 59 dB\n\n\n 71 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 81 (320) \n     calling : 3255335346, called : 32495914836\n     setup time:  11/01/23 10h23m33s\n     connexion time: 11/01/23 10h23m46s\n         B channel (from B1..) : B3\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:02:14\n     PDD duration: 678 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16398 /Dest ip :212.224.167.110 rtp:21460\n     Play time (voice) : 00h02m14s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 7352 / 7352\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 29 dB\n     ACOM  : 62 dB\n\n\n 72 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 80 (319) \n     calling : 32460973920, called : 32495914836\n     setup time:  11/01/23 10h23m24s\n     connexion time: 11/01/23 10h23m31s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:13\n     PDD duration: 1492 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16394 /Dest ip :212.224.167.110 rtp:21454\n     Play time (voice) : 00h00m13s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 936 / 937\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 29 dB\n     ACOM  : 54 dB\n\n\n 73 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 79 (318) \n     calling : 460973920, called : 55335241\n     setup time:  11/01/23 10h23m24s\n     connexion time: 11/01/23 10h23m31s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:13\n     PDD duration: 1727 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16396 /Dest ip :212.224.167.110 rtp:21452\n     Play time (voice) : 00h00m13s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 652 / 657\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 28 dB\n     ACOM  : 55 dB\n\n\n 74 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 78 (317) \n     calling : 3255335346, called : 32490661124\n     setup time:  11/01/23 10h19m03s\n     connexion time: 11/01/23 10h19m19s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:22\n     PDD duration: 3237 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16392 /Dest ip :212.224.167.110 rtp:21438\n     Play time (voice) : 00h01m22s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 4726 / 4729\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : 31 dB\n     ACOM  : 56 dB\n\n\n 75 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 77 (316) \n     calling : 3255335346, called : 32474718109\n     setup time:  11/01/23 10h18m16s\n     connexion time: 11/01/23 10h18m20s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:39\n     PDD duration: 919 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16390 /Dest ip :212.224.167.110 rtp:21450\n     Play time (voice) : 00h00m39s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2137 / 2137\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 27 dB\n     ACOM  : 51 dB\n\n\n 76 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 76 (315) \n     calling : 3255335346, called : 32490661135\n     setup time:  11/01/23 10h16m51s\n     connexion time: 11/01/23 10h17m05s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:11\n     PDD duration: 2327 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16388 /Dest ip :212.224.167.110 rtp:21430\n     Play time (voice) : 00h00m11s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1166 / 1166\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 28 dB\n     ACOM  : 53 dB\n\n\n 77 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 75 (314) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 10h07m53s\n     connexion time: 11/01/23 10h08m17s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:02\n     PDD duration: 1453 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16386 /Dest ip :212.224.167.110 rtp:21352\n     Play time (voice) : 00h00m02s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1224 / 1239\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 66 dB\n     ACOM  : 90 dB\n\n\n 78 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 73 (312) \n     calling : 491169975, called : 55335354\n     setup time:  11/01/23 10h05m41s\n     connexion time: 11/01/23 10h05m55s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:35\n     PDD duration: 2467 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16384 /Dest ip :212.224.167.110 rtp:21354\n     Play time (voice) : 00h00m35s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1746 / 1738\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 17 dB\n     ACOM  : 44 dB\n\n\n 79 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 74 (313) \n     calling : 32491169975, called : 32490661135\n     setup time:  11/01/23 10h05m41s\n     connexion time: 11/01/23 10h05m54s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:35\n     PDD duration: 2259 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16454 /Dest ip :212.224.167.110 rtp:21356\n     Play time (voice) : 00h00m35s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2294 / 2295\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 17 dB\n     ACOM  : 60 dB\n\n\n 80 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 72 (311) \n     calling : 3255335346, called : 32495914834\n     setup time:  11/01/23 09h58m30s\n     connexion time: 11/01/23 09h58m53s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:04\n     PDD duration: 961 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:21314\n     Play time (voice) : 00h00m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1305 / 1307\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 60 dB\n     ACOM  : 90 dB\n\n\n 81 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 71 (310) \n     calling : 3255335346, called : 32495914834\n     setup time:  11/01/23 09h57m58s\n     connexion time: 11/01/23 09h58m22s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:03\n     PDD duration: 1369 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:21324\n     Play time (voice) : 00h00m03s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1261 / 1263\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 60 dB\n     ACOM  : 90 dB\n\n\n 82 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 70 (309) \n     calling : 3255337741, called : 3256232940\n     setup time:  11/01/23 09h49m37s\n     connexion time: 11/01/23 09h49m38s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:02\n     PDD duration: 1118 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:21266\n     Play time (voice) : 00h01m02s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 622 / 3093\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 3998976\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 33 dB\n     ACOM  : 58 dB\n\n\n 83 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 69 (308) \n     calling : 3255337741, called : 3256232940\n     setup time:  11/01/23 09h49m34s\n     connexion time: 11/01/23 09h49m36s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:04\n     PDD duration: 1325 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:21262\n     Play time (voice) : 00h01m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 628 / 3220\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 2684106\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.35 / 4.39 \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 84 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 68 (307) \n     calling : 3255337741, called : 3256232940\n     setup time:  11/01/23 09h48m47s\n     connexion time: 11/01/23 09h48m48s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:34\n     PDD duration: 1098 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:21252\n     Play time (voice) : 00h00m34s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 619 / 1707\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 1121577\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 34 dB\n     ACOM  : 61 dB\n\n\n 85 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 67 (306) \n     calling : 495914834, called : 55335241\n     setup time:  11/01/23 09h48m07s\n     connexion time: 11/01/23 09h48m23s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:17\n     PDD duration: 308 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:21268\n     Play time (voice) : 00h00m17s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 824 / 813\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 23 dB\n     ACOM  : 72 dB\n\n\n 86 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 66 (305) \n     calling : 3255335241, called : 32495914834\n     setup time:  11/01/23 09h41m58s\n     connexion time: 11/01/23 09h42m00s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:13\n     PDD duration: 1335 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:21216\n     Play time (voice) : 00h00m13s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 678 / 680\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 87 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 65 (304) \n     calling : 31113760035, called : 55335278\n     setup time:  11/01/23 09h36m21s\n     connexion time: ---\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:00\n     PDD duration: 263 msec\n     advice-of-charge: free\n     call priority: 100\n \n\n 88 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 64 (303) \n     calling : 460973920, called : 55335241\n     setup time:  11/01/23 09h21m11s\n     connexion time: 11/01/23 09h21m14s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:01:46\n     PDD duration: 311 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:21108\n     Play time (voice) : 00h01m46s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 5330 / 5332\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 19 dB\n     ACOM  : 44 dB\n\n\n 89 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 63 (302) \n     calling : 3255337741, called : 32492819960\n     setup time:  11/01/23 09h02m42s\n     connexion time: 11/01/23 09h02m51s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:19\n     PDD duration: 1052 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:20998\n     Play time (voice) : 00h00m19s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1336 / 1356\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 35 dB\n     ACOM  : 57 dB\n\n\n 90 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 62 (301) \n     calling : 3255337741, called : 3292349010\n     setup time:  11/01/23 08h55m10s\n     connexion time: 11/01/23 08h55m13s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:07:20\n     PDD duration: 1490 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:20990\n     Play time (voice) : 00h07m20s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 17752 / 22075\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.33 / 4.39 \n     ERL   : 32 dB\n     ACOM  : 58 dB\n\n\n 91 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 61 (300) \n     calling : 3255337741, called : 32492819960\n     setup time:  11/01/23 08h51m58s\n     connexion time: 11/01/23 08h52m22s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:04\n     PDD duration: 1153 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:20970\n     Play time (voice) : 00h00m04s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1298 / 1315\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 24 dB\n     ACOM  : 73 dB\n\n\n 92 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 60 (299) \n     calling : 3255337741, called : 32492819960\n     setup time:  11/01/23 08h44m49s\n     connexion time: 11/01/23 08h45m13s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:02\n     PDD duration: 1285 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:20888\n     Play time (voice) : 00h00m02s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1243 / 1262\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 56 dB\n     ACOM  : 75 dB\n\n\n 93 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 59 (298) \n     calling : 3255335206, called : 32492819960\n     setup time:  11/01/23 08h42m47s\n     connexion time: 11/01/23 08h42m59s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:09\n     PDD duration: 1183 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:20902\n     Play time (voice) : 00h00m09s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 994 / 1009\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 1\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 33 dB\n     ACOM  : 58 dB\n\n\n 94 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 58 (297) \n     calling : 3255335286, called : 32490661144\n     setup time:  11/01/23 08h27m13s\n     connexion time: 11/01/23 08h27m26s\n         B channel (from B1..) : B2\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:21\n     PDD duration: 2148 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:20874\n     Play time (voice) : 00h00m21s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1600 / 1600\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : -- dB\n     ACOM  : 255 dB\n\n\n 95 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 57 (296) \n     calling : 3255337758, called : 32490661150\n     setup time:  11/01/23 08h26m27s\n     connexion time: 11/01/23 08h26m36s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:01:06\n     PDD duration: 3073 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:20882\n     Play time (voice) : 00h01m06s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 3578 / 3611\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.24 / 4.39 \n     ERL   : 25 dB\n     ACOM  : 50 dB\n\n\n 96 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 56 (295) \n     calling : 3255335241, called : 32490446941\n     setup time:  11/01/23 08h12m33s\n     connexion time: 11/01/23 08h12m42s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:03:31\n     PDD duration: 1404 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:20840\n     Play time (voice) : 00h03m32s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 10973 / 10974\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 12 dB\n     ACOM  : 45 dB\n\n\n 97 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 55 (294) \n     calling : 32491169927, called : 32490446941\n     setup time:  11/01/23 07h58m45s\n     connexion time: 11/01/23 07h59m09s\n         B channel (from B1..) : B2\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:05\n     PDD duration: 1072 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:20780\n     Play time (voice) : 00h00m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 1377 / 1378\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 3\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 49 dB\n     ACOM  : 78 dB\n\n\n 98 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 54 (293) \n     calling : 491169927, called : 55335361\n     setup time:  11/01/23 07h58m45s\n     connexion time: 11/01/23 07h59m09s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:05\n     PDD duration: 1343 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:20778\n     Play time (voice) : 00h00m05s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 227 / 216\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : -- / -- \n     ERL   : 20 dB\n     ACOM  : 65 dB\n\n\n 99 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 53 (292) \n     calling : 3255335286, called : 32490661144\n     setup time:  11/01/23 07h04m54s\n     connexion time: 11/01/23 07h05m00s\n         B channel (from B1..) : B1\n     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]\n     call duration: 00:00:44\n     PDD duration: 2156 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:20716\n     Play time (voice) : 00h00m44s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 2416 / 2417\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 15 dB\n     ACOM  : 42 dB\n\n\n 100 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 51 (290) \n     calling : 476215202, called : 55335234\n     setup time:  11/01/23 07h04m14s\n     connexion time: 11/01/23 07h04m27s\n         B channel (from B1..) : B1\n     disconnected by local port: 5/0 cause :(16)[Normal call clearing]\n     call duration: 00:00:12\n     PDD duration: 3735 msec\n     advice-of-charge: free\n     call priority: 100\n \n     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:20682\n     Play time (voice) : 00h00m12s\n     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law\n     RTP Packets RX / TX : 577 / 575\n     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0\n     Number of Excessive Jitter events : 0\n     MOS-CQ / MOS-LQ   : 4.34 / 4.39 \n     ERL   : 26 dB\n     ACOM  : 50 dB\n'
+
+ 1 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 151 (390) 
+     calling : 490446941, called : 55335275
+     setup time:  11/01/23 21h52m53s
+     connexion time: 11/01/23 21h53m07s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:02:31
+     PDD duration: 283 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:23394
+     Play time (voice) : 00h02m31s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 7544 / 7531
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 14 dB
+     ACOM  : 43 dB
+
+
+ 2 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 150 (389) 
+     calling : 490446941, called : 55335275
+     setup time:  11/01/23 21h27m06s
+     connexion time: 11/01/23 21h27m33s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:36
+     PDD duration: 270 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:23492
+     Play time (voice) : 00h01m36s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 4814 / 4807
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 13 dB
+     ACOM  : 40 dB
+
+
+ 3 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 149 (388) 
+     calling : 488313757, called : 55337751
+     setup time:  11/01/23 20h25m09s
+     connexion time: 11/01/23 20h25m09s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:05
+     PDD duration: 102 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:23440
+     Play time (voice) : 00h00m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 244 / 245
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 4 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 148 (387) 
+     calling : 488313757, called : 55337751
+     setup time:  11/01/23 20h24m56s
+     connexion time: 11/01/23 20h24m56s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:06
+     PDD duration: 155 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:23418
+     Play time (voice) : 00h00m06s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 272 / 273
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 5 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 147 (386) 
+     calling : 3255335278, called : 3250703433
+     setup time:  11/01/23 16h33m08s
+     connexion time: 11/01/23 16h33m09s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:02:11
+     PDD duration: 847 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:23192
+     Play time (voice) : 00h02m11s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6529 / 6529
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 13 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.33 / 4.39 
+     ERL   : 40 dB
+     ACOM  : 66 dB
+
+
+ 6 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 144 (383) 
+     calling : 3255335278, called : 3250703433
+     setup time:  11/01/23 16h15m11s
+     connexion time: 11/01/23 16h15m12s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:13:29
+     PDD duration: 708 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:23156
+     Play time (voice) : 00h13m29s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 40459 / 40459
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 37 dB
+     ACOM  : 64 dB
+
+
+ 7 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 146 (385) 
+     calling : 32491169975, called : 32490661143
+     setup time:  11/01/23 16h22m35s
+     connexion time: 11/01/23 16h22m39s
+         B channel (from B1..) : B3
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:02:48
+     PDD duration: 599 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:23196
+     Play time (voice) : 00h02m48s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 8567 / 8567
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 73 dB
+
+
+ 8 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 145 (384) 
+     calling : 491169975, called : 55337505
+     setup time:  11/01/23 16h22m35s
+     connexion time: 11/01/23 16h22m39s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:02:48
+     PDD duration: 852 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:23180
+     Play time (voice) : 00h02m48s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 8390 / 8382
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 32 dB
+     ACOM  : 58 dB
+
+
+ 9 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 143 (382) 
+     calling : 492819960, called : 55335206
+     setup time:  11/01/23 16h06m05s
+     connexion time: 11/01/23 16h06m08s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:19
+     PDD duration: 377 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:23128
+     Play time (voice) : 00h00m19s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 943 / 929
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 42 dB
+     ACOM  : 67 dB
+
+
+ 10 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 142 (381) 
+     calling : 3255335346, called : 32490661137
+     setup time:  11/01/23 16h04m09s
+     connexion time: 11/01/23 16h04m17s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:10
+     PDD duration: 2088 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:23122
+     Play time (voice) : 00h00m10s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 801 / 801
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 28 dB
+     ACOM  : 51 dB
+
+
+ 11 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 141 (380) 
+     calling : 3255335241, called : 32498178799
+     setup time:  11/01/23 15h59m31s
+     connexion time: 11/01/23 15h59m55s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:02
+     PDD duration: 1422 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:23074
+     Play time (voice) : 00h00m02s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1182 / 1199
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 66 dB
+     ACOM  : 90 dB
+
+
+ 12 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 140 (379) 
+     calling : 3255335278, called : 32492819960
+     setup time:  11/01/23 15h42m36s
+     connexion time: 11/01/23 15h43m00s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:04
+     PDD duration: 967 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:23008
+     Play time (voice) : 00h00m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1318 / 1334
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 67 dB
+     ACOM  : 91 dB
+
+
+ 13 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 139 (378) 
+     calling : 3255335278, called : 32492819960
+     setup time:  11/01/23 15h41m50s
+     connexion time: 11/01/23 15h42m14s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:05
+     PDD duration: 1041 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:23006
+     Play time (voice) : 00h00m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1379 / 1391
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 67 dB
+     ACOM  : 91 dB
+
+
+ 14 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 138 (377) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 15h10m36s
+     connexion time: 11/01/23 15h10m48s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:17
+     PDD duration: 1464 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:22878
+     Play time (voice) : 00h00m17s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1356 / 1373
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 54 dB
+
+
+ 15 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 137 (376) 
+     calling : 3255337739, called : 32491169927
+     setup time:  11/01/23 15h07m19s
+     connexion time: 11/01/23 15h07m43s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:07
+     PDD duration: 1515 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:22890
+     Play time (voice) : 00h00m07s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1458 / 1462
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 41 dB
+     ACOM  : 71 dB
+
+
+ 16 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 136 (375) 
+     calling : 490661133, called : 55335206
+     setup time:  11/01/23 15h02m05s
+     connexion time: 11/01/23 15h02m07s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:04
+     PDD duration: 361 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:22866
+     Play time (voice) : 00h01m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 3199 / 3187
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 38 dB
+     ACOM  : 65 dB
+
+
+ 17 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 135 (374) 
+     calling : 495914834, called : 55335241
+     setup time:  11/01/23 14h58m35s
+     connexion time: 11/01/23 14h58m38s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:02:05
+     PDD duration: 321 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:22838
+     Play time (voice) : 00h02m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6214 / 6200
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 18 dB
+     ACOM  : 42 dB
+
+
+ 18 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 134 (373) 
+     calling : 3255337758, called : 32490661150
+     setup time:  11/01/23 14h54m36s
+     connexion time: 11/01/23 14h54m49s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:51
+     PDD duration: 3148 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:22826
+     Play time (voice) : 00h01m51s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6031 / 6066
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.38 / 4.39 
+     ERL   : 40 dB
+     ACOM  : 59 dB
+
+
+ 19 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 133 (372) 
+     calling : 32499172658, called : 32490446941
+     setup time:  11/01/23 14h53m42s
+     connexion time: 11/01/23 14h54m06s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:12
+     PDD duration: 1136 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:22808
+     Play time (voice) : 00h00m12s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1758 / 1760
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 28 dB
+     ACOM  : 66 dB
+
+
+ 20 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 132 (371) 
+     calling : 499172658, called : 55335361
+     setup time:  11/01/23 14h53m42s
+     connexion time: 11/01/23 14h54m06s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:12
+     PDD duration: 1393 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:22802
+     Play time (voice) : 00h00m12s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 598 / 602
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 20 dB
+     ACOM  : 75 dB
+
+
+ 21 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 131 (370) 
+     calling : 3255335346, called : 32490661134
+     setup time:  11/01/23 14h41m09s
+     connexion time: 11/01/23 14h41m21s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:30
+     PDD duration: 2115 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16412 /Dest ip :212.224.167.110 rtp:22776
+     Play time (voice) : 00h00m30s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2003 / 2004
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 53 dB
+
+
+ 22 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 130 (369) 
+     calling : 32490661150, called : 32479844827
+     setup time:  11/01/23 14h12m45s
+     connexion time: 11/01/23 14h12m46s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:23
+     PDD duration: 1109 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16410 /Dest ip :212.224.167.110 rtp:22630
+     Play time (voice) : 00h00m23s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1140 / 1141
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 2
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 48 dB
+     ACOM  : 77 dB
+
+
+ 23 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 129 (368) 
+     calling : 490661150, called : 55337758
+     setup time:  11/01/23 14h12m45s
+     connexion time: 11/01/23 14h12m46s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:22
+     PDD duration: 1401 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 24 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 128 (367) 
+     calling : 495504138, called : 55335211
+     setup time:  11/01/23 14h07m36s
+     connexion time: 11/01/23 14h07m43s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:02:20
+     PDD duration: 263 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16408 /Dest ip :212.224.167.110 rtp:22634
+     Play time (voice) : 00h02m20s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 7005 / 7003
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.33 / 4.39 
+     ERL   : 44 dB
+     ACOM  : 68 dB
+
+
+ 25 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 127 (366) 
+     calling : 475453097, called : 55335278
+     setup time:  11/01/23 13h31m44s
+     connexion time: 11/01/23 13h31m51s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:05:38
+     PDD duration: 254 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16406 /Dest ip :212.224.167.110 rtp:22452
+     Play time (voice) : 00h05m38s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 16865 / 16867
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 46 dB
+     ACOM  : 73 dB
+
+
+ 26 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 126 (365) 
+     calling : 3255337741, called : 32492819960
+     setup time:  11/01/23 13h18m28s
+     connexion time: 11/01/23 13h18m38s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:33
+     PDD duration: 899 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16404 /Dest ip :212.224.167.110 rtp:22392
+     Play time (voice) : 00h00m33s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2118 / 2136
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 20 dB
+     ACOM  : 52 dB
+
+
+ 27 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 125 (364) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 13h16m15s
+     connexion time: 11/01/23 13h16m27s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:14
+     PDD duration: 1409 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16402 /Dest ip :212.224.167.110 rtp:22348
+     Play time (voice) : 00h00m15s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1217 / 1234
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 47 dB
+     ACOM  : 78 dB
+
+
+ 28 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 123 (362) 
+     calling : 32039693, called : 55337755
+     setup time:  11/01/23 12h36m17s
+     connexion time: 11/01/23 12h36m22s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:48
+     PDD duration: 1241 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16400 /Dest ip :212.224.167.110 rtp:22232
+     Play time (voice) : 00h00m48s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2365 / 2362
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.33 / 4.39 
+     ERL   : 30 dB
+     ACOM  : 54 dB
+
+
+ 29 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 124 (363) 
+     calling : 3232039693, called : 32495914860
+     setup time:  11/01/23 12h36m17s
+     connexion time: 11/01/23 12h36m22s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:48
+     PDD duration: 1020 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16398 /Dest ip :212.224.167.110 rtp:22160
+     Play time (voice) : 00h00m48s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2574 / 2574
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 30 dB
+     ACOM  : 57 dB
+
+
+ 30 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 122 (361) 
+     calling : 3255335206, called : 32492136378
+     setup time:  11/01/23 12h11m38s
+     connexion time: 11/01/23 12h11m52s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:12
+     PDD duration: 3277 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16396 /Dest ip :212.224.167.110 rtp:22132
+     Play time (voice) : 00h00m12s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1107 / 1112
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 39 dB
+     ACOM  : 62 dB
+
+
+ 31 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 121 (360) 
+     calling : 3255335206, called : 32495914834
+     setup time:  11/01/23 12h10m24s
+     connexion time: 11/01/23 12h10m27s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:27
+     PDD duration: 1219 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16394 /Dest ip :212.224.167.110 rtp:22136
+     Play time (voice) : 00h00m27s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1444 / 1444
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 37 dB
+     ACOM  : 63 dB
+
+
+ 32 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 120 (359) 
+     calling : 3255335206, called : 32490661154
+     setup time:  11/01/23 12h09m51s
+     connexion time: 11/01/23 12h10m18s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:03
+     PDD duration: 3375 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16392 /Dest ip :212.224.167.110 rtp:22142
+     Play time (voice) : 00h00m03s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1287 / 1290
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 60 dB
+     ACOM  : 89 dB
+
+
+ 33 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 119 (358) 
+     calling : 3255335241, called : 32491169975
+     setup time:  11/01/23 12h02m16s
+     connexion time: 11/01/23 12h02m24s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:19
+     PDD duration: 1208 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16390 /Dest ip :212.224.167.110 rtp:22090
+     Play time (voice) : 00h00m19s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1323 / 1323
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 21 dB
+     ACOM  : 41 dB
+
+
+ 34 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 118 (357) 
+     calling : 3255337741, called : 32470635841
+     setup time:  11/01/23 11h48m06s
+     connexion time: 11/01/23 11h48m16s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:55
+     PDD duration: 1406 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16388 /Dest ip :212.224.167.110 rtp:21946
+     Play time (voice) : 00h01m55s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6164 / 6170
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 25 dB
+     ACOM  : 47 dB
+
+
+ 35 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 117 (356) 
+     calling : 470635841, called : 55335211
+     setup time:  11/01/23 11h46m22s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 258 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 36 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 116 (355) 
+     calling : 495914834, called : 55335395
+     setup time:  11/01/23 11h41m18s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 343 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 37 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 115 (354) 
+     calling : 495914834, called : 55335395
+     setup time:  11/01/23 11h41m15s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: -
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 38 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 114 (353) 
+     calling : 495914834, called : 55335395
+     setup time:  11/01/23 11h38m56s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 302 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 39 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 113 (352) 
+     calling : 495914834, called : 55335395
+     setup time:  11/01/23 11h36m21s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 356 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 40 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 111 (350) 
+     calling : 476215202, called : 55335234
+     setup time:  11/01/23 11h30m51s
+     connexion time: 11/01/23 11h31m03s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:13
+     PDD duration: 3942 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16386 /Dest ip :212.224.167.110 rtp:21918
+     Play time (voice) : 00h00m13s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 646 / 644
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 52 dB
+
+
+ 41 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 112 (351) 
+     calling : 32476215202, called : 32490661131
+     setup time:  11/01/23 11h30m51s
+     connexion time: 11/01/23 11h31m03s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:13
+     PDD duration: 3646 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16384 /Dest ip :212.224.167.110 rtp:21936
+     Play time (voice) : 00h00m13s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1060 / 1065
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 41 dB
+     ACOM  : 65 dB
+
+
+ 42 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 110 (349) 
+     calling : 490661150, called : 55335241
+     setup time:  11/01/23 11h23m17s
+     connexion time: 11/01/23 11h23m44s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:02
+     PDD duration: 301 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16454 /Dest ip :212.224.167.110 rtp:21848
+     Play time (voice) : 00h00m02s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 76 / 62
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : 27 dB
+     ACOM  : 82 dB
+
+
+ 43 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 109 (348) 
+     calling : 55218750, called : 55335241
+     setup time:  11/01/23 11h21m13s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 355 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 44 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 108 (347) 
+     calling : 3255335334, called : 32475638295
+     setup time:  11/01/23 11h17m51s
+     connexion time: 11/01/23 11h17m57s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:24
+     PDD duration: 814 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:21814
+     Play time (voice) : 00h01m24s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 4463 / 4464
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 20 dB
+     ACOM  : 53 dB
+
+
+ 45 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 107 (346) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 11h16m33s
+     connexion time: 11/01/23 11h16m46s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:11
+     PDD duration: 900 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:21764
+     Play time (voice) : 00h00m11s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1159 / 1177
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 40 dB
+     ACOM  : 64 dB
+
+
+ 46 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 106 (345) 
+     calling : 3255335278, called : 32492819960
+     setup time:  11/01/23 11h13m41s
+     connexion time: 11/01/23 11h13m51s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:58
+     PDD duration: 1332 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:21776
+     Play time (voice) : 00h01m58s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6322 / 6335
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 57 dB
+
+
+ 47 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 104 (343) 
+     calling : 3255335241, called : 32491169975
+     setup time:  11/01/23 11h09m16s
+     connexion time: 11/01/23 11h09m21s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:03:01
+     PDD duration: 1464 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:21738
+     Play time (voice) : 00h03m01s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 9207 / 9207
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 25 dB
+     ACOM  : 62 dB
+
+
+ 48 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 105 (344) 
+     calling : 3255335278, called : 32474810035
+     setup time:  11/01/23 11h10m19s
+     connexion time: 11/01/23 11h10m26s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:38
+     PDD duration: 1209 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:21724
+     Play time (voice) : 00h01m38s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 5201 / 5202
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 31 dB
+     ACOM  : 61 dB
+
+
+ 49 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 103 (342) 
+     calling : 55218750, called : 55335241
+     setup time:  11/01/23 11h05m39s
+     connexion time: 11/01/23 11h06m06s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:03
+     PDD duration: 350 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:21744
+     Play time (voice) : 00h00m03s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 102 / 106
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : 28 dB
+     ACOM  : 83 dB
+
+
+ 50 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 102 (341) 
+     calling : 3255335278, called : 32479790455
+     setup time:  11/01/23 11h04m18s
+     connexion time: 11/01/23 11h04m30s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:04
+     PDD duration: 1099 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:21706
+     Play time (voice) : 00h00m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 732 / 761
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 25 dB
+     ACOM  : 53 dB
+
+
+ 51 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 101 (340) 
+     calling : 3255335241, called : 3255218750
+     setup time:  11/01/23 11h03m15s
+     connexion time: 11/01/23 11h03m15s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:43
+     PDD duration: 554 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:21686
+     Play time (voice) : 00h00m43s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2131 / 2148
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 2
+     MOS-CQ / MOS-LQ   : 4.33 / 4.39 
+     ERL   : 48 dB
+     ACOM  : 71 dB
+
+
+ 52 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 100 (339) 
+     calling : 3255335241, called : 32495914834
+     setup time:  11/01/23 11h01m29s
+     connexion time: 11/01/23 11h01m33s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:24
+     PDD duration: 1491 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:21718
+     Play time (voice) : 00h01m24s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 4315 / 4315
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 32 dB
+     ACOM  : 64 dB
+
+
+ 53 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 98 (337) 
+     calling : 3255335241, called : 32486141517
+     setup time:  11/01/23 10h59m16s
+     connexion time: 11/01/23 10h59m30s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:53
+     PDD duration: 1433 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:21672
+     Play time (voice) : 00h01m53s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 6280 / 6281
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 43 dB
+     ACOM  : 77 dB
+
+
+ 54 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 99 (338) 
+     calling : 3255335275, called : 32495914834
+     setup time:  11/01/23 11h00m11s
+     connexion time: 11/01/23 11h00m15s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:22
+     PDD duration: 998 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:21662
+     Play time (voice) : 00h00m22s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1256 / 1256
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 14 dB
+     ACOM  : 53 dB
+
+
+ 55 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 97 (336) 
+     calling : 3255335241, called : 3255235858
+     setup time:  11/01/23 10h58m23s
+     connexion time: 11/01/23 10h58m25s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:41
+     PDD duration: 1643 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:21684
+     Play time (voice) : 00h00m41s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2053 / 2080
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 7 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.32 / 4.38 
+     ERL   : 45 dB
+     ACOM  : 76 dB
+
+
+ 56 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 96 (335) 
+     calling : 3255335241, called : 32495914834
+     setup time:  11/01/23 10h57m17s
+     connexion time: 11/01/23 10h57m21s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:40
+     PDD duration: 1310 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:21618
+     Play time (voice) : 00h00m40s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2136 / 2136
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 54 dB
+     ACOM  : 88 dB
+
+
+ 57 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 95 (334) 
+     calling : 3255335241, called : 3256303372
+     setup time:  11/01/23 10h54m14s
+     connexion time: 11/01/23 10h54m16s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:02:57
+     PDD duration: 1601 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:21642
+     Play time (voice) : 00h02m57s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 8815 / 8872
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 14 dB
+     ACOM  : 40 dB
+
+
+ 58 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 93 (332) 
+     calling : 3255335334, called : 32475638295
+     setup time:  11/01/23 10h52m58s
+     connexion time: 11/01/23 10h53m22s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:03:03
+     PDD duration: 1153 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:21632
+     Play time (voice) : 00h03m03s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 10275 / 10276
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 29 dB
+     ACOM  : 54 dB
+
+
+ 59 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 94 (333) 
+     calling : 3255337755, called : 32474718109
+     setup time:  11/01/23 10h53m32s
+     connexion time: 11/01/23 10h53m36s
+         B channel (from B1..) : B3
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:06
+     PDD duration: 1327 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:21612
+     Play time (voice) : 00h01m06s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 3428 / 3428
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 33 dB
+     ACOM  : 59 dB
+
+
+ 60 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 92 (331) 
+     calling : 3255335241, called : 3256627111
+     setup time:  11/01/23 10h52m03s
+     connexion time: 11/01/23 10h52m05s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:57
+     PDD duration: 649 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:21634
+     Play time (voice) : 00h01m57s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 5846 / 5893
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 2.87 / 4.39 
+     ERL   : 49 dB
+     ACOM  : 76 dB
+
+
+ 61 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 91 (330) 
+     calling : 3255335241, called : 3255218750
+     setup time:  11/01/23 10h47m31s
+     connexion time: 11/01/23 10h47m31s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:04:05
+     PDD duration: 566 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:21590
+     Play time (voice) : 00h04m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 12176 / 12215
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 10786 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 1.00 / 1.00 
+     ERL   : 37 dB
+     ACOM  : 65 dB
+
+
+ 62 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 90 (329) 
+     calling : 3255335346, called : 32490661135
+     setup time:  11/01/23 10h47m26s
+     connexion time: 11/01/23 10h47m36s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:37
+     PDD duration: 1731 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:21586
+     Play time (voice) : 00h00m37s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2283 / 2283
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 31 dB
+     ACOM  : 55 dB
+
+
+ 63 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 89 (328) 
+     calling : 3255335346, called : 32490661135
+     setup time:  11/01/23 10h44m55s
+     connexion time: 11/01/23 10h44m58s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:03
+     PDD duration: 2197 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:21574
+     Play time (voice) : 00h00m03s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 166 / 168
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 64 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 88 (327) 
+     calling : 3255337741, called : 31228355612
+     setup time:  11/01/23 10h39m59s
+     connexion time: 11/01/23 10h40m06s
+         B channel (from B1..) : B3
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:09
+     PDD duration: 1017 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16412 /Dest ip :212.224.167.110 rtp:21570
+     Play time (voice) : 00h01m09s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 3717 / 3723
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.29 / 4.39 
+     ERL   : 35 dB
+     ACOM  : 61 dB
+
+
+ 65 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 87 (326) 
+     calling : 32491169975, called : 32490661134
+     setup time:  11/01/23 10h37m30s
+     connexion time: 11/01/23 10h37m41s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:03:14
+     PDD duration: 2045 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16408 /Dest ip :212.224.167.110 rtp:21544
+     Play time (voice) : 00h03m14s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 10140 / 10141
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 18 dB
+     ACOM  : 44 dB
+
+
+ 66 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 86 (325) 
+     calling : 491169975, called : 55335341
+     setup time:  11/01/23 10h37m30s
+     connexion time: 11/01/23 10h37m41s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:03:14
+     PDD duration: 2247 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16410 /Dest ip :212.224.167.110 rtp:21532
+     Play time (voice) : 00h03m14s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 9688 / 9681
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 20 dB
+     ACOM  : 48 dB
+
+
+ 67 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 84 (323) 
+     calling : 3255218750, called : 32495914836
+     setup time:  11/01/23 10h32m20s
+     connexion time: 11/01/23 10h32m35s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:18
+     PDD duration: 1840 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16402 /Dest ip :212.224.167.110 rtp:21520
+     Play time (voice) : 00h00m18s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1560 / 1561
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 51 dB
+     ACOM  : 75 dB
+
+
+ 68 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 83 (322) 
+     calling : 55218750, called : 55335241
+     setup time:  11/01/23 10h32m20s
+     connexion time: 11/01/23 10h32m35s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:18
+     PDD duration: 2104 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16406 /Dest ip :212.224.167.110 rtp:21528
+     Play time (voice) : 00h00m18s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 884 / 896
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 42 dB
+     ACOM  : 73 dB
+
+
+ 69 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 85 (324) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 10h32m23s
+     connexion time: 11/01/23 10h32m31s
+         B channel (from B1..) : B3
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:10
+     PDD duration: 931 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16404 /Dest ip :212.224.167.110 rtp:21542
+     Play time (voice) : 00h00m10s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 817 / 835
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 36 dB
+     ACOM  : 64 dB
+
+
+ 70 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 82 (321) 
+     calling : 3255335334, called : 32490661126
+     setup time:  11/01/23 10h31m03s
+     connexion time: 11/01/23 10h31m16s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:07
+     PDD duration: 3170 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16400 /Dest ip :212.224.167.110 rtp:21498
+     Play time (voice) : 00h00m07s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 811 / 847
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 34 dB
+     ACOM  : 59 dB
+
+
+ 71 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 81 (320) 
+     calling : 3255335346, called : 32495914836
+     setup time:  11/01/23 10h23m33s
+     connexion time: 11/01/23 10h23m46s
+         B channel (from B1..) : B3
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:02:14
+     PDD duration: 678 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16398 /Dest ip :212.224.167.110 rtp:21460
+     Play time (voice) : 00h02m14s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 7352 / 7352
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 29 dB
+     ACOM  : 62 dB
+
+
+ 72 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 80 (319) 
+     calling : 32460973920, called : 32495914836
+     setup time:  11/01/23 10h23m24s
+     connexion time: 11/01/23 10h23m31s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:13
+     PDD duration: 1492 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16394 /Dest ip :212.224.167.110 rtp:21454
+     Play time (voice) : 00h00m13s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 936 / 937
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 29 dB
+     ACOM  : 54 dB
+
+
+ 73 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 79 (318) 
+     calling : 460973920, called : 55335241
+     setup time:  11/01/23 10h23m24s
+     connexion time: 11/01/23 10h23m31s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:13
+     PDD duration: 1727 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16396 /Dest ip :212.224.167.110 rtp:21452
+     Play time (voice) : 00h00m13s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 652 / 657
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 28 dB
+     ACOM  : 55 dB
+
+
+ 74 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 78 (317) 
+     calling : 3255335346, called : 32490661124
+     setup time:  11/01/23 10h19m03s
+     connexion time: 11/01/23 10h19m19s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:22
+     PDD duration: 3237 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16392 /Dest ip :212.224.167.110 rtp:21438
+     Play time (voice) : 00h01m22s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 4726 / 4729
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : 31 dB
+     ACOM  : 56 dB
+
+
+ 75 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 77 (316) 
+     calling : 3255335346, called : 32474718109
+     setup time:  11/01/23 10h18m16s
+     connexion time: 11/01/23 10h18m20s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:39
+     PDD duration: 919 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16390 /Dest ip :212.224.167.110 rtp:21450
+     Play time (voice) : 00h00m39s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2137 / 2137
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 27 dB
+     ACOM  : 51 dB
+
+
+ 76 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 76 (315) 
+     calling : 3255335346, called : 32490661135
+     setup time:  11/01/23 10h16m51s
+     connexion time: 11/01/23 10h17m05s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:11
+     PDD duration: 2327 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16388 /Dest ip :212.224.167.110 rtp:21430
+     Play time (voice) : 00h00m11s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1166 / 1166
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 28 dB
+     ACOM  : 53 dB
+
+
+ 77 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 75 (314) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 10h07m53s
+     connexion time: 11/01/23 10h08m17s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:02
+     PDD duration: 1453 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16386 /Dest ip :212.224.167.110 rtp:21352
+     Play time (voice) : 00h00m02s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1224 / 1239
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 66 dB
+     ACOM  : 90 dB
+
+
+ 78 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 73 (312) 
+     calling : 491169975, called : 55335354
+     setup time:  11/01/23 10h05m41s
+     connexion time: 11/01/23 10h05m55s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:35
+     PDD duration: 2467 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16384 /Dest ip :212.224.167.110 rtp:21354
+     Play time (voice) : 00h00m35s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1746 / 1738
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 17 dB
+     ACOM  : 44 dB
+
+
+ 79 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 74 (313) 
+     calling : 32491169975, called : 32490661135
+     setup time:  11/01/23 10h05m41s
+     connexion time: 11/01/23 10h05m54s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:35
+     PDD duration: 2259 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16454 /Dest ip :212.224.167.110 rtp:21356
+     Play time (voice) : 00h00m35s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2294 / 2295
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 17 dB
+     ACOM  : 60 dB
+
+
+ 80 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 72 (311) 
+     calling : 3255335346, called : 32495914834
+     setup time:  11/01/23 09h58m30s
+     connexion time: 11/01/23 09h58m53s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:04
+     PDD duration: 961 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16452 /Dest ip :212.224.167.110 rtp:21314
+     Play time (voice) : 00h00m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1305 / 1307
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 60 dB
+     ACOM  : 90 dB
+
+
+ 81 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 71 (310) 
+     calling : 3255335346, called : 32495914834
+     setup time:  11/01/23 09h57m58s
+     connexion time: 11/01/23 09h58m22s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:03
+     PDD duration: 1369 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16450 /Dest ip :212.224.167.110 rtp:21324
+     Play time (voice) : 00h00m03s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1261 / 1263
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 60 dB
+     ACOM  : 90 dB
+
+
+ 82 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 70 (309) 
+     calling : 3255337741, called : 3256232940
+     setup time:  11/01/23 09h49m37s
+     connexion time: 11/01/23 09h49m38s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:02
+     PDD duration: 1118 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16448 /Dest ip :212.224.167.110 rtp:21266
+     Play time (voice) : 00h01m02s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 622 / 3093
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 3998976
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 33 dB
+     ACOM  : 58 dB
+
+
+ 83 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 69 (308) 
+     calling : 3255337741, called : 3256232940
+     setup time:  11/01/23 09h49m34s
+     connexion time: 11/01/23 09h49m36s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:04
+     PDD duration: 1325 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16446 /Dest ip :212.224.167.110 rtp:21262
+     Play time (voice) : 00h01m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 628 / 3220
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 2684106
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.35 / 4.39 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 84 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 68 (307) 
+     calling : 3255337741, called : 3256232940
+     setup time:  11/01/23 09h48m47s
+     connexion time: 11/01/23 09h48m48s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:34
+     PDD duration: 1098 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16444 /Dest ip :212.224.167.110 rtp:21252
+     Play time (voice) : 00h00m34s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 619 / 1707
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 1121577
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 34 dB
+     ACOM  : 61 dB
+
+
+ 85 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 67 (306) 
+     calling : 495914834, called : 55335241
+     setup time:  11/01/23 09h48m07s
+     connexion time: 11/01/23 09h48m23s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:17
+     PDD duration: 308 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16442 /Dest ip :212.224.167.110 rtp:21268
+     Play time (voice) : 00h00m17s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 824 / 813
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 23 dB
+     ACOM  : 72 dB
+
+
+ 86 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 66 (305) 
+     calling : 3255335241, called : 32495914834
+     setup time:  11/01/23 09h41m58s
+     connexion time: 11/01/23 09h42m00s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:13
+     PDD duration: 1335 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16440 /Dest ip :212.224.167.110 rtp:21216
+     Play time (voice) : 00h00m13s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 678 / 680
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 87 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 65 (304) 
+     calling : 31113760035, called : 55335278
+     setup time:  11/01/23 09h36m21s
+     connexion time: ---
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:00
+     PDD duration: 263 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+
+ 88 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 64 (303) 
+     calling : 460973920, called : 55335241
+     setup time:  11/01/23 09h21m11s
+     connexion time: 11/01/23 09h21m14s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:01:46
+     PDD duration: 311 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16438 /Dest ip :212.224.167.110 rtp:21108
+     Play time (voice) : 00h01m46s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 5330 / 5332
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 19 dB
+     ACOM  : 44 dB
+
+
+ 89 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 63 (302) 
+     calling : 3255337741, called : 32492819960
+     setup time:  11/01/23 09h02m42s
+     connexion time: 11/01/23 09h02m51s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:19
+     PDD duration: 1052 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16436 /Dest ip :212.224.167.110 rtp:20998
+     Play time (voice) : 00h00m19s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1336 / 1356
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 35 dB
+     ACOM  : 57 dB
+
+
+ 90 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 62 (301) 
+     calling : 3255337741, called : 3292349010
+     setup time:  11/01/23 08h55m10s
+     connexion time: 11/01/23 08h55m13s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:07:20
+     PDD duration: 1490 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16434 /Dest ip :212.224.167.110 rtp:20990
+     Play time (voice) : 00h07m20s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 17752 / 22075
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 1 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.33 / 4.39 
+     ERL   : 32 dB
+     ACOM  : 58 dB
+
+
+ 91 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 61 (300) 
+     calling : 3255337741, called : 32492819960
+     setup time:  11/01/23 08h51m58s
+     connexion time: 11/01/23 08h52m22s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:04
+     PDD duration: 1153 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16432 /Dest ip :212.224.167.110 rtp:20970
+     Play time (voice) : 00h00m04s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1298 / 1315
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 24 dB
+     ACOM  : 73 dB
+
+
+ 92 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 60 (299) 
+     calling : 3255337741, called : 32492819960
+     setup time:  11/01/23 08h44m49s
+     connexion time: 11/01/23 08h45m13s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:02
+     PDD duration: 1285 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16430 /Dest ip :212.224.167.110 rtp:20888
+     Play time (voice) : 00h00m02s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1243 / 1262
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 56 dB
+     ACOM  : 75 dB
+
+
+ 93 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 59 (298) 
+     calling : 3255335206, called : 32492819960
+     setup time:  11/01/23 08h42m47s
+     connexion time: 11/01/23 08h42m59s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:09
+     PDD duration: 1183 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16428 /Dest ip :212.224.167.110 rtp:20902
+     Play time (voice) : 00h00m09s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 994 / 1009
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 1
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 33 dB
+     ACOM  : 58 dB
+
+
+ 94 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 58 (297) 
+     calling : 3255335286, called : 32490661144
+     setup time:  11/01/23 08h27m13s
+     connexion time: 11/01/23 08h27m26s
+         B channel (from B1..) : B2
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:21
+     PDD duration: 2148 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16426 /Dest ip :212.224.167.110 rtp:20874
+     Play time (voice) : 00h00m21s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1600 / 1600
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : -- dB
+     ACOM  : 255 dB
+
+
+ 95 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 57 (296) 
+     calling : 3255337758, called : 32490661150
+     setup time:  11/01/23 08h26m27s
+     connexion time: 11/01/23 08h26m36s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:01:06
+     PDD duration: 3073 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16424 /Dest ip :212.224.167.110 rtp:20882
+     Play time (voice) : 00h01m06s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 3578 / 3611
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.24 / 4.39 
+     ERL   : 25 dB
+     ACOM  : 50 dB
+
+
+ 96 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 56 (295) 
+     calling : 3255335241, called : 32490446941
+     setup time:  11/01/23 08h12m33s
+     connexion time: 11/01/23 08h12m42s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:03:31
+     PDD duration: 1404 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16422 /Dest ip :212.224.167.110 rtp:20840
+     Play time (voice) : 00h03m32s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 10973 / 10974
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 12 dB
+     ACOM  : 45 dB
+
+
+ 97 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 55 (294) 
+     calling : 32491169927, called : 32490446941
+     setup time:  11/01/23 07h58m45s
+     connexion time: 11/01/23 07h59m09s
+         B channel (from B1..) : B2
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:05
+     PDD duration: 1072 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16418 /Dest ip :212.224.167.110 rtp:20780
+     Play time (voice) : 00h00m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 1377 / 1378
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 3
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 49 dB
+     ACOM  : 78 dB
+
+
+ 98 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 54 (293) 
+     calling : 491169927, called : 55335361
+     setup time:  11/01/23 07h58m45s
+     connexion time: 11/01/23 07h59m09s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:05
+     PDD duration: 1343 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16420 /Dest ip :212.224.167.110 rtp:20778
+     Play time (voice) : 00h00m05s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 227 / 216
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : -- / -- 
+     ERL   : 20 dB
+     ACOM  : 65 dB
+
+
+ 99 - Call from local port: 5/0, to remote voip: 0  (UDP) call-id: 53 (292) 
+     calling : 3255335286, called : 32490661144
+     setup time:  11/01/23 07h04m54s
+     connexion time: 11/01/23 07h05m00s
+         B channel (from B1..) : B1
+     disconnected by remote voip: 0  (UDP) cause :(16)[Normal call clearing]
+     call duration: 00:00:44
+     PDD duration: 2156 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16416 /Dest ip :212.224.167.110 rtp:20716
+     Play time (voice) : 00h00m44s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 2416 / 2417
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / --
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 15 dB
+     ACOM  : 42 dB
+
+
+ 100 - Call from remote voip: 0  (UDP), to local port: 5/0 call-id: 51 (290) 
+     calling : 476215202, called : 55335234
+     setup time:  11/01/23 07h04m14s
+     connexion time: 11/01/23 07h04m27s
+         B channel (from B1..) : B1
+     disconnected by local port: 5/0 cause :(16)[Normal call clearing]
+     call duration: 00:00:12
+     PDD duration: 3735 msec
+     advice-of-charge: free
+     call priority: 100
+ 
+     RTP Source ip :94.105.56.114 rtp:16414 /Dest ip :212.224.167.110 rtp:20682
+     Play time (voice) : 00h00m12s
+     Tx Coder : G711 A Law / 20 ms ; Rx Coder : G711 A Law
+     RTP Packets RX / TX : 577 / 575
+     RTP Packet lost&discarded RX / TX (RTCP reported) : 0 / 0
+     Number of Excessive Jitter events : 0
+     MOS-CQ / MOS-LQ   : 4.34 / 4.39 
+     ERL   : 26 dB
+     ACOM  : 50 dB
+
 ```
 
 **Help:** execute the command "show voice voip-call any all"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### show vrrp interface
 
 **Output:**
 ```
-'GigabitEthernet 0/0 - Group 1\n  State is master\n  Version 2\n  Virtual IP address 172.16.0.240, Netmask 255.255.255.0 (1)\n  Virtual MAC address is 00:00:5e:00:01:01\n  Advertisement interval is 5 sec\n  Preemption is enabled, min delay is 15 sec\n  Priority 105\n  Master router is 172.16.0.241 (local), priority is 105\nGigabitEthernet 0/1 - Group 3\n  State is master\n  Version 2\n  Virtual IP address 172.16.3.240, Netmask 255.255.255.0 (1)\n  Virtual MAC address is 00:00:5e:00:01:03\n  Advertisement interval is 5 sec\n  Preemption is enabled, min delay is 15 sec\n  Priority 105\n  Master router is 172.16.3.241 (local), priority is 105\nGigabitEthernet 0/2 - Group 2\n  State is master\n  Version 2\n  Virtual IP address 172.16.5.240, Netmask 255.255.255.0 (1)\n  Virtual MAC address is 00:00:5e:00:01:02\n  Advertisement interval is 5 sec\n  Preemption is enabled, min delay is 15 sec\n  Priority 105\n  Master router is 172.16.5.241 (local), priority is 105\nGigabitEthernet 0/3 - Group 4\n  State is master\n  Version 2\n  Virtual IP address 172.16.6.240, Netmask 255.255.255.0 (1)\n  Virtual MAC address is 00:00:5e:00:01:04\n  Advertisement interval is 5 sec\n  Preemption is enabled, min delay is 15 sec\n  Priority 105\n  Master router is 172.16.6.241 (local), priority is 105\n'
+GigabitEthernet 0/0 - Group 1
+  State is master
+  Version 2
+  Virtual IP address 172.16.0.240, Netmask 255.255.255.0 (1)
+  Virtual MAC address is 00:00:5e:00:01:01
+  Advertisement interval is 5 sec
+  Preemption is enabled, min delay is 15 sec
+  Priority 105
+  Master router is 172.16.0.241 (local), priority is 105
+GigabitEthernet 0/1 - Group 3
+  State is master
+  Version 2
+  Virtual IP address 172.16.3.240, Netmask 255.255.255.0 (1)
+  Virtual MAC address is 00:00:5e:00:01:03
+  Advertisement interval is 5 sec
+  Preemption is enabled, min delay is 15 sec
+  Priority 105
+  Master router is 172.16.3.241 (local), priority is 105
+GigabitEthernet 0/2 - Group 2
+  State is master
+  Version 2
+  Virtual IP address 172.16.5.240, Netmask 255.255.255.0 (1)
+  Virtual MAC address is 00:00:5e:00:01:02
+  Advertisement interval is 5 sec
+  Preemption is enabled, min delay is 15 sec
+  Priority 105
+  Master router is 172.16.5.241 (local), priority is 105
+GigabitEthernet 0/3 - Group 4
+  State is master
+  Version 2
+  Virtual IP address 172.16.6.240, Netmask 255.255.255.0 (1)
+  Virtual MAC address is 00:00:5e:00:01:04
+  Advertisement interval is 5 sec
+  Preemption is enabled, min delay is 15 sec
+  Priority 105
+  Master router is 172.16.6.241 (local), priority is 105
+
 ```
 
 **Help:** execute the command "show vrrp interface"
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 
 ### _default_
 
 **Output:**
 ```
-'% Invalid input detected'
+% Invalid input detected
 ```
 
 **Help:** default output for unknown commands
 
 **Prompt:**
-- {base_prompt}>
-- {base_prompt}#
+- oneaccess_oneos>
+- oneaccess_oneos#
 

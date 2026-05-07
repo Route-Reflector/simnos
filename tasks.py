@@ -66,29 +66,26 @@ def gen_docs_platform_commands(ctx):
 
     for platform in platforms:
         print(f"Generating Platform: {platform}")
-        if os.path.exists(f"docs/platforms/{platform}.md"):
-            continue
         with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
             data = yaml.safe_load(file)
         with open(f"docs/platforms/{platform}.md", "w", encoding="utf-8") as platforms_file:
             platforms_file.write(f"# {platform}\n\n")
             platforms_file.write(WARNING_MESSAGE)
-            platforms_file.write("## Platforms:\n\n")
             platforms_file.write("## Commands\n\n")
             for command, details in data["commands"].items():
                 platforms_file.write(f"### {command}\n\n")
-                output = details["output"]
-                if output is None:
+                output = details.get("output")
+                if not output:
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    platforms_file.write("**Output:**\n```\n" + repr(output) + "\n```\n\n")
-                platforms_file.write(f"**Help:** {details['help']}\n\n")
+                    platforms_file.write(f"**Output:**\n```\n{output.replace('{base_prompt}', platform)}\n```\n\n")
+                platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
                 platforms_file.write("**Prompt:**\n")
-                prompts = details["prompt"]
+                prompts = details.get("prompt", [])
                 if not isinstance(prompts, list):
                     prompts = [prompts]
                 for prompt in prompts:
-                    platforms_file.write(f"- {prompt}\n")
+                    platforms_file.write(f"- {prompt.replace('{base_prompt}', platform)}\n")
                 platforms_file.write("\n")
 
 
