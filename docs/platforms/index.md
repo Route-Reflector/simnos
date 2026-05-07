@@ -33,7 +33,7 @@ The following platforms are supported by SIMNOS. Each platform has been tested f
 | [cisco_apic](cisco_apic.md) | ✅ | ⚠️ | - | - | Linux-based NOS. Netmiko sends `sudo -s` for enable mode escalation. SIMNOS does not support sudo. Show commands work after manual `enable`. New in v2.2.0 |
 | [cisco_asa](cisco_asa.md) | ✅ | ✅ | - | - | |
 | [cisco_ftd](cisco_ftd.md) | ✅ | ✅ | - | - | |
-| [cisco_ios](cisco_ios.md) | ✅ | ✅ | - | - | |
+| [cisco_ios](cisco_ios.md) | ✅ | ✅ | - | ✅ | |
 | [cisco_nxos](cisco_nxos.md) | ✅ | ✅ | - | - | |
 | [cisco_s300](cisco_s300.md) | ✅ | ✅ | - | - | |
 | [cisco_viptela](cisco_viptela.md) | ✅ | ✅ | - | - | New in v2.2.0 |

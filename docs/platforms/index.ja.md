@@ -33,7 +33,7 @@ SIMNOS がサポートするプラットフォームの一覧です。各プラ�
 | [cisco_apic](cisco_apic.md) | ✅ | ⚠️ | - | - | Linux ベース NOS。Netmiko が enable モード昇格で `sudo -s` を送信する。SIMNOS は sudo 未対応。手動 `enable` 後に show コマンドは動作。v2.2.0 で追加 |
 | [cisco_asa](cisco_asa.md) | ✅ | ✅ | - | - | |
 | [cisco_ftd](cisco_ftd.md) | ✅ | ✅ | - | - | |
-| [cisco_ios](cisco_ios.md) | ✅ | ✅ | - | - | |
+| [cisco_ios](cisco_ios.md) | ✅ | ✅ | - | ✅ | |
 | [cisco_nxos](cisco_nxos.md) | ✅ | ✅ | - | - | |
 | [cisco_s300](cisco_s300.md) | ✅ | ✅ | - | - | |
 | [cisco_viptela](cisco_viptela.md) | ✅ | ✅ | - | - | v2.2.0 で追加 |
