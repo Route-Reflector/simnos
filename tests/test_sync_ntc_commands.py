@@ -27,6 +27,45 @@ sys.modules["sync_ntc_commands"] = sync_ntc_commands
 _spec.loader.exec_module(sync_ntc_commands)
 
 select_primary_raw = sync_ntc_commands.select_primary_raw
+escape_format_braces = sync_ntc_commands.escape_format_braces
+
+
+class TestEscapeFormatBraces:
+    """`escape_format_braces` doubles ``{`` and ``}`` so NTC outputs survive
+    simnos's runtime ``output.format(base_prompt=...)`` call without
+    ``KeyError``. The motivating real-world cases are Juniper's ``{master}``
+    routing-engine indicator and ``rpd{junos-bgpshard0}`` process-thread
+    names from ``show system processes summary``.
+    """
+
+    def test_juniper_master_indicator(self):
+        """`{master}` becomes `{{master}}` — the most common Juniper case."""
+        assert escape_format_braces("...\n{master}\n") == "...\n{{master}}\n"
+
+    def test_juniper_process_thread_names(self):
+        """Nested-looking patterns like `rpd{junos-bgpshard0}` are escaped."""
+        assert (
+            escape_format_braces("rpd{junos-bgpshard0}\nchassisd{chassisd}")
+            == "rpd{{junos-bgpshard0}}\nchassisd{{chassisd}}"
+        )
+
+    def test_already_escaped_double_braces_get_quadrupled(self):
+        """Pre-escaped `{{x}}` becomes `{{{{x}}}}` — by design.
+
+        Inputs to this function are raw NTC fixtures, which never carry
+        pre-escaped braces. We pin the literal behaviour here to make
+        the contract explicit: callers must pass untouched fixture text.
+        """
+        assert escape_format_braces("{{x}}") == "{{{{x}}}}"
+
+    def test_passthrough_when_no_braces(self):
+        """Strings without braces are returned unchanged."""
+        assert escape_format_braces("plain output text\n") == "plain output text\n"
+
+    def test_preserves_other_characters(self):
+        """Newlines, percent signs, backslashes are not affected."""
+        text = "line1\nline2\n100%\\path\n"
+        assert escape_format_braces(text) == text
 
 
 class TestSelectPrimaryRaw:
