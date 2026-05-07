@@ -86,16 +86,11 @@ uv run pre-commit install
 ### テストの実行
 
 ```bash
-# すべてのチェック（lint + security + tests）を Docker で実行
-uv run invoke tests
-
-# Docker なしでローカル実行
-uv run invoke tests --local
-
-# 個別のチェック
-uv run invoke ruff --local      # リンティングとフォーマット
-uv run invoke bandit --local    # セキュリティチェック
-uv run invoke pytest --local    # ユニットテスト
+# すべてのチェック（lint + security + tests）
+uv run invoke ruff       # リンティングとフォーマット
+uv run invoke yamllint   # YAML リンティング
+uv run invoke bandit     # セキュリティチェック
+uv run pytest -n auto    # ユニットテスト
 ```
 
 ### コードスタイル
