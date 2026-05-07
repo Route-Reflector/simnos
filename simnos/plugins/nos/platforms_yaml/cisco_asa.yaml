@@ -1385,3 +1385,42 @@ commands:
       three\nobject-group service five tcp\n port-object eq 445\n port-object eq netbios-ssn\n"
     help: execute the command "show running-config object-group service"
     prompt: *id001
+  # ----- Manually maintained (netmiko init compat) -----
+  # These commands are NOT sourced from NTC Templates. They are added so
+  # netmiko's session_preparation() does not see "Unknown command" responses
+  # for cisco_asa. Re-runs of `sync_ntc_commands.py` will not affect this
+  # section.
+  show curpriv:
+    output: "Username : enable_15\nCurrent privilege level : 15\nCurrent Mode/s : P_PRIV\n"
+    help: Execute the command show curpriv. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  terminal pager 0:
+    output: null
+    help: Execute the command terminal pager 0. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  terminal width 511:
+    output: null
+    help: Execute the command terminal width 511. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  configure terminal:
+    output: null
+    new_prompt: "{base_prompt}(config)#"
+    help: enter configuration mode
+    prompt: "{base_prompt}#"
+  end:
+    output: null
+    new_prompt: "{base_prompt}#"
+    help: exit configuration mode
+    prompt: "{base_prompt}(config)#"
