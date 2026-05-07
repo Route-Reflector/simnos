@@ -75,13 +75,13 @@ def gen_docs_platform_commands(ctx):
             for command, details in data["commands"].items():
                 platforms_file.write(f"### {command}\n\n")
                 output = details.get("output")
-                if output is None:
+                if not output:
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    platforms_file.write(f"**Output:**\n```\n{output}\n```\n\n")
-                platforms_file.write(f"**Help:** {details['help']}\n\n")
+                    platforms_file.write(f"**Output:**\n```\n{output.replace('{base_prompt}', platform)}\n```\n\n")
+                platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
                 platforms_file.write("**Prompt:**\n")
-                prompts = details["prompt"]
+                prompts = details.get("prompt", [])
                 if not isinstance(prompts, list):
                     prompts = [prompts]
                 for prompt in prompts:
