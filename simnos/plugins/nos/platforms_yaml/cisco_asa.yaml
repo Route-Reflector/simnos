@@ -1317,3 +1317,110 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  show access-list brief:
+    output: "access-list global-acl-test-show-acl-brief; 3 elements; name hash: 0xccfef45c\n\
+      06228509 d0a2680b 00006049 6178289f\n4c8c760a d0a2680b 00000cf5 6245930b\n179f5b95
+      00000000 00000003 61695d26\n"
+    help: execute the command "show access-list brief"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+  show running-config access-group:
+    output: "access-group INSIDE_acl in interface inside\naccess-group dmz1_acl in
+      interface dmz1\naccess-group dmz2_acl in interface dmz2\naccess-group dmz3_acl
+      in interface dmz3\naccess-group dmz4 in interface dmz4\naccess-group dmz5 in
+      interface dmz5\naccess-group OUTSIDE_acl in interface outside\n"
+    help: execute the command "show running-config access-group"
+    prompt: *id001
+  show running-config object service:
+    output: "object service one\n description test one\n service tcp source eq 8000
+      destination eq 9000\nobject service two\n description test two\n service udp
+      source eq 8000 destination gt 9000\nobject service three\n description test
+      three\n service tcp source eq 8000 destination lt 9000\nobject service four\n\
+      \ description test four\n service tcp source eq 8000 destination range 9000
+      9999\nobject service five\n description test five\n service tcp source gt 8000
+      destination eq 9000\nobject service six\n description test six\n service udp
+      source gt 8000 destination gt 9000\nobject service seven\n description test
+      seven\n service tcp source gt 8000 destination lt 9000\nobject service eight\n\
+      \ description test eight\n service tcp source gt 8000 destination range 9000
+      9999\nobject service nine\n description test nine\n service tcp source lt 8000
+      destination eq 9000\nobject service ten\n description test ten\n service udp
+      source lt 8000 destination gt 9000\nobject service eleven\n description test
+      eleven\n service tcp source lt 8000 destination lt 9000\nobject service twelve\n\
+      \ description test twelve\n service tcp source lt 8000 destination range 9000
+      9999\nobject service thirteen\n description test thirteen\n service tcp source
+      range 8000 8999 destination eq 9000\nobject service fourteen\n description test
+      fourteen\n service udp source range 8000 8999 destination gt 9000\nobject service
+      fifteen\n description test fifteen\n service tcp source range 8000 8999 destination
+      lt 9000\nobject service sixteen\n description test sixteen\n service tcp source
+      range 8000 8999 destination range 9000 9999\nobject service seventeen\n description
+      test seventeen\n service tcp source eq 8000\nobject service eighteen\n description
+      test eighteen\n service tcp source gt 8000\nobject service nineteen\n description
+      test nineteen\n service udp source lt 8000\nobject service twenty\n description
+      test twenty\n service tcp source range 8000 8999\nobject service twenty-one\n\
+      \ description test twenty-one\n service tcp destination eq 8000\nobject service
+      twenty-two\n description test twenty-two\n service tcp destination gt 8000\n\
+      object service twenty-three\n description test twenty-three\n service tcp destination
+      lt 8000\nobject service twenty-four\n service udp destination range 8000 8999\n\
+      object service twenty-five\n service tcp source range 1 1024 destination eq
+      https\nobject service twenty-six\n service tcp destination eq http\nobject service
+      twenty-seven\n service tcp source eq ssh\nobject service twenty-eight\n service
+      icmp echo\nobject service twenty-nine\n service icmp\nobject service thirty\n\
+      \ service icmp 9 16\nobject service thirty-one\n description Except for IRC-based
+      botnet C&C traffic\n service tcp destination neq 6667\nobject service thirty-two\n\
+      \ description Numeric protocol\n service 137\n"
+    help: execute the command "show running-config object service"
+    prompt: *id001
+  show running-config object-group service:
+    output: "object-group service one\n description TEST ONE\n service-object object
+      alpha \n service-object object bravo \n service-object icmp echo 0\n service-object
+      icmp echo\nobject-group service two\n description TEST TWO\n service-object
+      object charlie\n service-object tcp destination eq ftp \n service-object tcp
+      destination eq 5666 \n service-object icmp\n service-object 137 \nobject-group
+      service three\n description TEST THREE\n service-object udp destination range
+      48129 48137 \n service-object udp source range 48129 48137 \n service-object
+      udp source eq 48129 destination eq 48137 \n service-object udp source range
+      48129 48137 destination eq 48137 \n service-object udp source gt 1023 destination
+      lt 40000 \nobject-group service four\n description TEST FOUR\n group-object
+      three\nobject-group service five tcp\n port-object eq 445\n port-object eq netbios-ssn\n"
+    help: execute the command "show running-config object-group service"
+    prompt: *id001
+  # ----- Manually maintained (netmiko init compat) -----
+  # These commands are NOT sourced from NTC Templates. They are added so
+  # netmiko's session_preparation() does not see "Unknown command" responses
+  # for cisco_asa. Re-runs of `sync_ntc_commands.py` will not affect this
+  # section.
+  show curpriv:
+    output: "Username : enable_15\nCurrent privilege level : 15\nCurrent Mode/s : P_PRIV\n"
+    help: Execute the command show curpriv. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  terminal pager 0:
+    output: null
+    help: Execute the command terminal pager 0. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  terminal width 511:
+    output: null
+    help: Execute the command terminal width 511. This automatically generated. Feel
+      free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+    - "{base_prompt}(config)#"
+  configure terminal:
+    output: null
+    new_prompt: "{base_prompt}(config)#"
+    help: enter configuration mode
+    prompt: "{base_prompt}#"
+  end:
+    output: null
+    new_prompt: "{base_prompt}#"
+    help: exit configuration mode
+    prompt: "{base_prompt}(config)#"

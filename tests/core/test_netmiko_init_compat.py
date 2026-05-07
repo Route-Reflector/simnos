@@ -26,7 +26,6 @@ HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output fo
 INIT_UNKNOWN_CMD_ALLOWED = {
     "aruba_os",  # no paging
     "brocade_fastiron",  # enable (repeated)
-    "cisco_asa",  # show curpriv, terminal pager 0, configure terminal
     "dlink_ds",  # disable clipaging
     "huawei_smartax",  # enable password (#70)
     "ipinfusion_ocnos",  # terminal length 0
