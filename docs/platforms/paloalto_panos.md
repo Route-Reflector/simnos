@@ -84,7 +84,7 @@ tunnel              4     1                     N/A                      0      
 
 **Output:**
 ```
-"DMZ-PROXY-NAT; index: 1" {{
+"DMZ-PROXY-NAT; index: 1" {
         nat-type ipv4;
         from DMZ-APPS;
         source [ 10.1.1.1 10.1.1.2 ];
@@ -94,7 +94,7 @@ tunnel              4     1                     N/A                      0      
         service 0:any/any/any;
         translate-to "src: 2.2.2.2 (dynamic-ip-and-port) (pool idx: 1)";
         terminal no;
-}}
+}
 
 ```
 
@@ -445,7 +445,7 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
 
 **Output:**
 ```
-"Outside Web Server" {{
+"Outside Web Server" {
         from Trust;
         source 10.1.1.0/24;
         source-region none;
@@ -458,9 +458,9 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"ICMP Any" {{
+"ICMP Any" {
         from Trust;
         source any;
         source-region none;
@@ -473,9 +473,9 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"DNS Outbound" {{
+"DNS Outbound" {
         from Trust;
         source 10.1.1.0/24;
         source-region none;
@@ -488,9 +488,9 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"Inbound to DMZ Web" {{
+"Inbound to DMZ Web" {
         from Untrust;
         source any;
         source-region none;
@@ -503,9 +503,9 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"Inbound to DMZ Deny" {{
+"Inbound to DMZ Deny" {
         from Untrust;
         source any;
         source-region none;
@@ -518,9 +518,9 @@ hsci                    8     ukn/ukn/down(autoneg)     c4:24:56:d7:30:08
         action deny;
         icmp-unreachable: no
         terminal no;
-}}
+}
 
-intrazone-default {{
+intrazone-default {
         from any;
         source any;
         source-region none;
@@ -533,9 +533,9 @@ intrazone-default {{
         icmp-unreachable: no
         terminal yes;
         type intrazone;
-}}
+}
 
-interzone-default {{
+interzone-default {
         from any;
         source any;
         source-region none;
@@ -548,7 +548,7 @@ interzone-default {{
         icmp-unreachable: no
         terminal yes;
         type interzone;
-}}
+}
 
 dynamic url: no
 pol objs matched
@@ -565,7 +565,7 @@ pol objs matched
 
 **Output:**
 ```
-"Allow 10.125.100.58-To-Google DNS; index: 1" {{
+"Allow 10.125.100.58-To-Google DNS; index: 1" {
         from Internal;
         source 10.125.100.58;
         source-region none;
@@ -580,9 +580,9 @@ pol objs matched
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"Allow 10.125.100.58-To-1.1.1.1; index: 2" {{
+"Allow 10.125.100.58-To-1.1.1.1; index: 2" {
         from Internal;
         source 10.125.100.58;
         source-region none;
@@ -597,9 +597,9 @@ pol objs matched
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 
-"Allow DNS_Objects-To-192.0.2.10; index: 4" {{
+"Allow DNS_Objects-To-192.0.2.10; index: 4" {
         from Internal;
         source [ 1.1.1.1 8.8.8.8 ];
         source-region none;
@@ -614,7 +614,7 @@ pol objs matched
         action allow;
         icmp-unreachable: no
         terminal yes;
-}}
+}
 ```
 
 **Help:** execute the command "test security-policy-match"

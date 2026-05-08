@@ -1684,7 +1684,7 @@ cpsr           0x20030010       537067536
 * Current instructions
 *
 => 0xb55a9ab4 <raise+52>:       cmn     r0, #4096       ; 0x1000
-   0xb55a9ab8 <raise+56>:       pop     {{r7}}            ; (ldr r7, [sp], #4)
+   0xb55a9ab8 <raise+56>:       pop     {r7}            ; (ldr r7, [sp], #4)
    0xb55a9abc <raise+60>:       ldrhi   r2, [pc, #44]   ; 0xb55a9af0 <raise+112>
    0xb55a9ac0 <raise+64>:       rsbhi   r1, r0, #0
    0xb55a9ac4 <raise+68>:       mvnhi   r0, #0

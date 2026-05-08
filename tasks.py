@@ -78,14 +78,16 @@ def gen_docs_platform_commands(ctx):
                 if not output:
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    platforms_file.write(f"**Output:**\n```\n{output.replace('{base_prompt}', platform)}\n```\n\n")
+                    # Use .format() to match runtime (cmd_shell.default): substitutes
+                    # {base_prompt} and unescapes {{ / }} literals from preventive escape.
+                    platforms_file.write(f"**Output:**\n```\n{output.format(base_prompt=platform)}\n```\n\n")
                 platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
                 platforms_file.write("**Prompt:**\n")
                 prompts = details.get("prompt", [])
                 if not isinstance(prompts, list):
                     prompts = [prompts]
                 for prompt in prompts:
-                    platforms_file.write(f"- {prompt.replace('{base_prompt}', platform)}\n")
+                    platforms_file.write(f"- {prompt.format(base_prompt=platform)}\n")
                 platforms_file.write("\n")
 
 

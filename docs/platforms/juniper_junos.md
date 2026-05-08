@@ -60,7 +60,7 @@ default-switch          v109-TEMP-Project-Data 109
                                                            xe-0/0/22.0
                                                            xe-0/0/9.0*
 
-{{master:0}}
+{master:0}
 ```
 
 **Help:** execute the command "show vlans"
@@ -155,7 +155,7 @@ Physical interface: sp-0/0/0, Enabled, Physical link is Up
   Device Flags   : Present Running
   Interface flags: Point-To-Point SNMP-Traps Internal: 0x4000
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -238,7 +238,7 @@ MAC Address       Address         Interface     Flags
 00:00:00:00:13:13 10.1.13.13      vlan.20        none
 Total entries: 9
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -289,7 +289,7 @@ Aggregated interface: ae115
       et-0/0/25                 Current   Fast periodic Collecting distributing
       et-0/0/29                 Current   Fast periodic Collecting distributing
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -487,7 +487,7 @@ SPMB 0                   ROM        Juniper ROM Monitor Version 6.4b18
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
                          O/S        Version 7.0-20040804.0 by builder on 2004-0
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -586,7 +586,7 @@ ge-0/0/2.0            XRv3           1  Up                    8  50:0:0:3:0:2
 ge-0/0/2.0            XRv3           2  Up                    8  50:0:0:3:0:2
 ge-0/0/3.0            XRv3           3  Up                   25
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -630,7 +630,7 @@ Routing instance : default-switch
     Vlan100             2c:5a:0f:bc:a3:cd   DL            -   ae112.0
     Vlan100             ca:fe:ca:fe:00:07   DL            -   ae112.0
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -648,7 +648,7 @@ Address          Interface              State     ID               Pri  Dead
 10.1.2.2         ge-0/0/2.0             Full      2.2.2.2            1    37
 10.1.3.3         ge-0/0/3.0             Full      3.3.3.3            1    31
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -697,7 +697,7 @@ JUNOS Online Documentation [13.2X51-D35.3]
  JUNOS EX 4500 Software Suite [13.2X51-D35.3]
 JUNOS Web Management [13.2X51-D35.3]
 
-{{master:0}}
+{master:0}
 
 ```
 
@@ -863,7 +863,7 @@ Current database size on disk: 4.00 MB
 Actual database usage: 3.92 MB
 Available database space: 1298.07 MB
 
-{{master}}
+{master}
 
 
 ```
@@ -903,32 +903,32 @@ Mem: 3977M Active, 14G Inact, 1815M Wired, 504M Buf, 74G Free
 Swap: 12G Total, 12G Free
 
   PID USERNAME    PRI NICE   SIZE    RES STATE    C   TIME    WCPU COMMAND
-   11 root        155 ki31     0B   128K CPU7     7 787.8H  98.58% idle{{idle: cpu7}}
-   11 root        155 ki31     0B   128K CPU0     0 931.9H  98.39% idle{{idle: cpu0}}
-   11 root        155 ki31     0B   128K CPU2     2 783.0H  96.88% idle{{idle: cpu2}}
-   11 root        155 ki31     0B   128K RUN      5 787.6H  96.78% idle{{idle: cpu5}}
-   11 root        155 ki31     0B   128K CPU4     4 786.1H  96.68% idle{{idle: cpu4}}
-   11 root        155 ki31     0B   128K CPU6     6 787.6H  93.26% idle{{idle: cpu6}}
-   11 root        155 ki31     0B   128K CPU1     1 785.5H  91.70% idle{{idle: cpu1}}
-   11 root        155 ki31     0B   128K CPU3     3 785.6H  90.67% idle{{idle: cpu3}}
+   11 root        155 ki31     0B   128K CPU7     7 787.8H  98.58% idle{idle: cpu7}
+   11 root        155 ki31     0B   128K CPU0     0 931.9H  98.39% idle{idle: cpu0}
+   11 root        155 ki31     0B   128K CPU2     2 783.0H  96.88% idle{idle: cpu2}
+   11 root        155 ki31     0B   128K RUN      5 787.6H  96.78% idle{idle: cpu5}
+   11 root        155 ki31     0B   128K CPU4     4 786.1H  96.68% idle{idle: cpu4}
+   11 root        155 ki31     0B   128K CPU6     6 787.6H  93.26% idle{idle: cpu6}
+   11 root        155 ki31     0B   128K CPU1     1 785.5H  91.70% idle{idle: cpu1}
+   11 root        155 ki31     0B   128K CPU3     3 785.6H  90.67% idle{idle: cpu3}
 19880 root         25    0   801M    74M select   2 132.6H  15.09% cosd
 19926 root         24    0   735M    27M select   7 113.5H  11.87% snmpd
 19929 root         22    0   805M    86M select   3  81.9H   9.28% mib2d
-19876 root         21    0    14G    13G kqread   3 938.4H   2.69% rpd{{rpd}}
-19876 root         21    0    14G    13G kqread   3  20.3H   2.69% rpd{{junos-bgpshard3}}
-19876 root         21    0    14G    13G kqread   4  20.3H   1.76% rpd{{junos-bgpshard0}}
-19876 root         20    0    14G    13G kqread   0  24.6H   1.46% rpd{{junos-bgpshard2}}
-19914 root         21    0   839M   118M select   5  18.4H   1.37% jinsightd{{jinsightd}}
-19876 root         20    0    14G    13G kqread   1  22.2H   1.27% rpd{{junos-bgpshard1}}
-   12 root        -60    -     0B   864K WAIT     0  69:18   1.17% intr{{swi4: clock (0)}}
-19315 root         21    0   880M    78M select   6 898:25   0.98% chassisd{{chassisd}}
-19921 root         20    0   131M    49M select   2 596:38   0.59% na-grpcd{{na-grpcd}}
-19876 root         20    0    14G    13G kqread   6 489:58   0.59% rpd{{bgp-updio-3}}
+19876 root         21    0    14G    13G kqread   3 938.4H   2.69% rpd{rpd}
+19876 root         21    0    14G    13G kqread   3  20.3H   2.69% rpd{junos-bgpshard3}
+19876 root         21    0    14G    13G kqread   4  20.3H   1.76% rpd{junos-bgpshard0}
+19876 root         20    0    14G    13G kqread   0  24.6H   1.46% rpd{junos-bgpshard2}
+19914 root         21    0   839M   118M select   5  18.4H   1.37% jinsightd{jinsightd}
+19876 root         20    0    14G    13G kqread   1  22.2H   1.27% rpd{junos-bgpshard1}
+   12 root        -60    -     0B   864K WAIT     0  69:18   1.17% intr{swi4: clock (0)}
+19315 root         21    0   880M    78M select   6 898:25   0.98% chassisd{chassisd}
+19921 root         20    0   131M    49M select   2 596:38   0.59% na-grpcd{na-grpcd}
+19876 root         20    0    14G    13G kqread   6 489:58   0.59% rpd{bgp-updio-3}
 24926 remote       20    0    95M    25M select   1   0:00   0.59% cli
-   12 root        -92    -     0B   864K WAIT     0 162:55   0.49% intr{{irq271: ixlv0:que 0}}
+   12 root        -92    -     0B   864K WAIT     0 162:55   0.49% intr{irq271: ixlv0:que 0}
 24923 root         22    0   756M    13M select   7   0:00   0.29% sshd
-   12 root        -72    -     0B   864K WAIT     1 417:28   0.20% intr{{swi1: netisr 2}}
-19352 root         20    0   724M  8544K select   2 106:54   0.20% timingd{{ptp_stack}}
+   12 root        -72    -     0B   864K WAIT     1 417:28   0.20% intr{swi1: netisr 2}
+19352 root         20    0   724M  8544K select   2 106:54   0.20% timingd{ptp_stack}
 24925 remote       20    0   756M    13M select   6   0:00   0.20% sshd
 19858 root        -16    -     0B    16K select   1 184:43   0.10% ppt_11_80000010
 19743 root        -16    -     0B    16K select   7 172:15   0.10% ppt_11_80000013

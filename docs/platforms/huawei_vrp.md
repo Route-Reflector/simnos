@@ -1001,8 +1001,8 @@ Output:  0 packets, 0 bytes
 
 **Output:**
 ```
-   Community name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{{(3i02`R$>&n}}+56Pb'@]rd}}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
-   Group name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{{(3i02`R$>&n}}+56Pb'@]rd}}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
+   Community name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{(3i02`R$>&n}+56Pb'@]rd}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
+   Group name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{(3i02`R$>&n}+56Pb'@]rd}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
    Acl: 2001
    Storage-type: nonVolatile
 

@@ -1568,7 +1568,7 @@ BGP routing table entry for 10.103.1.0/24
       Rx SAFI: Unicast
 BGP routing table entry for 10.104.1.0/24
  Paths: 1 available
-  6333 623566 42669611124 {{432556}}
+  6333 623566 42669611124 {432556}
     10.10.11.2 from 10.10.11.2 (10.10.11.1)
       Origin IGP, metric 0, localpref 200, IGP metric 1, weight 0, received 19:13:51 ago, valid, internal, best
       Community: 10050:300 10222:10010 3223:0 1000:17066
@@ -1576,7 +1576,7 @@ BGP routing table entry for 10.104.1.0/24
       Rx SAFI: Unicast
 BGP routing table entry for 10.105.1.0/24
  Paths: 2 available
-  6333 623566 42669611124 {{432556}}
+  6333 623566 42669611124 {432556}
     10.10.11.2 from 10.10.11.2 (10.10.11.1)
       Origin IGP, metric 0, localpref 300, IGP metric 1, weight 0, received 13:43:11 ago, valid, internal, best, atomic-aggregate
       Community: 10050:300 10222:10010 3223:0 1000:17077
@@ -1595,7 +1595,7 @@ BGP routing table entry for 10.105.1.0/24
       Rx SAFI: Unicast
 BGP routing table entry for 10.105.100.0
  Paths: 2 available
-  6333 623566 42669611124 {{432556}}
+  6333 623566 42669611124 {432556}
     10.10.11.2 from 10.10.11.2 (10.10.11.1)
       Origin IGP, metric 0, localpref 300, IGP metric 1, weight 0, received 13:43:11 ago, valid, internal, best, atomic-aggregate
       Community: 10050:300 10222:10010 3223:0 1000:17077

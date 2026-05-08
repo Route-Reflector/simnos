@@ -711,7 +711,7 @@
 
 **Output:**
 ```
-{{ <cr>||<K> }}:
+{ <cr>||<K> }:
 
   Command:
           display location aaaa-aaaa-aaaa ont

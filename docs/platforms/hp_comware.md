@@ -278,13 +278,13 @@ System ID: 0x8000, aaaa-bbbb-75bc
 Local:
   Port             Status  Priority Oper-Key  Flag
 --------------------------------------------------------------------------------
-  GE0/0/0          S       32768    1         {{ACDEF}}
-  GE0/0/1          S       32768    1         {{ACDEF}}
+  GE0/0/0          S       32768    1         {ACDEF}
+  GE0/0/1          S       32768    1         {ACDEF}
 Remote:
   Actor            Partner Priority Oper-Key  SystemID               Flag
 --------------------------------------------------------------------------------
-  GE0/0/0          21      32768    7         0x8000, aaaa-bbbb-6485 {{ACDEF}}
-  GE0/0/1          23      32768    7         0x8000, aaaa-bbbb-6485 {{ACDEF}}
+  GE0/0/0          21      32768    7         0x8000, aaaa-bbbb-6485 {ACDEF}
+  GE0/0/1          23      32768    7         0x8000, aaaa-bbbb-6485 {ACDEF}
 
 ```
 

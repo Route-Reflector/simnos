@@ -2138,7 +2138,7 @@ interface: Tunnel1
    local  ident (addr/mask/prot/port): (1.2.3.4/255.255.255.255/47/0)
    remote ident (addr/mask/prot/port): (2.2.2.2/255.255.255.255/47/0)
    current_peer 2.2.2.2 port 4500
-     PERMIT, flags={{origin_is_acl,}}
+     PERMIT, flags={origin_is_acl,}
     #pkts encaps: 4981028, #pkts encrypt: 4981028, #pkts digest: 4981028
     #pkts decaps: 4112421, #pkts decrypt: 4112421, #pkts verify: 4112421
     #pkts compressed: 0, #pkts decompressed: 0
@@ -2162,7 +2162,7 @@ interface: Tunnel1
      inbound esp sas:
       spi: 0xABCD1234(2882343476)
         transform: esp-256-aes esp-sha-hmac ,
-        in use settings ={{Transport UDP-Encaps, }}
+        in use settings ={Transport UDP-Encaps, }
         conn id: 124, flow_id: Onboard VPN:124, sibling_flags 80000000, crypto map: Tunnel1-head-0
         sa timing: remaining key lifetime (k/sec): (4332650/3205)
         IV size: 16 bytes
@@ -2176,7 +2176,7 @@ interface: Tunnel1
      outbound esp sas:
       spi: 0x1234ABCD(305441741)
         transform: esp-256-aes esp-sha-hmac ,
-        in use settings ={{Transport UDP-Encaps, }}
+        in use settings ={Transport UDP-Encaps, }
         conn id: 123, flow_id: Onboard VPN:123, sibling_flags 80000000, crypto map: Tunnel1-head-0
         sa timing: remaining key lifetime (k/sec): (4332649/3205)
         IV size: 16 bytes
@@ -2194,7 +2194,7 @@ interface: Tunnel2
    local  ident (addr/mask/prot/port): (1.2.3.4/255.255.255.255/47/0)
    remote ident (addr/mask/prot/port): (3.3.3.3/255.255.255.255/47/0)
    current_peer 3.3.3.3 port 4500
-     PERMIT, flags={{origin_is_acl,}}
+     PERMIT, flags={origin_is_acl,}
     #pkts encaps: 13133657, #pkts encrypt: 13133657, #pkts digest: 13133657
     #pkts decaps: 12013064, #pkts decrypt: 12013064, #pkts verify: 12013064
     #pkts compressed: 0, #pkts decompressed: 0
@@ -2218,7 +2218,7 @@ interface: Tunnel2
      inbound esp sas:
       spi: 0x1234DCBA(4321567890)
         transform: esp-256-aes esp-sha-hmac ,
-        in use settings ={{Transport UDP-Encaps, }}
+        in use settings ={Transport UDP-Encaps, }
         conn id: 457, flow_id: Onboard VPN:457, sibling_flags 80000000, crypto map: Tunnel2-head-0
         sa timing: remaining key lifetime (k/sec): (4272028/2813)
         IV size: 16 bytes
@@ -2232,7 +2232,7 @@ interface: Tunnel2
      outbound esp sas:
       spi: 0x4321DCBA(0987612345)
         transform: esp-256-aes esp-sha-hmac ,
-        in use settings ={{Transport UDP-Encaps, }}
+        in use settings ={Transport UDP-Encaps, }
         conn id: 456, flow_id: Onboard VPN:456, sibling_flags 80000000, crypto map: Tunnel2-head-0
         sa timing: remaining key lifetime (k/sec): (4272026/2813)
         IV size: 16 bytes
