@@ -1,3 +1,7 @@
+# NTC fixture-derived `output` and `output_variants` are preventively escaped
+# via sync_ntc_commands.escape_format_braces: literal `{` / `}` are doubled
+# (`{{` / `}}`) so the runtime `.format(base_prompt=...)` collapses them back
+# to single braces. Lone `}}` runs in encrypted strings are intentional.
 name: huawei_smartax
 initial_prompt: "{base_prompt}>"
 enable_prompt: "{base_prompt}#"

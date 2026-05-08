@@ -55,6 +55,26 @@ WARNING_MESSAGE = """
 """
 
 
+def render_template(template: str, platform: str, command: str, field: str) -> str:
+    """Render a YAML string template the same way the runtime shell does.
+
+    Uses `str.format(base_prompt=platform)` to match `cmd_shell.default`:
+    substitutes `{base_prompt}` and unescapes `{{` / `}}` literals from
+    `sync_ntc_commands.escape_format_braces` preventive escape.
+
+    Re-raises any formatting failure as `RuntimeError` carrying the
+    platform / command / field context, so CI failures pinpoint the
+    offending YAML entry instead of dumping a contextless stack trace.
+    """
+    try:
+        return template.format(base_prompt=platform)
+    except (KeyError, IndexError, ValueError) as exc:
+        raise RuntimeError(
+            f"Failed to format {field} for {platform}/{command!r}: {exc!r}. "
+            f"Check that any literal '{{' / '}}' in YAML is escaped as '{{{{' / '}}}}'."
+        ) from exc
+
+
 @task
 def gen_docs_platform_commands(ctx):
     """
@@ -78,16 +98,16 @@ def gen_docs_platform_commands(ctx):
                 if not output:
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    # Use .format() to match runtime (cmd_shell.default): substitutes
-                    # {base_prompt} and unescapes {{ / }} literals from preventive escape.
-                    platforms_file.write(f"**Output:**\n```\n{output.format(base_prompt=platform)}\n```\n\n")
+                    rendered = render_template(output, platform, command, "output")
+                    platforms_file.write(f"**Output:**\n```\n{rendered}\n```\n\n")
                 platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
                 platforms_file.write("**Prompt:**\n")
                 prompts = details.get("prompt", [])
                 if not isinstance(prompts, list):
                     prompts = [prompts]
                 for prompt in prompts:
-                    platforms_file.write(f"- {prompt.format(base_prompt=platform)}\n")
+                    rendered = render_template(prompt, platform, command, "prompt")
+                    platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
 
 
