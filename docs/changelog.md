@@ -3,6 +3,34 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## v2.2.1
+
+**Features**
+
+- Add NTC Templates v9.1 commands to Cisco family — cisco_nxos / cisco_xr / cisco_asa: 19 commands total. Includes manual `cisco_asa` netmiko init compat (`show curpriv` / `terminal pager 0` etc.) (#151)
+- Add NTC Templates v9.1 commands to non-Cisco batch — fortinet / juniper_junos / paloalto_panos / arista_eos: 30 commands total (#154)
+- Add NTC Templates v9.1 commands to Huawei family — huawei_smartax / huawei_vrp: 39 commands total (#160)
+- Add `show privilege` to cisco_ios for Ansible compatibility, mark cisco_ios as Ansible-verified in compatibility table (#124)
+
+**Bug Fixes**
+
+- Rewrite `gen_docs_platform_commands` invoke task: handle commands without `output` field, use `str.format()` for `{base_prompt}` substitution to match runtime semantics, regenerate all 50 platform docs with correct rendering (#146)
+- Render escaped brace literals (`{{ ... }}`) correctly in platform docs by switching docs generator to `str.format()`, matching `cmd_shell.default` runtime. Affects 10 platforms with literal braces in fixtures (huawei_smartax, juniper_junos, cisco_asa, cisco_ios, cisco_nxos, hp_comware, arista_eos, paloalto_panos, oneaccess_oneos, huawei_vrp) (#160)
+
+**Tooling**
+
+- Improve `sync_ntc_commands.py`: prefer canonical raw fixture, retain alternate fixtures as `output_variants`, filter sibling-fixture noise (#147)
+- Auto-escape literal `{xxx}` patterns in `sync_ntc_commands.py` output (preventive escape) so that runtime `str.format()` is safe for any NTC fixture content (#156)
+
+**Tests**
+
+- Add `tests/test_gen_docs_platform_commands.py` pinning `render_template` formatter semantics (substitution, escape unescape, error context) to prevent future regression of brace rendering (#160)
+
+**CI/CD**
+
+- Enable `pytest-xdist` parallel execution by default (`addopts = "-vv -n auto"`). Local measurement: 18:06 → 3:01 (6.0x speedup) (#164)
+- Remove Docker-first tasks (`build` / `clean` / `rebuild` / `pytest` / `cli` / `tests`) and dead code from `tasks.py`, drop `INVOKE_LOCAL` from CI workflows (#145)
+
 ## v2.2.0
 
 **Features**
