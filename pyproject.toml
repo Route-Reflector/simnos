@@ -117,7 +117,7 @@ directory = "coverage_html_report"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-vv"
+addopts = "-vv -n auto"
 
 [tool.uv.build-backend]
 module-name = "simnos"
