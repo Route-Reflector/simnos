@@ -1,3 +1,7 @@
+# NTC fixture-derived `output` and `output_variants` are preventively escaped
+# via sync_ntc_commands.escape_format_braces: literal `{` / `}` are doubled
+# (`{{` / `}}`) so the runtime `.format(base_prompt=...)` collapses them back
+# to single braces. Lone `}}` runs in encrypted strings are intentional.
 name: huawei_vrp
 initial_prompt: "{base_prompt}>"
 enable_prompt: "{base_prompt}#"
@@ -587,3 +591,235 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  dir:
+    output: "Directory of flash:/\n\n  Idx  Attr     Size(Byte)  Date        Time\
+      \       FileName\n    0  dr-x              -  Nov 11 2019 20:16:35   $_checkpoint\n\
+      \    1  dr-x              -  Nov 06 2019 15:51:57   $_install_mod\n    2  dr-x\
+      \              -  Oct 12 2019 18:12:15   $_license\n    3  dr-x            \
+      \  -  Oct 12 2019 18:12:26   $_security_info\n    4  dr-x              -  Nov
+      11 2019 20:16:31   $_startup\n    5  dr-x              -  Nov 11 2019 20:15:06\
+      \   $_system\n    6  -rw-         14,940  Nov 11 2019 17:56:29   111.cc\n  \
+      \  7  -rw-    572,847,476  Oct 21 2019 15:21:23   123.cc\n    8  -rw-      \
+      \   34,505  Nov 11 2019 20:01:07   device.sys\n    9  drwx              -  Nov
+      11 2019 21:01:39   logfile\n\n2,994,228 KB total (801,664 KB free)\n"
+    help: execute the command "dir"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+  display ap all:
+    output: "Total AP information:\nfault : fault           [1]\nidle  : idle    \
+      \        [1]\nnor   : normal          [1]\nstdby : standby         [1]\nExtraInfo
+      : Extra information\nP     : insufficient power supply\n--------------------------------------------------------------------------------------------------------------------------------------------------------------\n\
+      ID    MAC            Name                             Group               IP\
+      \             Type               State  STA  Uptime          ExtraInfo Scene\n\
+      --------------------------------------------------------------------------------------------------------------------------------------------------------------\n\
+      0     aaaa-aaaa-aaaa APW_0055(WC VIP)                 AP_GROUP_OBIWAN     11.11.11.11\
+      \    AirEngine1111-11   nor    0    4D:1H:10M:0S    -         -\n1     bbbb-bbbb-bbbb
+      APW_0001                         AP_GROUP_HELLO      -              -      \
+      \            idle   0    -               P         -\n2     cccc-cccc-cccc APW_0002\
+      \                         AP_GROUP_THERE      -              AirEngine1111R-11E
+      fault  0    -               -         -\n3     dddd-dddd-dddd APW_0003(Parkin
+      VIP)             AP_GROUP_STAR_WARS  22.22.22.22    AirEngine1111R-11E stdby\
+      \  0    17D:11H:4M:28S  P         -\n--------------------------------------------------------------------------------------------------------------------------------------------------------------\n
+      Total: 4"
+    help: execute the command "display ap all"
+    prompt: *id001
+  display bgp peer:
+    output: " Status codes: * - Dynamic\n BGP local router ID        : 192.168.1.1\n
+      Local AS number            : 635.88\n Total number of peers      : 4\n Peers
+      in established state : 4\n Total number of dynamic peers : 0\n\n  Peer     \
+      \       V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv\n\
+      \  192.168.1.11    4      635.66    47622    49953     0  626h43m Established\
+      \      551\n  192.168.1.12    4      635.66    47036    40065     0  626h43m
+      Established      551\n  192.168.1.13    4      635.66    47795    40010    \
+      \ 0  626h43m Established      551\n  192.168.1.14    4      635.66    47293\
+      \    49912     0  626h43m Established      551\n"
+    help: execute the command "display bgp peer"
+    prompt: *id001
+    output_variants:
+    - " BGP Local router ID : 10.2.3.4\n local AS number : 10\n Total number of peers
+      : 2                 \n Peers in established state : 1\n\n  Peer        V   \
+      \ AS  MsgRcvd  MsgSent  OutQ  Up/Down       State PrefRcv\n  10.1.1.1    4 \
+      \  100        0        0     0 00:00:07        Idle       0\n  10.2.5.6    4\
+      \   200       32       35     0 00:17:49 Established       0"
+  display device:
+    output: "CE12808S's Device status:\n-------------------------------------------------------------------------------------------\n\
+      Slot  Card   Type                     Online   Power Register     Alarm    \
+      \ Primary        \n-------------------------------------------------------------------------------------------\n\
+      3     -      CE-L24LQ-EC1             Present  On    Registered   Normal   \
+      \ NA             \n4     -      CE-L24LQ-EC1             Present  On    Registered\
+      \   Normal    NA             \n6     -      CE-L24LQ-EC1             Present\
+      \  On    Registered   Normal    NA             \n7     -      CE-L24LQ-EC1 \
+      \            Present  On    Registered   Normal    NA             \n8     -\
+      \      CE-L48XS-EC              Present  On    Registered   Normal    NA   \
+      \          \n9     -      CE-MPUA-S                Present  On    Registered\
+      \   Normal    Master         \n10    -      CE-MPUA-S                Present\
+      \  On    Registered   Normal    Slave          \n11    -      CE-SFUC-S    \
+      \            Present  On    Registered   Normal    NA             \n12    -\
+      \      CE-SFUC-S                Present  On    Registered   Normal    NA   \
+      \          \n13    -      CE-SFUC-S                Present  On    Registered\
+      \   Normal    NA             \n14    -      CE-SFUC-S                Present\
+      \  On    Registered   Normal    NA             \n15    -      CMU(MPU 9)   \
+      \            Present  On    Registered   Normal    Master         \n16    -\
+      \      CMU(MPU 10)              Present  On    Registered   Normal    Slave\
+      \          \nPWR1  -      PHD-3000WA               Present  On    Registered\
+      \   Normal    NA             \nPWR2  -      PHD-3000WA               Present\
+      \  On    Registered   Normal    NA             \nPWR3  -      PHD-3000WA   \
+      \            Present  On    Registered   Normal    NA             \nPWR4  -\
+      \      PHD-3000WA               Present  On    Registered   Normal    NA   \
+      \          \nFAN1  -      FAN-600A-B               Present  On    Registered\
+      \   Normal    NA             \nFAN2  -      FAN-600A-B               Present\
+      \  On    Registered   Normal    NA             \nFAN3  -      FAN-600A-B   \
+      \            Present  On    Registered   Normal    NA             \nFAN4  -\
+      \      FAN-600A-B               Present  On    Registered   Normal    NA   \
+      \          \nFAN5  -      FAN-600A-B               Present  On    Registered\
+      \   Normal    NA             \nFAN6  -      FAN-600A-B               Present\
+      \  On    Registered   Normal    NA  \n"
+    help: execute the command "display device"
+    prompt: *id001
+    output_variants:
+    - "*: configured, unactived board\nDevice status:\n--------------------------------------------------------------------------------------\n\
+      Slot  Card   Type                Online   Power Register     Alarm     Primary\n\
+      --------------------------------------------------------------------------------------\n\
+      1     -      CE6850-48S4Q-EI     Present  On    Registered   Normal    Master\n\
+      \      FAN1   FAN-40SA-B          Present  On    Registered   Normal    NA\n\
+      \      FAN2   PAC-150WA           Present  On    Registered   Normal    NA\n\
+      \      PWR2   W1PA04BF0           Present  On    Registered   Normal    NA\n\
+      2     -      *CE6850-48S4Q-EI    Offline  -     Unregistered -         NA\n\
+      --------------------------------------------------------------------------------------\n"
+    - "-------------------------------------------------------------------------------------\n\
+      Slot/Card  Card-Type      Online      Power     Register       Alarm\n-------------------------------------------------------------------------------------\n\
+      1/3        CE88-D16Q      Present     On        Registered     Normal\n1/4 \
+      \       CE88-D24S2CQ   Present     On        Registered     Normal\n-------------------------------------------------------------------------------------\n"
+  display eth-trunk:
+    output: "Eth-Trunk0's state information is:\nWorkingMode: NORMAL         Hash
+      arithmetic: According to SIP-XOR-DIP         \nLeast Active-linknumber: 1  Max
+      Bandwidth-affected-linknumber: 8              \nOperate status: up         \
+      \ Number Of Up Port In Trunk: 2                     \n--------------------------------------------------------------------------------\n\
+      PortName                      Status      Weight \nGigabitEthernet0/0/27   \
+      \      Up          1      \nGigabitEthernet0/0/28         Up          1    \
+      \  \n  \nEth-Trunk1's state information is:\nLocal:\nLAG ID: 1             \
+      \      WorkingMode: LACP                                 \nPreempt Delay: Disabled\
+      \     Hash arithmetic: According to SIP-XOR-DIP         \nSystem Priority: 32768\
+      \      System ID: aaaa-aaaa-aaaa                         \nLeast Active-linknumber:
+      1  Max Active-linknumber: 8                          \nOperate status: up  \
+      \        Number Of Up Port In Trunk: 2                     \n--------------------------------------------------------------------------------\n\
+      ActorPortName          Status   PortType PortPri PortNo PortKey PortState Weight\n\
+      GigabitEthernet0/0/11  Selected 1GE      32768   1      305     10111100  1\
+      \     \nGigabitEthernet0/0/12  Selected 1GE      32768   2      305     10111100\
+      \  1     \n\nPartner:\n--------------------------------------------------------------------------------\n\
+      ActorPortName          SysPri   SystemID        PortPri PortNo PortKey PortState\n\
+      GigabitEthernet0/0/11  65535    bbbb-bbbb-bbbb  255     1      9       10111100\n\
+      GigabitEthernet0/0/12  65535    bbbb-bbbb-bbbb  255     2      9       10111100\n"
+    help: execute the command "display eth-trunk"
+    prompt: *id001
+    output_variants:
+    - 'Info: No valid trunk in the system.'
+  display http server:
+    output: "   HTTP Server Status              : disabled\n   HTTP Server Port  \
+      \              : 80(80)\n   HTTP Timeout Interval           : 20\n   Current
+      Online Users            : 0\n   Maximum Users Allowed           : 1\n   HTTP
+      Secure-server Status       : disabled\n   HTTP Secure-server Port         :
+      443(443)\n   HTTP SSL Policy                 : Default\n   HTTP IPv6 Server
+      Status         : disabled\n   HTTP IPv6 Server Port           : 80(80)\n   HTTP
+      IPv6 Secure-server Status  : disabled\n   HTTP IPv6 Secure-server Port    :
+      443(443)\n   HTTP server source address      : 0.0.0.0\n"
+    help: execute the command "display http server"
+    prompt: *id001
+  display license verbose:
+    output: " Active license    : flash:/LICXXXX\n License state     : Demo\n Revoke
+      ticket     : No ticket\n License mode      : common\n\n Product name      :
+      ****\n Product version   : V300R023C00\n License file ESN  : 391091068000297\n
+      License Serial No : LIC20190424S0G55M\n Creator           : Huawei Technologies
+      Co., Ltd.\n Created Time      : 2020-04-07 15:03:32\n Country           : English\n
+      Custom            : RD of Huawei Technologies Co., Ltd.\n Office           \
+      \ : ShenZhen\n\n Feature name      : Trial0\n Authorize type    : demo\n Expired
+      date      : 2020-07-12\n Trial days        : --\n Sale name         : *****0VA5C00\n
+      Item name         : *****LCK00\n Item type         : Function\n Control value\
+      \     : 1\n Used value        : 1\n Item state        : Demo\n Item expired
+      date : 2020-07-12\n Item trial days   : 60\n Description       : *****LCK00\n
+      \n Sale name         : *****0VA5C00\n Item name         : *****40VA5C00\n Item
+      type         : Resource\n Control value     : 80\n Used value        : 0\n Item
+      state        : Demo\n Item expired date : 2020-07-12\n Item trial days   : 60\n
+      Description       : XXXX Host License for 5 Client\n\n Sale name         : *****0VA1C00\n
+      Item name         : *****40VA1C00\n Item type         : Resource\n Control value\
+      \     : 400\n Used value        : 0\n Item state        : Demo\n Item expired
+      date : 2020-07-12\n Item trial days   : 60\n Description       : XXXX Host License
+      for 1 Client\n"
+    help: execute the command "display license verbose"
+    prompt: *id001
+  display module-information verbose:
+    output: "                       Module Information\n--------------------------------------------------------------------------------------------------------\n\
+      Module               Version             InstallTime                   PackageName\n\
+      --------------------------------------------------------------------------------------------------------\n\
+      semls                xxxxxx              2020-05-29 09:57:32           xxxxxx.MOD\n
+      --------------------------------------------------------------------------------------------------------\n
+      Total = 1\n****************************************************************************\n\
+      *             Information about patch errors is as follows:                *\n\
+      ****************************************************************************\n\
+      \nSlotID/CpuID   CurrentVersion\n----------------------------------------------------------------------------\n
+      No patch error occurs on any board\n----------------------------------------------------------------------------\n
+      Total = 0\nBoard Info :\n--------------------------------------------------------------------------------------------------------------\n\
+      SlotID/CpuID    ProcName            Type     FileName      EffectiveTime   \
+      \                   Module\n--------------------------------------------------------------------------------------------------------------\n\
+      1/0             swm_daemon_master   C        HM780000.mod  2020-05-29 09:57:28.050\
+      \            semls\n--------------------------------------------------------------------------------------------------------------\n
+      Total = 1\n"
+    help: execute the command "display module-information verbose"
+    prompt: *id001
+  display mpls te tunnel:
+    output: "* means the LSP is detour LSP\n-------------------------------------------------------------------------------\n
+      Ingress LsrId   Destination     LSPID In/OutLabel     R Tunnel-name\n-------------------------------------------------------------------------------\n\
+      10.219.220.136  10.219.220.8    29    -/2080          I Tunnel1_RR-KL2414993-01H_to_RAW-KL1956-01H\n\
+      10.219.220.136  10.219.220.9    22684 -/2204          I Tunnel2_RR-KL2414993-01H_to_RAW-KL1938-01H\n\
+      10.219.220.8    10.219.220.136  34518 2096/-          E Tunnel12_RAW-KL1956-01H_to_RR-KL3453225G-01H\n\
+      10.219.220.8    10.219.220.136  34521 2098/-          E Tunnel12_RAW-KL1956-01H_to_RR-KL3453225G-01H\n\
+      10.219.220.9    10.219.220.136  34510 2144/-          E Tunnel12_RAW-KL1938-01H_to_RR-KL3453225G-01H\n
+      -------------------------------------------------------------------------------\n
+      R: Role, I: Ingress, T: Transit, E: Egress"
+    help: execute the command "display mpls te tunnel"
+    prompt: *id001
+  display ntp status:
+    output: " clock status: synchronized\n clock stratum: 2\n reference clock ID:
+      LOCAL(0)\n nominal frequency: 60.0002 Hz\n actual frequency: 60.0002 Hz\n clock
+      precision: 2^18\n clock offset: 0.0000 ms\n root delay: 0.00 ms\n root dispersion:
+      0.00 ms\n peer dispersion: 10.00 ms\n reference time: 15:51:36.259 UTC Apr 25
+      2020(C6179088.426490A3)\n synchronization state: clock synchronized\n"
+    help: execute the command "display ntp status"
+    prompt: *id001
+  display patch-information:
+    output: "Patch Package Name    :flash:/RPG_PNFV600R021SPH001.PAT\nPatch Package
+      Version :V600R021SPH001\nPatch Package State   :Running\nPatch Package Run Time:2022-04-06
+      10:00:17\n"
+    help: execute the command "display patch-information"
+    prompt: *id001
+  display telnet server status:
+    output: " TELNET IPv4 server                       :Disable\n TELNET IPv6 server\
+      \                       :Disable\n TELNET server port                      \
+      \ :23\n TELNET server source address             :0.0.0.0\n ACL4 number    \
+      \                          :0\n ACL6 number                              :0\n"
+    help: execute the command "display telnet server status"
+    prompt: *id001
+  display vlan brief:
+    output: "U:Up;D:Down;TG:Tagged;UT:Untagged;\n\nVID  Name             Status  Ports\
+      \                                             \n--------------------------------------------------------------------------------\n\
+      1                     enable  UT: MultiGE0/0/0(U) XGE0/0/0(D)              \
+      \     \n2                     enable  TG: MultiGE0/0/1(U) Wlan-Bss3(U) Wlan-Bss19(U)\
+      \    \n                                  XGE0/0/1(D)                       \
+      \            \n4                     enable  TG: MultiGE0/0/2(U) Wlan-Bss1(U)
+      Wlan-Bss17(U)    \n                                  XGE0/0/2(D)           \
+      \                        \n5                     enable  TG: MultiGE0/0/3(U)
+      Wlan-Bss2(U) Wlan-Bss18(U)    \n                                  XGE0/0/3(D)\
+      \                                   \n100                   enable  TG: MultiGE0/0/4(U)
+      Wlan-Bss0(U) Wlan-Bss16(U)    \n                                  XGE0/0/4(D)\
+      \  \n"
+    help: execute the command "display vlan brief"
+    prompt: *id001
+  virtual-cable-test:
+    output: "Warning: The command will stop service for a while. Continue? [Y/N]:Y\n
+      Info: This operation may take a few seconds. Please wait for a moment..done.\n
+      Pair A length: Unknown\nPair B length: Unknown\nPair C length: Unknown\nPair
+      D length: Unknown\nPair A state: Ok\nPair B state: Ok\nPair C state: Ok\nPair
+      D state: Ok\nInfo: The test result is only for reference."
+    help: execute the command "virtual-cable-test"
+    prompt: *id001

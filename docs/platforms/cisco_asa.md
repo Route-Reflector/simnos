@@ -933,7 +933,7 @@ interface: outside2
      inbound esp sas:
        spi: 0x1E8246FC (511854332)
           transform: esp-3des esp-md5-hmac
-          in use settings ={{RA, Tunnel, }}
+          in use settings ={RA, Tunnel, }
           slot: 0, conn_id: 3, crypto-map: def
           sa timing: remaining key lifetime (sec): 548
           IV size: 8 bytes
@@ -941,7 +941,7 @@ interface: outside2
      outbound esp sas:
        spi: 0xDC15BF68 (3692412776)
           transform: esp-3des esp-md5-hmac
-          in use settings ={{RA, Tunnel, }}
+          in use settings ={RA, Tunnel, }
           slot: 0, conn_id: 3, crypto-map: def
           sa timing: remaining key lifetime (sec): 548
           IV size: 8 bytes
@@ -977,7 +977,7 @@ interface: COLO
       spi: 0x32F752FF (855069439)
          SA State: active
          transform: esp-aes-256 esp-md5-hmac no compression
-         in use settings ={{L2L, Tunnel,  NAT-T-Encaps, IKEv1, }}
+         in use settings ={L2L, Tunnel,  NAT-T-Encaps, IKEv1, }
          slot: 0, conn_id: 159694848, crypto-map: COLO-MAP
          sa timing: remaining key lifetime (kB/sec): (2699423/25461)
          IV size: 16 bytes
@@ -988,7 +988,7 @@ interface: COLO
       spi: 0x50023DDC (1342324188)
          SA State: active
          transform: esp-aes-256 esp-md5-hmac no compression
-         in use settings ={{L2L, Tunnel,  NAT-T-Encaps, IKEv1, }}
+         in use settings ={L2L, Tunnel,  NAT-T-Encaps, IKEv1, }
          slot: 0, conn_id: 159694848, crypto-map: COLO-MAP
          sa timing: remaining key lifetime (kB/sec): (3892153/25461)
          IV size: 16 bytes
@@ -1025,7 +1025,7 @@ interface: COLO
       spi: 0x6A7391E0 (1785958880)
          SA State: active
          transform: esp-aes-256 esp-md5-hmac no compression
-         in use settings ={{L2L, Tunnel, IKEv1, }}
+         in use settings ={L2L, Tunnel, IKEv1, }
          slot: 0, conn_id: 14376960, crypto-map: COLO-MAP
          sa timing: remaining key lifetime (kB/sec): (2038431743/70749)
          IV size: 16 bytes
@@ -1036,7 +1036,7 @@ interface: COLO
       spi: 0xEA40155F (3930068319)
          SA State: active
          transform: esp-aes-256 esp-md5-hmac no compression
-         in use settings ={{L2L, Tunnel, IKEv1, }}
+         in use settings ={L2L, Tunnel, IKEv1, }
          slot: 0, conn_id: 14376960, crypto-map: COLO-MAP
          sa timing: remaining key lifetime (kB/sec): (2038431743/70749)
          IV size: 16 bytes

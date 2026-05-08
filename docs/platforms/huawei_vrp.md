@@ -1001,8 +1001,8 @@ Output:  0 packets, 0 bytes
 
 **Output:**
 ```
-   Community name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{{(3i02`R$>&n}}+56Pb'@]rd}}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
-   Group name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{{(3i02`R$>&n}}+56Pb'@]rd}}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
+   Community name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{(3i02`R$>&n}+56Pb'@]rd}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
+   Group name: %^%#K[&`Jc~_4H-~.>0:m%dK:*7s,{(3i02`R$>&n}+56Pb'@]rd}NT@o4.7RG'8ScPW0=d%O<1oU+7KHS[I%^%#
    Acl: 2001
    Storage-type: nonVolatile
 
@@ -1042,6 +1042,422 @@ Output:  0 packets, 0 bytes
 **Output:** None
 
 **Help:** Execute the command screen-length 0 temporary. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### dir
+
+**Output:**
+```
+Directory of flash:/
+
+  Idx  Attr     Size(Byte)  Date        Time       FileName
+    0  dr-x              -  Nov 11 2019 20:16:35   $_checkpoint
+    1  dr-x              -  Nov 06 2019 15:51:57   $_install_mod
+    2  dr-x              -  Oct 12 2019 18:12:15   $_license
+    3  dr-x              -  Oct 12 2019 18:12:26   $_security_info
+    4  dr-x              -  Nov 11 2019 20:16:31   $_startup
+    5  dr-x              -  Nov 11 2019 20:15:06   $_system
+    6  -rw-         14,940  Nov 11 2019 17:56:29   111.cc
+    7  -rw-    572,847,476  Oct 21 2019 15:21:23   123.cc
+    8  -rw-         34,505  Nov 11 2019 20:01:07   device.sys
+    9  drwx              -  Nov 11 2019 21:01:39   logfile
+
+2,994,228 KB total (801,664 KB free)
+
+```
+
+**Help:** execute the command "dir"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display ap all
+
+**Output:**
+```
+Total AP information:
+fault : fault           [1]
+idle  : idle            [1]
+nor   : normal          [1]
+stdby : standby         [1]
+ExtraInfo : Extra information
+P     : insufficient power supply
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ID    MAC            Name                             Group               IP             Type               State  STA  Uptime          ExtraInfo Scene
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+0     aaaa-aaaa-aaaa APW_0055(WC VIP)                 AP_GROUP_OBIWAN     11.11.11.11    AirEngine1111-11   nor    0    4D:1H:10M:0S    -         -
+1     bbbb-bbbb-bbbb APW_0001                         AP_GROUP_HELLO      -              -                  idle   0    -               P         -
+2     cccc-cccc-cccc APW_0002                         AP_GROUP_THERE      -              AirEngine1111R-11E fault  0    -               -         -
+3     dddd-dddd-dddd APW_0003(Parkin VIP)             AP_GROUP_STAR_WARS  22.22.22.22    AirEngine1111R-11E stdby  0    17D:11H:4M:28S  P         -
+--------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Total: 4
+```
+
+**Help:** execute the command "display ap all"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display bgp peer
+
+**Output:**
+```
+ Status codes: * - Dynamic
+ BGP local router ID        : 192.168.1.1
+ Local AS number            : 635.88
+ Total number of peers      : 4
+ Peers in established state : 4
+ Total number of dynamic peers : 0
+
+  Peer            V          AS  MsgRcvd  MsgSent  OutQ  Up/Down       State  PrefRcv
+  192.168.1.11    4      635.66    47622    49953     0  626h43m Established      551
+  192.168.1.12    4      635.66    47036    40065     0  626h43m Established      551
+  192.168.1.13    4      635.66    47795    40010     0  626h43m Established      551
+  192.168.1.14    4      635.66    47293    49912     0  626h43m Established      551
+
+```
+
+**Help:** execute the command "display bgp peer"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display device
+
+**Output:**
+```
+CE12808S's Device status:
+-------------------------------------------------------------------------------------------
+Slot  Card   Type                     Online   Power Register     Alarm     Primary        
+-------------------------------------------------------------------------------------------
+3     -      CE-L24LQ-EC1             Present  On    Registered   Normal    NA             
+4     -      CE-L24LQ-EC1             Present  On    Registered   Normal    NA             
+6     -      CE-L24LQ-EC1             Present  On    Registered   Normal    NA             
+7     -      CE-L24LQ-EC1             Present  On    Registered   Normal    NA             
+8     -      CE-L48XS-EC              Present  On    Registered   Normal    NA             
+9     -      CE-MPUA-S                Present  On    Registered   Normal    Master         
+10    -      CE-MPUA-S                Present  On    Registered   Normal    Slave          
+11    -      CE-SFUC-S                Present  On    Registered   Normal    NA             
+12    -      CE-SFUC-S                Present  On    Registered   Normal    NA             
+13    -      CE-SFUC-S                Present  On    Registered   Normal    NA             
+14    -      CE-SFUC-S                Present  On    Registered   Normal    NA             
+15    -      CMU(MPU 9)               Present  On    Registered   Normal    Master         
+16    -      CMU(MPU 10)              Present  On    Registered   Normal    Slave          
+PWR1  -      PHD-3000WA               Present  On    Registered   Normal    NA             
+PWR2  -      PHD-3000WA               Present  On    Registered   Normal    NA             
+PWR3  -      PHD-3000WA               Present  On    Registered   Normal    NA             
+PWR4  -      PHD-3000WA               Present  On    Registered   Normal    NA             
+FAN1  -      FAN-600A-B               Present  On    Registered   Normal    NA             
+FAN2  -      FAN-600A-B               Present  On    Registered   Normal    NA             
+FAN3  -      FAN-600A-B               Present  On    Registered   Normal    NA             
+FAN4  -      FAN-600A-B               Present  On    Registered   Normal    NA             
+FAN5  -      FAN-600A-B               Present  On    Registered   Normal    NA             
+FAN6  -      FAN-600A-B               Present  On    Registered   Normal    NA  
+
+```
+
+**Help:** execute the command "display device"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display eth-trunk
+
+**Output:**
+```
+Eth-Trunk0's state information is:
+WorkingMode: NORMAL         Hash arithmetic: According to SIP-XOR-DIP         
+Least Active-linknumber: 1  Max Bandwidth-affected-linknumber: 8              
+Operate status: up          Number Of Up Port In Trunk: 2                     
+--------------------------------------------------------------------------------
+PortName                      Status      Weight 
+GigabitEthernet0/0/27         Up          1      
+GigabitEthernet0/0/28         Up          1      
+  
+Eth-Trunk1's state information is:
+Local:
+LAG ID: 1                   WorkingMode: LACP                                 
+Preempt Delay: Disabled     Hash arithmetic: According to SIP-XOR-DIP         
+System Priority: 32768      System ID: aaaa-aaaa-aaaa                         
+Least Active-linknumber: 1  Max Active-linknumber: 8                          
+Operate status: up          Number Of Up Port In Trunk: 2                     
+--------------------------------------------------------------------------------
+ActorPortName          Status   PortType PortPri PortNo PortKey PortState Weight
+GigabitEthernet0/0/11  Selected 1GE      32768   1      305     10111100  1     
+GigabitEthernet0/0/12  Selected 1GE      32768   2      305     10111100  1     
+
+Partner:
+--------------------------------------------------------------------------------
+ActorPortName          SysPri   SystemID        PortPri PortNo PortKey PortState
+GigabitEthernet0/0/11  65535    bbbb-bbbb-bbbb  255     1      9       10111100
+GigabitEthernet0/0/12  65535    bbbb-bbbb-bbbb  255     2      9       10111100
+
+```
+
+**Help:** execute the command "display eth-trunk"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display http server
+
+**Output:**
+```
+   HTTP Server Status              : disabled
+   HTTP Server Port                : 80(80)
+   HTTP Timeout Interval           : 20
+   Current Online Users            : 0
+   Maximum Users Allowed           : 1
+   HTTP Secure-server Status       : disabled
+   HTTP Secure-server Port         : 443(443)
+   HTTP SSL Policy                 : Default
+   HTTP IPv6 Server Status         : disabled
+   HTTP IPv6 Server Port           : 80(80)
+   HTTP IPv6 Secure-server Status  : disabled
+   HTTP IPv6 Secure-server Port    : 443(443)
+   HTTP server source address      : 0.0.0.0
+
+```
+
+**Help:** execute the command "display http server"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display license verbose
+
+**Output:**
+```
+ Active license    : flash:/LICXXXX
+ License state     : Demo
+ Revoke ticket     : No ticket
+ License mode      : common
+
+ Product name      : ****
+ Product version   : V300R023C00
+ License file ESN  : 391091068000297
+ License Serial No : LIC20190424S0G55M
+ Creator           : Huawei Technologies Co., Ltd.
+ Created Time      : 2020-04-07 15:03:32
+ Country           : English
+ Custom            : RD of Huawei Technologies Co., Ltd.
+ Office            : ShenZhen
+
+ Feature name      : Trial0
+ Authorize type    : demo
+ Expired date      : 2020-07-12
+ Trial days        : --
+ Sale name         : *****0VA5C00
+ Item name         : *****LCK00
+ Item type         : Function
+ Control value     : 1
+ Used value        : 1
+ Item state        : Demo
+ Item expired date : 2020-07-12
+ Item trial days   : 60
+ Description       : *****LCK00
+ 
+ Sale name         : *****0VA5C00
+ Item name         : *****40VA5C00
+ Item type         : Resource
+ Control value     : 80
+ Used value        : 0
+ Item state        : Demo
+ Item expired date : 2020-07-12
+ Item trial days   : 60
+ Description       : XXXX Host License for 5 Client
+
+ Sale name         : *****0VA1C00
+ Item name         : *****40VA1C00
+ Item type         : Resource
+ Control value     : 400
+ Used value        : 0
+ Item state        : Demo
+ Item expired date : 2020-07-12
+ Item trial days   : 60
+ Description       : XXXX Host License for 1 Client
+
+```
+
+**Help:** execute the command "display license verbose"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display module-information verbose
+
+**Output:**
+```
+                       Module Information
+--------------------------------------------------------------------------------------------------------
+Module               Version             InstallTime                   PackageName
+--------------------------------------------------------------------------------------------------------
+semls                xxxxxx              2020-05-29 09:57:32           xxxxxx.MOD
+ --------------------------------------------------------------------------------------------------------
+ Total = 1
+****************************************************************************
+*             Information about patch errors is as follows:                *
+****************************************************************************
+
+SlotID/CpuID   CurrentVersion
+----------------------------------------------------------------------------
+ No patch error occurs on any board
+----------------------------------------------------------------------------
+ Total = 0
+Board Info :
+--------------------------------------------------------------------------------------------------------------
+SlotID/CpuID    ProcName            Type     FileName      EffectiveTime                      Module
+--------------------------------------------------------------------------------------------------------------
+1/0             swm_daemon_master   C        HM780000.mod  2020-05-29 09:57:28.050            semls
+--------------------------------------------------------------------------------------------------------------
+ Total = 1
+
+```
+
+**Help:** execute the command "display module-information verbose"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display mpls te tunnel
+
+**Output:**
+```
+* means the LSP is detour LSP
+-------------------------------------------------------------------------------
+ Ingress LsrId   Destination     LSPID In/OutLabel     R Tunnel-name
+-------------------------------------------------------------------------------
+10.219.220.136  10.219.220.8    29    -/2080          I Tunnel1_RR-KL2414993-01H_to_RAW-KL1956-01H
+10.219.220.136  10.219.220.9    22684 -/2204          I Tunnel2_RR-KL2414993-01H_to_RAW-KL1938-01H
+10.219.220.8    10.219.220.136  34518 2096/-          E Tunnel12_RAW-KL1956-01H_to_RR-KL3453225G-01H
+10.219.220.8    10.219.220.136  34521 2098/-          E Tunnel12_RAW-KL1956-01H_to_RR-KL3453225G-01H
+10.219.220.9    10.219.220.136  34510 2144/-          E Tunnel12_RAW-KL1938-01H_to_RR-KL3453225G-01H
+ -------------------------------------------------------------------------------
+ R: Role, I: Ingress, T: Transit, E: Egress
+```
+
+**Help:** execute the command "display mpls te tunnel"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display ntp status
+
+**Output:**
+```
+ clock status: synchronized
+ clock stratum: 2
+ reference clock ID: LOCAL(0)
+ nominal frequency: 60.0002 Hz
+ actual frequency: 60.0002 Hz
+ clock precision: 2^18
+ clock offset: 0.0000 ms
+ root delay: 0.00 ms
+ root dispersion: 0.00 ms
+ peer dispersion: 10.00 ms
+ reference time: 15:51:36.259 UTC Apr 25 2020(C6179088.426490A3)
+ synchronization state: clock synchronized
+
+```
+
+**Help:** execute the command "display ntp status"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display patch-information
+
+**Output:**
+```
+Patch Package Name    :flash:/RPG_PNFV600R021SPH001.PAT
+Patch Package Version :V600R021SPH001
+Patch Package State   :Running
+Patch Package Run Time:2022-04-06 10:00:17
+
+```
+
+**Help:** execute the command "display patch-information"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display telnet server status
+
+**Output:**
+```
+ TELNET IPv4 server                       :Disable
+ TELNET IPv6 server                       :Disable
+ TELNET server port                       :23
+ TELNET server source address             :0.0.0.0
+ ACL4 number                              :0
+ ACL6 number                              :0
+
+```
+
+**Help:** execute the command "display telnet server status"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### display vlan brief
+
+**Output:**
+```
+U:Up;D:Down;TG:Tagged;UT:Untagged;
+
+VID  Name             Status  Ports                                             
+--------------------------------------------------------------------------------
+1                     enable  UT: MultiGE0/0/0(U) XGE0/0/0(D)                   
+2                     enable  TG: MultiGE0/0/1(U) Wlan-Bss3(U) Wlan-Bss19(U)    
+                                  XGE0/0/1(D)                                   
+4                     enable  TG: MultiGE0/0/2(U) Wlan-Bss1(U) Wlan-Bss17(U)    
+                                  XGE0/0/2(D)                                   
+5                     enable  TG: MultiGE0/0/3(U) Wlan-Bss2(U) Wlan-Bss18(U)    
+                                  XGE0/0/3(D)                                   
+100                   enable  TG: MultiGE0/0/4(U) Wlan-Bss0(U) Wlan-Bss16(U)    
+                                  XGE0/0/4(D)  
+
+```
+
+**Help:** execute the command "display vlan brief"
+
+**Prompt:**
+- huawei_vrp>
+- huawei_vrp#
+
+### virtual-cable-test
+
+**Output:**
+```
+Warning: The command will stop service for a while. Continue? [Y/N]:Y
+ Info: This operation may take a few seconds. Please wait for a moment..done.
+ Pair A length: Unknown
+Pair B length: Unknown
+Pair C length: Unknown
+Pair D length: Unknown
+Pair A state: Ok
+Pair B state: Ok
+Pair C state: Ok
+Pair D state: Ok
+Info: The test result is only for reference.
+```
+
+**Help:** execute the command "virtual-cable-test"
 
 **Prompt:**
 - huawei_vrp>
