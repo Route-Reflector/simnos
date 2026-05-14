@@ -197,7 +197,7 @@ class CMDShell(Cmd):
         if ret is not None:
             try:
                 ret = ret.format(base_prompt=self.base_prompt)
-            except (KeyError, IndexError, ValueError) as exc:
+            except (KeyError, IndexError, ValueError) as e:
                 # Runtime shell is intentionally lenient: yaml format errors
                 # are logged but do not crash the shell session. The build-
                 # time counterpart `tasks.render_template` raises RuntimeError
@@ -212,7 +212,7 @@ class CMDShell(Cmd):
                     "shell.default '%s' error formatting output for command '%s': %r",
                     self.base_prompt,
                     [line],
-                    exc,
+                    e,
                 )
             self.writeline(ret)
         return False
