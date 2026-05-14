@@ -286,6 +286,73 @@ class TestCmdShell(TestCase):
         shell.default("test")
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
 
+    def test_default_silent_fallback_on_keyerror(self):
+        """`KeyError` failure mode of `.format()` is silently logged.
+
+        Pins #162: `cmd_shell.default()` is intentionally lenient about
+        yaml format errors (silent log + raw passthrough), in contrast
+        to `tasks.render_template` which raises `RuntimeError` at build
+        time. The runtime catch set is kept aligned with the build-time
+        counterpart at `(KeyError, IndexError, ValueError)`, so both
+        paths cover the same `str.format()` failure modes; only the
+        action (raise vs silent) differs.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_key_cmd"] = {
+            "output": "value is {unknown_key}",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_key_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {unknown_key}")
+
+    def test_default_silent_fallback_on_valueerror(self):
+        """`ValueError` failure mode of `.format()` is silently logged.
+
+        Pins #162: covers the malformed-brace path (a bare `{` with no
+        closing `}`). Same lenient-runtime contract as the `KeyError`
+        case — the catch set `(KeyError, IndexError, ValueError)`
+        mirrors `tasks.render_template`.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_brace_cmd"] = {
+            "output": "value is {broken",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_brace_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {broken")
+
+    def test_default_silent_fallback_on_indexerror(self):
+        """`IndexError` failure mode of `.format()` is silently logged.
+
+        Pins #162: covers the positional-placeholder path (`{}` / `{N}`
+        against an empty positional-args tuple). Same lenient-runtime
+        contract as the other two cases; together the three tests pin
+        each member of the catch set `(KeyError, IndexError, ValueError)`
+        shared with `tasks.render_template`.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_pos_cmd"] = {
+            "output": "value is {}",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_pos_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {}")
+
     def test_default_command_new_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
