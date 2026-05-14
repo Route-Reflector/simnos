@@ -314,9 +314,9 @@ class TestCmdShell(TestCase):
         """`ValueError` failure mode of `.format()` is silently logged.
 
         Pins #162: covers the malformed-brace path (a bare `{` with no
-        closing `}`). Same lenient-runtime contract as the keyerror case
-        — the catch set `(KeyError, IndexError, ValueError)` mirrors
-        `tasks.render_template`.
+        closing `}`). Same lenient-runtime contract as the `KeyError`
+        case — the catch set `(KeyError, IndexError, ValueError)`
+        mirrors `tasks.render_template`.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
