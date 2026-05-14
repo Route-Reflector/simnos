@@ -17,7 +17,7 @@ def _scrapli_creds(creds: dict) -> dict:
 
 @pytest.mark.compatibility
 def test_scrapli_connect_and_show_version(cisco_ios_simnos):
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     with IOSXEDriver(**_scrapli_creds(creds)) as conn:
         resp = conn.send_command("show version")
         assert not resp.failed
@@ -26,7 +26,7 @@ def test_scrapli_connect_and_show_version(cisco_ios_simnos):
 
 @pytest.mark.compatibility
 def test_scrapli_show_running_config(cisco_ios_simnos):
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     with IOSXEDriver(**_scrapli_creds(creds)) as conn:
         resp = conn.send_command("show running-config")
         assert not resp.failed

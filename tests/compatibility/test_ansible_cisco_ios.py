@@ -49,7 +49,7 @@ def test_ansible_ios_facts(cisco_ios_simnos, tmp_path):
     if shutil.which("ansible-playbook") is None:
         pytest.skip("ansible-playbook not on PATH")
 
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     inventory = tmp_path / "inventory.yml"
     _write_inventory(inventory, creds)
     playbook = tmp_path / "play.yml"
@@ -74,7 +74,7 @@ def test_ansible_cli_command(cisco_ios_simnos, tmp_path):
     if shutil.which("ansible-playbook") is None:
         pytest.skip("ansible-playbook not on PATH")
 
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     inventory = tmp_path / "inventory.yml"
     _write_inventory(inventory, creds)
     playbook = tmp_path / "play.yml"

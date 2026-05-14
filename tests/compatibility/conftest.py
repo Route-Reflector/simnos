@@ -14,13 +14,12 @@ from tests.utils import get_free_port
 
 @pytest.fixture
 def cisco_ios_simnos():
-    """Start a simnos cisco_ios instance on a free port; yield (port, creds)."""
-    port = get_free_port()
+    """Start a simnos cisco_ios instance on a free port; yield connection creds."""
     creds = {
         "host": "localhost",
         "username": "test_user",
         "password": "test_pass",
-        "port": port,
+        "port": get_free_port(),
     }
     inventory = {
         "hosts": {
@@ -31,4 +30,4 @@ def cisco_ios_simnos():
         }
     }
     with SimNOS(inventory=inventory) as _net:
-        yield port, creds
+        yield creds

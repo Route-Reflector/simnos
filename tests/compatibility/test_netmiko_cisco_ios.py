@@ -6,7 +6,7 @@ import pytest
 
 @pytest.mark.compatibility
 def test_netmiko_connect_and_show_version(cisco_ios_simnos):
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     device = {**creds, "device_type": "cisco_ios"}
     with ConnectHandler(**device) as conn:
         conn.enable()
@@ -16,7 +16,7 @@ def test_netmiko_connect_and_show_version(cisco_ios_simnos):
 
 @pytest.mark.compatibility
 def test_netmiko_config_mode_round_trip(cisco_ios_simnos):
-    _port, creds = cisco_ios_simnos
+    creds = cisco_ios_simnos
     device = {**creds, "device_type": "cisco_ios"}
     with ConnectHandler(**device) as conn:
         conn.enable()
