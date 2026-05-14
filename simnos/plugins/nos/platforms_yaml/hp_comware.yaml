@@ -14,11 +14,11 @@ commands:
     prompt: "[{base_prompt}]"
   quit:
     exit: true
-    help: exit the terminal
+    help: exit the terminal (user view only; from system view use `return` to go back to user view)
     prompt: "<{base_prompt}>"
   screen-length disable:
     output: null
-    help: set the terminal width to maximum
+    help: set the terminal width to maximum (kept available in user view for netmiko `disable_paging` interop; real HP requires system view)
     prompt:
     - "<{base_prompt}>"
     - "[{base_prompt}]"
@@ -119,7 +119,7 @@ commands:
     - "<{base_prompt}>"
     - "[{base_prompt}]"
   display ip routing-table:
-    output: "<HS125X>dis ip routing-table \n\nDestinations : 17604     Routes : 28601\n\
+    output: "Destinations : 17604     Routes : 28601\n\
       \nDestination/Mask    Proto  Pre  Cost         NextHop         Interface\n0.0.0.0/32\
       \          Direct 0    0            127.0.0.1       InLoop0\n9.72.47.0/24  \
       \      OSPF   150  1            172.16.43.2     Vlan1600\n                 \

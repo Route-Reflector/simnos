@@ -48,7 +48,7 @@ SIMNOS がサポートするプラットフォームの一覧です。各プラ�
 | [extreme_exos](extreme_exos.md) | ✅ | ✅ | - | - | |
 | [extreme_slxos](extreme_slxos.md) | ✅ | ✅ | - | - | enable モードなし（常に特権モード）。v2.2.0 で追加 |
 | [fortinet](fortinet.md) | ✅ | ✅ | - | - | |
-| [hp_comware](hp_comware.md) | ✅ | ⚠️ | - | - | Netmiko が config モード遷移で `system-view` を送信するが、SIMNOS にこのコマンドがない。show コマンドは正常に動作。 |
+| [hp_comware](hp_comware.md) | ✅ | ✅ | - | - | HP Comware 慣習: `<host>` user view、`[host]` system view。separate enable mode は無く、`system-view` で system view (config) に遷移する。 |
 | [hp_procurve](hp_procurve.md) | ✅ | ✅ | - | - | |
 | [huawei_smartax](huawei_smartax.md) | ✅ | ⚠️ | - | - | callable コマンド（`return`/`disable`）がプロンプトを動的に変更するため、Netmiko が ReadTimeout になる。 |
 | [huawei_vrp](huawei_vrp.md) | ✅ | ✅ | - | - | |

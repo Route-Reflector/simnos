@@ -7,34 +7,42 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### enable
+### system-view
 
 **Output:** None
 
-**Help:** enter enable mode
+**Help:** enter system view (HP Comware equivalent of configure terminal)
 
 **Prompt:**
-- hp_comware>
+- <hp_comware>
+
+### return
+
+**Output:** None
+
+**Help:** return to user view from system view
+
+**Prompt:**
+- [hp_comware]
+
+### quit
+
+**Output:** None
+
+**Help:** exit the terminal (user view only; from system view use `return` to go back to user view)
+
+**Prompt:**
+- <hp_comware>
 
 ### screen-length disable
 
 **Output:** None
 
-**Help:** set the terminal width to maximum
+**Help:** set the terminal width to maximum (kept available in user view for netmiko `disable_paging` interop; real HP requires system view)
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
-
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display vlan all
 
@@ -84,8 +92,8 @@
 **Help:** execute the command "display vlan all"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display interface brief
 
@@ -118,8 +126,8 @@ GE0/4                DOWN auto    A      A    1
 **Help:** execute the command "display interface brief"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display device manuinfo
 
@@ -140,8 +148,8 @@ The operation is not supported on the specified power.
 **Help:** execute the command "display device manuinfo"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display lldp neighbor-information list
 
@@ -159,8 +167,8 @@ XGE1/0/0/2      bcea-fa00-0033  Ten-GigabitEthernet2/0/47  SWITCH01
 **Help:** execute the command "display lldp neighbor-information list"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display arp
 
@@ -177,15 +185,13 @@ XGE1/0/0/2      bcea-fa00-0033  Ten-GigabitEthernet2/0/47  SWITCH01
 **Help:** execute the command "display arp"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display ip routing-table
 
 **Output:**
 ```
-<HS125X>dis ip routing-table 
-
 Destinations : 17604     Routes : 28601
 
 Destination/Mask    Proto  Pre  Cost         NextHop         Interface
@@ -226,8 +232,8 @@ Destination/Mask    Proto  Pre  Cost         NextHop         Interface
 **Help:** execute the command "display ip routing-table"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display ip vpn-instance
 
@@ -245,8 +251,8 @@ Destination/Mask    Proto  Pre  Cost         NextHop         Interface
 **Help:** execute the command "display ip vpn-instance"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display clock
 
@@ -258,8 +264,8 @@ Destination/Mask    Proto  Pre  Cost         NextHop         Interface
 **Help:** execute the command "display clock"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display link-aggregation verbose
 
@@ -291,8 +297,8 @@ Remote:
 **Help:** execute the command "display link-aggregation verbose"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display vlan brief
 
@@ -324,8 +330,8 @@ VLAN ID   Name                             Port
 **Help:** execute the command "display vlan brief"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display lldp neighbor-information verbose
 
@@ -479,8 +485,8 @@ LLDP neighbor-information of port 1[GigabitEthernet0/0]:
 **Help:** execute the command "display lldp neighbor-information verbose"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display interface
 
@@ -637,8 +643,8 @@ Output: 0 output errors, 0 underruns, 0 buffer failures
 **Help:** execute the command "display interface"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display ip vpn-instance instance-name
 
@@ -659,8 +665,8 @@ Output: 0 output errors, 0 underruns, 0 buffer failures
 **Help:** execute the command "display ip vpn-instance instance-name"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display ip interface
 
@@ -702,8 +708,8 @@ Policy routing is enabled, using route map TO_INTERNET
 **Help:** execute the command "display ip interface"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display mac-address
 
@@ -720,8 +726,8 @@ dead-beef-0042 20       Learned        GigabitEthernet1/0/10    AGING
 **Help:** execute the command "display mac-address"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
 ### display counters bound interface
 
@@ -745,6 +751,6 @@ XGE6/0/52                46490              16009               7582           0
 **Help:** execute the command "display counters bound interface"
 
 **Prompt:**
-- hp_comware>
-- hp_comware#
+- <hp_comware>
+- [hp_comware]
 
