@@ -313,8 +313,8 @@ class TestCmdShell(TestCase):
         """Malformed brace `{broken` in output triggers silent ValueError fallback.
 
         Pins #162: covers the `ValueError` failure mode (a bare `{` with
-        no closing `}`) which previously crashed the shell because only
-        KeyError was caught.
+        no closing `}`). Without the silent-fallback `cmd_shell.default()`
+        would propagate the exception and break the shell session.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
@@ -334,9 +334,8 @@ class TestCmdShell(TestCase):
 
         Pins #162: covers the `IndexError` failure mode (a `{}` or `{N}`
         placeholder against an empty positional-args tuple). Without the
-        fix this crashed the shell because only `(KeyError, ValueError)`
-        were caught. Aligns the runtime catch set with the build-time
-        `tasks.render_template` (`(KeyError, IndexError, ValueError)`).
+        silent-fallback the exception would propagate and break the shell
+        session.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
