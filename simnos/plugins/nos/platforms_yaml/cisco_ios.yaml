@@ -18,6 +18,11 @@ commands:
     new_prompt: "{base_prompt}#"
     help: exit configuration mode and return to enable mode
     prompt: "{base_prompt}(config)#"
+  exit:
+    output: null
+    new_prompt: "{base_prompt}#"
+    help: exit current configuration sub-mode (from config mode returns to enable)
+    prompt: "{base_prompt}(config)#"
   show rep topology:
     output: 'REP Segment 1
 

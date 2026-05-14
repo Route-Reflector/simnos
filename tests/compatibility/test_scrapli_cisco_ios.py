@@ -1,6 +1,8 @@
 """Compatibility check: scrapli × cisco_ios."""
 
 import pytest
+
+pytest.importorskip("scrapli")
 from scrapli.driver.core import IOSXEDriver
 
 

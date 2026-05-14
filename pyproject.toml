@@ -151,7 +151,7 @@ dev = [
     "yamllint", # YAML linter
 ]
 compatibility = [
-    "netmiko",        # netmiko interop test
+    # netmiko is already in `dev` (default group), so not repeated here
     "scrapli",        # scrapli interop test
     "ansible-core",   # ansible interop test (cli_command / ios_facts)
 ]

@@ -1,7 +1,9 @@
 """Compatibility check: netmiko × cisco_ios."""
 
-from netmiko import ConnectHandler
 import pytest
+
+pytest.importorskip("netmiko")
+from netmiko import ConnectHandler
 
 
 @pytest.mark.compatibility
