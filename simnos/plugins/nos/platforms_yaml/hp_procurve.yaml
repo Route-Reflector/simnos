@@ -514,3 +514,70 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  show version:
+    output: 'Aruba Operating System Software.
+
+      ArubaOS (MODEL: 310), Version 01.01.0.1 SSR
+
+      Website: http://www.arubanetworks.com
+
+      (c) Copyright 2001 Hewlett Packard Enterprise Development LP.
+
+      Compiled on 2001-01-01 at 01:01:01 UTC (build 00001) by jenkins
+
+      FIPS Mode :disabled
+
+
+      AP uptime is 01 hours 01 minutes 01 seconds
+
+      Reboot Time and Cause: AP rebooted caused by cold HW reset(power loss)
+
+      '
+    help: execute the command "show version"
+    prompt: &id001
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  show vsf detail:
+    output: "VSF Domain ID    : 1\n MAC Address      : 94f128-aabbcc\n VSF Topology\
+      \     : Chain\n VSF Status       : Active\n Uptime           : 134d 1h 55m\n\
+      \ VSF MAD          : None\n VSF Port Speed   : 10G\n Software Version : WC.16.11.0021\n\
+      \nName             : SWITCH-1\nContact          : Network Team (email@address.com)\n\
+      Location         : Datacenter Generic\n\n\nMember ID        : 1\nMAC Address\
+      \      : 94f128-aabbcd\nType             : JL256A\nModel            : Aruba\
+      \ JL256A 2930F-48G-PoE+-4SFP+ Switch\nPriority         : 255\nStatus       \
+      \    : Commander\nROM Version      : WC.16.01.0010\nSerial Number    : SN0000001A\n\
+      Uptime           : 134d 1h 55m\nCPU Utilization  : 10%\nMemory - Total   : 333,513,216\
+      \ bytes\nFree             : 212,192,464 bytes\nVSF Links -\n#1 : Active, Peer\
+      \ member 2\n#2 : Inactive\n\n\n\nMember ID        : 2\nMAC Address      : 94f128-aabbce\n\
+      Type             : JL256A\nModel            : Aruba JL256A 2930F-48G-PoE+-4SFP+\
+      \ Switch\nPriority         : 128\nStatus           : Standby\nROM Version  \
+      \    : WC.16.01.0010\nSerial Number    : SN0000002A\nUptime           : 134d\
+      \ 1h 55m\nCPU Utilization  : 4%\nMemory - Total   : 333,513,216 bytes\nFree\
+      \             : 227,871,324 bytes\nVSF Links -\n#1 : Active, Peer member 1\n\
+      #2 : Inactive\n"
+    help: execute the command "show vsf detail"
+    prompt: *id001
+    output_variants:
+      - "VSF Domain ID    : 5\n MAC Address      : 548028-aabbd0\n VSF Topology  \
+        \   : Ring\n VSF Status       : Active\n Uptime           : 454d 7h 42m\n\
+        \ VSF MAD          : None\n VSF Port Speed   : 1G\n Software Version : WC.16.10.0014\n\
+        \nName             : SWITCH-2\nContact          :\nLocation         :\n\n\n\
+        Member ID        : 1\nMAC Address      : 548028-aabbd1\nType             :\
+        \ JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+ Switch\nPriority\
+        \         : 255\nStatus           : Commander\nROM Version      : WC.16.01.0008\n\
+        Serial Number    : SN0000003A\nUptime           : 454d 7h 42m\nCPU Utilization\
+        \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 216,976,472\
+        \ bytes\nVSF Links -\n#1 : Active, Peer member 3\n#2 : Active, Peer member\
+        \ 2\n\n\n\nMember ID        : 2\nMAC Address      : 548028-aabbd2\nType  \
+        \           : JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+\
+        \ Switch\nPriority         : 128\nStatus           : Standby\nROM Version\
+        \      : WC.16.01.0008\nSerial Number    : SN0000004A\nUptime           :\
+        \ 454d 7h 42m\nCPU Utilization  : 0%\nMemory - Total   : 338,285,056 bytes\n\
+        Free             : 233,891,828 bytes\nVSF Links -\n#1 : Active, Peer member\
+        \ 3\n#2 : Active, Peer member 1\n\n\n\nMember ID        : 3\nMAC Address \
+        \     : 548028-aabbd3\nType             : JL255A\nModel            : Aruba\
+        \ JL255A 2930F-24G-PoE+-4SFP+ Switch\nPriority         : 128\nStatus     \
+        \      : Member\nROM Version      : WC.16.01.0008\nSerial Number    : SN0000005A\n\
+        Uptime           : 454d 7h 42m\nCPU Utilization  : 0%\nMemory - Total   :\
+        \ 338,285,056 bytes\nFree             : 247,712,468 bytes\nVSF Links -\n#1\
+        \ : Active, Peer member 1\n#2 : Active, Peer member 2\n"

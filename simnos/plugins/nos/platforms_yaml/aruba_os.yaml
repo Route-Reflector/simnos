@@ -174,3 +174,101 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  show hostname:
+    output: '
+
+      Hostname is WLC-AMC72-LAB01'
+    help: execute the command "show hostname"
+    prompt: &id001
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  show inventory:
+    output: "\nSupervisor Card slot            : 0\nSystem Serial#               \
+      \   : CV123ABC2 (Date:08/25/18)\nCPU Card Serial#                : ABC123XYZ\
+      \ (Date:08/25/18)\nCPU Card Assembly#              : 2010151H\nCPU Card Revision\
+      \               : (Rev:11.00)\nInterface Card Serial#          : AI3ABC12379\
+      \ (Date:08/25/18)\nInterface Card Assembly#        : 2010085E\nInterface Card\
+      \ Revision         : (Rev:04.00)\nSC Model#                       : Aruba7210-US\n\
+      HW MAC Addr                     : 00:1a:1e:05:27:60 to 00:1a:1e:05:27:67\nCPLD\
+      \ Version                    : (Rev: 3.0)\nPower Supply 0                  :\
+      \ Present               : No\nPower Supply 1                  : Present    \
+      \           : Yes\n                                : 12V OK                :\
+      \ Yes\n                                : Fan OK                : Yes\n     \
+      \                           : Aruba Model No        : 2510057\n            \
+      \                    : Vendor & Model No     : QCS DCJ3501-01P\n           \
+      \                     : Serial No             : QC1234506L\n               \
+      \                 : MFG Date              : 7/2/18\n                       \
+      \         : Output 1 Config       : 12V 350W\n                             \
+      \   : Input Min             : 90V AC\n                                : Input\
+      \ Max             : 264V AC\nMain Board Temperatures         :             \
+      \     \n                                : U24 - Local Temp      25 C (shadow\
+      \ of XLP heatsink)\n                                : Q1  - Remote 1 Temp  \
+      \ 27 C (shadow of VRM, VDD_CPU)\n                                : Q2  - Remote\
+      \ 2 Temp   26 C (shadow of VRM, VDD_SOC)\n                                :\
+      \ U44 - Local Temp      20 C (shadow of DPI connector)\n                   \
+      \             : U29  - Remote 1 Temp  24 C (XLP die temperature)\n         \
+      \                       : Q36  - Remote 2 Temp  21 C (shadow of 98X1422)\n \
+      \                               : J2  - DDR A Temp      18 C (DDR3 A temp)\n\
+      \                                : J4  - DDR B Temp      22 C (DDR3 B temp)\n\
+      \                                : J1  - DDR C Temp      19 C (DDR3 C temp)\n\
+      \                                : J3  - DDR D Temp      20 C (DDR3 D temp)\n\
+      \                                : Port 0 Temp           23 C (1G PHY temp)\n\
+      \                                : Port 1 Temp           23 C (1G PHY temp)\n\
+      Interface Board Temperatures    :\n                                : U21 - Local\
+      \ Temp      23 C (shadow of port 1 RJ45)\n                                :\
+      \ Q4 - Remote 1 Temp    22 C (shadow of 88E1543)\n                         \
+      \       : Q3 - Remote 2 Temp    25 C (shadow of 88X2140)\nFan  0           \
+      \               : 9070 rpm (5.831 V),Speed Low\nFan  1                     \
+      \     : 9112 rpm (5.921 V),Speed Low\nFan  2                          : 8916\
+      \ rpm (5.809 V),Speed Low\nFan  3                          : 9049 rpm (5.876\
+      \ V),Speed Low\nMain Board Voltages             :\nispPAC_POWR1014A_A      \
+      \        :\n                                : 1V2                  1.20V sense\
+      \ 1.208 V\n                                : VDD SOC              0.943V sense\
+      \ 0.928 V\n                                : VCC IOBD 1V5         1.50V sense\
+      \ 1.538 V\n                                : DDR3BD_VTT           0.75V sense\
+      \ 0.760 V\n                                : VCC 1A               1.00V sense\
+      \ 1.026 V\n                                : IV8_DIGITAL          1.80V sense\
+      \ 1.852 V\n                                : 3V3_MAIN             3.30V sense\
+      \ 3.348 V\n                                : VCC1                 1.00V sense\
+      \ 1.024 V\n                                : VCC25                2.50V sense\
+      \ 2.538 V\n                                : 3V3 SB               3.30V sense\
+      \ 3.366 V\nispPAC_POWR1014A_B              :\n                             \
+      \   : VDD                  0.837V sense 0.850 V\n                          \
+      \      : VCC IOAC 1V5         1.50V sense 1.546 V\n                        \
+      \        : DDR3AC_VTT           0.75V sense 0.760 V\n                      \
+      \          : VDD_SRAM             1.00V sense 1.048 V\n                    \
+      \            : VCC1B                1.00V sense 1.030 V\n                  \
+      \              : 1V8_ANALOG           1.80V sense 1.842 V\n                \
+      \                : 1V8                  1.80V sense 1.848 V\n              \
+      \                  : VDDIO12_XAUI         1.20V sense 1.212 V\n            \
+      \                    : 5V                   5.00V sense 5.016 V\nInterface Board\
+      \ Voltages        :\nispPAC_POWR6AT6                 :\n                   \
+      \             : VCC33                3.30V sense 3.342 V\n                 \
+      \               : VCC 18               1.80V sense 1.840 V\n               \
+      \                 : VCC1                 1.00V sense 1.024 V\n             \
+      \                   : VCC12                1.20V sense 1.220 V\n           \
+      \                     : VCC12-DVDD           1.20V sense 1.214 V\n         \
+      \                       : VCC9                 0.90V sense 0.932 V"
+    help: execute the command "show inventory"
+    prompt: *id001
+  show version:
+    output: "\nImage stamp:    /ws/swbuildm/rel_venice_qaoff/code/build/lvm(swbuildm_rel_venice_qaoff_rel_venice)\n\
+      \                Mar 26 2018 23:16:08\n                WC.16.05.0007\n     \
+      \           570\nBoot Image:     Primary\n\nBoot ROM Version:    WC.16.01.0005\n\
+      Active Boot ROM:     Primary\n"
+    help: execute the command "show version"
+    prompt: *id001
+  show vlan:
+    output: " Status and Counters - VLAN Information\n\n  Maximum VLANs to support\
+      \ : 128\n  Primary VLAN : DEFAULT_VLAN\n  Management VLAN :\n\n  VLAN ID Name\
+      \                             | Status     Voice Jumbo\n  ------- --------------------------------\
+      \ + ---------- ----- -----\n  1       DEFAULT_VLAN                     | Port-based\
+      \ No    No\n  102     Printers                         | Port-based No    No\n\
+      \  103     Workstations                     | Port-based No    No\n  104   \
+      \  Management                       | Port-based No    No\n  105     AP_Management\
+      \                    | Port-based No    No\n  106     WiFi_ot              \
+      \            | Port-based No    No\n  107     WiFi_main                    \
+      \    | Port-based No    No\n  108     WiFi_guest                       | Port-based\
+      \ No    No\n"
+    help: execute the command "show vlan"
+    prompt: *id001

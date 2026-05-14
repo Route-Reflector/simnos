@@ -208,3 +208,206 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  lldp show neighbors:
+    output: '+--------------------------------------------------------------------------------------------------------------+
+
+      |                                                LLDP Neighbors                                                |
+
+      +--------------------------------------------------------------------------------------------------------------+
+
+      | Remote Addr: 10.8.91.1                                                                                       |
+
+      | Remote Addr: 10.8.128.39                                                                                     |
+
+      | Remote Addr: fe80::9e7a:3ff:fed1:cd1                                                                         |
+
+      | Remote Addr: fe80::9e7a:3ff:fed1:cdf                                                                         |
+
+      | System Name: LAB_00009-SDS39-100                                                                             |
+
+      | System Desc: Ciena 3916 Service Delivery Switch                                                              |
+
+      +-------------+------------------------------------------------------------------------------------------------+
+
+      |Local        |                                              Remote                                            |
+
+      +-------------+--------------------------------+---------------------------------------------------------------+
+
+      |Port         |Port                            |Info                                                           |
+
+      +-------------+--------------------------------+---------------------------------------------------------------+
+
+      |5            |6                               |  Chassis Id: 9C7A03A10D60                                     |
+
+      |             |                                |   Mgmt Addr: 10.8.91.2                                        |
+
+      |             |                                |              10.8.128.40                                      |
+
+      |             |                                |              fe80::9e7a:3ff:fed1:d61                          |
+
+      |             |                                |              fe80::9e7a:3ff:fed1:d6f                          |
+
+      |             |                                | System Name: LAB_SDS39-200                                    |
+
+      |             |                                | System Desc: Ciena 3916 Service
+      Delivery Switch               |
+
+      |             |                                | SyncE Suppt: Not Supported                                    |
+
+      |             |                                | SyncE Confg: Not Configured                                   |
+
+      +-------------+--------------------------------+---------------------------------------------------------------+
+
+      |6            |3                               |  Chassis Id: 9C7A03B86040                                     |
+
+      |             |                                |   Mgmt Addr: 10.8.90.250                                      |
+
+      |             |                                |              10.8.130.1                                       |
+
+      |             |                                |              fe80::9e7a:3ff:fec8:6040                         |
+
+      |             |                                |              fe80::9e7a:3ff:fec8:6041                         |
+
+      |             |                                | System Name: LAB_SAS51-100                                    |
+
+      |             |                                | System Desc: Ciena 5142 Service
+      Aggregation Switch            |
+
+      |             |                                | SyncE Suppt: Input and Output                                 |
+
+      |             |                                | SyncE Confg: Not Configured                                   |
+
+      +-------------+--------------------------------+---------------------------------------------------------------+
+
+      '
+    help: execute the command "lldp show neighbors"
+    prompt: &id001
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+  port show ethernet-config:
+    output: '+------------------------ PORT ETHERNET CONFIGURATION -------------------------+
+
+      |        |         |       |      |     |    |    |     |      |    Mirror     |
+
+      | Port   | Port    | Admin |      |     |    | FC | Auto| MTU  |    Status     |
+
+      | Name   | Type    | Status| Speed| Dplx| FC | Adv| Neg | Size |State| Eg |
+      Ig |
+
+      +--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
+
+      | 1      | 10/100/G| Dis   | Auto | ??  |off |off | On  | 9100 | Off | 0  |
+      0  |
+
+      | 2      | 10/100/G| Ena   | Auto | ??  |off |off | On  | 9100 | Off | 0  |
+      0  |
+
+      | 3      | 100/G   | Ena   | 100  | ??  |off |off | Off | 9100 | Off | 0  |
+      0  |
+
+      | 4      | 100/G   | Ena   | 1000 | ??  |off |off | On  | 9100 | Off | 0  |
+      0  |
+
+      | 5      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  |
+      0  |
+
+      | 6      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  |
+      0  |
+
+      +--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
+
+      '
+    help: execute the command "port show ethernet-config"
+    prompt: *id001
+  port show network-config:
+    output: '+----------------------------- PORT NETWORK CONFIGURATION ------------------------------+
+
+      |         |     | Accpt  |Untag  |VLAN   |VS     |Egress |VS     |Ingress| VPLS  |Eth
+      VC|
+
+      | Port    |     | Frame  |Ingress|Ingress|Ingress|Untag  |Egress |CoS    | Port  |Ether-|
+
+      | Name    |PVID | Type   |Vid    |Filter |Filter |VLAN   |Filter |Policy | Type  |Type  |
+
+      +---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
+
+      | 1       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc
+      | 8100 |
+
+      | 2       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc
+      | 8100 |
+
+      | 3       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc
+      | 8100 |
+
+      | 4       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Subsc
+      | 8100 |
+
+      | 5       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Ntwrk
+      | 8100 |
+
+      | 6       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Ntwrk
+      | 8100 |
+
+      +---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
+
+      '
+    help: execute the command "port show network-config"
+    prompt: *id001
+  port show status:
+    output: '+---------------------------- PORT OPERATIONAL STATUS ----------------------------+
+
+      |    |                               |    |Link State|    |   |Speed/ |MTU  |Flow
+      |
+
+      | ## | Description                   |Link|Duration  |XCVR|STP|Duplex |Size
+      |Ctrl |
+
+      +----+-------------------------------+----+----------+----+---+-------+-----+-----+
+
+      |1   |ACL_3360610_71CHA              |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+
+      |2   |UNI-Port2                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+
+      |3   |UNI-Port3                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+
+      |4   |NNI-Ringport                   |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+
+      |5   |NNI-Ringport                   | Up |268d 1h12m|Ena |FWD|1000/FD| 9216|off  |
+
+      |6   |NNI-Ringport                   | Up |268d 1h14m|Ena |FWD|1000/FD| 9216|off  |
+
+      +----+-------------------------------+----+----------+----+---+-------+-----+-----+
+
+      '
+    help: execute the command "port show status"
+    prompt: *id001
+  port xcvr show:
+    output: '+----+-----+-----+---------Transceiver-Status------------+-----+----------------+----+
+
+      |    |Admin| Oper|                                       |Ciena|Ether Medium
+      &  |Diag|
+
+      |Port|State|State|      Vendor Name & Part Number        | Rev |Connector Type  |Data|
+
+      +----+-----+-----+---------------------------------------+-----+----------------+----+
+
+      |1   |Empty|     |                                       |     |                |    |
+
+      |2   |Empty|     |                                       |     |                |    |
+
+      |3   |Empty|     |                                       |     |                |    |
+
+      |4   |Empty|     |                                       |     |                |    |
+
+      |5   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes
+      |
+
+      |6   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes
+      |
+
+      +----+-----+-----+---------------------------------------+-----+----------------+----+
+
+      '
+    help: execute the command "port xcvr show"
+    prompt: *id001

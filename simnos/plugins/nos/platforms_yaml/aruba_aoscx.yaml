@@ -502,3 +502,101 @@ commands:
     prompt:
     - '{base_prompt}>'
     - '{base_prompt}#'
+  show vrf:
+    output: "VRF Configuration:\n------------------\nVRF Name   : default\n      \
+      \  Interfaces             Status\n        -----------------------------\n  \
+      \      1/1/9                    down\n        1/1/10                   down\n\
+      \        1/1/11                   down\n        1/1/12                   down\n\
+      \        1/1/15                   down\n        1/1/20                   down\n\
+      \        1/1/21                   down\n        1/1/22                   down\n\
+      \        1/1/23                   down\n        1/1/24                   down\n\
+      \        1/1/37                   down\n        1/1/38                   down\n\
+      \        1/1/39                   down\n        1/1/40                   down\n\
+      \        1/1/41                   down\n        1/1/42                   down\n\
+      \        1/1/43                   down\n        1/1/44                   down\n\
+      \        1/1/45                   down\n        1/1/46                   down\n\
+      \        1/1/47                   down\n        1/1/52                   down\n\
+      \        1/1/54                   down\n        1/1/55                   down\n\
+      \        1/1/56                   down\n\nVRF Name   : VRF_GREEN\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback117\
+      \              up\n        vlan704                  up\n        vlan917    \
+      \              up\n\nVRF Name   : VRF_BLUE\n        Interfaces             Status\n\
+      \        -----------------------------\n        loopback102              up\n\
+      \        vlan7                    up\n        vlan9                    up\n\
+      \        vlan903                  up\n\nVRF Name   : CCTV\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback103\
+      \              up\n        vlan904                  up\n\nVRF Name   : CLIENT\n\
+      \        Interfaces             Status\n        -----------------------------\n\
+      \        loopback109              up\n        vlan10                   up\n\
+      \        vlan910                  up\n\nVRF Name   : DMZ\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback129\
+      \              up\n        vlan1300                 up\n        vlan1302   \
+      \              up\n        vlan1325                 up\n\nVRF Name   : VRF_INT_A\n\
+      \        Interfaces             Status\n        -----------------------------\n\
+      \        loopback126              up\n        vlan502                  up\n\
+      \        vlan924                  up\n        vlan926                  up\n\n\
+      VRF Name   : INTERNET_DMZ\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback127              up\n        vlan707                  up\n\
+      \        vlan927                  up\n        vlan2540                 up\n\n\
+      VRF Name   : INTERNET_ISP\n        Interfaces             Status\n        -----------------------------\n\
+      \        vlan714                  up\n        vlan715                  up\n\
+      \        vlan716                  up\n        vlan717                  up\n\n\
+      VRF Name   : VRF_INT_B\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback125              up\n        vlan501                  up\n\
+      \        vlan923                  up\n        vlan925                  up\n\n\
+      VRF Name   : VRF_MAGENTA\n        Interfaces             Status\n        -----------------------------\n\
+      \        1/1/48                   up\n\nVRF Name   : VRF_YELLOW\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback121\
+      \              up\n        vlan830                  up\n        vlan831    \
+      \              up\n        vlan876                  up\n        vlan922    \
+      \              up\n\nVRF Name   : MEDICAL\n        Interfaces             Status\n\
+      \        -----------------------------\n        loopback108              up\n\
+      \        vlan31                   up\n        vlan909                  up\n\n\
+      VRF Name   : MGMT\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback110              up\n        vlan2                    up\n\
+      \        vlan5                    up\n        vlan60                   up\n\
+      \        vlan61                   up\n        vlan62                   up\n\
+      \        vlan63                   up\n        vlan64                   up\n\
+      \        vlan65                   up\n        vlan66                   up\n\
+      \        vlan67                   up\n        vlan911                  up\n\n\
+      VRF Name   : MULTIMEDIA\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback100              up\n        vlan901                  up\n\n\
+      VRF Name   : PCI\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback104              up\n        vlan12                   up\n\
+      \        vlan905                  up\n\nVRF Name   : POS\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback107\
+      \              up\n        vlan30                   up\n        vlan40     \
+      \              up\n        vlan140                  up\n        vlan908    \
+      \              up\n\nVRF Name   : SD-WAN\n        Interfaces             Status\n\
+      \        -----------------------------\n        loopback111              up\n\
+      \        vlan102                  up\n        vlan801                  up\n\
+      \        vlan912                  up\n\nVRF Name   : VRF_RED\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback101\
+      \              up\n        vlan11                   up\n        vlan902    \
+      \              up\n\nVRF Name   : SERVICE\n        Interfaces             Status\n\
+      \        -----------------------------\n        loopback130              up\n\
+      \        vlan1600                 up\n        vlan1660                 up\n\
+      \        vlan1661                 up\n        vlan1665                 up\n\
+      \        vlan1670                 up\n\nVRF Name   : VRF_ORANGE\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback113\
+      \              up\n        vlan914                  up\n\nVRF Name   : VRF_PURPLE\n\
+      \        Interfaces             Status\n        -----------------------------\n\
+      \nVRF Name   : TELEPHONY\n        Interfaces             Status\n        -----------------------------\n\
+      \nVRF Name   : VRF_CYAN\n        Interfaces             Status\n        -----------------------------\n\
+      \        loopback105              up\n        vlan385                  up\n\
+      \        vlan906                  up\n\nVRF Name   : VENDOR\n        Interfaces\
+      \             Status\n        -----------------------------\n        loopback106\
+      \              up\n        vlan20                   up\n        vlan907    \
+      \              up\n        vlan2070                 up\n\nVRF Name   : VOIP\n\
+      \        Interfaces             Status\n        -----------------------------\n\
+      \        loopback128              up\n        vlan55                   up\n\
+      \        vlan75                   up\n        vlan305                  up\n\
+      \        vlan310                  up\n        vlan928                  up\n"
+    help: execute the command "show vrf"
+    prompt:
+      - '{base_prompt}>'
+      - '{base_prompt}#'
+    output_variants:
+      - "VRF Configuration:\n------------------\nVRF Name   : default\n        Interfaces\
+        \             Status\n        -----------------------------\n        vlan1\
+        \                    up\n        vlan61                   up\n"

@@ -423,3 +423,188 @@ commands:
       total routes shown: 98"
     help: execute the command "show routing route"
     prompt: '{base_prompt}>'
+  show interface all:
+    output: "total configured hardware interfaces: 12\nname                    id\
+      \    speed/duplex/state/fec        mac address\n--------------------------------------------------------------------------------\n\
+      ethernet1/8             23    1000/full/up/auto             00:1b:17:aa:bb:01\n\
+      ethernet1/13            28    1000/full/up/auto             00:1b:17:aa:bb:02\n\
+      ethernet1/14            29    1000/full/up/auto             00:1b:17:aa:bb:03\n\
+      ethernet1/19            34    10000/full/up/auto            00:1b:17:aa:bb:04\n\
+      ae1                     64    [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:40\n\
+      ae2                     65    [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:41\n\
+      ha1-a                   5     1000/full/up/ukn              8c:36:7a:aa:bb:b5\n\
+      ha1-b                   7     ukn/ukn/down((autoneg))/ukn   8c:36:7a:aa:bb:b4\n\
+      vlan                    1     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:01\n\
+      loopback                3     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:03\n\
+      tunnel                  4     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:04\n\
+      hsci                    8     10000/full/up/ukn             64:7c:e8:aa:bb:08\n\
+      \naggregation groups: 2\nae1 members:\n  ethernet1/19 ethernet1/20\nae2 members:\n\
+      \  ethernet1/11\n\n\ntotal configured logical interfaces: 14\n\nname       \
+      \               id    vsys zone             forwarding               tag   \
+      \ address\n\n------------------- ----- ---- ---------------- ------------------------\
+      \ ------ ------------------\nethernet1/8               23    3    ZONE_TECH\
+      \        vr:vrf01                 0      192.0.2.1/28\nethernet1/8.81      \
+      \      300   3    ZONE_TECH        vr:vrf01                 81     192.0.2.17/27\n\
+      ethernet1/13              28    5    ZONE_INET        vr:vrf02             \
+      \    0      192.0.2.33/29\n                                                \
+      \                                10.10.10.1/29\nethernet1/13.388          298\
+      \   2    ZONE_SDWAN       vr:vrf03                 388    192.0.2.65/27\nethernet1/14\
+      \              29    5    ZONE_INET        vr:vrf02                 0      192.0.2.97/28\n\
+      ae1                       64    2                     N/A                  \
+      \    0      N/A\nae1.99                    267   2    ZONE_OTSC        vr:vrf03\
+      \                 99     192.0.2.113/28\nae5                       68    5 \
+      \                    vr:vrf02                 0      N/A\nha1-a            \
+      \         5     0                     ha                       0      198.51.100.1/30\n\
+      vlan                      1     1                     N/A                  \
+      \    0      N/A\nloopback                  3     1                     N/A \
+      \                     0      N/A\nloopback.99               297   2    ZONE_CORP\
+      \        vr:vrf03                 0      192.0.2.129/32\ntunnel            \
+      \        4     1                     N/A                      0      N/A\nhsci\
+      \                      8     0                     N/A                     \
+      \ 0      198.51.100.5/30\n"
+    help: execute the command "show interface all"
+    prompt: '{base_prompt}>'
+  show lacp aggregate-ethernet all:
+    output: "**********************************************************************************\n\
+      AE group: ae1\nMembers:                Bndl Rx state       Mux state  Sel state\n\
+      \  ethernet1/19          yes  Current        Tx_Rx      Selected\n  ethernet1/20\
+      \          yes  Current        Tx_Rx      Selected\nStatus:           Enabled\n\
+      Mode:             Active\nRate:             Slow\nMax-port:         8\nFast-failover:\
+      \    Disabled\nPre-negotiation:  Enabled\nLocal:            System Priority:\
+      \ 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n            \
+      \      Key:             64\nPartner:          System Priority: 65534\n     \
+      \             System MAC:      0a:00:00:aa:bb:cc\n                  Key:   \
+      \          103\nPort State\n--------------------------------------------------------------------------------\n\
+      Interface                       Port\n                    Number Priority  Mode\
+      \    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+      ethernet1/19         34     32768    Active  Slow  64       0x3D\nPartner  \
+      \            3      1        Active  Slow  103      0x3D\n\nethernet1/20   \
+      \      35     32768    Active  Slow  64       0x3D\nPartner              1003\
+      \   1        Active  Slow  103      0x3D\n\nPort Counters\n--------------------------------------------------------------------------------\n\
+      Interface               LACPDUs         Marker      Marker Response       Error\n\
+      \                    Sent     Recv     Sent Recv     Sent     Recv     Unknown\
+      \  Illegal\n--------------------------------------------------------------------------------\n\
+      ethernet1/19         100      100      0    0        0        0        0   \
+      \     0\nethernet1/20         100      100      0    0        0        0   \
+      \     0        0\n\n**********************************************************************************\n\
+      AE group: ae2\nMembers:                Bndl Rx state       Mux state  Sel state\n\
+      \  ethernet1/11          yes  Current        Tx_Rx      Selected\nStatus:  \
+      \         Enabled\nMode:             Active\nRate:             Slow\nMax-port:\
+      \         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\nLocal: \
+      \           System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+      \                  Key:             65\nPartner:          System Priority: 32768\n\
+      \                  System MAC:      64:7c:e8:aa:bb:01\n                  Key:\
+      \             67\nPort State\n--------------------------------------------------------------------------------\n\
+      Interface                       Port\n                    Number Priority  Mode\
+      \    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+      ethernet1/11         26     32768    Active  Slow  65       0x3D\nPartner  \
+      \            27     32768    Active  Slow  67       0x3D\n\nPort Counters\n\
+      --------------------------------------------------------------------------------\n\
+      Interface               LACPDUs         Marker      Marker Response       Error\n\
+      \                    Sent     Recv     Sent Recv     Sent     Recv     Unknown\
+      \  Illegal\n--------------------------------------------------------------------------------\n\
+      ethernet1/11         100      100      0    0        0        0        0   \
+      \     0\n"
+    help: execute the command "show lacp aggregate-ethernet all"
+    prompt: '{base_prompt}>'
+    output_variants:
+      - "LACP:\n\n**********************************************************************************\n\
+        AE group: ae1\nMembers:                Bndl Rx state       Mux state  Sel\
+        \ state\n  ethernet1/19          yes  Current        Tx_Rx      Selected\n\
+        \  ethernet1/20          yes  Current        Tx_Rx      Selected\nStatus:\
+        \           Enabled\nMode:             Active\nRate:             Slow\nMax-port:\
+        \         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\nLocal:\
+        \            System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+        \                  Key:             64\nPartner:          System Priority:\
+        \ 65534\n                  System MAC:      0a:00:00:aa:bb:cc\n          \
+        \        Key:             103\nPort State\n--------------------------------------------------------------------------------\n\
+        Interface                       Port\n                    Number Priority\
+        \  Mode    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+        ethernet1/19         34     32768    Active  Slow  64       0x3D\nPartner\
+        \              3      1        Active  Slow  103      0x3D\n\nethernet1/20\
+        \         35     32768    Active  Slow  64       0x3D\nPartner           \
+        \   1003   1        Active  Slow  103      0x3D\n\nPort Counters\n--------------------------------------------------------------------------------\n\
+        Interface               LACPDUs         Marker      Marker Response      \
+        \ Error\n                    Sent     Recv     Sent Recv     Sent     Recv\
+        \     Unknown  Illegal\n--------------------------------------------------------------------------------\n\
+        ethernet1/19         584295   584296   0    0        0        0        0 \
+        \       0\nethernet1/20         584295   584297   0    0        0        0\
+        \        0        0\n\n**********************************************************************************\n\
+        AE group: ae2\nMembers:                Bndl Rx state       Mux state  Sel\
+        \ state\n  ethernet1/11          yes  Current        Tx_Rx      Selected\n\
+        Status:           Enabled\nMode:             Active\nRate:             Slow\n\
+        Max-port:         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\n\
+        Local:            System Priority: 32768\n                  System MAC:  \
+        \    64:7c:e8:aa:bb:01\n                  Key:             65\nPartner:  \
+        \        System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+        \                  Key:             67\nPort State\n--------------------------------------------------------------------------------\n\
+        Interface                       Port\n                    Number Priority\
+        \  Mode    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+        ethernet1/11         26     32768    Active  Slow  65       0x3D\nPartner\
+        \              27     32768    Active  Slow  67       0x3D\n\nPort Counters\n\
+        --------------------------------------------------------------------------------\n\
+        Interface               LACPDUs         Marker      Marker Response      \
+        \ Error\n                    Sent     Recv     Sent Recv     Sent     Recv\
+        \     Unknown  Illegal\n--------------------------------------------------------------------------------\n\
+        ethernet1/11         584290   584286   0    0        0        0        0 \
+        \       0\n\n**********************************************************************************\n\
+        AE group: ae4\nMembers:                Bndl Rx state       Mux state  Sel\
+        \ state\n  ethernet1/12          yes  Current        Tx_Rx      Selected\n\
+        Status:           Enabled\nMode:             Active\nRate:             Slow\n\
+        Max-port:         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\n\
+        Local:            System Priority: 32768\n                  System MAC:  \
+        \    64:7c:e8:aa:bb:01\n                  Key:             67\nPartner:  \
+        \        System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+        \                  Key:             65\nPort State\n--------------------------------------------------------------------------------\n\
+        Interface                       Port\n                    Number Priority\
+        \  Mode    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+        ethernet1/12         27     32768    Active  Slow  67       0x3D\nPartner\
+        \              26     32768    Active  Slow  65       0x3D\n\nPort Counters\n\
+        --------------------------------------------------------------------------------\n\
+        Interface               LACPDUs         Marker      Marker Response      \
+        \ Error\n                    Sent     Recv     Sent Recv     Sent     Recv\
+        \     Unknown  Illegal\n--------------------------------------------------------------------------------\n\
+        ethernet1/12         584290   584286   0    0        0        0        0 \
+        \       0\n\n**********************************************************************************\n\
+        AE group: ae5\nMembers:                Bndl Rx state       Mux state  Sel\
+        \ state\n  ethernet1/15          yes  Current        Tx_Rx      Selected\n\
+        \  ethernet1/17          yes  Current        Tx_Rx      Selected\nStatus:\
+        \           Enabled\nMode:             Active\nRate:             Slow\nMax-port:\
+        \         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\nLocal:\
+        \            System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+        \                  Key:             68\nPartner:          System Priority:\
+        \ 65534\n                  System MAC:      0a:00:00:aa:bb:cc\n          \
+        \        Key:             101\nPort State\n--------------------------------------------------------------------------------\n\
+        Interface                       Port\n                    Number Priority\
+        \  Mode    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+        ethernet1/15         30     32768    Active  Slow  68       0x3D\nPartner\
+        \              1001   1        Active  Slow  101      0x3D\n\nethernet1/17\
+        \         32     32768    Active  Slow  68       0x3D\nPartner           \
+        \   1      1        Active  Slow  101      0x3D\n\nPort Counters\n--------------------------------------------------------------------------------\n\
+        Interface               LACPDUs         Marker      Marker Response      \
+        \ Error\n                    Sent     Recv     Sent Recv     Sent     Recv\
+        \     Unknown  Illegal\n--------------------------------------------------------------------------------\n\
+        ethernet1/15         584299   584270   0    0        0        0        0 \
+        \       0\nethernet1/17         584300   584271   0    0        0        0\
+        \        0        0\n\n**********************************************************************************\n\
+        AE group: ae6\nMembers:                Bndl Rx state       Mux state  Sel\
+        \ state\n  ethernet1/21          yes  Current        Tx_Rx      Selected\n\
+        \  ethernet1/22          yes  Current        Tx_Rx      Selected\nStatus:\
+        \           Enabled\nMode:             Active\nRate:             Slow\nMax-port:\
+        \         8\nFast-failover:    Disabled\nPre-negotiation:  Enabled\nLocal:\
+        \            System Priority: 32768\n                  System MAC:      64:7c:e8:aa:bb:01\n\
+        \                  Key:             69\nPartner:          System Priority:\
+        \ 65534\n                  System MAC:      0a:00:00:aa:bb:cc\n          \
+        \        Key:             102\nPort State\n--------------------------------------------------------------------------------\n\
+        Interface                       Port\n                    Number Priority\
+        \  Mode    Rate  Key      State\n--------------------------------------------------------------------------------\n\
+        ethernet1/21         36     32768    Active  Slow  69       0x3D\nPartner\
+        \              2      1        Active  Slow  102      0x3D\n\nethernet1/22\
+        \         37     32768    Active  Slow  69       0x3D\nPartner           \
+        \   1002   1        Active  Slow  102      0x3D\n\nPort Counters\n--------------------------------------------------------------------------------\n\
+        Interface               LACPDUs         Marker      Marker Response      \
+        \ Error\n                    Sent     Recv     Sent Recv     Sent     Recv\
+        \     Unknown  Illegal\n--------------------------------------------------------------------------------\n\
+        ethernet1/21         584296   584297   0    0        0        0        0 \
+        \       0\nethernet1/22         584296   584297   0    0        0        0\
+        \        0        0\n"

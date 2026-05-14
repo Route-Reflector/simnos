@@ -481,3 +481,66 @@ Total number of VLAN(s) : 3469
 - extreme_exos>
 - extreme_exos#
 
+### show fdb
+
+**Output:**
+```
+MAC                                      VLAN Name( Tag)  Age  Flags          Port / Virtual Port List
+------------------------------------------------------------------------------------------------------
+00:0c:29:4b:34:cf                             v101(0101) 0041  d m D          1:2
+00:0c:29:4b:34:cf                             v100(0100) 0041  d m P          1:2
+00:0c:29:d2:2d:48                             v102(0102) 0045  d miM          1:3, 1:45
+00:0c:29:d2:2d:48                             v100(0100) 0045  d m P          1:3
+00:0c:29:f1:f2:f5                             v100(0100) 0045  d miM          1:51:1, 1:45
+00:0c:29:f1:f2:f5                             v102(0102) 0045  d m P          1:1
+00:0c:29:f1:f2:f5                             v101(0101) 0000  d m P          1:1
+
+Flags : d - Dynamic, s - Static, p - Permanent, n - NetLogin, m - MAC, i - IP,
+        x - IPX, l - lockdown MAC, L - lockdown-timeout MAC, M- Mirror, B - Egress Blackhole,
+        b - Ingress Blackhole, v - MAC-Based VLAN, P - Private VLAN, T - VLAN translation,
+        D - drop packet, h - Hardware Aging (Age=0), o - IEEE 802.1ah Backbone MAC,
+        S - Software Controlled Deletion, r - MSRP,
+        X - VXLAN, E - EVPN
+
+Total: 3 Static: 0  Perm: 0  Dyn: 3  Dropped: 1  Locked: 0  Locked with Timeout: 0
+FDB Aging time: 300
+
+```
+
+**Help:** execute the command "show fdb"
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
+### show iparp
+
+**Output:**
+```
+VR            Destination      Mac                Age  Static  VLAN          VID   Port
+VR-Default    10.128.32.4      00:d0:59:17:74:83   20      NO  bluered       4092  1:25
+VR-Default    10.128.32.8      00:01:30:ba:6a:a0    7      NO  Default       4095
+
+Dynamic Entries  :           4             Static Entries            :          0
+Pending Entries  :           0
+
+ARP address check:    Enabled              ARP refresh               :    Enabled
+Timeout          :          20 minutes     ARP Sender-Mac Learning   :   Disabled
+Locktime         :        1000 milliseconds
+Retransmit Time  :        1000 milliseconds
+Reachable Time   :      900000 milliseconds (Auto)
+Fast Convergence :         Off 
+
+ARP Global Settings
+Max Entries         :    12288 
+Max Pending Entries :      256 
+Max Proxy Entries   :      256
+
+```
+
+**Help:** execute the command "show iparp"
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
