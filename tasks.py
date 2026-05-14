@@ -75,12 +75,43 @@ def render_template(template: str, platform: str, command: str, field: str) -> s
         ) from exc
 
 
+_PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"})
+
+
+def sweep_orphaned_platform_docs(
+    docs_folder: str,
+    valid_platforms: set[str],
+    preserve: frozenset[str] = _PRESERVED_PLATFORM_DOCS,
+) -> list[str]:
+    """Remove ``docs/platforms/*.md`` entries whose backing yaml is gone.
+
+    Keeps the docs idempotent with the yaml directory as the source of
+    truth: if a platform's yaml is deleted, the corresponding markdown
+    is also removed on the next regeneration. ``preserve`` lists hand-
+    authored markdown that has no yaml counterpart (index pages etc.)
+    and must never be swept.
+
+    Returns the sorted list of removed filenames for caller-side logging.
+    """
+    expected: set[str] = {f"{platform}.md" for platform in valid_platforms}
+    removed: list[str] = []
+    for entry in sorted(os.listdir(docs_folder)):
+        if not entry.endswith(".md"):
+            continue
+        if entry in expected or entry in preserve:
+            continue
+        os.remove(f"{docs_folder}/{entry}")
+        removed.append(entry)
+    return removed
+
+
 @task
 def gen_docs_platform_commands(ctx):
     """
     Generate platform specific commands in the docs.
     """
     platforms_folder: str = "simnos/plugins/nos/platforms_yaml"
+    docs_folder: str = "docs/platforms"
     files: list[str] = os.listdir(platforms_folder)
     platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
 
@@ -88,7 +119,7 @@ def gen_docs_platform_commands(ctx):
         print(f"Generating Platform: {platform}")
         with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
             data = yaml.safe_load(file)
-        with open(f"docs/platforms/{platform}.md", "w", encoding="utf-8") as platforms_file:
+        with open(f"{docs_folder}/{platform}.md", "w", encoding="utf-8") as platforms_file:
             platforms_file.write(f"# {platform}\n\n")
             platforms_file.write(WARNING_MESSAGE)
             platforms_file.write("## Commands\n\n")
@@ -109,6 +140,9 @@ def gen_docs_platform_commands(ctx):
                     rendered = render_template(prompt, platform, command, "prompt")
                     platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
+
+    for orphan in sweep_orphaned_platform_docs(docs_folder, set(platforms)):
+        print(f"Removed orphaned doc: {orphan}")
 
 
 @task(help={"device_type": "The device type to connect to."})
