@@ -8,6 +8,16 @@ commands:
     new_prompt: "{base_prompt}#"
     help: enter enable mode
     prompt: "{base_prompt}>"
+  configure terminal:
+    output: null
+    new_prompt: "{base_prompt}(config)#"
+    help: enter global configuration mode
+    prompt: "{base_prompt}#"
+  end:
+    output: null
+    new_prompt: "{base_prompt}#"
+    help: exit configuration mode and return to enable mode
+    prompt: "{base_prompt}(config)#"
   show rep topology:
     output: 'REP Segment 1
 
@@ -4571,6 +4581,13 @@ commands:
     output: null
     help: Execute the command terminal width 511. This automatically generated. Feel
       free to change it!
+    prompt:
+    - "{base_prompt}>"
+    - "{base_prompt}#"
+  terminal width 512:
+    output: null
+    help: Execute the command terminal width 512. Used by scrapli for privilege escalation
+      preparation.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
