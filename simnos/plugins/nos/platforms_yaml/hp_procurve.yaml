@@ -535,8 +535,8 @@ commands:
       '
     help: execute the command "show version"
     prompt: &id001
-      - '{base_prompt}>'
-      - '{base_prompt}#'
+    - '{base_prompt}>'
+    - '{base_prompt}#'
   show vsf detail:
     output: "VSF Domain ID    : 1\n MAC Address      : 94f128-aabbcc\n VSF Topology\
       \     : Chain\n VSF Status       : Active\n Uptime           : 134d 1h 55m\n\
@@ -558,26 +558,25 @@ commands:
     help: execute the command "show vsf detail"
     prompt: *id001
     output_variants:
-      - "VSF Domain ID    : 5\n MAC Address      : 548028-aabbd0\n VSF Topology  \
-        \   : Ring\n VSF Status       : Active\n Uptime           : 454d 7h 42m\n\
-        \ VSF MAD          : None\n VSF Port Speed   : 1G\n Software Version : WC.16.10.0014\n\
-        \nName             : SWITCH-2\nContact          :\nLocation         :\n\n\n\
-        Member ID        : 1\nMAC Address      : 548028-aabbd1\nType             :\
-        \ JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+ Switch\nPriority\
-        \         : 255\nStatus           : Commander\nROM Version      : WC.16.01.0008\n\
-        Serial Number    : SN0000003A\nUptime           : 454d 7h 42m\nCPU Utilization\
-        \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 216,976,472\
-        \ bytes\nVSF Links -\n#1 : Active, Peer member 3\n#2 : Active, Peer member\
-        \ 2\n\n\n\nMember ID        : 2\nMAC Address      : 548028-aabbd2\nType  \
-        \           : JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+\
-        \ Switch\nPriority         : 128\nStatus           : Standby\nROM Version\
-        \      : WC.16.01.0008\nSerial Number    : SN0000004A\nUptime           :\
-        \ 454d 7h 42m\nCPU Utilization  : 0%\nMemory - Total   : 338,285,056 bytes\n\
-        Free             : 233,891,828 bytes\nVSF Links -\n#1 : Active, Peer member\
-        \ 3\n#2 : Active, Peer member 1\n\n\n\nMember ID        : 3\nMAC Address \
-        \     : 548028-aabbd3\nType             : JL255A\nModel            : Aruba\
-        \ JL255A 2930F-24G-PoE+-4SFP+ Switch\nPriority         : 128\nStatus     \
-        \      : Member\nROM Version      : WC.16.01.0008\nSerial Number    : SN0000005A\n\
-        Uptime           : 454d 7h 42m\nCPU Utilization  : 0%\nMemory - Total   :\
-        \ 338,285,056 bytes\nFree             : 247,712,468 bytes\nVSF Links -\n#1\
-        \ : Active, Peer member 1\n#2 : Active, Peer member 2\n"
+    - "VSF Domain ID    : 5\n MAC Address      : 548028-aabbd0\n VSF Topology    \
+      \ : Ring\n VSF Status       : Active\n Uptime           : 454d 7h 42m\n VSF\
+      \ MAD          : None\n VSF Port Speed   : 1G\n Software Version : WC.16.10.0014\n\
+      \nName             : SWITCH-2\nContact          :\nLocation         :\n\n\n\
+      Member ID        : 1\nMAC Address      : 548028-aabbd1\nType             : JL255A\n\
+      Model            : Aruba JL255A 2930F-24G-PoE+-4SFP+ Switch\nPriority      \
+      \   : 255\nStatus           : Commander\nROM Version      : WC.16.01.0008\n\
+      Serial Number    : SN0000003A\nUptime           : 454d 7h 42m\nCPU Utilization\
+      \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 216,976,472\
+      \ bytes\nVSF Links -\n#1 : Active, Peer member 3\n#2 : Active, Peer member 2\n\
+      \n\n\nMember ID        : 2\nMAC Address      : 548028-aabbd2\nType         \
+      \    : JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+ Switch\n\
+      Priority         : 128\nStatus           : Standby\nROM Version      : WC.16.01.0008\n\
+      Serial Number    : SN0000004A\nUptime           : 454d 7h 42m\nCPU Utilization\
+      \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 233,891,828\
+      \ bytes\nVSF Links -\n#1 : Active, Peer member 3\n#2 : Active, Peer member 1\n\
+      \n\n\nMember ID        : 3\nMAC Address      : 548028-aabbd3\nType         \
+      \    : JL255A\nModel            : Aruba JL255A 2930F-24G-PoE+-4SFP+ Switch\n\
+      Priority         : 128\nStatus           : Member\nROM Version      : WC.16.01.0008\n\
+      Serial Number    : SN0000005A\nUptime           : 454d 7h 42m\nCPU Utilization\
+      \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 247,712,468\
+      \ bytes\nVSF Links -\n#1 : Active, Peer member 1\n#2 : Active, Peer member 2\n"

@@ -594,9 +594,9 @@ commands:
       \        vlan310                  up\n        vlan928                  up\n"
     help: execute the command "show vrf"
     prompt:
-      - '{base_prompt}>'
-      - '{base_prompt}#'
+    - '{base_prompt}>'
+    - '{base_prompt}#'
     output_variants:
-      - "VRF Configuration:\n------------------\nVRF Name   : default\n        Interfaces\
-        \             Status\n        -----------------------------\n        vlan1\
-        \                    up\n        vlan61                   up\n"
+    - "VRF Configuration:\n------------------\nVRF Name   : default\n        Interfaces\
+      \             Status\n        -----------------------------\n        vlan1 \
+      \                   up\n        vlan61                   up\n"

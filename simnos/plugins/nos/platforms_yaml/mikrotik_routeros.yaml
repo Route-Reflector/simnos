@@ -266,16 +266,16 @@ commands:
     help: execute the command "interface bonding print detail"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - "Flags: X - disabled; R - running\n 0  R ;;; Link to Mikrotik\n      name=\"\
-        bond1\" mtu=1500 mac-address=48:A9:8A:5D:24:05 arp=enabled arp-timeout=auto\
-        \ slaves=sfp-sfpplus9,sfp-sfpplus10 mode=802.3ad primary=none link-monitoring=mii\
-        \ arp-interval=100ms arp-ip-targets=\"\" mii-interval=100ms down-delay=0ms\
-        \ up-delay=0ms lacp-rate=30secs transmit-hash-policy=layer-2 min-links=0\n"
-      - "Flags: X - disabled; R - running\n 0  R ;;; Link to Mikrotik\nand other things\n\
-        \      name=\"bond1\" mtu=1500 mac-address=48:A9:8A:5D:24:05 arp=enabled arp-timeout=auto\
-        \ slaves=sfp-sfpplus9,sfp-sfpplus10 mode=802.3ad primary=none link-monitoring=mii\
-        \ arp-interval=100ms arp-ip-targets=\"\" mii-interval=100ms down-delay=0ms\
-        \ up-delay=0ms lacp-rate=30secs transmit-hash-policy=layer-2 min-links=0\n"
+    - "Flags: X - disabled; R - running\n 0  R ;;; Link to Mikrotik\n      name=\"\
+      bond1\" mtu=1500 mac-address=48:A9:8A:5D:24:05 arp=enabled arp-timeout=auto\
+      \ slaves=sfp-sfpplus9,sfp-sfpplus10 mode=802.3ad primary=none link-monitoring=mii\
+      \ arp-interval=100ms arp-ip-targets=\"\" mii-interval=100ms down-delay=0ms up-delay=0ms\
+      \ lacp-rate=30secs transmit-hash-policy=layer-2 min-links=0\n"
+    - "Flags: X - disabled; R - running\n 0  R ;;; Link to Mikrotik\nand other things\n\
+      \      name=\"bond1\" mtu=1500 mac-address=48:A9:8A:5D:24:05 arp=enabled arp-timeout=auto\
+      \ slaves=sfp-sfpplus9,sfp-sfpplus10 mode=802.3ad primary=none link-monitoring=mii\
+      \ arp-interval=100ms arp-ip-targets=\"\" mii-interval=100ms down-delay=0ms up-delay=0ms\
+      \ lacp-rate=30secs transmit-hash-policy=layer-2 min-links=0\n"
   interface bridge host print terse without-paging:
     output: '0 D E  mac-address=11:22:33:44:55:01 interface=ether4 bridge=lan-bridge
       on-interface=ether4
@@ -341,89 +341,87 @@ commands:
     help: execute the command "interface print detail"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - "Flags: D - dynamic; X - disabled, R - running; S - slave; P - passthrough\n\
-        \ 0  R   ;;; Management Port - 4G OOB\n        name=\"ether1\" default-name=\"\
-        ether1\" type=\"ether\" mtu=1500 actual-mtu=1500 l2mtu=1600 max-l2mtu=9586\
-        \ mac-address=AA:BB:CC:11:22:33 ifname=\"eth0\" ifindex=7 id=1 last-link-down-time=2024-10-08\
-        \ 11:14:27 last-link-up-time=2024-10-08 11:14:36 link-downs=166\n\n 1  R \
-        \  ;;; Uplink\n        name=\"sfp-sfpplus1\" default-name=\"sfp-sfpplus1\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth1\" ifindex=9 id=2 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\
-        \n 2  X   ;;; Spare Optic\n        name=\"sfp-sfpplus2\" default-name=\"sfp-sfpplus2\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth2\" ifindex=10 id=3 link-downs=0\n\n 3  X   name=\"sfp-sfpplus3\"\
-        \ default-name=\"sfp-sfpplus3\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
-        \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth3\" ifindex=11\
-        \ id=4 link-downs=0\n\n 4  X   name=\"sfp-sfpplus4\" default-name=\"sfp-sfpplus4\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth4\" ifindex=12 id=5 link-downs=0\n\n 5  X   name=\"sfp-sfpplus5\"\
-        \ default-name=\"sfp-sfpplus5\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
-        \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth5\" ifindex=13\
-        \ id=6 link-downs=0\n\n 6  X   name=\"sfp-sfpplus6\" default-name=\"sfp-sfpplus6\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth6\" ifindex=14 id=7 link-downs=0\n\n 7  X   name=\"sfp-sfpplus7\"\
-        \ default-name=\"sfp-sfpplus7\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
-        \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth7\" ifindex=15\
-        \ id=8 link-downs=0\n\n 8  X   name=\"sfp-sfpplus8\" default-name=\"sfp-sfpplus8\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth8\" ifindex=16 id=9 link-downs=0\n\n 9  RS  ;;; Link to\n  \
-        \      name=\"sfp-sfpplus9\" default-name=\"sfp-sfpplus9\" type=\"ether\"\
-        \ mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth9\" ifindex=17 id=10 last-link-down-time=2024-08-23 12:53:56\
-        \ last-link-up-time=2024-08-23 12:53:56 link-downs=4\n\n10  RS  ;;; Link to\n\
-        \        name=\"sfp-sfpplus10\" default-name=\"sfp-sfpplus10\" type=\"ether\"\
-        \ mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth10\" ifindex=18 id=11 last-link-down-time=2024-08-23 12:53:27\
-        \ last-link-up-time=2024-08-23 12:53:55 link-downs=5\n\n11  R   ;;; Cust\n\
-        \        name=\"sfp-sfpplus11\" default-name=\"sfp-sfpplus11\" type=\"ether\"\
-        \ mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth11\" ifindex=19 id=12 last-link-down-time=2024-08-29 20:57:53\
-        \ last-link-up-time=2024-09-19 23:00:35 link-downs=1\n\n12  X   ;;; Cust\n\
-        \        name=\"sfp-sfpplus12\" default-name=\"sfp-sfpplus12\" type=\"ether\"\
-        \ mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth12\" ifindex=20 id=13 link-downs=0\n\n13  X   name=\"sfp28-1\"\
-        \ default-name=\"sfp28-1\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
-        \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth13\" ifindex=21\
-        \ id=14 link-downs=0\n\n14  X   name=\"sfp28-2\" default-name=\"sfp28-2\"\
-        \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"eth14\" ifindex=22 id=15 link-downs=0\n\n15  R   ;;; Loopback\n\
-        \        name=\"Lo0\" type=\"bridge\" mtu=auto actual-mtu=1500 l2mtu=65535\
-        \ mac-address=AA:BB:CC:11:22:33 ifname=\"br0\" ifindex=24 id=23 last-link-up-time=2024-07-23\
-        \ 10:13:19 link-downs=0\n\n16  R   ;;; INET Loopback\n        name=\"Lo1\"\
-        \ type=\"bridge\" mtu=auto actual-mtu=1500 l2mtu=65535 vrf=INET mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"br1\" ifindex=36 id=27 last-link-up-time=2024-07-23 10:19:01 link-downs=0\n\
-        \n17  R   ;;; Link to\n        name=\"bond1\" type=\"bond\" mtu=1500 actual-mtu=1500\
-        \ l2mtu=9216 mac-address=AA:BB:CC:11:22:33 ifname=\"bond24\" ifindex=23 id=24\
-        \ last-link-down-time=2024-08-23 12:53:27 last-link-up-time=2024-08-23 12:53:55\
-        \ link-downs=3\n\n18  R   name=\"pppoe-out1\" type=\"pppoe-out\" mtu=1400\
-        \ actual-mtu=1400 ifname=\"ppp25889\" ifindex=25948 id=20 last-link-down-time=2024-10-08\
-        \ 12:36:57 last-link-up-time=2024-10-08 12:39:16 link-downs=7208\n\n19  R\
-        \   ;;; MGMT\n        name=\"vlan1@bond1\" type=\"vlan\" mtu=1574 actual-mtu=1574\
-        \ l2mtu=9212 mac-address=AA:BB:CC:11:22:33 ifname=\"vlan25\" ifindex=27 id=25\
-        \ last-link-down-time=2024-08-23 12:53:27 last-link-up-time=2024-08-23 12:53:55\
-        \ link-downs=3\n\n20  R   ;;; INET\n        name=\"vlan2@bond1\" type=\"vlan\"\
-        \ mtu=1574 actual-mtu=1574 l2mtu=9212 vrf=INET mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"vlan26\" ifindex=28 id=26 last-link-down-time=2024-08-23 12:53:27\
-        \ last-link-up-time=2024-08-23 12:53:55 link-downs=3\n\n21  R   ;;; MGMT Uplink\
-        \ YDCE-M1\n        name=\"vlan10@vlan975@sfp-sfpplus1\" type=\"vlan\" mtu=1574\
-        \ actual-mtu=1574 l2mtu=9208 mac-address=AA:BB:CC:11:22:33 ifname=\"vlan22\"\
-        \ ifindex=33 id=22 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\n\
-        22  R   ;;; INET: IX\n        name=\"vlan11@vlan975@sfp-sfpplus1\" type=\"\
-        vlan\" mtu=1500 actual-mtu=1500 l2mtu=9208 vrf=INET mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"vlan21\" ifindex=31 id=21 last-link-up-time=2024-07-23 10:13:23\
-        \ link-downs=0\n\n23  R   ;;; INET: IX\n        name=\"vlan12@vlan975@sfp-sfpplus1\"\
-        \ type=\"vlan\" mtu=1500 actual-mtu=1500 l2mtu=9208 vrf=INET mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"vlan29\" ifindex=38 id=29 last-link-up-time=2024-07-23 11:45:31\
-        \ link-downs=0\n\n24  R   ;;; INET: IX\n        name=\"vlan111@sfp-sfpplus1\"\
-        \ type=\"vlan\" mtu=1500 actual-mtu=1500 l2mtu=9212 vrf=INET mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"vlan18\" ifindex=26 id=18 last-link-up-time=2024-07-23 10:13:23\
-        \ link-downs=0\n\n25  R   ;;; Intercap\n        name=\"vlan975@sfp-sfpplus1\"\
-        \ type=\"vlan\" mtu=1500 actual-mtu=1500 l2mtu=9212 mac-address=AA:BB:CC:11:22:33\
-        \ ifname=\"vlan16\" ifindex=25 id=16 last-link-up-time=2024-07-23 10:13:23\
-        \ link-downs=0\n\n26  R   name=\"vlan4050@sfp-sfpplus11\" type=\"vlan\" mtu=9212\
-        \ actual-mtu=9212 l2mtu=9212 vrf=INET mac-address=AA:BB:CC:11:22:33 ifname=\"\
-        vlan30\" ifindex=239 id=30 last-link-down-time=2024-08-29 20:57:53 last-link-up-time=2024-09-19\
-        \ 23:00:35 link-downs=1"
+    - "Flags: D - dynamic; X - disabled, R - running; S - slave; P - passthrough\n\
+      \ 0  R   ;;; Management Port - 4G OOB\n        name=\"ether1\" default-name=\"\
+      ether1\" type=\"ether\" mtu=1500 actual-mtu=1500 l2mtu=1600 max-l2mtu=9586 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth0\" ifindex=7 id=1 last-link-down-time=2024-10-08 11:14:27 last-link-up-time=2024-10-08\
+      \ 11:14:36 link-downs=166\n\n 1  R   ;;; Uplink\n        name=\"sfp-sfpplus1\"\
+      \ default-name=\"sfp-sfpplus1\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth1\" ifindex=9 id=2\
+      \ last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\n 2  X   ;;; Spare Optic\n\
+      \        name=\"sfp-sfpplus2\" default-name=\"sfp-sfpplus2\" type=\"ether\"\
+      \ mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth2\" ifindex=10 id=3 link-downs=0\n\n 3  X   name=\"sfp-sfpplus3\"\
+      \ default-name=\"sfp-sfpplus3\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth3\" ifindex=11 id=4\
+      \ link-downs=0\n\n 4  X   name=\"sfp-sfpplus4\" default-name=\"sfp-sfpplus4\"\
+      \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth4\" ifindex=12 id=5 link-downs=0\n\n 5  X   name=\"sfp-sfpplus5\"\
+      \ default-name=\"sfp-sfpplus5\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth5\" ifindex=13 id=6\
+      \ link-downs=0\n\n 6  X   name=\"sfp-sfpplus6\" default-name=\"sfp-sfpplus6\"\
+      \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth6\" ifindex=14 id=7 link-downs=0\n\n 7  X   name=\"sfp-sfpplus7\"\
+      \ default-name=\"sfp-sfpplus7\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth7\" ifindex=15 id=8\
+      \ link-downs=0\n\n 8  X   name=\"sfp-sfpplus8\" default-name=\"sfp-sfpplus8\"\
+      \ type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth8\" ifindex=16 id=9 link-downs=0\n\n 9  RS  ;;; Link to\n    \
+      \    name=\"sfp-sfpplus9\" default-name=\"sfp-sfpplus9\" type=\"ether\" mtu=9216\
+      \ actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"\
+      eth9\" ifindex=17 id=10 last-link-down-time=2024-08-23 12:53:56 last-link-up-time=2024-08-23\
+      \ 12:53:56 link-downs=4\n\n10  RS  ;;; Link to\n        name=\"sfp-sfpplus10\"\
+      \ default-name=\"sfp-sfpplus10\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth10\" ifindex=18 id=11\
+      \ last-link-down-time=2024-08-23 12:53:27 last-link-up-time=2024-08-23 12:53:55\
+      \ link-downs=5\n\n11  R   ;;; Cust\n        name=\"sfp-sfpplus11\" default-name=\"\
+      sfp-sfpplus11\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578\
+      \ mac-address=AA:BB:CC:11:22:33 ifname=\"eth11\" ifindex=19 id=12 last-link-down-time=2024-08-29\
+      \ 20:57:53 last-link-up-time=2024-09-19 23:00:35 link-downs=1\n\n12  X   ;;;\
+      \ Cust\n        name=\"sfp-sfpplus12\" default-name=\"sfp-sfpplus12\" type=\"\
+      ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth12\" ifindex=20 id=13 link-downs=0\n\n13  X   name=\"sfp28-1\"\
+      \ default-name=\"sfp28-1\" type=\"ether\" mtu=9216 actual-mtu=9216 l2mtu=9216\
+      \ max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33 ifname=\"eth13\" ifindex=21 id=14\
+      \ link-downs=0\n\n14  X   name=\"sfp28-2\" default-name=\"sfp28-2\" type=\"\
+      ether\" mtu=9216 actual-mtu=9216 l2mtu=9216 max-l2mtu=9578 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"eth14\" ifindex=22 id=15 link-downs=0\n\n15  R   ;;; Loopback\n \
+      \       name=\"Lo0\" type=\"bridge\" mtu=auto actual-mtu=1500 l2mtu=65535 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"br0\" ifindex=24 id=23 last-link-up-time=2024-07-23 10:13:19 link-downs=0\n\
+      \n16  R   ;;; INET Loopback\n        name=\"Lo1\" type=\"bridge\" mtu=auto actual-mtu=1500\
+      \ l2mtu=65535 vrf=INET mac-address=AA:BB:CC:11:22:33 ifname=\"br1\" ifindex=36\
+      \ id=27 last-link-up-time=2024-07-23 10:19:01 link-downs=0\n\n17  R   ;;; Link\
+      \ to\n        name=\"bond1\" type=\"bond\" mtu=1500 actual-mtu=1500 l2mtu=9216\
+      \ mac-address=AA:BB:CC:11:22:33 ifname=\"bond24\" ifindex=23 id=24 last-link-down-time=2024-08-23\
+      \ 12:53:27 last-link-up-time=2024-08-23 12:53:55 link-downs=3\n\n18  R   name=\"\
+      pppoe-out1\" type=\"pppoe-out\" mtu=1400 actual-mtu=1400 ifname=\"ppp25889\"\
+      \ ifindex=25948 id=20 last-link-down-time=2024-10-08 12:36:57 last-link-up-time=2024-10-08\
+      \ 12:39:16 link-downs=7208\n\n19  R   ;;; MGMT\n        name=\"vlan1@bond1\"\
+      \ type=\"vlan\" mtu=1574 actual-mtu=1574 l2mtu=9212 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"vlan25\" ifindex=27 id=25 last-link-down-time=2024-08-23 12:53:27\
+      \ last-link-up-time=2024-08-23 12:53:55 link-downs=3\n\n20  R   ;;; INET\n \
+      \       name=\"vlan2@bond1\" type=\"vlan\" mtu=1574 actual-mtu=1574 l2mtu=9212\
+      \ vrf=INET mac-address=AA:BB:CC:11:22:33 ifname=\"vlan26\" ifindex=28 id=26\
+      \ last-link-down-time=2024-08-23 12:53:27 last-link-up-time=2024-08-23 12:53:55\
+      \ link-downs=3\n\n21  R   ;;; MGMT Uplink YDCE-M1\n        name=\"vlan10@vlan975@sfp-sfpplus1\"\
+      \ type=\"vlan\" mtu=1574 actual-mtu=1574 l2mtu=9208 mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"vlan22\" ifindex=33 id=22 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\
+      \n22  R   ;;; INET: IX\n        name=\"vlan11@vlan975@sfp-sfpplus1\" type=\"\
+      vlan\" mtu=1500 actual-mtu=1500 l2mtu=9208 vrf=INET mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"vlan21\" ifindex=31 id=21 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\
+      \n23  R   ;;; INET: IX\n        name=\"vlan12@vlan975@sfp-sfpplus1\" type=\"\
+      vlan\" mtu=1500 actual-mtu=1500 l2mtu=9208 vrf=INET mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"vlan29\" ifindex=38 id=29 last-link-up-time=2024-07-23 11:45:31 link-downs=0\n\
+      \n24  R   ;;; INET: IX\n        name=\"vlan111@sfp-sfpplus1\" type=\"vlan\"\
+      \ mtu=1500 actual-mtu=1500 l2mtu=9212 vrf=INET mac-address=AA:BB:CC:11:22:33\
+      \ ifname=\"vlan18\" ifindex=26 id=18 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\
+      \n25  R   ;;; Intercap\n        name=\"vlan975@sfp-sfpplus1\" type=\"vlan\"\
+      \ mtu=1500 actual-mtu=1500 l2mtu=9212 mac-address=AA:BB:CC:11:22:33 ifname=\"\
+      vlan16\" ifindex=25 id=16 last-link-up-time=2024-07-23 10:13:23 link-downs=0\n\
+      \n26  R   name=\"vlan4050@sfp-sfpplus11\" type=\"vlan\" mtu=9212 actual-mtu=9212\
+      \ l2mtu=9212 vrf=INET mac-address=AA:BB:CC:11:22:33 ifname=\"vlan30\" ifindex=239\
+      \ id=30 last-link-down-time=2024-08-29 20:57:53 last-link-up-time=2024-09-19\
+      \ 23:00:35 link-downs=1"
   interface vlan print detail:
     output: "Flags: X - disabled, R - running\n 0 R ;;; MGMT\n     name=\"vlan1@bond1\"\
       \ mtu=1574 l2mtu=9212 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto\
@@ -457,40 +455,40 @@ commands:
     help: execute the command "interface vlan print detail"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - "Flags: X - disabled, R - running\n 0 R ;;; CUST\n     name=\"vlan1@vlan602@interface\"\
-        \ mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto\
-        \ loop-protect=default loop-protect-status=off loop-protect-send-interval=5s\
-        \ loop-protect-disable-time=5m vlan-id=1 interface=vlan602@interface use-service-tag=no\n\
-        \n 1 R ;;; PPPoE Termination on BNGs\n     name=\"vlan6@bond1\" mtu=1508 l2mtu=8996\
-        \ mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
-        \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
-        \ vlan-id=6 interface=bond1 use-service-tag=no\n\n 2 R ;;; Cust\n     name=\"\
-        vlan10@vlan975@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
-        \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
-        \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=10 interface=vlan975@interface\
-        \ use-service-tag=no\n\n 3 R ;;; test pppoe\n     name=\"vlan11@bond1\" mtu=1500\
-        \ l2mtu=8996 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
-        \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
-        \ vlan-id=11 interface=bond1 use-service-tag=no\n\n 4 R ;;; Intercap\n   \
-        \  name=\"vlan11@vlan975@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
-        \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
-        \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=11 interface=vlan975@interface\
-        \ use-service-tag=no\n\n 5 R ;;; Intercap\n     name=\"vlan12@vlan975@interface\"\
-        \ mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto\
-        \ loop-protect=default loop-protect-status=off loop-protect-send-interval=5s\
-        \ loop-protect-disable-time=5m vlan-id=12 interface=vlan975@interface use-service-tag=no\n\
-        \n 6 R ;;; Carrier\n     name=\"vlan60@interface\" mtu=1600 l2mtu=8996 mac-address=AA:BB:CC:11:22:33\
-        \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
-        \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=60 interface=sfp-sfpplus1\
-        \ use-service-tag=no\n\n 7 R ;;; Carrier\n     name=\"vlan60@bond1\" mtu=1600\
-        \ l2mtu=8996 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
-        \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
-        \ vlan-id=60 interface=bond1 use-service-tag=no\n"
-      - "Flags: X - disabled, R - running\n 0 R ;;; CUST\nwho has a multiline comment\n\
-        \     name=\"vlan1@vlan602@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
-        \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
-        \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=1 interface=vlan602@interface\
-        \ use-service-tag=no\n"
+    - "Flags: X - disabled, R - running\n 0 R ;;; CUST\n     name=\"vlan1@vlan602@interface\"\
+      \ mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto\
+      \ loop-protect=default loop-protect-status=off loop-protect-send-interval=5s\
+      \ loop-protect-disable-time=5m vlan-id=1 interface=vlan602@interface use-service-tag=no\n\
+      \n 1 R ;;; PPPoE Termination on BNGs\n     name=\"vlan6@bond1\" mtu=1508 l2mtu=8996\
+      \ mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
+      \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
+      \ vlan-id=6 interface=bond1 use-service-tag=no\n\n 2 R ;;; Cust\n     name=\"\
+      vlan10@vlan975@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
+      \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
+      \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=10 interface=vlan975@interface\
+      \ use-service-tag=no\n\n 3 R ;;; test pppoe\n     name=\"vlan11@bond1\" mtu=1500\
+      \ l2mtu=8996 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
+      \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
+      \ vlan-id=11 interface=bond1 use-service-tag=no\n\n 4 R ;;; Intercap\n     name=\"\
+      vlan11@vlan975@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
+      \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
+      \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=11 interface=vlan975@interface\
+      \ use-service-tag=no\n\n 5 R ;;; Intercap\n     name=\"vlan12@vlan975@interface\"\
+      \ mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto\
+      \ loop-protect=default loop-protect-status=off loop-protect-send-interval=5s\
+      \ loop-protect-disable-time=5m vlan-id=12 interface=vlan975@interface use-service-tag=no\n\
+      \n 6 R ;;; Carrier\n     name=\"vlan60@interface\" mtu=1600 l2mtu=8996 mac-address=AA:BB:CC:11:22:33\
+      \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
+      \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=60 interface=sfp-sfpplus1\
+      \ use-service-tag=no\n\n 7 R ;;; Carrier\n     name=\"vlan60@bond1\" mtu=1600\
+      \ l2mtu=8996 mac-address=AA:BB:CC:11:22:33 arp=enabled arp-timeout=auto loop-protect=default\
+      \ loop-protect-status=off loop-protect-send-interval=5s loop-protect-disable-time=5m\
+      \ vlan-id=60 interface=bond1 use-service-tag=no\n"
+    - "Flags: X - disabled, R - running\n 0 R ;;; CUST\nwho has a multiline comment\n\
+      \     name=\"vlan1@vlan602@interface\" mtu=1574 l2mtu=8992 mac-address=AA:BB:CC:11:22:33\
+      \ arp=enabled arp-timeout=auto loop-protect=default loop-protect-status=off\
+      \ loop-protect-send-interval=5s loop-protect-disable-time=5m vlan-id=1 interface=vlan602@interface\
+      \ use-service-tag=no\n"
   interface wireguard peers print terse without-paging:
     output: '0 interface=wg1 name=peer2 public-key=dcKiJ0TpLjtSWZh3G0ILJ9cL56fTIfHBAsZsXdDIlFM=
       private-key= endpoint-address= endpoint-port=0 current-endpoint-address=192.168.93.254
@@ -537,11 +535,11 @@ commands:
     help: execute the command "ip dhcp-server lease print"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - "Flags: D - DYNAMIC\nColumns: ADDRESS, MAC-ADDRESS, HOST-NAME, SERVER, STATUS,\
-        \ LAST-SEEN\n #   ADDRESS     MAC-ADDRESS        HOST-NAME    SERVER   STATUS\
-        \  LAST-SEEN\n0  D 10.0.1.94   BA:98:2C:BD:EA:47  raspberrypi  Clients  bound\
-        \   3m6s     \n1  D 10.0.1.99   DE:6E:70:C0:CC:B2  raspberrypi  Clients  bound\
-        \   2m48s    \n"
+    - "Flags: D - DYNAMIC\nColumns: ADDRESS, MAC-ADDRESS, HOST-NAME, SERVER, STATUS,\
+      \ LAST-SEEN\n #   ADDRESS     MAC-ADDRESS        HOST-NAME    SERVER   STATUS\
+      \  LAST-SEEN\n0  D 10.0.1.94   BA:98:2C:BD:EA:47  raspberrypi  Clients  bound\
+      \   3m6s     \n1  D 10.0.1.99   DE:6E:70:C0:CC:B2  raspberrypi  Clients  bound\
+      \   2m48s    \n"
   ip dhcp-server lease print terse without-paging:
     output: " 0 D address=192.168.69.254 address-lists=\"\" server=*1 dhcp-option=\"\
       \" status=conflict expires-after=6m59s last-seen=35w12h24m42s active-address=192.168.69.254\
@@ -553,26 +551,26 @@ commands:
     help: execute the command "ip dhcp-server lease print terse without-paging"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - " 0   comment=UniFi1 address=10.124.3.199 mac-address=74:83:C2:36:5A:6E client-id=1:74:83:c2:36:5a:6e\
-        \ address-lists=\"\" server=dhcp1 dhcp-option=unifi status=bound expires-after=6m51s\
-        \ last-seen=3m9s active-address=10.164.1.199 active-mac-address=74:83:C2:36:5A:6E\
-        \ active-client-id=1:74:83:c2:36:5a:6e active-server=dhcp1 host-name=Unifi3B\
-        \ \n 1   comment=PC address=10.124.3.252 mac-address=00:50:56:88:80:EE client-id=1:0:50:56:88:80:ee\
-        \ address-lists=\"\" server=dhcp1 dhcp-option=\"\" status=bound expires-after=6m18s\
-        \ last-seen=3m42s active-address=10.164.1.252 active-mac-address=00:50:56:88:80:EE\
-        \ active-client-id=1:0:50:56:88:80:ee active-server=dhcp1 host-name=RSNC-CLIENT1-VM\
-        \ \n 2   comment=SPA address=10.124.3.222 mac-address=C4:0A:CB:BC:65:C8 address-lists=\"\
-        \" server=dhcp1 dhcp-option=\"\" status=bound expires-after=5m56s last-seen=4m4s\
-        \ active-address=10.164.1.222 active-mac-address=C4:0A:CB:BC:65:C8 active-client-id=1:c4:a:cb:bc:65:c8\
-        \ active-server=dhcp1 host-name=SPA122 \n 3 D address=10.0.1.56 mac-address=C2:39:B3:FA:81:D0\
-        \ client-id=1:c2:39:b3:fa:81:d0 address-lists= server=Clients dhcp-option=\
-        \ status=bound expires-after=2m38s last-seen=2m22s age=2h11m23s active-address=10.0.1.56\
-        \ active-mac-address=C2:39:B3:FA:81:D0 active-client-id=1:c2:39:b3:fa:81:d0\
-        \ active-server=Clients\n 4 D address=192.168.80.254 mac-address=AA:C1:AB:E3:F5:E8\
-        \ client-id=1:aa:c1:ab:e3:f5:e8 address-lists= server=dhcp1 dhcp-option= status=bound\
-        \ expires-after=16m59s last-seen=13m1s age=13m1s active-address=192.168.80.254\
-        \ active-mac-address=AA:C1:AB:E3:F5:E8 active-client-id=1:aa:c1:ab:e3:f5:e8\
-        \ active-server=dhcp1 class-id=udhcp 1.37.0"
+    - " 0   comment=UniFi1 address=10.124.3.199 mac-address=74:83:C2:36:5A:6E client-id=1:74:83:c2:36:5a:6e\
+      \ address-lists=\"\" server=dhcp1 dhcp-option=unifi status=bound expires-after=6m51s\
+      \ last-seen=3m9s active-address=10.164.1.199 active-mac-address=74:83:C2:36:5A:6E\
+      \ active-client-id=1:74:83:c2:36:5a:6e active-server=dhcp1 host-name=Unifi3B\
+      \ \n 1   comment=PC address=10.124.3.252 mac-address=00:50:56:88:80:EE client-id=1:0:50:56:88:80:ee\
+      \ address-lists=\"\" server=dhcp1 dhcp-option=\"\" status=bound expires-after=6m18s\
+      \ last-seen=3m42s active-address=10.164.1.252 active-mac-address=00:50:56:88:80:EE\
+      \ active-client-id=1:0:50:56:88:80:ee active-server=dhcp1 host-name=RSNC-CLIENT1-VM\
+      \ \n 2   comment=SPA address=10.124.3.222 mac-address=C4:0A:CB:BC:65:C8 address-lists=\"\
+      \" server=dhcp1 dhcp-option=\"\" status=bound expires-after=5m56s last-seen=4m4s\
+      \ active-address=10.164.1.222 active-mac-address=C4:0A:CB:BC:65:C8 active-client-id=1:c4:a:cb:bc:65:c8\
+      \ active-server=dhcp1 host-name=SPA122 \n 3 D address=10.0.1.56 mac-address=C2:39:B3:FA:81:D0\
+      \ client-id=1:c2:39:b3:fa:81:d0 address-lists= server=Clients dhcp-option= status=bound\
+      \ expires-after=2m38s last-seen=2m22s age=2h11m23s active-address=10.0.1.56\
+      \ active-mac-address=C2:39:B3:FA:81:D0 active-client-id=1:c2:39:b3:fa:81:d0\
+      \ active-server=Clients\n 4 D address=192.168.80.254 mac-address=AA:C1:AB:E3:F5:E8\
+      \ client-id=1:aa:c1:ab:e3:f5:e8 address-lists= server=dhcp1 dhcp-option= status=bound\
+      \ expires-after=16m59s last-seen=13m1s age=13m1s active-address=192.168.80.254\
+      \ active-mac-address=AA:C1:AB:E3:F5:E8 active-client-id=1:aa:c1:ab:e3:f5:e8\
+      \ active-server=dhcp1 class-id=udhcp 1.37.0"
   ip dns cache print terse without-paging:
     output: '0 type=A data=216.58.215.142 name=google.com ttl=1m44s
 
@@ -616,30 +614,30 @@ commands:
     help: execute the command "ip neighbor print detail"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - ' 0 interface=ether10,bridge_255_mgmt address=1.2.4.5 address4=1.2.4.5 address6=2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d
-        mac-address=12:34:56:78:90:AB identity="CLEAR" platform="MikroTik" version="7.15.1
-        (stable) 2024-06-07 12:49:11" unpack=none age=7s uptime=1d8h37m20s software-id="AAAA-BBBB"
-        board="RB450Gx4" ipv6=yes interface-name="ether1" system-description="MikroTik
-        RouterOS 7.15.1 (stable) 2024-06-07 12:49:11 RB450Gx4" system-caps=bridge,router
-        system-caps-enabled=router
+    - ' 0 interface=ether10,bridge_255_mgmt address=1.2.4.5 address4=1.2.4.5 address6=2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d
+      mac-address=12:34:56:78:90:AB identity="CLEAR" platform="MikroTik" version="7.15.1
+      (stable) 2024-06-07 12:49:11" unpack=none age=7s uptime=1d8h37m20s software-id="AAAA-BBBB"
+      board="RB450Gx4" ipv6=yes interface-name="ether1" system-description="MikroTik
+      RouterOS 7.15.1 (stable) 2024-06-07 12:49:11 RB450Gx4" system-caps=bridge,router
+      system-caps-enabled=router
 
-        '
-      - " 0 interface=ether2,bridge_local mac-address=12:34:56:78:90:AB identity=\"\
-        CLEAR\" platform=\"MikroTik\" version=\"6.49.14 (stable)\" unpack=none age=37s\
-        \ uptime=1d8h37m17s software-id=\"AAAA-BBBB\" board=\"RB750UPr2\" interface-name=\"\
-        ether1\" system-description=\"MikroTik RouterOS 6.49.14 (stable) RB750UPr2\"\
-        \ system-caps=bridge,router system-caps-enabled=router\n\n 1 interface=ether10,bridge_255_mgmt\
-        \ address=1.2.4.5 address4=1.2.4.5 address6=2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d\
-        \ mac-address=12:34:56:78:90:AC identity=\"Device_1\" platform=\"MikroTik\"\
-        \ version=\"7.15.1 (stable) 2024-06-07 12:49:11\" unpack=none age=7s uptime=1d8h37m20s\
-        \ software-id=\"CCCC-DDDD\" board=\"RB450Gx4\" ipv6=yes interface-name=\"\
-        ether1\" system-description=\"MikroTik RouterOS 7.15.1 (stable) 2024-06-07\
-        \ 12:49:11 RB450Gx4\" system-caps=bridge,router\n   system-caps-enabled=router\n\
-        \n 2 interface=eth1-vlan255,bridge_255_mgmt mac-address=12:34:56:78:90:AD\
-        \ identity=\"Device-2\" platform=\"MikroTik\" version=\"6.43.14 (long-term)\"\
-        \ unpack=none age=23s uptime=48w3d9h41m36s software-id=\"AAAA-ZZZZ\" board=\"\
-        RB1100x4\" ipv6=no interface-name=\"bridge_vlan255\" system-caps=\"\" system-caps-enabled=\"\
-        \"\n"
+      '
+    - " 0 interface=ether2,bridge_local mac-address=12:34:56:78:90:AB identity=\"\
+      CLEAR\" platform=\"MikroTik\" version=\"6.49.14 (stable)\" unpack=none age=37s\
+      \ uptime=1d8h37m17s software-id=\"AAAA-BBBB\" board=\"RB750UPr2\" interface-name=\"\
+      ether1\" system-description=\"MikroTik RouterOS 6.49.14 (stable) RB750UPr2\"\
+      \ system-caps=bridge,router system-caps-enabled=router\n\n 1 interface=ether10,bridge_255_mgmt\
+      \ address=1.2.4.5 address4=1.2.4.5 address6=2001:0db8:11a3:09d7:1f34:8a2e:07a0:765d\
+      \ mac-address=12:34:56:78:90:AC identity=\"Device_1\" platform=\"MikroTik\"\
+      \ version=\"7.15.1 (stable) 2024-06-07 12:49:11\" unpack=none age=7s uptime=1d8h37m20s\
+      \ software-id=\"CCCC-DDDD\" board=\"RB450Gx4\" ipv6=yes interface-name=\"ether1\"\
+      \ system-description=\"MikroTik RouterOS 7.15.1 (stable) 2024-06-07 12:49:11\
+      \ RB450Gx4\" system-caps=bridge,router\n   system-caps-enabled=router\n\n 2\
+      \ interface=eth1-vlan255,bridge_255_mgmt mac-address=12:34:56:78:90:AD identity=\"\
+      Device-2\" platform=\"MikroTik\" version=\"6.43.14 (long-term)\" unpack=none\
+      \ age=23s uptime=48w3d9h41m36s software-id=\"AAAA-ZZZZ\" board=\"RB1100x4\"\
+      \ ipv6=no interface-name=\"bridge_vlan255\" system-caps=\"\" system-caps-enabled=\"\
+      \"\n"
   ip route print detail:
     output: "Flags: X - disabled, A - active, D - dynamic, C - connect, S - static,\
       \ r - rip, b - bgp, o - ospf, m - mme, B - blackhole, U - unreachable, P - prohibit\n\
@@ -690,19 +688,19 @@ commands:
     help: execute the command "routing ospf interface print terse"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - '0 D address=1.1.1.1%vlan11@vlan975@sfp-sfpplus1 area=INET-v2 state=ptp network-type=ptp
-        cost=1400 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=1s
-        dead-interval=4s
+    - '0 D address=1.1.1.1%vlan11@vlan975@sfp-sfpplus1 area=INET-v2 state=ptp network-type=ptp
+      cost=1400 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=1s
+      dead-interval=4s
 
-        1 D address=1.1.1.1%vlan10@vlan975@sfp-sfpplus1 area=MGMT-v2 state=ptp network-type=ptp
-        cost=10 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=10s
-        dead-interval=40s
+      1 D address=1.1.1.1%vlan10@vlan975@sfp-sfpplus1 area=MGMT-v2 state=ptp network-type=ptp
+      cost=10 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=10s
+      dead-interval=40s
 
-        2 D address=1.1.1.1%Lo0 area=MGMT-v2 state=passive network-type=broadcast
-        cost=1 priority=128 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=10s
-        dead-interval=40s
+      2 D address=1.1.1.1%Lo0 area=MGMT-v2 state=passive network-type=broadcast cost=1
+      priority=128 use-bfd=no retransmit-interval=5s transmit-delay=1s hello-interval=10s
+      dead-interval=40s
 
-        '
+      '
   routing ospf neighbor print:
     output: " 0 instance=default router-id=89.188.172.2 address=89.188.172.81 interface=vlan68\
       \ priority=128 dr-address=0.0.0.0 backup-dr-address=0.0.0.0 state=\"Full\" state-changes=5\
@@ -731,31 +729,31 @@ commands:
     help: execute the command "system resource print"
     prompt: '[admin@{base_prompt}] >'
     output_variants:
-      - "                   uptime: 1d6h22m\n                  version: 6.48.7 (long-term)\n\
-        \               build-time: May/23/2023 05:27:08\n         factory-software:\
-        \ 6.44.6\n              free-memory: 45.5MiB\n             total-memory: 64.0MiB\n\
-        \                      cpu: MIPS 24Kc V7.4\n                cpu-count: 1\n\
-        \            cpu-frequency: 650MHz\n                 cpu-load: 1%\n      \
-        \     free-hdd-space: 3428.0KiB\n          total-hdd-space: 16.0MiB\n  write-sect-since-reboot:\
-        \ 1970\n         write-sect-total: 77652\n               bad-blocks: 0%\n\
-        \        architecture-name: mipsbe\n               board-name: hEX PoE lite\n\
-        \                 platform: MikroTik\n"
-      - "\t\t\t\t   uptime: 5w3d20m51s\n                  version: 7.12.2 (stable)\n\
-        \               build-time: Dec/20/2023 08:41:00\n         factory-software:\
-        \ 7.1\n              free-memory: 36.7MiB\n             total-memory: 192.0MiB\n\
-        \                      cpu: Common\n                cpu-count: 2\n       \
-        \     cpu-frequency: 2294MHz\n                 cpu-load: 53%\n           free-hdd-space:\
-        \ 69.8MiB\n          total-hdd-space: 89.2MiB\n  write-sect-since-reboot:\
-        \ 213432\n         write-sect-total: 213432\n        architecture-name: x86_64\n\
-        \               board-name: CHR\n                 platform: MikroTik\n"
-      - "                   uptime: 10w2d6h21m59s\n                  version: 7.12.2\
-        \ (stable)\n               build-time: Dec/20/2023 08:41:00\n         factory-software:\
-        \ 7.6\n              free-memory: 3704.1MiB\n             total-memory: 4032.0MiB\n\
-        \                      cpu: ARM64\n                cpu-count: 4\n        \
-        \         cpu-load: 36%\n           free-hdd-space: 104.4MiB\n          total-hdd-space:\
-        \ 128.0MiB\n  write-sect-since-reboot: 54120\n         write-sect-total: 291965\n\
-        \               bad-blocks: 0%\n        architecture-name: arm64\n       \
-        \        board-name: CCR2004-1G-12S+2XS\n                 platform: MikroTik\n"
+    - "                   uptime: 1d6h22m\n                  version: 6.48.7 (long-term)\n\
+      \               build-time: May/23/2023 05:27:08\n         factory-software:\
+      \ 6.44.6\n              free-memory: 45.5MiB\n             total-memory: 64.0MiB\n\
+      \                      cpu: MIPS 24Kc V7.4\n                cpu-count: 1\n \
+      \           cpu-frequency: 650MHz\n                 cpu-load: 1%\n         \
+      \  free-hdd-space: 3428.0KiB\n          total-hdd-space: 16.0MiB\n  write-sect-since-reboot:\
+      \ 1970\n         write-sect-total: 77652\n               bad-blocks: 0%\n  \
+      \      architecture-name: mipsbe\n               board-name: hEX PoE lite\n\
+      \                 platform: MikroTik\n"
+    - "\t\t\t\t   uptime: 5w3d20m51s\n                  version: 7.12.2 (stable)\n\
+      \               build-time: Dec/20/2023 08:41:00\n         factory-software:\
+      \ 7.1\n              free-memory: 36.7MiB\n             total-memory: 192.0MiB\n\
+      \                      cpu: Common\n                cpu-count: 2\n         \
+      \   cpu-frequency: 2294MHz\n                 cpu-load: 53%\n           free-hdd-space:\
+      \ 69.8MiB\n          total-hdd-space: 89.2MiB\n  write-sect-since-reboot: 213432\n\
+      \         write-sect-total: 213432\n        architecture-name: x86_64\n    \
+      \           board-name: CHR\n                 platform: MikroTik\n"
+    - "                   uptime: 10w2d6h21m59s\n                  version: 7.12.2\
+      \ (stable)\n               build-time: Dec/20/2023 08:41:00\n         factory-software:\
+      \ 7.6\n              free-memory: 3704.1MiB\n             total-memory: 4032.0MiB\n\
+      \                      cpu: ARM64\n                cpu-count: 4\n          \
+      \       cpu-load: 36%\n           free-hdd-space: 104.4MiB\n          total-hdd-space:\
+      \ 128.0MiB\n  write-sect-since-reboot: 54120\n         write-sect-total: 291965\n\
+      \               bad-blocks: 0%\n        architecture-name: arm64\n         \
+      \      board-name: CCR2004-1G-12S+2XS\n                 platform: MikroTik\n"
   tool profile:
     output: 'NAME                    CPU        USAGE
 
