@@ -441,8 +441,8 @@ commands:
       \    0       1 0129h14m Established\n"
     help: execute the command "display bgp peer ipv4"
     prompt:
-    - <{base_prompt}>
-    - '[{base_prompt}]'
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
     output_variants:
     - " BGP local router ID: 1.2.3.74\n Local AS number: 4259844944\n Total number\
       \ of peers: 3                 Peers in established state: 3\n\n  * - Dynamically\
@@ -467,8 +467,8 @@ commands:
       \ 0 packet(s)"
     help: execute the command "display link-aggregation member-port"
     prompt:
-    - <{base_prompt}>
-    - '[{base_prompt}]'
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
     output_variants:
     - "Flags: A -- LACP_Activity, B -- LACP_Timeout, C -- Aggregation, \n       D\
       \ -- Synchronization, E -- Collecting, F -- Distributing, \n       G -- Defaulted,\
