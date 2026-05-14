@@ -48,7 +48,7 @@ The following platforms are supported by SIMNOS. Each platform has been tested f
 | [extreme_exos](extreme_exos.md) | ✅ | ✅ | - | - | |
 | [extreme_slxos](extreme_slxos.md) | ✅ | ✅ | - | - | No enable mode (always privileged). New in v2.2.0 |
 | [fortinet](fortinet.md) | ✅ | ✅ | - | - | |
-| [hp_comware](hp_comware.md) | ✅ | ⚠️ | - | - | Netmiko sends `system-view` to enter config mode, but SIMNOS does not have this command. Show commands work normally. |
+| [hp_comware](hp_comware.md) | ✅ | ✅ | - | - | HP Comware convention: `<host>` user view, `[host]` system view. No separate enable mode; `system-view` enters system view (config). |
 | [hp_procurve](hp_procurve.md) | ✅ | ✅ | - | - | |
 | [huawei_smartax](huawei_smartax.md) | ✅ | ⚠️ | - | - | Has callable commands (`return`/`disable`) that dynamically change the prompt, causing Netmiko ReadTimeout. |
 | [huawei_vrp](huawei_vrp.md) | ✅ | ✅ | - | - | |

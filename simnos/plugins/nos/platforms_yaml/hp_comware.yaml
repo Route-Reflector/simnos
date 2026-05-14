@@ -1,25 +1,27 @@
 name: hp_comware
-initial_prompt: "{base_prompt}>"
-enable_prompt: "{base_prompt}#"
-config_prompt: "{base_prompt}(config)#"
+initial_prompt: "<{base_prompt}>"
+config_prompt: "[{base_prompt}]"
 commands:
-  enable:
+  system-view:
     output: null
-    new_prompt: "{base_prompt}#"
-    help: enter enable mode
-    prompt: "{base_prompt}>"
+    new_prompt: "[{base_prompt}]"
+    help: enter system view (HP Comware equivalent of configure terminal)
+    prompt: "<{base_prompt}>"
+  return:
+    output: null
+    new_prompt: "<{base_prompt}>"
+    help: return to user view from system view
+    prompt: "[{base_prompt}]"
+  quit:
+    exit: true
+    help: exit the terminal (user view only; from system view use `return` to go back to user view)
+    prompt: "<{base_prompt}>"
   screen-length disable:
     output: null
-    help: set the terminal width to maximum
+    help: set the terminal width to maximum (kept available in user view for netmiko `disable_paging` interop; real HP requires system view)
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
-  ex:
-    exit: true
-    help: exit the terminal
-    prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display vlan all:
     output: " VLAN ID: 1\n VLAN type: Static\n Route interface: Not configured\n Description:\
       \ VLAN 0001\n Name: VLAN 0001\n Tagged ports:   None\n Untagged ports: \n  \
@@ -37,8 +39,8 @@ commands:
       \     \n Untagged ports:\n    Ten-GigabitEthernet1/0/46     \n"
     help: execute the command "display vlan all"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display interface brief:
     output: 'The brief information of interface(s) under route mode:
 
@@ -85,8 +87,8 @@ commands:
       '
     help: execute the command "display interface brief"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display device manuinfo:
     output: "\n Slot 1 CPU 0:\n DEVICE_NAME          : SecPath F1000-AK115\n DEVICE_SERIAL_NUMBER\
       \ : 219801A1C39214Q00075\n MAC_ADDRESS          : 1451-7EB8-D4DE\n MANUFACTURING_DATE\
@@ -94,8 +96,8 @@ commands:
       \ supported on the specified power.\n"
     help: execute the command "display device manuinfo"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display lldp neighbor-information list:
     output: "Chassis ID : * -- -- Nearest nontpmr bridge neighbor\n             #\
       \ -- -- Nearest customer bridge neighbor\n             Default -- -- Nearest\
@@ -104,8 +106,8 @@ commands:
       \  SWITCH01\nXGE1/0/0/2      bcea-fa00-0033  Ten-GigabitEthernet2/0/47  SWITCH01\n"
     help: execute the command "display lldp neighbor-information list"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display arp:
     output: "  Type: S-Static   D-Dynamic   O-Openflow   R-Rule   M-Multiport  I-Invalid\n\
       \ IP address      MAC address    VLAN     Interface                Aging Type\n\
@@ -114,10 +116,10 @@ commands:
       \     2c23-3a40-7e18 1        XGE1/0/48                5     D\n"
     help: execute the command "display arp"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display ip routing-table:
-    output: "<HS125X>dis ip routing-table \n\nDestinations : 17604     Routes : 28601\n\
+    output: "Destinations : 17604     Routes : 28601\n\
       \nDestination/Mask    Proto  Pre  Cost         NextHop         Interface\n0.0.0.0/32\
       \          Direct 0    0            127.0.0.1       InLoop0\n9.72.47.0/24  \
       \      OSPF   150  1            172.16.43.2     Vlan1600\n                 \
@@ -149,8 +151,8 @@ commands:
       10.211.0.0/16       BGP    130  0          10.6.12.86        GE9/1/1.1114\n"
     help: execute the command "display ip routing-table"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display ip vpn-instance:
     output: "  Total VPN-Instances configured : 1\n  VPN-Instance Name           \
       \    RD                     Create time\n  red                             1:1\
@@ -160,14 +162,14 @@ commands:
       \                                2017/05/18 05:48:53\n"
     help: execute the command "display ip vpn-instance"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display clock:
     output: 10:09:00 UTC Fri 03/16/2015
     help: execute the command "display clock"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display link-aggregation verbose:
     output: "Loadsharing Type: Shar -- Loadsharing, NonS -- Non-Loadsharing\nPort\
       \ Status: S -- Selected, U -- Unselected\nFlags:  A -- LACP_Activity, B -- LACP_Timeout,\
@@ -182,8 +184,8 @@ commands:
       \  GE0/0/1          23      32768    7         0x8000, aaaa-bbbb-6485 {{ACDEF}}\n"
     help: execute the command "display link-aggregation verbose"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display vlan brief:
     output: "Brief information about all VLANs:\nSupported Minimum VLAN ID: 1\nSupported\
       \ Maximum VLAN ID: 4094\nDefault VLAN ID: 1\nVLAN ID   Name                \
@@ -202,8 +204,8 @@ commands:
       200       VLAN 0200\n500       VLAN 0500"
     help: execute the command "display vlan brief"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display lldp neighbor-information verbose:
     output: "LLDP neighbor-information of port 1[Ten-GigabitEthernet1/0/0/1]:\nLLDP\
       \ agent nearest-bridge:\n LLDP neighbor index : 1\n Update time         : 457\
@@ -286,8 +288,8 @@ commands:
       \ size         : 9216"
     help: execute the command "display lldp neighbor-information verbose"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display interface:
     output: "Vlan-interface2000\nCurrent state: UP\nLine protocol state: UP\nDescription:\
       \ Servers\nBandwidth: 10000000 kbps\nMaximum transmission unit: 1500\nInternet\
@@ -369,8 +371,8 @@ commands:
       \ carrier, 0 no carrier\n"
     help: execute the command "display interface"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display ip vpn-instance instance-name:
     output: "  VPN-Instance Name and Index : vpnb, 2\n  Route Distinguisher : 100:2\n\
       \  Interfaces : Vlan-interface20, FortyGigE1/0/53,\n               GigabitEthernet1/0/25\n\
@@ -378,8 +380,8 @@ commands:
       \ Targets :\n       222:2 111:1\n"
     help: execute the command "display ip vpn-instance instance-name"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display ip interface:
     output: "Route-Aggregation1.4 current state :UP\nLine protocol current state :UP\n\
       \ Internet Address is 10.1.1.1/24 Primary\nBroadcast address : 10.1.1.255\n\
@@ -399,8 +401,8 @@ commands:
       \                 0\nPolicy routing is enabled, using route map TO_INTERNET\n"
     help: execute the command "display ip interface"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display mac-address:
     output: "MAC ADDR       VLAN ID  STATE          PORT INDEX               AGING\
       \ TIME(s)\n0000-1111-2222 1        Learned        Bridge-Aggregation1      AGING\n\
@@ -409,8 +411,8 @@ commands:
       \       Learned        GigabitEthernet1/0/10    AGING\n"
     help: execute the command "display mac-address"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
   display counters bound interface:
     output: "Interface         Total (pkts)   Broadcast (pkts)   Multicast (pkts)\
       \  Err (pkts)\nGE1/0/1                 573422               2580           \
@@ -425,5 +427,5 @@ commands:
       \ More than 14 digits (7 digits for column \"Err\").\n       --: Not supported.\n"
     help: execute the command "display counters bound interface"
     prompt:
-    - "{base_prompt}>"
-    - "{base_prompt}#"
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
