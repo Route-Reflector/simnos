@@ -177,9 +177,6 @@ class TestPlatforms:
             "linux": "Linux-based, requires sudo -s for enable",
             "yamaha": "requires enable with secret",
         }
-        # hp_comware: config_mode() fails (system-view not available) AND netmiko
-        # cleanup after enable() also triggers config check, causing test failure.
-        skip_enable_platforms["hp_comware"] = "system-view unavailable, cleanup triggers config check"
         device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
         free_port: int = get_free_port()
         credentials: dict = {
