@@ -287,14 +287,15 @@ class TestCmdShell(TestCase):
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
 
     def test_default_silent_fallback_on_keyerror(self):
-        """Unknown `{placeholder}` in output triggers silent KeyError fallback.
+        """`KeyError` failure mode of `.format()` is silently logged.
 
-        Pins #162: `cmd_shell.default()` must not crash the shell session
-        when yaml output contains a brace pattern that `.format()` cannot
-        resolve. The runtime is intentionally lenient (silent log + raw
-        passthrough), in contrast to `tasks.render_template` which raises
-        RuntimeError at build time. The catch set is kept aligned with
-        `tasks.render_template` (`(KeyError, IndexError, ValueError)`).
+        Pins #162: `cmd_shell.default()` is intentionally lenient about
+        yaml format errors (silent log + raw passthrough), in contrast
+        to `tasks.render_template` which raises `RuntimeError` at build
+        time. The runtime catch set is kept aligned with the build-time
+        counterpart at `(KeyError, IndexError, ValueError)`, so both
+        paths cover the same `str.format()` failure modes; only the
+        action (raise vs silent) differs.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
@@ -306,15 +307,16 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_key_cmd")
         self.assertEqual(len(captured.output), 1)
-        assert any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output)
+        self.assertTrue(any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {unknown_key}")
 
     def test_default_silent_fallback_on_valueerror(self):
-        """Malformed brace `{broken` in output triggers silent ValueError fallback.
+        """`ValueError` failure mode of `.format()` is silently logged.
 
-        Pins #162: covers the `ValueError` failure mode (a bare `{` with
-        no closing `}`). Without the silent-fallback `cmd_shell.default()`
-        would propagate the exception and break the shell session.
+        Pins #162: covers the malformed-brace path (a bare `{` with no
+        closing `}`). Same lenient-runtime contract as the keyerror case
+        — the catch set `(KeyError, IndexError, ValueError)` mirrors
+        `tasks.render_template`.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
@@ -326,16 +328,17 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_brace_cmd")
         self.assertEqual(len(captured.output), 1)
-        assert any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output)
+        self.assertTrue(any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {broken")
 
     def test_default_silent_fallback_on_indexerror(self):
-        """Positional placeholder `{}` / `{0}` in output triggers silent IndexError fallback.
+        """`IndexError` failure mode of `.format()` is silently logged.
 
-        Pins #162: covers the `IndexError` failure mode (a `{}` or `{N}`
-        placeholder against an empty positional-args tuple). Without the
-        silent-fallback the exception would propagate and break the shell
-        session.
+        Pins #162: covers the positional-placeholder path (`{}` / `{N}`
+        against an empty positional-args tuple). Same lenient-runtime
+        contract as the other two cases; together the three tests pin
+        each member of the catch set `(KeyError, IndexError, ValueError)`
+        shared with `tasks.render_template`.
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
@@ -347,7 +350,7 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_pos_cmd")
         self.assertEqual(len(captured.output), 1)
-        assert any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output)
+        self.assertTrue(any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {}")
 
     def test_default_command_new_prompt(self):

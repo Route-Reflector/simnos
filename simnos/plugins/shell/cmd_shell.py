@@ -197,18 +197,22 @@ class CMDShell(Cmd):
         if ret is not None:
             try:
                 ret = ret.format(base_prompt=self.base_prompt)
-            except (KeyError, IndexError, ValueError):
+            except (KeyError, IndexError, ValueError) as exc:
                 # Runtime shell is intentionally lenient: yaml format errors
                 # are logged but do not crash the shell session. The build-
                 # time counterpart `tasks.render_template` raises RuntimeError
                 # for the same situation; the asymmetry is "raise vs silent",
                 # but the catch set is kept aligned (`(KeyError, IndexError,
                 # ValueError)`) so both paths cover the same `str.format()`
-                # failure modes.
+                # failure modes. The yaml author is expected to use only
+                # `{base_prompt}` substitution; the `{x.attr}` / `{x[k]}` /
+                # format-spec mini-language is unsupported and may surface
+                # as `AttributeError` / `TypeError` outside this catch set.
                 log.error(
-                    "shell.default '%s' error formatting output for command '%s'",
+                    "shell.default '%s' error formatting output for command '%s': %r",
                     self.base_prompt,
                     [line],
+                    exc,
                 )
             self.writeline(ret)
         return False
