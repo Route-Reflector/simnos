@@ -877,3 +877,136 @@ total routes shown: 98
 **Prompt:**
 - paloalto_panos>
 
+### show interface all
+
+**Output:**
+```
+total configured hardware interfaces: 12
+name                    id    speed/duplex/state/fec        mac address
+--------------------------------------------------------------------------------
+ethernet1/8             23    1000/full/up/auto             00:1b:17:aa:bb:01
+ethernet1/13            28    1000/full/up/auto             00:1b:17:aa:bb:02
+ethernet1/14            29    1000/full/up/auto             00:1b:17:aa:bb:03
+ethernet1/19            34    10000/full/up/auto            00:1b:17:aa:bb:04
+ae1                     64    [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:40
+ae2                     65    [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:41
+ha1-a                   5     1000/full/up/ukn              8c:36:7a:aa:bb:b5
+ha1-b                   7     ukn/ukn/down((autoneg))/ukn   8c:36:7a:aa:bb:b4
+vlan                    1     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:01
+loopback                3     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:03
+tunnel                  4     [n/a]/[n/a]/up/[n/a]          00:1b:17:aa:bb:04
+hsci                    8     10000/full/up/ukn             64:7c:e8:aa:bb:08
+
+aggregation groups: 2
+ae1 members:
+  ethernet1/19 ethernet1/20
+ae2 members:
+  ethernet1/11
+
+
+total configured logical interfaces: 14
+
+name                      id    vsys zone             forwarding               tag    address
+
+------------------- ----- ---- ---------------- ------------------------ ------ ------------------
+ethernet1/8               23    3    ZONE_TECH        vr:vrf01                 0      192.0.2.1/28
+ethernet1/8.81            300   3    ZONE_TECH        vr:vrf01                 81     192.0.2.17/27
+ethernet1/13              28    5    ZONE_INET        vr:vrf02                 0      192.0.2.33/29
+                                                                                10.10.10.1/29
+ethernet1/13.388          298   2    ZONE_SDWAN       vr:vrf03                 388    192.0.2.65/27
+ethernet1/14              29    5    ZONE_INET        vr:vrf02                 0      192.0.2.97/28
+ae1                       64    2                     N/A                      0      N/A
+ae1.99                    267   2    ZONE_OTSC        vr:vrf03                 99     192.0.2.113/28
+ae5                       68    5                     vr:vrf02                 0      N/A
+ha1-a                     5     0                     ha                       0      198.51.100.1/30
+vlan                      1     1                     N/A                      0      N/A
+loopback                  3     1                     N/A                      0      N/A
+loopback.99               297   2    ZONE_CORP        vr:vrf03                 0      192.0.2.129/32
+tunnel                    4     1                     N/A                      0      N/A
+hsci                      8     0                     N/A                      0      198.51.100.5/30
+
+```
+
+**Help:** execute the command "show interface all"
+
+**Prompt:**
+- paloalto_panos>
+
+### show lacp aggregate-ethernet all
+
+**Output:**
+```
+**********************************************************************************
+AE group: ae1
+Members:                Bndl Rx state       Mux state  Sel state
+  ethernet1/19          yes  Current        Tx_Rx      Selected
+  ethernet1/20          yes  Current        Tx_Rx      Selected
+Status:           Enabled
+Mode:             Active
+Rate:             Slow
+Max-port:         8
+Fast-failover:    Disabled
+Pre-negotiation:  Enabled
+Local:            System Priority: 32768
+                  System MAC:      64:7c:e8:aa:bb:01
+                  Key:             64
+Partner:          System Priority: 65534
+                  System MAC:      0a:00:00:aa:bb:cc
+                  Key:             103
+Port State
+--------------------------------------------------------------------------------
+Interface                       Port
+                    Number Priority  Mode    Rate  Key      State
+--------------------------------------------------------------------------------
+ethernet1/19         34     32768    Active  Slow  64       0x3D
+Partner              3      1        Active  Slow  103      0x3D
+
+ethernet1/20         35     32768    Active  Slow  64       0x3D
+Partner              1003   1        Active  Slow  103      0x3D
+
+Port Counters
+--------------------------------------------------------------------------------
+Interface               LACPDUs         Marker      Marker Response       Error
+                    Sent     Recv     Sent Recv     Sent     Recv     Unknown  Illegal
+--------------------------------------------------------------------------------
+ethernet1/19         100      100      0    0        0        0        0        0
+ethernet1/20         100      100      0    0        0        0        0        0
+
+**********************************************************************************
+AE group: ae2
+Members:                Bndl Rx state       Mux state  Sel state
+  ethernet1/11          yes  Current        Tx_Rx      Selected
+Status:           Enabled
+Mode:             Active
+Rate:             Slow
+Max-port:         8
+Fast-failover:    Disabled
+Pre-negotiation:  Enabled
+Local:            System Priority: 32768
+                  System MAC:      64:7c:e8:aa:bb:01
+                  Key:             65
+Partner:          System Priority: 32768
+                  System MAC:      64:7c:e8:aa:bb:01
+                  Key:             67
+Port State
+--------------------------------------------------------------------------------
+Interface                       Port
+                    Number Priority  Mode    Rate  Key      State
+--------------------------------------------------------------------------------
+ethernet1/11         26     32768    Active  Slow  65       0x3D
+Partner              27     32768    Active  Slow  67       0x3D
+
+Port Counters
+--------------------------------------------------------------------------------
+Interface               LACPDUs         Marker      Marker Response       Error
+                    Sent     Recv     Sent Recv     Sent     Recv     Unknown  Illegal
+--------------------------------------------------------------------------------
+ethernet1/11         100      100      0    0        0        0        0        0
+
+```
+
+**Help:** execute the command "show lacp aggregate-ethernet all"
+
+**Prompt:**
+- paloalto_panos>
+

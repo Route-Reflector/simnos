@@ -935,3 +935,85 @@ Allocation statistics for MSG buffer pool:
 - hp_procurve>
 - hp_procurve#
 
+### show version
+
+**Output:**
+```
+Aruba Operating System Software.
+ArubaOS (MODEL: 310), Version 01.01.0.1 SSR
+Website: http://www.arubanetworks.com
+(c) Copyright 2001 Hewlett Packard Enterprise Development LP.
+Compiled on 2001-01-01 at 01:01:01 UTC (build 00001) by jenkins
+FIPS Mode :disabled
+
+AP uptime is 01 hours 01 minutes 01 seconds
+Reboot Time and Cause: AP rebooted caused by cold HW reset(power loss)
+
+```
+
+**Help:** execute the command "show version"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show vsf detail
+
+**Output:**
+```
+VSF Domain ID    : 1
+ MAC Address      : 94f128-aabbcc
+ VSF Topology     : Chain
+ VSF Status       : Active
+ Uptime           : 134d 1h 55m
+ VSF MAD          : None
+ VSF Port Speed   : 10G
+ Software Version : WC.16.11.0021
+
+Name             : SWITCH-1
+Contact          : Network Team (email@address.com)
+Location         : Datacenter Generic
+
+
+Member ID        : 1
+MAC Address      : 94f128-aabbcd
+Type             : JL256A
+Model            : Aruba JL256A 2930F-48G-PoE+-4SFP+ Switch
+Priority         : 255
+Status           : Commander
+ROM Version      : WC.16.01.0010
+Serial Number    : SN0000001A
+Uptime           : 134d 1h 55m
+CPU Utilization  : 10%
+Memory - Total   : 333,513,216 bytes
+Free             : 212,192,464 bytes
+VSF Links -
+#1 : Active, Peer member 2
+#2 : Inactive
+
+
+
+Member ID        : 2
+MAC Address      : 94f128-aabbce
+Type             : JL256A
+Model            : Aruba JL256A 2930F-48G-PoE+-4SFP+ Switch
+Priority         : 128
+Status           : Standby
+ROM Version      : WC.16.01.0010
+Serial Number    : SN0000002A
+Uptime           : 134d 1h 55m
+CPU Utilization  : 4%
+Memory - Total   : 333,513,216 bytes
+Free             : 227,871,324 bytes
+VSF Links -
+#1 : Active, Peer member 1
+#2 : Inactive
+
+```
+
+**Help:** execute the command "show vsf detail"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+

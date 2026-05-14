@@ -946,3 +946,241 @@ TO_R4                 0.0.0.0         0.0.0.0         0.0.0.0         Up   PToP
 - alcatel_sros>
 - alcatel_sros#
 
+### ping
+
+**Output:**
+```
+PING 10.252.117.158 56 data bytes
+64 bytes from 10.252.117.158: icmp_seq=1 ttl=255 time=1.93ms.
+64 bytes from 10.252.117.158: icmp_seq=2 ttl=255 time=1.89ms.
+64 bytes from 10.252.117.158: icmp_seq=3 ttl=255 time=1.80ms.
+64 bytes from 10.252.117.158: icmp_seq=4 ttl=255 time=1.84ms.
+64 bytes from 10.252.117.158: icmp_seq=5 ttl=255 time=1.70ms.
+
+---- 10.252.117.158 PING Statistics ----
+5 packets transmitted, 5 packets received, 0.00% packet loss
+round-trip min = 1.70ms, avg = 1.83ms, max = 1.93ms, stddev = 0.079ms
+
+```
+
+**Help:** execute the command "ping"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show lag port
+
+**Output:**
+```
+
+===============================================================================
+Lag Port States
+LACP Status: e - Enabled, d - Disabled
+===============================================================================
+Lag-id Port-id        Adm   Act/     Opr   Primary Sub-group      Forced Prio
+                            Stdby
+-------------------------------------------------------------------------------
+5(d)   1/1/15         up    active   down  yes     1              -      32768
+       1/1/16         up    active   down          2              -      32768
+10(e)  1/1/1          down  active   down  yes     1              -      32768
+11(d)  1/1/2          up    active   down  yes     1              -      32768
+12(d)  1/1/3          up    active   down  yes     1              -      32768
+13(d)  1/1/4          up    active   down  yes     1              -      32768
+14(d)  1/1/5          up    active   down  yes     1              -      32768
+15(d)  1/1/6          up    active   down  yes     1              -      32768
+16(d)  1/1/7          up    active   down  yes     1              -      32768
+17(d)  1/1/8          up    active   down  yes     1              -      32768
+18(d)  1/1/9          up    active   down  yes     1              -      32768
+19(e)  1/1/10         up    active   down  yes     1              -      32768
+20(d)  1/1/12         up    active   down  yes     1              -      32768
+51(d)  1/1/13         up    active   down  yes     1              -      32768
+       1/1/14         up    active   down          1              -      32768
+52(d)  1/1/18         up    active   down  yes     1              -      32768
+53(d)  1/1/19         up    active   down  yes     1              -      32768
+54(d)  1/1/20         down  active   down  yes     1              -      32768
+115(e) 3/2/2          up    active   up    yes     2              -      32768
+       7/2/3          up    standby  down          1              -      32768
+116(e) esat-1/1/6     up    active   up    yes     1              -      32768
+       esat-2/1/6     up    standby  down          2              -      32768
+120(e) 2/1/13         up    active   up    yes     1              -      32768
+       3/1/4          up    standby  down          2              -      32768
+121(e) 3/2/6          up    standby  down  yes     1              -      32768
+       8/1/5          up    active   up            2              -      32768
+122(e) A/6            up    standby  down  yes     1              -      32768
+       B/5            up    active   up            2              -      32768
+===============================================================================
+
+```
+
+**Help:** execute the command "show lag port"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show port description
+
+**Output:**
+```
+===============================================================================
+Port Descriptions on Slot 1
+===============================================================================
+Port Id        Description
+-------------------------------------------------------------------------------
+1/1/1          some_gig1_test
+1/1/2          some2_gig1_test
+1/1/3          some3_gig1_test
+1/1/4          some4_gig1_test
+1/1/5          some5_gig1_test
+1/1/6          10/100/Gig Ethernet SFP
+1/1/7          10/100/Gig Ethernet SFP
+1/1/8          10/100/Gig Ethernet SFP
+1/1/9          10/100/Gig Ethernet SFP
+1/1/10         10/100/Gig Ethernet SFP
+1/1/11         10/100/Gig Ethernet SFP
+1/1/12         TEST_AGG_TOGGLE
+1/1/13         TNET_RAN_TEST1
+1/1/14         TNET_RAN_TEST2
+1/1/15         test 1
+1/1/16         test 2
+1/1/17         TEST_3
+1/1/18         TNET_RAN_TEST3
+1/1/19         TNET_RAN_TEST4
+1/1/20         TNET_RAN_TEST5
+1/5/1          10-Gig Ethernet
+1/5/2          10-Gig Ethernet
+
+===============================================================================
+Port Descriptions on Slot A
+===============================================================================
+Port Id        Description
+-------------------------------------------------------------------------------
+A/1            10/100 Ethernet TX
+===============================================================================
+
+===============================================================================
+Port Descriptions on Satellite esat-3
+===============================================================================
+Port Id        Description
+-------------------------------------------------------------------------------
+esat-3/1/21    TNET_RAN_TEST9999
+===============================================================================
+
+
+```
+
+**Help:** execute the command "show port description"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show service id 0 sap
+
+**Output:**
+```
+===============================================================================
+SAP(Summary), Service 24731
+===============================================================================
+PortId                          SvcId      Ing.  Ing.    Egr.  Egr.   Adm  Opr
+                                           QoS   Fltr    QoS   Fltr
+-------------------------------------------------------------------------------
+lag-54:950                      24731      1     none    1     none   Up   Down
+-------------------------------------------------------------------------------
+Number of SAPs : 1
+-------------------------------------------------------------------------------
+===============================================================================
+
+```
+
+**Help:** execute the command "show service id 0 sap"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show service id interface
+
+**Output:**
+```
+
+==============================================================================
+Interface Table
+==============================================================================
+Interface-Name                   Adm       Opr(v4/v6)  Type    Port/SapId
+   IP-Address                                                  PfxState
+------------------------------------------------------------------------------
+Gigaesat-1/1/5:7                 Up        Up/Up       IES     esat-1/1/5:7.0
+   10.42.255.73/30                                            n/a
+   fe80:a8:2:90::8d5/126                                       PREFERRED
+   fe80::22e0:9cff:fe20:d401/64                                PREFERRED
+------------------------------------------------------------------------------
+Interfaces : 1
+==============================================================================
+
+```
+
+**Help:** execute the command "show service id interface"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show service service-name-using
+
+**Output:**
+```
+===============================================================================
+Services By Name
+===============================================================================
+Service Name                                                 Type   Service Id
+-------------------------------------------------------------------------------
+ROYAL_CUSTOMER:3581                                           Vprn         1200
+LLC:3293                                                      Vprn         1246
+OLD_UNIVERSE AC                                               Ies          1042
+OLD_M PUB UNION                                               Ies          1041
+TLS_TCE-AC                                                    Ies          1170
+ABC_MPLS:6666                                                 Vprn         1171
+_tmnx_InternalVplsService                                     intV*  2147487649
+_tmnx_InternalSatVpls                                         Vpls   2148667979
+_tmnx_InternalSatVprn                                         Vprn   2141237980
+-------------------------------------------------------------------------------
+Matching Services : 9
+===============================================================================
+
+```
+
+**Help:** execute the command "show service service-name-using"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+
+### show service service-using
+
+**Output:**
+```
+
+===============================================================================
+Services [vpls]  Customer 4020
+===============================================================================
+ServiceId    Type      Adm  Opr  CustomerId Service Name
+-------------------------------------------------------------------------------
+24728        VPLS      Up   Down 4020       testservice1
+24729        VPLS      Up   Up   4020       test-service2
+24730        VPLS      Up   Down 4020       testservice3
+24731        VPLS      Up   Down 4020       testservice5
+-------------------------------------------------------------------------------
+Matching Services : 4
+-------------------------------------------------------------------------------
+===============================================================================
+
+```
+
+**Help:** execute the command "show service service-using"
+
+**Prompt:**
+- alcatel_sros>
+- alcatel_sros#
+

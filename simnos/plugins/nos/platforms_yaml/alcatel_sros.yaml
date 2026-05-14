@@ -651,3 +651,414 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  ping:
+    output: 'PING 10.252.117.158 56 data bytes
+
+      64 bytes from 10.252.117.158: icmp_seq=1 ttl=255 time=1.93ms.
+
+      64 bytes from 10.252.117.158: icmp_seq=2 ttl=255 time=1.89ms.
+
+      64 bytes from 10.252.117.158: icmp_seq=3 ttl=255 time=1.80ms.
+
+      64 bytes from 10.252.117.158: icmp_seq=4 ttl=255 time=1.84ms.
+
+      64 bytes from 10.252.117.158: icmp_seq=5 ttl=255 time=1.70ms.
+
+
+      ---- 10.252.117.158 PING Statistics ----
+
+      5 packets transmitted, 5 packets received, 0.00% packet loss
+
+      round-trip min = 1.70ms, avg = 1.83ms, max = 1.93ms, stddev = 0.079ms
+
+      '
+    help: execute the command "ping"
+    prompt: &id001
+    - '{base_prompt}>'
+    - '{base_prompt}#'
+    output_variants:
+    - 'PING 10.30.99.22 56 data bytes
+
+      Request timed out. icmp_seq=1.
+
+      Request timed out. icmp_seq=2.
+
+      Request timed out. icmp_seq=3.
+
+      Request timed out. icmp_seq=4.
+
+      Request timed out. icmp_seq=5.
+
+
+      ---- 201.30.99.22 PING Statistics ----
+
+      5 packets transmitted, 5 packets bounced, 0 packets received, 100% packet loss
+
+      '
+    - 'PING 10.39.119.105 56 data bytes
+
+      Request timed out. icmp_seq=1.
+
+      Request timed out. icmp_seq=2.
+
+      Request timed out. icmp_seq=3.
+
+      Request timed out. icmp_seq=4.
+
+      Request timed out. icmp_seq=5.
+
+
+      ---- 10.39.119.105 PING Statistics ----
+
+      5 packets transmitted, 0 packets received, 100% packet loss
+
+      '
+    - 'PING 10.42.255.74 56 data bytes
+
+      !!!!!
+
+      ---- 10.42.255.74 PING Statistics ----
+
+      5 packets transmitted, 5 packets received, 0.00% packet loss
+
+      round-trip min = 2.36ms, avg = 2.39ms, max = 2.42ms, stddev = 0.025ms
+
+      '
+    - 'PING 10.30.99.22 56 data bytes
+
+
+      ---- 10.30.99.22 PING Statistics ----
+
+      5 packets transmitted, 5 packets bounced, 0 packets received, 100% packet loss
+
+      '
+    - 'PING 10.53.16.134 56 data bytes
+
+      ...!!.!.
+
+      ---- 189.53.16.134 PING Statistics ----
+
+      5 packets transmitted, 0 packets received, 3 duplicates
+
+      '
+    - 'PING 10.39.119.105 56 data bytes
+
+      .....
+
+      ---- 10.39.119.105 PING Statistics ----
+
+      5 packets transmitted, 0 packets received, 100% packet loss
+
+      '
+    - 'PING 10.52.198.114 56 data bytes
+
+      Send failed. Source IP address is not local to the system
+
+      Send failed. Source IP address is not local to the system
+
+      Send failed. Source IP address is not local to the system
+
+      Send failed. Source IP address is not local to the system
+
+      Send failed. Source IP address is not local to the system
+
+
+      ---- 10.52.198.114 PING Statistics ----
+
+      5 packets transmitted, 0 packets received, 100% packet loss
+
+      '
+  show lag port:
+    output: "\n===============================================================================\n\
+      Lag Port States\nLACP Status: e - Enabled, d - Disabled\n===============================================================================\n\
+      Lag-id Port-id        Adm   Act/     Opr   Primary Sub-group      Forced Prio\n\
+      \                            Stdby\n-------------------------------------------------------------------------------\n\
+      5(d)   1/1/15         up    active   down  yes     1              -      32768\n\
+      \       1/1/16         up    active   down          2              -      32768\n\
+      10(e)  1/1/1          down  active   down  yes     1              -      32768\n\
+      11(d)  1/1/2          up    active   down  yes     1              -      32768\n\
+      12(d)  1/1/3          up    active   down  yes     1              -      32768\n\
+      13(d)  1/1/4          up    active   down  yes     1              -      32768\n\
+      14(d)  1/1/5          up    active   down  yes     1              -      32768\n\
+      15(d)  1/1/6          up    active   down  yes     1              -      32768\n\
+      16(d)  1/1/7          up    active   down  yes     1              -      32768\n\
+      17(d)  1/1/8          up    active   down  yes     1              -      32768\n\
+      18(d)  1/1/9          up    active   down  yes     1              -      32768\n\
+      19(e)  1/1/10         up    active   down  yes     1              -      32768\n\
+      20(d)  1/1/12         up    active   down  yes     1              -      32768\n\
+      51(d)  1/1/13         up    active   down  yes     1              -      32768\n\
+      \       1/1/14         up    active   down          1              -      32768\n\
+      52(d)  1/1/18         up    active   down  yes     1              -      32768\n\
+      53(d)  1/1/19         up    active   down  yes     1              -      32768\n\
+      54(d)  1/1/20         down  active   down  yes     1              -      32768\n\
+      115(e) 3/2/2          up    active   up    yes     2              -      32768\n\
+      \       7/2/3          up    standby  down          1              -      32768\n\
+      116(e) esat-1/1/6     up    active   up    yes     1              -      32768\n\
+      \       esat-2/1/6     up    standby  down          2              -      32768\n\
+      120(e) 2/1/13         up    active   up    yes     1              -      32768\n\
+      \       3/1/4          up    standby  down          2              -      32768\n\
+      121(e) 3/2/6          up    standby  down  yes     1              -      32768\n\
+      \       8/1/5          up    active   up            2              -      32768\n\
+      122(e) A/6            up    standby  down  yes     1              -      32768\n\
+      \       B/5            up    active   up            2              -      32768\n\
+      ===============================================================================\n"
+    help: execute the command "show lag port"
+    prompt: *id001
+    output_variants:
+    - "\n===============================================================================\n\
+      Lag Port States\nLACP Status: e - Enabled, d - Disabled\n===============================================================================\n\
+      Name\nId     Port-id         Adm   Act/     Opr   Primary Sub-group     Forced\
+      \ Prio\n                             Stdby\n-------------------------------------------------------------------------------\n\
+      lag-1\n1(e)   1/1/1           down  active   down  yes     1             - \
+      \     32768\nlag-2\n2(e)   1/1/2           up    active   up    yes     1  \
+      \           -      32768\nlag-3\n3(d)   1/1/3           up    active   up  \
+      \  yes     1             -      32768\nlag-4\n4(d)   1/1/4           up    active\
+      \   up    yes     1             -      32768\nlag-5\n5(d)   1/1/5          \
+      \ up    active   up    yes     1             -      32768\nlag-6\n6(d)   1/1/6\
+      \           up    active   up    yes     1             -      32768\nlag-7\n\
+      7(d)   1/1/7           up    active   up    yes     1             -      32768\n\
+      lag-8\n8(d)   1/1/8           up    active   up    yes     1             - \
+      \     32768\nlag-9\n9(d)   1/1/9           up    active   up    yes     1  \
+      \           -      32768\nlag-10\n10(d)  1/1/10          up    active   up \
+      \   yes     1             -      32768\nlag-11\n11(e)  1/1/11          up  \
+      \  active   up    yes     1             -      32768\nlag-12\n12(d)  1/1/12\
+      \          up    active   up    yes     1             -      32768\nlag-13\n\
+      13(d)  1/1/13          up    active   up    yes     1             -      32768\n\
+      lag-14\n14(d)  1/1/14          up    active   up    yes     1             -\
+      \      32768\nlag-15\n15(e)  1/1/15          up    active   up    yes     1\
+      \             -      32768\nlag-16\n16(e)  1/1/16          up    active   up\
+      \    yes     1             -      32768\nlag-17\n17(d)  1/1/17          up \
+      \   active   up    yes     1             -      32768\nlag-18\n18(d)  1/1/18\
+      \          up    active   up    yes     1             -      32768\nlag-19\n\
+      19(d)  1/1/19          up    active   up    yes     1             -      32768\n\
+      lag-20\n20(e)  1/1/20          up    active   up    yes     1             -\
+      \      32768\nlag-21\n21(e)  1/1/21          up    active   up    yes     1\
+      \             -      32768\nlag-22\n22(d)  1/1/22          up    active   up\
+      \    yes     1             -      32768\nlag-23\n23(d)  1/1/23          up \
+      \   active   up    yes     1             -      32768\nlag-24\n24(e)  1/1/24\
+      \          up    active   up    yes     1             -      32768\nlag-25\n\
+      25(d)  1/1/25          up    active   up    yes     1             -      32768\n\
+      lag-26\n26(d)  1/1/26          up    active   up    yes     1             -\
+      \      32768\nlag-27\n27(e)  1/1/27          up    active   up    yes     1\
+      \             -      32768\nlag-28\n28(d)  1/1/28          up    active   up\
+      \    yes     1             -      32768\nlag-29\n29(d)  1/1/29          up \
+      \   active   up    yes     1             -      32768\nlag-30\n30(d)  1/1/30\
+      \          up    active   up    yes     1             -      32768\nlag-31\n\
+      31(e)  1/1/31          up    active   up    yes     1             -      32768\n\
+      lag-32\n32(d)  1/1/32          up    active   up    yes     1             -\
+      \      32768\nlag-33\n33(e)  1/1/33          up    active   up    yes     1\
+      \             -      32768\nlag-34\n34(d)  1/1/34          up    active   up\
+      \    yes     1             -      32768\nlag-35\n35(d)  1/1/35          up \
+      \   active   up    yes     1             -      32768\nlag-36\n36(d)  1/1/36\
+      \          up    active   up    yes     1             -      32768\nlag-37\n\
+      37(d)  1/1/37          up    active   up    yes     1             -      32768\n\
+      lag-38\n38(d)  1/1/38          up    active   up    yes     1             -\
+      \      32768\nlag-39\n39(d)  1/1/39          up    active   up    yes     1\
+      \             -      32768\nlag-40\n40(d)  1/1/40          up    active   up\
+      \    yes     1             -      32768\nlag-41\n41(d)  1/1/41          up \
+      \   active   up    yes     1             -      32768\nlag-42\n42(d)  1/1/42\
+      \          up    active   up    yes     1             -      32768\nlag-49\n\
+      49(e)  1/1/c49/1       up    active   up    yes     1             -      32768\n\
+      lag-51\n51(e)  1/1/c51/1       up    active   up    yes     1             -\
+      \      32768\nlag-52\n52(e)  1/1/c52/1       up    active   up    yes     1\
+      \             -      32768\nlag-64\n64(e)  1/1/45          up    active   up\
+      \    yes     1             -      32768\n       1/1/46          up    active\
+      \   up            1             -      32768\n       1/1/47          up    active\
+      \   up            1             -      32768\n       1/1/48          up    active\
+      \   up            1             -      32768\n===============================================================================\n"
+  show port description:
+    output: '===============================================================================
+
+      Port Descriptions on Slot 1
+
+      ===============================================================================
+
+      Port Id        Description
+
+      -------------------------------------------------------------------------------
+
+      1/1/1          some_gig1_test
+
+      1/1/2          some2_gig1_test
+
+      1/1/3          some3_gig1_test
+
+      1/1/4          some4_gig1_test
+
+      1/1/5          some5_gig1_test
+
+      1/1/6          10/100/Gig Ethernet SFP
+
+      1/1/7          10/100/Gig Ethernet SFP
+
+      1/1/8          10/100/Gig Ethernet SFP
+
+      1/1/9          10/100/Gig Ethernet SFP
+
+      1/1/10         10/100/Gig Ethernet SFP
+
+      1/1/11         10/100/Gig Ethernet SFP
+
+      1/1/12         TEST_AGG_TOGGLE
+
+      1/1/13         TNET_RAN_TEST1
+
+      1/1/14         TNET_RAN_TEST2
+
+      1/1/15         test 1
+
+      1/1/16         test 2
+
+      1/1/17         TEST_3
+
+      1/1/18         TNET_RAN_TEST3
+
+      1/1/19         TNET_RAN_TEST4
+
+      1/1/20         TNET_RAN_TEST5
+
+      1/5/1          10-Gig Ethernet
+
+      1/5/2          10-Gig Ethernet
+
+
+      ===============================================================================
+
+      Port Descriptions on Slot A
+
+      ===============================================================================
+
+      Port Id        Description
+
+      -------------------------------------------------------------------------------
+
+      A/1            10/100 Ethernet TX
+
+      ===============================================================================
+
+
+      ===============================================================================
+
+      Port Descriptions on Satellite esat-3
+
+      ===============================================================================
+
+      Port Id        Description
+
+      -------------------------------------------------------------------------------
+
+      esat-3/1/21    TNET_RAN_TEST9999
+
+      ===============================================================================
+
+
+      '
+    help: execute the command "show port description"
+    prompt: *id001
+  show service id 0 sap:
+    output: "===============================================================================\n\
+      SAP(Summary), Service 24731\n===============================================================================\n\
+      PortId                          SvcId      Ing.  Ing.    Egr.  Egr.   Adm  Opr\n\
+      \                                           QoS   Fltr    QoS   Fltr\n-------------------------------------------------------------------------------\n\
+      lag-54:950                      24731      1     none    1     none   Up   Down\n\
+      -------------------------------------------------------------------------------\n\
+      Number of SAPs : 1\n-------------------------------------------------------------------------------\n\
+      ===============================================================================\n"
+    help: execute the command "show service id 0 sap"
+    prompt: *id001
+  show service id interface:
+    output: "\n==============================================================================\n\
+      Interface Table\n==============================================================================\n\
+      Interface-Name                   Adm       Opr(v4/v6)  Type    Port/SapId\n\
+      \   IP-Address                                                  PfxState\n------------------------------------------------------------------------------\n\
+      Gigaesat-1/1/5:7                 Up        Up/Up       IES     esat-1/1/5:7.0\n\
+      \   10.42.255.73/30                                            n/a\n   fe80:a8:2:90::8d5/126\
+      \                                       PREFERRED\n   fe80::22e0:9cff:fe20:d401/64\
+      \                                PREFERRED\n------------------------------------------------------------------------------\n\
+      Interfaces : 1\n==============================================================================\n"
+    help: execute the command "show service id interface"
+    prompt: *id001
+  show service service-name-using:
+    output: '===============================================================================
+
+      Services By Name
+
+      ===============================================================================
+
+      Service Name                                                 Type   Service
+      Id
+
+      -------------------------------------------------------------------------------
+
+      ROYAL_CUSTOMER:3581                                           Vprn         1200
+
+      LLC:3293                                                      Vprn         1246
+
+      OLD_UNIVERSE AC                                               Ies          1042
+
+      OLD_M PUB UNION                                               Ies          1041
+
+      TLS_TCE-AC                                                    Ies          1170
+
+      ABC_MPLS:6666                                                 Vprn         1171
+
+      _tmnx_InternalVplsService                                     intV*  2147487649
+
+      _tmnx_InternalSatVpls                                         Vpls   2148667979
+
+      _tmnx_InternalSatVprn                                         Vprn   2141237980
+
+      -------------------------------------------------------------------------------
+
+      Matching Services : 9
+
+      ===============================================================================
+
+      '
+    help: execute the command "show service service-name-using"
+    prompt: *id001
+  show service service-using:
+    output: '
+
+      ===============================================================================
+
+      Services [vpls]  Customer 4020
+
+      ===============================================================================
+
+      ServiceId    Type      Adm  Opr  CustomerId Service Name
+
+      -------------------------------------------------------------------------------
+
+      24728        VPLS      Up   Down 4020       testservice1
+
+      24729        VPLS      Up   Up   4020       test-service2
+
+      24730        VPLS      Up   Down 4020       testservice3
+
+      24731        VPLS      Up   Down 4020       testservice5
+
+      -------------------------------------------------------------------------------
+
+      Matching Services : 4
+
+      -------------------------------------------------------------------------------
+
+      ===============================================================================
+
+      '
+    help: execute the command "show service service-using"
+    prompt: *id001
+    output_variants:
+    - "===============================================================================\n\
+      Services \n===============================================================================\n\
+      ServiceId    Type      Adm  Opr  CustomerId Service Name\n-------------------------------------------------------------------------------\n\
+      1000         VPRN      Up   Up   1000       DELTA_CLIENT:581\n1046         VPRN\
+      \      Up   Up   128978     LIQ:8293\n1048         IES       Up   Up   123714\
+      \     BALD_JEAN\n1049         IES       Up   Down 121593     BOLD_PORT02\n1052\
+      \         IES       Up   Down 129882     SPACE1 AC\n1054         IES       Up\
+      \   Down 130273     SPACE1 COM SPACE2\n1061         IES       Up   Down 11402\
+      \      B0LD_MR_IUB_UNION\n1095         IES       Up   Down 117029     BUILD_VALR_1146ABC292\n\
+      -------------------------------------------------------------------------------\n\
+      Matching Services : 8\n-------------------------------------------------------------------------------\n\
+      ===============================================================================\n"
