@@ -286,6 +286,46 @@ class TestCmdShell(TestCase):
         shell.default("test")
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
 
+    def test_default_silent_fallback_on_keyerror(self):
+        """Unknown `{placeholder}` in output triggers silent KeyError fallback.
+
+        Pins #162: `cmd_shell.default()` must not crash the shell session
+        when yaml output contains a brace pattern that `.format()` cannot
+        resolve. The runtime is intentionally lenient (silent log + raw
+        passthrough), in contrast to `tasks.render_template` which raises
+        RuntimeError at build time.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_key_cmd"] = {
+            "output": "value is {unknown_key}",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_key_cmd")
+        assert any("Error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output)
+        shell.writeline.assert_called_once_with("value is {unknown_key}")
+
+    def test_default_silent_fallback_on_valueerror(self):
+        """Malformed brace `{broken` in output triggers silent ValueError fallback.
+
+        Pins #162: covers the second `.format()` failure mode (a bare `{`
+        with no closing `}`) which previously crashed the shell because
+        only KeyError was caught.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_brace_cmd"] = {
+            "output": "value is {broken",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_brace_cmd")
+        assert any("Error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output)
+        shell.writeline.assert_called_once_with("value is {broken")
+
     def test_default_command_new_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()

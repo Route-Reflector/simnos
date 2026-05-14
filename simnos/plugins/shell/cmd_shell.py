@@ -197,7 +197,16 @@ class CMDShell(Cmd):
         if ret is not None:
             try:
                 ret = ret.format(base_prompt=self.base_prompt)
-            except KeyError:
-                log.error("Error in formatting output")
+            except (KeyError, ValueError):
+                # Runtime shell is intentionally lenient: yaml format errors
+                # are logged but do not crash the shell session. The build-
+                # time counterpart `tasks.render_template` raises RuntimeError
+                # for the same situation; the asymmetry matches the context
+                # (interactive user session vs. CI-checked docs build).
+                log.error(
+                    "Error formatting output for command '%s' on '%s'",
+                    line,
+                    self.base_prompt,
+                )
             self.writeline(ret)
         return False
