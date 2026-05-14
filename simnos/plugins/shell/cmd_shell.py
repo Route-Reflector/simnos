@@ -204,9 +204,9 @@ class CMDShell(Cmd):
                 # for the same situation; the asymmetry matches the context
                 # (interactive user session vs. CI-checked docs build).
                 log.error(
-                    "Error formatting output for command '%s' on '%s'",
-                    line,
+                    "shell.default '%s' error formatting output for command '%s'",
                     self.base_prompt,
+                    [line],
                 )
             self.writeline(ret)
         return False

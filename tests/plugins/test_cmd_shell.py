@@ -304,7 +304,7 @@ class TestCmdShell(TestCase):
         }
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_key_cmd")
-        assert any("Error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output)
+        assert any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output)
         shell.writeline.assert_called_once_with("value is {unknown_key}")
 
     def test_default_silent_fallback_on_valueerror(self):
@@ -323,7 +323,7 @@ class TestCmdShell(TestCase):
         }
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_brace_cmd")
-        assert any("Error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output)
+        assert any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output)
         shell.writeline.assert_called_once_with("value is {broken")
 
     def test_default_command_new_prompt(self):
