@@ -496,12 +496,6 @@ commands:
       \       : 11%\n\tVSF Link 1               : Up, connected to peer member 1, link 1\n\tVSF Link 2\n"
     help: execute the command "show vsf detail"
     prompt: *id001
-  _default_:
-    output: '% Invalid input detected'
-    help: default output for unknown commands
-    prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
   show vrf:
     output: "VRF Configuration:\n------------------\nVRF Name   : default\n      \
       \  Interfaces             Status\n        -----------------------------\n  \
@@ -600,3 +594,9 @@ commands:
     - "VRF Configuration:\n------------------\nVRF Name   : default\n        Interfaces\
       \             Status\n        -----------------------------\n        vlan1 \
       \                   up\n        vlan61                   up\n"
+  _default_:
+    output: '% Invalid input detected'
+    help: default output for unknown commands
+    prompt:
+    - '{base_prompt}>'
+    - '{base_prompt}#'

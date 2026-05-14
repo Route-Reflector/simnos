@@ -1547,19 +1547,6 @@ Member ID                        : 2
 - aruba_aoscx>
 - aruba_aoscx#
 
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
-
-**Prompt:**
-- aruba_aoscx>
-- aruba_aoscx#
-
 ### show vrf
 
 **Output:**
@@ -1789,6 +1776,19 @@ VRF Name   : VOIP
 ```
 
 **Help:** execute the command "show vrf"
+
+**Prompt:**
+- aruba_aoscx>
+- aruba_aoscx#
+
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
 
 **Prompt:**
 - aruba_aoscx>
