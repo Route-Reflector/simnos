@@ -429,3 +429,78 @@ commands:
     prompt:
     - "<{base_prompt}>"
     - "[{base_prompt}]"
+  display bgp peer ipv4:
+    output: "\n BGP local router ID: 1.2.3.4\n Local AS number: 4259844162\n Total\
+      \ number of peers: 5                 Peers in established state: 3\n\n  * -\
+      \ Dynamically created peer\n  Peer                    AS  MsgRcvd  MsgSent OutQ\
+      \ PrefRcv Up/Down  State\n\n  12.123.123.189        100   101225   113460  \
+      \  0       1 0286h47m Established\n  2.114.82.34        100        0       \
+      \ 0    0       0 0129h15m Connect\n  2.114.82.38        100        0       \
+      \ 0    0       0 0129h15m Connect\n  2.114.82.42        100    45618    50575\
+      \    0       1 0129h14m Established\n  2.114.82.46        100    45619    56743\
+      \    0       1 0129h14m Established\n"
+    help: execute the command "display bgp peer ipv4"
+    prompt:
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
+    output_variants:
+    - " BGP local router ID: 1.2.3.74\n Local AS number: 4259844944\n Total number\
+      \ of peers: 3                 Peers in established state: 3\n\n  * - Dynamically\
+      \ created peer\n  Peer                    AS  MsgRcvd  MsgSent OutQ PrefRcv\
+      \ Up/Down  State\n\n  2.2.2.129        100  1058340  1101538    0       1 2998h36m\
+      \ Established\n  2.2.2.133        100  1058338  1124484    0       1 2998h36m\
+      \ Established\n  2.2.2.30         200     1180     1221    0       1 08:30:47\
+      \ Established"
+  display link-aggregation member-port:
+    output: "Flags: A -- LACP_Activity, B -- LACP_Timeout, C -- Aggregation,\n   \
+      \    D -- Synchronization, E -- Collecting, F -- Distributing,\n       G --\
+      \ Defaulted, H -- Expired\n\nGigabitEthernet4/0/36:\nAggregation Interface:\
+      \ Bridge-Aggregation123\nLocal:\n    Port Number: 74\n    Port Priority: 32768\n\
+      \    Oper-Key: 1\n    Flag: {{ACG}}\nRemote:\n    System ID: 0x8000, 0000-0000-0000\n\
+      \    Port Number: 0\n    Port Priority: 32768\n    Oper-Key: 0\n    Flag: {{EF}}\n\
+      Received LACP Packets: 0 packet(s)\nIllegal: 0 packet(s)\nSent LACP Packets:\
+      \ 0 packet(s)\n\nGigabitEthernet7/0/1:\nAggregation Interface: Bridge-Aggregation123\n\
+      Local:          \n    Port Number: 76\n    Port Priority: 32768\n    Oper-Key:\
+      \ 1\n    Flag: {{ACG}}\nRemote:\n    System ID: 0x8000, 0000-0000-0000\n   \
+      \ Port Number: 0\n    Port Priority: 32768\n    Oper-Key: 0\n    Flag: {{EF}}\n\
+      Received LACP Packets: 0 packet(s)\nIllegal: 0 packet(s)\nSent LACP Packets:\
+      \ 0 packet(s)"
+    help: execute the command "display link-aggregation member-port"
+    prompt:
+    - "<{base_prompt}>"
+    - "[{base_prompt}]"
+    output_variants:
+    - "Flags: A -- LACP_Activity, B -- LACP_Timeout, C -- Aggregation, \n       D\
+      \ -- Synchronization, E -- Collecting, F -- Distributing, \n       G -- Defaulted,\
+      \ H -- Expired\n\nTwenty-FiveGigE6/0/27: \nAggregate Interface: Bridge-Aggregation123\n\
+      Local: \n    Port Number: 1 \n    Port Priority: 32768 \n    Oper-Key: 2 \n\
+      \    Flag: {{ACDEF}}\nRemote: \n    System ID: 0x8000, aaaa-1111-bbbb \n   \
+      \ Port Number: 1 \n    Port Priority: 32768 \n    Oper-Key: 2 \n    Flag: {{ACDEF}}\n\
+      Received LACP Packets: 652111 packet(s) \nIllegal: 0 packet(s) \nSent LACP Packets:\
+      \ 652267 packet(s)\n\nTwenty-FiveGigE9/0/47: \nAggregate Interface: Bridge-Aggregation123\n\
+      Local:         \n    Port Number: 2 \n    Port Priority: 32768 \n    Oper-Key:\
+      \ 2 \n    Flag: {{ACDEF}}\nRemote: \n    System ID: 0x8000, cccc-dddd-2222\n\
+      \    Port Number: 2 \n    Port Priority: 32768 \n    Oper-Key: 2 \n    Flag:\
+      \ {{ACDEF}}\nReceived LACP Packets: 652108 packet(s) \nIllegal: 0 packet(s)\
+      \ \nSent LACP Packets: 652253 packet(s)\n\nTwenty-FiveGigE2/0/10: \nAggregate\
+      \ Interface: Bridge-Aggregation321\nLocal: \n    Port Number: 3 \n    Port Priority:\
+      \ 32768 \n    Oper-Key: 2 \n    Flag: {{ACDEF}}\nRemote: \n    System ID: 0x8000,\
+      \ tttt-zzzz-1122 \n    Port Number: 3 \n    Port Priority: 32768 \n    Oper-Key:\
+      \ 2 \n    Flag: {{ACDEF}}\nReceived LACP Packets: 652108 packet(s) \nIllegal:\
+      \ 0 packet(s) \nSent LACP Packets: 652244 packet(s)\n\nTwenty-FiveGigE1/0/56:\
+      \ \nAggregate Interface: Bridge-Aggregation321\nLocal: \n    Port Number: 4\
+      \ \n    Port Priority: 32768 \n    Oper-Key: 2 \n    Flag: {{ACDEF}}\nRemote:\
+      \ \n    System ID: 0x8000, zzzz-aaaa-cccc \n    Port Number: 4 \n    Port Priority:\
+      \ 32768 \n    Oper-Key: 2 \n    Flag: {{ACDEF}}\nReceived LACP Packets: 652104\
+      \ packet(s) \nIllegal: 0 packet(s) \nSent LACP Packets: 652237 packet(s)"
+    - "Flags: A -- LACP_Activity, B -- LACP_Timeout, C -- Aggregation, \n       D\
+      \ -- Synchronization, E -- Collecting, F -- Distributing, \n       G -- Defaulted,\
+      \ H -- Expired\n       \nFortyGigE1/0/10: \nAggregate Interface: Bridge-Aggregation11\n\
+      Local:         \n    Port Number: 37 \n    Port Priority: 32768 \n    Oper-Key:\
+      \ 2 \n    Flag: {{ACDEF}}\nRemote:        \n    System ID: 0x8000, 5c8a-3849-a0a0\
+      \ \n    Port Number: 256 \n    Port Priority: 32768 \n    Oper-Key: 1 \n   \
+      \ Flag: {{ACDEF}}\nReceived LACP Packets: 272834 packet(s) \nIllegal: 0 packet(s)\
+      \ \nSent LACP Packets: 136456 packet(s)\n\nFortyGigE1/0/25: \nAggregate Interface:\
+      \ Bridge-Aggregation25\nPort Number: 97 \nPort Priority: 32768\nOper-Key: 3\n\
+      \nFortyGigE1/0/26: \nAggregate Interface: Bridge-Aggregation25\nPort Number:\
+      \ 101 \nPort Priority: 32768\nOper-Key: 3"

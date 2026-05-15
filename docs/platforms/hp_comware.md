@@ -754,3 +754,78 @@ XGE6/0/52                46490              16009               7582           0
 - <hp_comware>
 - [hp_comware]
 
+### display bgp peer ipv4
+
+**Output:**
+```
+
+ BGP local router ID: 1.2.3.4
+ Local AS number: 4259844162
+ Total number of peers: 5                 Peers in established state: 3
+
+  * - Dynamically created peer
+  Peer                    AS  MsgRcvd  MsgSent OutQ PrefRcv Up/Down  State
+
+  12.123.123.189        100   101225   113460    0       1 0286h47m Established
+  2.114.82.34        100        0        0    0       0 0129h15m Connect
+  2.114.82.38        100        0        0    0       0 0129h15m Connect
+  2.114.82.42        100    45618    50575    0       1 0129h14m Established
+  2.114.82.46        100    45619    56743    0       1 0129h14m Established
+
+```
+
+**Help:** execute the command "display bgp peer ipv4"
+
+**Prompt:**
+- <hp_comware>
+- [hp_comware]
+
+### display link-aggregation member-port
+
+**Output:**
+```
+Flags: A -- LACP_Activity, B -- LACP_Timeout, C -- Aggregation,
+       D -- Synchronization, E -- Collecting, F -- Distributing,
+       G -- Defaulted, H -- Expired
+
+GigabitEthernet4/0/36:
+Aggregation Interface: Bridge-Aggregation123
+Local:
+    Port Number: 74
+    Port Priority: 32768
+    Oper-Key: 1
+    Flag: {ACG}
+Remote:
+    System ID: 0x8000, 0000-0000-0000
+    Port Number: 0
+    Port Priority: 32768
+    Oper-Key: 0
+    Flag: {EF}
+Received LACP Packets: 0 packet(s)
+Illegal: 0 packet(s)
+Sent LACP Packets: 0 packet(s)
+
+GigabitEthernet7/0/1:
+Aggregation Interface: Bridge-Aggregation123
+Local:          
+    Port Number: 76
+    Port Priority: 32768
+    Oper-Key: 1
+    Flag: {ACG}
+Remote:
+    System ID: 0x8000, 0000-0000-0000
+    Port Number: 0
+    Port Priority: 32768
+    Oper-Key: 0
+    Flag: {EF}
+Received LACP Packets: 0 packet(s)
+Illegal: 0 packet(s)
+Sent LACP Packets: 0 packet(s)
+```
+
+**Help:** execute the command "display link-aggregation member-port"
+
+**Prompt:**
+- <hp_comware>
+- [hp_comware]
+
