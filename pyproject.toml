@@ -135,6 +135,7 @@ dev = [
     "pytest", # Testing framework
     "pytest-timeout", # Pytest: Timeout tests
     "pytest-xdist>=3.8.0", # Pytest: Parallel test execution
+    "pytest-rerunfailures", # Pytest: Retry flaky tests (@pytest.mark.flaky)
     "bandit",
     "coverage",
     "invoke",
