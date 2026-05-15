@@ -1,6 +1,6 @@
 [project]
 name = "simnos"
-version = "2.2.1"
+version = "2.3.0"
 description = "Simulated Network Operating System"
 authors = [
     { name = "KeroRoute lab" },

@@ -3,6 +3,32 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## v2.3.0
+
+**Breaking Changes**
+
+- `hp_comware` platform was rewritten to follow real HP Comware CLI convention (`<HOST>` user view / `[HOST]` system view) instead of the previous Cisco-style prompts (`>`/`#`/`(config)#`). The `enable` and `ex` commands were removed (HP does not have them), and `system-view` / `return` / `quit` were added. netmiko / scrapli / ansible interop with hp_comware now works out of the box. Direct-CLI users that scripted against the previous `enable` command must update their scripts to use `system-view` (#173, closes #136)
+
+**Features**
+
+- Add netmiko / scrapli / ansible compatibility CI workflow (`workflow_dispatch`) for `cisco_ios`. New `tests/compatibility/` test suite gated by the `compatibility` pytest marker and `compatibility` optional dependency group (`scrapli`, `ansible-core`). Each library runs as an independent CI job. Adds `terminal width 512` / `configure terminal` / `end` / `exit` to `cisco_ios.yaml` for full netmiko + scrapli compatibility (#177, closes #125 Phase 1+2+3)
+- Add NTC Templates v9.1 commands to 10 platforms — `mikrotik_routeros` (25), `linux` (15), `alcatel_aos` (12), `alcatel_sros` (7), `ciena_saos` (5), `aruba_os` (4), `extreme_exos` (2), `hp_procurve` (2), `paloalto_panos` (2), `aruba_aoscx` (1): 75 commands total (#174)
+- Add NTC Templates v9.1 commands to `hp_comware` — `display bgp peer ipv4` / `display link-aggregation member-port`: 2 commands. Closes the `#128` NTC v9.1 epic (#175)
+
+**Bug Fixes**
+
+- `cmd_shell.default` no longer crashes the shell session when a yaml `output` contains an unrecognized `str.format` placeholder. Catches `KeyError`, `ValueError`, and `IndexError`, logs the error, and returns the raw output. Runtime is intentionally lenient; the build-time docs generator (`tasks.render_template`) still raises `RuntimeError` for the same situation (#170, closes #162)
+
+**Tooling**
+
+- `invoke gen-docs-platform-commands` now sweeps orphaned `docs/platforms/*.md` files when their backing yaml is deleted. Includes `_PRESERVED_PLATFORM_DOCS` for `index.md` / `index.ja.md` (#169, closes #159)
+- Add `pytest-rerunfailures` and mark `test_send_command_returns_defined_output` as `@pytest.mark.flaky(reruns=2, reruns_delay=1)` to stabilize netmiko auto-enable race intermittently observed on slow CI runners (e.g. `broadcom_icos`) (#176)
+
+**Dependencies**
+
+- Bump `paramiko` constraint from `>=4.0,<5.0` to `>=4.0,<6.0` (paramiko 5.0 released). The existing `_DISABLED_GEX_ALGORITHMS` workaround remains required (upstream stale-snapshot bug still unfixed in 5.0) (#168)
+- Bump `urllib3` from 2.6.3 to 2.7.0 (#167)
+
 ## v2.2.1
 
 **Features**
