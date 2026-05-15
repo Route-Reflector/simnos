@@ -1229,7 +1229,6 @@ dependencies = [
 [package.dev-dependencies]
 compatibility = [
     { name = "ansible-core" },
-    { name = "netmiko" },
     { name = "scrapli" },
 ]
 dev = [
@@ -1264,7 +1263,6 @@ requires-dist = [
 [package.metadata.requires-dev]
 compatibility = [
     { name = "ansible-core" },
-    { name = "netmiko" },
     { name = "scrapli" },
 ]
 dev = [
