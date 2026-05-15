@@ -165,10 +165,18 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
 class TestSendCommandResponse:
     """Test that send_command returns the defined output for each platform (#76)."""
 
+    @pytest.mark.flaky(reruns=2, reruns_delay=1)
     @pytest.mark.timeout(30)
     @pytest.mark.parametrize("device_type", get_platforms_from_md())
     def test_send_command_returns_defined_output(self, device_type: str):
-        """Defined command should return matching output via send_command."""
+        """Defined command should return matching output via send_command.
+
+        Marked `flaky` (reruns=2): netmiko's auto-enable on certain device_types
+        (observed: broadcom_icos) can intermittently fail on slow CI runners with
+        "Failed to enter enable mode" due to SSH handshake / banner timing race.
+        The race is in the netmiko side and not deterministically reproducible;
+        a 2-rerun retry stabilizes CI without masking deterministic regressions.
+        """
         result = _get_test_command(device_type)
         assert result is not None, (
             f"No testable command found for {device_type}. "
