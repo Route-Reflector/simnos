@@ -22,6 +22,9 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 **Tooling**
 
 - `invoke gen-docs-platform-commands` now sweeps orphaned `docs/platforms/*.md` files when their backing yaml is deleted. Includes `_PRESERVED_PLATFORM_DOCS` for `index.md` / `index.ja.md` (#169, closes #159)
+
+**Tests**
+
 - Add `pytest-rerunfailures` and mark `test_send_command_returns_defined_output` as `@pytest.mark.flaky(reruns=2, reruns_delay=1)` to stabilize netmiko auto-enable race intermittently observed on slow CI runners (e.g. `broadcom_icos`) (#176)
 
 **Dependencies**
