@@ -12,6 +12,22 @@ wheels = [
 ]
 
 [[package]]
+name = "ansible-core"
+version = "2.20.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "jinja2" },
+    { name = "packaging" },
+    { name = "pyyaml" },
+    { name = "resolvelib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9d/ec/690cc73e38c3546eabc8ef4118e0d7be1758a598bc23eed3e24ca1f346a7/ansible_core-2.20.5.tar.gz", hash = "sha256:82e3049d95e6e02e5d20d4a5a8e10533a55e0cc52e878e4cf77166c45410f16f", size = 3339511, upload-time = "2026-04-21T00:48:27.175Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f9/e1/4454505e725b84ae670229565dfc20c4075480199647bf4874cf337c560e/ansible_core-2.20.5-py3-none-any.whl", hash = "sha256:ff6ff15c6a37fda07dc7400207e17e93727b24173ca48c068b3311a50d75ecc3", size = 2416843, upload-time = "2026-04-21T00:48:25.413Z" },
+]
+
+[[package]]
 name = "babel"
 version = "2.18.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1135,6 +1151,15 @@ wheels = [
 ]
 
 [[package]]
+name = "resolvelib"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/1d/14/4669927e06631070edb968c78fdb6ce8992e27c9ab2cde4b3993e22ac7af/resolvelib-1.2.1.tar.gz", hash = "sha256:7d08a2022f6e16ce405d60b68c390f054efcfd0477d4b9bd019cc941c28fad1c", size = 24575, upload-time = "2025-10-11T01:07:44.582Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e2/23/c941a0d0353681ca138489983c4309e0f5095dfd902e1357004f2357ddf2/resolvelib-1.2.1-py3-none-any.whl", hash = "sha256:fb06b66c8da04172d9e72a21d7d06186d8919e32ae5ab5cdf5b9d920be805ac2", size = 18737, upload-time = "2025-10-11T01:07:43.081Z" },
+]
+
+[[package]]
 name = "rich"
 version = "14.3.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1194,6 +1219,15 @@ wheels = [
 ]
 
 [[package]]
+name = "scrapli"
+version = "2026.2.20"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cc/20/5a16997013f9aca4100e41493a93af774b1e73ef2c0fafc312a250b7425a/scrapli-2026.2.20.tar.gz", hash = "sha256:b6f8492110601c11ca8394d8540814464bb97681b87e92b30bb6853b5213558a", size = 104525, upload-time = "2026-02-20T23:42:57.414Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2f/bd/4297e274df5cb43d0e3a85d9a30e7298daa13185f26442ef3f142a047105/scrapli-2026.2.20-py3-none-any.whl", hash = "sha256:abbe6f0d70e9b59166e590a74335781e4b5987a488403e08110ce75321a255af", size = 145891, upload-time = "2026-02-20T23:42:56.113Z" },
+]
+
+[[package]]
 name = "simnos"
 version = "2.2.1"
 source = { editable = "." }
@@ -1206,6 +1240,10 @@ dependencies = [
 ]
 
 [package.dev-dependencies]
+compatibility = [
+    { name = "ansible-core" },
+    { name = "scrapli" },
+]
 dev = [
     { name = "bandit" },
     { name = "coverage" },
@@ -1237,6 +1275,10 @@ requires-dist = [
 ]
 
 [package.metadata.requires-dev]
+compatibility = [
+    { name = "ansible-core" },
+    { name = "scrapli" },
+]
 dev = [
     { name = "bandit" },
     { name = "coverage" },

@@ -1,0 +1,54 @@
+---
+name: SIMNOS Compatibility
+
+# Manually triggered. Verifies that simnos cisco_ios works with the major
+# network automation libraries (netmiko / scrapli / ansible). Tests live
+# under tests/compatibility/ and are gated by the `compatibility` marker
+# (excluded from the default suite).
+on:
+  workflow_dispatch: {}
+
+jobs:
+  netmiko:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          activate-environment: true
+          enable-cache: true
+      - name: "Install compatibility dep group"
+        run: "uv sync --group compatibility"
+      - name: "Run netmiko compatibility tests"
+        run: "uv run pytest tests/compatibility/test_netmiko_cisco_ios.py -m compatibility"
+
+  scrapli:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          activate-environment: true
+          enable-cache: true
+      - name: "Install compatibility dep group"
+        run: "uv sync --group compatibility"
+      - name: "Run scrapli compatibility tests"
+        run: "uv run pytest tests/compatibility/test_scrapli_cisco_ios.py -m compatibility"
+
+  ansible:
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: "actions/checkout@v6"
+      - uses: "astral-sh/setup-uv@v7"
+        with:
+          version: "0.9.8"
+          activate-environment: true
+          enable-cache: true
+      - name: "Install compatibility dep group"
+        run: "uv sync --group compatibility"
+      - name: "Install ansible collections"
+        run: "uv run ansible-galaxy collection install cisco.ios ansible.netcommon"
+      - name: "Run ansible compatibility tests"
+        run: "uv run pytest tests/compatibility/test_ansible_cisco_ios.py -m compatibility"
