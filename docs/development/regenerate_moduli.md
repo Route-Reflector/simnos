@@ -54,7 +54,8 @@ the same practice — there is no security implication.
 ## Rotation policy
 
 - **Every 3 years** (next recommended: YYYY-MM, computed as the file's
-  ssh-keygen `# Time` header + 3 years).
+  ssh-keygen generation timestamp — the first column of each moduli line
+  in `YYYYMMDDHHMMSS` format — + 3 years).
 - **Ad-hoc** if a new logjam-class precomputation attack is reported
   against 2048-bit-or-larger DH-GEX.
 
@@ -101,9 +102,11 @@ cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
 # 4. Clean up intermediates
 rm moduli-*.candidates moduli-2048 moduli-3072 moduli-3072.chunk.*
 
-# 5. Verify (should be a few hundred to a few thousand lines)
+# 5. Verify (should be a few hundred to a few thousand lines).
+# Each line starts with the ssh-keygen generation timestamp in
+# YYYYMMDDHHMMSS format, e.g. `20260516054136 2 6 100 2047 2 D5AC...`
 wc -l simnos/plugins/servers/moduli
-head -1 simnos/plugins/servers/moduli   # confirm the "# Time" header is present
+head -1 simnos/plugins/servers/moduli
 ```
 
 These commands write only to the current directory; the system's

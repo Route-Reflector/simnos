@@ -54,8 +54,8 @@ public repo に同梱することは同じ慣習であり、security implication
 
 ## Rotation policy
 
-- **3 年ごと** (次回推奨日: YYYY-MM、ファイルの ssh-keygen `# Time`
-  ヘッダ + 3 年で計算)
+- **3 年ごと** (次回推奨日: YYYY-MM、ファイル各行の先頭カラムにある
+  ssh-keygen 生成タイムスタンプ (`YYYYMMDDHHMMSS` 形式) + 3 年で計算)
 - **Ad-hoc**: 2048-bit 以上の DH-GEX に対する新規 logjam-class
   precomputation 攻撃が報告された場合
 
@@ -101,9 +101,11 @@ cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
 # 4. 中間ファイル cleanup
 rm moduli-*.candidates moduli-2048 moduli-3072 moduli-3072.chunk.*
 
-# 5. 検証 (合計で数百〜数千行になるはず)
+# 5. 検証 (合計で数百〜数千行になるはず)。各行は YYYYMMDDHHMMSS 形式の
+# ssh-keygen 生成タイムスタンプから始まる、例:
+# `20260516054136 2 6 100 2047 2 D5AC...`
 wc -l simnos/plugins/servers/moduli
-head -1 simnos/plugins/servers/moduli   # 「# Time」ヘッダの存在を確認
+head -1 simnos/plugins/servers/moduli
 ```
 
 これらのコマンドは cwd にのみ書き込み、system の `/etc/ssh/moduli` には
