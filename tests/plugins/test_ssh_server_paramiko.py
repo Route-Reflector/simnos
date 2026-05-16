@@ -1075,6 +1075,69 @@ class ParamikoSshServerTest(unittest.TestCase):
         keys = {id(s._ssh_server_key) for s in servers}
         self.assertEqual(len(keys), 1, f"Expected all servers to share the same key, got {len(keys)} distinct keys")
 
+    # ---- moduli load fallback (issue #189) ----
+    # Pin 4 fallback paths so future paramiko / packaging regressions surface in unit tests.
+
+    @mock.patch("paramiko.Transport.load_server_moduli")
+    def test_moduli_load_system_success(self, mock_load):
+        """System moduli load success skips the bundled fallback path entirely."""
+        ParamikoSshServer._moduli_loaded = None
+        self.addCleanup(setattr, ParamikoSshServer, "_moduli_loaded", None)
+        mock_load.return_value = True
+
+        ParamikoSshServer(**self.arguments)
+
+        mock_load.assert_called_once_with()
+        self.assertTrue(ParamikoSshServer._moduli_loaded)
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko._BUNDLED_MODULI")
+    @mock.patch("paramiko.Transport.load_server_moduli")
+    def test_moduli_load_system_fail_bundled_success(self, mock_load, mock_bundled):
+        """When system moduli is missing, the bundled file is loaded and no error is logged."""
+        ParamikoSshServer._moduli_loaded = None
+        self.addCleanup(setattr, ParamikoSshServer, "_moduli_loaded", None)
+        mock_load.side_effect = [False, True]
+        mock_bundled.is_file.return_value = True
+
+        with self.assertNoLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.ERROR):
+            ParamikoSshServer(**self.arguments)
+
+        self.assertEqual(mock_load.call_count, 2)
+        self.assertTrue(ParamikoSshServer._moduli_loaded)
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko._BUNDLED_MODULI")
+    @mock.patch("paramiko.Transport.load_server_moduli")
+    def test_moduli_load_system_fail_bundled_missing(self, mock_load, mock_bundled):
+        """When both system and bundled moduli are missing, log.error 'missing' and fall back to workaround."""
+        ParamikoSshServer._moduli_loaded = None
+        self.addCleanup(setattr, ParamikoSshServer, "_moduli_loaded", None)
+        mock_load.return_value = False
+        mock_bundled.is_file.return_value = False
+
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.ERROR) as cm:
+            ParamikoSshServer(**self.arguments)
+
+        # System moduli load attempted once; bundled load skipped because is_file()=False
+        mock_load.assert_called_once_with()
+        self.assertFalse(ParamikoSshServer._moduli_loaded)
+        self.assertTrue(any("missing" in msg for msg in cm.output))
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko._BUNDLED_MODULI")
+    @mock.patch("paramiko.Transport.load_server_moduli")
+    def test_moduli_load_system_fail_bundled_corrupted(self, mock_load, mock_bundled):
+        """When bundled moduli exists but fails to load (corrupted/unreadable), log.error 'corrupted'."""
+        ParamikoSshServer._moduli_loaded = None
+        self.addCleanup(setattr, ParamikoSshServer, "_moduli_loaded", None)
+        mock_load.side_effect = [False, False]
+        mock_bundled.is_file.return_value = True
+
+        with self.assertLogs("simnos.plugins.servers.ssh_server_paramiko", level=logging.ERROR) as cm:
+            ParamikoSshServer(**self.arguments)
+
+        self.assertEqual(mock_load.call_count, 2)
+        self.assertFalse(ParamikoSshServer._moduli_loaded)
+        self.assertTrue(any("corrupted" in msg for msg in cm.output))
+
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):
     """Test cases for auth_none support in ParamikoSshServerInterface."""
