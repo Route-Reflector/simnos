@@ -5,6 +5,7 @@ paramiko as the SSH connection library.
 
 import io
 import logging
+from pathlib import Path
 import socket
 import threading
 import time
@@ -29,6 +30,13 @@ _DISABLED_GEX_ALGORITHMS = {
         "diffie-hellman-group-exchange-sha1",
     ]
 }
+
+# Path to bundled moduli file (concatenated 2048 + 3072-bit primes).
+# Used as fallback when no system moduli (e.g. /etc/ssh/moduli) is available
+# — typically on Windows / macOS hosts. 4096-bit primes are not bundled;
+# see docs/development/regenerate_moduli.md for the rotation procedure and
+# rationale.
+_BUNDLED_MODULI = Path(__file__).parent / "moduli"
 
 
 class ParamikoSshServerInterface(paramiko.ServerInterface):
@@ -319,6 +327,7 @@ class ParamikoSshServer(TCPServerBase):
     """
 
     _moduli_loaded: bool | None = None
+    _moduli_lock: threading.Lock = threading.Lock()
     _default_key: paramiko.rsakey.RSAKey | None = None
     _default_key_lock: threading.Lock = threading.Lock()
     _KNOWN_KEY_TYPES = (
@@ -374,10 +383,40 @@ class ParamikoSshServer(TCPServerBase):
                 "for non-local use."
             )
 
-        # Load SSH moduli once for DH Group Exchange support in server mode.
-        # Result is cached at the class level so subsequent instances skip the file I/O.
-        if ParamikoSshServer._moduli_loaded is None:
-            ParamikoSshServer._moduli_loaded = paramiko.Transport.load_server_moduli()
+        # Load SSH moduli once for DH Group Exchange (GEX) support in server mode.
+        # Prefer system moduli (live, distro-rotated) when available; fall back to
+        # the moduli file bundled with the package on hosts without /etc/ssh/moduli
+        # (Windows / macOS). Result is cached at the class level under a lock.
+        #
+        # `_moduli_lock` only serializes SIMNOS-internal init; the underlying
+        # `paramiko.Transport._modulus_pack` is a paramiko-global state and is
+        # not lockable from here. If another thread loads moduli via paramiko
+        # directly (outside SIMNOS), it can still race. Mirrors the
+        # `_default_key_lock` pattern in scope, not in coverage.
+        with ParamikoSshServer._moduli_lock:
+            if ParamikoSshServer._moduli_loaded is None:
+                ok = paramiko.Transport.load_server_moduli()
+                if not ok:
+                    # `is_file()` returns False for missing path, directory, or
+                    # broken symlink. The latter two are extreme edge cases for
+                    # a package-bundled file; treating them as "missing" is fine.
+                    if _BUNDLED_MODULI.is_file():
+                        ok = paramiko.Transport.load_server_moduli(filename=str(_BUNDLED_MODULI))
+                        if not ok:
+                            log.error(
+                                "Bundled moduli at %s exists but failed to load "
+                                "(possibly corrupted or unreadable). Falling back "
+                                "to GEX-disable workaround.",
+                                _BUNDLED_MODULI,
+                            )
+                    else:
+                        log.error(
+                            "Bundled moduli file missing at %s — falling back to "
+                            "GEX-disable workaround. This indicates a packaging "
+                            "regression, please report.",
+                            _BUNDLED_MODULI,
+                        )
+                ParamikoSshServer._moduli_loaded = ok
 
     @staticmethod
     def _load_authorized_keys(path: str) -> set[tuple[str, str]]:
@@ -508,7 +547,7 @@ class ParamikoSshServer(TCPServerBase):
 
         # create the SSH transport object
         session = paramiko.Transport(client)
-        if not self._moduli_loaded:
+        if not ParamikoSshServer._moduli_loaded:
             session.disabled_algorithms = _DISABLED_GEX_ALGORITHMS
         session.add_server_key(self._ssh_server_key)
         session.banner_timeout = _SHUTDOWN_TIMEOUT

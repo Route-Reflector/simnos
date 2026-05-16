@@ -3,6 +3,17 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## v2.3.1
+
+**Bug Fixes**
+
+- Bundle a DH Group Exchange (DH-GEX) moduli file (`simnos/plugins/servers/moduli`, 2048 + 3072-bit primes concatenated) and load it as fallback when no system moduli is available. Restores `gex-sha256` advertisement on Windows / macOS so that SHA-1-leaning legacy SSH clients such as `netmiko.fortinet.FortinetSSH` can complete KEX again — resolves the `pytest-full-matrix` Win/macOS deterministic failures listed as Known Issues in v2.3.0. Linux behaviour is unchanged (system `/etc/ssh/moduli` continues to take precedence). Adds `_moduli_lock` for thread-safe one-shot load caching mirroring the existing `_default_key_lock` pattern, plus `log.error` alarms for the bundled-missing and bundled-corrupted regression paths. 4096-bit primes are deferred for a future chore PR due to ssh-keygen `-M screen` runtime in VM hosts (#189)
+
+**Tooling**
+
+- Add `docs/development/regenerate_moduli.md` (+ `.ja.md` i18n) documenting the rotation policy (every 3 years, ad-hoc on logjam-class events) and the `ssh-keygen` regeneration procedure (#189)
+- Add a release-time `unzip -l dist/*.whl | grep moduli` and `tar tzf dist/*.tar.gz | grep moduli` assertion to `pypi-publish.yml` so a packaging regression that drops the bundled moduli is caught before publish (#189)
+
 ## v2.3.0
 
 **Breaking Changes**
