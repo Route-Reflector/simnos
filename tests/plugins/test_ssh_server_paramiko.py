@@ -718,6 +718,7 @@ class ParamikoSshServerTest(unittest.TestCase):
     def setUp(self):
         """Set up the ParamikoSshServer tests."""
         ParamikoSshServer._default_key = None
+        ParamikoSshServer._moduli_loaded = None
         self.arguments: dict = {
             "shell": Mock(),
             "nos": Mock(),
@@ -1103,6 +1104,9 @@ class ParamikoSshServerTest(unittest.TestCase):
             ParamikoSshServer(**self.arguments)
 
         self.assertEqual(mock_load.call_count, 2)
+        # The second call must pass `filename=` as a keyword argument so a
+        # future "positional" or "filename forgotten" regression is caught.
+        self.assertIn("filename", mock_load.call_args_list[1].kwargs)
         self.assertTrue(ParamikoSshServer._moduli_loaded)
 
     @mock.patch("simnos.plugins.servers.ssh_server_paramiko._BUNDLED_MODULI")
@@ -1135,8 +1139,38 @@ class ParamikoSshServerTest(unittest.TestCase):
             ParamikoSshServer(**self.arguments)
 
         self.assertEqual(mock_load.call_count, 2)
+        # Same `filename=` kwarg invariant as the success case.
+        self.assertIn("filename", mock_load.call_args_list[1].kwargs)
         self.assertFalse(ParamikoSshServer._moduli_loaded)
         self.assertTrue(any("corrupted" in msg for msg in cm.output))
+
+    def test_moduli_load_lock_is_thread_safe(self):
+        """Concurrent instantiation should call paramiko.Transport.load_server_moduli once.
+
+        Mirrors `test_default_key_generation_is_thread_safe` to pin that
+        `_moduli_lock` serializes the class-level one-shot load.
+        """
+        self.addCleanup(setattr, ParamikoSshServer, "_moduli_loaded", None)
+        num_threads = 8
+        barrier = threading.Barrier(num_threads)
+
+        with mock.patch("paramiko.Transport.load_server_moduli", return_value=True) as mock_load:
+            ParamikoSshServer._moduli_loaded = None
+
+            def create_server(port):
+                barrier.wait()
+                return ParamikoSshServer(**{**self.arguments, "port": port})
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as ex:
+                futures = [ex.submit(create_server, 7000 + i) for i in range(num_threads)]
+                [f.result() for f in futures]
+
+            self.assertEqual(
+                mock_load.call_count,
+                1,
+                f"Expected load_server_moduli to be called once under the lock, got {mock_load.call_count}",
+            )
+            self.assertTrue(ParamikoSshServer._moduli_loaded)
 
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):

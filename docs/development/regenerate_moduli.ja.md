@@ -54,8 +54,9 @@ public repo に同梱することは同じ慣習であり、security implication
 
 ## Rotation policy
 
-- **3 年ごと** (次回推奨日: YYYY-MM、ファイル各行の先頭カラムにある
-  ssh-keygen 生成タイムスタンプ (`YYYYMMDDHHMMSS` 形式) + 3 年で計算)
+- **3 年ごと** (現 bundle の次回推奨日: **2029-05**、ファイル各行の
+  先頭カラムにある ssh-keygen 生成タイムスタンプ (`YYYYMMDDHHMMSS`
+  形式) + 3 年で計算)
 - **Ad-hoc**: 2048-bit 以上の DH-GEX に対する新規 logjam-class
   precomputation 攻撃が報告された場合
 
@@ -74,8 +75,9 @@ Linux maintainer machine で実行してください。`-M screen` step は CPU-
 するだけで、CI で再生成することはありません。
 
 現在の bundle には 2048-bit と 3072-bit の primes のみが含まれます。
-4096-bit primes は本リリースでは見送り済みです (詳細は設計 doc の
-Notes § と、4096 を追加する follow-up chore PR を参照)。
+4096-bit primes は将来の chore PR で追加予定です (rationale: ssh-keygen
+`-M screen` の runtime が VM host では非現実的だったため初回生成では
+見送り。詳細は v2.3.1 CHANGELOG entry と issue #189 を参照)。
 
 ```bash
 # 1. 各 bit size の候補生成 (高速、数秒〜数分)
@@ -86,7 +88,8 @@ ssh-keygen -M generate -O bits=3072 moduli-3072.candidates
 ssh-keygen -M screen -f moduli-2048.candidates moduli-2048
 
 # 2b. 3072-bit candidates を分割し、複数 ssh-keygen を並列実行
-#     (利用可能 CPU 数に合わせて N を調整)
+#     (利用可能 CPU 数に合わせて N (下記は 8) を調整。Linux なら
+#      `nproc` で物理 / 仮想コア数を確認可能)
 split -n l/8 moduli-3072.candidates moduli-3072.chunk.
 for chunk in moduli-3072.chunk.*; do
   (ssh-keygen -M screen -f "$chunk" "${chunk}.screened") &
@@ -98,8 +101,9 @@ cat moduli-3072.chunk.*.screened > moduli-3072
 #    (ファイル名は拡張子なし、OpenSSH 慣習に揃える)
 cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
 
-# 4. 中間ファイル cleanup
-rm moduli-*.candidates moduli-2048 moduli-3072 moduli-3072.chunk.*
+# 4. 中間ファイル cleanup (`-f` で部分実行時の missing ファイルを許容)
+rm -f moduli-*.candidates moduli-2048 moduli-3072 \
+      moduli-3072.chunk.* moduli-3072.chunk.*.screened
 
 # 5. 検証 (合計で数百〜数千行になるはず)。各行は YYYYMMDDHHMMSS 形式の
 # ssh-keygen 生成タイムスタンプから始まる、例:
@@ -122,16 +126,23 @@ unzip -l dist/simnos-*.whl | grep moduli
 tar tzf dist/simnos-*.tar.gz | grep moduli
 ```
 
-ファイルが含まれていない場合は、`pyproject.toml` に明示的に include を
-追加してください:
+両コマンドで moduli の path が表示されるはずです。`uv_build` (現在の
+build backend) は package directory 配下の non-Python ファイルを
+**デフォルトで全て include する** ため、現状の build に対して
+**`pyproject.toml` への追加設定は不要** です。上記の check は将来この
+default 挙動が変わった場合の regression を catch する目的で置いて
+います。
+
+将来の `uv_build` (or 別 backend) でファイルが drop される事態が発生
+したら、fallback として以下を `pyproject.toml` に明示追加します:
 
 ```toml
 [tool.uv.build-backend]
 source-include = ["simnos/plugins/servers/moduli"]
 ```
 
-Release CI workflow でも publish 前に wheel 内の moduli ファイル存在を
-assert します。
+Release CI workflow (`.github/workflows/pypi-publish.yml`) も publish
+前に wheel + sdist 両方の moduli ファイル存在を assert します。
 
 ## Commit と PR
 

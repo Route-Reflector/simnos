@@ -386,13 +386,20 @@ class ParamikoSshServer(TCPServerBase):
         # Load SSH moduli once for DH Group Exchange (GEX) support in server mode.
         # Prefer system moduli (live, distro-rotated) when available; fall back to
         # the moduli file bundled with the package on hosts without /etc/ssh/moduli
-        # (Windows / macOS). Result is cached at the class level under a lock to
-        # avoid concurrent file I/O when multiple server instances are constructed
-        # from different threads (mirrors _default_key_lock pattern).
+        # (Windows / macOS). Result is cached at the class level under a lock.
+        #
+        # `_moduli_lock` only serializes SIMNOS-internal init; the underlying
+        # `paramiko.Transport._modulus_pack` is a paramiko-global state and is
+        # not lockable from here. If another thread loads moduli via paramiko
+        # directly (outside SIMNOS), it can still race. Mirrors the
+        # `_default_key_lock` pattern in scope, not in coverage.
         with ParamikoSshServer._moduli_lock:
             if ParamikoSshServer._moduli_loaded is None:
                 ok = paramiko.Transport.load_server_moduli()
                 if not ok:
+                    # `is_file()` returns False for missing path, directory, or
+                    # broken symlink. The latter two are extreme edge cases for
+                    # a package-bundled file; treating them as "missing" is fine.
                     if _BUNDLED_MODULI.is_file():
                         ok = paramiko.Transport.load_server_moduli(filename=str(_BUNDLED_MODULI))
                         if not ok:
@@ -540,7 +547,7 @@ class ParamikoSshServer(TCPServerBase):
 
         # create the SSH transport object
         session = paramiko.Transport(client)
-        if not self._moduli_loaded:
+        if not ParamikoSshServer._moduli_loaded:
             session.disabled_algorithms = _DISABLED_GEX_ALGORITHMS
         session.add_server_key(self._ssh_server_key)
         session.banner_timeout = _SHUTDOWN_TIMEOUT

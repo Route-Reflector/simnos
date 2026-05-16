@@ -53,9 +53,9 @@ the same practice — there is no security implication.
 
 ## Rotation policy
 
-- **Every 3 years** (next recommended: YYYY-MM, computed as the file's
-  ssh-keygen generation timestamp — the first column of each moduli line
-  in `YYYYMMDDHHMMSS` format — + 3 years).
+- **Every 3 years** (next recommended: **2029-05** for the current
+  bundle, computed from the ssh-keygen generation timestamp in the first
+  column of each moduli line — `YYYYMMDDHHMMSS` format — plus 3 years).
 - **Ad-hoc** if a new logjam-class precomputation attack is reported
   against 2048-bit-or-larger DH-GEX.
 
@@ -73,9 +73,11 @@ inside a VM it may run much longer, so the 3072-bit step is split across
 multiple parallel `ssh-keygen` processes via `split -n l/N`. The file is
 generated once and committed; CI does not regenerate it.
 
-The current bundle contains 2048-bit and 3072-bit primes. 4096-bit primes
-are not bundled (deferred — see the design doc Notes § for the rationale
-and the follow-up chore PR to add them).
+The current bundle contains 2048-bit and 3072-bit primes. 4096-bit
+primes are deferred for a future chore PR (see the v2.3.1 CHANGELOG
+entry and the discussion on issue #189 for the rationale: ssh-keygen
+`-M screen` runtime was prohibitive in the VM host used for the
+initial generation).
 
 ```bash
 # 1. Generate candidates for each bit size (fast — seconds to minutes)
@@ -87,7 +89,8 @@ ssh-keygen -M screen -f moduli-2048.candidates moduli-2048
 
 # 2b. Screen the 3072-bit candidates by splitting the candidate file and
 #     running multiple ssh-keygen processes in parallel (one per available
-#     CPU). Adjust `N` to your physical / virtual core count.
+#     CPU). Adjust `N` (= 8 below) to your physical / virtual core count,
+#     which you can inspect with `nproc` on Linux.
 split -n l/8 moduli-3072.candidates moduli-3072.chunk.
 for chunk in moduli-3072.chunk.*; do
   (ssh-keygen -M screen -f "$chunk" "${chunk}.screened") &
@@ -99,8 +102,9 @@ cat moduli-3072.chunk.*.screened > moduli-3072
 #    matching the OpenSSH convention)
 cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
 
-# 4. Clean up intermediates
-rm moduli-*.candidates moduli-2048 moduli-3072 moduli-3072.chunk.*
+# 4. Clean up intermediates (`-f` to ignore missing files on partial runs)
+rm -f moduli-*.candidates moduli-2048 moduli-3072 \
+      moduli-3072.chunk.* moduli-3072.chunk.*.screened
 
 # 5. Verify (should be a few hundred to a few thousand lines).
 # Each line starts with the ssh-keygen generation timestamp in
@@ -123,15 +127,23 @@ unzip -l dist/simnos-*.whl | grep moduli
 tar tzf dist/simnos-*.tar.gz | grep moduli
 ```
 
-If the file is missing, add an explicit include in `pyproject.toml`:
+Both commands should print the moduli path. `uv_build` (current
+backend) includes every non-Python file under the package directory by
+default, so **no `pyproject.toml` change is needed** for the current
+build. The check above exists to catch a future regression in that
+default behaviour.
+
+If a future `uv_build` version (or a different backend) ever drops the
+file, the fallback is to add an explicit include:
 
 ```toml
 [tool.uv.build-backend]
 source-include = ["simnos/plugins/servers/moduli"]
 ```
 
-The release CI workflow also asserts the moduli file is present in the
-built wheel before publishing.
+The release CI workflow (`.github/workflows/pypi-publish.yml`) also
+asserts the moduli file is present in both the built wheel and sdist
+before publishing.
 
 ## Commit and PR
 
