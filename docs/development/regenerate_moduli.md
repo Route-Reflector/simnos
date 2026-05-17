@@ -69,9 +69,10 @@ interval used by major Linux distributions.
 
 Run on a Linux maintainer machine. The `-M screen` step is CPU-bound and
 single-threaded. On a physical host the total runtime is in the hours;
-inside a VM it may run much longer, so the 3072-bit step is split across
-multiple parallel `ssh-keygen` processes via `split -n l/N`. The file is
-generated once and committed; CI does not regenerate it.
+inside a VM it may run much longer, so the 3072-bit and 4096-bit steps
+are split across multiple parallel `ssh-keygen` processes via
+`split -n l/N`. The file is generated once and committed; CI does not
+regenerate it.
 
 The current bundle contains 2048-bit, 3072-bit, and 4096-bit primes.
 The 4096-bit batch was generated on a Windows host (see the

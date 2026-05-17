@@ -69,7 +69,7 @@ baseline は主要 Linux distribution の典型的な refresh 周期に揃えて
 
 Linux maintainer machine で実行してください。`-M screen` step は CPU-bound
 かつ single-threaded で、物理 host では合計数時間、VM 環境ではさらに長
-時間かかる場合があります。そのため 3072-bit の screen 処理は
+時間かかる場合があります。そのため 3072-bit と 4096-bit の screen 処理は
 `split -n l/N` で candidates ファイルを N 分割し、複数 ssh-keygen process
 を並列に走らせるアプローチを取ります。ファイルは 1 度生成して commit
 するだけで、CI で再生成することはありません。
