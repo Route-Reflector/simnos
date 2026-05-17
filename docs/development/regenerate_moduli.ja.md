@@ -99,8 +99,9 @@ done
 wait
 cat moduli-3072.chunk.*.screened > moduli-3072
 
-# 2c. 4096-bit candidates も同じ並列パターン。VM 環境での single-process
-#     screening は 10 時間以上かかるので並列化を強く推奨
+# 2c. 4096-bit candidates も同じ並列パターン (`N` のチューニングは 2b の
+#     `nproc` 注釈を参照)。VM 環境での single-process screening は
+#     10 時間以上かかるので並列化を強く推奨
 #     (bare-metal 8-core ならおよそ 1 時間で完了)
 split -n l/8 moduli-4096.candidates moduli-4096.chunk.
 for chunk in moduli-4096.chunk.*; do
@@ -144,24 +145,30 @@ OpenSSH client を直接使うと VM オーバーヘッドを回避でき、bare
 ssh-keygen -M generate -O bits=4096 candidates-4096.txt
 
 # 2. candidates を 8 分割 (実 core 数に合わせて 8 を調整)
+#    `$lines[$start..$end]` ではなく `Select-Object -Skip / -First` を
+#    使うのは、PowerShell の `..` 演算子は $start > $end のとき空配列で
+#    はなく逆順を返すため、小さい入力で行の重複を silent に引き起こすから
 $lines = Get-Content candidates-4096.txt
 $chunkSize = [Math]::Ceiling($lines.Count / 8)
 0..7 | ForEach-Object {
     $start = $_ * $chunkSize
-    $end = [Math]::Min($start + $chunkSize - 1, $lines.Count - 1)
-    $lines[$start..$end] | Set-Content "candidates-4096.part$_.txt"
+    $lines | Select-Object -Skip $start -First $chunkSize |
+        Set-Content "candidates-4096.chunk$_.txt"
 }
 
-# 3. 並列 screening (-ThrottleLimit は step 2 の chunk 数と一致させる)
+# 3. 並列 screening (-ThrottleLimit は step 2 の chunk 数と一致させる)。
+#    注意: ForEach-Object -Parallel は ssh-keygen の失敗を silent に飲み込む。
+#    merge 前に各 `moduli-4096.chunk*.txt` が non-empty か必ず確認すること
+#    (例: `Get-ChildItem moduli-4096.chunk*.txt | Where-Object Length -eq 0`)
 0..7 | ForEach-Object -Parallel {
-    ssh-keygen -M screen -f "candidates-4096.part$_.txt" "moduli-4096.part$_.txt"
+    ssh-keygen -M screen -f "candidates-4096.chunk$_.txt" "moduli-4096.chunk$_.txt"
 } -ThrottleLimit 8
 
-# 4. 部分結果を merge。Windows の Set-Content は CRLF で書くため
+# 4. chunk を merge。Windows の Set-Content は CRLF で書くため
 #    moduli (LF 必須) に直すために [IO.File]::WriteAllText を使う
-$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.part$_.txt" -Raw }) -join ""
+$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.chunk$_.txt" -Raw }) -join ""
 $content = $content -replace "`r`n", "`n"
-[IO.File]::WriteAllText("$pwd\moduli-4096-lf.txt", $content)
+[IO.File]::WriteAllText((Join-Path $pwd 'moduli-4096-lf.txt'), $content)
 
 # 5. moduli-4096-lf.txt を Linux maintainer machine に転送して
 #    既存の 2048/3072 bundle に追記:

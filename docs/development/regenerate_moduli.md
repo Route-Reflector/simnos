@@ -100,7 +100,8 @@ done
 wait
 cat moduli-3072.chunk.*.screened > moduli-3072
 
-# 2c. Same parallel pattern for 4096-bit candidates. Single-process
+# 2c. Same parallel pattern for 4096-bit candidates (see 2b for the
+#     `N` tuning note — adjust to your `nproc`). Single-process
 #     screening for 4096 typically runs 10 hours or more on a VM, so
 #     parallel split is strongly recommended (a bare-metal 8-core box
 #     finishes the screened batch in roughly 1 hour).
@@ -147,24 +148,31 @@ finishes much faster — roughly 1 hour for 4096-bit on a bare-metal
 ssh-keygen -M generate -O bits=4096 candidates-4096.txt
 
 # 2. Split candidates into 8 chunks (adjust 8 to your physical core count)
+#    `Select-Object -Skip / -First` is used instead of `$lines[$start..$end]`
+#    because PowerShell's `..` range operator reverses (rather than yielding
+#    an empty array) when $start > $end — this would silently duplicate
+#    rows in tiny test inputs.
 $lines = Get-Content candidates-4096.txt
 $chunkSize = [Math]::Ceiling($lines.Count / 8)
 0..7 | ForEach-Object {
     $start = $_ * $chunkSize
-    $end = [Math]::Min($start + $chunkSize - 1, $lines.Count - 1)
-    $lines[$start..$end] | Set-Content "candidates-4096.part$_.txt"
+    $lines | Select-Object -Skip $start -First $chunkSize |
+        Set-Content "candidates-4096.chunk$_.txt"
 }
 
-# 3. Screen in parallel (-ThrottleLimit = chunk count from step 2)
+# 3. Screen in parallel (-ThrottleLimit = chunk count from step 2).
+#    Note: ForEach-Object -Parallel silently swallows ssh-keygen failures;
+#    after this step verify every `moduli-4096.chunk*.txt` is non-empty
+#    before merging (e.g. `Get-ChildItem moduli-4096.chunk*.txt | Where-Object Length -eq 0`).
 0..7 | ForEach-Object -Parallel {
-    ssh-keygen -M screen -f "candidates-4096.part$_.txt" "moduli-4096.part$_.txt"
+    ssh-keygen -M screen -f "candidates-4096.chunk$_.txt" "moduli-4096.chunk$_.txt"
 } -ThrottleLimit 8
 
-# 4. Merge parts. Set-Content writes CRLF on Windows; the moduli file
+# 4. Merge chunks. Set-Content writes CRLF on Windows; the moduli file
 #    must be LF-only, so re-write via [IO.File]::WriteAllText.
-$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.part$_.txt" -Raw }) -join ""
+$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.chunk$_.txt" -Raw }) -join ""
 $content = $content -replace "`r`n", "`n"
-[IO.File]::WriteAllText("$pwd\moduli-4096-lf.txt", $content)
+[IO.File]::WriteAllText((Join-Path $pwd 'moduli-4096-lf.txt'), $content)
 
 # 5. Transfer moduli-4096-lf.txt to the Linux maintainer machine, then
 #    concatenate with the existing 2048 / 3072 bundle:

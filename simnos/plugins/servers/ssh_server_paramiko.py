@@ -31,11 +31,10 @@ _DISABLED_GEX_ALGORITHMS = {
     ]
 }
 
-# Path to bundled moduli file (concatenated 2048 + 3072-bit primes).
+# Path to bundled moduli file (concatenated 2048 + 3072 + 4096-bit primes).
 # Used as fallback when no system moduli (e.g. /etc/ssh/moduli) is available
-# — typically on Windows / macOS hosts. 4096-bit primes are not bundled;
-# see docs/development/regenerate_moduli.md for the rotation procedure and
-# rationale.
+# — typically on Windows / macOS hosts.
+# See docs/development/regenerate_moduli.md for the rotation procedure.
 _BUNDLED_MODULI = Path(__file__).parent / "moduli"
 
 
