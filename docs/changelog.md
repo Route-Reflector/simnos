@@ -3,6 +3,20 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## Unreleased
+
+**Enhancements**
+
+- Add 4096-bit safe primes (37 entries) to the bundled DH-GEX moduli file at `simnos/plugins/servers/moduli`. The file now contains 1735 entries across three bit sizes (2048-bit × 1177, 3072-bit × 521, 4096-bit × 37). Generated on a Windows host via PowerShell 7 `ForEach-Object -Parallel` to avoid the VM-host runtime that made the 4096-bit batch deferred in v2.3.1 (#193)
+
+**Tests**
+
+- Add `test_bundled_moduli_contains_expected_bit_sizes` pinning the {2047, 3071, 4095} bit-size set plus a per-size minimum count, so accidental truncation or partial regeneration that leaves only a handful of entries is caught (#193)
+
+**Tooling**
+
+- Add a Windows PowerShell `## Alternative` section to `docs/development/regenerate_moduli.md` (+ `.ja.md`) documenting the `ForEach-Object -Parallel` generation flow used for the 4096-bit batch, including CRLF→LF conversion and a `nproc` cross-reference on the new bash `2c` step (#193)
+
 ## v2.3.1
 
 **Bug Fixes**

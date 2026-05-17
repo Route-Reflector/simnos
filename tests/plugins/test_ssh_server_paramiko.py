@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, Mock
 import paramiko
 
 from simnos.plugins.servers.ssh_server_paramiko import (
+    _BUNDLED_MODULI,
     _SHUTDOWN_TIMEOUT,
     ParamikoSshServer,
     ParamikoSshServerInterface,
@@ -1171,6 +1172,35 @@ class ParamikoSshServerTest(unittest.TestCase):
                 f"Expected load_server_moduli to be called once under the lock, got {mock_load.call_count}",
             )
             self.assertTrue(ParamikoSshServer._moduli_loaded)
+
+    # ---- bundled moduli content (issue #189 + #193) ----
+    # Pin the data invariant so accidental truncation or partial regeneration is caught.
+
+    def test_bundled_moduli_contains_expected_bit_sizes(self):
+        """Bundled moduli file ships with 2048, 3072, and 4096 bit safe primes.
+
+        OpenSSH moduli format stores `bits - 1` in column 5 (e.g. 4095 = 4096-bit prime).
+        Pins both the set of bit sizes AND a per-size minimum count so that an
+        accidental truncation that leaves e.g. only 1 entry of each size still fails.
+        """
+        from collections import Counter
+
+        bit_size_counts: Counter[int] = Counter()
+        with open(_BUNDLED_MODULI, encoding="ascii") as f:
+            for line in f:
+                if line.startswith("#") or not line.strip():
+                    continue
+                parts = line.split()
+                if len(parts) >= 7:
+                    bit_size_counts[int(parts[4])] += 1
+        self.assertEqual(set(bit_size_counts), {2047, 3071, 4095})
+        # Minimum counts are intentionally conservative: 4096-bit batch is only 37 entries
+        # (single sieve run from a Windows host), so the floor is set well below the
+        # committed counts (2048: 1177, 3072: 521, 4096: 37) to avoid false positives on
+        # legitimate future regeneration while still catching partial truncation.
+        self.assertGreaterEqual(bit_size_counts[2047], 100)
+        self.assertGreaterEqual(bit_size_counts[3071], 100)
+        self.assertGreaterEqual(bit_size_counts[4095], 30)
 
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):

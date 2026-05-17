@@ -69,20 +69,22 @@ interval used by major Linux distributions.
 
 Run on a Linux maintainer machine. The `-M screen` step is CPU-bound and
 single-threaded. On a physical host the total runtime is in the hours;
-inside a VM it may run much longer, so the 3072-bit step is split across
-multiple parallel `ssh-keygen` processes via `split -n l/N`. The file is
-generated once and committed; CI does not regenerate it.
+inside a VM it may run much longer, so the 3072-bit and 4096-bit steps
+are split across multiple parallel `ssh-keygen` processes via
+`split -n l/N`. The file is generated once and committed; CI does not
+regenerate it.
 
-The current bundle contains 2048-bit and 3072-bit primes. 4096-bit
-primes are deferred for a future chore PR (see the v2.3.1 CHANGELOG
-entry and the discussion on issue #189 for the rationale: ssh-keygen
-`-M screen` runtime was prohibitive in the VM host used for the
-initial generation).
+The current bundle contains 2048-bit, 3072-bit, and 4096-bit primes.
+The 4096-bit batch was generated on a Windows host (see the
+[Alternative: Windows PowerShell](#alternative-windows-powershell) section
+below) because `ssh-keygen -M screen` for 4096-bit candidates is
+prohibitively slow inside the VM host used for the 2048/3072 batch.
 
 ```bash
 # 1. Generate candidates for each bit size (fast — seconds to minutes)
 ssh-keygen -M generate -O bits=2048 moduli-2048.candidates
 ssh-keygen -M generate -O bits=3072 moduli-3072.candidates
+ssh-keygen -M generate -O bits=4096 moduli-4096.candidates
 
 # 2a. Screen the 2048-bit candidates in a single process (~30 min - 3 h)
 ssh-keygen -M screen -f moduli-2048.candidates moduli-2048
@@ -98,13 +100,26 @@ done
 wait
 cat moduli-3072.chunk.*.screened > moduli-3072
 
+# 2c. Same parallel pattern for 4096-bit candidates (see 2b for the
+#     `N` tuning note — adjust to your `nproc`). Single-process
+#     screening for 4096 typically runs 10 hours or more on a VM, so
+#     parallel split is strongly recommended (a bare-metal 8-core box
+#     finishes the screened batch in roughly 1 hour).
+split -n l/8 moduli-4096.candidates moduli-4096.chunk.
+for chunk in moduli-4096.chunk.*; do
+  (ssh-keygen -M screen -f "$chunk" "${chunk}.screened") &
+done
+wait
+cat moduli-4096.chunk.*.screened > moduli-4096
+
 # 3. Concatenate into the bundled file (file name has no extension,
 #    matching the OpenSSH convention)
-cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
+cat moduli-2048 moduli-3072 moduli-4096 > simnos/plugins/servers/moduli
 
 # 4. Clean up intermediates (`-f` to ignore missing files on partial runs)
-rm -f moduli-*.candidates moduli-2048 moduli-3072 \
-      moduli-3072.chunk.* moduli-3072.chunk.*.screened
+rm -f moduli-*.candidates moduli-2048 moduli-3072 moduli-4096 \
+      moduli-3072.chunk.* moduli-3072.chunk.*.screened \
+      moduli-4096.chunk.* moduli-4096.chunk.*.screened
 
 # 5. Verify (should be a few hundred to a few thousand lines).
 # Each line starts with the ssh-keygen generation timestamp in
@@ -115,6 +130,58 @@ head -1 simnos/plugins/servers/moduli
 
 These commands write only to the current directory; the system's
 `/etc/ssh/moduli` is not touched and no root privileges are required.
+
+## Alternative: Windows PowerShell
+
+If the maintainer's Linux host is a VM, the 4096-bit screening step
+can take 10+ hours. Running directly on a Windows host with PowerShell
+7 (using the built-in OpenSSH client) avoids the VM overhead and
+finishes much faster — roughly 1 hour for 4096-bit on a bare-metal
+8-core machine.
+
+```powershell
+# Run from any working directory (writes to cwd only).
+# Requires: Windows 10/11 with OpenSSH Client enabled and PowerShell 7+
+#          (ForEach-Object -Parallel is unavailable on PowerShell 5.1).
+
+# 1. Generate candidates (single-threaded, ~5-15 min for 4096-bit)
+ssh-keygen -M generate -O bits=4096 candidates-4096.txt
+
+# 2. Split candidates into 8 chunks (adjust 8 to your physical core count)
+#    `Select-Object -Skip / -First` is used instead of `$lines[$start..$end]`
+#    because PowerShell's `..` range operator reverses (rather than yielding
+#    an empty array) when $start > $end — this would silently duplicate
+#    rows in tiny test inputs.
+$lines = Get-Content candidates-4096.txt
+$chunkSize = [Math]::Ceiling($lines.Count / 8)
+0..7 | ForEach-Object {
+    $start = $_ * $chunkSize
+    $lines | Select-Object -Skip $start -First $chunkSize |
+        Set-Content "candidates-4096.chunk$_.txt"
+}
+
+# 3. Screen in parallel (-ThrottleLimit = chunk count from step 2).
+#    Note: ForEach-Object -Parallel silently swallows ssh-keygen failures;
+#    after this step verify every `moduli-4096.chunk*.txt` is non-empty
+#    before merging (e.g. `Get-ChildItem moduli-4096.chunk*.txt | Where-Object Length -eq 0`).
+0..7 | ForEach-Object -Parallel {
+    ssh-keygen -M screen -f "candidates-4096.chunk$_.txt" "moduli-4096.chunk$_.txt"
+} -ThrottleLimit 8
+
+# 4. Merge chunks. Set-Content writes CRLF on Windows; the moduli file
+#    must be LF-only, so re-write via [IO.File]::WriteAllText.
+$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.chunk$_.txt" -Raw }) -join ""
+$content = $content -replace "`r`n", "`n"
+[IO.File]::WriteAllText((Join-Path $pwd 'moduli-4096-lf.txt'), $content)
+
+# 5. Transfer moduli-4096-lf.txt to the Linux maintainer machine, then
+#    concatenate with the existing 2048 / 3072 bundle:
+#      cat moduli-4096-lf.txt >> simnos/plugins/servers/moduli
+```
+
+Note: ssh-keygen on Windows shares the same `-M generate / -M screen`
+flags as the Unix build, so the output format is identical and can be
+concatenated directly with batches produced on Linux.
 
 ## Verifying the wheel includes the moduli file
 
