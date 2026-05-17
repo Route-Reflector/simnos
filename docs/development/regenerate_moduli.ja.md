@@ -74,15 +74,17 @@ Linux maintainer machine で実行してください。`-M screen` step は CPU-
 を並列に走らせるアプローチを取ります。ファイルは 1 度生成して commit
 するだけで、CI で再生成することはありません。
 
-現在の bundle には 2048-bit と 3072-bit の primes のみが含まれます。
-4096-bit primes は将来の chore PR で追加予定です (rationale: ssh-keygen
-`-M screen` の runtime が VM host では非現実的だったため初回生成では
-見送り。詳細は v2.3.1 CHANGELOG entry と issue #189 を参照)。
+現在の bundle には 2048-bit, 3072-bit, 4096-bit の primes が含まれます。
+4096-bit batch は Windows host で生成しています (下記の
+[Alternative: Windows PowerShell](#alternative-windows-powershell) 節
+を参照)。理由は、2048/3072 を生成した VM host では `ssh-keygen -M screen`
+の 4096-bit 処理が非現実的に遅かったためです。
 
 ```bash
 # 1. 各 bit size の候補生成 (高速、数秒〜数分)
 ssh-keygen -M generate -O bits=2048 moduli-2048.candidates
 ssh-keygen -M generate -O bits=3072 moduli-3072.candidates
+ssh-keygen -M generate -O bits=4096 moduli-4096.candidates
 
 # 2a. 2048-bit candidates を 1 process で screening (約 30 分〜3 時間)
 ssh-keygen -M screen -f moduli-2048.candidates moduli-2048
@@ -97,13 +99,24 @@ done
 wait
 cat moduli-3072.chunk.*.screened > moduli-3072
 
+# 2c. 4096-bit candidates も同じ並列パターン。VM 環境での single-process
+#     screening は 10 時間以上かかるので並列化を強く推奨
+#     (bare-metal 8-core ならおよそ 1 時間で完了)
+split -n l/8 moduli-4096.candidates moduli-4096.chunk.
+for chunk in moduli-4096.chunk.*; do
+  (ssh-keygen -M screen -f "$chunk" "${chunk}.screened") &
+done
+wait
+cat moduli-4096.chunk.*.screened > moduli-4096
+
 # 3. 同梱ファイルとして concatenate
 #    (ファイル名は拡張子なし、OpenSSH 慣習に揃える)
-cat moduli-2048 moduli-3072 > simnos/plugins/servers/moduli
+cat moduli-2048 moduli-3072 moduli-4096 > simnos/plugins/servers/moduli
 
 # 4. 中間ファイル cleanup (`-f` で部分実行時の missing ファイルを許容)
-rm -f moduli-*.candidates moduli-2048 moduli-3072 \
-      moduli-3072.chunk.* moduli-3072.chunk.*.screened
+rm -f moduli-*.candidates moduli-2048 moduli-3072 moduli-4096 \
+      moduli-3072.chunk.* moduli-3072.chunk.*.screened \
+      moduli-4096.chunk.* moduli-4096.chunk.*.screened
 
 # 5. 検証 (合計で数百〜数千行になるはず)。各行は YYYYMMDDHHMMSS 形式の
 # ssh-keygen 生成タイムスタンプから始まる、例:
@@ -114,6 +127,50 @@ head -1 simnos/plugins/servers/moduli
 
 これらのコマンドは cwd にのみ書き込み、system の `/etc/ssh/moduli` には
 触れません。root 権限も不要です。
+
+## Alternative: Windows PowerShell
+
+Maintainer の Linux host が VM の場合、4096-bit の screening は 10 時間
+以上かかることがあります。Windows host 上で PowerShell 7 と Windows 同梱の
+OpenSSH client を直接使うと VM オーバーヘッドを回避でき、bare-metal 8-core
+マシンなら 4096-bit でもおよそ 1 時間で完了します。
+
+```powershell
+# 任意の作業 directory で実行可能 (cwd にのみ書き込み)。
+# 要件: Windows 10/11 + OpenSSH Client 有効 + PowerShell 7+
+#       (ForEach-Object -Parallel は PowerShell 5.1 では使えない)
+
+# 1. candidates 生成 (single-thread、4096-bit で約 5〜15 分)
+ssh-keygen -M generate -O bits=4096 candidates-4096.txt
+
+# 2. candidates を 8 分割 (実 core 数に合わせて 8 を調整)
+$lines = Get-Content candidates-4096.txt
+$chunkSize = [Math]::Ceiling($lines.Count / 8)
+0..7 | ForEach-Object {
+    $start = $_ * $chunkSize
+    $end = [Math]::Min($start + $chunkSize - 1, $lines.Count - 1)
+    $lines[$start..$end] | Set-Content "candidates-4096.part$_.txt"
+}
+
+# 3. 並列 screening (-ThrottleLimit は step 2 の chunk 数と一致させる)
+0..7 | ForEach-Object -Parallel {
+    ssh-keygen -M screen -f "candidates-4096.part$_.txt" "moduli-4096.part$_.txt"
+} -ThrottleLimit 8
+
+# 4. 部分結果を merge。Windows の Set-Content は CRLF で書くため
+#    moduli (LF 必須) に直すために [IO.File]::WriteAllText を使う
+$content = (0..7 | ForEach-Object { Get-Content "moduli-4096.part$_.txt" -Raw }) -join ""
+$content = $content -replace "`r`n", "`n"
+[IO.File]::WriteAllText("$pwd\moduli-4096-lf.txt", $content)
+
+# 5. moduli-4096-lf.txt を Linux maintainer machine に転送して
+#    既存の 2048/3072 bundle に追記:
+#      cat moduli-4096-lf.txt >> simnos/plugins/servers/moduli
+```
+
+Windows 側の ssh-keygen は `-M generate / -M screen` フラグを Unix 版と
+共通仕様で備えているため出力フォーマットは完全に同一で、Linux で生成
+した batch に直接 concat できます。
 
 ## wheel に moduli が含まれていることの verify
 

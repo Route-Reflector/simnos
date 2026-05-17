@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, Mock
 import paramiko
 
 from simnos.plugins.servers.ssh_server_paramiko import (
+    _BUNDLED_MODULI,
     _SHUTDOWN_TIMEOUT,
     ParamikoSshServer,
     ParamikoSshServerInterface,
@@ -1171,6 +1172,24 @@ class ParamikoSshServerTest(unittest.TestCase):
                 f"Expected load_server_moduli to be called once under the lock, got {mock_load.call_count}",
             )
             self.assertTrue(ParamikoSshServer._moduli_loaded)
+
+    # ---- bundled moduli content (issue #189 + #193) ----
+    # Pin the data invariant so accidental truncation or partial regeneration is caught.
+
+    def test_bundled_moduli_contains_expected_bit_sizes(self):
+        """Bundled moduli file ships with 2048, 3072, and 4096 bit safe primes.
+
+        OpenSSH moduli format stores `bits - 1` in column 5 (e.g. 4095 = 4096-bit prime).
+        """
+        bit_sizes = set()
+        with open(_BUNDLED_MODULI) as f:
+            for line in f:
+                if line.startswith("#") or not line.strip():
+                    continue
+                parts = line.split()
+                if len(parts) >= 7:
+                    bit_sizes.add(int(parts[4]))
+        self.assertEqual(bit_sizes, {2047, 3071, 4095})
 
 
 class ParamikoSshServerInterfaceAuthNoneTest(unittest.TestCase):

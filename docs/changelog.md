@@ -3,6 +3,12 @@
 All notable changes to SIMNOS are documented here.
 For full details, see the [GitHub Releases](https://github.com/Route-Reflector/simnos/releases).
 
+## Unreleased
+
+**Enhancements**
+
+- Add 4096-bit safe primes to the bundled DH-GEX moduli file (`simnos/plugins/servers/moduli`, now 2048 + 3072 + 4096 entries totalling 1735 lines). Generated on a Windows host via PowerShell 7 `ForEach-Object -Parallel` to avoid the VM-host runtime that made 4096-bit deferred in v2.3.1. Adds `test_bundled_moduli_contains_expected_bit_sizes` to pin the data invariant against accidental truncation, and a Windows PowerShell `## Alternative` section to `docs/development/regenerate_moduli.md` (+ `.ja.md`) describing the generation flow (#193)
+
 ## v2.3.1
 
 **Bug Fixes**
