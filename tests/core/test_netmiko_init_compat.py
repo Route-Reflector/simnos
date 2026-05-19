@@ -28,7 +28,6 @@ INIT_UNKNOWN_CMD_ALLOWED = {
     "brocade_fastiron",  # enable (repeated)
     "dlink_ds",  # disable clipaging
     "huawei_smartax",  # enable password (#70)
-    "ipinfusion_ocnos",  # terminal length 0
     "ruckus_fastiron",  # enable (repeated), skip-page-display
     "vyatta_vyos",  # set terminal width 512
 }
