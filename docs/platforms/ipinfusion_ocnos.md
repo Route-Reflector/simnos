@@ -51,6 +51,26 @@ Total entries displayed:  7
 - ipinfusion_ocnos>
 - ipinfusion_ocnos#
 
+### terminal length 0
+
+**Output:** None
+
+**Help:** disable pagination (netmiko session_preparation)
+
+**Prompt:**
+- ipinfusion_ocnos>
+- ipinfusion_ocnos#
+
+### terminal no monitor
+
+**Output:** None
+
+**Help:** disable monitor output (netmiko 4.7.0+ session_preparation)
+
+**Prompt:**
+- ipinfusion_ocnos>
+- ipinfusion_ocnos#
+
 ### show curpriv
 
 **Output:** None
