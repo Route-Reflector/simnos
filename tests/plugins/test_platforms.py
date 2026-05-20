@@ -103,11 +103,11 @@ class TestPlatforms:
             for values in data["commands"].values():
                 assert "output" in values or "exit" in values
                 if "output" in values:
-                    assert has_single_curly_brackets(values["output"], exceptions) is False
+                    assert not has_single_curly_brackets(values["output"], exceptions)
                 assert "help" in values
-                assert has_single_curly_brackets(values["help"], exceptions) is False
+                assert not has_single_curly_brackets(values["help"], exceptions)
                 assert "prompt" in values
-                assert has_single_curly_brackets(values["prompt"], exceptions) is False
+                assert not has_single_curly_brackets(values["prompt"], exceptions)
 
     @pytest.mark.parametrize("platform", get_py_nos_modules())
     def test_platforms_py_has_correct_format(self, platform: str):
@@ -155,9 +155,9 @@ class TestPlatforms:
                     assert isinstance(value["output"], types.FunctionType)
                     assert value["output"].__name__ in dir(module_class)
                 else:
-                    assert has_single_curly_brackets(value["output"], exceptions) is False
+                    assert not has_single_curly_brackets(value["output"], exceptions)
             assert "help" in value
-            assert has_single_curly_brackets(value["help"], exceptions) is False
+            assert not has_single_curly_brackets(value["help"], exceptions)
             assert "prompt" in value
 
     @pytest.mark.timeout(600)
@@ -202,17 +202,17 @@ class TestPlatforms:
             with ConnectHandler(**credentials) as conn:
                 for command in initial_commands:
                     output = conn.send_command(command)
-                    assert output or output == ""
+                    assert isinstance(output, str)
                 if enable_commands and platform not in skip_enable_platforms:
                     conn.enable()
                     for command in enable_commands:
                         output = conn.send_command(command)
-                        assert output or output == ""
+                        assert isinstance(output, str)
                 if config_commands and platform not in skip_enable_platforms:
                     conn.config_mode()
                     for command in config_commands:
                         output = conn.send_command(command)
-                        assert output or output == ""
+                        assert isinstance(output, str)
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_nos_modules())
@@ -250,14 +250,14 @@ class TestPlatforms:
             with ConnectHandler(**credentials) as conn:
                 for command in initial_commands:
                     output = conn.send_command(command)
-                    assert output or output == ""
+                    assert isinstance(output, str)
                 if enable_commands:
                     conn.enable()
                     for command in enable_commands:
                         output = conn.send_command(command)
-                        assert output or output == ""
+                        assert isinstance(output, str)
                 if config_commands:
                     conn.config_mode()
                     for command in config_commands:
                         output = conn.send_command(command)
-                        assert output or output == ""
+                        assert isinstance(output, str)

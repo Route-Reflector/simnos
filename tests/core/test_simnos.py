@@ -130,7 +130,7 @@ class TestSimNOS:
         """
         net = SimNOS()
         net.inventory = "tests/assets/inventory.yaml"
-        assert net._is_inventory_in_yaml() is True
+        assert net._is_inventory_in_yaml()
 
     def test_is_inventory_in_yaml_unit_false(self):
         """
@@ -139,7 +139,7 @@ class TestSimNOS:
         """
         net = SimNOS()
         net.inventory = "tests/assets/inventory.txt"
-        assert net._is_inventory_in_yaml() is False
+        assert not net._is_inventory_in_yaml()
 
     def test_load_inventory_yaml_unit_true(self):
         """
@@ -411,34 +411,34 @@ class TestSimNOS:
         net = SimNOS()
 
         net.start(hosts="router_cisco_ios")
-        assert net.hosts["router_cisco_ios"].running is True
-        assert net.hosts["router_huawei_smartax"].running is False
-        assert net.hosts["router_arista_eos"].running is False
+        assert net.hosts["router_cisco_ios"].running
+        assert not net.hosts["router_huawei_smartax"].running
+        assert not net.hosts["router_arista_eos"].running
 
         net.start(hosts="router_huawei_smartax")
-        assert net.hosts["router_cisco_ios"].running is True
-        assert net.hosts["router_huawei_smartax"].running is True
-        assert net.hosts["router_arista_eos"].running is False
+        assert net.hosts["router_cisco_ios"].running
+        assert net.hosts["router_huawei_smartax"].running
+        assert not net.hosts["router_arista_eos"].running
 
         net.start(hosts="router_arista_eos")
-        assert net.hosts["router_cisco_ios"].running is True
-        assert net.hosts["router_huawei_smartax"].running is True
-        assert net.hosts["router_arista_eos"].running is True
+        assert net.hosts["router_cisco_ios"].running
+        assert net.hosts["router_huawei_smartax"].running
+        assert net.hosts["router_arista_eos"].running
 
         net.stop(hosts="router_cisco_ios")
-        assert net.hosts["router_cisco_ios"].running is False
-        assert net.hosts["router_huawei_smartax"].running is True
-        assert net.hosts["router_arista_eos"].running is True
+        assert not net.hosts["router_cisco_ios"].running
+        assert net.hosts["router_huawei_smartax"].running
+        assert net.hosts["router_arista_eos"].running
 
         net.stop(hosts="router_huawei_smartax")
-        assert net.hosts["router_cisco_ios"].running is False
-        assert net.hosts["router_huawei_smartax"].running is False
-        assert net.hosts["router_arista_eos"].running is True
+        assert not net.hosts["router_cisco_ios"].running
+        assert not net.hosts["router_huawei_smartax"].running
+        assert net.hosts["router_arista_eos"].running
 
         net.stop(hosts="router_arista_eos")
-        assert net.hosts["router_cisco_ios"].running is False
-        assert net.hosts["router_huawei_smartax"].running is False
-        assert net.hosts["router_arista_eos"].running is False
+        assert not net.hosts["router_cisco_ios"].running
+        assert not net.hosts["router_huawei_smartax"].running
+        assert not net.hosts["router_arista_eos"].running
 
         net.stop()
 
@@ -450,17 +450,17 @@ class TestSimNOS:
         net = SimNOS()
         before_start = get_running_hosts(net.hosts)
         for running_state in before_start.values():
-            assert running_state is False
+            assert not running_state
 
         net.start()
         after_start = get_running_hosts(net.hosts)
         for running_state in after_start.values():
-            assert running_state is True
+            assert running_state
 
         net.stop()
         after_stop = get_running_hosts(net.hosts)
         for running_state in after_stop.values():
-            assert running_state is False
+            assert not running_state
 
         assert len(before_start) == len(after_start) == len(after_stop) == 3
 
@@ -501,10 +501,15 @@ class TestSimNOS:
         assert len(net.nos_plugins["cisco_ios"]) == 2, "Not all files detected"
 
 
-class TestPlatforms:
+class TestPlatformsManifest:
     """
     Tests directly related to the platforms like the ordering
     or if the platforms match the docs and the real in the code.
+
+    Renamed from ``TestPlatforms`` to disambiguate from
+    ``tests/plugins/test_platforms.py::TestPlatforms`` which covers
+    YAML format / runtime command execution; this class covers the
+    ``available_platforms`` manifest integrity (ordering, docs match).
     """
 
     def test_available_platforms_match_docs(self):
