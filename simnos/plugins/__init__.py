@@ -1,1 +1,3 @@
-"""SimNOS plugins: pluggable servers, shells, and NOS plugin modules."""
+"""
+SimNOS plugins: pluggable servers, shells, and NOS plugin modules.
+"""
