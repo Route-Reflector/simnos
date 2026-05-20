@@ -103,12 +103,21 @@ class SimNOS:
         self.start()
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, exc_type, exc_val, exc_tb):
         """
         Method to stop the SimNOS servers when exiting the context manager.
         It is meant to be used with the `with` statement.
+
+        If ``stop()`` itself raises, the traceback is logged via
+        ``log.exception`` (so it is not lost) and the exception is re-raised
+        to preserve normal context-manager semantics. This prevents
+        silent failures during shutdown.
         """
-        self.stop()
+        try:
+            self.stop()
+        except Exception:
+            log.exception("stop() failed during SimNOS context manager __exit__")
+            raise
 
     def _is_inventory_in_yaml(self) -> bool:
         """method that checks if the inventory is a yaml file."""
