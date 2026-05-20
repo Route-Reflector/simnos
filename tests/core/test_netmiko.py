@@ -122,9 +122,9 @@ class TestNetmiko:
             for router in inventory["hosts"]:
                 try:
                     with ConnectHandler(**credentials[router]):
-                        assert net.hosts[router].running is True
+                        assert net.hosts[router].running
                 except (NetMikoTimeoutException, NetMikoAuthenticationException):
-                    assert net.hosts[router].running is False
+                    assert not net.hosts[router].running
 
         net.stop()
 

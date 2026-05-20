@@ -100,10 +100,10 @@ class TestNetmikoInitCompat:
                     "this_command_does_not_exist_12345",
                     read_timeout=10,
                 )
-                assert output is not None
+                assert isinstance(output, str)
                 # Verify session is still alive after unknown command
                 follow_up = conn.send_command_timing("?")
-                assert follow_up is not None
+                assert isinstance(follow_up, str)
         finally:
             net.stop()
 

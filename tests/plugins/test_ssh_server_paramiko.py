@@ -226,10 +226,11 @@ class TapIOTest(unittest.TestCase):
         mock_run_srv: Mock = Mock()
         mock_run_srv.is_set.side_effect = [True] * 10 + [False]
         tap_io: TapIO = TapIO(run_srv=mock_run_srv)
-        tap_io.lines = ["line1", "line2"]
+        tap_io.write("line1")
+        tap_io.write("line2")
 
-        self.assertEqual(tap_io.readline(), "line2")
         self.assertEqual(tap_io.readline(), "line1")
+        self.assertEqual(tap_io.readline(), "line2")
         self.assertEqual(tap_io.readline(), "")
 
         self.assertEqual(mock_run_srv.is_set.call_count, 11)
@@ -1917,7 +1918,7 @@ class TeardownFixTests(unittest.TestCase):
         # 3 threads: channel_to_shell_tapper, shell_to_channel_tapper, watchdog
         assert len(threads_created) == 3
         for t in threads_created:
-            assert t.daemon is True, f"Thread {t.name} should be daemon"
+            assert t.daemon, f"Thread {t.name} should be daemon"
 
     @mock.patch("paramiko.Transport")
     def test_start_server_exception_triggers_cleanup(self, mock_transport_cls: MagicMock):
