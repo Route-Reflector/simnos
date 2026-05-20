@@ -12,14 +12,14 @@ import yaml
 class BaseDevice:
     """Interface for all devices."""
 
-    def __init__(self, configuration_file: str) -> None:
+    def __init__(self, configuration_file: str | None = None) -> None:
         self.configurations = self.load_configurations(configuration_file)
         self.env = Environment(
             loader=PackageLoader("simnos.plugins.nos.platforms_py", "templates"),
             autoescape=False,  # noqa: S701 — output is CLI text, not HTML
         )
 
-    def load_configurations(self, configuration_file: str) -> dict:
+    def load_configurations(self, configuration_file: str | None) -> dict:
         """
         Load configurations from a file.
         The file can be either a YAML file or a Jinja2 template.

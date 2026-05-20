@@ -118,27 +118,16 @@ class Nos:
         """
         Method to build NOS from dictionary data.
 
-        Sample NOS dictionary::
+        The per-command schema follows :class:`simnos.core.pydantic_models.ModelNosCommand`;
+        a live Python plugin example is :mod:`simnos.plugins.nos.platforms_py.cisco_ios`.
+
+        Minimal sample::
 
             nos_plugin_dict = {
                 "name": "MySimNOSPlugin",
                 "initial_prompt": "{base_prompt}>",
                 "commands": {
-                    "terminal width 511": {
-                        "output": "",
-                        "help": "Set terminal width to 511",
-                        "prompt": "{base_prompt}>",
-                    },
-                    "terminal length 0": {
-                        "output": "",
-                        "help": "Set terminal length to 0",
-                        "prompt": "{base_prompt}>",
-                    },
-                    "show clock": {
-                        "output": "MySimNOSPlugin system time is 00:00:00",
-                        "help": "Show system time",
-                        "prompt": "{base_prompt}>",
-                    },
+                    "show clock": {"output": "12:00:00", "help": "Show clock"},
                 },
             }
 
@@ -155,26 +144,10 @@ class Nos:
         """
         Method to build NOS from YAML file.
 
-        Sample NOS YAML file content::
-
-            name: "MySimNOSPlugin"
-            initial_prompt: "{base_prompt}>"
-            commands:
-                terminal width 511: {
-                    "output": "",
-                    "help": "Set terminal width to 511",
-                    "prompt": "{base_prompt}>",
-                }
-                terminal length 0: {
-                    "output": "",
-                    "help": "Set terminal length to 0",
-                    "prompt": "{base_prompt}>",
-                }
-                show clock: {
-                    "output": "MySimNOSPlugin system time is 00:00:00",
-                    "help": "Show system time",
-                    "prompt": "{base_prompt}>",
-                }
+        The YAML mirrors the dict schema accepted by :meth:`from_dict`;
+        see :class:`simnos.core.pydantic_models.ModelNosCommand` for the
+        per-command schema and ``simnos/plugins/nos/platforms_yaml/cisco_ios.yaml``
+        for a live example.
 
         :param filepath: OS path to YAML file with NOS data
         """
@@ -188,29 +161,10 @@ class Nos:
         Loads from the .py file using the recipe:
         https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
 
-        Sample Python NOS plugin file::
-
-            name = "MySimNOSPlugin"
-
-            INITIAL_PROMPT = "{base_prompt}>"
-
-            commands = {
-                "terminal width 511": {
-                    "output": "",
-                    "help": "Set terminal width to 511",
-                    "prompt": "{base_prompt}>",
-                },
-                "terminal length 0": {
-                    "output": "",
-                    "help": "Set terminal length to 0",
-                    "prompt": "{base_prompt}>",
-                },
-                "show clock": {
-                    "output": "MySimNOSPlugin system time is 00:00:00",
-                    "help": "Show system time",
-                    "prompt": "{base_prompt}>",
-                },
-            }
+        The module is expected to define module-level constants (``NAME``,
+        ``INITIAL_PROMPT``, optional ``ENABLE_PROMPT`` / ``CONFIG_PROMPT`` /
+        ``DEVICE_NAME`` / ``DEFAULT_CONFIGURATION``) and a ``commands`` dict;
+        see :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
 
         :param filename: OS path string to Python .py file
         """
