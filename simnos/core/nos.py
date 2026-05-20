@@ -180,11 +180,26 @@ class Nos:
         :param filename: OS path string to Python .py file
         """
         spec = importlib.util.spec_from_file_location("module.name", filename)
+        if spec is None or spec.loader is None:
+            raise ValueError(f"Cannot load NOS module from '{filename}' (spec_from_file_location returned None)")
         module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
+        try:
+            spec.loader.exec_module(module)
+        except FileNotFoundError:
+            # Preserve FileNotFoundError as-is so callers can distinguish
+            # "path does not exist" from "plugin code itself failed".
+            raise
+        except Exception as e:
+            raise RuntimeError(f"Failed to load NOS plugin '{filename}': {e}") from e
         for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
             setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
         self.commands.update(getattr(module, "commands", self.commands))
+        if self.name == "SimNOS":
+            log.warning(
+                "Module '%s' does not define NAME; falling back to default 'SimNOS' "
+                "(plugin will be registered under that key)",
+                filename,
+            )
         classname = getattr(module, "DEVICE_NAME", None)
         if classname is None:
             log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
