@@ -5,9 +5,13 @@ It also validates the host object using pydantic.
 """
 
 import logging
+from typing import TYPE_CHECKING
 
 from simnos.core.nos import Nos, available_platforms
 from simnos.core.pydantic_models import ModelHost
+
+if TYPE_CHECKING:
+    from simnos.core.simnos import SimNOS
 
 log = logging.getLogger(__name__)
 
@@ -26,7 +30,7 @@ class Host:
         server: dict,
         shell: dict,
         nos: dict,
-        simnos,
+        simnos: "SimNOS",
         platform: str | None = None,
         configuration_file: str | None = None,
     ) -> None:

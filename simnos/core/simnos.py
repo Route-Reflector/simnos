@@ -150,7 +150,7 @@ class SimNOS:
             self._check_ports_and_replicas(port, replicas)
             self._instantiate_host_object(host_name, port, replicas, params)
 
-    def _check_ports_and_replicas(self, port, replicas):
+    def _check_ports_and_replicas(self, port: int | list[int], replicas: int | None) -> None:
         """
         Method to check if the port and replicas are valid
 
@@ -170,7 +170,9 @@ class SimNOS:
         if replicas and port[1] - port[0] + 1 != replicas:
             raise ValueError("If replicas is set, port range must be equal to the number of replicas.")
 
-    def _instantiate_host_object(self, host_name: str, port: int | list[int], replicas: int | None, params: dict):
+    def _instantiate_host_object(
+        self, host_name: str, port: int | list[int], replicas: int | None, params: dict
+    ) -> None:
         """
         Method that instantiate the host objects. It initializes the hosts
         with the corresponding name, port and network operating system
@@ -185,7 +187,9 @@ class SimNOS:
         for h_name, p in zip(hosts_name, ports, strict=True):
             self._instantiate_single_host_object(h_name, p, params)
 
-    def _get_hosts_and_ports(self, host_name: str, port: int | list[int], replicas: int | None = None):
+    def _get_hosts_and_ports(
+        self, host_name: str, port: int | list[int], replicas: int | None = None
+    ) -> tuple[list[str], list[int]]:
         """
         Method to get hosts and ports correctly
         depending on the number of replicas (if exists).
@@ -202,7 +206,7 @@ class SimNOS:
             ports = [port]
         return hosts_name, ports
 
-    def _instantiate_single_host_object(self, host: str, port: int, params: dict):
+    def _instantiate_single_host_object(self, host: str, port: int, params: dict) -> None:
         """
         Method that instantiates a single host object.
 
@@ -353,7 +357,7 @@ class SimNOS:
         parallel: bool = False,
         workers: int | None = None,
         deadline: float | None = None,
-    ):
+    ) -> None:
         """
         Function that executes a function like start or stop over
         the selected hosts.
