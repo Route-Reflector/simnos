@@ -15,8 +15,8 @@ hosts:
 
 In this case, the configuration file is located in the `my_configurations` folder and is called `cisco_ios.yaml.j2`.
 
-Currently SIMNOS accepts configurations in the following platforms:
+Currently SIMNOS bundles a default configuration file only for:
 
-- [cisco_ios](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/cisco_ios.yaml.j2)
 - [huawei_smartax](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2)
-- [arista_eos](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/arista_eos.yaml.j2)
+
+For other platforms you may still supply a custom `configuration_file` in the inventory, but it will only take effect if the device's plugin class consumes `self.configurations` (the bundled `CiscoIOS` / `AristaEOS` plugins do not currently use this hook).

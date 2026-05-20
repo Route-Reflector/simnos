@@ -259,7 +259,7 @@ commands = {
     - `"new_prompt"` - 新しいプロンプト値（`{base_prompt}` フォーマッターが使用可能）
     - `"exit"` - `True` の場合、シェルセッションを終了（output は表示されない）
 
-最後に、BaseDevice を継承するクラスがあります。このクラスは SIMNOS がモジュールを正しくロードするために必要です。内部的には、`DEFAULT_CONFIGURATION` 属性で定義された[設定](../usage/configurations.md)ファイルのデータが辞書としてロードされる `self.configurations` 属性でモジュールを初期化します。また、`simnos/plugins/nos/platforms_py/templates/` ディレクトリ内の Jinja2 テンプレートをレンダリングできる `render(self, template: str, **kwargs) -> str` メソッドも含まれています。これらの属性を持つクラスにすることで、モジュールの標準化に役立ちます。同時に、個別の関数ではなくクラスにすることで、コマンド間で変数を共有したり、デバイスの状態を変更することもできます。例えば、デバイスの IP を変更するコマンドを作成した場合、クラス内のデバイスの状態を変更し、残りのコマンドがこの変更を考慮して新しい IP で文字列を返すようにできます。
+最後に、BaseDevice を継承するクラスがあります。このクラスは SIMNOS がモジュールを正しくロードするために必要です。内部的には、`self.configurations` 属性でモジュールを初期化します。モジュールが optional な `DEFAULT_CONFIGURATION` 属性 (YAML/Jinja2 形式の[設定](../usage/configurations.md)ファイルのパス) を定義していれば、そのファイルが辞書として `self.configurations` にロードされます。未定義の場合は `self.configurations` は空 dict になります (バンドル plugin の中ではこの hook を実際に使っているのは `HuaweiSmartAX` のみです)。また、`simnos/plugins/nos/platforms_py/templates/` ディレクトリ内の Jinja2 テンプレートをレンダリングできる `render(self, template: str, **kwargs) -> str` メソッドも含まれています。これらの属性を持つクラスにすることで、モジュールの標準化に役立ちます。同時に、個別の関数ではなくクラスにすることで、コマンド間で変数を共有したり、デバイスの状態を変更することもできます。例えば、デバイスの IP を変更するコマンドを作成した場合、クラス内のデバイスの状態を変更し、残りのコマンドがこの変更を考慮して新しい IP で文字列を返すようにできます。
 
 もちろん、独自のコマンドとロジックで独自の Python モジュールを作成することもできます。正しい構造を持ち、正しくロードできることを確認してください。SIMNOS インベントリで指定すれば、SIMNOS がロードとコマンドの登録を行います。
 
