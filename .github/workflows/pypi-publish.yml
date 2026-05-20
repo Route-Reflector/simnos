@@ -54,6 +54,7 @@ jobs:
             if ! "$@" | grep -E 'simnos/plugins/servers/moduli$'; then
               echo "::error::Bundled moduli file missing from ${label} — packaging regression detected"
               "$@"
+              echo "::endgroup::"
               exit 1
             fi
             echo "::endgroup::"

@@ -65,13 +65,18 @@ jobs:
           severity: "CRITICAL,HIGH"
       - name: "Trivy vulnerability scan (SARIF for Code Scanning)"
         if: always()
+        continue-on-error: true
         uses: "aquasecurity/trivy-action@v0.36.0"
         with:
           image-ref: "${{ env.IMAGE_NAME }}:scan"
           format: "sarif"
           output: "trivy-results.sarif"
       - name: "Upload Trivy SARIF to GitHub Code Scanning"
+        # SARIF upload is a security observability channel, not a release gate.
+        # `continue-on-error: true` keeps a transient Code Scanning outage from
+        # failing the scan job (which would block `publish` via `needs: scan`).
         if: always()
+        continue-on-error: true
         uses: "github/codeql-action/upload-sarif@v3"
         with:
           sarif_file: "trivy-results.sarif"
