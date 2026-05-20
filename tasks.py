@@ -6,14 +6,12 @@ local docs serving (`docs`), platform docs generation
 (`netmiko_check`).
 """
 
+from collections.abc import Iterable
 import os
 import time
 
 from invoke import task
-from netmiko import ConnectHandler
 import yaml
-
-from simnos import SimNOS
 
 
 def run_cmd(context, exec_cmd):
@@ -80,7 +78,7 @@ _PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"}
 
 def sweep_orphaned_platform_docs(
     docs_folder: str,
-    valid_platforms: set[str],
+    valid_platforms: Iterable[str],
     preserve: frozenset[str] = _PRESERVED_PLATFORM_DOCS,
 ) -> list[str]:
     """Remove ``docs/platforms/*.md`` entries whose backing yaml is gone.
@@ -141,7 +139,7 @@ def gen_docs_platform_commands(ctx):
                     platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
 
-    for orphan in sweep_orphaned_platform_docs(docs_folder, set(platforms)):
+    for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
         print(f"Removed orphaned doc: {orphan}")
 
 
@@ -150,6 +148,12 @@ def netmiko_check(ctx, device_type: str):
     """
     This is a task for debugging possible problems with Netmiko logins.
     """
+    # Lazy import: keep `invoke --list` and lint-only tasks fast by avoiding
+    # the heavy netmiko / simnos import cost unless this task is actually run.
+    from netmiko import ConnectHandler
+
+    from simnos import SimNOS
+
     init_time = time.time()
     inventory = {
         "hosts": {
