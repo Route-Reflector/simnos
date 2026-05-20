@@ -136,7 +136,8 @@ class TCPServerBase(ABC):
             with contextlib.suppress(OSError):
                 self._wakeup_w.send(b"\x00")
 
-        self._listen_thread.join(timeout=2)
+        # fail-safe join — wakeup socket may have failed; bound by _SHUTDOWN_TIMEOUT.
+        self._listen_thread.join(timeout=_SHUTDOWN_TIMEOUT)
 
         try:
             alive = join_threads_with_deadline(self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN)

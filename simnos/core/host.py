@@ -61,8 +61,6 @@ class Host:
         """Method to start server instance for this host."""
         self.server_plugin = self.simnos.servers_plugins[self.server_inventory["plugin"]]
         self.shell_plugin = self.simnos.shell_plugins[self.shell_inventory["plugin"]]
-        if self.platform:
-            self.nos_inventory["plugin"] = self.platform
         self.nos_plugin = self.simnos.nos_plugins.get(self.nos_inventory["plugin"], self.nos_inventory["plugin"])
         self.nos = (
             Nos(filename=self.nos_plugin, configuration_file=self.configuration_file)
@@ -83,7 +81,13 @@ class Host:
         self.running = True
 
     def stop(self):
-        """Method to stop server instance for this host."""
+        """Method to stop server instance for this host.
+
+        No-op if the server was never started or has already been stopped
+        (``self.server is None``); this guards against double-stop calls.
+        """
+        if self.server is None:
+            return
         self.server.stop()
         self.server = None
         self.running = False

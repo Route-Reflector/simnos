@@ -25,11 +25,13 @@ from simnos.plugins.shell import shell_plugins
 
 log = logging.getLogger(__name__)
 
+DEFAULT_PORT_START = 6000
+
 default_inventory = {
     "default": {
         "username": "user",
         "password": "user",
-        "port": 6000,
+        "port": DEFAULT_PORT_START,
         "server": {
             "plugin": "ParamikoSshServer",
             "configuration": {
@@ -41,9 +43,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "platform": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "platform": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "platform": "arista_eos"},
+        "router_cisco_ios": {"port": DEFAULT_PORT_START, "platform": "cisco_ios"},
+        "router_huawei_smartax": {"port": DEFAULT_PORT_START + 1, "platform": "huawei_smartax"},
+        "router_arista_eos": {"port": DEFAULT_PORT_START + 2, "platform": "arista_eos"},
     },
 }
 
