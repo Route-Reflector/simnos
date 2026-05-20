@@ -152,11 +152,6 @@ class InventoryDefaultSection(BaseModel):
 
     username: StrictStr | None = None
     password: StrictStr | None = None
-    # port: Optional[Union[conint(strict=True, gt=0, le=65535),
-    # conlist(conint(strict=True, gt=0, le=65535),
-    # min_items=2, max_items=2, unique_items=True)]]
-    # use this for now, mkdocstring having issue with pydantic
-    # https://github.com/mkdocstrings/griffe/issues/66
     port: StrictInt | list[StrictInt] | None = None
     configuration_file: StrictStr | None = None
     platform: StrictStr | None = None
@@ -170,9 +165,6 @@ class HostConfig(InventoryDefaultSection):
     Pydantic model for SimNOS inventory host configuration.
     """
 
-    # count: Optional[conint(strict=True, gt=0)]
-    # use this for now, mkdocstring having issue with pydantic
-    # https://github.com/mkdocstrings/griffe/issues/66
     replicas: StrictInt | None = None
 
     @model_validator(mode="before")

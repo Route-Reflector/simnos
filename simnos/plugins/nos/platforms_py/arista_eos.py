@@ -2,7 +2,6 @@
 NOS module for Arista EOS
 """
 
-import os
 import time
 
 from simnos.plugins.nos.platforms_py.base_template import BaseDevice
@@ -13,10 +12,7 @@ ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
 DEVICE_NAME: str = "AristaEOS"
 
-DEFAULT_CONFIGURATION: str = os.path.join(os.path.dirname(__file__), "configurations", "arista_eos.yaml.j2")
 
-
-# pylint: disable=unused-argument
 class AristaEOS(BaseDevice):
     """
     Class that keeps track of the state of the Arista EOS device.
@@ -36,10 +32,6 @@ class AristaEOS(BaseDevice):
         if current_prompt == config_prompt:
             return {"output": "", "new_prompt": ENABLE_PROMPT}
         raise RuntimeError(f"make_exit does not know how to handle '{current_prompt}' prompt")
-
-    def make_running_configuration(self, base_prompt, current_prompt, command):
-        """Return the running configuration."""
-        return self.render("arista_eos/show_running-config.j2", base_prompt=base_prompt)
 
     def make_show_ip_int_br(self, base_prompt, current_prompt, command):
         """Return the IP interface brief output."""
