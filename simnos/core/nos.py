@@ -71,6 +71,17 @@ class Nos:
     Base class to build NOS plugins instances to use with SIMNOS.
     """
 
+    # Mapping of module-level UPPERCASE constants in a Python plugin file
+    # to the corresponding lowercase attribute on the Nos instance.
+    # Used by `_from_module` to sync module constants into self.
+    _MODULE_ATTR_MAP: dict[str, str] = {
+        "NAME": "name",
+        "INITIAL_PROMPT": "initial_prompt",
+        "AUTH": "auth",
+        "ENABLE_PROMPT": "enable_prompt",
+        "CONFIG_PROMPT": "config_prompt",
+    }
+
     def __init__(
         self,
         name: str = "SimNOS",
@@ -171,12 +182,9 @@ class Nos:
         spec = importlib.util.spec_from_file_location("module.name", filename)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        self.name = getattr(module, "NAME", self.name)
+        for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
+            setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
         self.commands.update(getattr(module, "commands", self.commands))
-        self.initial_prompt = getattr(module, "INITIAL_PROMPT", self.initial_prompt)
-        self.auth = getattr(module, "AUTH", self.auth)
-        self.enable_prompt = getattr(module, "ENABLE_PROMPT", self.enable_prompt)
-        self.config_prompt = getattr(module, "CONFIG_PROMPT", self.config_prompt)
         classname = getattr(module, "DEVICE_NAME", None)
         if classname is None:
             log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
