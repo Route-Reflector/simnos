@@ -16,8 +16,8 @@ hosts:
 
 この場合、設定ファイルは `my_configurations` フォルダにあり、`cisco_ios.yaml.j2` という名前です。
 
-現在、SIMNOS は以下のプラットフォームで設定を受け付けます:
+現在、SIMNOS がデフォルト設定ファイルをバンドルしているのは以下のプラットフォームのみです:
 
-- [cisco_ios](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/cisco_ios.yaml.j2)
 - [huawei_smartax](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/huawei_smartax.yaml.j2)
-- [arista_eos](https://github.com/Route-Reflector/simnos/tree/main/simnos/plugins/nos/platforms_py/configurations/arista_eos.yaml.j2)
+
+その他のプラットフォームでも `configuration_file` をインベントリで指定することは可能ですが、デバイス側の plugin クラスが `self.configurations` を読み取る場合にのみ有効になります (バンドルされている `CiscoIOS` / `AristaEOS` plugin は現状この hook を使用していません)。

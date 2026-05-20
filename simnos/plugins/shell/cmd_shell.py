@@ -23,7 +23,6 @@ BASIC_COMMANDS: dict = {
 }
 
 
-# pylint: disable=too-many-instance-attributes
 class CMDShell(Cmd):
     """
     Custom shell class to interact with NOS.
@@ -31,7 +30,6 @@ class CMDShell(Cmd):
 
     use_rawinput = False
 
-    # pylint: disable=too-many-arguments
     def __init__(
         self,
         stdin,
@@ -101,12 +99,10 @@ class CMDShell(Cmd):
                 self.reload_commands(changed_files)
         return line
 
-    # pylint: disable=unused-argument
     def postcmd(self, stop, line):
         """Method to return stop value to stop the shell"""
         return stop
 
-    # pylint: disable=unused-argument
     def do_help(self, arg):
         """Method to return help for commands"""
         lines = {}  # dict of {cmd: cmd_help}
@@ -141,7 +137,6 @@ class CMDShell(Cmd):
             return self.prompt == prompt_.format(base_prompt=self.base_prompt)
         return any(self.prompt == i.format(base_prompt=self.base_prompt) for i in prompt_)
 
-    # pylint: disable=too-many-branches
     def default(self, line):
         """Method called if no do_xyz methods found"""
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
@@ -184,7 +179,6 @@ class CMDShell(Cmd):
             log.error("shell.default '%s' command '%s' not found", self.base_prompt, [line])
             if callable(ret):
                 ret = "An error occurred related to the command function"
-        # pylint: disable=broad-except
         except ValueError:
             log.error("Output is still a callable")
             ret = "An error occurred"

@@ -241,7 +241,7 @@ class Nos:
 
         :param filename: OS path string to `.yaml/.yml` or `.py` file with NOS data
         """
-        if not self.is_file_ending_correct(filename):
+        if not self._is_file_ending_correct(filename):
             raise ValueError(f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
@@ -250,7 +250,7 @@ class Nos:
         elif filename.endswith(".py"):
             self._from_module(filename)
 
-    def is_file_ending_correct(self, filename: str) -> bool:
+    def _is_file_ending_correct(self, filename: str) -> bool:
         """
         Method to check if file extension is supported.
         Supported types are: .yaml, .yml and .py
