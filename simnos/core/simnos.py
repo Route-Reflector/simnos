@@ -219,7 +219,8 @@ class SimNOS:
 
         Pre-condition: ``_check_ports_and_replicas`` already validated that
         when ``replicas`` is truthy, ``port`` is a list[int] of length 2,
-        and otherwise ``port`` is an int. Cast assertions narrow for ty.
+        and otherwise ``port`` is an int. The ``isinstance`` assertions
+        below narrow ``port`` for ty without changing runtime behavior.
 
         :param host_name: string - name of the host
         :param port: integer or list of two integers - port to allocate
