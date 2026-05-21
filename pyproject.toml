@@ -102,6 +102,17 @@ tests = ["B201", "B301"]
 skips = ["B101", "B601"]
 
 
+[tool.ty.src]
+# Phase 1: non-blocking ty integration (#216).
+# Paramiko (untyped) generates ~67% of diagnostics (~318 of 474).
+# Excluding the two heaviest offenders drops total from 474 to ~156.
+# Phase 2 will reassess types-paramiko adoption and remove these exclusions.
+exclude = [
+    "simnos/plugins/servers/ssh_server_paramiko.py",
+    "tests/plugins/test_ssh_server_paramiko.py",
+]
+
+
 [tool.coverage.run]
 branch = true
 omit = [".*", ".venv"]
