@@ -5,6 +5,7 @@ The file can be found in simnos/core/simnos.py
 
 # pylint: disable=protected-access
 import logging
+import os
 import platform
 import threading
 from unittest.mock import MagicMock, Mock, patch
@@ -16,6 +17,7 @@ import yaml
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS, simnos
+from simnos.plugins.nos import nos_plugins
 from tests.utils import get_platforms_from_md, get_running_hosts
 
 
@@ -579,6 +581,65 @@ class TestPlatformsManifest:
                 pass
 
             dummy_function()
+
+    def test_available_platforms_derived_from_nos_plugins(self):
+        """Pin that `available_platforms` is derived from `nos_plugins.keys()`.
+
+        Source of truth integrity guard: any drift between the registry
+        (`nos_plugins`) and the public symbol breaks this test immediately,
+        catching the failure mode that issue #206 (G1) eliminated.
+        """
+        assert available_platforms == sorted(nos_plugins.keys())
+
+    def test_available_platforms_excludes_base_template(self):
+        """Pin that `base_template` is filtered out of both registry and manifest.
+
+        `simnos/plugins/nos/platforms_py/base_template.py` is the plugin
+        authoring template (BaseDevice example), not a user-facing platform.
+        It must not appear in `available_platforms` or `nos_plugins`. This
+        test catches any future loosening of the py glob filter.
+        """
+        assert "base_template" not in available_platforms
+        assert "base_template" not in nos_plugins
+
+    def test_available_platforms_have_yaml_source(self):
+        """Pin that every supported platform has a backing yaml file.
+
+        Catches "dangling key" drift: if a yaml is deleted in a future PR
+        but `available_platforms` is not updated (e.g. via a stale registry
+        cache), this test fails. All current platforms ship at least a yaml
+        definition; py-only entries (BaseDevice subclasses) live alongside
+        yaml entries.
+        """
+        yaml_dir = "simnos/plugins/nos/platforms_yaml"
+        for platform_name in available_platforms:
+            yaml_path = f"{yaml_dir}/{platform_name}.yaml"
+            assert os.path.isfile(yaml_path), (
+                f"Platform '{platform_name}' is in available_platforms but its yaml file is missing: {yaml_path}"
+            )
+
+    def test_simnos_decorator_rejects_unknown_platform(self):
+        """Pin that `simnos(platform=...)` raises at decorator-factory evaluation time.
+
+        The validation lives in the decorator factory body (before the
+        inner `decorator(func)` is returned), so a typo like
+        `@simnos(platform="cisxo_ios")` raises at module load time rather
+        than waiting until the wrapped function is called. Catching this
+        early avoids paying test startup cost on a doomed run.
+        """
+        with pytest.raises(ValueError, match="not supported"):
+            simnos(platform="nonexistent_platform")
+
+    def test_simnos_decorator_accepts_known_platform(self):
+        """Pin that a known platform does not raise at decorator evaluation.
+
+        Negative-only tests (typo reject) would still pass if the new
+        validation incorrectly rejected every platform; this happy-path
+        test ensures the validation discriminates correctly.
+        """
+        # Should not raise — known platform from registry.
+        decorator = simnos(platform="cisco_ios")
+        assert callable(decorator)
 
 
 class TestWarnSecurity:

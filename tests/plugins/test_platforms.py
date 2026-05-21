@@ -23,7 +23,7 @@ from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_command
 def get_yaml_only_platforms() -> list[str]:
     """Return platforms that have YAML definitions but no Python module."""
     py_modules = set(get_py_nos_modules())
-    return [p for p in sorted(nos_plugins) if p not in py_modules and p != "base_template"]
+    return [p for p in sorted(nos_plugins) if p not in py_modules]
 
 
 def get_py_nos_modules() -> list[str]:
