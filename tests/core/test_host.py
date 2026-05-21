@@ -76,7 +76,7 @@ class TestHost:
         """
         platform = "wrong_platform"
         host.simnos = SimNOS()
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Platform wrong_platform is not supported by SIMNOS"):
             # pylint: disable=protected-access
             host._check_if_platform_is_supported(platform)
 

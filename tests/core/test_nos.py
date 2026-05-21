@@ -81,7 +81,7 @@ class NosTest(unittest.TestCase):
         Test that the validate raises a ValidationError
         when the NOS attributes are invalid.
         """
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"commands"):
             nos = Nos(commands="invalid_commands")
             nos.validate()
 
@@ -103,33 +103,24 @@ class NosTest(unittest.TestCase):
 
     def test_from_dict_incorrect_name(self):
         """
-        Test that the from_dict method raises a
-        ValidationError when the name is incorrect.
+        Test that Nos raises a ValidationError when the name is incorrect.
         """
-        with pytest.raises(ValidationError):
-            Nos({"name": 123, "initial_prompt": "MySimNOS>", "commands": self.commands})
+        with pytest.raises(ValidationError, match=r"\bname\b"):
+            Nos(name=123, initial_prompt="MySimNOS>", commands=self.commands)
 
     def test_from_dict_incorrect_initial_prompt(self):
         """
-        Test that the from_dict method raises a
-        ValidationError when the initial_prompt is incorrect.
+        Test that Nos raises a ValidationError when the initial_prompt is incorrect.
         """
-        with pytest.raises(ValidationError):
-            Nos({"name": "MySimNOS", "initial_prompt": 123, "commands": self.commands})
+        with pytest.raises(ValidationError, match=r"initial_prompt"):
+            Nos(name="MySimNOS", initial_prompt=123, commands=self.commands)
 
     def test_from_dict_incorrect_commands(self):
         """
-        Test that the from_dict method raises a
-        ValidationError when the commands are incorrect.
+        Test that Nos raises a ValidationError when the commands are incorrect.
         """
-        with pytest.raises(ValidationError):
-            Nos(
-                {
-                    "name": "MySimNOS",
-                    "initial_prompt": "MySimNOS>",
-                    "commands": "invalid_commands",
-                }
-            )
+        with pytest.raises(ValidationError, match=r"commands"):
+            Nos(name="MySimNOS", initial_prompt="MySimNOS>", commands="invalid_commands")
 
     def test_from_dict_only_name(self):
         """
@@ -188,7 +179,7 @@ class NosTest(unittest.TestCase):
         Test that the from_file method raises a
         FileNotFoundError when the file is incorrect.
         """
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError, match=r"incorrect_file\.yaml"):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.yaml")
 
@@ -210,7 +201,7 @@ class NosTest(unittest.TestCase):
         Test that the from_file method raises a
         FileNotFoundError when the file is incorrect.
         """
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError, match=r"incorrect_file\.py"):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.py")
 
@@ -232,7 +223,7 @@ class NosTest(unittest.TestCase):
         Test that the from_module method raises a
         FileNotFoundError when the file is incorrect.
         """
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(FileNotFoundError, match=r"incorrect_file\.py"):
             nos = Nos()
             # pylint: disable=protected-access
             nos._from_module("tests/assets/incorrect_file.py")
@@ -293,7 +284,7 @@ class NosTest(unittest.TestCase):
         """
         Test that we can register a nos model from a dict.
         """
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"output"):
             Nos(
                 name="MySimNOSPlugin",
                 initial_prompt="{base_prompt}>",
@@ -306,7 +297,7 @@ class NosTest(unittest.TestCase):
         """
         Test that we can register a nos model from a dict.
         """
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"\bname\b"):
             Nos(
                 name=123,
                 initial_prompt="{base_prompt}>",
@@ -319,7 +310,7 @@ class NosTest(unittest.TestCase):
         """
         Test that we can register a nos model from a dict.
         """
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError, match=r"output"):
             Nos(commands={"show clock": {"output": 42}})
 
     def test_yaml_file_command_is_overwritten_by_corresponding_module(self):
