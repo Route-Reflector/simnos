@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import MagicMock
 
 from simnos.core.pydantic_models import ModelSimnosInventory
-from simnos.core.servers import _SHUTDOWN_TIMEOUT
+from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.servers.telnet_server import (
     DO,
@@ -647,8 +647,8 @@ class SocketToShellTapTest(unittest.TestCase):
         self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
         # Should exit without processing the byte 'a' because the inner wait loop breaks
         self.sock.sendall.assert_not_called()
-        # Verify the interruptible wait uses _SHUTDOWN_TIMEOUT
-        self.shell_replied_event.wait.assert_called_with(timeout=_SHUTDOWN_TIMEOUT)
+        # Verify the interruptible wait uses SHUTDOWN_IO_TIMEOUT
+        self.shell_replied_event.wait.assert_called_with(timeout=SHUTDOWN_IO_TIMEOUT)
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
@@ -854,9 +854,9 @@ class WatchdogTest(unittest.TestCase):
 
     @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_sleep_interval_capped_by_shutdown_timeout(self, mock_sleep):
-        """Sleep interval is the minimum of watchdog_interval and _SHUTDOWN_TIMEOUT."""
-        self.server.watchdog_interval = 10.0  # Larger than _SHUTDOWN_TIMEOUT
+        """Sleep interval is the minimum of watchdog_interval and SHUTDOWN_IO_TIMEOUT."""
+        self.server.watchdog_interval = 10.0  # Larger than SHUTDOWN_IO_TIMEOUT
         self.run_srv.is_set.side_effect = [True, False]
         self.is_running.is_set.return_value = True
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
-        mock_sleep.assert_called_once_with(_SHUTDOWN_TIMEOUT)
+        mock_sleep.assert_called_once_with(SHUTDOWN_IO_TIMEOUT)

@@ -15,7 +15,8 @@ import time
 from typing import Any
 
 from simnos.core.nos import Nos
-from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
+from simnos.core.servers import TCPServerBase
+from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.tap_io import TapIO, process_tap_line
 
 log = logging.getLogger(__name__)
@@ -252,7 +253,7 @@ class TelnetServer(TCPServerBase):
 
             # Wait for the shell to reply, but check run_srv periodically
             # so that shutdown is not blocked for the full wait duration.
-            while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
+            while not shell_replied_event.wait(timeout=SHUTDOWN_IO_TIMEOUT):
                 if not run_srv.is_set():
                     break
             if not run_srv.is_set():
@@ -377,7 +378,7 @@ class TelnetServer(TCPServerBase):
         while run_srv.is_set():
             if not is_running.is_set():
                 break
-            time.sleep(min(self.watchdog_interval, _SHUTDOWN_TIMEOUT))
+            time.sleep(min(self.watchdog_interval, SHUTDOWN_IO_TIMEOUT))
         # Always stop the shell — whether run_srv or is_running caused the exit.
         shell.stop()
 

@@ -12,12 +12,13 @@ import sys
 import threading
 import time
 
-log = logging.getLogger(__name__)
+from simnos.core.timeouts import (
+    SHUTDOWN_IO_TIMEOUT,
+    SHUTDOWN_SERVER_PER_THREAD_JOIN,
+    SHUTDOWN_SERVER_STOP_DEADLINE,
+)
 
-# Timeout constants for shutdown
-_SHUTDOWN_TIMEOUT = 2  # Bounded timeout (seconds) for shutdown-critical I/O paths
-_STOP_DEADLINE = 10  # Total wall-clock budget for joining connection threads
-_PER_THREAD_JOIN = 2  # Max join timeout per individual connection thread
+log = logging.getLogger(__name__)
 
 
 def join_threads_with_deadline(
@@ -136,16 +137,20 @@ class TCPServerBase(ABC):
             with contextlib.suppress(OSError):
                 self._wakeup_w.send(b"\x00")
 
-        # fail-safe join — wakeup socket may have failed; bound by _SHUTDOWN_TIMEOUT.
-        self._listen_thread.join(timeout=_SHUTDOWN_TIMEOUT)
+        # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
+        self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
 
         try:
-            alive = join_threads_with_deadline(self._connection_threads, _STOP_DEADLINE, _PER_THREAD_JOIN)
+            alive = join_threads_with_deadline(
+                self._connection_threads,
+                SHUTDOWN_SERVER_STOP_DEADLINE,
+                SHUTDOWN_SERVER_PER_THREAD_JOIN,
+            )
             if alive:
                 log.warning(
                     "%d connection thread(s) did not exit within %ds",
                     len(alive),
-                    _STOP_DEADLINE,
+                    SHUTDOWN_SERVER_STOP_DEADLINE,
                 )
         finally:
             self._cleanup_resources()
