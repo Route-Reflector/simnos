@@ -10,13 +10,13 @@ import platform
 import threading
 from unittest.mock import MagicMock, Mock, patch
 
-import detect
 import pytest
 import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS, simnos
+from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import nos_plugins
 from tests.utils import get_platforms_from_md, get_running_hosts
 
@@ -53,7 +53,7 @@ class TestSimNOS:
             assert host.password in ["user"]
             assert host.port in {6000, 6001, 6002}
             assert host.server_inventory["plugin"] == "ParamikoSshServer"
-            if detect.docker and "WSL2" in platform.release():
+            if _is_in_docker() and "WSL2" in platform.release():
                 assert host.server_inventory["configuration"]["address"] == "0.0.0.0"
             else:
                 assert host.server_inventory["configuration"]["address"] == "127.0.0.1"

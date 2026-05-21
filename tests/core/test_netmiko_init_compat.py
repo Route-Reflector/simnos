@@ -9,9 +9,9 @@ Verifies that:
 """
 
 import contextlib
+import sys
 import threading
 
-import detect
 from netmiko import ConnectHandler
 import pytest
 
@@ -237,7 +237,7 @@ class TestShutdownEOF:
             net.stop()
             self._join_all_threads()
 
-        n_threads = 2 if detect.windows else 1
+        n_threads = 2 if sys.platform == "win32" else 1
         assert threading.active_count() == n_threads
 
     @pytest.mark.timeout(30)
@@ -263,5 +263,5 @@ class TestShutdownEOF:
         finally:
             self._join_all_threads()
 
-        n_threads = 2 if detect.windows else 1
+        n_threads = 2 if sys.platform == "win32" else 1
         assert threading.active_count() == n_threads
