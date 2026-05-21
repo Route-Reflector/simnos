@@ -12,7 +12,6 @@ import socket
 import threading
 import time
 
-import detect
 import yaml
 
 from simnos.core.host import Host
@@ -24,6 +23,7 @@ from simnos.core.timeouts import (
     SHUTDOWN_SAFETY_NET_DEADLINE,
     SHUTDOWN_SAFETY_NET_PER_THREAD,
 )
+from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import available_platforms, nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
@@ -56,7 +56,7 @@ default_inventory = {
 
 # If Windows or WSL, the configuration address is 0.0.0.0
 # WSL Bug: https://github.com/microsoft/WSL/issues/4983
-if detect.docker and "WSL2" in platform.release():
+if _is_in_docker() and "WSL2" in platform.release():
     server_config = default_inventory["default"]["server"]["configuration"]
     server_config["address"] = "0.0.0.0"  # noqa: S104
 

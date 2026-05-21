@@ -395,12 +395,6 @@ wheels = [
 ]
 
 [[package]]
-name = "detect"
-version = "2020.12.3"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a7/e4/50b692a4eb05580e7e081823e71c6b16cb6c506e766a2dfa5f9705f50c05/detect-2020.12.3.tar.gz", hash = "sha256:eecd6c41c17072b4db8dbfa850d979bda40b33b4f349ab4378205bceb74d712e", size = 1530, upload-time = "2020-12-03T20:18:30.881Z" }
-
-[[package]]
 name = "distlib"
 version = "0.4.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1232,7 +1226,6 @@ name = "simnos"
 version = "2.3.1"
 source = { editable = "." }
 dependencies = [
-    { name = "detect" },
     { name = "jinja2" },
     { name = "paramiko" },
     { name = "pydantic" },
@@ -1267,7 +1260,6 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "detect", specifier = "==2020.12.*" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "paramiko", specifier = ">=4.0,<6.0" },
     { name = "pydantic", specifier = "<3.0" },
