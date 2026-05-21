@@ -3,11 +3,15 @@ This module is the point of entry for all NOS plugins.
 
 It gets the names and filenames to load the NOS plugins
 later whenever needed (lazy loading).
-The NOS plugins are loaded first, using the .py modules and
-then the .yaml files in the platforms directory for those which are left.
+The NOS plugins are loaded first from YAML files, then Python modules
+override or extend any existing entries.
 
 With .py modules we can have functionality, while using YAML is only
 intended for quick development of new NOS plugins.
+
+``available_platforms`` is the public derived view of this registry —
+``simnos.core.nos.available_platforms`` re-exports it for backward
+compatibility with callers that still import from the core module.
 """
 
 import glob
