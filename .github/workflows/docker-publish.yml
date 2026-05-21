@@ -10,6 +10,8 @@ on:
 permissions:
   contents: read
   packages: write
+  # Trivy SARIF upload to GitHub Code Scanning (Security tab).
+  security-events: write
 
 env:
   REGISTRY: ghcr.io
@@ -54,13 +56,31 @@ jobs:
           tags: "${{ env.IMAGE_NAME }}:scan"
           cache-from: "type=gha,scope=docker-scan"
           cache-to: "type=gha,mode=max,scope=docker-scan"
-      - name: "Trivy vulnerability scan"
+      - name: "Trivy vulnerability scan (table, fail on CRITICAL/HIGH)"
         uses: "aquasecurity/trivy-action@v0.36.0"
         with:
           image-ref: "${{ env.IMAGE_NAME }}:scan"
           format: "table"
           exit-code: "1"
           severity: "CRITICAL,HIGH"
+      - name: "Trivy vulnerability scan (SARIF for Code Scanning)"
+        if: always()
+        continue-on-error: true
+        uses: "aquasecurity/trivy-action@v0.36.0"
+        with:
+          image-ref: "${{ env.IMAGE_NAME }}:scan"
+          format: "sarif"
+          output: "trivy-results.sarif"
+      - name: "Upload Trivy SARIF to GitHub Code Scanning"
+        # SARIF upload is a security observability channel, not a release gate.
+        # `continue-on-error: true` keeps a transient Code Scanning outage from
+        # failing the scan job (which would block `publish` via `needs: scan`).
+        if: always()
+        continue-on-error: true
+        uses: "github/codeql-action/upload-sarif@v3"
+        with:
+          sarif_file: "trivy-results.sarif"
+          category: "trivy-docker"
 
   publish:
     runs-on: "ubuntu-latest"
@@ -70,6 +90,12 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
+        with:
+          # metadata-action@v6 needs full history + tags so semver pattern
+          # extraction works on workflow_dispatch / manual re-runs (release
+          # published trigger alone is fine, but this guards against drift).
+          fetch-depth: 0
+          fetch-tags: true
       - name: "Lowercase image name"
         run: echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >> "$GITHUB_ENV"
       - name: "Set up QEMU"

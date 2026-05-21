@@ -47,20 +47,20 @@ jobs:
         run: "uv build"
       - name: "Verify bundled moduli is present in artifacts (issue #189)"
         run: |
-          echo "::group::wheel contents"
-          unzip -l dist/simnos-*.whl | grep -E 'simnos/plugins/servers/moduli$' || {
-            echo "::error::Bundled moduli file missing from wheel — packaging regression detected"
-            unzip -l dist/simnos-*.whl
-            exit 1
+          verify_moduli() {
+            local label="$1"
+            shift
+            echo "::group::${label} contents"
+            if ! "$@" | grep -E 'simnos/plugins/servers/moduli$'; then
+              echo "::error::Bundled moduli file missing from ${label} — packaging regression detected"
+              "$@"
+              echo "::endgroup::"
+              exit 1
+            fi
+            echo "::endgroup::"
           }
-          echo "::endgroup::"
-          echo "::group::sdist contents"
-          tar tzf dist/simnos-*.tar.gz | grep -E 'simnos/plugins/servers/moduli$' || {
-            echo "::error::Bundled moduli file missing from sdist — packaging regression detected"
-            tar tzf dist/simnos-*.tar.gz
-            exit 1
-          }
-          echo "::endgroup::"
+          verify_moduli "wheel" unzip -l dist/simnos-*.whl
+          verify_moduli "sdist" tar tzf dist/simnos-*.tar.gz
       - name: "Upload distributions"
         uses: "actions/upload-artifact@v7"
         with:

@@ -32,10 +32,12 @@ rules:
     check-multi-line-strings: false
 
   # GitHub Actions workflows use `on:` as a top-level key, which YAML parses
-  # as boolean `True`. Disable truthy check on keys to allow this idiom.
+  # as boolean `True`. Allow `on`/`off` as truthy values (alongside `true`/`false`)
+  # so the workflow idiom passes while keeping key-level enforcement on (narrow
+  # to this set, instead of disabling key checks entirely).
   truthy:
-    allowed-values: ['true', 'false']
-    check-keys: false
+    allowed-values: ['true', 'false', 'on', 'off']
+    check-keys: true
 
   # Allow up to 3 consecutive blank lines (excluding platform YAMLs which
   # contain raw command outputs that may include multiple blank lines).
