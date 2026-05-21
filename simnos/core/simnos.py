@@ -130,6 +130,8 @@ class SimNOS:
 
     def _load_inventory_yaml(self) -> None:
         """Helper method to load SimNOS inventory if it is yaml."""
+        # narrow for ty; _is_inventory_in_yaml() guarantees self.inventory is a str.
+        assert isinstance(self.inventory, str)  # noqa: S101 — caller-side invariant
         with open(self.inventory, encoding="utf-8") as f:
             self.inventory = yaml.safe_load(f.read())
 
@@ -173,17 +175,22 @@ class SimNOS:
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
-        if not replicas and isinstance(port, list):
-            raise ValueError("If replicas is not set, port must be an integer.")
-        if replicas and not isinstance(port, list):
+        # Structured as guard cascade so ty can narrow `port` to list[int] after the
+        # initial isinstance check; the original flat chain re-tested `isinstance`
+        # implicitly each line and lost type narrowing.
+        if not replicas:
+            if isinstance(port, list):
+                raise ValueError("If replicas is not set, port must be an integer.")
+            return  # port is int, no further check needed
+        if not isinstance(port, list):
             raise ValueError("If replicas is set, port must be a list of two integers.")
-        if replicas and len(port) != 2:
+        if len(port) != 2:
             raise ValueError("If replicas is set, port must be a list of two integers.")
-        if replicas and port[0] >= port[1]:
+        if port[0] >= port[1]:
             raise ValueError("If replicas is set, port[0] must be less than port[1].")
-        if replicas and replicas < 1:
+        if replicas < 1:
             raise ValueError("If replicas is set, replicas must be greater than 0.")
-        if replicas and port[1] - port[0] + 1 != replicas:
+        if port[1] - port[0] + 1 != replicas:
             raise ValueError("If replicas is set, port range must be equal to the number of replicas.")
 
     def _instantiate_host_object(
@@ -210,14 +217,20 @@ class SimNOS:
         Method to get hosts and ports correctly
         depending on the number of replicas (if exists).
 
+        Pre-condition: ``_check_ports_and_replicas`` already validated that
+        when ``replicas`` is truthy, ``port`` is a list[int] of length 2,
+        and otherwise ``port`` is an int. Cast assertions narrow for ty.
+
         :param host_name: string - name of the host
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
         if replicas:
+            assert isinstance(port, list)  # noqa: S101 — caller-side invariant from _check_ports_and_replicas
             hosts_name = [f"{host_name}{i}" for i in range(replicas)]
             ports = list(range(port[0], port[1] + 1))
         else:
+            assert isinstance(port, int)  # noqa: S101 — caller-side invariant
             hosts_name = [host_name]
             ports = [port]
         return hosts_name, ports

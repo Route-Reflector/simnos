@@ -34,17 +34,12 @@ jobs:
         run: "uv run invoke yamllint"
       - name: "Security: bandit"
         run: "uv run invoke bandit"
-      # Typecheck: ty is Phase 1 non-blocking (#216).
-      # First step prints "Found N diagnostics" to CI log for count trending;
-      # second step emits GitHub Actions annotations to PR review.
-      # Both wrapped with continue-on-error to avoid blocking the workflow
-      # while ~156 diagnostics still exist. Phase 2 will fix them and flip
-      # this to blocking by removing both --no-exit-zero and continue-on-error.
-      - name: "Typecheck: ty - count trend (Phase 1 non-blocking)"
-        continue-on-error: true
-        run: "uv run invoke ty --no-exit-zero"
-      - name: "Typecheck: ty - PR annotations (Phase 1 non-blocking)"
-        continue-on-error: true
+      # Typecheck: ty is blocking since Phase 2 (#218).
+      # Production code (simnos/) is ty-clean; tests/ excluded via
+      # pyproject.toml [tool.ty.src]. New type errors in production fail CI.
+      # GitHub Actions annotation format surfaces error locations directly in
+      # PR review's "Files changed" tab.
+      - name: "Typecheck: ty"
         run: "uv run ty check . --output-format=github"
 
   pytest:

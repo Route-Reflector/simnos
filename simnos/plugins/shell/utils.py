@@ -50,14 +50,22 @@ def change_jinja_to_corresponding_py(files: list[str]):
     return list(files)
 
 
+# Module-level cache for get_files_changed. Previously stored as a
+# function attribute (get_files_changed.files_lasttime_changed_old),
+# which defeats static type analysis. Moved to module scope so ty can
+# track the type properly.
+_files_lasttime_changed_old: dict[str, float] = {}
+
+
 def get_files_changed(directory: str):
     """Method to get files changed under a directory"""
+    global _files_lasttime_changed_old
     files_changed: list[str] = []
     files_under_directory: list[str] = get_files_under_directory(directory)
-    if not hasattr(get_files_changed, "files_lasttime_changed_old"):
-        get_files_changed.files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
-    files_changed += get_new_files(get_files_changed.files_lasttime_changed_old.keys(), files_under_directory)
-    files_changed += get_files_recently_modified(files_under_directory, get_files_changed.files_lasttime_changed_old)
+    if not _files_lasttime_changed_old:
+        _files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
+    files_changed += get_new_files(list(_files_lasttime_changed_old.keys()), files_under_directory)
+    files_changed += get_files_recently_modified(files_under_directory, _files_lasttime_changed_old)
     files_changed = change_jinja_to_corresponding_py(files_changed)
-    get_files_changed.files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
+    _files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
     return files_changed

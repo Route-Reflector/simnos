@@ -29,8 +29,14 @@ class TapIO(io.StringIO):
         self._cond: threading.Condition = threading.Condition()
         super().__init__(initial_value, newline)
 
-    def readline(self):
-        """Block until a line is available or the server shuts down."""
+    def readline(self, size: int | None = -1) -> str:
+        """Block until a line is available or the server shuts down.
+
+        The ``size`` argument is accepted for compatibility with
+        ``io.IOBase.readline`` but ignored; this stream returns complete
+        lines from the internal queue regardless of byte budget.
+        """
+        del size  # parent-class signature compatibility only
         with self._cond:
             while self.run_srv.is_set():
                 if self.lines:

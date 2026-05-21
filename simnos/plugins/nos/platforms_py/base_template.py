@@ -42,5 +42,5 @@ class BaseDevice:
 
     def render(self, template: str, **kwargs) -> str:
         """Render a template."""
-        template = self.env.get_template(template)
-        return template.render(**kwargs)
+        tmpl = self.env.get_template(template)
+        return tmpl.render(**kwargs)
