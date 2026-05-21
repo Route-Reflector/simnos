@@ -19,6 +19,11 @@ from simnos.core.host import Host
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelSimnosInventory
 from simnos.core.servers import join_threads_with_deadline
+from simnos.core.timeouts import (
+    SHUTDOWN_GLOBAL_DEADLINE,
+    SHUTDOWN_SAFETY_NET_DEADLINE,
+    SHUTDOWN_SAFETY_NET_PER_THREAD,
+)
 from simnos.plugins.nos import available_platforms, nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
@@ -295,10 +300,6 @@ class SimNOS:
             log.info("Device %s is running on port %s", host.name, host.port)
             self._warn_security(host)
 
-    # Global wall-clock budget for the entire stop() operation.
-    # Covers host.stop() calls + safety-net thread join.
-    _STOP_GLOBAL_DEADLINE = 60
-
     def stop(
         self,
         hosts: str | list[str] | None = None,
@@ -308,7 +309,7 @@ class SimNOS:
         """
         Function to stop NOS servers instances and join managed threads.
 
-        Uses a global deadline (_STOP_GLOBAL_DEADLINE seconds) to bound the
+        Uses a global deadline (SHUTDOWN_GLOBAL_DEADLINE seconds) to bound the
         total wall-clock time.  If the deadline is exceeded, remaining hosts
         may be left running and a warning is logged.
 
@@ -316,7 +317,7 @@ class SimNOS:
         :param parallel: if True, stop hosts in parallel using threads.
         :param workers: max number of worker threads (default: min(32, host_count)).
         """
-        deadline = time.monotonic() + self._STOP_GLOBAL_DEADLINE
+        deadline = time.monotonic() + SHUTDOWN_GLOBAL_DEADLINE
         hosts: list[Host] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
         managed_threads = self._collect_server_threads(hosts)
@@ -330,7 +331,7 @@ class SimNOS:
         )
         if managed_threads:
             remaining = max(0, deadline - time.monotonic())
-            self._join_threads(managed_threads, timeout=min(self._SAFETY_NET_DEADLINE, remaining))
+            self._join_threads(managed_threads, timeout=min(SHUTDOWN_SAFETY_NET_DEADLINE, remaining))
 
     def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
         """Collect all managed threads from host servers before stopping."""
@@ -339,11 +340,6 @@ class SimNOS:
             if host.server is not None:
                 threads.extend(host.server.managed_threads)
         return threads
-
-    # Safety-net join budget: longer than per-server budget because this
-    # covers ALL hosts after they have already been told to stop.
-    _SAFETY_NET_DEADLINE = 15
-    _SAFETY_NET_PER_THREAD = 5
 
     def _join_threads(
         self,
@@ -355,8 +351,8 @@ class SimNOS:
         Server threads are already joined by TCPServerBase.stop();
         this is a safety net for any stragglers.
         """
-        total = timeout if timeout is not None else self._SAFETY_NET_DEADLINE
-        alive = join_threads_with_deadline(threads, total, self._SAFETY_NET_PER_THREAD)
+        total = timeout if timeout is not None else SHUTDOWN_SAFETY_NET_DEADLINE
+        alive = join_threads_with_deadline(threads, total, SHUTDOWN_SAFETY_NET_PER_THREAD)
         if alive:
             log.warning("%d SimNOS thread(s) did not exit within timeout", len(alive))
 

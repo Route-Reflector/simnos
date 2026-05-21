@@ -15,7 +15,8 @@ import paramiko
 import paramiko.rsakey
 
 from simnos.core.nos import Nos
-from simnos.core.servers import _SHUTDOWN_TIMEOUT, TCPServerBase
+from simnos.core.servers import TCPServerBase
+from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.tap_io import TapIO, process_tap_line
 
 log = logging.getLogger(__name__)
@@ -205,7 +206,7 @@ def channel_to_shell_tap(
 
         # Wait for the shell to reply, but check run_srv periodically
         # so that shutdown is not blocked for the full wait duration.
-        while not shell_replied_event.wait(timeout=_SHUTDOWN_TIMEOUT):
+        while not shell_replied_event.wait(timeout=SHUTDOWN_IO_TIMEOUT):
             if not run_srv.is_set():
                 break
         if not run_srv.is_set():
@@ -466,7 +467,7 @@ class ParamikoSshServer(TCPServerBase):
             if not is_running.is_set():
                 break
 
-            time.sleep(min(self.watchdog_interval, _SHUTDOWN_TIMEOUT))
+            time.sleep(min(self.watchdog_interval, SHUTDOWN_IO_TIMEOUT))
 
         shell.stop()
 
@@ -549,8 +550,8 @@ class ParamikoSshServer(TCPServerBase):
         if not ParamikoSshServer._moduli_loaded:
             session.disabled_algorithms = _DISABLED_GEX_ALGORITHMS
         session.add_server_key(self._ssh_server_key)
-        session.banner_timeout = _SHUTDOWN_TIMEOUT
-        session.handshake_timeout = _SHUTDOWN_TIMEOUT
+        session.banner_timeout = SHUTDOWN_IO_TIMEOUT
+        session.handshake_timeout = SHUTDOWN_IO_TIMEOUT
 
         try:
             # create the server
@@ -573,7 +574,7 @@ class ParamikoSshServer(TCPServerBase):
             # wait for the client to open a channel
             channel = None
             while channel is None and is_running.is_set() and session.is_alive():
-                channel = session.accept(_SHUTDOWN_TIMEOUT)
+                channel = session.accept(SHUTDOWN_IO_TIMEOUT)
             if channel is None:
                 log.warning("session.accept() returned None or server stopping, closing transport")
                 return

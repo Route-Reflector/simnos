@@ -15,9 +15,9 @@ from unittest.mock import MagicMock, Mock
 
 import paramiko
 
+from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.ssh_server_paramiko import (
     _BUNDLED_MODULI,
-    _SHUTDOWN_TIMEOUT,
     ParamikoSshServer,
     ParamikoSshServerInterface,
     channel_to_shell_tap,
@@ -307,7 +307,7 @@ class ChannelToShellTapTest(unittest.TestCase):
             shell_replied_event=self.mock_shell_replied_event,
             run_srv=self.mock_run_srv,
         )
-        self.mock_shell_replied_event.wait.assert_called_with(timeout=_SHUTDOWN_TIMEOUT)
+        self.mock_shell_replied_event.wait.assert_called_with(timeout=SHUTDOWN_IO_TIMEOUT)
 
     def test_channel_to_shell_tap_break_loop_when_channel_not_active(self):
         """Check that channel_to_shell_tap breaks the loop when the channel is not active."""
@@ -1833,7 +1833,7 @@ class TeardownFixTests(unittest.TestCase):
 
     @mock.patch("paramiko.Transport")
     def test_session_accept_bounded(self, mock_transport_cls: MagicMock):
-        """session.accept() should be called with _SHUTDOWN_TIMEOUT."""
+        """session.accept() should be called with SHUTDOWN_IO_TIMEOUT."""
         mock_session = MagicMock()
         mock_session.accept.return_value = None
         mock_transport_cls.return_value = mock_session
@@ -1843,7 +1843,7 @@ class TeardownFixTests(unittest.TestCase):
         server = ParamikoSshServer(**self.arguments)
         server.connection_function(MagicMock(), mock_is_running)
 
-        mock_session.accept.assert_called_with(_SHUTDOWN_TIMEOUT)
+        mock_session.accept.assert_called_with(SHUTDOWN_IO_TIMEOUT)
 
     @mock.patch("paramiko.Transport")
     def test_session_accept_returns_on_stop(self, mock_transport_cls: MagicMock):
@@ -1885,8 +1885,8 @@ class TeardownFixTests(unittest.TestCase):
         server = ParamikoSshServer(**self.arguments)
         server.connection_function(MagicMock(), mock_is_running)
 
-        assert mock_session.banner_timeout == _SHUTDOWN_TIMEOUT
-        assert mock_session.handshake_timeout == _SHUTDOWN_TIMEOUT
+        assert mock_session.banner_timeout == SHUTDOWN_IO_TIMEOUT
+        assert mock_session.handshake_timeout == SHUTDOWN_IO_TIMEOUT
 
     @mock.patch("simnos.plugins.servers.ssh_server_paramiko.channel_to_shell_tap")
     @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_channel_tap")
@@ -2000,7 +2000,7 @@ class SshIntegrationTests(unittest.TestCase):
 
     def _assert_stop_time(self, elapsed):
         """Assert stop() completed within the expected time budget."""
-        budget = _SHUTDOWN_TIMEOUT * 3 + 2
+        budget = SHUTDOWN_IO_TIMEOUT * 3 + 2
         self.assertLess(elapsed, budget, f"stop() took {elapsed:.1f}s, expected < {budget}s")
 
     def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
