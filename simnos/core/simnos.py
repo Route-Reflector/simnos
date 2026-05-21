@@ -19,7 +19,7 @@ from simnos.core.host import Host
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelSimnosInventory
 from simnos.core.servers import join_threads_with_deadline
-from simnos.plugins.nos import nos_plugins
+from simnos.plugins.nos import available_platforms, nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
 
@@ -461,6 +461,10 @@ def simnos(platform: str | None = None, inventory: dict | None = None, return_in
         raise ValueError("platform and inventory cannot be used together")
     if not platform and not inventory:
         raise ValueError("platform or inventory must be set")
+    if platform and platform not in available_platforms:
+        raise ValueError(
+            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {available_platforms}"
+        )
     if platform:
         inventory = {
             "hosts": {

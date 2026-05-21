@@ -12,59 +12,6 @@ from simnos.core.pydantic_models import ModelNosAttributes
 
 log = logging.getLogger(__name__)
 
-available_platforms: list[str] = [
-    "alcatel_aos",
-    "alcatel_sros",
-    "allied_telesis_awplus",
-    "arista_eos",
-    "aruba_aoscx",
-    "aruba_os",
-    "avaya_ers",
-    "avaya_vsp",
-    "broadcom_icos",
-    "brocade_fastiron",
-    "brocade_netiron",
-    "checkpoint_gaia",
-    "ciena_saos",
-    "cisco_apic",
-    "cisco_asa",
-    "cisco_ftd",
-    "cisco_ios",
-    "cisco_nxos",
-    "cisco_s300",
-    "cisco_viptela",
-    "cisco_wlc_ssh",
-    "cisco_xr",
-    "dell_force10",
-    "dell_powerconnect",
-    "dlink_ds",
-    "edgecore",
-    "eltex",
-    "ericsson_ipos",
-    "extreme_exos",
-    "extreme_slxos",
-    "fortinet",
-    "hp_comware",
-    "hp_procurve",
-    "huawei_smartax",
-    "huawei_vrp",
-    "ipinfusion_ocnos",
-    "juniper_junos",
-    "juniper_screenos",
-    "linux",
-    "mikrotik_routeros",
-    "oneaccess_oneos",
-    "paloalto_panos",
-    "ruckus_fastiron",
-    "ubiquiti_edgerouter",
-    "ubiquiti_edgeswitch",
-    "vyatta_vyos",
-    "watchguard_firebox",
-    "yamaha",
-    "zte_zxros",
-    "zyxel_os",
-]
-
 
 class Nos:
     """
@@ -233,3 +180,14 @@ class Nos:
         Supported types are: .yaml, .yml and .py
         """
         return filename.endswith((".yaml", ".yml", ".py"))
+
+
+# Re-export `available_platforms` from simnos.plugins.nos so existing callers
+# (e.g. `from simnos.core.nos import available_platforms`) keep working after
+# the source of truth was moved to the dynamically-derived registry. Placed
+# at file end to avoid circular import with simnos.plugins.nos.
+# `import X as X` + explicit `__all__` keeps mypy strict mode happy about
+# implicit re-export.
+from simnos.plugins.nos import available_platforms as available_platforms  # noqa: E402
+
+__all__ = ["Nos", "available_platforms"]
