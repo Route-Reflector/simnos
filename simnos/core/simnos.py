@@ -175,21 +175,23 @@ class SimNOS:
         :param port: integer or list of two integers - port to allocate
         :param replicas: integer - number of hosts to create
         """
-        # Structured as guard cascade so ty can narrow `port` to list[int] after the
-        # initial isinstance check; the original flat chain re-tested `isinstance`
-        # implicitly each line and lost type narrowing.
-        if not replicas:
+        # `is None` (not `not replicas`) so that replicas=0 is treated as "set
+        # with invalid value" and reaches the `replicas < 1` check below. T-12
+        # PR #211 recorded this as a known quirk; #220 promotes the check.
+        # Guard cascade also lets ty narrow `port` to list[int] after the
+        # initial isinstance check.
+        if replicas is None:
             if isinstance(port, list):
                 raise ValueError("If replicas is not set, port must be an integer.")
             return  # port is int, no further check needed
+        if replicas < 1:
+            raise ValueError("If replicas is set, replicas must be greater than 0.")
         if not isinstance(port, list):
             raise ValueError("If replicas is set, port must be a list of two integers.")
         if len(port) != 2:
             raise ValueError("If replicas is set, port must be a list of two integers.")
         if port[0] >= port[1]:
             raise ValueError("If replicas is set, port[0] must be less than port[1].")
-        if replicas < 1:
-            raise ValueError("If replicas is set, replicas must be greater than 0.")
         if port[1] - port[0] + 1 != replicas:
             raise ValueError("If replicas is set, port range must be equal to the number of replicas.")
 
