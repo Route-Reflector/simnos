@@ -40,6 +40,29 @@ def bandit(context):
 
 
 @task
+def ty(context, exit_zero=True):
+    """Run ty type-checker (Phase 1 non-blocking, see #216).
+
+    Phase 1 ships ty in a non-blocking mode while the codebase still
+    has ~156 diagnostics (paramiko-heavy files are excluded via
+    pyproject.toml ``[tool.ty.src]``). Phase 2 will gradually fix the
+    remaining errors and flip this task to blocking by changing the
+    ``exit_zero`` default to ``False`` and dropping
+    ``continue-on-error: true`` from CI.
+
+    Args:
+        exit_zero: When True (default, for local invoke chains), pass
+            ``--exit-zero`` so ty never exits non-zero. CI runs
+            ``uv run invoke ty --no-exit-zero`` and relies on
+            ``continue-on-error: true`` for non-blocking — this lets the
+            step icon reflect ty's verdict so failing trends are visible
+            in GitHub Actions UI.
+    """
+    flag = "--exit-zero " if exit_zero else ""
+    run_cmd(context, f"uv run ty check . {flag}".rstrip())
+
+
+@task
 def docs(context):
     """Build and serve docs locally for development."""
     run_cmd(context, "mkdocs serve --dev-addr 0.0.0.0:8001")
