@@ -11,38 +11,20 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
-          python-version: "3.13"
-      - name: "Linting: ruff"
-        run: "uv run invoke ruff"
-      - name: "Security: bandit"
-        run: "uv run invoke bandit"
-      - name: "Run Tests"
-        run: "uv run pytest -n auto"
-
+  # G7 / #222: removed the duplicate `test` job. main.yml runs lint + pytest on
+  # every tag push (via `push.tags: ["v*"]`), so the tag-pushed `release:
+  # published` trigger here arrives after main.yml has already verified the
+  # commit. Releasing without re-running the same checks avoids ~3-4 minutes
+  # of duplicate CI per release and keeps lint coverage (incl. yamllint) on
+  # the main.yml SSoT instead of partial copies here.
   build:
     runs-on: "ubuntu-latest"
-    needs:
-      - "test"
     steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
         with:
-          version: "0.9.8"
-          enable-cache: true
           python-version: "3.13"
+          activate-environment: "false"
       - name: "Build package"
         run: "uv build"
       - name: "Verify bundled moduli is present in artifacts (issue #189)"

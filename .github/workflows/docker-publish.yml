@@ -17,25 +17,10 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  test:
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Check out repository code"
-        uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
-          python-version: "3.13"
-      - name: "Linting: ruff"
-        run: "uv run invoke ruff"
-      - name: "Security: bandit"
-        run: "uv run invoke bandit"
-      - name: "Run Tests"
-        run: "uv run pytest -n auto"
-
+  # G7 / #222: removed the duplicate `test` job. main.yml runs lint + pytest on
+  # every tag push, so by the time `release: published` fires here the commit
+  # is already verified. Keeps the lint/test SSoT on main.yml and saves CI
+  # minutes per release.
   scan:
     runs-on: "ubuntu-latest"
     steps:
@@ -85,7 +70,6 @@ jobs:
   publish:
     runs-on: "ubuntu-latest"
     needs:
-      - "test"
       - "scan"
     steps:
       - name: "Check out repository code"

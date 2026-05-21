@@ -12,12 +12,8 @@ jobs:
   netmiko:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
-      - uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"
         run: "uv sync --group compatibility"
       - name: "Run netmiko compatibility tests"
@@ -26,12 +22,8 @@ jobs:
   scrapli:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
-      - uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"
         run: "uv sync --group compatibility"
       - name: "Run scrapli compatibility tests"
@@ -40,12 +32,8 @@ jobs:
   ansible:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: "actions/checkout@v6"
-      - uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"
         run: "uv sync --group compatibility"
       - name: "Install ansible collections"

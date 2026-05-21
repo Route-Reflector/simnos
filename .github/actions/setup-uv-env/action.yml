@@ -1,0 +1,37 @@
+---
+name: "Setup uv environment"
+description: >-
+  Checks out the repository and installs uv with the project-pinned version.
+  Replaces the previously-duplicated checkout + setup-uv pair across all
+  SIMNOS workflows (see #222 / G7). When `setup-uv` is bumped, only this
+  file needs editing.
+inputs:
+  python-version:
+    description: >-
+      Python version for uv to set up. Leave empty to let uv resolve from
+      pyproject.toml's `requires-python` (used by lint-only jobs).
+    required: false
+    default: ""
+  activate-environment:
+    description: >-
+      Activate the uv-managed virtualenv on $PATH. Default `true`; the docker
+      build job sets `false` because it does not run python directly.
+    required: false
+    default: "true"
+  enable-cache:
+    description: >-
+      Enable uv's GitHub Actions cache for resolution speedups.
+    required: false
+    default: "true"
+runs:
+  using: "composite"
+  steps:
+    - name: "Check out repository code"
+      uses: "actions/checkout@v6"
+    - name: "Install uv"
+      uses: "astral-sh/setup-uv@v7"
+      with:
+        version: "0.9.8"
+        activate-environment: "${{ inputs.activate-environment }}"
+        enable-cache: "${{ inputs.enable-cache }}"
+        python-version: "${{ inputs.python-version }}"
