@@ -220,7 +220,7 @@ class TestSimNOS:
         """
         net = SimNOS()
         net.allocated_ports = [5000]
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"already in use"):
             net._allocate_port(5000)
 
     def test_allocate_port(self):
@@ -264,16 +264,21 @@ class TestSimNOS:
         when replicas is not set.
         """
         inventory = {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}}
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"replicas is not set, port must be an integer"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_int(self):
         """
         Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and port is an int.
+
+        Note: ``replicas`` lives on each host (not in ``default``) because
+        ``InventoryDefaultSection`` uses ``extra="forbid"``. Keeping ``port`` in
+        ``default`` while moving ``replicas`` to the host lets the merged params
+        reach ``_check_ports_and_replicas`` without tripping pydantic first.
         """
-        inventory = {"default": {"port": 5000, "replicas": 2}, "hosts": {"R1": {}}}
-        with pytest.raises(ValueError):
+        inventory = {"default": {"port": 5000}, "hosts": {"R1": {"replicas": 2}}}
+        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_list_not_enough_ports(self):
@@ -281,8 +286,8 @@ class TestSimNOS:
         Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and there are not enough ports.
         """
-        inventory = {"default": {"port": [5000], "replicas": 2}, "hosts": {"R1": {}}}
-        with pytest.raises(ValueError):
+        inventory = {"default": {"port": [5000]}, "hosts": {"R1": {"replicas": 2}}}
+        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_list_too_many_ports(self):
@@ -291,10 +296,10 @@ class TestSimNOS:
         when replicas is set and there are too many ports.
         """
         inventory = {
-            "default": {"port": [5000, 5001, 5002], "replicas": 2},
-            "hosts": {"R1": {}},
+            "default": {"port": [5000, 5001, 5002]},
+            "hosts": {"R1": {"replicas": 2}},
         }
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_port_1_larger_than_port_2(self):
@@ -303,22 +308,28 @@ class TestSimNOS:
         when replicas is set and the first port is larger than the second port.
         """
         inventory = {
-            "default": {"port": [5001, 5000], "replicas": 2},
-            "hosts": {"R1": {}},
+            "default": {"port": [5001, 5000]},
+            "hosts": {"R1": {"replicas": 2}},
         }
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"port\[0\] must be less than port\[1\]"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_replicas_less_than_1(self):
         """
         Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the replicas are less than 1.
+
+        Note: With ``replicas=0`` the guards in ``_check_ports_and_replicas`` short-circuit
+        on the first ``if not replicas and isinstance(port, list)`` branch (0 is falsy),
+        so the actual message is "replicas is not set, port must be an integer" — not
+        the "replicas must be greater than 0" branch the docstring would suggest. This is
+        a known quirk worth tracking in a follow-up issue.
         """
         inventory = {
-            "default": {"port": [5000, 5001], "replicas": 0},
-            "hosts": {"R1": {}},
+            "default": {"port": [5000, 5001]},
+            "hosts": {"R1": {"replicas": 0}},
         }
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"replicas is not set, port must be an integer"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_ports_set_not_same_length(self):
@@ -327,10 +338,10 @@ class TestSimNOS:
         when replicas is set and the ports are not the same length.
         """
         inventory = {
-            "default": {"port": [5000, 5001], "replicas": 3},
-            "hosts": {"R1": {}},
+            "default": {"port": [5000, 5001]},
+            "hosts": {"R1": {"replicas": 3}},
         }
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"port range must be equal to the number of replicas"):
             SimNOS(inventory=inventory)
 
     def test_wrong_plugin_name(self):
@@ -339,7 +350,7 @@ class TestSimNOS:
         when the plugin name is wrong.
         """
         inventory = {"hosts": {"R1": {"server": {"plugin": "wrong_plugin"}}}}
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"wrong_plugin"):
             SimNOS(inventory=inventory)
 
     def test_wrong_platform(self):
@@ -348,7 +359,7 @@ class TestSimNOS:
         when the platform is wrong.
         """
         inventory = {"hosts": {"R1": {"platform": "wrong_platform"}}}
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"Platform wrong_platform is not supported by SIMNOS"):
             SimNOS(inventory=inventory)
 
     def test_inventory_validation_cmdshell_plugin(self):
@@ -564,7 +575,7 @@ class TestPlatformsManifest:
 
     def test_decorator_raise_error_if_platform_and_inventory_provided(self):
         """Test that the decorator raises an exception if both platform and inventory are set."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"platform and inventory cannot be used together"):
 
             @simnos(platform="cisco_ios", inventory="tests/assets/inventory.yaml")
             def dummy_function():
@@ -574,7 +585,7 @@ class TestPlatformsManifest:
 
     def test_decorator_raise_error_if_not_platform_or_inventory_provided(self):
         """Test that the decorator raises an exception if neither platform nor inventory are set."""
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match=r"platform or inventory must be set"):
 
             @simnos()
             def dummy_function():
