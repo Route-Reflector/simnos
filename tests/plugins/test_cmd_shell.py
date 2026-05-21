@@ -5,13 +5,13 @@ Module to test the cmd_shell plugin.
 import importlib
 import os
 import shutil
+import sys
 import tempfile
 import threading
 import time
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
-import detect
 from netmiko import ConnectHandler
 import pytest
 import yaml
@@ -428,7 +428,7 @@ class HotReloadTest(TestCase):
         mock_from_file.assert_called_once_with(module.__name__.replace(".", "/") + ".py")
         assert all(key in shell.commands for key in module.commands)
 
-    @pytest.mark.skipif(detect.windows, reason="Windows does not allow file movement on Github runners")
+    @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @simnos(platform="cisco_ios", return_instance=True)
     def test_hot_reload_integration_yaml(self, net: SimNOS):
         """
@@ -482,7 +482,7 @@ class HotReloadTest(TestCase):
             finally:
                 undo_change_file()
 
-    @pytest.mark.skipif(detect.windows, reason="Windows does not allow file movement on Github runners")
+    @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @simnos(platform="cisco_ios", return_instance=True)
     def test_hot_reload_integration_py_jinja(self, net: SimNOS):
         """

@@ -5,9 +5,9 @@ as a testing tool for Netmiko.
 
 import random
 import re
+import sys
 import threading
 
-import detect
 from netmiko import (
     ConnectHandler,
     NetMikoAuthenticationException,
@@ -71,7 +71,7 @@ class TestNetmiko:
                 if thread is not threading.main_thread() and "pytest_timeout" not in thread.name:
                     thread.join()
 
-        n_threads: int = 2 if detect.windows else 1
+        n_threads: int = 2 if sys.platform == "win32" else 1
         assert threading.active_count() == n_threads
 
     @pytest.mark.timeout(20 * 10)
