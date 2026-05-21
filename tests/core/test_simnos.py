@@ -319,17 +319,17 @@ class TestSimNOS:
         Test that the function _check_ports_and_replicas raises an exception
         when replicas is set and the replicas are less than 1.
 
-        Note: With ``replicas=0`` the guards in ``_check_ports_and_replicas`` short-circuit
-        on the first ``if not replicas and isinstance(port, list)`` branch (0 is falsy),
-        so the actual message is "replicas is not set, port must be an integer" — not
-        the "replicas must be greater than 0" branch the docstring would suggest. This is
-        a known quirk worth tracking in a follow-up issue.
+        Fix in #220 promoted the ``replicas < 1`` check above the ``port`` type
+        checks and switched the entry guard from ``if not replicas`` to
+        ``if replicas is None``, so ``replicas=0`` now reaches the intended
+        "replicas must be greater than 0" branch instead of short-circuiting
+        on the falsy-replicas path.
         """
         inventory = {
             "default": {"port": [5000, 5001]},
             "hosts": {"R1": {"replicas": 0}},
         }
-        with pytest.raises(ValueError, match=r"replicas is not set, port must be an integer"):
+        with pytest.raises(ValueError, match=r"replicas must be greater than 0"):
             SimNOS(inventory=inventory)
 
     def test_replicas_set_and_ports_set_not_same_length(self):
