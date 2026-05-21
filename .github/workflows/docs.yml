@@ -16,12 +16,9 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
         with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
           python-version: "3.13"
       - name: "Build documentation"
         run: "uv run mkdocs build --clean"

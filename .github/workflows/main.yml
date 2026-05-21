@@ -11,6 +11,11 @@ on:
     tags:
       - "v*"
   pull_request: ~
+  # Weekly nightly to catch Win/macOS regressions before a tag is cut.
+  # Issue #189 (moduli) was an example of a Win/macOS-only failure that
+  # surfaced only at release time without scheduled coverage.
+  schedule:
+    - cron: "0 0 * * 1"  # every Monday 00:00 UTC
   workflow_dispatch: ~
 
 env:
@@ -22,12 +27,8 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
-        with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
       - name: "Linting: ruff"
         run: "uv run invoke ruff"
       - name: "Linting: yamllint"
@@ -51,12 +52,9 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
         with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: "Run Tests"
         run: "uv run pytest -n auto"
@@ -64,10 +62,13 @@ jobs:
       - "lint"
 
   pytest-full-matrix:
-    # Triggered automatically on tag push (release flow) and manually via
-    # `gh workflow run` / GitHub UI for pre-release verification (e.g.
-    # confirming Win/macOS connectivity on `main` before cutting a tag).
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    # Triggered automatically on tag push (release flow), weekly via schedule
+    # (Monday nightly), and manually via `gh workflow run` / GitHub UI for
+    # pre-release verification.
+    if: >-
+      startsWith(github.ref, 'refs/tags/')
+      || github.event_name == 'workflow_dispatch'
+      || github.event_name == 'schedule'
     strategy:
       fail-fast: true
       matrix:
@@ -77,12 +78,9 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
         with:
-          version: "0.9.8"
-          activate-environment: true
-          enable-cache: true
           python-version: ${{ matrix.python-version }}
       - name: "Run Tests"
         run: "uv run pytest -n auto"
@@ -100,12 +98,11 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: "actions/checkout@v6"
-      - name: "Install uv"
-        uses: "astral-sh/setup-uv@v7"
+      - name: "Set up uv environment"
+        uses: "./.github/actions/setup-uv-env"
         with:
-          version: "0.9.8"
-          enable-cache: true
           python-version: ${{ matrix.python-version }}
+          activate-environment: "false"
       - name: "Get image version"
         run: "echo IMAGE_VER=$(python -c \"import tomllib;print(tomllib.load(open('pyproject.toml','rb'))['project']['version'])\")-py${{ matrix.python-version }} >> $GITHUB_ENV"
       - name: "Setup Docker Buildx"
