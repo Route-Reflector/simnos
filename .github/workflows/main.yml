@@ -25,6 +25,8 @@ jobs:
   lint:
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
       - name: "Linting: ruff"
@@ -48,6 +50,8 @@ jobs:
         python-version: ["3.13", "3.14"]
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
         with:
@@ -72,6 +76,8 @@ jobs:
         os: ["macos-latest", "windows-latest"]
     runs-on: "${{ matrix.os }}"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
         with:
@@ -90,6 +96,8 @@ jobs:
     env:
       PYTHON_VER: ${{ matrix.python-version }}
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
         with:

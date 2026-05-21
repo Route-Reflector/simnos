@@ -12,6 +12,8 @@ jobs:
   netmiko:
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"
@@ -22,6 +24,8 @@ jobs:
   scrapli:
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"
@@ -32,6 +36,8 @@ jobs:
   ansible:
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out repository code"
+        uses: "actions/checkout@v6"
       - name: "Set up uv environment"
         uses: "./.github/actions/setup-uv-env"
       - name: "Install compatibility dep group"

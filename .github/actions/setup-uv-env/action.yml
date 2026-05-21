@@ -1,10 +1,11 @@
 ---
 name: "Setup uv environment"
 description: >-
-  Checks out the repository and installs uv with the project-pinned version.
-  Replaces the previously-duplicated checkout + setup-uv pair across all
-  SIMNOS workflows (see #222 / G7). When `setup-uv` is bumped, only this
-  file needs editing.
+  Installs uv with the project-pinned version (replaces the previously-
+  duplicated `setup-uv` step across all SIMNOS workflows; see #222 / G7).
+  Callers must run `actions/checkout` themselves before invoking this
+  action — composite actions stored in the repository can only be loaded
+  after the workspace has been checked out.
 inputs:
   python-version:
     description: >-
@@ -14,8 +15,9 @@ inputs:
     default: ""
   activate-environment:
     description: >-
-      Activate the uv-managed virtualenv on $PATH. Default `true`; the docker
-      build job sets `false` because it does not run python directly.
+      Activate the uv-managed virtualenv on $PATH. Default `true`; the
+      docker / package build jobs set `false` because they do not run
+      python directly.
     required: false
     default: "true"
   enable-cache:
@@ -26,8 +28,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: "Check out repository code"
-      uses: "actions/checkout@v6"
     - name: "Install uv"
       uses: "astral-sh/setup-uv@v7"
       with:
