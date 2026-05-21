@@ -40,23 +40,19 @@ def bandit(context):
 
 
 @task
-def ty(context, exit_zero=True):
-    """Run ty type-checker (Phase 1 non-blocking, see #216).
+def ty(context, exit_zero=False):
+    """Run ty type-checker (blocking since Phase 2, see #218).
 
-    Phase 1 ships ty in a non-blocking mode while the codebase still
-    has ~156 diagnostics (paramiko-heavy files are excluded via
-    pyproject.toml ``[tool.ty.src]``). Phase 2 will gradually fix the
-    remaining errors and flip this task to blocking by changing the
-    ``exit_zero`` default to ``False`` and dropping
-    ``continue-on-error: true`` from CI.
+    Phase 2 brought production code to 0 diagnostics; tests/ is excluded
+    via pyproject.toml ``[tool.ty.src]``. CI now treats ty as blocking
+    (exit_zero=False default + no continue-on-error). New type errors in
+    production code break the build.
 
     Args:
-        exit_zero: When True (default, for local invoke chains), pass
-            ``--exit-zero`` so ty never exits non-zero. CI runs
-            ``uv run invoke ty --no-exit-zero`` and relies on
-            ``continue-on-error: true`` for non-blocking — this lets the
-            step icon reflect ty's verdict so failing trends are visible
-            in GitHub Actions UI.
+        exit_zero: When True, pass ``--exit-zero`` so ty never exits
+            non-zero. Default is False (blocking) for CI. Set True only
+            for developer workflow chains where a transient typing error
+            should not abort the rest of the invoke pipeline.
     """
     flag = "--exit-zero " if exit_zero else ""
     run_cmd(context, f"uv run ty check . {flag}".rstrip())

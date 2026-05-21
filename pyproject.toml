@@ -103,13 +103,18 @@ skips = ["B101", "B601"]
 
 
 [tool.ty.src]
-# Phase 1: non-blocking ty integration (#216).
-# Paramiko (untyped) generates ~67% of diagnostics (~318 of 474).
-# Excluding the two heaviest offenders drops total from 474 to ~156.
-# Phase 2 will reassess types-paramiko adoption and remove these exclusions.
+# Phase 2 (#218): production code (simnos/) is ty-clean (0 diagnostics).
+# tests/ is excluded because the test layer relies heavily on MagicMock dynamic
+# attributes and function-state fixture patterns that defeat static type
+# analysis. Phase 3 (TBD) will revisit tests with a type-aware testing approach
+# (e.g. create_autospec) if/when MagicMock alternatives mature.
+#
+# Phase 1 (#216) excluded ssh_server_paramiko separately because paramiko is
+# untyped and types-paramiko v4 was incompatible with paramiko 5.0. Keep that
+# entry until Phase 3 reassesses types-paramiko v5.x adoption.
 exclude = [
     "simnos/plugins/servers/ssh_server_paramiko.py",
-    "tests/plugins/test_ssh_server_paramiko.py",
+    "tests/",
 ]
 
 

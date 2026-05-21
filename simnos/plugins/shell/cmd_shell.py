@@ -124,11 +124,11 @@ class CMDShell(Cmd):
             help_msg.append(f"{k}{padding}{v}")
         self.writeline(self.newline.join(help_msg))
 
-    def _check_prompt(self, prompt_: str | list[str]):
+    def _check_prompt(self, prompt_: str | list[str] | None):
         """
         Helper method to check if prompt_ matches current prompt
 
-        :param prompt_: (string or None)  prompt to check
+        :param prompt_: (string, list of strings, or None) prompt to check
         """
         # prompt_ is None if no 'prompt' key defined for command
         if prompt_ is None:

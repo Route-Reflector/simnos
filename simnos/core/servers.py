@@ -84,6 +84,8 @@ class TCPServerBase(ABC):
         self._is_running.set()
         try:
             self._bind_sockets()
+            # _bind_sockets() assigns self._socket; narrow for ty.
+            assert self._socket is not None  # noqa: S101 — post-condition of _bind_sockets
             self._socket.listen()
 
             self._wakeup_r, self._wakeup_w = socket.socketpair()
@@ -138,6 +140,9 @@ class TCPServerBase(ABC):
                 self._wakeup_w.send(b"\x00")
 
         # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
+        # _is_running.is_set() guard at the top of stop() returns early if start()
+        # hasn't been called, so self._listen_thread is set here; narrow for ty.
+        assert self._listen_thread is not None  # noqa: S101 — post-condition of start()
         self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
 
         try:
@@ -177,6 +182,10 @@ class TCPServerBase(ABC):
         A wakeup socketpair allows stop() to unblock select() instantly
         instead of waiting for the timeout to expire.
         """
+        # _listen only runs from the thread started by start(), where both
+        # self._socket and self._selector are non-None; narrow for ty.
+        assert self._selector is not None  # noqa: S101 — post-condition of start()
+        assert self._socket is not None  # noqa: S101 — post-condition of start()
         while self._is_running.is_set():
             try:
                 # select(timeout) is a safety net. Normal shutdown is
