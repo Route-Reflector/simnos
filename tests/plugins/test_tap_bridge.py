@@ -200,7 +200,3 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
         shell_to_client_tap(transport, shell_stdout, ev, run_srv)
         shell_stdout.readline.assert_not_called()
         self.assertEqual(transport.sent, [])
-
-
-if __name__ == "__main__":
-    unittest.main()

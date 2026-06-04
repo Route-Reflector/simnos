@@ -387,7 +387,7 @@ class ParamikoSshServer(TCPServerBase):
 
         :param channel: paramiko Channel
         :return: (authenticated, skip_lf) — skip_lf should be forwarded to
-                 channel_to_shell_tap so it can consume a trailing LF after
+                 client_to_shell_tap so it can consume a trailing LF after
                  the final CR of the password line.
         """
         channel.sendall(b"\r\nUser Name:")

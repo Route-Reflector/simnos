@@ -67,7 +67,6 @@ class TelnetSocketAdapter:
         self._server = server
 
     def recv_byte(self) -> bytes | None:
-        # Private-method delegation by design: the IAC layer stays in TelnetServer.
         return self._server._recv_byte(self._sock)
 
     def sendall(self, data: bytes) -> None:
