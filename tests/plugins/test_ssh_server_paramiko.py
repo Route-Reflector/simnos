@@ -274,6 +274,43 @@ class TapIOTest(unittest.TestCase):
         self.assertEqual(tap_io.drain(), [])
 
 
+class ParamikoChannelAdapterTest(unittest.TestCase):
+    """Direct pins for ParamikoChannelAdapter (mirrors TelnetSocketAdapterTest).
+
+    recv_byte's b"" -> None EOF normalization (D3) and the is_closed()
+    closed-or-inactive truth table (U2) are pinned at the adapter level so a
+    regression cannot hide behind the loop tests' implicit coverage.
+    """
+
+    def setUp(self):
+        self.mock_channel: Mock = Mock()
+        self.adapter = ParamikoChannelAdapter(self.mock_channel)
+
+    def test_recv_byte_normalizes_empty_to_none(self):
+        """D3: b"" (paramiko EOF) is normalized to None."""
+        self.mock_channel.recv.return_value = b""
+        self.assertIsNone(self.adapter.recv_byte())
+
+    def test_recv_byte_passes_data_through(self):
+        """Regular bytes pass through unchanged."""
+        self.mock_channel.recv.return_value = b"x"
+        self.assertEqual(self.adapter.recv_byte(), b"x")
+
+    def test_is_closed_truth_table(self):
+        """U2: is_closed() == closed or not active (OR short-circuit)."""
+        cases = [
+            (False, True, False),
+            (True, True, True),
+            (False, False, True),
+            (True, False, True),
+        ]
+        for closed, active, expected in cases:
+            with self.subTest(closed=closed, active=active):
+                self.mock_channel.closed = closed
+                self.mock_channel.active = active
+                self.assertEqual(self.adapter.is_closed(), expected)
+
+
 class ChannelToShellTapTest(unittest.TestCase):
     """
     Test cases for client_to_shell_tap driven through a ParamikoChannelAdapter.
