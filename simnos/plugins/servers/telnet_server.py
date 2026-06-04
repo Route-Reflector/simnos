@@ -16,7 +16,11 @@ from typing import Any
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
-from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_bridge import (
+    client_to_shell_tap,
+    interactive_login,
+    shell_to_client_tap,
+)
 from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
@@ -176,58 +180,29 @@ class TelnetServer(TCPServerBase):
                 continue
 
     # ------------------------------------------------------------------
-    # Line reading and authentication
+    # Authentication
     # ------------------------------------------------------------------
 
-    def _read_line(self, sock: socket.socket, echo: bool = True) -> str:
-        """
-        Read a single line from the socket byte-by-byte using _recv_byte.
-
-        Handles CR LF, CR NUL (RFC 854), and bare LF as line terminators.
-
-        :param sock: client socket
-        :param echo: if True, echo each byte back to the client
-        :return: the line read (without trailing CR/LF)
-        """
-        buf = b""
-        while True:
-            try:
-                byte = self._recv_byte(sock)
-            except TimeoutError:
-                continue
-            if byte is None:
-                break
-            if byte == b"\r":
-                if echo:
-                    sock.sendall(b"\r\n")
-                # Consume trailing LF or NUL after CR (RFC 854).
-                # Non-standard followers are discarded for simplicity;
-                # in practice, clients always send CR LF or CR NUL.
-                with contextlib.suppress(TimeoutError):
-                    self._recv_byte(sock)
-                break
-            if byte == b"\n":
-                if echo:
-                    sock.sendall(b"\r\n")
-                break
-            if echo:
-                sock.sendall(byte)
-            buf += byte
-        return buf.decode("utf-8", errors="replace")
-
-    def _authenticate(self, sock: socket.socket) -> bool:
+    def _authenticate(self, sock: socket.socket) -> tuple[bool, bool]:
         """
         Perform username/password authentication over the Telnet connection.
 
+        Thin wrapper around tap_bridge.interactive_login supplying the
+        Telnet prompts; the interaction itself is shared with SSH channel
+        login. The trailing LF/NUL after a CR is no longer consumed with a
+        blocking read — it is reported via skip_lf and must be forwarded to
+        client_to_shell_tap (initial_skip_lf), matching SSH (U3).
+
         :param sock: client socket
-        :return: True if authentication succeeded
+        :return: (authenticated, skip_lf)
         """
-        sock.sendall(b"Username: ")
-        username = self._read_line(sock, echo=True)
-        sock.sendall(b"Password: ")
-        password = self._read_line(sock, echo=False)
-        sock.sendall(b"\r\n")
-        return username == self.username and password == self.password
+        return interactive_login(
+            TelnetSocketAdapter(sock, self),
+            self.username,
+            self.password,
+            user_prompt=b"Username: ",
+            pass_prompt=b"Password: ",
+        )
 
     # ------------------------------------------------------------------
     # Watchdog
@@ -293,7 +268,7 @@ class TelnetServer(TCPServerBase):
 
             # Authenticate
             try:
-                auth_ok = self._authenticate(client)
+                auth_ok, skip_lf = self._authenticate(client)
             except (TimeoutError, OSError):
                 log.debug("Client disconnected during authentication")
                 return
@@ -309,11 +284,12 @@ class TelnetServer(TCPServerBase):
             # Bridge the socket and the shell through the shared tap pair
             transport_adapter = TelnetSocketAdapter(client, self)
 
-            # Start client→shell tap thread
+            # Start client→shell tap thread (skip_lf forwards the pending
+            # LF/NUL from the password line's CR — U3, matches SSH)
             client_to_shell_tapper = threading.Thread(
                 target=client_to_shell_tap,
                 args=(transport_adapter, shell_stdin, shell_replied_event, run_srv),
-                kwargs={"shell_stdout": shell_stdout},
+                kwargs={"initial_skip_lf": skip_lf, "shell_stdout": shell_stdout},
                 daemon=True,
             )
             client_to_shell_tapper.start()
