@@ -1895,6 +1895,38 @@ class TeardownFixTests(unittest.TestCase):
 
         mock_channel.settimeout.assert_called_once_with(server.timeout)
 
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("paramiko.Transport")
+    def test_channel_login_send_error_closes_connection(
+        self,
+        mock_transport_cls: MagicMock,
+        mock_shell_to_client_tap: MagicMock,
+        mock_client_to_shell_tap: MagicMock,
+    ):
+        """PR2 caller-wrap pin: a send error during channel login closes the
+        connection without starting taps/shell and without propagating."""
+        mock_session = MagicMock()
+        mock_channel = MagicMock()
+        mock_session.accept.return_value = mock_channel
+        mock_transport_cls.return_value = mock_session
+
+        server = ParamikoSshServer(**self.arguments)
+        with (
+            mock.patch("simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface") as mock_iface_cls,
+            mock.patch.object(
+                ParamikoSshServer,
+                "_channel_login",
+                side_effect=paramiko.SSHException("send failed"),
+            ),
+        ):
+            mock_iface_cls.return_value.auth_method_used = "none"
+            server.connection_function(MagicMock(), Mock())  # must not raise
+
+        mock_client_to_shell_tap.assert_not_called()
+        mock_shell_to_client_tap.assert_not_called()
+        mock_session.close.assert_called_once()
+
     @mock.patch("paramiko.Transport")
     def test_session_accept_bounded(self, mock_transport_cls: MagicMock):
         """session.accept() should be called with SHUTDOWN_IO_TIMEOUT."""

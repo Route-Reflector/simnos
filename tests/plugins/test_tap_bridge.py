@@ -339,3 +339,66 @@ class InteractiveLoginTest(unittest.TestCase):
                 user_prompt=b"Username: ",
                 pass_prompt=b"Password: ",
             )
+
+    def test_exact_credential_then_eof_authenticates(self):
+        """U4 pin: exact credential + abrupt disconnect (no terminator) authenticates.
+
+        read_line cannot distinguish a terminated line from a truncated one,
+        so this matches — the pre-G3 SSH behaviour, kept for equivalence.
+        The connection still tears down right after via the taps' EOF path.
+        """
+        (auth_ok, skip_lf), _ = self._login(b"admin\rsecret", nul_resets_skip_lf=False)
+        self.assertTrue(auth_ok)
+        self.assertFalse(skip_lf)
+
+    def test_truncated_credential_then_eof_fails(self):
+        """U4 pin: a truncated credential fails the comparison."""
+        (auth_ok, _), _ = self._login(b"admin\rsecr", nul_resets_skip_lf=False)
+        self.assertFalse(auth_ok)
+
+
+class LoginToTapBoundaryTest(unittest.TestCase):
+    """Password→tap boundary pins (G3 design acceptance: 3 patterns × both quirks).
+
+    Wires interactive_login's returned skip_lf into client_to_shell_tap
+    (initial_skip_lf) on the same transport — mirroring connection_function —
+    and asserts the password line's CR follower is consumed/kept correctly
+    by the tap. Complements InteractiveLoginTest, which covers the
+    username→password boundary.
+    """
+
+    def _run(self, data: bytes, *, nul_resets_skip_lf: bool) -> list[str]:
+        transport = FakeTransport(_bytes_script(data), nul_resets_skip_lf=nul_resets_skip_lf)
+        auth_ok, skip_lf = interactive_login(
+            transport,
+            "admin",
+            "secret",
+            user_prompt=b"Username: ",
+            pass_prompt=b"Password: ",
+        )
+        self.assertTrue(auth_ok)
+        shell_stdin = Mock()
+        ev, run_srv = _events()
+        client_to_shell_tap(transport, shell_stdin, ev, run_srv, initial_skip_lf=skip_lf)
+        return [c.args[0] for c in shell_stdin.write.call_args_list]
+
+    def test_password_cr_lf_boundary(self):
+        """CR LF: the trailing LF is consumed by the tap via initial_skip_lf (both quirks)."""
+        for quirk in (False, True):
+            with self.subTest(nul_resets_skip_lf=quirk):
+                writes = self._run(b"admin\r\nsecret\r\ncmd\n", nul_resets_skip_lf=quirk)
+                self.assertEqual(writes, ["cmd\n"])
+
+    def test_password_cr_nul_lf_boundary_quirk_split(self):
+        """CR NUL LF: quirk True treats LF as a new line, quirk False consumes it."""
+        writes_telnet = self._run(b"admin\r\nsecret\r\x00\ncmd\n", nul_resets_skip_lf=True)
+        self.assertEqual(writes_telnet, ["\n", "cmd\n"])
+        writes_ssh = self._run(b"admin\r\nsecret\r\x00\ncmd\n", nul_resets_skip_lf=False)
+        self.assertEqual(writes_ssh, ["cmd\n"])
+
+    def test_password_cr_data_boundary(self):
+        """CR + regular byte: the byte reaches the shell as line data (both quirks)."""
+        for quirk in (False, True):
+            with self.subTest(nul_resets_skip_lf=quirk):
+                writes = self._run(b"admin\r\nsecret\rXcmd\n", nul_resets_skip_lf=quirk)
+                self.assertEqual(writes, ["Xcmd\n"])

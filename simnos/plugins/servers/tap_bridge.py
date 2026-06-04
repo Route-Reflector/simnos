@@ -5,6 +5,11 @@ transport differences are absorbed by TransportAdapter implementations
 that live in the respective server modules (G3 / #225). The loop logic is
 ported verbatim from the former SSH tap pair in ssh_server_paramiko.py so
 that the #87 echo-coalescing behaviour is preserved byte for byte.
+
+NUL handling is intentionally asymmetric between the two layers (do not
+"unify" it): read_line keeps mid-line NUL bytes in the buffer so login
+credentials are compared exactly (auth-bypass prevention), while
+client_to_shell_tap drops every NUL before it reaches the shell.
 """
 
 import io
@@ -293,8 +298,11 @@ def read_line(
     Exception contract:
     - recv TimeoutError -> retry (continue).
     - recv io_errors / EOF -> return the partial line read so far (U4 —
-      unified on the SSH behaviour; auth then fails on the partial value
-      and the connection closes through the normal path).
+      unified on the SSH behaviour). NOTE: the return value does not
+      distinguish a terminated line from a truncated one; a caller
+      comparing the line against an expected value will match when the
+      client sent the exact value and then disconnected without a
+      terminator (pre-G3 SSH equivalent, pinned in tests).
     - echo send errors propagate to the caller.
     """
     buf = b""
@@ -346,9 +354,12 @@ def interactive_login(
     LF/NUL left over from the final CR of the password line.
 
     Exception contract: prompt sends and echo sends propagate; recv
-    io_errors yield partial lines via read_line (U4) and fail the
-    comparison. Callers must wrap this call in try/except covering
-    TimeoutError and transport.io_errors.
+    io_errors yield partial lines via read_line (U4). A truncated
+    credential fails the comparison; an exact credential followed by an
+    abrupt disconnect (no terminator) still authenticates — the pre-G3
+    SSH behaviour, kept for equivalence (the connection then tears down
+    through the taps' EOF path anyway). Callers must wrap this call in
+    try/except covering TimeoutError and transport.io_errors.
     """
     transport.sendall(user_prompt)
     entered_user, skip_lf = read_line(transport, echo=True, skip_lf=False)
