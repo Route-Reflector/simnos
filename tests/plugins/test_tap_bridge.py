@@ -185,7 +185,8 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
     def test_d11_no_send_when_cleared_before_attempt(self):
         """D11: if run_srv is cleared before the send attempt, nothing is sent."""
         transport = FakeTransport()
-        shell_stdout = self._stdout(["hello\r\n", ""])
+        # No EOF tail: a mistuned countdown fails visibly with StopIteration.
+        shell_stdout = self._stdout(["hello\r\n"])
         # countdown(1): outer loop head consumes the True, the retry-loop
         # gate gets the first False — the send attempt must not happen.
         ev, run_srv = _events(countdown_run_srv(1))
@@ -197,7 +198,8 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
         """D11: if run_srv is cleared during a TimeoutError retry, no resend happens."""
         transport = FakeTransport()
         transport.send_errors = [TimeoutError()]
-        shell_stdout = self._stdout(["hello\r\n", ""])
+        # No EOF tail: a mistuned countdown fails visibly with StopIteration.
+        shell_stdout = self._stdout(["hello\r\n"])
         # countdown(2): outer head True, retry gate True (send raises),
         # the retry re-gate gets the first False — no resend after timeout.
         ev, run_srv = _events(countdown_run_srv(2))

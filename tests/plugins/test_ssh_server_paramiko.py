@@ -523,7 +523,7 @@ class ChannelToShellTapTest(unittest.TestCase):
 
     def test_client_to_shell_tap_empty_byte_causes_exit(self):
         """Empty byte (EOF) should cause the loop to exit."""
-        self.mock_channel.recv.side_effect = [b"", b"\n"]
+        self.mock_channel.recv.side_effect = [b""]
         client_to_shell_tap(
             transport=self.adapter,
             shell_stdin=self.mock_shell_stdin,
@@ -738,7 +738,7 @@ class ShellToChannelTapTest(unittest.TestCase):
             run_srv=self.mock_run_srv,
         )
         # Batch send raised: nothing was delivered, the reply flag stays unset.
-        self.mock_channel.sendall.assert_called_once()
+        self.mock_channel.sendall.assert_called_once_with(b"b")
         self.mock_shell_replied_event.set.assert_not_called()
         self.mock_run_srv.clear.assert_called_once()
 
@@ -753,7 +753,7 @@ class ShellToChannelTapTest(unittest.TestCase):
             run_srv=self.mock_run_srv,
         )
         # Batch send raised: nothing was delivered, the reply flag stays unset.
-        self.mock_channel.sendall.assert_called_once()
+        self.mock_channel.sendall.assert_called_once_with(b"b")
         self.mock_shell_replied_event.set.assert_not_called()
         self.mock_run_srv.clear.assert_called_once()
 

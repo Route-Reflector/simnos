@@ -730,9 +730,11 @@ class ShellToSocketTapTest(unittest.TestCase):
         """When run_srv is cleared after readline, sendall is skipped (D11).
 
         countdown(1): the loop head consumes the True; the retry-loop gate
-        gets the first False — the send attempt must not happen.
+        gets the first False — the send attempt must not happen. No EOF
+        tail: a mistuned countdown would exhaust the script and fail
+        visibly with StopIteration instead of silently exiting via EOF.
         """
-        self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
+        self.shell_stdout.readline.side_effect = ["Router>\r\n"]
         self.run_srv = countdown_run_srv(1)
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_not_called()
