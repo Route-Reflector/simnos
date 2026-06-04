@@ -12,6 +12,7 @@ from unittest.mock import MagicMock
 from simnos.core.pydantic_models import ModelSimnosInventory
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers import servers_plugins
+from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
 from simnos.plugins.servers.telnet_server import (
     DO,
     DONT,
@@ -24,6 +25,7 @@ from simnos.plugins.servers.telnet_server import (
     WILL,
     WONT,
     TelnetServer,
+    TelnetSocketAdapter,
     _is_loopback,
 )
 
@@ -529,114 +531,115 @@ class TelnetIntegrationTest(unittest.TestCase):
 
 
 class SocketToShellTapTest(unittest.TestCase):
-    """Test cases for TelnetServer.socket_to_shell_tap()."""
+    """Test cases for client_to_shell_tap() via TelnetSocketAdapter."""
 
     def setUp(self):
         self.server = _make_server()
         self.sock = MagicMock(spec=socket.socket)
+        self.adapter = TelnetSocketAdapter(self.sock, self.server)
         self.shell_stdin = MagicMock()
         self.shell_replied_event = MagicMock()
         self.shell_replied_event.wait.return_value = True
         self.run_srv = MagicMock()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_normal_byte_echoed_to_socket(self, mock_recv, _mock_sleep):
         """A normal byte is echoed to the socket and buffered."""
         mock_recv.side_effect = [b"a", None]  # One byte, then EOF
         self.run_srv.is_set.side_effect = [True, True, True, False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_with(b"a")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_newline_sends_line_to_shell(self, mock_recv, _mock_sleep):
         """Receiving a newline sends the buffered line to the shell and clears replied event."""
         mock_recv.side_effect = [b"h", b"i", b"\r", None]
         self.run_srv.is_set.side_effect = [True] * 7 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("hi\r")
         self.shell_replied_event.clear.assert_called_once()
         # Newline echo: \r\n sent to socket for the newline character
         self.sock.sendall.assert_any_call(b"\r\n")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_crlf_sends_single_line_to_shell(self, mock_recv, _mock_sleep):
         """CRLF input: \\r triggers line send, trailing \\n is consumed (RFC 854)."""
         mock_recv.side_effect = [b"h", b"i", b"\r", b"\n", None]
         self.run_srv.is_set.side_effect = [True] * 10 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("hi\r")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_cr_nul_resets_skip_lf(self, mock_recv, _mock_sleep):
         """CR NUL is a complete sequence (RFC 854); a subsequent LF is a new line."""
         mock_recv.side_effect = [b"a", b"\r", b"\x00", b"\n", None]
         self.run_srv.is_set.side_effect = [True] * 12 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.assertEqual(self.shell_stdin.write.call_count, 2)
         self.shell_stdin.write.assert_any_call("a\r")
         self.shell_stdin.write.assert_any_call("\n")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_cr_followed_by_data_preserves_data(self, mock_recv, _mock_sleep):
         """CR followed by a non-LF byte: line is sent, next byte is not lost."""
         mock_recv.side_effect = [b"x", b"\r", b"y", None]
         self.run_srv.is_set.side_effect = [True] * 10 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("x\r")
         self.sock.sendall.assert_any_call(b"y")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_eof_breaks_loop(self, mock_recv, _mock_sleep):
         """EOF (None) breaks the loop and clears run_srv."""
         mock_recv.return_value = None
         self.run_srv.is_set.return_value = True
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_nul_bytes_dropped(self, mock_recv, _mock_sleep):
         """NUL bytes (0x00) are dropped and not echoed."""
         mock_recv.side_effect = [b"\x00", b"a", None]
         self.run_srv.is_set.side_effect = [True] * 4 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_oserror_on_recv_breaks_loop(self, mock_recv, _mock_sleep):
         """OSError during recv breaks the loop."""
         mock_recv.side_effect = OSError("Read error")
         self.run_srv.is_set.return_value = True
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_oserror_on_sendall_breaks_loop(self, mock_recv, _mock_sleep):
         """OSError during sendall breaks the loop."""
         mock_recv.side_effect = [b"a", b"b"]
         self.sock.sendall.side_effect = OSError("Write error")
         self.run_srv.is_set.return_value = True
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_run_srv_clear_exits_loop(self, mock_recv, _mock_sleep):
         """If run_srv is cleared externally, the loop exits."""
         mock_recv.return_value = b"a"
         self.run_srv.is_set.return_value = False
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         mock_recv.assert_not_called()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_shutdown_during_shell_wait(self, mock_recv, _mock_sleep):
         """If run_srv is cleared while waiting for shell reply, the loop exits."""
@@ -644,37 +647,38 @@ class SocketToShellTapTest(unittest.TestCase):
         # wait() returns False (timeout), then run_srv is checked and found False
         self.shell_replied_event.wait.return_value = False
         self.run_srv.is_set.side_effect = [True, True, False, False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         # Should exit without processing the byte 'a' because the inner wait loop breaks
         self.sock.sendall.assert_not_called()
         # Verify the interruptible wait uses SHUTDOWN_IO_TIMEOUT
         self.shell_replied_event.wait.assert_called_with(timeout=SHUTDOWN_IO_TIMEOUT)
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_timeout_error_continues_loop(self, mock_recv, _mock_sleep):
         """TimeoutError during _recv_byte is caught and loop continues."""
         mock_recv.side_effect = [TimeoutError(), b"a", None]
         self.run_srv.is_set.side_effect = [True] * 4 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_shell_replied_event_cleared_on_newline(self, mock_recv, _mock_sleep):
         """Receiving a newline clears the shell_replied_event."""
         mock_recv.side_effect = [b"\n", None]
         self.run_srv.is_set.side_effect = [True] * 3 + [False]
-        self.server.socket_to_shell_tap(self.sock, self.shell_stdin, self.shell_replied_event, self.run_srv)
+        client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.clear.assert_called_once()
 
 
 class ShellToSocketTapTest(unittest.TestCase):
-    """Test cases for TelnetServer.shell_to_socket_tap()."""
+    """Test cases for shell_to_client_tap() via TelnetSocketAdapter."""
 
     def setUp(self):
         self.server = _make_server()
         self.sock = MagicMock(spec=socket.socket)
+        self.adapter = TelnetSocketAdapter(self.sock, self.server)
         self.shell_stdout = MagicMock()
         self.shell_stdout.drain.return_value = []
         self.shell_replied_event = MagicMock()
@@ -683,8 +687,13 @@ class ShellToSocketTapTest(unittest.TestCase):
     def test_line_forwarded_to_socket(self):
         """A line from the shell is forwarded to the socket and event is set."""
         self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"Router>\r\n")
         self.shell_replied_event.set.assert_called_once()
 
@@ -692,28 +701,38 @@ class ShellToSocketTapTest(unittest.TestCase):
         """Empty line from shell (EOF) breaks the loop and clears run_srv."""
         self.shell_stdout.readline.return_value = ""
         self.run_srv.is_set.return_value = True
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
     def test_run_srv_cleared_skips_sendall(self):
         """When run_srv is cleared after readline, sendall is skipped."""
         self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
         self.run_srv.is_set.side_effect = [True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_not_called()
 
     def test_nul_stripped_from_line(self):
         """NUL bytes are stripped from the shell output."""
         self.shell_stdout.readline.side_effect = ["abc\x00def\r\n", ""]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"abcdef\r\n")
 
     def test_lf_converted_to_crlf(self):
         """Bare LF from shell is converted to CRLF."""
         self.shell_stdout.readline.side_effect = ["line\n", ""]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"line\r\n")
 
     def test_oserror_on_sendall_breaks_loop(self):
@@ -721,14 +740,19 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.shell_stdout.readline.return_value = "Router>\r\n"
         self.sock.sendall.side_effect = OSError("Write error")
         self.run_srv.is_set.return_value = True
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
     def test_shell_replied_event_set_after_send(self):
         """Successfully sending a line to the socket sets the replied event."""
         self.shell_stdout.readline.side_effect = ["hi\r\n", ""]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.set.assert_called_once()
 
     def test_echo_only_blocks_for_prompt(self):
@@ -736,7 +760,7 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.shell_stdout.readline.side_effect = ["\r\n", "Router>", ""]
         self.shell_stdout.drain.side_effect = [[], [], []]
         self.run_srv.is_set.side_effect = [True, True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         # Echo and prompt are sent together in one sendall
         self.sock.sendall.assert_called_once_with(b"\r\nRouter>")
 
@@ -744,16 +768,26 @@ class ShellToSocketTapTest(unittest.TestCase):
         """Drained lines are coalesced into a single sendall."""
         self.shell_stdout.readline.side_effect = ["line1\r\n", ""]
         self.shell_stdout.drain.side_effect = [["line2\r\n", "Router>"], []]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"line1\r\nline2\r\nRouter>")
 
     def test_prompt_separator_prevents_concatenation(self):
         """Consecutive prompts without trailing newline get \\r\\n separator."""
         self.shell_stdout.readline.side_effect = ["Router>", ""]
         self.shell_stdout.drain.side_effect = [["Router>"], []]
-        self.run_srv.is_set.side_effect = [True, True, False]
-        self.server.shell_to_socket_tap(self.sock, self.shell_stdout, self.shell_replied_event, self.run_srv)
+        self.run_srv.is_set.side_effect = [
+            True,
+            True,
+            True,
+            False,
+        ]  # D11: retry-loop form consumes one extra is_set per send
+        shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         # Prompts are separated, not concatenated as "Router>Router>"
         self.sock.sendall.assert_called_once_with(b"Router>\r\nRouter>")
 
@@ -764,20 +798,21 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
     def setUp(self):
         self.server = _make_server()
         self.sock = MagicMock(spec=socket.socket)
+        self.adapter = TelnetSocketAdapter(self.sock, self.server)
         self.shell_stdin = MagicMock()
         self.shell_stdout = MagicMock()
         self.shell_replied_event = MagicMock()
         self.shell_replied_event.wait.return_value = True
         self.run_srv = MagicMock()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_newline_echo_routed_to_shell_stdout(self, mock_recv, _mock_sleep):
         """When shell_stdout is provided, newline echo goes to shell_stdout, not socket."""
         mock_recv.side_effect = [b"\r", None]
         self.run_srv.is_set.side_effect = [True] * 5 + [False]
-        self.server.socket_to_shell_tap(
-            self.sock,
+        client_to_shell_tap(
+            self.adapter,
             self.shell_stdin,
             self.shell_replied_event,
             self.run_srv,
@@ -788,28 +823,28 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         sendall_args = [call.args[0] for call in self.sock.sendall.call_args_list]
         self.assertNotIn(b"\r\n", sendall_args)
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_newline_echo_to_socket_without_shell_stdout(self, mock_recv, _mock_sleep):
         """Without shell_stdout, newline echo goes directly to socket."""
         mock_recv.side_effect = [b"\r", None]
         self.run_srv.is_set.side_effect = [True] * 5 + [False]
-        self.server.socket_to_shell_tap(
-            self.sock,
+        client_to_shell_tap(
+            self.adapter,
             self.shell_stdin,
             self.shell_replied_event,
             self.run_srv,
         )
         self.sock.sendall.assert_any_call(b"\r\n")
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_normal_byte_still_echoed_to_socket(self, mock_recv, _mock_sleep):
         """Normal bytes are always echoed directly to socket, even with shell_stdout."""
         mock_recv.side_effect = [b"a", None]
         self.run_srv.is_set.side_effect = [True, True, True, False]
-        self.server.socket_to_shell_tap(
-            self.sock,
+        client_to_shell_tap(
+            self.adapter,
             self.shell_stdin,
             self.shell_replied_event,
             self.run_srv,
@@ -827,7 +862,7 @@ class WatchdogTest(unittest.TestCase):
         self.run_srv = MagicMock()
         self.shell = MagicMock()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     def test_run_srv_loop(self, mock_sleep):
         """Watchdog loops while run_srv is set, then stops shell."""
         self.run_srv.is_set.side_effect = [True, True, False]
@@ -836,7 +871,7 @@ class WatchdogTest(unittest.TestCase):
         self.assertEqual(mock_sleep.call_count, 2)
         self.shell.stop.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     def test_breaks_when_is_running_cleared(self, _mock_sleep):
         """Watchdog breaks when is_running is cleared, then stops shell."""
         self.run_srv.is_set.return_value = True
@@ -844,7 +879,7 @@ class WatchdogTest(unittest.TestCase):
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
         self.shell.stop.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     def test_shell_stop_called_on_exit(self, _mock_sleep):
         """shell.stop() is always called on watchdog exit."""
         # Case: run_srv cleared
@@ -852,7 +887,7 @@ class WatchdogTest(unittest.TestCase):
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
         self.assertEqual(self.shell.stop.call_count, 1)
 
-    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     def test_sleep_interval_capped_by_shutdown_timeout(self, mock_sleep):
         """Sleep interval is the minimum of watchdog_interval and SHUTDOWN_IO_TIMEOUT."""
         self.server.watchdog_interval = 10.0  # Larger than SHUTDOWN_IO_TIMEOUT

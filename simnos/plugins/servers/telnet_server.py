@@ -6,7 +6,6 @@ and the existing TCPServerBase + TapIO architecture. No external dependencies.
 """
 
 import contextlib
-import io
 import ipaddress
 import logging
 import socket
@@ -17,7 +16,8 @@ from typing import Any
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
-from simnos.plugins.servers.tap_io import TapIO, process_tap_line
+from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
 
@@ -49,6 +49,34 @@ def _is_loopback(address: str) -> bool:
         return all(ipaddress.ip_address(ai[4][0]).is_loopback for ai in info)
     except (OSError, ValueError):
         return False
+
+
+class TelnetSocketAdapter:
+    """TransportAdapter implementation wrapping a raw Telnet socket (G3 / #225).
+
+    Delegates byte reads to ``TelnetServer._recv_byte`` (private by design)
+    so IAC negotiation handling stays inside the Telnet protocol layer.
+    """
+
+    io_errors = (OSError,)
+    nul_resets_skip_lf = True  # RFC 854: CR NUL is a complete sequence
+    name = "telnet"
+
+    def __init__(self, sock: socket.socket, server: "TelnetServer"):
+        self._sock = sock
+        self._server = server
+
+    def recv_byte(self) -> bytes | None:
+        # Private-method delegation by design: the IAC layer stays in TelnetServer.
+        return self._server._recv_byte(self._sock)
+
+    def sendall(self, data: bytes) -> None:
+        self._sock.sendall(data)
+
+    def is_closed(self) -> bool:
+        # U2: known-local-closed early check only (peer disconnect is
+        # detected via recv_byte() -> None / send io_errors).
+        return self._sock.fileno() == -1
 
 
 class TelnetServer(TCPServerBase):
@@ -203,162 +231,6 @@ class TelnetServer(TCPServerBase):
         return username == self.username and password == self.password
 
     # ------------------------------------------------------------------
-    # Tap functions (socket ↔ shell bridge)
-    # ------------------------------------------------------------------
-
-    def socket_to_shell_tap(
-        self,
-        sock: socket.socket,
-        shell_stdin: TapIO,
-        shell_replied_event: threading.Event,
-        run_srv: threading.Event,
-        *,
-        shell_stdout: TapIO | None = None,
-    ) -> None:
-        """Read bytes from socket and forward complete lines to shell stdin.
-
-        When *shell_stdout* is provided, the newline echo (``\\r\\n``) for
-        line-ending bytes is written to *shell_stdout* instead of being sent
-        directly to the socket.  ``shell_to_socket_tap`` then batches the
-        echo together with the shell's response into a single ``sendall()``,
-        preventing a race where the client reads the echo and the prompt as
-        separate TCP segments (#94).
-        """
-        buffer: io.BytesIO = io.BytesIO()
-        skip_lf = False  # Set after \r to consume the trailing \n of CR LF
-        while run_srv.is_set():
-            try:
-                byte = self._recv_byte(sock)
-            except TimeoutError:
-                continue
-            except OSError:
-                log.error("telnet_server.socket_to_shell_tap socket read error")
-                break
-
-            # EOF / connection closed
-            if byte is None:
-                break
-
-            # Drop NUL bytes completely.
-            # CR NUL is a complete sequence (RFC 854), so reset skip_lf.
-            if byte == b"\x00":
-                skip_lf = False
-                continue
-
-            # Consume the LF half of a CR LF pair (RFC 854).
-            if skip_lf:
-                skip_lf = False
-                if byte == b"\n":
-                    continue
-
-            # Wait for the shell to reply, but check run_srv periodically
-            # so that shutdown is not blocked for the full wait duration.
-            while not shell_replied_event.wait(timeout=SHUTDOWN_IO_TIMEOUT):
-                if not run_srv.is_set():
-                    break
-            if not run_srv.is_set():
-                break
-
-            try:
-                if byte in (b"\r", b"\n"):
-                    skip_lf = byte == b"\r"
-                    if shell_stdout is not None:
-                        shell_stdout.write("\r\n")
-                    else:
-                        sock.sendall(b"\r\n")
-                    log.debug("telnet_server.socket_to_shell_tap echoing newline")
-                    buffer.write(byte)
-                    buffer.seek(0)
-                    line = buffer.read().decode(encoding="utf-8")
-                    buffer.seek(0)
-                    buffer.truncate()
-                    log.debug(
-                        "telnet_server.socket_to_shell_tap sending line to shell: %s",
-                        [line],
-                    )
-                    shell_stdin.write(line)
-                    shell_replied_event.clear()
-                else:
-                    sock.sendall(byte)
-                    log.debug(
-                        "telnet_server.socket_to_shell_tap echoing byte to socket: %s",
-                        [byte],
-                    )
-                    buffer.write(byte)
-            except OSError as e:
-                log.error("telnet_server.socket_to_shell_tap socket write error: %s", e)
-                break
-
-        # Signal all threads to stop
-        run_srv.clear()
-
-    def shell_to_socket_tap(
-        self,
-        sock: socket.socket,
-        shell_stdout: TapIO,
-        shell_replied_event: threading.Event,
-        run_srv: threading.Event,
-    ) -> None:
-        """Read lines from shell stdout and send them to the socket.
-
-        After reading the first available line, a brief coalescing pause
-        (1 ms) allows the shell to enqueue additional output (e.g. a prompt
-        following a newline echo).  All available lines are then sent in a
-        single ``sendall()`` call so the client receives them in one TCP
-        segment, avoiding a race where echo and prompt arrive separately
-        (#94, mirrors SSH fix in #87).
-
-        When the first line is whitespace-only (a newline echo from
-        ``socket_to_shell_tap``), the function blocks on a second
-        ``readline()`` instead of sending the echo alone.  This guarantees
-        the echo and the prompt that follows it are always delivered in the
-        same ``sendall()`` call.
-        """
-        while run_srv.is_set():
-            line = shell_stdout.readline()
-            if not line:
-                break
-
-            # Coalesce: brief pause lets the shell enqueue the prompt
-            # after the newline echo, so both are sent in one segment.
-            time.sleep(0.001)
-
-            batch = process_tap_line(line)
-            drained = shell_stdout.drain()
-
-            if not drained and batch.strip() == "":
-                # Echo-only batch (e.g. "\r\n") with nothing else queued.
-                # The shell hasn't produced the prompt yet — block until it
-                # does so we never send a bare echo as a separate segment.
-                next_line = shell_stdout.readline()
-                if next_line:
-                    batch += process_tap_line(next_line)
-                    # Drain any extra items that arrived alongside the prompt.
-                    time.sleep(0.001)
-                    drained = shell_stdout.drain()
-
-            for extra in drained:
-                # Separate consecutive lines that don't end with a newline
-                # (e.g. prompts) so they aren't concatenated into one string
-                # which breaks netmiko's find_prompt().
-                if batch and not batch.endswith("\n"):
-                    batch += "\r\n"
-                batch += process_tap_line(extra)
-
-            log.debug("telnet_server.shell_to_socket_tap sending batch to socket: %s", [batch])
-            if not run_srv.is_set():
-                break
-            try:
-                sock.sendall(batch.encode(encoding="utf-8"))
-            except OSError as e:
-                log.error("telnet_server.shell_to_socket_tap socket write error: %s", e)
-                break
-            shell_replied_event.set()
-
-        # Signal all threads to stop
-        run_srv.clear()
-
-    # ------------------------------------------------------------------
     # Watchdog
     # ------------------------------------------------------------------
 
@@ -435,22 +307,25 @@ class TelnetServer(TCPServerBase):
             # Create stdio for the shell
             shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
 
-            # Start socket→shell tap thread
-            socket_to_shell_tapper = threading.Thread(
-                target=self.socket_to_shell_tap,
-                args=(client, shell_stdin, shell_replied_event, run_srv),
+            # Bridge the socket and the shell through the shared tap pair
+            transport_adapter = TelnetSocketAdapter(client, self)
+
+            # Start client→shell tap thread
+            client_to_shell_tapper = threading.Thread(
+                target=client_to_shell_tap,
+                args=(transport_adapter, shell_stdin, shell_replied_event, run_srv),
                 kwargs={"shell_stdout": shell_stdout},
                 daemon=True,
             )
-            socket_to_shell_tapper.start()
+            client_to_shell_tapper.start()
 
-            # Start shell→socket tap thread
-            shell_to_socket_tapper = threading.Thread(
-                target=self.shell_to_socket_tap,
-                args=(client, shell_stdout, shell_replied_event, run_srv),
+            # Start shell→client tap thread
+            shell_to_client_tapper = threading.Thread(
+                target=shell_to_client_tap,
+                args=(transport_adapter, shell_stdout, shell_replied_event, run_srv),
                 daemon=True,
             )
-            shell_to_socket_tapper.start()
+            shell_to_client_tapper.start()
 
             # Create the client shell
             client_shell = self.shell(
