@@ -3,7 +3,6 @@ This module implements an SSH server done using
 paramiko as the SSH connection library.
 """
 
-import io
 import logging
 from pathlib import Path
 import socket
@@ -17,7 +16,8 @@ import paramiko.rsakey
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
-from simnos.plugins.servers.tap_io import TapIO, process_tap_line
+from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
 
@@ -158,166 +158,32 @@ class ParamikoSshServerInterface(paramiko.ServerInterface):
         return (self.ssh_banner + "\r\n", "en-US")
 
 
-def channel_to_shell_tap(
-    channel: paramiko.Channel,
-    shell_stdin: TapIO,
-    shell_replied_event: threading.Event,
-    run_srv: threading.Event,
-    *,
-    initial_skip_lf: bool = False,
-    shell_stdout: TapIO | None = None,
-) -> None:
-    """Read bytes from SSH channel and forward complete lines to shell stdin.
+class ParamikoChannelAdapter:
+    """TransportAdapter implementation wrapping a paramiko Channel (G3 / #225).
 
-    When *shell_stdout* is provided, the newline echo (``\\r\\n``) for
-    line-ending bytes is written to *shell_stdout* instead of being sent
-    directly to the channel.  ``shell_to_channel_tap`` then batches the
-    echo together with the shell's response into a single ``sendall()``,
-    preventing a GIL-scheduling race where the client reads the echo and
-    the prompt as separate SSH packets (#87).
+    Used by the shared tap functions in tap_bridge; keeps all paramiko
+    specifics (exception types, channel liveness flags) in this module.
     """
-    buffer: io.BytesIO = io.BytesIO()
-    skip_lf = initial_skip_lf
-    while run_srv.is_set():
-        try:
-            byte: bytes = channel.recv(1)
-        except TimeoutError:
-            continue
-        except (OSError, EOFError, paramiko.SSHException):
-            log.debug("ssh_server.channel_to_shell_tap channel read closed")
-            break
-        log.debug("ssh_server.channel_to_shell_tap received from channel: %s", [byte])
 
-        # EOF / channel closed
-        if byte in (b"", None):
-            break
+    io_errors = (OSError, EOFError, paramiko.SSHException)
+    nul_resets_skip_lf = False  # SSH has no CR NUL convention (RFC 854 is Telnet-only)
+    name = "ssh"
 
-        # Drop NUL bytes completely (don't echo, don't buffer).
-        # Unlike Telnet (RFC 854), SSH has no CR NUL convention,
-        # so skip_lf is intentionally preserved across NUL bytes.
-        if byte == b"\x00":
-            continue
+    def __init__(self, channel: paramiko.Channel):
+        self._channel = channel
 
-        # Consume the LF half of a CR LF pair.
-        if skip_lf:
-            skip_lf = False
-            if byte == b"\n":
-                continue
+    def recv_byte(self) -> bytes | None:
+        byte = self._channel.recv(1)
+        return byte if byte else None  # normalize b"" (EOF) to None
 
-        # Wait for the shell to reply, but check run_srv periodically
-        # so that shutdown is not blocked for the full wait duration.
-        while not shell_replied_event.wait(timeout=SHUTDOWN_IO_TIMEOUT):
-            if not run_srv.is_set():
-                break
-        if not run_srv.is_set():
-            break
-        if not channel.active:
-            log.error("SSH channel is not active. Exiting.")
-            break
-        try:
-            if byte in (b"\r", b"\n"):
-                skip_lf = byte == b"\r"
-                if shell_stdout is not None:
-                    shell_stdout.write("\r\n")
-                else:
-                    channel.sendall(b"\r\n")
-                log.debug(
-                    "ssh_server.channel_to_shell_tap echoing new line to channel: %s",
-                    [b"\r\n"],
-                )
-                buffer.write(byte)
-                buffer.seek(0)
-                line = buffer.read().decode(encoding="utf-8")
-                buffer.seek(0)
-                buffer.truncate()
-                log.debug("ssh_server.channel_to_shell_tap sending line to shell: %s", [line])
-                shell_stdin.write(line)
-                shell_replied_event.clear()
-            else:
-                channel.sendall(byte)
-                log.debug(
-                    "ssh_server.channel_to_shell_tap echoing byte to channel: %s",
-                    [byte],
-                )
-                buffer.write(byte)
-        except (OSError, EOFError, paramiko.SSHException) as e:
-            log.error("ssh_server.channel_to_shell_tap channel write error: %s", e)
-            break
+    def sendall(self, data: bytes) -> None:
+        self._channel.sendall(data)
 
-    run_srv.clear()
-
-
-def shell_to_channel_tap(
-    channel: paramiko.Channel,
-    shell_stdout: TapIO,
-    shell_replied_event: threading.Event,
-    run_srv: threading.Event,
-) -> None:
-    """Read lines from shell stdout and send them to the SSH channel.
-
-    After reading the first available line, a brief coalescing pause
-    (1 ms) allows the shell to enqueue additional output (e.g. a prompt
-    following a newline echo).  All available lines are then sent in a
-    single ``sendall()`` call so the client receives them in one SSH
-    packet, avoiding a GIL-scheduling race in paramiko (#87).
-
-    When the first line is whitespace-only (a newline echo from
-    ``channel_to_shell_tap``), the function blocks on a second
-    ``readline()`` instead of sending the echo alone.  This guarantees
-    the echo and the prompt that follows it are always delivered in the
-    same ``sendall()`` call, even when the shell is slow (e.g. hot
-    reload YAML re-parse in ``precmd()``).
-    """
-    while run_srv.is_set():
-        if channel.closed:
-            break
-        line = shell_stdout.readline()
-        if not line:
-            break
-
-        # Coalesce: brief pause lets the shell enqueue the prompt
-        # after the newline echo, so both are sent in one packet.
-        time.sleep(0.001)
-
-        batch = process_tap_line(line)
-        drained = shell_stdout.drain()
-
-        if not drained and batch.strip() == "":
-            # Echo-only batch (e.g. "\r\n") with nothing else queued.
-            # The shell hasn't produced the prompt yet — block until it
-            # does so we never send a bare echo as a separate packet.
-            next_line = shell_stdout.readline()
-            if next_line:
-                batch += process_tap_line(next_line)
-                # Drain any extra items that arrived alongside the prompt.
-                time.sleep(0.001)
-                drained = shell_stdout.drain()
-
-        for extra in drained:
-            # Separate consecutive lines that don't end with a newline
-            # (e.g. prompts: "SimNOS>") so they aren't concatenated into
-            # "SimNOS>SimNOS>..." which breaks netmiko's find_prompt().
-            if batch and not batch.endswith("\n"):
-                batch += "\r\n"
-            batch += process_tap_line(extra)
-
-        log.debug("ssh_server.shell_to_channel_tap sending batch to channel %s", [batch])
-        written = False
-        while run_srv.is_set() and not written:
-            try:
-                channel.sendall(batch.encode(encoding="utf-8"))
-                written = True
-            except TimeoutError:
-                log.debug("ssh_server.shell_to_channel_tap write timeout, retrying")
-                continue
-            except (OSError, EOFError, paramiko.SSHException) as e:
-                log.error("ssh_server.shell_to_channel_tap channel write error: %s", e)
-                break
-        if not written:
-            break
-        shell_replied_event.set()
-
-    run_srv.clear()
+    def is_closed(self) -> bool:
+        # Known-dead early check: closed channel or dead transport.
+        # channel.active also reflects peer-side EOF paramiko already knows;
+        # authoritative peer-disconnect detection stays recv/send based.
+        return self._channel.closed or not self._channel.active
 
 
 class ParamikoSshServer(TCPServerBase):
@@ -521,7 +387,7 @@ class ParamikoSshServer(TCPServerBase):
 
         :param channel: paramiko Channel
         :return: (authenticated, skip_lf) — skip_lf should be forwarded to
-                 channel_to_shell_tap so it can consume a trailing LF after
+                 client_to_shell_tap so it can consume a trailing LF after
                  the final CR of the password line.
         """
         channel.sendall(b"\r\nUser Name:")
@@ -595,24 +461,27 @@ class ParamikoSshServer(TCPServerBase):
             # create stdio for the shell
             shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
 
+            # bridge the channel and the shell through the shared tap pair
+            transport_adapter = ParamikoChannelAdapter(channel)
+
             # start intermediate thread to tap into
-            # the channel->shell_stdin bytes stream
-            channel_to_shell_tapper = threading.Thread(
-                target=channel_to_shell_tap,
-                args=(channel, shell_stdin, shell_replied_event, run_srv),
+            # the client->shell_stdin bytes stream
+            client_to_shell_tapper = threading.Thread(
+                target=client_to_shell_tap,
+                args=(transport_adapter, shell_stdin, shell_replied_event, run_srv),
                 kwargs={"initial_skip_lf": skip_lf, "shell_stdout": shell_stdout},
                 daemon=True,
             )
-            channel_to_shell_tapper.start()
+            client_to_shell_tapper.start()
 
             # start intermediate thread to tap into
-            # the shell_stdout->channel bytes stream
-            shell_to_channel_tapper = threading.Thread(
-                target=shell_to_channel_tap,
-                args=(channel, shell_stdout, shell_replied_event, run_srv),
+            # the shell_stdout->client bytes stream
+            shell_to_client_tapper = threading.Thread(
+                target=shell_to_client_tap,
+                args=(transport_adapter, shell_stdout, shell_replied_event, run_srv),
                 daemon=True,
             )
-            shell_to_channel_tapper.start()
+            shell_to_client_tapper.start()
 
             # create the client shell
             client_shell = self.shell(
