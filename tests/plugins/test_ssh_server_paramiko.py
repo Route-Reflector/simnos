@@ -22,7 +22,7 @@ from simnos.plugins.servers.ssh_server_paramiko import (
     ParamikoSshServer,
     ParamikoSshServerInterface,
 )
-from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_bridge import client_to_shell_tap, read_line, shell_to_client_tap
 from simnos.plugins.servers.tap_io import TapIO
 
 
@@ -1510,18 +1510,12 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         self.assertTrue(skip_lf)
 
 
-class ReadChannelLineTest(unittest.TestCase):
-    """Test cases for _read_channel_line CRLF handling."""
+class ReadLineTest(unittest.TestCase):
+    """CRLF/skip_lf pins for the shared read_line via ParamikoChannelAdapter.
 
-    def setUp(self):
-        self.arguments = {
-            "shell": Mock(),
-            "nos": Mock(),
-            "nos_inventory_config": {},
-            "port": 22,
-            "username": "admin",
-            "password": "admin",
-        }
+    Replaces the former ParamikoSshServer._read_channel_line tests (PR2 #225);
+    the assertions are unchanged — the SSH semantics carried over verbatim.
+    """
 
     def _make_channel(self, data: bytes):
         """Create a mock channel whose recv returns bytes one at a time."""
@@ -1532,51 +1526,45 @@ class ReadChannelLineTest(unittest.TestCase):
         mock_channel.sendall = MagicMock()
         return mock_channel
 
-    def test_read_channel_line_bare_cr(self):
+    def test_read_line_bare_cr(self):
         """Bare CR should return (line, True) without blocking."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"test\r")
-        line, skip_lf = server._read_channel_line(channel)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "test")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_bare_lf(self):
+    def test_read_line_bare_lf(self):
         """Bare LF should return (line, False)."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"test\n")
-        line, skip_lf = server._read_channel_line(channel)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "test")
         self.assertFalse(skip_lf)
 
-    def test_read_channel_line_skip_lf_consumes_lf(self):
+    def test_read_line_skip_lf_consumes_lf(self):
         """skip_lf=True should consume a leading LF, then read normally."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"\nnext\r")
-        line, skip_lf = server._read_channel_line(channel, skip_lf=True)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel), skip_lf=True)
         self.assertEqual(line, "next")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_skip_lf_non_lf(self):
+    def test_read_line_skip_lf_non_lf(self):
         """skip_lf=True with non-LF first byte should not consume it."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"Pass\r")
-        line, skip_lf = server._read_channel_line(channel, skip_lf=True)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel), skip_lf=True)
         self.assertEqual(line, "Pass")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_nul_preserved(self):
+    def test_read_line_nul_preserved(self):
         """NUL bytes should be preserved in login input to prevent auth bypass."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"ad\x00min\r")
-        line, skip_lf = server._read_channel_line(channel)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "ad\x00min")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_eof(self):
+    def test_read_line_eof(self):
         """EOF should return accumulated buffer with skip_lf=False."""
-        server = ParamikoSshServer(**self.arguments)
         channel = self._make_channel(b"partial")
-        line, skip_lf = server._read_channel_line(channel)
+        line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "partial")
         self.assertFalse(skip_lf)
 
@@ -1906,6 +1894,38 @@ class TeardownFixTests(unittest.TestCase):
         server.connection_function(MagicMock(), Mock())
 
         mock_channel.settimeout.assert_called_once_with(server.timeout)
+
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("paramiko.Transport")
+    def test_channel_login_send_error_closes_connection(
+        self,
+        mock_transport_cls: MagicMock,
+        mock_shell_to_client_tap: MagicMock,
+        mock_client_to_shell_tap: MagicMock,
+    ):
+        """PR2 caller-wrap pin: a send error during channel login closes the
+        connection without starting taps/shell and without propagating."""
+        mock_session = MagicMock()
+        mock_channel = MagicMock()
+        mock_session.accept.return_value = mock_channel
+        mock_transport_cls.return_value = mock_session
+
+        server = ParamikoSshServer(**self.arguments)
+        with (
+            mock.patch("simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServerInterface") as mock_iface_cls,
+            mock.patch.object(
+                ParamikoSshServer,
+                "_channel_login",
+                side_effect=paramiko.SSHException("send failed"),
+            ),
+        ):
+            mock_iface_cls.return_value.auth_method_used = "none"
+            server.connection_function(MagicMock(), Mock())  # must not raise
+
+        mock_client_to_shell_tap.assert_not_called()
+        mock_shell_to_client_tap.assert_not_called()
+        mock_session.close.assert_called_once()
 
     @mock.patch("paramiko.Transport")
     def test_session_accept_bounded(self, mock_transport_cls: MagicMock):

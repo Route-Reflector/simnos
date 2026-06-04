@@ -16,7 +16,11 @@ import paramiko.rsakey
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
-from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_bridge import (
+    client_to_shell_tap,
+    interactive_login,
+    shell_to_client_tap,
+)
 from simnos.plugins.servers.tap_io import TapIO
 
 log = logging.getLogger(__name__)
@@ -337,71 +341,27 @@ class ParamikoSshServer(TCPServerBase):
 
         shell.stop()
 
-    def _read_channel_line(
-        self,
-        channel,
-        echo: bool = True,
-        skip_lf: bool = False,
-    ) -> tuple[str, bool]:
-        """
-        Read a single line from the channel byte-by-byte.
-
-        :param channel: paramiko Channel
-        :param echo: if True, echo each byte back to the client
-        :param skip_lf: if True, consume a leading LF left over from a previous CR
-        :return: (line without trailing CR/LF, whether next call should skip LF)
-        """
-        channel.settimeout(self.timeout)
-        buf = b""
-        while True:
-            try:
-                byte = channel.recv(1)
-            except TimeoutError:
-                continue
-            except (OSError, EOFError, paramiko.SSHException):
-                break
-            if byte in (b"", None):
-                break
-            if skip_lf:
-                skip_lf = False
-                if byte == b"\n":
-                    continue
-            if byte == b"\r":
-                if echo:
-                    channel.sendall(b"\r\n")
-                return buf.decode("utf-8", errors="replace"), True
-            if byte == b"\n":
-                if echo:
-                    channel.sendall(b"\r\n")
-                return buf.decode("utf-8", errors="replace"), False
-            if echo:
-                channel.sendall(byte)
-            buf += byte
-        return buf.decode("utf-8", errors="replace"), False
-
     def _channel_login(self, channel) -> tuple[bool, bool]:
         """
         Perform channel-level login for auth_none platforms (e.g. Dell PowerConnect).
 
-        Sends "User Name:" / "Password:" prompts and validates credentials.
+        Thin wrapper around tap_bridge.interactive_login supplying the
+        Dell-style prompts; the interaction itself is shared with Telnet.
+        Expects the channel timeout to be configured by the caller
+        (connection_function) beforehand.
 
         :param channel: paramiko Channel
         :return: (authenticated, skip_lf) — skip_lf should be forwarded to
                  client_to_shell_tap so it can consume a trailing LF after
                  the final CR of the password line.
         """
-        channel.sendall(b"\r\nUser Name:")
-        username, skip_lf = self._read_channel_line(channel, echo=True, skip_lf=False)
-        channel.sendall(b"\r\nPassword:")
-        password, skip_lf = self._read_channel_line(channel, echo=False, skip_lf=skip_lf)
-        channel.sendall(b"\r\n")
-
-        if username == self.username and password == self.password:
-            log.debug("Channel login succeeded for user %s", username)
-            return True, skip_lf
-
-        log.warning("Channel login failed for user %s", username)
-        return False, skip_lf
+        return interactive_login(
+            ParamikoChannelAdapter(channel),
+            self.username,
+            self.password,
+            user_prompt=b"\r\nUser Name:",
+            pass_prompt=b"\r\nPassword:",
+        )
 
     def connection_function(self, client: socket.socket, is_running: threading.Event):
         shell_replied_event = threading.Event()
@@ -445,18 +405,24 @@ class ParamikoSshServer(TCPServerBase):
                 log.warning("session.accept() returned None or server stopping, closing transport")
                 return
 
+            # Timeout responsibility lives here (not in the adapter / shared
+            # helpers): configure it before any channel I/O below.
+            channel.settimeout(self.timeout)
+
             # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
             # login before starting the shell.  When publickey auth is also configured,
             # clients that authenticate via publickey bypass this channel-level login
             # intentionally — SSH-level publickey auth already verified the identity.
             skip_lf = False
             if server.auth_method_used == "none":
-                authenticated, skip_lf = self._channel_login(channel)
+                try:
+                    authenticated, skip_lf = self._channel_login(channel)
+                except (TimeoutError, OSError, EOFError, paramiko.SSHException):
+                    log.debug("Client disconnected during channel login")
+                    return
                 if not authenticated:
                     log.warning("Channel login failed, closing connection")
                     return
-
-            channel.settimeout(self.timeout)
 
             # create stdio for the shell
             shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)

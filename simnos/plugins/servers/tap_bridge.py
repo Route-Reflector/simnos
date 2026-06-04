@@ -5,6 +5,11 @@ transport differences are absorbed by TransportAdapter implementations
 that live in the respective server modules (G3 / #225). The loop logic is
 ported verbatim from the former SSH tap pair in ssh_server_paramiko.py so
 that the #87 echo-coalescing behaviour is preserved byte for byte.
+
+NUL handling is intentionally asymmetric between the two layers (do not
+"unify" it): read_line keeps mid-line NUL bytes in the buffer so login
+credentials are compared exactly (auth-bypass prevention), while
+client_to_shell_tap drops every NUL before it reaches the shell.
 """
 
 import io
@@ -268,3 +273,104 @@ def shell_to_client_tap(
         shell_replied_event.set()
 
     run_srv.clear()
+
+
+def read_line(
+    transport: TransportAdapter,
+    *,
+    echo: bool = True,
+    skip_lf: bool = False,
+) -> tuple[str, bool]:
+    """Read one line byte-by-byte from the client transport.
+
+    Returns (line without trailing CR/LF, next_skip_lf). A CR terminator
+    sets next_skip_lf=True so the *next* call consumes the trailing LF of a
+    CR LF pair — the #88 skip_lf-propagation pattern, unified for both
+    transports (U3; replaces the former Telnet blocking one-byte consume).
+
+    skip_lf handling on entry:
+    - LF: consumed (second half of a CR LF pair), skip_lf cleared.
+    - NUL with transport.nul_resets_skip_lf=True (Telnet): consumed
+      (RFC 854 CR NUL is a complete sequence), skip_lf cleared.
+    - CR: skip_lf cleared, the CR is processed as a line terminator.
+    - any other byte: skip_lf cleared, the byte is processed normally.
+
+    Exception contract:
+    - recv TimeoutError -> retry (continue).
+    - recv io_errors / EOF -> return the partial line read so far (U4 —
+      unified on the SSH behaviour). NOTE: the return value does not
+      distinguish a terminated line from a truncated one; a caller
+      comparing the line against an expected value will match when the
+      client sent the exact value and then disconnected without a
+      terminator (pre-G3 SSH equivalent, pinned in tests).
+    - echo send errors propagate to the caller.
+    """
+    buf = b""
+    while True:
+        try:
+            byte = transport.recv_byte()
+        except TimeoutError:
+            continue
+        except transport.io_errors:
+            break
+        if byte is None:
+            break
+        if skip_lf:
+            skip_lf = False
+            if byte == b"\n":
+                continue
+            if byte == b"\x00" and transport.nul_resets_skip_lf:
+                continue
+        if byte == b"\r":
+            if echo:
+                transport.sendall(b"\r\n")
+            return buf.decode("utf-8", errors="replace"), True
+        if byte == b"\n":
+            if echo:
+                transport.sendall(b"\r\n")
+            return buf.decode("utf-8", errors="replace"), False
+        if echo:
+            transport.sendall(byte)
+        buf += byte
+    return buf.decode("utf-8", errors="replace"), False
+
+
+def interactive_login(
+    transport: TransportAdapter,
+    username: str,
+    password: str,
+    *,
+    user_prompt: bytes,
+    pass_prompt: bytes,
+) -> tuple[bool, bool]:
+    """Prompt for username/password over the transport and validate them.
+
+    The prompt byte strings are transport-specific (SSH channel login uses
+    Dell-style ``b"\\r\\nUser Name:"``, Telnet uses ``b"Username: "``), so
+    they are parameters; the interaction shape is shared.
+
+    Returns (authenticated, skip_lf). The skip_lf flag must be forwarded to
+    client_to_shell_tap (initial_skip_lf) so it can consume the trailing
+    LF/NUL left over from the final CR of the password line.
+
+    Exception contract: prompt sends and echo sends propagate; recv
+    io_errors yield partial lines via read_line (U4). A truncated
+    credential fails the comparison; an exact credential followed by an
+    abrupt disconnect (no terminator) still authenticates — the pre-G3
+    SSH behaviour, kept for equivalence (the connection then tears down
+    through the taps' EOF path anyway). Callers must wrap this call in
+    try/except covering TimeoutError and transport.io_errors.
+    """
+    transport.sendall(user_prompt)
+    entered_user, skip_lf = read_line(transport, echo=True, skip_lf=False)
+    transport.sendall(pass_prompt)
+    entered_pass, skip_lf = read_line(transport, echo=False, skip_lf=skip_lf)
+    transport.sendall(b"\r\n")
+    authenticated = entered_user == username and entered_pass == password
+    log.debug(
+        "tap_bridge.interactive_login [%s] %s for user %s",
+        transport.name,
+        "succeeded" if authenticated else "failed",
+        entered_user,
+    )
+    return authenticated, skip_lf

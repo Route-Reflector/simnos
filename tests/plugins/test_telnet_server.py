@@ -12,7 +12,7 @@ from unittest.mock import MagicMock
 from simnos.core.pydantic_models import ModelSimnosInventory
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers import servers_plugins
-from simnos.plugins.servers.tap_bridge import client_to_shell_tap, shell_to_client_tap
+from simnos.plugins.servers.tap_bridge import client_to_shell_tap, read_line, shell_to_client_tap
 from simnos.plugins.servers.telnet_server import (
     DO,
     DONT,
@@ -181,24 +181,31 @@ class HandleNegotiationTest(unittest.TestCase):
 
 
 class AuthenticateTest(unittest.TestCase):
-    """Test cases for TelnetServer._authenticate()."""
+    """Test cases for TelnetServer._authenticate() (interactive_login wrapper).
+
+    Since PR2 (#225) _authenticate returns (authenticated, skip_lf): the
+    trailing LF/NUL after the password line's CR is reported via skip_lf
+    instead of being consumed with a blocking read (U3).
+    """
 
     def setUp(self):
         self.server = _make_server(username="admin", password="secret")
 
     def test_authenticate_success(self):
-        """Correct credentials return True."""
+        """Correct credentials return (True, skip_lf=True after a CR-terminated password)."""
         sock = MagicMock(spec=socket.socket)
         sock.recv.side_effect = [bytes([b]) for b in b"admin\r\n"] + [bytes([b]) for b in b"secret\r\n"]
-        result = self.server._authenticate(sock)
-        self.assertTrue(result)
+        auth_ok, skip_lf = self.server._authenticate(sock)
+        self.assertTrue(auth_ok)
+        # U3: the final \n is NOT consumed here — reported for the tap to skip
+        self.assertTrue(skip_lf)
 
     def test_authenticate_failure(self):
-        """Wrong credentials return False."""
+        """Wrong credentials return (False, skip_lf)."""
         sock = MagicMock(spec=socket.socket)
         sock.recv.side_effect = [bytes([b]) for b in b"admin\r\n"] + [bytes([b]) for b in b"wrong\r\n"]
-        result = self.server._authenticate(sock)
-        self.assertFalse(result)
+        auth_ok, _skip_lf = self.server._authenticate(sock)
+        self.assertFalse(auth_ok)
 
     def test_authenticate_echo_disabled_for_password(self):
         """Password input should not be echoed back."""
@@ -215,31 +222,52 @@ class AuthenticateTest(unittest.TestCase):
 
 
 class ReadLineTest(unittest.TestCase):
-    """Test cases for TelnetServer._read_line() line termination."""
+    """Line-termination pins for the shared read_line via TelnetSocketAdapter.
+
+    Replaces the former TelnetServer._read_line tests. U3 changed the CR
+    follower handling: the LF/NUL after a CR is no longer consumed with a
+    blocking read inside the call — it is consumed by the NEXT read_line
+    call via skip_lf propagation (boundary patterns pinned per the G3
+    design: CR LF / CR NUL / CR + regular byte).
+    """
 
     def setUp(self):
         self.server = _make_server()
 
-    def test_read_line_cr_lf(self):
-        """CR LF terminates the line, consuming the LF."""
+    def _adapter(self, input_bytes: bytes) -> TelnetSocketAdapter:
         sock = MagicMock(spec=socket.socket)
-        sock.recv.side_effect = [bytes([b]) for b in b"hi\r\n"]
-        result = self.server._read_line(sock, echo=False)
-        self.assertEqual(result, "hi")
+        sock.recv.side_effect = [bytes([b]) for b in input_bytes]
+        return TelnetSocketAdapter(sock, self.server)
 
-    def test_read_line_cr_nul(self):
-        """CR NUL (RFC 854) terminates the line, consuming the NUL."""
-        sock = MagicMock(spec=socket.socket)
-        sock.recv.side_effect = [bytes([b]) for b in b"hi\r\x00"]
-        result = self.server._read_line(sock, echo=False)
-        self.assertEqual(result, "hi")
+    def test_read_line_cr_lf_boundary(self):
+        """CR LF across a boundary: LF is consumed by the next call via skip_lf."""
+        adapter = self._adapter(b"hi\r\nok\r")
+        line, skip_lf = read_line(adapter, echo=False)
+        self.assertEqual((line, skip_lf), ("hi", True))
+        line, skip_lf = read_line(adapter, echo=False, skip_lf=skip_lf)
+        self.assertEqual((line, skip_lf), ("ok", True))
+
+    def test_read_line_cr_nul_boundary(self):
+        """CR NUL (RFC 854): NUL is consumed by the next call (nul_resets_skip_lf=True)."""
+        adapter = self._adapter(b"hi\r\x00ok\r")
+        line, skip_lf = read_line(adapter, echo=False)
+        self.assertEqual((line, skip_lf), ("hi", True))
+        line, skip_lf = read_line(adapter, echo=False, skip_lf=skip_lf)
+        self.assertEqual((line, skip_lf), ("ok", True))
+
+    def test_read_line_cr_then_data_boundary(self):
+        """CR followed by a regular byte: the byte belongs to the next line."""
+        adapter = self._adapter(b"hi\rXok\n")
+        line, skip_lf = read_line(adapter, echo=False)
+        self.assertEqual((line, skip_lf), ("hi", True))
+        line, skip_lf = read_line(adapter, echo=False, skip_lf=skip_lf)
+        self.assertEqual((line, skip_lf), ("Xok", False))
 
     def test_read_line_bare_lf(self):
-        """Bare LF terminates the line."""
-        sock = MagicMock(spec=socket.socket)
-        sock.recv.side_effect = [bytes([b]) for b in b"hi\n"]
-        result = self.server._read_line(sock, echo=False)
-        self.assertEqual(result, "hi")
+        """Bare LF terminates the line with no pending skip_lf."""
+        adapter = self._adapter(b"hi\n")
+        line, skip_lf = read_line(adapter, echo=False)
+        self.assertEqual((line, skip_lf), ("hi", False))
 
 
 class PluginRegistrationTest(unittest.TestCase):
