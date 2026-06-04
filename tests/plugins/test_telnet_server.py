@@ -28,6 +28,7 @@ from simnos.plugins.servers.telnet_server import (
     TelnetSocketAdapter,
     _is_loopback,
 )
+from tests.plugins.tap_test_helpers import countdown_run_srv, live_run_srv
 
 
 def _make_server(**kwargs) -> TelnetServer:
@@ -568,14 +569,14 @@ class SocketToShellTapTest(unittest.TestCase):
         self.shell_stdin = MagicMock()
         self.shell_replied_event = MagicMock()
         self.shell_replied_event.wait.return_value = True
-        self.run_srv = MagicMock()
+        # T-9 default: run_srv stays live, loops exit via the recv script's EOF.
+        self.run_srv = live_run_srv()
 
     @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_normal_byte_echoed_to_socket(self, mock_recv, _mock_sleep):
         """A normal byte is echoed to the socket and buffered."""
         mock_recv.side_effect = [b"a", None]  # One byte, then EOF
-        self.run_srv.is_set.side_effect = [True, True, True, False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_with(b"a")
 
@@ -584,7 +585,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_newline_sends_line_to_shell(self, mock_recv, _mock_sleep):
         """Receiving a newline sends the buffered line to the shell and clears replied event."""
         mock_recv.side_effect = [b"h", b"i", b"\r", None]
-        self.run_srv.is_set.side_effect = [True] * 7 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("hi\r")
         self.shell_replied_event.clear.assert_called_once()
@@ -596,7 +596,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_crlf_sends_single_line_to_shell(self, mock_recv, _mock_sleep):
         """CRLF input: \\r triggers line send, trailing \\n is consumed (RFC 854)."""
         mock_recv.side_effect = [b"h", b"i", b"\r", b"\n", None]
-        self.run_srv.is_set.side_effect = [True] * 10 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("hi\r")
 
@@ -605,7 +604,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_cr_nul_resets_skip_lf(self, mock_recv, _mock_sleep):
         """CR NUL is a complete sequence (RFC 854); a subsequent LF is a new line."""
         mock_recv.side_effect = [b"a", b"\r", b"\x00", b"\n", None]
-        self.run_srv.is_set.side_effect = [True] * 12 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.assertEqual(self.shell_stdin.write.call_count, 2)
         self.shell_stdin.write.assert_any_call("a\r")
@@ -616,7 +614,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_cr_followed_by_data_preserves_data(self, mock_recv, _mock_sleep):
         """CR followed by a non-LF byte: line is sent, next byte is not lost."""
         mock_recv.side_effect = [b"x", b"\r", b"y", None]
-        self.run_srv.is_set.side_effect = [True] * 10 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_stdin.write.assert_called_once_with("x\r")
         self.sock.sendall.assert_any_call(b"y")
@@ -626,7 +623,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_eof_breaks_loop(self, mock_recv, _mock_sleep):
         """EOF (None) breaks the loop and clears run_srv."""
         mock_recv.return_value = None
-        self.run_srv.is_set.return_value = True
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
@@ -635,7 +631,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_nul_bytes_dropped(self, mock_recv, _mock_sleep):
         """NUL bytes (0x00) are dropped and not echoed."""
         mock_recv.side_effect = [b"\x00", b"a", None]
-        self.run_srv.is_set.side_effect = [True] * 4 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
 
@@ -644,7 +639,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_oserror_on_recv_breaks_loop(self, mock_recv, _mock_sleep):
         """OSError during recv breaks the loop."""
         mock_recv.side_effect = OSError("Read error")
-        self.run_srv.is_set.return_value = True
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
@@ -654,27 +648,35 @@ class SocketToShellTapTest(unittest.TestCase):
         """OSError during sendall breaks the loop."""
         mock_recv.side_effect = [b"a", b"b"]
         self.sock.sendall.side_effect = OSError("Write error")
-        self.run_srv.is_set.return_value = True
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
     @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_run_srv_clear_exits_loop(self, mock_recv, _mock_sleep):
-        """If run_srv is cleared externally, the loop exits."""
+        """If run_srv is already cleared, the loop exits without reading.
+
+        countdown(0): the loop head gets the first False — nothing is read.
+        """
         mock_recv.return_value = b"a"
-        self.run_srv.is_set.return_value = False
+        self.run_srv = countdown_run_srv(0)
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         mock_recv.assert_not_called()
 
     @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_shutdown_during_shell_wait(self, mock_recv, _mock_sleep):
-        """If run_srv is cleared while waiting for shell reply, the loop exits."""
+        """If run_srv is cleared while waiting for shell reply, the loop exits.
+
+        countdown(2): loop head + first inner-wait guard consume the Trues;
+        the second inner-wait guard gets the first False (wait() keeps
+        timing out), and the post-wait guard sees False again — the byte
+        must not be echoed.
+        """
         mock_recv.side_effect = [b"a", b"b"]
         # wait() returns False (timeout), then run_srv is checked and found False
         self.shell_replied_event.wait.return_value = False
-        self.run_srv.is_set.side_effect = [True, True, False, False]
+        self.run_srv = countdown_run_srv(2)
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         # Should exit without processing the byte 'a' because the inner wait loop breaks
         self.sock.sendall.assert_not_called()
@@ -686,7 +688,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_timeout_error_continues_loop(self, mock_recv, _mock_sleep):
         """TimeoutError during _recv_byte is caught and loop continues."""
         mock_recv.side_effect = [TimeoutError(), b"a", None]
-        self.run_srv.is_set.side_effect = [True] * 4 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"a")
 
@@ -695,7 +696,6 @@ class SocketToShellTapTest(unittest.TestCase):
     def test_shell_replied_event_cleared_on_newline(self, mock_recv, _mock_sleep):
         """Receiving a newline clears the shell_replied_event."""
         mock_recv.side_effect = [b"\n", None]
-        self.run_srv.is_set.side_effect = [True] * 3 + [False]
         client_to_shell_tap(self.adapter, self.shell_stdin, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.clear.assert_called_once()
 
@@ -710,17 +710,12 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.shell_stdout = MagicMock()
         self.shell_stdout.drain.return_value = []
         self.shell_replied_event = MagicMock()
-        self.run_srv = MagicMock()
+        # T-9 default: run_srv stays live, loops exit via readline's "" EOF.
+        self.run_srv = live_run_srv()
 
     def test_line_forwarded_to_socket(self):
         """A line from the shell is forwarded to the socket and event is set."""
         self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"Router>\r\n")
         self.shell_replied_event.set.assert_called_once()
@@ -728,38 +723,29 @@ class ShellToSocketTapTest(unittest.TestCase):
     def test_empty_line_breaks_loop(self):
         """Empty line from shell (EOF) breaks the loop and clears run_srv."""
         self.shell_stdout.readline.return_value = ""
-        self.run_srv.is_set.return_value = True
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
     def test_run_srv_cleared_skips_sendall(self):
-        """When run_srv is cleared after readline, sendall is skipped."""
+        """When run_srv is cleared after readline, sendall is skipped (D11).
+
+        countdown(1): the loop head consumes the True; the retry-loop gate
+        gets the first False — the send attempt must not happen.
+        """
         self.shell_stdout.readline.side_effect = ["Router>\r\n", ""]
-        self.run_srv.is_set.side_effect = [True, False]
+        self.run_srv = countdown_run_srv(1)
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_not_called()
 
     def test_nul_stripped_from_line(self):
         """NUL bytes are stripped from the shell output."""
         self.shell_stdout.readline.side_effect = ["abc\x00def\r\n", ""]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"abcdef\r\n")
 
     def test_lf_converted_to_crlf(self):
         """Bare LF from shell is converted to CRLF."""
         self.shell_stdout.readline.side_effect = ["line\n", ""]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"line\r\n")
 
@@ -767,19 +753,12 @@ class ShellToSocketTapTest(unittest.TestCase):
         """OSError during sendall breaks the loop."""
         self.shell_stdout.readline.return_value = "Router>\r\n"
         self.sock.sendall.side_effect = OSError("Write error")
-        self.run_srv.is_set.return_value = True
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.run_srv.clear.assert_called_once()
 
     def test_shell_replied_event_set_after_send(self):
         """Successfully sending a line to the socket sets the replied event."""
         self.shell_stdout.readline.side_effect = ["hi\r\n", ""]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.shell_replied_event.set.assert_called_once()
 
@@ -787,7 +766,6 @@ class ShellToSocketTapTest(unittest.TestCase):
         """Whitespace-only first line blocks on second readline for prompt."""
         self.shell_stdout.readline.side_effect = ["\r\n", "Router>", ""]
         self.shell_stdout.drain.side_effect = [[], [], []]
-        self.run_srv.is_set.side_effect = [True, True, True, False]
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         # Echo and prompt are sent together in one sendall
         self.sock.sendall.assert_called_once_with(b"\r\nRouter>")
@@ -796,12 +774,6 @@ class ShellToSocketTapTest(unittest.TestCase):
         """Drained lines are coalesced into a single sendall."""
         self.shell_stdout.readline.side_effect = ["line1\r\n", ""]
         self.shell_stdout.drain.side_effect = [["line2\r\n", "Router>"], []]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         self.sock.sendall.assert_called_once_with(b"line1\r\nline2\r\nRouter>")
 
@@ -809,12 +781,6 @@ class ShellToSocketTapTest(unittest.TestCase):
         """Consecutive prompts without trailing newline get \\r\\n separator."""
         self.shell_stdout.readline.side_effect = ["Router>", ""]
         self.shell_stdout.drain.side_effect = [["Router>"], []]
-        self.run_srv.is_set.side_effect = [
-            True,
-            True,
-            True,
-            False,
-        ]  # D11: retry-loop form consumes one extra is_set per send
         shell_to_client_tap(self.adapter, self.shell_stdout, self.shell_replied_event, self.run_srv)
         # Prompts are separated, not concatenated as "Router>Router>"
         self.sock.sendall.assert_called_once_with(b"Router>\r\nRouter>")
@@ -853,8 +819,7 @@ class TelnetSocketAdapterTest(unittest.TestCase):
         sock.close()
         adapter = TelnetSocketAdapter(sock, self.server)
         shell_stdout = MagicMock()
-        run_srv = MagicMock()
-        run_srv.is_set.return_value = True
+        run_srv = live_run_srv()
         shell_to_client_tap(adapter, shell_stdout, MagicMock(), run_srv)
         shell_stdout.readline.assert_not_called()
 
@@ -870,14 +835,14 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
         self.shell_stdout = MagicMock()
         self.shell_replied_event = MagicMock()
         self.shell_replied_event.wait.return_value = True
-        self.run_srv = MagicMock()
+        # T-9 default: run_srv stays live, loops exit via the recv script's EOF.
+        self.run_srv = live_run_srv()
 
     @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
     @unittest.mock.patch.object(TelnetServer, "_recv_byte")
     def test_newline_echo_routed_to_shell_stdout(self, mock_recv, _mock_sleep):
         """When shell_stdout is provided, newline echo goes to shell_stdout, not socket."""
         mock_recv.side_effect = [b"\r", None]
-        self.run_srv.is_set.side_effect = [True] * 5 + [False]
         client_to_shell_tap(
             self.adapter,
             self.shell_stdin,
@@ -895,7 +860,6 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
     def test_newline_echo_to_socket_without_shell_stdout(self, mock_recv, _mock_sleep):
         """Without shell_stdout, newline echo goes directly to socket."""
         mock_recv.side_effect = [b"\r", None]
-        self.run_srv.is_set.side_effect = [True] * 5 + [False]
         client_to_shell_tap(
             self.adapter,
             self.shell_stdin,
@@ -909,7 +873,6 @@ class SocketToShellTapShellStdoutTest(unittest.TestCase):
     def test_normal_byte_still_echoed_to_socket(self, mock_recv, _mock_sleep):
         """Normal bytes are always echoed directly to socket, even with shell_stdout."""
         mock_recv.side_effect = [b"a", None]
-        self.run_srv.is_set.side_effect = [True, True, True, False]
         client_to_shell_tap(
             self.adapter,
             self.shell_stdin,
