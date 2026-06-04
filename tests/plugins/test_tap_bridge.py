@@ -26,6 +26,7 @@ from simnos.plugins.servers.tap_bridge import (
     read_line,
     shell_to_client_tap,
 )
+from tests.plugins.tap_test_helpers import countdown_run_srv, live_run_srv
 
 
 class FakeTransport:
@@ -64,16 +65,15 @@ def _bytes_script(data: bytes) -> list[bytes]:
     return [bytes([b]) for b in data]
 
 
-def _events(is_set_fuel=None):
-    """Build (shell_replied_event, run_srv) mocks. wait() returns True."""
+def _events(run_srv=None):
+    """Build (shell_replied_event, run_srv) mocks. wait() returns True.
+
+    *run_srv* defaults to live_run_srv() (T-9 idiom: the loop exits via
+    data-source EOF); shutdown-path pins pass countdown_run_srv(n).
+    """
     shell_replied_event = Mock()
     shell_replied_event.wait.return_value = True
-    run_srv = Mock()
-    if is_set_fuel is not None:
-        run_srv.is_set.side_effect = is_set_fuel
-    else:
-        run_srv.is_set.return_value = True
-    return shell_replied_event, run_srv
+    return shell_replied_event, run_srv if run_srv is not None else live_run_srv()
 
 
 class ClientToShellTapQuirkTest(unittest.TestCase):
@@ -186,8 +186,9 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
         """D11: if run_srv is cleared before the send attempt, nothing is sent."""
         transport = FakeTransport()
         shell_stdout = self._stdout(["hello\r\n", ""])
-        # outer loop True, retry-loop gate False
-        ev, run_srv = _events([True, False])
+        # countdown(1): outer loop head consumes the True, the retry-loop
+        # gate gets the first False — the send attempt must not happen.
+        ev, run_srv = _events(countdown_run_srv(1))
         shell_to_client_tap(transport, shell_stdout, ev, run_srv)
         self.assertEqual(transport.sent, [])
         ev.set.assert_not_called()
@@ -197,8 +198,9 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
         transport = FakeTransport()
         transport.send_errors = [TimeoutError()]
         shell_stdout = self._stdout(["hello\r\n", ""])
-        # outer True, retry gate True (send raises), retry re-gate False
-        ev, run_srv = _events([True, True, False])
+        # countdown(2): outer head True, retry gate True (send raises),
+        # the retry re-gate gets the first False — no resend after timeout.
+        ev, run_srv = _events(countdown_run_srv(2))
         shell_to_client_tap(transport, shell_stdout, ev, run_srv)
         self.assertEqual(transport.sent, [])
         ev.set.assert_not_called()
