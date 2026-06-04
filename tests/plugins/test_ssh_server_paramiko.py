@@ -327,6 +327,28 @@ class ChannelToShellTapTest(unittest.TestCase):
         self.assertEqual(self.mock_run_srv.is_set.call_count, 2)
         self.mock_run_srv.clear.assert_called_once()
 
+    def test_client_to_shell_tap_break_loop_when_channel_closed_but_active(self):
+        """U2 widening pin: closed=True is detected even while the transport is alive.
+
+        Pre-G3, the client->shell loop only checked `channel.active`; the shared
+        is_closed() now also breaks on `channel.closed` (channel closed while the
+        underlying transport is still alive). Pins the OR short-circuit of
+        ParamikoChannelAdapter.is_closed() in the client->shell direction.
+        """
+        self.mock_channel.recv.return_value = b"a"
+        self.mock_channel.closed = True
+        self.mock_channel.active = True
+        client_to_shell_tap(
+            transport=self.adapter,
+            shell_stdin=self.mock_shell_stdin,
+            shell_replied_event=self.mock_shell_replied_event,
+            run_srv=self.mock_run_srv,
+        )
+        # Breaks at is_closed() before echoing or buffering the byte
+        self.mock_channel.sendall.assert_not_called()
+        self.mock_shell_stdin.write.assert_not_called()
+        self.mock_run_srv.clear.assert_called_once()
+
     def test_client_to_shell_tap_break_loop_if_os_error(self):
         """Check that client_to_shell_tap breaks the loop if an OSError occurs."""
         self.mock_channel.sendall.side_effect = OSError

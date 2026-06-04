@@ -792,6 +792,45 @@ class ShellToSocketTapTest(unittest.TestCase):
         self.sock.sendall.assert_called_once_with(b"Router>\r\nRouter>")
 
 
+class TelnetSocketAdapterTest(unittest.TestCase):
+    """U2 pins for TelnetSocketAdapter.is_closed() (real fileno() == -1 detection).
+
+    The FakeTransport tests in test_tap_bridge.py pin that the shared loops
+    consult is_closed(); these tests pin the Telnet adapter's actual
+    implementation so a regression to `return False` cannot pass unnoticed.
+    """
+
+    def setUp(self):
+        self.server = _make_server()
+
+    def test_is_closed_false_on_live_socket(self):
+        """A live (open) socket reports is_closed() == False."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            adapter = TelnetSocketAdapter(sock, self.server)
+            self.assertFalse(adapter.is_closed())
+        finally:
+            sock.close()
+
+    def test_is_closed_true_after_local_close(self):
+        """A locally closed socket (fileno() == -1) reports is_closed() == True."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.close()
+        adapter = TelnetSocketAdapter(sock, self.server)
+        self.assertTrue(adapter.is_closed())
+
+    def test_shell_to_client_tap_stops_on_closed_socket(self):
+        """U2: a locally-closed socket stops the shell->client loop before any read."""
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.close()
+        adapter = TelnetSocketAdapter(sock, self.server)
+        shell_stdout = MagicMock()
+        run_srv = MagicMock()
+        run_srv.is_set.return_value = True
+        shell_to_client_tap(adapter, shell_stdout, MagicMock(), run_srv)
+        shell_stdout.readline.assert_not_called()
+
+
 class SocketToShellTapShellStdoutTest(unittest.TestCase):
     """Test echo routing via shell_stdout parameter."""
 
@@ -862,7 +901,7 @@ class WatchdogTest(unittest.TestCase):
         self.run_srv = MagicMock()
         self.shell = MagicMock()
 
-    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_run_srv_loop(self, mock_sleep):
         """Watchdog loops while run_srv is set, then stops shell."""
         self.run_srv.is_set.side_effect = [True, True, False]
@@ -871,7 +910,7 @@ class WatchdogTest(unittest.TestCase):
         self.assertEqual(mock_sleep.call_count, 2)
         self.shell.stop.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_breaks_when_is_running_cleared(self, _mock_sleep):
         """Watchdog breaks when is_running is cleared, then stops shell."""
         self.run_srv.is_set.return_value = True
@@ -879,7 +918,7 @@ class WatchdogTest(unittest.TestCase):
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
         self.shell.stop.assert_called_once()
 
-    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_shell_stop_called_on_exit(self, _mock_sleep):
         """shell.stop() is always called on watchdog exit."""
         # Case: run_srv cleared
@@ -887,7 +926,7 @@ class WatchdogTest(unittest.TestCase):
         self.server.watchdog(self.is_running, self.run_srv, self.shell)
         self.assertEqual(self.shell.stop.call_count, 1)
 
-    @unittest.mock.patch("simnos.plugins.servers.tap_bridge.time.sleep")
+    @unittest.mock.patch("simnos.plugins.servers.telnet_server.time.sleep")
     def test_sleep_interval_capped_by_shutdown_timeout(self, mock_sleep):
         """Sleep interval is the minimum of watchdog_interval and SHUTDOWN_IO_TIMEOUT."""
         self.server.watchdog_interval = 10.0  # Larger than SHUTDOWN_IO_TIMEOUT

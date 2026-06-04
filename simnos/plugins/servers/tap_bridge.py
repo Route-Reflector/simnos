@@ -29,6 +29,11 @@ class TransportAdapter(Protocol):
 
     Implementations: ParamikoChannelAdapter (ssh_server_paramiko),
     TelnetSocketAdapter (telnet_server).
+
+    Timeout responsibility: adapters do NOT manage I/O timeouts. The caller
+    (connection_function) configures them on the underlying channel/socket
+    before the taps start; recv_byte()/sendall() simply let the resulting
+    TimeoutError propagate. New transports must follow the same split.
     """
 
     #: Exceptions that mean "I/O failed / peer gone" for this transport.
@@ -247,7 +252,13 @@ def shell_to_client_tap(
                 transport.sendall(batch.encode(encoding="utf-8"))
                 written = True
             except TimeoutError:
-                log.debug("tap_bridge.shell_to_client_tap [%s] write timeout, retrying", transport.name)
+                # Batch size aids debugging the partial-send duplicate risk
+                # accepted in the G3 design (resend may duplicate echoed chars).
+                log.debug(
+                    "tap_bridge.shell_to_client_tap [%s] write timeout (batch %d chars), retrying",
+                    transport.name,
+                    len(batch),
+                )
                 continue
             except transport.io_errors as e:
                 log.error("tap_bridge.shell_to_client_tap [%s] client write error: %s", transport.name, e)
