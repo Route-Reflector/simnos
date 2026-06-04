@@ -553,7 +553,8 @@ class ChannelToShellTapTest(unittest.TestCase):
 
         countdown(1): the loop head consumes the True (the NUL is dropped
         before the shell-wait guard); the second loop head gets the first
-        False.
+        False. No EOF tail: a mistuned countdown fails visibly with
+        StopIteration.
         """
         self.mock_run_srv = countdown_run_srv(1)
         self.mock_channel.recv.side_effect = [b"\x00"]

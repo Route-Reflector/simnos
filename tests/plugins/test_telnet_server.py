@@ -671,9 +671,10 @@ class SocketToShellTapTest(unittest.TestCase):
         countdown(2): loop head + first inner-wait guard consume the Trues;
         the second inner-wait guard gets the first False (wait() keeps
         timing out), and the post-wait guard sees False again — the byte
-        must not be echoed.
+        must not be echoed. No EOF tail: a mistuned countdown fails
+        visibly with StopIteration.
         """
-        mock_recv.side_effect = [b"a", b"b"]
+        mock_recv.side_effect = [b"a"]
         # wait() returns False (timeout), then run_srv is checked and found False
         self.shell_replied_event.wait.return_value = False
         self.run_srv = countdown_run_srv(2)
