@@ -355,4 +355,11 @@ def interactive_login(
     transport.sendall(pass_prompt)
     entered_pass, skip_lf = read_line(transport, echo=False, skip_lf=skip_lf)
     transport.sendall(b"\r\n")
-    return (entered_user == username and entered_pass == password), skip_lf
+    authenticated = entered_user == username and entered_pass == password
+    log.debug(
+        "tap_bridge.interactive_login [%s] %s for user %s",
+        transport.name,
+        "succeeded" if authenticated else "failed",
+        entered_user,
+    )
+    return authenticated, skip_lf

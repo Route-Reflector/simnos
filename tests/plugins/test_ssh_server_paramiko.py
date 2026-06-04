@@ -1510,7 +1510,7 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
         self.assertTrue(skip_lf)
 
 
-class ReadChannelLineTest(unittest.TestCase):
+class ReadLineTest(unittest.TestCase):
     """CRLF/skip_lf pins for the shared read_line via ParamikoChannelAdapter.
 
     Replaces the former ParamikoSshServer._read_channel_line tests (PR2 #225);
@@ -1526,42 +1526,42 @@ class ReadChannelLineTest(unittest.TestCase):
         mock_channel.sendall = MagicMock()
         return mock_channel
 
-    def test_read_channel_line_bare_cr(self):
+    def test_read_line_bare_cr(self):
         """Bare CR should return (line, True) without blocking."""
         channel = self._make_channel(b"test\r")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "test")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_bare_lf(self):
+    def test_read_line_bare_lf(self):
         """Bare LF should return (line, False)."""
         channel = self._make_channel(b"test\n")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "test")
         self.assertFalse(skip_lf)
 
-    def test_read_channel_line_skip_lf_consumes_lf(self):
+    def test_read_line_skip_lf_consumes_lf(self):
         """skip_lf=True should consume a leading LF, then read normally."""
         channel = self._make_channel(b"\nnext\r")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel), skip_lf=True)
         self.assertEqual(line, "next")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_skip_lf_non_lf(self):
+    def test_read_line_skip_lf_non_lf(self):
         """skip_lf=True with non-LF first byte should not consume it."""
         channel = self._make_channel(b"Pass\r")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel), skip_lf=True)
         self.assertEqual(line, "Pass")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_nul_preserved(self):
+    def test_read_line_nul_preserved(self):
         """NUL bytes should be preserved in login input to prevent auth bypass."""
         channel = self._make_channel(b"ad\x00min\r")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel))
         self.assertEqual(line, "ad\x00min")
         self.assertTrue(skip_lf)
 
-    def test_read_channel_line_eof(self):
+    def test_read_line_eof(self):
         """EOF should return accumulated buffer with skip_lf=False."""
         channel = self._make_channel(b"partial")
         line, skip_lf = read_line(ParamikoChannelAdapter(channel))

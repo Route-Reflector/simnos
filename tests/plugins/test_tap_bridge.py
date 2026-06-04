@@ -59,6 +59,11 @@ class FakeTransport:
         return self.closed
 
 
+def _bytes_script(data: bytes) -> list[bytes]:
+    """Split *data* into a per-byte recv script."""
+    return [bytes([b]) for b in data]
+
+
 def _events(is_set_fuel=None):
     """Build (shell_replied_event, run_srv) mocks. wait() returns True."""
     shell_replied_event = Mock()
@@ -207,11 +212,6 @@ class ShellToClientTapPolicyTest(unittest.TestCase):
         shell_to_client_tap(transport, shell_stdout, ev, run_srv)
         shell_stdout.readline.assert_not_called()
         self.assertEqual(transport.sent, [])
-
-
-def _bytes_script(data: bytes) -> list[bytes]:
-    """Split *data* into a per-byte recv script."""
-    return [bytes([b]) for b in data]
 
 
 class ReadLinePolicyTest(unittest.TestCase):

@@ -355,18 +355,13 @@ class ParamikoSshServer(TCPServerBase):
                  client_to_shell_tap so it can consume a trailing LF after
                  the final CR of the password line.
         """
-        authenticated, skip_lf = interactive_login(
+        return interactive_login(
             ParamikoChannelAdapter(channel),
             self.username,
             self.password,
             user_prompt=b"\r\nUser Name:",
             pass_prompt=b"\r\nPassword:",
         )
-        if authenticated:
-            log.debug("Channel login succeeded for user %s", self.username)
-        else:
-            log.warning("Channel login failed")
-        return authenticated, skip_lf
 
     def connection_function(self, client: socket.socket, is_running: threading.Event):
         shell_replied_event = threading.Event()
