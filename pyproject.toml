@@ -132,7 +132,9 @@ directory = "coverage_html_report"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-vv -n auto -m 'not compatibility'"
+# --dist loadgroup: behaves like the default `load` scheduling, except tests
+# sharing an `xdist_group` mark run on one worker (hot-reload fs tests, #232).
+addopts = "-vv -n auto --dist loadgroup -m 'not compatibility'"
 markers = [
     "compatibility: requires the `compatibility` dep group (netmiko/scrapli/ansible-core) and is run only via the compatibility CI workflow",
 ]

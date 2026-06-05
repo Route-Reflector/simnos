@@ -3,6 +3,8 @@ Test module for simnos.core.nos module.
 This module can be found at simnos/core/nos.py
 """
 
+import pathlib
+import tempfile
 import unittest
 
 from pydantic import ValidationError
@@ -182,6 +184,30 @@ class NosTest(unittest.TestCase):
         with pytest.raises(FileNotFoundError, match=r"incorrect_file\.yaml"):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.yaml")
+
+    def test_from_file_empty_yaml_file(self):
+        """An empty yaml file raises ValueError instead of crashing later.
+
+        Pins the `_from_yaml` mapping guard (#232): `yaml.safe_load` returns
+        None for an empty file (e.g. a half-written file observed by hot
+        reload mid-save) and `from_dict` used to crash on `data.get` with an
+        opaque AttributeError out of the SSH shell thread.
+        """
+        empty_yaml = pathlib.Path(tempfile.mkdtemp()) / "empty_nos.yaml"
+        empty_yaml.write_text("", encoding="utf-8")
+        with pytest.raises(ValueError, match=r"does not contain a mapping \(got NoneType\)"):
+            Nos().from_file(str(empty_yaml))
+
+    def test_from_file_non_mapping_yaml_file(self):
+        """A yaml file with a non-dict top level raises ValueError.
+
+        Same `_from_yaml` guard as the empty-file case (#232), pinned for
+        the other non-mapping shape `yaml.safe_load` can return.
+        """
+        list_yaml = pathlib.Path(tempfile.mkdtemp()) / "list_nos.yaml"
+        list_yaml.write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+        with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
+            Nos().from_file(str(list_yaml))
 
     def test_from_py_file(self):
         """

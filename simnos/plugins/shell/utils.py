@@ -20,8 +20,19 @@ def get_files_under_directory(directory):
 
 
 def get_files_lasttime_changed(files):
-    """Method to get files last time changed"""
-    return {file: os.stat(file).st_mtime for file in files}
+    """Method to get files last time changed
+
+    A file may vanish between the directory walk and the stat (e.g.
+    another process replaces or removes it); such files are skipped and
+    the next poll picks up their final state.
+    """
+    files_lasttime_changed: dict[str, float] = {}
+    for file in files:
+        try:
+            files_lasttime_changed[file] = os.stat(file).st_mtime
+        except FileNotFoundError:
+            continue
+    return files_lasttime_changed
 
 
 def get_new_files(old_files: list[str], new_files: list[str]):
@@ -30,8 +41,20 @@ def get_new_files(old_files: list[str], new_files: list[str]):
 
 
 def get_files_recently_modified(files: list[str], files_lasttime_changed_old: dict[str, float]):
-    """Method to get files recently modified"""
-    return [file for file in files if os.stat(file).st_mtime != files_lasttime_changed_old.get(file, 0)]
+    """Method to get files recently modified
+
+    A file that vanished since the walk (see `get_files_lasttime_changed`)
+    is not reported as modified; the next poll sees its final state.
+    """
+    files_recently_modified: list[str] = []
+    for file in files:
+        try:
+            mtime = os.stat(file).st_mtime
+        except FileNotFoundError:
+            continue
+        if mtime != files_lasttime_changed_old.get(file, 0):
+            files_recently_modified.append(file)
+    return files_recently_modified
 
 
 def change_jinja_to_corresponding_py(files: list[str]):

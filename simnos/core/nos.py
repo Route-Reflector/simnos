@@ -108,9 +108,16 @@ class Nos:
         for a live example.
 
         :param filepath: OS path to YAML file with NOS data
+        :raises ValueError: if the file holds no YAML mapping (empty file
+            or a non-dict top level), e.g. a half-written file caught
+            mid-save — `yaml.safe_load` returns None for it and
+            :meth:`from_dict` would crash on `data.get`
         """
         with open(filepath, encoding="utf-8") as f:
-            self.from_dict(yaml.safe_load(f))
+            data = yaml.safe_load(f)
+        if not isinstance(data, dict):
+            raise ValueError(f"NOS YAML file '{filepath}' does not contain a mapping (got {type(data).__name__})")
+        self.from_dict(data)
 
     def _from_module(self, filename: str) -> None:
         """

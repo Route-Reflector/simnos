@@ -95,9 +95,20 @@ class CMDShell(Cmd):
         """This method to do nothing if empty line entered"""
 
     def reload_commands(self, changed_files: list):
-        """Method to reload commands"""
+        """Method to reload commands
+
+        Lenient per file: hot reload is a dev feature and may observe a
+        half-written or malformed plugin file (e.g. an editor's partial
+        save, or a file that vanished after detection). One broken file
+        must not kill the SSH session nor block reloading the remaining
+        files — log and retry on the next change.
+        """
         for file in changed_files:
-            self.nos.from_file(file)
+            try:
+                self.nos.from_file(file)
+            except Exception as e:
+                log.error("shell '%s' failed to hot-reload %r: %r", self.base_prompt, file, e)
+                continue
             self.commands.update(self.nos.commands)
 
     def precmd(self, line):

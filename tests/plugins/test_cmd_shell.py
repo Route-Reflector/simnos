@@ -670,14 +670,39 @@ class HotReloadTest(TestCase):
         mock_from_file.assert_called_once_with(module.__name__.replace(".", "/") + ".py")
         assert all(key in shell.commands for key in module.commands)
 
+    def test_reload_commands_broken_file_logs_and_continues(self):
+        """One broken file does not kill the session nor block the rest.
+
+        Pins the per-file lenient guard in `reload_commands` (#232): a
+        half-written or malformed plugin file observed by hot reload used
+        to raise out of `precmd` and crash the whole shell thread. Now the
+        broken file is logged and skipped while remaining files reload.
+        """
+        shell = CMDShell(**self.arguments)
+        shell.nos.from_file = Mock(side_effect=[ValueError("boom"), None])
+        shell.nos.commands = {"healthy": {"output": "ok"}}
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.reload_commands(["broken.yaml", "healthy.yaml"])
+        self.assertEqual(len(captured.output), 1)
+        self.assertIn("broken.yaml", captured.output[0])
+        self.assertIn("healthy", shell.commands)
+
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
+    @pytest.mark.xdist_group("hot-reload-fs")
     @simnos(platform="cisco_ios", return_instance=True)
     def test_hot_reload_integration_yaml(self, net: SimNOS):
         """
         Test that the hot reload feature works correctly
+
+        Both hot-reload integration tests mutate the same real
+        `simnos/plugins/nos/` tree that every reload-enabled server in
+        the worker process watches, so they are serialized onto one
+        worker via `xdist_group` and keep their backup copies on a
+        non-watched `.bak` extension (#232: a sibling worker observed
+        a mid-`copyfile` empty `.yaml` and crashed its shell thread).
         """
         original_filename = "simnos/plugins/nos/platforms_yaml/cisco_ios.yaml"
-        copy_filename = "simnos/plugins/nos/platforms_yaml/copy_ios.yaml"
+        copy_filename = "simnos/plugins/nos/platforms_yaml/cisco_ios.yaml.bak"
         test_commands = {
             "test": {
                 "output": "test output",
@@ -691,9 +716,9 @@ class HotReloadTest(TestCase):
             with open(original_filename, encoding="utf-8") as file:
                 values = yaml.safe_load(file)
             values["commands"].update(test_commands)
-            # Write to a temp file then atomically replace to avoid
-            # exposing an empty/partial file to parallel test workers.
-            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".yaml")
+            # Write to a temp file (non-watched .bak suffix) then atomically
+            # replace so no empty/partial yaml is ever visible to a watcher.
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".yaml.bak")
             try:
                 with os.fdopen(fd, "w", encoding="utf-8") as file:
                     file.write(yaml.dump(values))
@@ -703,8 +728,8 @@ class HotReloadTest(TestCase):
                 raise
 
         def undo_change_file():
-            os.remove(original_filename)
-            shutil.move(copy_filename, original_filename)
+            # Atomic restore: no window where the original is missing.
+            os.replace(copy_filename, original_filename)
 
         device = list(net.hosts.values())
         credentials = {
@@ -725,19 +750,24 @@ class HotReloadTest(TestCase):
                 undo_change_file()
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
+    @pytest.mark.xdist_group("hot-reload-fs")
     @simnos(platform="cisco_ios", return_instance=True)
     def test_hot_reload_integration_py_jinja(self, net: SimNOS):
         """
         Test that the hot reload feature works correctly
+
+        See `test_hot_reload_integration_yaml` for why both hot-reload
+        integration tests share an `xdist_group` and use `.bak` backups
+        (#232 cross-worker file race).
         """
         original_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2"
-        copy_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/copy_show_version.j2"
+        copy_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2.bak"
 
         def change_file():
             shutil.copyfile(original_filename, copy_filename)
-            # Write to a temp file then atomically replace to avoid
-            # exposing an empty/partial file to parallel test workers.
-            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".j2")
+            # Write to a temp file (non-watched .bak suffix) then atomically
+            # replace so no empty/partial file is ever visible to a watcher.
+            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".j2.bak")
             try:
                 with os.fdopen(fd, "w", encoding="utf-8") as file:
                     file.write("test output")
@@ -747,8 +777,8 @@ class HotReloadTest(TestCase):
                 raise
 
         def undo_change_file():
-            os.remove(original_filename)
-            shutil.move(copy_filename, original_filename)
+            # Atomic restore: no window where the original is missing.
+            os.replace(copy_filename, original_filename)
 
         device = list(net.hosts.values())
         credentials = {

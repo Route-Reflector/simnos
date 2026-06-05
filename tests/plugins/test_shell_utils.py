@@ -145,6 +145,32 @@ class ShellUtilsTest(TestCase):
         self.assertIn(RANDOM_FILE, files)
         self.assertTrue(all(files_lasttime_changed[file] != 0 for file in files))
 
+    def test_get_files_lasttime_changed_vanished_file_skipped(self):
+        """A file that vanished between walk and stat is skipped, not raised.
+
+        Pins the FileNotFoundError tolerance (#232): another process may
+        remove or replace a file after the directory walk collected it;
+        the stat used to propagate and crash the hot-reload caller.
+        """
+        files = get_files_under_directory("simnos/plugins/nos")
+        vanished = "simnos/plugins/nos/platforms_yaml/vanished_after_walk.yaml"
+        files_lasttime_changed = get_files_lasttime_changed([*files, vanished])
+        self.assertNotIn(vanished, files_lasttime_changed)
+        self.assertTrue(all(file in files_lasttime_changed for file in files))
+
+    def test_get_files_recently_modified_vanished_file_skipped(self):
+        """A vanished file is not reported as modified, not raised.
+
+        Same FileNotFoundError tolerance as `get_files_lasttime_changed`
+        (#232) — a vanished file would otherwise hit the `.get(file, 0)`
+        default and crash on the stat instead.
+        """
+        files = get_files_under_directory("simnos/plugins/nos")
+        vanished = "simnos/plugins/nos/platforms_yaml/vanished_after_walk.yaml"
+        files_lasttime_changed = get_files_lasttime_changed(files)
+        modified = get_files_recently_modified([*files, vanished], files_lasttime_changed)
+        self.assertNotIn(vanished, modified)
+
     def test_get_files_changed(self):
         """
         Test to check if we get the files that have been changed
