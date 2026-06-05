@@ -76,6 +76,7 @@ def setup():
 
 
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
+@pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container(setup):
     """
     Test that we can connect to the device and run a command
@@ -96,6 +97,7 @@ def test_container(setup):
 
 
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
+@pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container_multiple_connections(setup):
     """
     Similar to test_container, but it runs multiple

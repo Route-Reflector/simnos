@@ -18,6 +18,9 @@ Pytest は Python のテストフレームワークで、シンプルかつス�
 pytest
 ```
 
+!!! note
+    suite には test ごとの global timeout 300 秒 ([pytest-timeout](https://pypi.org/project/pytest-timeout/)) が設定されています。hang したテストは CI job timeout まで run をブロックする代わりに数分で fail します。個々のテストは `@pytest.mark.timeout(...)` で override できます — loop リスクのあるテストには厳しめの pin、遅い all-commands sweep と docker テストには緩めの margin を指定します。
+
 ## セキュリティチェック: Bandit
 Bandit は Python コードのセキュリティツールで、一般的なセキュリティ問題や脆弱性を検出します。Python コードを静的に分析し、モジュールの安全でない使用、安全でない関数呼び出し、潜在的なセキュリティリスクなどのセキュリティ上の脅威を特定します。Bandit はさまざまなセキュリティ問題をチェックするプラグインセットを提供し、開発ワークフローに簡単に統合できるため、開発者が開発プロセスの早い段階でセキュリティ問題を特定して修正するのに役立ちます。Python アプリケーションやライブラリのセキュリティ体制を改善するための貴重なツールです。
 
