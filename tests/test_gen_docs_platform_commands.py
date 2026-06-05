@@ -15,11 +15,25 @@ for platforms that contain literal braces (e.g. `{master:0}` in
 Also pin the sweep semantics so that deleting a yaml causes the matching
 markdown to be removed on the next regeneration, while hand-authored
 `index.md` / `index.ja.md` are preserved.
+
+Since #171/#172 the catch set is the 5-tuple `FORMAT_ERRORS` shared with
+the lenient runtime (`cmd_shell._safe_format`), and the platform-yaml
+template sweep below keeps the "build-time loud" side CI-resident.
 """
 
+import os
+
 import pytest
+import yaml
 
 from tasks import render_template, sweep_orphaned_platform_docs
+
+PLATFORMS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
+
+
+def _yaml_platforms() -> list[str]:
+    """Platform names from the yaml dir (the same source gen_docs lists)."""
+    return sorted(f.removesuffix(".yaml") for f in os.listdir(PLATFORMS_YAML_DIR) if f.endswith(".yaml"))
 
 
 class TestRenderTemplate:
@@ -60,6 +74,72 @@ class TestRenderTemplate:
         """Error message should point users at the escape rule."""
         with pytest.raises(RuntimeError, match=r"escape"):
             render_template("{oops}", "p", "c", "output")
+
+    def test_raises_runtime_error_on_attribute_access(self):
+        """`{base_prompt.foo}` (AttributeError) must surface a contextual error.
+
+        Pins #171: AttributeError joined the catch set when it became the
+        shared 5-tuple `FORMAT_ERRORS`; previously this dumped a
+        contextless stack trace at docs-gen time.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format output for platformC/'cmd3'"):
+            render_template("{base_prompt.foo}", "platformC", "cmd3", "output")
+
+    def test_raises_runtime_error_on_index_access(self):
+        """`{base_prompt[bad]}` (TypeError) must surface a contextual error.
+
+        Pins #171: TypeError is the fifth member of `FORMAT_ERRORS`;
+        together with the three pre-existing tests above, every member of
+        the shared catch set has a contextual-RuntimeError pin.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format prompt for platformD/'cmd4'"):
+            render_template("{base_prompt[bad]}", "platformD", "cmd4", "prompt")
+
+
+class TestPlatformYamlTemplateSweep:
+    """CI-resident loud counterpart of the lenient runtime (#171/#172).
+
+    The runtime shell silently logs malformed `{base_prompt}` templates
+    (`cmd_shell._safe_format`), so a yaml authoring mistake in this repo
+    would otherwise surface only as a runtime log line. This sweep renders
+    every str template field of every platform yaml through
+    `render_template`, turning such a mistake into a contextual
+    RuntimeError in CI.
+
+    Covered fields: top-level initial_prompt / enable_prompt /
+    config_prompt (the latter two are not formatted by cmd_shell today,
+    but are written as `{base_prompt}` templates in yaml — covered
+    preventively) + per-command output (str only; callable outputs are
+    covered by the T-14 / #230 device-class tests) / prompt (each list
+    candidate gets an indexed field name like `prompt[0]`) / new_prompt.
+    """
+
+    TOP_LEVEL_FIELDS = ("initial_prompt", "enable_prompt", "config_prompt")
+
+    @pytest.mark.parametrize("platform", _yaml_platforms())
+    def test_all_templates_render(self, platform):
+        """Every `{base_prompt}` template field in the yaml must render."""
+        with open(f"{PLATFORMS_YAML_DIR}/{platform}.yaml", encoding="utf-8") as file:
+            data = yaml.safe_load(file)
+
+        for field in self.TOP_LEVEL_FIELDS:
+            template = data.get(field)
+            if isinstance(template, str):
+                render_template(template, platform, "-", field)
+
+        for command, details in data.get("commands", {}).items():
+            output = details.get("output")
+            if isinstance(output, str):
+                render_template(output, platform, command, "output")
+            prompts = details.get("prompt", [])
+            if isinstance(prompts, str):
+                render_template(prompts, platform, command, "prompt")
+            else:
+                for i, prompt in enumerate(prompts):
+                    render_template(prompt, platform, command, f"prompt[{i}]")
+            new_prompt = details.get("new_prompt")
+            if isinstance(new_prompt, str):
+                render_template(new_prompt, platform, command, "new_prompt")
 
 
 class TestSweepOrphanedPlatformDocs:

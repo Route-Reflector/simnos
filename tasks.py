@@ -79,13 +79,19 @@ def render_template(template: str, platform: str, command: str, field: str) -> s
     substitutes `{base_prompt}` and unescapes `{{` / `}}` literals from
     `sync_ntc_commands.escape_format_braces` preventive escape.
 
-    Re-raises any formatting failure as `RuntimeError` carrying the
-    platform / command / field context, so CI failures pinpoint the
-    offending YAML entry instead of dumping a contextless stack trace.
+    Re-raises any formatting failure (the `FORMAT_ERRORS` catch set shared
+    with the lenient runtime `cmd_shell._safe_format`; the asymmetry is
+    "raise vs silent" only) as `RuntimeError` carrying the platform /
+    command / field context, so CI failures pinpoint the offending YAML
+    entry instead of dumping a contextless stack trace.
     """
+    # Lazy import: keep `invoke --list` / lint-only tasks fast (the existing
+    # tasks.py convention, see netmiko_check); cached after the first call.
+    from simnos.plugins.shell.cmd_shell import FORMAT_ERRORS
+
     try:
         return template.format(base_prompt=platform)
-    except (KeyError, IndexError, ValueError) as exc:
+    except FORMAT_ERRORS as exc:
         raise RuntimeError(
             f"Failed to format {field} for {platform}/{command!r}: {exc!r}. "
             f"Check that any literal '{{' / '}}' in YAML is escaped as '{{{{' / '}}}}'."
