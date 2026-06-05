@@ -8,6 +8,8 @@ pinned per current_prompt branch — the consumer side of those dicts is
 pinned separately in tests/plugins/test_cmd_shell.py.
 """
 
+import re
+
 import pytest
 
 from simnos.core.nos import Nos
@@ -30,9 +32,15 @@ def nos() -> Nos:
     return Nos(filename=nos_plugins["arista_eos"])
 
 
-def test_show_clock_static_parts(nos):
-    """Time-dependent output (e2e denylist): pin the static render tail."""
+def test_show_clock_format(nos):
+    """Time-dependent output (e2e denylist): pin time-line shape + static tail.
+
+    The first line renders time.strftime("%a %b %d %H:%M:%S %Y"), e.g.
+    'Sat Apr 16 11:54:03 2022' (same shape as tests/core/test_netmiko.py
+    pins for the test-asset show clock).
+    """
     out = call_command(nos, "show clock", ENABLE)
+    assert re.match(r"^\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}$", out.splitlines()[0])
     assert "Timezone: UTC" in out
     assert "Clock source: local" in out
 
@@ -49,8 +57,10 @@ def test_show_running_config_content(nos):
     assert "{" not in out
 
 
-def test_show_ip_int_brief_content(nos):
-    out = call_command(nos, "show ip int brief", ENABLE)
+@pytest.mark.parametrize("command", ["show ip int brief", "show ip interface brief"])
+def test_show_ip_int_brief_content(nos, command):
+    """Both spellings are distinct entries backed by the same make_show_ip_int_br."""
+    out = call_command(nos, command, ENABLE)
     assert "Interface" in out
     assert "Ethernet1" in out
     assert "{" not in out

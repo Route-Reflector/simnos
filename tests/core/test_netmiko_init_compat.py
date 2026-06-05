@@ -210,6 +210,11 @@ def _classify_callable_commands(
     `.format(base_prompt=...)` post-processing step. Alias entries have
     no `output` key of their own, so they are skipped here; the alias
     target entry is swept independently.
+
+    Note: classification itself invokes the callables (probe + expected),
+    so a state-mutating callable would advance device state here before
+    the e2e session runs — fine today (all make_* are read-only), but a
+    sweep-eligibility redesign is needed if that ever changes.
     """
     initial_prompt = nos.initial_prompt.format(base_prompt=base_prompt)
     enable_prompt = (nos.enable_prompt or "").format(base_prompt=base_prompt)
