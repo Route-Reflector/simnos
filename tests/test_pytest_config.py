@@ -14,3 +14,15 @@ def test_global_timeout_configured(request):
     silently disappear from pyproject.toml.
     """
     assert float(request.config.getini("timeout")) == 300.0
+
+
+def test_timeout_method_left_to_auto(request):
+    """`timeout_method` stays unset on purpose (#233).
+
+    Pinning a method would break portability: POSIX uses `signal` (the
+    worker survives the failure) while Windows — covered by the weekly
+    full-matrix — has no SIGALRM and needs the `thread` fallback. An
+    explicit method appearing in pyproject.toml should be a conscious,
+    reviewed decision, not a drive-by edit.
+    """
+    assert not request.config.getini("timeout_method")

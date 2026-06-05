@@ -19,7 +19,7 @@ pytest
 ```
 
 !!! note
-    The suite has a global timeout of 300 seconds per test ([pytest-timeout](https://pypi.org/project/pytest-timeout/)): a hung test fails in minutes instead of blocking the run until the CI job timeout. Individual tests may override it with `@pytest.mark.timeout(...)` — tighter pins for loop-risk tests, looser margins for the slow all-commands sweeps.
+    The suite has a global timeout of 300 seconds per test ([pytest-timeout](https://pypi.org/project/pytest-timeout/)): a hung test fails in minutes instead of blocking the run until the CI job timeout. Individual tests may override it with `@pytest.mark.timeout(...)` — tighter pins for loop-risk tests, looser margins for the slow all-commands sweeps and the docker tests.
 
 ## Security check: Bandit
 Bandit is a security tool for Python code that detects common security issues and vulnerabilities. It analyzes Python code statically to identify potential security threats such as insecure use of modules, unsafe function calls, and potential security risks. Bandit provides a set of plugins that check for various security issues and can be easily integrated into development workflows, helping developers identify and fix security issues early in the development process. It's a valuable tool for improving the security posture of Python applications and libraries.
