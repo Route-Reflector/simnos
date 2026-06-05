@@ -712,19 +712,9 @@ class HotReloadTest(TestCase):
         skipped it — and the next successful reload then leaked the broken
         plugin's commands into the shell via `commands.update(nos.commands)`.
         """
-        tmp_dir = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp_dir.cleanup)
-        broken_py = os.path.join(tmp_dir.name, "broken_plugin.py")
-        with open(broken_py, "w", encoding="utf-8") as file:
-            file.write(
-                'NAME = "broken_module"\n'
-                'INITIAL_PROMPT = "{base_prompt}$"\n'
-                'DEVICE_NAME = "MissingClass"\n'
-                'commands = {"polluting command": {"output": "x", "help": "x"}}\n'
-            )
         shell = CMDShell(**self.arguments)
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands([broken_py, "tests/assets/module.py"])
+            shell.reload_commands(["tests/assets/broken_device_name_module.py", "tests/assets/module.py"])
         self.assertEqual(len(captured.output), 1)
         self.assertNotIn("polluting command", shell.commands)  # broken plugin never leaks
         self.assertIn("show version", shell.commands)  # healthy reload still applied

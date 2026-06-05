@@ -215,6 +215,21 @@ class NosTest(unittest.TestCase):
         with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
             Nos().from_file(list_yaml)
 
+    def test_from_dict_non_mapping_commands_leaves_nos_untouched(self):
+        """A non-mapping 'commands' value raises before any mutation.
+
+        Pins the validate-before-commit ordering of `from_dict` (#232):
+        `name` used to be committed before `commands.update` raised on a
+        malformed value, leaving partial state behind — the same hole
+        `_from_module` had with DEVICE_NAME.
+        """
+        bad_yaml = self._write_tmp_file("bad_commands_nos.yaml", "name: polluted\ncommands: not-a-mapping\n")
+        nos = Nos()
+        with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
+            nos.from_file(bad_yaml)
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
+
     def test_from_py_file(self):
         """
         Test that the from_file method works with .py.
@@ -260,13 +275,6 @@ class NosTest(unittest.TestCase):
             # pylint: disable=protected-access
             nos._from_module("tests/assets/incorrect_file.py")
 
-    BROKEN_DEVICE_NAME_MODULE = (
-        'NAME = "broken_module"\n'
-        'INITIAL_PROMPT = "{base_prompt}$"\n'
-        'DEVICE_NAME = "MissingClass"\n'
-        'commands = {"polluting command": {"output": "x", "help": "x"}}\n'
-    )
-
     def test_from_module_broken_device_name_leaves_nos_untouched(self):
         """A plugin whose DEVICE_NAME class is missing leaves Nos unchanged.
 
@@ -275,10 +283,9 @@ class NosTest(unittest.TestCase):
         validation, so a broken plugin raised out of `from_file` but still
         polluted `nos.commands` / `nos.name` behind the caller's back.
         """
-        broken_py = self._write_tmp_file("broken_plugin.py", self.BROKEN_DEVICE_NAME_MODULE)
         nos = Nos()
         with pytest.raises(AttributeError, match=r"DEVICE_NAME='MissingClass'"):
-            nos.from_file(broken_py)
+            nos.from_file("tests/assets/broken_device_name_module.py")
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
         assert "polluting command" not in nos.commands

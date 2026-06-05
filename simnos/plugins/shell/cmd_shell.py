@@ -107,9 +107,9 @@ class CMDShell(Cmd):
             try:
                 self.nos.from_file(file)
             except Exception:
-                # Same traceback-preserving broad-except form as `default()`:
-                # a genuine plugin bug surfacing through hot reload must stay
-                # diagnosable from the log.
+                # Broad except, like `default()`: any plugin error must not
+                # crash the session. The traceback goes to the log so a
+                # genuine plugin bug surfacing here stays diagnosable.
                 log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, file, traceback.format_exc())
                 continue
             self.commands.update(self.nos.commands)

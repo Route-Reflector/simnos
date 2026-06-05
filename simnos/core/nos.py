@@ -90,9 +90,16 @@ class Nos:
             }
 
         :param data: NOS dictionary
+        :raises ValueError: if the 'commands' value is not a mapping —
+            validated before any attribute is committed, so a malformed
+            dict never leaves partial state behind (same no-partial-state
+            contract as `_from_module`, #232)
         """
+        commands = data.get("commands", {})
+        if not isinstance(commands, dict):
+            raise ValueError(f"NOS data 'commands' must be a mapping (got {type(commands).__name__})")
         self.name = data.get("name", self.name)
-        self.commands.update(data.get("commands", self.commands))
+        self.commands.update(commands)
         self.initial_prompt = data.get("initial_prompt", self.initial_prompt)
         self.auth = data.get("auth", self.auth)
         self.enable_prompt = data.get("enable_prompt", self.enable_prompt)
