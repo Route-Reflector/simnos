@@ -106,8 +106,11 @@ class CMDShell(Cmd):
         for file in changed_files:
             try:
                 self.nos.from_file(file)
-            except Exception as e:
-                log.error("shell '%s' failed to hot-reload %r: %r", self.base_prompt, file, e)
+            except Exception:
+                # Same traceback-preserving broad-except form as `default()`:
+                # a genuine plugin bug surfacing through hot reload must stay
+                # diagnosable from the log.
+                log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, file, traceback.format_exc())
                 continue
             self.commands.update(self.nos.commands)
 

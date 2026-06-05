@@ -185,13 +185,13 @@ class NosTest(unittest.TestCase):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.yaml")
 
-    def _write_tmp_yaml(self, name: str, content: str) -> str:
-        """Write a throwaway yaml file and return its path (auto-cleaned)."""
+    def _write_tmp_file(self, name: str, content: str) -> str:
+        """Write a throwaway plugin file and return its path (auto-cleaned)."""
         tmp_dir = tempfile.TemporaryDirectory()
         self.addCleanup(tmp_dir.cleanup)
-        tmp_yaml = pathlib.Path(tmp_dir.name) / name
-        tmp_yaml.write_text(content, encoding="utf-8")
-        return str(tmp_yaml)
+        tmp_file = pathlib.Path(tmp_dir.name) / name
+        tmp_file.write_text(content, encoding="utf-8")
+        return str(tmp_file)
 
     def test_from_file_empty_yaml_file(self):
         """An empty yaml file raises ValueError instead of crashing later.
@@ -201,7 +201,7 @@ class NosTest(unittest.TestCase):
         reload mid-save) and `from_dict` used to crash on `data.get` with an
         opaque AttributeError out of the SSH shell thread.
         """
-        empty_yaml = self._write_tmp_yaml("empty_nos.yaml", "")
+        empty_yaml = self._write_tmp_file("empty_nos.yaml", "")
         with pytest.raises(ValueError, match=r"does not contain a mapping \(got NoneType\)"):
             Nos().from_file(empty_yaml)
 
@@ -211,7 +211,7 @@ class NosTest(unittest.TestCase):
         Same `_from_yaml` guard as the empty-file case (#232), pinned for
         the other non-mapping shape `yaml.safe_load` can return.
         """
-        list_yaml = self._write_tmp_yaml("list_nos.yaml", "- not\n- a\n- mapping\n")
+        list_yaml = self._write_tmp_file("list_nos.yaml", "- not\n- a\n- mapping\n")
         with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
             Nos().from_file(list_yaml)
 
@@ -259,6 +259,30 @@ class NosTest(unittest.TestCase):
             nos = Nos()
             # pylint: disable=protected-access
             nos._from_module("tests/assets/incorrect_file.py")
+
+    BROKEN_DEVICE_NAME_MODULE = (
+        'NAME = "broken_module"\n'
+        'INITIAL_PROMPT = "{base_prompt}$"\n'
+        'DEVICE_NAME = "MissingClass"\n'
+        'commands = {"polluting command": {"output": "x", "help": "x"}}\n'
+    )
+
+    def test_from_module_broken_device_name_leaves_nos_untouched(self):
+        """A plugin whose DEVICE_NAME class is missing leaves Nos unchanged.
+
+        Pins the build-before-commit ordering of `_from_module` (#232 cross
+        review): attrs/commands used to be committed before the DEVICE_NAME
+        validation, so a broken plugin raised out of `from_file` but still
+        polluted `nos.commands` / `nos.name` behind the caller's back.
+        """
+        broken_py = self._write_tmp_file("broken_plugin.py", self.BROKEN_DEVICE_NAME_MODULE)
+        nos = Nos()
+        with pytest.raises(AttributeError, match=r"DEVICE_NAME='MissingClass'"):
+            nos.from_file(broken_py)
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
+        assert "polluting command" not in nos.commands
+        assert nos.device is None
 
     def test_register_nos_plugin_directly(self):
         """

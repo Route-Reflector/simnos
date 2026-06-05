@@ -32,7 +32,7 @@ def _get_mtime(file: str) -> float | None:
         return None
 
 
-def get_files_lasttime_changed(files):
+def get_files_lasttime_changed(files: list[str]):
     """Method to get files last time changed
 
     Files that vanished since the walk are skipped (see `_get_mtime`).

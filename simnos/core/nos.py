@@ -145,15 +145,13 @@ class Nos:
             raise
         except Exception as e:
             raise RuntimeError(f"Failed to load NOS plugin '{filename}': {e}") from e
-        for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
-            setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
-        self.commands.update(getattr(module, "commands", self.commands))
-        if self.name == "SimNOS":
-            log.warning(
-                "Module '%s' does not define NAME; falling back to default 'SimNOS' "
-                "(plugin will be registered under that key)",
-                filename,
-            )
+        # Build/validate everything that can still fail BEFORE mutating self,
+        # so a broken plugin raises without leaving partial state behind
+        # (#232 cross-review: attrs/commands used to be committed before the
+        # DEVICE_NAME validation, so the hot-reload per-file guard skipped the
+        # file but a later `commands.update(nos.commands)` leaked the broken
+        # plugin's commands into the running shell).
+        device = None
         classname = getattr(module, "DEVICE_NAME", None)
         if classname is None:
             log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
@@ -164,7 +162,19 @@ class Nos:
                     f"Module '{filename}' defines DEVICE_NAME='{classname}' but class '{classname}' was not found"
                 )
             configuration_file = self.configuration_file or getattr(module, "DEFAULT_CONFIGURATION", None)
-            self.device = device_class(configuration_file=configuration_file)
+            device = device_class(configuration_file=configuration_file)
+        # Commit phase — nothing below is expected to raise.
+        for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
+            setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
+        self.commands.update(getattr(module, "commands", self.commands))
+        if self.name == "SimNOS":
+            log.warning(
+                "Module '%s' does not define NAME; falling back to default 'SimNOS' "
+                "(plugin will be registered under that key)",
+                filename,
+            )
+        if classname is not None:
+            self.device = device
 
     def from_file(self, filename: str) -> None:
         """

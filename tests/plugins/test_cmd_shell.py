@@ -687,6 +687,48 @@ class HotReloadTest(TestCase):
         self.assertIn("broken.yaml", captured.output[0])
         self.assertIn("healthy", shell.commands)
 
+    def test_reload_commands_broken_file_last_still_applies_rest(self):
+        """The per-file guard is order-independent: broken file last.
+
+        Complements `test_reload_commands_broken_file_logs_and_continues`
+        (broken first): the healthy file's commands are applied before the
+        broken file raises, and the error is still logged.
+        """
+        shell = CMDShell(**self.arguments)
+        shell.nos.from_file = Mock(side_effect=[None, ValueError("boom")])
+        shell.nos.commands = {"healthy": {"output": "ok"}}
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.reload_commands(["healthy.yaml", "broken.yaml"])
+        self.assertEqual(len(captured.output), 1)
+        self.assertIn("broken.yaml", captured.output[0])
+        self.assertIn("healthy", shell.commands)
+
+    def test_reload_commands_broken_py_plugin_does_not_leak_commands(self):
+        """A broken py plugin skipped by the guard never reaches the shell.
+
+        Pins the #232 cross-review hole: `_from_module` used to commit
+        attrs/commands before the DEVICE_NAME validation, so a broken py
+        plugin polluted `nos.commands` even though the per-file guard
+        skipped it — and the next successful reload then leaked the broken
+        plugin's commands into the shell via `commands.update(nos.commands)`.
+        """
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        broken_py = os.path.join(tmp_dir.name, "broken_plugin.py")
+        with open(broken_py, "w", encoding="utf-8") as file:
+            file.write(
+                'NAME = "broken_module"\n'
+                'INITIAL_PROMPT = "{base_prompt}$"\n'
+                'DEVICE_NAME = "MissingClass"\n'
+                'commands = {"polluting command": {"output": "x", "help": "x"}}\n'
+            )
+        shell = CMDShell(**self.arguments)
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.reload_commands([broken_py, "tests/assets/module.py"])
+        self.assertEqual(len(captured.output), 1)
+        self.assertNotIn("polluting command", shell.commands)  # broken plugin never leaks
+        self.assertIn("show version", shell.commands)  # healthy reload still applied
+
     @staticmethod
     def _atomic_write(path: str, content: str, suffix: str) -> None:
         """Write `content` to `path` atomically (tempfile + `os.replace`).
@@ -697,7 +739,14 @@ class HotReloadTest(TestCase):
         """
         fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), suffix=suffix)
         try:
-            with os.fdopen(fd, "w", encoding="utf-8") as file:
+            file = os.fdopen(fd, "w", encoding="utf-8")
+        except BaseException:
+            # `fd` is only ours to close until fdopen takes ownership.
+            os.close(fd)
+            os.unlink(tmp)
+            raise
+        try:
+            with file:
                 file.write(content)
             os.replace(tmp, path)
         except BaseException:
