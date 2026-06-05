@@ -3,9 +3,10 @@ Device-class unit tests for the arista_eos Python plugin (T-14 / #230).
 
 Producer-side pins for the callable outputs: str-returning make_* are
 pinned on meaningful invariants (key substrings + `{{base_prompt}}`
-resolution), and the dict-returning mode callable (`make_exit`) is
-pinned per current_prompt branch — the consumer side of those dicts is
-pinned separately in tests/plugins/test_cmd_shell.py.
+resolution, and the time-line shape for the time-dependent show clock),
+and the dict-returning mode callable (`make_exit`) is pinned per
+current_prompt branch — the consumer side of those dicts is pinned
+separately in tests/plugins/test_cmd_shell.py.
 """
 
 import re
