@@ -99,6 +99,7 @@ class Host:
         (``self.server is None``); this guards against double-stop calls.
         """
         if self.server is None:
+            log.debug("Host %s has no running server; stop() is a no-op", self.name)
             return
         self.server.stop()
         self.server = None
