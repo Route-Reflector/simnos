@@ -8,6 +8,7 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
+from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.utils import (
     change_jinja_to_corresponding_py,
     get_files_changed,
@@ -55,14 +56,27 @@ class ShellUtilsTest(TestCase):
     Test class for the shell utils
     """
 
+    def setUp(self):
+        """Reset the stateful get_files_changed cache before each test.
+
+        Other tests in the same pytest-xdist worker (e.g. the hot-reload
+        integration tests, which exercise `get_files_changed` via `precmd`
+        with the absolute `nos.__path__[0]`) may have primed the
+        module-level `_files_lasttime_changed_old` snapshot; without a
+        reset, the relative-path calls below would treat every file as
+        "new" and the first-call-returns-empty contract breaks.
+        """
+        shell_utils._files_lasttime_changed_old.clear()
+
     def tearDown(self):
+        """Avoid leaking the stateful cache to other tests.
+
+        Note: the previous implementation deleted the function attribute
+        `get_files_changed.files_lasttime_changed_old`, which silently
+        became a no-op when the cache moved to the module-level
+        `_files_lasttime_changed_old` (ty adoption, M-9).
         """
-        Set up for the tests.
-        We want to avoid side-effect as get_files_changed
-        it is stateful.
-        """
-        if hasattr(get_files_changed, "files_lasttime_changed_old"):
-            del get_files_changed.files_lasttime_changed_old
+        shell_utils._files_lasttime_changed_old.clear()
 
     def test_get_files_under_directory(self):
         """

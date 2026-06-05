@@ -148,6 +148,27 @@ class TestCmdShell(TestCase):
                 base_prompt="test",
             )
 
+    def test_init_broken_initial_prompt_falls_back_to_raw(self):
+        """A malformed initial_prompt template must not crash construction.
+
+        Pins #172: `__init__` used to call `.format()` unguarded, so a
+        broken template killed every connection to the host. The lenient
+        fallback keeps the session usable (raw template as prompt) and
+        logs the error for diagnosis.
+        """
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt.foo}>",
+                "commands": {"_default_": {"output": "% Unknown", "help": "default"}},
+            }
+        )
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell = CMDShell(**self.arguments)
+        self.assertEqual(shell.prompt, "{base_prompt.foo}>")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting initial_prompt" in msg for msg in captured.output))
+
     def test_start(self):
         """Test that the start method calls cmdloop."""
         shell = CMDShell(**self.arguments)
@@ -407,6 +428,172 @@ class TestCmdShell(TestCase):
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {}")
+
+    def test_default_silent_fallback_on_attributeerror(self):
+        """`AttributeError` failure mode of `.format()` is silently logged.
+
+        Pins #171: attribute access (`{base_prompt.foo}`) used to escape
+        the 3-tuple catch set — and the output format sits *outside* the
+        broad try block of `default()`, so this crashed the whole shell
+        session instead of just leaking a traceback. Now covered by the
+        shared 5-tuple `FORMAT_ERRORS`.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_attr_cmd"] = {
+            "output": "value is {base_prompt.foo}",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_attr_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "broken_attr_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+
+    def test_default_silent_fallback_on_typeerror(self):
+        """`TypeError` failure mode of `.format()` is silently logged.
+
+        Pins #171: item access on the str argument (`{base_prompt[bad]}`)
+        raises `TypeError` ("string indices must be integers"), the fifth
+        and last member of `FORMAT_ERRORS`. Together the five fallback
+        tests pin every member of the catch set shared with
+        `tasks.render_template`.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_item_cmd"] = {
+            "output": "value is {base_prompt[bad]}",
+            "prompt": ["{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_item_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "broken_item_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {base_prompt[bad]}")
+
+    def test_default_new_prompt_format_failure_keeps_prompt(self):
+        """A broken cmd_data new_prompt does not transition the prompt.
+
+        Pins #172: the new_prompt format used to bubble into the broad
+        `except Exception`, leaking a traceback into the user output.
+        Now the failure is a silent log, the session stays on the current
+        prompt, and the command output is still written normally.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_np_cmd"] = {
+            "output": "mode change attempted",
+            "prompt": ["{base_prompt}>"],
+            "new_prompt": "{base_prompt.foo}#",
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            stop = shell.default("broken_np_cmd")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test>")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting new_prompt" in msg and "broken_np_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("mode change attempted")
+
+    def test_default_callable_dict_new_prompt_format_failure(self):
+        """A broken callable-dict new_prompt does not transition the prompt.
+
+        Pins #172 (callable dict path, symmetric to the cmd_data path
+        above): format failure is a silent log + no transition, and no
+        traceback reaches the wire. The callable's own exceptions are
+        out of scope here (still the broad-except path, see G4).
+        """
+        shell = self._make_callable_dict_shell(
+            lambda device, **kwargs: {"output": "body", "new_prompt": "{base_prompt.foo}#"}
+        )
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test>")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting new_prompt" in msg and "'cmd'" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("body")
+
+    def test_default_callable_dict_broken_output_falls_back_raw(self):
+        """A broken template in a callable-dict output is raw-passthrough.
+
+        Pins the callable -> dict -> output -> `_safe_format` chain
+        end-to-end (1st code review 反映): the dict's output str flows
+        into the same lenient output path as yaml strings — silent log +
+        raw template on the wire, session intact.
+        """
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "'cmd'" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+
+    def test_default_broken_prompt_treated_as_non_match(self):
+        """A command with a broken prompt template is just unreachable.
+
+        Pins #172: `_check_prompt` used to leak the format error into the
+        broad `except Exception` (traceback in output). Now the broken
+        candidate is a logged non-match and the shell answers with the
+        unknown-command output, session intact.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_prompt_cmd"] = {
+            "output": "should not appear",
+            "prompt": "{base_prompt.foo}>",
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("broken_prompt_cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting prompt" in msg and "broken_prompt_cmd" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+
+    def test_do_help_broken_prompt_command_hidden(self):
+        """`do_help` survives a broken prompt template (command hidden).
+
+        Pins #172: the `do_help` -> `_check_prompt` path had *no* guard at
+        all — a single broken prompt yaml crashed the session on `help`.
+        Now the broken command is silently omitted from the help listing.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken_prompt_cmd"] = {
+            "output": "x",
+            "prompt": "{base_prompt.foo}>",
+            "help": "never listed",
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.do_help("")
+        self.assertEqual(len(captured.output), 1)
+        help_text = shell.writeline.call_args[0][0]
+        self.assertNotIn("broken_prompt_cmd", help_text)
+        self.assertIn("show clock", help_text)  # healthy commands still listed
+
+    def test_default_list_prompt_partial_breakage_still_matches(self):
+        """A broken candidate in a prompt list does not poison the rest.
+
+        Pins the per-candidate independent evaluation of `_check_prompt`
+        (#172 design improvement): previously one broken element raised
+        out of the `any()` generator and failed the whole match; now the
+        healthy element still matches and the command works.
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["partial_prompt_cmd"] = {
+            "output": "reached",
+            "prompt": ["{base_prompt.foo}>", "{base_prompt}>"],
+        }
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("partial_prompt_cmd")
+        self.assertEqual(len(captured.output), 1)  # the broken candidate, once
+        shell.writeline.assert_called_once_with("reached")
 
     def test_default_command_new_prompt(self):
         """Test that the default method does nothing."""

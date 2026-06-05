@@ -22,6 +22,13 @@ BASIC_COMMANDS: dict = {
     },
 }
 
+# `str.format()` failure modes caused by a malformed template. Shared as the
+# single source of truth between the lenient runtime shell (`_safe_format`)
+# and the loud build-time docs gen (`tasks.render_template`); the runtime
+# logs and degrades while build time raises (and additionally strict-rejects
+# unsupported constructs that would render fine).
+FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
+
 
 class CMDShell(Cmd):
     """
@@ -48,7 +55,10 @@ class CMDShell(Cmd):
         self.intro = intro
         self.base_prompt = base_prompt
         self.newline = newline
-        self.prompt = nos.initial_prompt.format(base_prompt=base_prompt)
+        # Lenient: a malformed initial_prompt template must not kill every
+        # connection to this host; fall back to the raw template and log.
+        formatted = self._safe_format(nos.initial_prompt, where="initial_prompt")
+        self.prompt = formatted if formatted is not None else nos.initial_prompt
         self.is_running = is_running
 
         # form commands
@@ -113,7 +123,7 @@ class CMDShell(Cmd):
             if cmd.startswith("_") and cmd.endswith("_"):
                 continue
             # skip commands that does not match current prompt
-            if not self._check_prompt(cmd_data.get("prompt")):
+            if not self._check_prompt(cmd_data.get("prompt"), command=cmd):
                 continue
             lines[cmd] = cmd_data.get("help", "")
             width = max(width, len(cmd))
@@ -124,18 +134,65 @@ class CMDShell(Cmd):
             help_msg.append(f"{k}{padding}{v}")
         self.writeline(self.newline.join(help_msg))
 
-    def _check_prompt(self, prompt_: str | list[str] | None):
+    def _safe_format(self, template: str, *, where: str) -> str | None:
+        """Format `template` with `base_prompt`; return None on failure.
+
+        The runtime shell is intentionally lenient: yaml templating errors
+        are logged but never crash the session nor leak tracebacks to the
+        wire. The build-time counterpart `tasks.render_template` shares the
+        `FORMAT_ERRORS` catch set but raises `RuntimeError` — and is
+        additionally strict about unsupported constructs that would render
+        fine (e.g. `{base_prompt!r}`). Yaml authors may use only
+        `{base_prompt}` substitution and `{{` / `}}` escapes; see
+        docs/development/creating_new_platforms.md.
+
+        :param template: format template string from yaml / plugin data
+        :param where: caller context for the error log; include the command
+            name when available (e.g. ``f"output for command {line!r}"``)
+        """
+        try:
+            return template.format(base_prompt=self.base_prompt)
+        except FORMAT_ERRORS as e:
+            log.error(
+                "shell '%s' error formatting %s %r: %r",
+                self.base_prompt,
+                where,
+                template,
+                e,
+            )
+            return None
+
+    def _check_prompt(self, prompt_: str | list[str] | None, command: str = ""):
         """
         Helper method to check if prompt_ matches current prompt
 
         :param prompt_: (string, list of strings, or None) prompt to check
+        :param command: command name for the error log; callers without it
+            keep working (the log just omits the command context)
         """
         # prompt_ is None if no 'prompt' key defined for command
         if prompt_ is None:
             return True
-        if isinstance(prompt_, str):
-            return self.prompt == prompt_.format(base_prompt=self.base_prompt)
-        return any(self.prompt == i.format(base_prompt=self.base_prompt) for i in prompt_)
+        candidates = [prompt_] if isinstance(prompt_, str) else prompt_
+        where = f"prompt for command {command!r}" if command else "prompt"
+        # A broken candidate is just a non-match; the remaining candidates
+        # are still evaluated independently.
+        for candidate in candidates:
+            formatted = self._safe_format(candidate, where=where)
+            if formatted is not None and self.prompt == formatted:
+                return True
+        return False
+
+    def _apply_new_prompt(self, template: str, command: str) -> None:
+        """Transition the prompt; a broken template keeps the current one.
+
+        Shared by the callable-dict and cmd_data `new_prompt` paths of
+        `default()`: a format failure means no prompt transition (the
+        session stays on the current prompt); see `_safe_format`.
+        """
+        new_prompt = self._safe_format(template, where=f"new_prompt for command {command!r}")
+        if new_prompt is not None:
+            self.prompt = new_prompt
 
     def default(self, line):
         """Method called if no do_xyz methods found"""
@@ -145,7 +202,7 @@ class CMDShell(Cmd):
             cmd_data = self.commands[line]
             if "alias" in cmd_data:
                 cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
-            if self._check_prompt(cmd_data.get("prompt")):
+            if self._check_prompt(cmd_data.get("prompt"), command=line):
                 if cmd_data.get("exit"):
                     return True
                 ret = cmd_data.get("output")
@@ -158,12 +215,12 @@ class CMDShell(Cmd):
                     )
                     if isinstance(ret, dict):
                         if "new_prompt" in ret:
-                            self.prompt = ret["new_prompt"].format(base_prompt=self.base_prompt)
+                            self._apply_new_prompt(ret["new_prompt"], line)
                         if ret.get("exit"):
                             return True
                         ret = ret.get("output")
                 if "new_prompt" in cmd_data:
-                    self.prompt = cmd_data["new_prompt"].format(base_prompt=self.base_prompt)
+                    self._apply_new_prompt(cmd_data["new_prompt"], line)
             else:
                 log.warning(
                     "'%s' command prompt '%s' not matching current prompt '%s'",
@@ -189,24 +246,8 @@ class CMDShell(Cmd):
         if not self.is_running.is_set():
             return True
         if ret is not None:
-            try:
-                ret = ret.format(base_prompt=self.base_prompt)
-            except (KeyError, IndexError, ValueError) as e:
-                # Runtime shell is intentionally lenient: yaml format errors
-                # are logged but do not crash the shell session. The build-
-                # time counterpart `tasks.render_template` raises RuntimeError
-                # for the same situation; the asymmetry is "raise vs silent",
-                # but the catch set is kept aligned (`(KeyError, IndexError,
-                # ValueError)`) so both paths cover the same `str.format()`
-                # failure modes. The yaml author is expected to use only
-                # `{base_prompt}` substitution; the `{x.attr}` / `{x[k]}` /
-                # format-spec mini-language is unsupported and may surface
-                # as `AttributeError` / `TypeError` outside this catch set.
-                log.error(
-                    "shell.default '%s' error formatting output for command '%s': %r",
-                    self.base_prompt,
-                    [line],
-                    e,
-                )
-            self.writeline(ret)
+            # Failure falls back to the raw template (information beats
+            # dropping the whole output); lenient policy in _safe_format.
+            formatted = self._safe_format(ret, where=f"output for command {line!r}")
+            self.writeline(formatted if formatted is not None else ret)
         return False

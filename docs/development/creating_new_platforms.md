@@ -16,6 +16,45 @@ as it is not possible to implement dynamic behavior.
 
 The YAML files are located in the `simnos/plugins/nos/platforms_yaml` directory.
 
+### Templating rules
+
+String fields in the YAML (`initial_prompt` and per-command `output` /
+`prompt` / `new_prompt`) are rendered with Python's `str.format()` at
+runtime. Top-level `enable_prompt` / `config_prompt` are not consumed by the
+runtime shell today (Python plugins use their own module constants), but they
+are written in the same template style and validated preventively by the CI
+sweep. Only two constructs are supported:
+
+- `{base_prompt}` — replaced with the device's base prompt (hostname):
+
+    ```yaml
+    initial_prompt: "{base_prompt}>"
+    ```
+
+- `{{` / `}}` — escapes for a literal `{` / `}` in the output:
+
+    ```yaml
+    output: "{{master:0}}"   # renders as: {master:0}
+    ```
+
+Anything else from the format mini-language is **not supported** and is
+treated as an authoring error: attribute access (`{base_prompt.foo}`), index
+access (`{base_prompt[0]}`), format specs (`{base_prompt:d}`), positional
+placeholders (`{}` / `{0}`), and unknown names (`{hostname}`). This includes
+constructs that `str.format()` would render without raising — e.g.
+`{base_prompt!r}` or `{base_prompt:>20}` — the build-time check rejects them
+explicitly.
+
+On a malformed template:
+
+- **Runtime** is lenient — the error is logged and the session degrades
+  safely instead of crashing: a broken `output` is sent unformatted, a broken
+  `prompt` candidate never matches (the command becomes unreachable), a
+  broken `new_prompt` keeps the current prompt.
+- **Build time** is loud — `invoke gen_docs_platform_commands` and the CI
+  template sweep (`tests/test_gen_docs_platform_commands.py`) raise a
+  `RuntimeError` naming the platform / command / field.
+
 
 ## Python modules
 This method is more flexible than the YAML files method. It is possible to implement
