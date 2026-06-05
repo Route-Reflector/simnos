@@ -75,6 +75,17 @@ class TestRenderTemplate:
         with pytest.raises(RuntimeError, match=r"escape"):
             render_template("{oops}", "p", "c", "output")
 
+    def test_raises_runtime_error_on_positional_placeholder(self):
+        """`{}` (IndexError) must surface a contextual error.
+
+        Pins #171: IndexError was already in the catch set since #162 but
+        had no contextual-RuntimeError pin on this side; added so each
+        `FORMAT_ERRORS` member is pinned symmetrically with the runtime
+        fallback tests in tests/plugins/test_cmd_shell.py.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format output for platformE/'cmd5'"):
+            render_template("value is {}", "platformE", "cmd5", "output")
+
     def test_raises_runtime_error_on_attribute_access(self):
         """`{base_prompt.foo}` (AttributeError) must surface a contextual error.
 
@@ -85,12 +96,12 @@ class TestRenderTemplate:
         with pytest.raises(RuntimeError, match=r"Failed to format output for platformC/'cmd3'"):
             render_template("{base_prompt.foo}", "platformC", "cmd3", "output")
 
-    def test_raises_runtime_error_on_index_access(self):
+    def test_raises_runtime_error_on_item_access(self):
         """`{base_prompt[bad]}` (TypeError) must surface a contextual error.
 
-        Pins #171: TypeError is the fifth member of `FORMAT_ERRORS`;
-        together with the three pre-existing tests above, every member of
-        the shared catch set has a contextual-RuntimeError pin.
+        Pins #171: TypeError is the fifth member of `FORMAT_ERRORS`; with
+        the KeyError / ValueError pins above and the IndexError pin, every
+        member of the shared catch set has a contextual-RuntimeError pin.
         """
         with pytest.raises(RuntimeError, match=r"Failed to format prompt for platformD/'cmd4'"):
             render_template("{base_prompt[bad]}", "platformD", "cmd4", "prompt")

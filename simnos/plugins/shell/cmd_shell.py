@@ -181,6 +181,17 @@ class CMDShell(Cmd):
                 return True
         return False
 
+    def _apply_new_prompt(self, template: str, command: str) -> None:
+        """Transition the prompt; a broken template keeps the current one.
+
+        Shared by the callable-dict and cmd_data `new_prompt` paths of
+        `default()`: a format failure means no prompt transition (the
+        session stays on the current prompt); see `_safe_format`.
+        """
+        new_prompt = self._safe_format(template, where=f"new_prompt for command {command!r}")
+        if new_prompt is not None:
+            self.prompt = new_prompt
+
     def default(self, line):
         """Method called if no do_xyz methods found"""
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
@@ -202,18 +213,12 @@ class CMDShell(Cmd):
                     )
                     if isinstance(ret, dict):
                         if "new_prompt" in ret:
-                            # Failure means no prompt transition (the session
-                            # stays on the current prompt); see _safe_format.
-                            new_prompt = self._safe_format(ret["new_prompt"], where=f"new_prompt for command {line!r}")
-                            if new_prompt is not None:
-                                self.prompt = new_prompt
+                            self._apply_new_prompt(ret["new_prompt"], line)
                         if ret.get("exit"):
                             return True
                         ret = ret.get("output")
                 if "new_prompt" in cmd_data:
-                    new_prompt = self._safe_format(cmd_data["new_prompt"], where=f"new_prompt for command {line!r}")
-                    if new_prompt is not None:
-                        self.prompt = new_prompt
+                    self._apply_new_prompt(cmd_data["new_prompt"], line)
             else:
                 log.warning(
                     "'%s' command prompt '%s' not matching current prompt '%s'",

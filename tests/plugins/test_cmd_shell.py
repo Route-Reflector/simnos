@@ -454,7 +454,7 @@ class TestCmdShell(TestCase):
     def test_default_silent_fallback_on_typeerror(self):
         """`TypeError` failure mode of `.format()` is silently logged.
 
-        Pins #171: index access on the str argument (`{base_prompt[bad]}`)
+        Pins #171: item access on the str argument (`{base_prompt[bad]}`)
         raises `TypeError` ("string indices must be integers"), the fifth
         and last member of `FORMAT_ERRORS`. Together the five fallback
         tests pin every member of the catch set shared with
@@ -463,14 +463,14 @@ class TestCmdShell(TestCase):
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         shell.writeline = Mock()
-        shell.commands["broken_index_cmd"] = {
+        shell.commands["broken_item_cmd"] = {
             "output": "value is {base_prompt[bad]}",
             "prompt": ["{base_prompt}>"],
         }
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_index_cmd")
+            shell.default("broken_item_cmd")
         self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_index_cmd" in msg for msg in captured.output))
+        self.assertTrue(any("error formatting output" in msg and "broken_item_cmd" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {base_prompt[bad]}")
 
     def test_default_new_prompt_format_failure_keeps_prompt(self):
