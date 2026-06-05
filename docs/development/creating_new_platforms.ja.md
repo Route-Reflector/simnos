@@ -11,7 +11,7 @@ YAML ファイルは `simnos/plugins/nos/platforms_yaml` ディレクトリに�
 
 ### テンプレート記法のルール
 
-YAML 内の文字列フィールド (`initial_prompt`、`enable_prompt`、`config_prompt`、および各コマンドの `output` / `prompt` / `new_prompt`) は Python の `str.format()` でレンダリングされます。サポートされる記法は次の 2 つだけです:
+YAML 内の文字列フィールド (`initial_prompt` および各コマンドの `output` / `prompt` / `new_prompt`) は、ランタイムで Python の `str.format()` によりレンダリングされます。top-level の `enable_prompt` / `config_prompt` は現状ランタイム shell からは消費されません (Python plugin は自前の module 定数を使用) が、同じテンプレート記法で書かれるため CI sweep が予防的に検証します。サポートされる記法は次の 2 つだけです:
 
 - `{base_prompt}` — デバイスのベースプロンプト (ホスト名) に置換されます:
 
@@ -25,7 +25,7 @@ YAML 内の文字列フィールド (`initial_prompt`、`enable_prompt`、`confi
     output: "{{master:0}}"   # 出力: {master:0}
     ```
 
-format ミニ言語のそれ以外の記法は**非サポート**であり、記述ミスとして扱われます: attribute access (`{base_prompt.foo}`)、index access (`{base_prompt[0]}`)、format spec (`{base_prompt:d}`)、positional placeholder (`{}` / `{0}`)、未知の名前 (`{hostname}`)。
+format ミニ言語のそれ以外の記法は**非サポート**であり、記述ミスとして扱われます: attribute access (`{base_prompt.foo}`)、index access (`{base_prompt[0]}`)、format spec (`{base_prompt:d}`)、positional placeholder (`{}` / `{0}`)、未知の名前 (`{hostname}`)。`str.format()` が例外を投げずにレンダリングしてしまう記法 — 例えば `{base_prompt!r}` や `{base_prompt:>20}` — も同様で、ビルド時チェックが明示的に reject します。
 
 テンプレートが不正な場合の挙動:
 

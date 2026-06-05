@@ -8,6 +8,7 @@ local docs serving (`docs`), platform docs generation
 
 from collections.abc import Iterable
 import os
+import string
 import time
 
 from invoke import task
@@ -79,17 +80,33 @@ def render_template(template: str, platform: str, command: str, field: str) -> s
     substitutes `{base_prompt}` and unescapes `{{` / `}}` literals from
     `sync_ntc_commands.escape_format_braces` preventive escape.
 
-    Re-raises any formatting failure (the `FORMAT_ERRORS` catch set shared
-    with the lenient runtime `cmd_shell._safe_format`; the asymmetry is
-    "raise vs silent" only) as `RuntimeError` carrying the platform /
-    command / field context, so CI failures pinpoint the offending YAML
-    entry instead of dumping a contextless stack trace.
+    Build time is strict: besides re-raising the `FORMAT_ERRORS` catch set
+    shared with the lenient runtime `cmd_shell._safe_format`, this rejects
+    unsupported constructs that `str.format()` would happily render (e.g.
+    `{base_prompt!r}` or `{base_prompt:>20}`) — only a plain
+    `{base_prompt}` field and `{{` / `}}` escapes are supported. Every
+    failure surfaces as `RuntimeError` carrying the platform / command /
+    field context, so CI failures pinpoint the offending YAML entry
+    instead of dumping a contextless stack trace.
     """
     # Lazy import: keep `invoke --list` / lint-only tasks fast (the existing
     # tasks.py convention, see netmiko_check); cached after the first call.
     from simnos.plugins.shell.cmd_shell import FORMAT_ERRORS
 
     try:
+        # Strict authoring check first: a malformed template raises ValueError
+        # out of parse() (caught below); a well-formed but unsupported
+        # construct (conversion / format spec / non-base_prompt field) would
+        # render silently, so it must be rejected explicitly.
+        for _, field_name, format_spec, conversion in string.Formatter().parse(template):
+            if field_name is None:
+                continue
+            if field_name != "base_prompt" or conversion is not None or format_spec:
+                raise RuntimeError(
+                    f"Failed to format {field} for {platform}/{command!r}: unsupported template "
+                    f"construct. Only '{{base_prompt}}' substitution and '{{{{' / '}}}}' escapes "
+                    f"are supported."
+                )
         return template.format(base_prompt=platform)
     except FORMAT_ERRORS as exc:
         raise RuntimeError(

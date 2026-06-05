@@ -138,11 +138,12 @@ class CMDShell(Cmd):
 
         The runtime shell is intentionally lenient: yaml templating errors
         are logged but never crash the session nor leak tracebacks to the
-        wire. The build-time counterpart `tasks.render_template` raises
-        `RuntimeError` for the same failure modes; the asymmetry is "raise
-        vs silent" only — the catch set `FORMAT_ERRORS` is shared. Yaml
-        authors may use only `{base_prompt}` substitution and `{{` / `}}`
-        escapes; see docs/development/creating_new_platforms.md.
+        wire. The build-time counterpart `tasks.render_template` shares the
+        `FORMAT_ERRORS` catch set but raises `RuntimeError` — and is
+        additionally strict about unsupported constructs that would render
+        fine (e.g. `{base_prompt!r}`). Yaml authors may use only
+        `{base_prompt}` substitution and `{{` / `}}` escapes; see
+        docs/development/creating_new_platforms.md.
 
         :param template: format template string from yaml / plugin data
         :param where: caller context for the error log; include the command

@@ -5,7 +5,8 @@ Pin the formatter semantics that `gen_docs_platform_commands` relies on:
 - unescapes `{{` / `}}` literals (preventive escape from
   `sync_ntc_commands.escape_format_braces`)
 - raises `RuntimeError` with platform / command / field context on any
-  formatting failure (escape漏れ など)
+  formatting failure (escape漏れ など) and on unsupported-but-renderable
+  constructs (strict authoring check, e.g. `{base_prompt!r}`)
 
 Without these tests, a future refactor switching `.format()` back to
 `.replace()` (or any other formatter) would silently break docs rendering
@@ -76,35 +77,57 @@ class TestRenderTemplate:
             render_template("{oops}", "p", "c", "output")
 
     def test_raises_runtime_error_on_positional_placeholder(self):
-        """`{}` (IndexError) must surface a contextual error.
+        """`{}` must surface a contextual error.
 
-        Pins #171: IndexError was already in the catch set since #162 but
-        had no contextual-RuntimeError pin on this side; added so each
-        `FORMAT_ERRORS` member is pinned symmetrically with the runtime
+        Pins #171: would raise IndexError via `str.format()`; rejected by
+        the strict authoring check (empty field name). Added so each
+        unsupported-input family is pinned symmetrically with the runtime
         fallback tests in tests/plugins/test_cmd_shell.py.
         """
         with pytest.raises(RuntimeError, match=r"Failed to format output for platformE/'cmd5'"):
             render_template("value is {}", "platformE", "cmd5", "output")
 
     def test_raises_runtime_error_on_attribute_access(self):
-        """`{base_prompt.foo}` (AttributeError) must surface a contextual error.
+        """`{base_prompt.foo}` must surface a contextual error.
 
-        Pins #171: AttributeError joined the catch set when it became the
-        shared 5-tuple `FORMAT_ERRORS`; previously this dumped a
+        Pins #171: would raise AttributeError via `str.format()` (a member
+        of the shared 5-tuple `FORMAT_ERRORS`); rejected by the strict
+        authoring check (compound field name). Previously this dumped a
         contextless stack trace at docs-gen time.
         """
         with pytest.raises(RuntimeError, match=r"Failed to format output for platformC/'cmd3'"):
             render_template("{base_prompt.foo}", "platformC", "cmd3", "output")
 
     def test_raises_runtime_error_on_item_access(self):
-        """`{base_prompt[bad]}` (TypeError) must surface a contextual error.
+        """`{base_prompt[bad]}` must surface a contextual error.
 
-        Pins #171: TypeError is the fifth member of `FORMAT_ERRORS`; with
-        the KeyError / ValueError pins above and the IndexError pin, every
-        member of the shared catch set has a contextual-RuntimeError pin.
+        Pins #171: would raise TypeError via `str.format()`, the fifth
+        member of `FORMAT_ERRORS`; rejected by the strict authoring check.
+        With the KeyError / ValueError / IndexError pins above, every
+        unsupported-input family has a contextual-RuntimeError pin.
         """
         with pytest.raises(RuntimeError, match=r"Failed to format prompt for platformD/'cmd4'"):
             render_template("{base_prompt[bad]}", "platformD", "cmd4", "prompt")
+
+    def test_raises_runtime_error_on_conversion(self):
+        """`{base_prompt!r}` must be rejected even though it renders fine.
+
+        Pins the strict authoring check (1st code review 反映): conversion
+        specifiers raise no exception via `str.format()` (they would render
+        a quoted hostname), so without the explicit parse-time check the
+        "only two constructs supported" spec would silently erode.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format output for platformF/'cmd6'.*unsupported"):
+            render_template("{base_prompt!r}", "platformF", "cmd6", "output")
+
+    def test_raises_runtime_error_on_format_spec(self):
+        """`{base_prompt:>20}` must be rejected even though it renders fine.
+
+        Pins the strict authoring check: str-valid format specs render
+        without raising, so the parse-time check is the only guard.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format prompt for platformG/'cmd7'.*unsupported"):
+            render_template("{base_prompt:>20}", "platformG", "cmd7", "prompt")
 
 
 class TestPlatformYamlTemplateSweep:

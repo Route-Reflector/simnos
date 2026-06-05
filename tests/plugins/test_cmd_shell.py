@@ -516,6 +516,22 @@ class TestCmdShell(TestCase):
         self.assertTrue(any("error formatting new_prompt" in msg and "'cmd'" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("body")
 
+    def test_default_callable_dict_broken_output_falls_back_raw(self):
+        """A broken template in a callable-dict output is raw-passthrough.
+
+        Pins the callable -> dict -> output -> `_safe_format` chain
+        end-to-end (1st code review 反映): the dict's output str flows
+        into the same lenient output path as yaml strings — silent log +
+        raw template on the wire, session intact.
+        """
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(len(captured.output), 1)
+        self.assertTrue(any("error formatting output" in msg and "'cmd'" in msg for msg in captured.output))
+        shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+
     def test_default_broken_prompt_treated_as_non_match(self):
         """A command with a broken prompt template is just unreachable.
 
