@@ -24,8 +24,9 @@ BASIC_COMMANDS: dict = {
 
 # `str.format()` failure modes caused by a malformed template. Shared as the
 # single source of truth between the lenient runtime shell (`_safe_format`)
-# and the loud build-time docs gen (`tasks.render_template`); the two sides
-# differ only in "raise vs silent".
+# and the loud build-time docs gen (`tasks.render_template`); the runtime
+# logs and degrades while build time raises (and additionally strict-rejects
+# unsupported constructs that would render fine).
 FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
 
 
