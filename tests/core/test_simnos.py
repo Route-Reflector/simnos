@@ -537,7 +537,15 @@ class TestPlatformsManifest:
         Test if the available platforms in the platforms.py file
         are ordered alphabetically.
         """
-        assert available_platforms == sorted(available_platforms)
+        assert list(available_platforms) == sorted(available_platforms)
+
+    def test_available_platforms_is_read_only(self):
+        """Pin that `available_platforms` is an immutable tuple (#237).
+
+        A mutable list let consumers mutate the registry view in place;
+        the tuple makes the derived view read-only at the type level.
+        """
+        assert isinstance(available_platforms, tuple)
 
     def test_available_platforms_in_docs_are_ordered(self):
         """
@@ -600,7 +608,7 @@ class TestPlatformsManifest:
         (`nos_plugins`) and the public symbol breaks this test immediately,
         catching the failure mode that issue #206 (G1) eliminated.
         """
-        assert available_platforms == sorted(nos_plugins.keys())
+        assert list(available_platforms) == sorted(nos_plugins.keys())
 
     def test_available_platforms_excludes_base_template(self):
         """Pin that `base_template` is filtered out of both registry and manifest.

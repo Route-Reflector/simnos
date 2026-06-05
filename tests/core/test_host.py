@@ -56,6 +56,20 @@ class TestHost:
         assert host.running
         host.server.start.assert_called_once()
 
+    def test_start_twice_is_noop(self, host):
+        """A second start() while running does not spawn a new server.
+
+        Pins the double-start guard (#237, #199 C-23 follow-up): without
+        it, start() built and started a second server instance, orphaning
+        the first. Symmetric with the double-stop guard in stop().
+        """
+        host.start()
+        first_server = host.server
+        host.start()
+        assert host.server is first_server
+        first_server.start.assert_called_once()
+        assert host.running
+
     def test_stop(self, host):
         """
         It test that when the host is called the stop,

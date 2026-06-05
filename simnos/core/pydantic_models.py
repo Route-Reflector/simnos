@@ -3,17 +3,22 @@ File to contain pydantic models for plugins input/output data validation
 """
 
 from collections.abc import Callable
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
     ConfigDict,
+    Field,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
     StrictStr,
     model_validator,
 )
+
+# Valid TCP port. Restores the range constraint lost in the pydantic v1 -> v2
+# migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
+Port = Annotated[StrictInt, Field(ge=1, le=65535)]
 
 # ---------------------------------------------------------------------------------------
 # NOS plugin commands model
@@ -54,7 +59,7 @@ class ModelHost(BaseModel):
     name: StrictStr
     username: StrictStr
     password: StrictStr
-    port: StrictInt
+    port: Port
     platform: StrictStr | None = None
 
 
@@ -152,7 +157,7 @@ class InventoryDefaultSection(BaseModel):
 
     username: StrictStr | None = None
     password: StrictStr | None = None
-    port: StrictInt | list[StrictInt] | None = None
+    port: Port | list[Port] | None = None
     configuration_file: StrictStr | None = None
     platform: StrictStr | None = None
     server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None

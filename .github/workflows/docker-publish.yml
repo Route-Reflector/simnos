@@ -56,6 +56,11 @@ jobs:
           image-ref: "${{ env.IMAGE_NAME }}:scan"
           format: "sarif"
           output: "trivy-results.sarif"
+        env:
+          # Reuse the vulnerability DB the table scan above just downloaded
+          # (same runner cache dir) instead of fetching it a second time (#237).
+          TRIVY_SKIP_DB_UPDATE: "true"
+          TRIVY_SKIP_JAVA_DB_UPDATE: "true"
       - name: "Upload Trivy SARIF to GitHub Code Scanning"
         # SARIF upload is a security observability channel, not a release gate.
         # `continue-on-error: true` keeps a transient Code Scanning outage from
