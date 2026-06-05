@@ -19,9 +19,30 @@ def get_files_under_directory(directory):
     return files
 
 
-def get_files_lasttime_changed(files):
-    """Method to get files last time changed"""
-    return {file: os.stat(file).st_mtime for file in files}
+def _get_mtime(file: str) -> float | None:
+    """Return the file's st_mtime, or None if the file vanished.
+
+    A file may vanish between the directory walk and the stat (e.g.
+    another process replaces or removes it); callers skip such files and
+    the next poll picks up their final state.
+    """
+    try:
+        return os.stat(file).st_mtime
+    except FileNotFoundError:
+        return None
+
+
+def get_files_lasttime_changed(files: list[str]):
+    """Method to get files last time changed
+
+    Files that vanished since the walk are skipped (see `_get_mtime`).
+    """
+    files_lasttime_changed: dict[str, float] = {}
+    for file in files:
+        mtime = _get_mtime(file)
+        if mtime is not None:
+            files_lasttime_changed[file] = mtime
+    return files_lasttime_changed
 
 
 def get_new_files(old_files: list[str], new_files: list[str]):
@@ -30,8 +51,17 @@ def get_new_files(old_files: list[str], new_files: list[str]):
 
 
 def get_files_recently_modified(files: list[str], files_lasttime_changed_old: dict[str, float]):
-    """Method to get files recently modified"""
-    return [file for file in files if os.stat(file).st_mtime != files_lasttime_changed_old.get(file, 0)]
+    """Method to get files recently modified
+
+    Files that vanished since the walk are not reported as modified
+    (see `_get_mtime`).
+    """
+    files_recently_modified: list[str] = []
+    for file in files:
+        mtime = _get_mtime(file)
+        if mtime is not None and mtime != files_lasttime_changed_old.get(file, 0):
+            files_recently_modified.append(file)
+    return files_recently_modified
 
 
 def change_jinja_to_corresponding_py(files: list[str]):

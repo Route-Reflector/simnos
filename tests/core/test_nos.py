@@ -3,6 +3,8 @@ Test module for simnos.core.nos module.
 This module can be found at simnos/core/nos.py
 """
 
+import pathlib
+import tempfile
 import unittest
 
 from pydantic import ValidationError
@@ -183,6 +185,51 @@ class NosTest(unittest.TestCase):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.yaml")
 
+    def _write_tmp_file(self, name: str, content: str) -> str:
+        """Write a throwaway plugin file and return its path (auto-cleaned)."""
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        tmp_file = pathlib.Path(tmp_dir.name) / name
+        tmp_file.write_text(content, encoding="utf-8")
+        return str(tmp_file)
+
+    def test_from_file_empty_yaml_file(self):
+        """An empty yaml file raises ValueError instead of crashing later.
+
+        Pins the `_from_yaml` mapping guard (#232): `yaml.safe_load` returns
+        None for an empty file (e.g. a half-written file observed by hot
+        reload mid-save) and `from_dict` used to crash on `data.get` with an
+        opaque AttributeError out of the SSH shell thread.
+        """
+        empty_yaml = self._write_tmp_file("empty_nos.yaml", "")
+        with pytest.raises(ValueError, match=r"does not contain a mapping \(got NoneType\)"):
+            Nos().from_file(empty_yaml)
+
+    def test_from_file_non_mapping_yaml_file(self):
+        """A yaml file with a non-dict top level raises ValueError.
+
+        Same `_from_yaml` guard as the empty-file case (#232), pinned for
+        the other non-mapping shape `yaml.safe_load` can return.
+        """
+        list_yaml = self._write_tmp_file("list_nos.yaml", "- not\n- a\n- mapping\n")
+        with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
+            Nos().from_file(list_yaml)
+
+    def test_from_dict_non_mapping_commands_leaves_nos_untouched(self):
+        """A non-mapping 'commands' value raises before any mutation.
+
+        Pins the validate-before-commit ordering of `from_dict` (#232):
+        `name` used to be committed before `commands.update` raised on a
+        malformed value, leaving partial state behind — the same hole
+        `_from_module` had with DEVICE_NAME.
+        """
+        bad_yaml = self._write_tmp_file("bad_commands_nos.yaml", "name: polluted\ncommands: not-a-mapping\n")
+        nos = Nos()
+        with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
+            nos.from_file(bad_yaml)
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
+
     def test_from_py_file(self):
         """
         Test that the from_file method works with .py.
@@ -227,6 +274,40 @@ class NosTest(unittest.TestCase):
             nos = Nos()
             # pylint: disable=protected-access
             nos._from_module("tests/assets/incorrect_file.py")
+
+    def test_from_module_non_mapping_commands_leaves_nos_untouched(self):
+        """A plugin whose `commands` is not a mapping raises before mutation.
+
+        Pins the `commands` type validation in `_from_module` (#232 cross
+        review 2nd round): symmetric with `from_dict`, a malformed
+        `commands` value raises ValueError without committing attrs first.
+        """
+        bad_py = self._write_tmp_file(
+            "bad_commands_plugin.py",
+            'NAME = "polluted"\nINITIAL_PROMPT = "{base_prompt}$"\ncommands = "not-a-mapping"\n',
+        )
+        nos = Nos()
+        with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
+            nos.from_file(bad_py)
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
+        assert nos.commands == {}
+
+    def test_from_module_broken_device_name_leaves_nos_untouched(self):
+        """A plugin whose DEVICE_NAME class is missing leaves Nos unchanged.
+
+        Pins the build-before-commit ordering of `_from_module` (#232 cross
+        review): attrs/commands used to be committed before the DEVICE_NAME
+        validation, so a broken plugin raised out of `from_file` but still
+        polluted `nos.commands` / `nos.name` behind the caller's back.
+        """
+        nos = Nos()
+        with pytest.raises(AttributeError, match=r"DEVICE_NAME='MissingClass'"):
+            nos.from_file("tests/assets/broken_device_name_module.py")
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
+        assert "polluting command" not in nos.commands
+        assert nos.device is None
 
     def test_register_nos_plugin_directly(self):
         """
