@@ -185,6 +185,14 @@ class NosTest(unittest.TestCase):
             nos = Nos()
             nos.from_file("tests/assets/incorrect_file.yaml")
 
+    def _write_tmp_yaml(self, name: str, content: str) -> str:
+        """Write a throwaway yaml file and return its path (auto-cleaned)."""
+        tmp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp_dir.cleanup)
+        tmp_yaml = pathlib.Path(tmp_dir.name) / name
+        tmp_yaml.write_text(content, encoding="utf-8")
+        return str(tmp_yaml)
+
     def test_from_file_empty_yaml_file(self):
         """An empty yaml file raises ValueError instead of crashing later.
 
@@ -193,10 +201,9 @@ class NosTest(unittest.TestCase):
         reload mid-save) and `from_dict` used to crash on `data.get` with an
         opaque AttributeError out of the SSH shell thread.
         """
-        empty_yaml = pathlib.Path(tempfile.mkdtemp()) / "empty_nos.yaml"
-        empty_yaml.write_text("", encoding="utf-8")
+        empty_yaml = self._write_tmp_yaml("empty_nos.yaml", "")
         with pytest.raises(ValueError, match=r"does not contain a mapping \(got NoneType\)"):
-            Nos().from_file(str(empty_yaml))
+            Nos().from_file(empty_yaml)
 
     def test_from_file_non_mapping_yaml_file(self):
         """A yaml file with a non-dict top level raises ValueError.
@@ -204,10 +211,9 @@ class NosTest(unittest.TestCase):
         Same `_from_yaml` guard as the empty-file case (#232), pinned for
         the other non-mapping shape `yaml.safe_load` can return.
         """
-        list_yaml = pathlib.Path(tempfile.mkdtemp()) / "list_nos.yaml"
-        list_yaml.write_text("- not\n- a\n- mapping\n", encoding="utf-8")
+        list_yaml = self._write_tmp_yaml("list_nos.yaml", "- not\n- a\n- mapping\n")
         with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
-            Nos().from_file(str(list_yaml))
+            Nos().from_file(list_yaml)
 
     def test_from_py_file(self):
         """

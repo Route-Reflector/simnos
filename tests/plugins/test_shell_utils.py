@@ -162,8 +162,8 @@ class ShellUtilsTest(TestCase):
         """A vanished file is not reported as modified, not raised.
 
         Same FileNotFoundError tolerance as `get_files_lasttime_changed`
-        (#232) — a vanished file would otherwise hit the `.get(file, 0)`
-        default and crash on the stat instead.
+        (#232) — the stat used to raise before the mtime comparison was
+        ever reached.
         """
         files = get_files_under_directory("simnos/plugins/nos")
         vanished = "simnos/plugins/nos/platforms_yaml/vanished_after_walk.yaml"

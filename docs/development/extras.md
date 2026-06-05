@@ -14,3 +14,6 @@ simnos --reload-commands
     Changes are additive. This means that if you introduce a new command, you will see the change reflected and the same if you modify the command. But if you delete a command, it will not be removed from the application until the server is restarted.
 
 This is achieved by setting an environment variable called "SIMNOS_RELOAD_COMMANDS". If this is found, then hot-reload will be activated. If it is not found, then it will not be activated. At the end of the CLI, the variable will be removed.
+
+!!! note
+    Hot reload is lenient about broken files: a malformed or half-written plugin file (e.g. an editor save caught mid-write) is logged as an `ERROR` and skipped — the SSH session keeps running and the file is reloaded on its next change.

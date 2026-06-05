@@ -687,6 +687,23 @@ class HotReloadTest(TestCase):
         self.assertIn("broken.yaml", captured.output[0])
         self.assertIn("healthy", shell.commands)
 
+    @staticmethod
+    def _atomic_write(path: str, content: str, suffix: str) -> None:
+        """Write `content` to `path` atomically (tempfile + `os.replace`).
+
+        `suffix` must be a non-watched `.bak`-based extension so neither
+        the tempfile nor an empty/partial target is ever visible to a
+        hot-reload watcher (#232).
+        """
+        fd, tmp = tempfile.mkstemp(dir=os.path.dirname(path), suffix=suffix)
+        try:
+            with os.fdopen(fd, "w", encoding="utf-8") as file:
+                file.write(content)
+            os.replace(tmp, path)
+        except BaseException:
+            os.unlink(tmp)
+            raise
+
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @pytest.mark.xdist_group("hot-reload-fs")
     @simnos(platform="cisco_ios", return_instance=True)
@@ -716,16 +733,7 @@ class HotReloadTest(TestCase):
             with open(original_filename, encoding="utf-8") as file:
                 values = yaml.safe_load(file)
             values["commands"].update(test_commands)
-            # Write to a temp file (non-watched .bak suffix) then atomically
-            # replace so no empty/partial yaml is ever visible to a watcher.
-            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".yaml.bak")
-            try:
-                with os.fdopen(fd, "w", encoding="utf-8") as file:
-                    file.write(yaml.dump(values))
-                os.replace(tmp, original_filename)
-            except BaseException:
-                os.unlink(tmp)
-                raise
+            self._atomic_write(original_filename, yaml.dump(values), suffix=".yaml.bak")
 
         def undo_change_file():
             # Atomic restore: no window where the original is missing.
@@ -765,16 +773,7 @@ class HotReloadTest(TestCase):
 
         def change_file():
             shutil.copyfile(original_filename, copy_filename)
-            # Write to a temp file (non-watched .bak suffix) then atomically
-            # replace so no empty/partial file is ever visible to a watcher.
-            fd, tmp = tempfile.mkstemp(dir=os.path.dirname(original_filename), suffix=".j2.bak")
-            try:
-                with os.fdopen(fd, "w", encoding="utf-8") as file:
-                    file.write("test output")
-                os.replace(tmp, original_filename)
-            except BaseException:
-                os.unlink(tmp)
-                raise
+            self._atomic_write(original_filename, "test output", suffix=".j2.bak")
 
         def undo_change_file():
             # Atomic restore: no window where the original is missing.
