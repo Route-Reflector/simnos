@@ -475,7 +475,6 @@ def simnos(platform: str | None = None, inventory: dict | None = None, return_in
         raise ValueError("platform or inventory must be set")
     if platform:
         assert_platform_supported(platform)
-    if platform:
         inventory = {
             "hosts": {
                 "SimNOS": {
