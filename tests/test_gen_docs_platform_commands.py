@@ -129,6 +129,17 @@ class TestRenderTemplate:
         with pytest.raises(RuntimeError, match=r"Failed to format prompt for platformG/'cmd7'.*unsupported"):
             render_template("{base_prompt:>20}", "platformG", "cmd7", "prompt")
 
+    def test_raises_runtime_error_on_nested_format_spec(self):
+        """`{base_prompt:{base_prompt}}` (nested replacement field) is rejected.
+
+        Pins the format_spec boundary of the strict authoring check (2nd
+        code review 反映): any non-empty spec — including a nested
+        replacement field — is unsupported, so a future relaxation of the
+        spec handling must consciously revisit this pin.
+        """
+        with pytest.raises(RuntimeError, match=r"Failed to format output for platformH/'cmd8'.*unsupported"):
+            render_template("{base_prompt:{base_prompt}}", "platformH", "cmd8", "output")
+
 
 class TestPlatformYamlTemplateSweep:
     """CI-resident loud counterpart of the lenient runtime (#171/#172).
@@ -165,7 +176,8 @@ class TestPlatformYamlTemplateSweep:
             output = details.get("output")
             if isinstance(output, str):
                 render_template(output, platform, command, "output")
-            prompts = details.get("prompt", [])
+            # `or []` also guards a degenerate `prompt:` entry (explicit null)
+            prompts = details.get("prompt") or []
             if isinstance(prompts, str):
                 render_template(prompts, platform, command, "prompt")
             else:

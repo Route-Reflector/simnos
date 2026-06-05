@@ -104,8 +104,9 @@ def render_template(template: str, platform: str, command: str, field: str) -> s
             if field_name != "base_prompt" or conversion is not None or format_spec:
                 raise RuntimeError(
                     f"Failed to format {field} for {platform}/{command!r}: unsupported template "
-                    f"construct. Only '{{base_prompt}}' substitution and '{{{{' / '}}}}' escapes "
-                    f"are supported."
+                    f"construct (field_name={field_name!r}, conversion={conversion!r}, "
+                    f"format_spec={format_spec!r}). Only '{{base_prompt}}' substitution and "
+                    f"'{{{{' / '}}}}' escapes are supported."
                 )
         return template.format(base_prompt=platform)
     except FORMAT_ERRORS as exc:
