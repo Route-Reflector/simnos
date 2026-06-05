@@ -270,6 +270,61 @@ class TestCmdShell(TestCase):
         shell.default("show clock")
         shell.writeline.assert_called_once_with(time.ctime())
 
+    def _make_callable_dict_shell(self, output_callable):
+        """Build a shell whose 'cmd' command is a dict-returning callable.
+
+        Consumer-side pins for the callable-dict dispatch branch of
+        `default()` (new_prompt update / exit / output extraction),
+        the counterpart of the producer-side device-class tests in
+        tests/plugins/nos/ (T-14 / #230). The str-returning branch is
+        covered by test_default_command_is_function above.
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "cmd": {
+                        "output": output_callable,
+                        "help": "dict-returning callable",
+                        "prompt": "{base_prompt}>",
+                    },
+                    "_default_": {
+                        "output": "% Unknown",
+                        "help": "default",
+                        "prompt": "{base_prompt}>",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        return shell
+
+    def test_default_callable_dict_new_prompt(self):
+        """Callable dict with new_prompt updates the prompt (formatted)."""
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "", "new_prompt": "{base_prompt}#"})
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test#")
+        shell.writeline.assert_called_once_with("")
+
+    def test_default_callable_dict_exit(self):
+        """Callable dict with exit=True signals shell termination."""
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"exit": True})
+        stop = shell.default("cmd")
+        self.assertTrue(stop)
+        shell.writeline.assert_not_called()
+
+    def test_default_callable_dict_output_only(self):
+        """Callable dict with output only writes it, prompt unchanged."""
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "dynamic body"})
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test>")
+        shell.writeline.assert_called_once_with("dynamic body")
+
     def test_default_command_not_matching_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()

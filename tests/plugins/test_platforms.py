@@ -5,7 +5,6 @@ in the yaml and python files.
 """
 
 from importlib import import_module
-import os
 import re
 import types
 from typing import Any
@@ -17,25 +16,13 @@ import yaml
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS
 from simnos.plugins.nos import nos_plugins
-from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_commands
+from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_commands, get_py_platforms
 
 
 def get_yaml_only_platforms() -> list[str]:
     """Return platforms that have YAML definitions but no Python module."""
-    py_modules = set(get_py_nos_modules())
+    py_modules = set(get_py_platforms())
     return [p for p in sorted(nos_plugins) if p not in py_modules]
-
-
-def get_py_nos_modules() -> list[str]:
-    """
-    It returns the list of all the python files
-    that are in the nos directory.
-    """
-    return [
-        f.split(".py", 1)[0]
-        for f in os.listdir("simnos/plugins/nos/platforms_py")
-        if f.endswith(".py") and f != "__init__.py" and f != "base_template.py"
-    ]
 
 
 def has_single_curly_brackets(text: Any, exceptions: list[str]) -> bool:
@@ -109,7 +96,7 @@ class TestPlatforms:
                 assert "prompt" in values
                 assert not has_single_curly_brackets(values["prompt"], exceptions)
 
-    @pytest.mark.parametrize("platform", get_py_nos_modules())
+    @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_has_correct_format(self, platform: str):
         """
         It checks if the platform python file can be imported correctly.
@@ -125,7 +112,7 @@ class TestPlatforms:
         assert hasattr(module, "DEVICE_NAME")
         assert hasattr(module, module.DEVICE_NAME)
 
-    @pytest.mark.parametrize("platform", get_py_nos_modules())
+    @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_commands_has_correct_format(self, platform: str):
         """
         It checks if the platform has the commands correctly set.
@@ -215,7 +202,7 @@ class TestPlatforms:
                         assert isinstance(output, str)
 
     @pytest.mark.timeout(600)
-    @pytest.mark.parametrize("platform", get_py_nos_modules())
+    @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_all_commands_are_running(self, platform: str):
         """
         Test that all the platforms commands can

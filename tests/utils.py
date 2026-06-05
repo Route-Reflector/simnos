@@ -7,6 +7,7 @@ import socket
 import string
 
 from simnos.core.host import Host
+from simnos.plugins.nos import nos_plugins
 
 # Mapping for platforms where simnos name differs from netmiko device_type
 NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
@@ -64,6 +65,17 @@ def get_platforms_from_md() -> list[str]:
                 platform = stripped.split("[")[1].split("]")[0]
                 platforms.append(platform)
     return platforms
+
+
+def get_py_platforms() -> list[str]:
+    """Return platforms that have a Python plugin module (sorted).
+
+    Derived from the `nos_plugins` registry (the same source the server
+    uses): values are lists of absolute plugin file paths, and
+    `base_template.py` is already excluded at registry build time, so
+    no manual listdir filtering is needed here.
+    """
+    return sorted(p for p, files in nos_plugins.items() if any(f.endswith(".py") for f in files))
 
 
 def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
