@@ -275,6 +275,24 @@ class NosTest(unittest.TestCase):
             # pylint: disable=protected-access
             nos._from_module("tests/assets/incorrect_file.py")
 
+    def test_from_module_non_mapping_commands_leaves_nos_untouched(self):
+        """A plugin whose `commands` is not a mapping raises before mutation.
+
+        Pins the `commands` type validation in `_from_module` (#232 cross
+        review 2nd round): symmetric with `from_dict`, a malformed
+        `commands` value raises ValueError without committing attrs first.
+        """
+        bad_py = self._write_tmp_file(
+            "bad_commands_plugin.py",
+            'NAME = "polluted"\nINITIAL_PROMPT = "{base_prompt}$"\ncommands = "not-a-mapping"\n',
+        )
+        nos = Nos()
+        with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
+            nos.from_file(bad_py)
+        assert nos.name == "SimNOS"
+        assert nos.initial_prompt == "SimNOS>"
+        assert nos.commands == {}
+
     def test_from_module_broken_device_name_leaves_nos_untouched(self):
         """A plugin whose DEVICE_NAME class is missing leaves Nos unchanged.
 
