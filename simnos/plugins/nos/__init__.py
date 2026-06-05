@@ -59,6 +59,8 @@ def assert_platform_supported(platform: str) -> None:
     (#237, G1 follow-up).
     """
     if platform not in available_platforms:
+        # Join the names so the user-facing message does not leak the
+        # registry container type (tuple vs list repr).
         raise ValueError(
-            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {available_platforms}"
+            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {', '.join(available_platforms)}"
         )

@@ -60,8 +60,9 @@ class TestHost:
         """A second start() while running does not spawn a new server.
 
         Pins the double-start guard (#237, #199 C-23 follow-up): without
-        it, start() built and started a second server instance, orphaning
-        the first. Symmetric with the double-stop guard in stop().
+        it, a direct start() call built and started a second server
+        instance, orphaning the first. Symmetric with the double-stop
+        guard in stop().
         """
         host.start()
         first_server = host.server
@@ -69,6 +70,25 @@ class TestHost:
         assert host.server is first_server
         first_server.start.assert_called_once()
         assert host.running
+
+    def test_restart_after_stop_creates_new_server(self, host):
+        """start() after stop() builds and starts a fresh server.
+
+        Separates the restartable semantics from the idempotent no-op
+        (#237 cross-review 🦊#5): the guard gates on `self.running`, so
+        a regression in stop()'s state update would silently turn
+        restarts into no-ops — this pin catches that.
+        """
+        host.start()
+        host.stop()
+        host.start()
+        assert host.running
+        assert host.server is not None
+        # The plugin factory ran twice = a fresh server was built for the
+        # restart (the mock factory returns the same object both times,
+        # so instance identity cannot be asserted here).
+        assert host.server_plugin.call_count == 2
+        assert host.server.start.call_count == 2
 
     def test_stop(self, host):
         """

@@ -61,12 +61,15 @@ class Host:
     def start(self):
         """Method to start server instance for this host.
 
-        No-op if the server is already running (``self.running``); this
-        guards against a double-start spawning a duplicate server instance
-        (and orphaning the first one), symmetric with the double-stop
-        guard in ``stop()``.
+        No-op if the server is already running (``self.running``),
+        symmetric with the double-stop guard in ``stop()``. This protects
+        direct ``host.start()`` callers from spawning a duplicate server
+        instance (and orphaning the first one); the SimNOS-level
+        orchestration already filters on ``host_running=False`` and never
+        double-starts.
         """
         if self.running:
+            log.debug("Host %s is already running; start() is a no-op", self.name)
             return
         self.server_plugin = self.simnos.servers_plugins[self.server_inventory["plugin"]]
         self.shell_plugin = self.simnos.shell_plugins[self.shell_inventory["plugin"]]
