@@ -206,7 +206,6 @@ NAME: str = "test_module"
 INITIAL_PROMPT = "{base_prompt}>"
 ENABLE_PROMPT = "{base_prompt}#"
 CONFIG_PROMPT = "{base_prompt}(config)#"
-DEVICE_NAME: str = "TestModule"
 
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 
@@ -246,9 +245,22 @@ commands = {
 }
 ```
 
-分解して説明しましょう。SIMNOS はモジュールを動的にロードできますが、モジュールには特定の構造が必要です。一方では、いくつかの定数（NAME、INITIAL_PROMPT、ENABLE_PROMPT、CONFIG_PROMPT、DEVICE_NAME）が必要で、他方ではコマンドの辞書、最後に BaseDevice を継承するクラスが必要です。これは SIMNOS がモジュールをロードするために必須です。
+分解して説明しましょう。SIMNOS はモジュールを動的にロードできますが、モジュールには特定の構造が必要です。一方では、いくつかの定数（NAME、INITIAL_PROMPT、任意で ENABLE_PROMPT / CONFIG_PROMPT）が必要で、他方ではコマンドの辞書、最後に BaseDevice を継承するクラスが必要です。これは SIMNOS がモジュールをロードするために必須です。
 
-まず、NAME、INITIAL_PROMPT、ENABLE_PROMPT（任意）、CONFIG_PROMPT（任意）、DEVICE_NAME の属性があります。これらの属性は SIMNOS が NOS プラグインを登録するために必要です。NAME はプラグインの名前、INITIAL_PROMPT は初期シェルインジケーター、ENABLE_PROMPT は enable モードのシェルインジケーター、CONFIG_PROMPT は config モードのシェルインジケーター、DEVICE_NAME はデバイスの名前です。
+まず、NAME、INITIAL_PROMPT、ENABLE_PROMPT（任意）、CONFIG_PROMPT（任意）の属性があります。これらの属性は SIMNOS が NOS プラグインを登録するために必要です。NAME はプラグインの名前、INITIAL_PROMPT は初期シェルインジケーター、ENABLE_PROMPT は enable モードのシェルインジケーター、CONFIG_PROMPT は config モードのシェルインジケーターです。
+
+device class は**自動検出**されます: SIMNOS は*モジュール内で定義された*
+`BaseDevice` subclass を 1 つだけ採用します。他の device class を import する
+こと (helper device / 型注釈用 import) は問題ありません — ローカル定義の
+subclass だけがカウントされます。同一モジュール内に 2 つ以上定義すると load 時に
+loud な `ValueError` になります。旧 `DEVICE_NAME` 定数 (#241 以前) は deprecation
+warning 付きで無視されます — 古い plugin からは削除してください。
+
+!!! note
+    platform が yaml と Python module の両方を持つ場合、module は後から
+    ロードされ、同名 command を **command 単位で全置換**します (`help` /
+    `prompt` / `output` の deep merge はしません)。override は debug level で
+    log されるため、module がどの yaml command を上書きしたか確認できます。
 
 次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列、`None`、またはレスポンス内容を生成する callable にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。
 
