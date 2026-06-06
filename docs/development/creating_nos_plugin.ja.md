@@ -250,14 +250,45 @@ commands = {
 
 まず、NAME、INITIAL_PROMPT、ENABLE_PROMPT（任意）、CONFIG_PROMPT（任意）、DEVICE_NAME の属性があります。これらの属性は SIMNOS が NOS プラグインを登録するために必要です。NAME はプラグインの名前、INITIAL_PROMPT は初期シェルインジケーター、ENABLE_PROMPT は enable モードのシェルインジケーター、CONFIG_PROMPT は config モードのシェルインジケーター、DEVICE_NAME はデバイスの名前です。
 
-次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列、`None`、またはレスポンス内容を生成する callable にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。callable コマンドは以下の値を返せます:
+次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列、`None`、またはレスポンス内容を生成する callable にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。
+
+### callable 契約
+
+型付きの契約は `simnos.core.command_contract` (`CommandHandler` Protocol +
+`CommandResult` TypedDict) にあります — 型注釈に使いたい場合は import してください。
+形が合っていれば普通の関数のままでも動作します。
+
+シェルは callable output を次の形で起動します:
+
+```python
+output(device, base_prompt=..., current_prompt=..., command=...)
+```
+
+`device` はあなたの `BaseDevice` subclass のインスタンスです (device class を
+持たない platform では `None`)。commands 辞書に `TestModule.make_show_clock`
+のような unbound method を置けばこの契約を満たします: `device` が `self` に
+bind されます。
+
+callable コマンドは以下の値を返せます:
 
 - `str` - 表示する出力文字列
 - `None` - レスポンスなし
-- `dict` - 以下のオプションキーを持つ辞書:
+- `dict` (`CommandResult`) - 以下のオプションキーを持つ辞書:
     - `"output"` - 表示する文字列
     - `"new_prompt"` - 新しいプロンプト値（`{base_prompt}` フォーマッターが使用可能）
     - `"exit"` - `True` の場合、シェルセッションを終了（output は表示されない）
+
+yaml static な output と異なるルールが 2 つあります:
+
+- **format は自分で行う。** シェルは callable output に `{base_prompt}` format を
+  適用**しません** — handler は `base_prompt` を引数で受け取り自分で文字列を
+  render します。device 出力に literal な brace が含まれていても escape 不要です。
+  (`new_prompt` は従来通りシェル側で format されます — prompt template はシェルの
+  関心事です。)
+- **raise してもよい。**「起きてはならない」状態 (想定外の prompt 等) では例外を
+  投げて構いません: シェルは full traceback を server log に記録し、client には
+  固定の `% Internal error` 1 行を返します — traceback が wire に出ることは
+  ありません。
 
 最後に、BaseDevice を継承するクラスがあります。このクラスは SIMNOS がモジュールを正しくロードするために必要です。内部的には、`self.configurations` 属性でモジュールを初期化します。モジュールが optional な `DEFAULT_CONFIGURATION` 属性 (YAML/Jinja2 形式の[設定](../usage/configurations.md)ファイルのパス) を定義していれば、そのファイルが辞書として `self.configurations` にロードされます。未定義の場合は `self.configurations` は空 dict になります (バンドル plugin の中ではこの hook を実際に使っているのは `HuaweiSmartAX` のみです)。また、`simnos/plugins/nos/platforms_py/templates/` ディレクトリ内の Jinja2 テンプレートをレンダリングできる `render(self, template: str, **kwargs) -> str` メソッドも含まれています。これらの属性を持つクラスにすることで、モジュールの標準化に役立ちます。同時に、個別の関数ではなくクラスにすることで、コマンド間で変数を共有したり、デバイスの状態を変更することもできます。例えば、デバイスの IP を変更するコマンドを作成した場合、クラス内のデバイスの状態を変更し、残りのコマンドがこの変更を考慮して新しい IP で文字列を返すようにできます。
 
