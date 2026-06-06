@@ -7,7 +7,9 @@ import copy
 import logging
 import os
 import traceback
+from typing import cast
 
+from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
 from simnos.plugins import nos
 from simnos.plugins.shell.utils import get_files_changed
@@ -208,34 +210,65 @@ class CMDShell(Cmd):
         if new_prompt is not None:
             self.prompt = new_prompt
 
-    def default(self, line):
-        """Method called if no do_xyz methods found"""
-        log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
-        ret = self.commands["_default_"]["output"]
+    def _resolve_command(self, line: str) -> dict | None:
+        """Return the merged cmd_data for `line`, or None if unknown.
+
+        Alias resolution happens here too: a missing alias target is the
+        same lenient unknown-command path as a missing command (both used
+        to be one broad `except KeyError`) — the caller answers with the
+        `_default_` output, never with the handler-crash response.
+        """
         try:
             cmd_data = self.commands[line]
             if "alias" in cmd_data:
                 cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
-            if self._check_prompt(cmd_data.get("prompt"), command=line):
-                if cmd_data.get("exit"):
-                    return True
-                ret = cmd_data.get("output")
-                if callable(ret):
-                    ret = ret(
-                        self.nos.device,
-                        base_prompt=self.base_prompt,
-                        current_prompt=self.prompt,
-                        command=line,
-                    )
-                    if isinstance(ret, dict):
-                        if "new_prompt" in ret:
-                            self._apply_new_prompt(ret["new_prompt"], line)
-                        if ret.get("exit"):
-                            return True
-                        ret = ret.get("output")
-                if "new_prompt" in cmd_data:
-                    self._apply_new_prompt(cmd_data["new_prompt"], line)
-            else:
+        except KeyError:
+            log.error("shell.default '%s' command '%s' not found", self.base_prompt, [line])
+            return None
+        return cmd_data
+
+    def _invoke_callable(self, func: CommandHandler, line: str) -> CommandResult:
+        """Invoke a command handler and normalize its return to CommandResult.
+
+        A plain str (or None) return is sugar for `{"output": <value>}`;
+        see `simnos.core.command_contract`. This is normalization, not
+        validation: a contract-breaking return (list / int / ...) is
+        wrapped and flows through the lenient output path like today —
+        contract violations are caught statically (Protocol) and by the
+        e2e callable sweep, not at runtime on the hot path.
+        """
+        ret = func(
+            self.nos.device,
+            base_prompt=self.base_prompt,
+            current_prompt=self.prompt,
+            command=line,
+        )
+        if isinstance(ret, dict):
+            return ret
+        # After the dict check `ret` is str | None at runtime (a TypedDict
+        # IS a dict); the cast spells that out for the type checker, which
+        # cannot narrow the TypedDict member out of the union by isinstance.
+        return {"output": cast("str | None", ret)}
+
+    def _render_output(self, ret, line: str) -> None:
+        """Format `ret` with `_safe_format` and write it to the client.
+
+        Failure falls back to the raw template (information beats
+        dropping the whole output); lenient policy in `_safe_format`.
+        """
+        formatted = self._safe_format(ret, where=f"output for command {line!r}")
+        self.writeline(formatted if formatted is not None else ret)
+
+    def default(self, line):
+        """Dispatch `line`: resolve -> prompt check -> invoke -> render."""
+        log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
+        cmd_data = self._resolve_command(line)
+        if cmd_data is not None and self._check_prompt(cmd_data.get("prompt"), command=line):
+            if cmd_data.get("exit"):
+                return True
+            ret = cmd_data.get("output")
+        else:
+            if cmd_data is not None:
                 log.warning(
                     "'%s' command prompt '%s' not matching current prompt '%s'",
                     line,
@@ -246,22 +279,29 @@ class CMDShell(Cmd):
                     ),
                     self.prompt,
                 )
-        except KeyError:
-            log.error("shell.default '%s' command '%s' not found", self.base_prompt, [line])
-            if callable(ret):
-                ret = "An error occurred related to the command function"
-        except ValueError:
-            log.error("Output is still a callable")
-            ret = "An error occurred"
-        except Exception as e:
-            log.error("An error occurred: %s", str(e))
-            ret = traceback.format_exc()
-            ret = ret.replace("\n", self.newline)
+            # Unknown command and prompt mismatch both answer with the
+            # `_default_` output — a silent shell would make clients
+            # (e.g. Netmiko) wait for a timeout instead.
+            ret = self.commands["_default_"]["output"]
+            cmd_data = None  # the `_default_` answer never applies cmd_data's new_prompt
+        if callable(ret):
+            try:
+                result = self._invoke_callable(ret, line)
+            except ValueError:
+                log.error("Output is still a callable")
+                result = {"output": "An error occurred"}
+            except Exception as e:
+                log.error("An error occurred: %s", str(e))
+                result = {"output": traceback.format_exc().replace("\n", self.newline)}
+            if "new_prompt" in result:
+                self._apply_new_prompt(result["new_prompt"], line)
+            if result.get("exit"):
+                return True
+            ret = result.get("output")
+        if cmd_data is not None and "new_prompt" in cmd_data:
+            self._apply_new_prompt(cmd_data["new_prompt"], line)
         if not self.is_running.is_set():
             return True
         if ret is not None:
-            # Failure falls back to the raw template (information beats
-            # dropping the whole output); lenient policy in _safe_format.
-            formatted = self._safe_format(ret, where=f"output for command {line!r}")
-            self.writeline(formatted if formatted is not None else ret)
+            self._render_output(ret, line)
         return False

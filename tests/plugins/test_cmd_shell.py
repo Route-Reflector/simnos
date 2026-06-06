@@ -378,6 +378,119 @@ class TestCmdShell(TestCase):
         shell.default("broken alias")
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
 
+    def test_resolve_command_unknown_returns_none(self):
+        """`_resolve_command` degrades an unknown command to None.
+
+        Unit pin for the #241 decomposition: the unknown-command KeyError
+        is consumed inside the helper so `default()` needs no try block
+        around resolution.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        self.assertIsNone(shell._resolve_command("no such command"))
+
+    def test_resolve_command_alias_target_missing_returns_none(self):
+        """`_resolve_command` degrades a missing alias target to None.
+
+        Unit counterpart of test_default_alias_target_missing_falls_back
+        _default (#241): the alias-merge KeyError must stay inside the
+        helper, on the same lenient path as an unknown command.
+        """
+        shell = CMDShell(**self.arguments)
+        shell.commands["broken alias"] = {"alias": "no such target"}
+        # pylint: disable=protected-access
+        self.assertIsNone(shell._resolve_command("broken alias"))
+
+    def test_resolve_command_alias_merges_target(self):
+        """`_resolve_command` merges the alias target under the alias keys.
+
+        Pins the `{**commands[target], **cmd_data}` merge order (#241):
+        the alias entry's own keys win over the target's.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        merged = shell._resolve_command("sh clock")
+        self.assertEqual(merged["output"], "*21:01:33.000 AET 01 01 01 2022")
+        self.assertEqual(merged["alias"], "show clock")
+
+    def test_invoke_callable_str_return_normalized(self):
+        """`_invoke_callable` wraps a str return into a CommandResult dict.
+
+        Pins the #241/D2 consumer-side normalization: a plain str return
+        is sugar for `{"output": <str>}`, so the dispatch body only ever
+        consumes the dict form.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: "body", "cmd")
+        self.assertEqual(result, {"output": "body"})
+
+    def test_invoke_callable_none_return_normalized(self):
+        """`_invoke_callable` wraps a None return (= write nothing) too."""
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: None, "cmd")
+        self.assertEqual(result, {"output": None})
+
+    def test_invoke_callable_dict_return_passthrough(self):
+        """`_invoke_callable` passes a CommandResult dict through unchanged."""
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")
+        self.assertEqual(result, {"output": "x", "exit": True})
+
+    def _make_callable_default_shell(self):
+        """Build a shell whose `_default_` output is a callable.
+
+        No shipped plugin has a callable `_default_` (yaml cannot express
+        one; the py plugins use strings), but the Python API
+        (`SimNOS(inventory=dict)`) can reach it — these pins fix the #241
+        unification: both the unknown-command and the prompt-mismatch
+        fallback invoke the callable through `_invoke_callable` (the old
+        code degraded to a fixed error string / leaked the function repr
+        respectively).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "known": {
+                        "output": "static",
+                        "help": "enable-mode only",
+                        "prompt": "{base_prompt}#",
+                    },
+                    "_default_": {
+                        "output": lambda device, **kwargs: f"dynamic unknown: {kwargs['command']}",
+                        "help": "callable default",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        return shell
+
+    def test_default_callable_default_invoked_on_unknown_command(self):
+        """An unknown command invokes a callable `_default_` (#241)."""
+        shell = self._make_callable_default_shell()
+        stop = shell.default("nope")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("dynamic unknown: nope")
+
+    def test_default_callable_default_invoked_on_prompt_mismatch(self):
+        """A prompt mismatch invokes a callable `_default_` (#241).
+
+        The old code never invoked it on this path — `_safe_format`
+        swallowed the AttributeError and the function repr leaked to the
+        wire. The unification fixes that display bug.
+        """
+        shell = self._make_callable_default_shell()
+        stop = shell.default("known")  # requires "test#", current prompt is "test>"
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("dynamic unknown: known")
+
     def test_default_silent_fallback_on_keyerror(self):
         """`KeyError` failure mode of `.format()` is silently logged.
 
