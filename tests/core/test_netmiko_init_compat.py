@@ -206,10 +206,12 @@ def _classify_callable_commands(
 
     The expected value is computed by invoking the callable with the
     same 4-arg contract as `cmd_shell.default` (device, base_prompt=,
-    current_prompt=, command=) followed by the same
-    `.format(base_prompt=...)` post-processing step. Alias entries have
-    no `output` key of their own, so they are skipped here; the alias
-    target entry is swept independently.
+    current_prompt=, command=) and taken **verbatim** — the shell does
+    not apply `.format(base_prompt=...)` to callable output (#241 /
+    D-b: handlers receive base_prompt and format themselves), so the
+    oracle must not either. Alias entries have no `output` key of their
+    own, so they are skipped here; the alias target entry is swept
+    independently.
 
     Note: classification itself invokes the callables (probe + expected),
     so a state-mutating callable would advance device state here before
@@ -246,7 +248,6 @@ def _classify_callable_commands(
         expected = output(nos.device, base_prompt=base_prompt, current_prompt=current_prompt, command=cmd_name)
         if not isinstance(expected, str):
             continue  # dict-returning mode/exit callables -> unit tests cover these
-        expected = expected.format(base_prompt=base_prompt)
         bucket.append((cmd_name, expected))
 
     assert not unclassified, (
@@ -424,8 +425,14 @@ class TestClassifyCallableCommands:
         assert initial_cmds == [("show clock", "deterministic")]
         assert enable_cmds == []
 
-    def test_bucketing_and_expected_format(self):
-        """initial / enable / dual-prompt (-> initial) bucketing + .format step."""
+    def test_bucketing_and_expected_verbatim(self):
+        """initial / enable / dual-prompt (-> initial) bucketing + verbatim oracle.
+
+        The `{base_prompt}` placeholder in 'enable only' stays **unsubstituted**
+        in the expected value: the shell does not format callable output
+        (#241 / D-b), so the sweep oracle must take the return verbatim —
+        this pin replaces the pre-#241 one that expected the `.format` step.
+        """
         nos = self._synthetic_nos(
             {
                 "init only": {
@@ -435,7 +442,7 @@ class TestClassifyCallableCommands:
                 },
                 "enable only": {
                     "output": lambda device, **kwargs: "hostname {base_prompt}",
-                    "help": "enable-prompt only, with format placeholder",
+                    "help": "enable-prompt only, with literal placeholder",
                     "prompt": "{base_prompt}#",
                 },
                 "dual prompt": {
@@ -447,7 +454,7 @@ class TestClassifyCallableCommands:
         )
         initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == [("init only", "from init"), ("dual prompt", "from dual")]
-        assert enable_cmds == [("enable only", f"hostname {HOSTNAME}")]
+        assert enable_cmds == [("enable only", "hostname {base_prompt}")]
 
 
 class TestShutdownEOF:

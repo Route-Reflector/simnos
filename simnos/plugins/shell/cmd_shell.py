@@ -251,9 +251,11 @@ class CMDShell(Cmd):
         )
         if isinstance(ret, dict):
             return ret
-        # After the dict check `ret` is str | None at runtime (a TypedDict
-        # IS a dict); the cast spells that out for the type checker, which
-        # cannot narrow the TypedDict member out of the union by isinstance.
+        # Declare the wrapped value as str | None for the type checker
+        # (it cannot narrow the TypedDict member out of the union by
+        # isinstance). The declaration matches the *contract*, not a
+        # runtime guarantee — a contract-breaking return (list / int)
+        # is wrapped as-is and absorbed by the lenient output path.
         return {"output": cast("str | None", ret)}
 
     def _render_output(self, ret, command: str, *, format_output: bool) -> None:
@@ -261,7 +263,9 @@ class CMDShell(Cmd):
 
         `ret` is untyped on purpose: the lenient path also carries
         contract-breaking handler returns (see `_invoke_callable`), which
-        `writeline`'s `str(value)` absorbs.
+        `writeline`'s `str(value)` absorbs. The caller must not pass
+        None though — `default()` guards with `if ret is not None`
+        ("write nothing"), this helper always writes.
 
         Callable output is passed through verbatim (`format_output=False`):
         handlers receive `base_prompt` as an argument and format

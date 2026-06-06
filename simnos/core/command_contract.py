@@ -39,7 +39,9 @@ class CommandHandler(Protocol):
     apply ``{base_prompt}`` formatting to callable output (handlers
     receive ``base_prompt`` as an argument and format themselves) — only
     yaml-static output strings are formatted. Literal braces in device
-    output therefore need no escaping.
+    output therefore need no escaping. A returned ``new_prompt`` is the
+    one exception: prompt templates are the shell's concern, so the
+    shell formats it like any yaml ``new_prompt``.
 
     Raising is allowed for "should never happen" states (see
     ``AristaEOS.make_exit``): cmd_shell logs the full traceback and

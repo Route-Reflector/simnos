@@ -491,6 +491,34 @@ class TestCmdShell(TestCase):
         self.assertFalse(stop)
         shell.writeline.assert_called_once_with("dynamic unknown: known")
 
+    def test_default_callable_default_dict_return_gets_full_dispatch(self):
+        """A dict-returning callable `_default_` gets the same dispatch (#241).
+
+        Pins that the unification is complete: a callable `_default_`
+        flows through `_invoke_callable` like any handler, so its dict
+        return's `new_prompt` (and `exit`) take effect. Unreachable in
+        the old code (the callable was never invoked on these paths).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "_default_": {
+                        "output": lambda device, **kwargs: {"output": "locked out", "new_prompt": "{base_prompt}#"},
+                        "help": "dict-returning callable default",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        stop = shell.default("nope")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test#")
+        shell.writeline.assert_called_once_with("locked out")
+
     def test_default_handler_crash_writes_fixed_error_line(self):
         """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
 
