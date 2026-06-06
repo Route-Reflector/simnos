@@ -293,21 +293,116 @@ class NosTest(unittest.TestCase):
         assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
-    def test_from_module_broken_device_name_leaves_nos_untouched(self):
-        """A plugin whose DEVICE_NAME class is missing leaves Nos unchanged.
+    def test_from_module_multiple_device_classes_leaves_nos_untouched(self):
+        """A plugin with two local BaseDevice subclasses leaves Nos unchanged.
 
         Pins the build-before-commit ordering of `_from_module` (#232 cross
-        review): attrs/commands used to be committed before the DEVICE_NAME
-        validation, so a broken plugin raised out of `from_file` but still
-        polluted `nos.commands` / `nos.name` behind the caller's back.
+        review, failure mode swapped in #241/D5): the multiple-subclass
+        ValueError fires in the build phase like the pre-#241 DEVICE_NAME
+        AttributeError did, so a broken plugin raises out of `from_file`
+        without polluting `nos.commands` / `nos.name` behind the caller's
+        back.
         """
         nos = Nos()
-        with pytest.raises(AttributeError, match=r"DEVICE_NAME='MissingClass'"):
-            nos.from_file("tests/assets/broken_device_name_module.py")
+        with pytest.raises(ValueError, match=r"multiple BaseDevice subclasses \(DeviceA, DeviceB\)"):
+            nos.from_file("tests/assets/broken_multi_device_module.py")
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
         assert "polluting command" not in nos.commands
         assert nos.device is None
+
+    def test_from_module_local_class_alias_is_not_a_second_subclass(self):
+        """An alias to the local device class is one definition, not two.
+
+        Pins the dedupe in `_find_device_classes` (3rd code review 🦊 #1):
+        `Device = LocalDevice` puts the same class object into
+        `vars(module)` twice — without dedupe the loader rejected a
+        perfectly valid plugin with the multiple-subclass ValueError.
+        """
+        alias_py = self._write_tmp_file(
+            "alias_device_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "alias_plugin"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            "class LocalDevice(BaseDevice):\n"
+            '    """The single local device class."""\n'
+            "Device = LocalDevice\n"
+            "commands = {}\n",
+        )
+        nos = Nos()
+        nos.from_file(alias_py)
+        assert nos.device.__class__.__name__ == "LocalDevice"
+
+    def test_from_module_imported_subclass_not_detected(self):
+        """An import-mixin plugin detects only its locally-defined class.
+
+        Pins the `__module__` guard of `_find_device_classes` (#241/D5):
+        the imported `CiscoIOS` keeps its origin module name and must not
+        trip the multiple-subclass ValueError nor steal the device slot.
+        """
+        nos = Nos()
+        nos.from_file("tests/assets/importing_device_module.py")
+        assert nos.device.__class__.__name__ == "LocalDevice"
+
+    def test_from_module_device_name_leftover_warns_and_is_ignored(self):
+        """A leftover DEVICE_NAME constant warns; detection still works.
+
+        Pins the #241/D5 migration warning: DEVICE_NAME is deprecated and
+        ignored — the device comes from auto-detection, and the author is
+        nudged to delete the constant.
+        """
+        legacy_py = self._write_tmp_file(
+            "legacy_device_name_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "legacy"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            'DEVICE_NAME = "LegacyDevice"\n'
+            "class LegacyDevice(BaseDevice):\n"
+            '    """Local device class, auto-detected regardless of DEVICE_NAME."""\n'
+            "commands = {}\n",
+        )
+        nos = Nos()
+        with self.assertLogs("simnos.core.nos", level="WARNING") as captured:
+            nos.from_file(legacy_py)
+        self.assertTrue(any("DEVICE_NAME" in msg and "deprecated and ignored" in msg for msg in captured.output))
+        assert nos.device.__class__.__name__ == "LegacyDevice"
+
+    def test_from_module_no_device_class_keeps_existing_device(self):
+        """A no-device module does not clear a previously set device.
+
+        Pins the #241/D5 commit semantics (2nd design review 🦊 #3): only
+        a detected class updates `self.device` — same "existing device
+        survives" behavior as the pre-#241 `if classname is not None`
+        commit, relevant for filename-list loads and hot reload.
+        """
+        nos = Nos()
+        nos.from_file("tests/assets/module.py")
+        device_before = nos.device
+        assert device_before is not None
+        no_device_py = self._write_tmp_file(
+            "no_device_plugin.py",
+            'NAME = "no_device"\nINITIAL_PROMPT = "{base_prompt}>"\ncommands = {}\n',
+        )
+        nos.from_file(no_device_py)
+        assert nos.device is device_before
+
+    def test_from_module_override_logs_debug(self):
+        """A py module overriding already-loaded commands logs at debug (#241 / P-7).
+
+        Pins the observable yaml-vs-py precedence: same-named commands
+        are replaced wholesale (per-command full replacement, no deep
+        merge) and the override is logged so a plugin author can see
+        which already-loaded commands the py module shadows.
+        """
+        nos = Nos()
+        nos.from_dict({"commands": {"show clock": {"output": "from yaml", "help": "static"}}})
+        with self.assertLogs("simnos.core.nos", level="DEBUG") as captured:
+            nos.from_file("tests/assets/module.py")
+        self.assertTrue(
+            any("overrides 1 already-loaded command(s)" in msg and "show clock" in msg for msg in captured.output)
+        )
+        # Full replacement: the module's callable output wins over the yaml str.
+        assert callable(nos.commands["show clock"]["output"])
 
     def test_register_nos_plugin_directly(self):
         """

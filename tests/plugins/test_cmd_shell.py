@@ -920,14 +920,17 @@ class HotReloadTest(TestCase):
         """A broken py plugin skipped by the guard never reaches the shell.
 
         Pins the #232 cross-review hole: `_from_module` used to commit
-        attrs/commands before the DEVICE_NAME validation, so a broken py
+        attrs/commands before the device-class validation, so a broken py
         plugin polluted `nos.commands` even though the per-file guard
         skipped it — and the next successful reload then leaked the broken
         plugin's commands into the shell via `commands.update(nos.commands)`.
+        The broken asset raises the #241/D5 multiple-subclass ValueError;
+        like the pre-#241 DEVICE_NAME AttributeError it fires in the build
+        phase, before any commit, so the leak check is equivalent.
         """
         shell = CMDShell(**self.arguments)
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands(["tests/assets/broken_device_name_module.py", "tests/assets/module.py"])
+            shell.reload_commands(["tests/assets/broken_multi_device_module.py", "tests/assets/module.py"])
         self.assertEqual(len(captured.output), 1)
         self.assertNotIn("polluting command", shell.commands)  # broken plugin never leaks
         self.assertIn("show version", shell.commands)  # healthy reload still applied

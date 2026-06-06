@@ -13,7 +13,7 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from simnos.core.nos import available_platforms
+from simnos.core.nos import _find_device_classes, available_platforms
 from simnos.core.simnos import SimNOS
 from simnos.plugins.nos import nos_plugins
 from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_commands, get_py_platforms
@@ -109,8 +109,13 @@ class TestPlatforms:
         assert module.__name__ == f"simnos.plugins.nos.platforms_py.{platform}"
         assert hasattr(module, "commands")
         assert hasattr(module, "INITIAL_PROMPT")
-        assert hasattr(module, "DEVICE_NAME")
-        assert hasattr(module, module.DEVICE_NAME)
+        # #241/D5 contract: exactly one locally-defined BaseDevice subclass,
+        # detected by the same criterion `Nos._from_module` uses (the
+        # `__module__` guard holds under package import too — both sides of
+        # the comparison track the load mechanism).
+        assert len(_find_device_classes(module)) == 1
+        # The legacy DEVICE_NAME indirection must not creep back in.
+        assert not hasattr(module, "DEVICE_NAME")
 
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_commands_has_correct_format(self, platform: str):
@@ -126,7 +131,9 @@ class TestPlatforms:
         except ImportError:
             pytest.fail(f"Failed to import platform module for {platform}")
 
-        module_class = getattr(module, module.DEVICE_NAME)
+        # Same detection criterion as `Nos._from_module` (#241/D5); the
+        # exactly-one contract is pinned in test_platforms_py_has_correct_format.
+        module_class = _find_device_classes(module)[0]
 
         for value in module.commands.values():
             if "alias" in value:

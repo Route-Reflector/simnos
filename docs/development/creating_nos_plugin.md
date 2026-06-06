@@ -220,7 +220,6 @@ NAME: str = "test_module"
 INITIAL_PROMPT = "{base_prompt}>"
 ENABLE_PROMPT = "{base_prompt}#"
 CONFIG_PROMPT = "{base_prompt}(config)#"
-DEVICE_NAME: str = "TestModule"
 
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 
@@ -260,9 +259,23 @@ commands = {
 }
 ```
 
-Let's break it down. SIMNOS allows loading modules dynamically, but it needs the module to have a certain structure. On one hand, it must have some constants (NAME, INITIAL_PROMPT, ENABLE_PROMPT, CONFIG_PROMPT, and DEVICE_NAME), on the other hand, a dictionary of commands, and lastly a class that inherits from BaseDevice. This is mandatory for SIMNOS to be able to load the module.
+Let's break it down. SIMNOS allows loading modules dynamically, but it needs the module to have a certain structure. On one hand, it must have some constants (NAME, INITIAL_PROMPT, and optionally ENABLE_PROMPT / CONFIG_PROMPT), on the other hand, a dictionary of commands, and lastly a class that inherits from BaseDevice. This is mandatory for SIMNOS to be able to load the module.
 
-First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
+First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), and CONFIG_PROMPT (optional). These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, and CONFIG_PROMPT is the shell indicator for the config mode.
+
+The device class is **auto-detected**: SIMNOS picks the single `BaseDevice`
+subclass *defined in the module itself*. Importing other device classes
+(helper devices, type-annotation imports) is fine — only locally defined
+subclasses count. Defining two or more local subclasses is a loud
+`ValueError` at load time. The legacy `DEVICE_NAME` constant (pre-#241) is
+ignored with a deprecation warning — delete it from older plugins.
+
+!!! note
+    When a platform has both a yaml file and a Python module, the module is
+    loaded second and **replaces same-named already-loaded commands
+    wholesale** (typically yaml-defined ones; per-command full replacement —
+    no deep merge of `help` / `prompt` / `output`). The override is logged
+    at debug level so you can see which commands the module shadows.
 
 Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
 

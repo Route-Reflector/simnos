@@ -10,7 +10,6 @@ NAME: str = "test_module"
 INITIAL_PROMPT = "{base_prompt}>"
 ENABLE_PROMPT = "{base_prompt}#"
 CONFIG_PROMPT = "{base_prompt}(config)#"
-DEVICE_NAME: str = "TestModule"
 
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 

@@ -10,7 +10,6 @@ NAME: str = "huawei_smartax"
 INITIAL_PROMPT: str = "{base_prompt}>"
 ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
-DEVICE_NAME: str = "HuaweiSmartAX"
 
 DEFAULT_CONFIGURATION: str = os.path.join(os.path.dirname(__file__), "configurations", "huawei_smartax.yaml.j2")
 
