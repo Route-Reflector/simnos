@@ -216,8 +216,8 @@ class CMDShell(Cmd):
         if new_prompt is not None:
             self.prompt = new_prompt
 
-    def _resolve_command(self, line: str) -> dict | None:
-        """Return the merged cmd_data for `line`, or None if unknown.
+    def _resolve_command(self, command: str) -> dict | None:
+        """Return the merged cmd_data for `command`, or None if unknown.
 
         Alias resolution happens here too: a missing alias target is the
         same lenient unknown-command path as a missing command (both used
@@ -225,15 +225,15 @@ class CMDShell(Cmd):
         `_default_` output, never with the handler-crash response.
         """
         try:
-            cmd_data = self.commands[line]
+            cmd_data = self.commands[command]
             if "alias" in cmd_data:
                 cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
         except KeyError:
-            log.error("shell.default '%s' command '%s' not found", self.base_prompt, [line])
+            log.error("shell.default '%s' command '%s' not found", self.base_prompt, [command])
             return None
         return cmd_data
 
-    def _invoke_callable(self, func: CommandHandler, line: str) -> CommandResult:
+    def _invoke_callable(self, func: CommandHandler, command: str) -> CommandResult:
         """Invoke a command handler and normalize its return to CommandResult.
 
         A plain str (or None) return is sugar for `{"output": <value>}`;
@@ -247,7 +247,7 @@ class CMDShell(Cmd):
             self.nos.device,
             base_prompt=self.base_prompt,
             current_prompt=self.prompt,
-            command=line,
+            command=command,
         )
         if isinstance(ret, dict):
             return ret
@@ -256,8 +256,12 @@ class CMDShell(Cmd):
         # cannot narrow the TypedDict member out of the union by isinstance.
         return {"output": cast("str | None", ret)}
 
-    def _render_output(self, ret, line: str, *, format_output: bool) -> None:
+    def _render_output(self, ret, command: str, *, format_output: bool) -> None:
         """Write `ret` to the client; only yaml-static output is formatted.
+
+        `ret` is untyped on purpose: the lenient path also carries
+        contract-breaking handler returns (see `_invoke_callable`), which
+        `writeline`'s `str(value)` absorbs.
 
         Callable output is passed through verbatim (`format_output=False`):
         handlers receive `base_prompt` as an argument and format
@@ -271,11 +275,18 @@ class CMDShell(Cmd):
         if not format_output:
             self.writeline(ret)
             return
-        formatted = self._safe_format(ret, where=f"output for command {line!r}")
+        formatted = self._safe_format(ret, where=f"output for command {command!r}")
         self.writeline(formatted if formatted is not None else ret)
 
     def default(self, line):
-        """Dispatch `line`: resolve -> prompt check -> invoke -> render."""
+        """Dispatch `line`: resolve -> prompt check -> invoke -> render.
+
+        The exception boundary is the `_invoke_callable` block only:
+        resolve / alias / prompt check / new_prompt never raise (KeyError
+        degrades inside `_resolve_command`, format errors are caught
+        inside `_safe_format`), so `HANDLER_ERROR_OUTPUT` is structurally
+        guaranteed to mean "a command handler crashed" and nothing else.
+        """
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
         from_callable = False
         cmd_data = self._resolve_command(line)
