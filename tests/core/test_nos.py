@@ -311,6 +311,28 @@ class NosTest(unittest.TestCase):
         assert "polluting command" not in nos.commands
         assert nos.device is None
 
+    def test_from_module_local_class_alias_is_not_a_second_subclass(self):
+        """An alias to the local device class is one definition, not two.
+
+        Pins the dedupe in `_find_device_classes` (3rd code review 🦊 #1):
+        `Device = LocalDevice` puts the same class object into
+        `vars(module)` twice — without dedupe the loader rejected a
+        perfectly valid plugin with the multiple-subclass ValueError.
+        """
+        alias_py = self._write_tmp_file(
+            "alias_device_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "alias_plugin"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            "class LocalDevice(BaseDevice):\n"
+            '    """The single local device class."""\n'
+            "Device = LocalDevice\n"
+            "commands = {}\n",
+        )
+        nos = Nos()
+        nos.from_file(alias_py)
+        assert nos.device.__class__.__name__ == "LocalDevice"
+
     def test_from_module_imported_subclass_not_detected(self):
         """An import-mixin plugin detects only its locally-defined class.
 

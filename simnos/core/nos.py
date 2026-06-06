@@ -26,20 +26,27 @@ def _find_device_classes(module: types.ModuleType) -> list[type]:
     therefore never picked up (#241 / D5). Shared with the platform
     contract test (tests/plugins/test_platforms.py), which applies the
     same criterion over package-imported plugin modules.
+
+    Deduplicated by class object: an alias to a local class
+    (``Device = LocalDevice``) appears twice in ``vars(module)`` but is
+    one definition, not a second subclass (3rd code review 🦊 #1).
     """
-    # Lazy import: simnos.plugins packages are kept out of this module's
-    # import time on purpose (see the `available_platforms` re-export note
-    # at the end of this file).
+    # Lazy import: `simnos.plugins` must not be imported while this module
+    # itself is still initializing — see the `available_platforms`
+    # re-export at the end of this file, which is deferred for the same
+    # circular-import reason.
     from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
-    return [
-        obj
-        for obj in vars(module).values()
-        if isinstance(obj, type)
-        and issubclass(obj, BaseDevice)
-        and obj is not BaseDevice
-        and obj.__module__ == module.__name__
-    ]
+    return list(
+        dict.fromkeys(
+            obj
+            for obj in vars(module).values()
+            if isinstance(obj, type)
+            and issubclass(obj, BaseDevice)
+            and obj is not BaseDevice
+            and obj.__module__ == module.__name__
+        )
+    )
 
 
 class Nos:
@@ -215,9 +222,10 @@ class Nos:
         # Commit phase — nothing below is expected to raise.
         for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
             setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
-        # P-7 (#241): a py module replaces same-named commands wholesale
-        # (per-command full replacement, no deep merge) — make the implicit
-        # yaml-vs-py precedence observable for plugin authors.
+        # P-7 (#241): a py module replaces same-named already-loaded
+        # commands wholesale (typically yaml-defined ones, but multi-file
+        # py loads count too; per-command full replacement, no deep
+        # merge) — make the implicit precedence observable for authors.
         overridden = self.commands.keys() & module_commands.keys()
         if overridden:
             log.debug(
