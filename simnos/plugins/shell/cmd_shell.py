@@ -31,6 +31,12 @@ BASIC_COMMANDS: dict = {
 # unsupported constructs that would render fine).
 FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
 
+# Wire response when a command handler (callable output) crashes. Real NOSes
+# never print Python tracebacks, and clients (Netmiko/KeroRoute integration
+# tests) must not be handed one to parse — the full traceback goes to the
+# server log instead (#241 / D4).
+HANDLER_ERROR_OUTPUT = "% Internal error"
+
 
 class CMDShell(Cmd):
     """
@@ -287,12 +293,17 @@ class CMDShell(Cmd):
         if callable(ret):
             try:
                 result = self._invoke_callable(ret, line)
-            except ValueError:
-                log.error("Output is still a callable")
-                result = {"output": "An error occurred"}
-            except Exception as e:
-                log.error("An error occurred: %s", str(e))
-                result = {"output": traceback.format_exc().replace("\n", self.newline)}
+            except Exception:
+                # Same shape as the hot-reload guard (#232): full traceback
+                # to the log, the session survives, and the client gets a
+                # real-NOS-style one-liner instead of a Python traceback.
+                log.error(
+                    "shell '%s' command %r handler crashed\n%s",
+                    self.base_prompt,
+                    line,
+                    traceback.format_exc(),
+                )
+                result = {"output": HANDLER_ERROR_OUTPUT}
             if "new_prompt" in result:
                 self._apply_new_prompt(result["new_prompt"], line)
             if result.get("exit"):

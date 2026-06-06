@@ -34,6 +34,11 @@ class CommandHandler(Protocol):
     `BaseDevice` subclass (see ``platforms_py/cisco_ios.py``); ``device``
     then binds as ``self``. ``device`` is None for platforms without a
     device class.
+
+    Raising is allowed for "should never happen" states (see
+    ``AristaEOS.make_exit``): cmd_shell logs the full traceback and
+    answers the client with the fixed ``HANDLER_ERROR_OUTPUT`` line —
+    no traceback reaches the wire.
     """
 
     def __call__(

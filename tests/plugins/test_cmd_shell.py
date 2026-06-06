@@ -18,7 +18,7 @@ import yaml
 
 from simnos.core.nos import Nos
 from simnos.core.simnos import SimNOS, simnos
-from simnos.plugins.shell.cmd_shell import CMDShell
+from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell
 
 
 # pylint: disable=too-many-public-methods
@@ -490,6 +490,44 @@ class TestCmdShell(TestCase):
         stop = shell.default("known")  # requires "test#", current prompt is "test>"
         self.assertFalse(stop)
         shell.writeline.assert_called_once_with("dynamic unknown: known")
+
+    def test_default_handler_crash_writes_fixed_error_line(self):
+        """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
+
+        Pins #241/D4: real NOSes never print Python tracebacks, and the
+        old behavior (traceback.format_exc() sent to the SSH client) made
+        Netmiko-side parsers chew on stack frames and leaked internal
+        paths. The wire now gets the fixed one-liner; the session stays up.
+        """
+
+        def crash(device, **kwargs):
+            raise RuntimeError("boom")
+
+        shell = self._make_callable_dict_shell(crash)
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with(HANDLER_ERROR_OUTPUT)
+
+    def test_default_handler_crash_logs_full_traceback(self):
+        """A crashing handler's traceback goes to the server log.
+
+        Pins #241/D4 (the diagnosability half): dropping the wire
+        traceback must not lose the information — the log carries the
+        full `traceback.format_exc()` including the original exception,
+        same shape as the hot-reload guard (#232).
+        """
+
+        def crash(device, **kwargs):
+            raise RuntimeError("boom-for-log")
+
+        shell = self._make_callable_dict_shell(crash)
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertIn("handler crashed", captured.output[0])
+        self.assertIn("RuntimeError: boom-for-log", captured.output[0])
+        self.assertIn("Traceback", captured.output[0])
 
     def test_default_silent_fallback_on_keyerror(self):
         """`KeyError` failure mode of `.format()` is silently logged.
