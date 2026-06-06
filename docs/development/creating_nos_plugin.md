@@ -99,7 +99,7 @@ Configuration register is 0x2102
 9. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
 10. The only prompt where this command is valid
 11. Default response content used for undefined commands
-12. The returned output can contain the `base_prompt` formatter
+12. A returned static string output can contain the `base_prompt` formatter; callable output formats itself (see [The callable contract](#the-callable-contract))
 
 Attributes supported by the commands dictionary:
 
@@ -118,7 +118,9 @@ The value of the `output` attribute of the commands dictionary can be of these t
 - `string` - string of one or more lines to return in the response, that string
    can contain the `base_prompt` formatter.
 - `None` - no response is returned
-- `callable` - a callable object that will be executed to produce the response content
+- `callable` - a callable object that will be executed to produce the response
+   content; its output is **not** formatted by the shell (see
+   [The callable contract](#the-callable-contract))
 
 The `exit` attribute:
 
