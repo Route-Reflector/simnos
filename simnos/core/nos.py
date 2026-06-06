@@ -176,6 +176,17 @@ class Nos:
         # Commit phase — nothing below is expected to raise.
         for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
             setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
+        # P-7 (#241): a py module replaces same-named commands wholesale
+        # (per-command full replacement, no deep merge) — make the implicit
+        # yaml-vs-py precedence observable for plugin authors.
+        overridden = self.commands.keys() & module_commands.keys()
+        if overridden:
+            log.debug(
+                "module '%s' overrides %d already-loaded command(s): %s",
+                filename,
+                len(overridden),
+                sorted(overridden),
+            )
         self.commands.update(module_commands)
         if self.name == "SimNOS":
             log.warning(

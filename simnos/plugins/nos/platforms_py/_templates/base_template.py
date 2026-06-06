@@ -19,6 +19,26 @@ class BaseDevice:
             autoescape=False,  # noqa: S701 — output is CLI text, not HTML
         )
 
+    @staticmethod
+    def _normalize_configurations(data, configuration_file: str) -> dict:
+        """Normalize a loaded configuration: None -> {}, non-dict -> ValueError.
+
+        An empty file (or a Jinja2 template rendering to nothing) means
+        "no configuration" — `yaml.safe_load` returns None for it, which
+        used to land in `self.configurations` and crash handlers with
+        `TypeError: 'NoneType'` on item access (#241 / #232 defer). The
+        order matters: `data or {}` would also coerce an empty list /
+        empty str to {} and contradict the non-mapping guard below
+        (symmetric with `Nos._from_yaml`, #232).
+        """
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"Configuration file '{configuration_file}' must contain a mapping (got {type(data).__name__})"
+            )
+        return data
+
     def load_configurations(self, configuration_file: str | None) -> dict:
         """
         Load configurations from a file.
@@ -34,11 +54,11 @@ class BaseDevice:
                 data = file.read()
             data_j2 = Template(data, autoescape=False, trim_blocks=True, lstrip_blocks=True).render()
             data = yaml.safe_load(data_j2)
-            return data
+            return self._normalize_configurations(data, configuration_file)
 
         with open(configuration_file, encoding="utf-8") as file:
             data = yaml.safe_load(file)
-        return data
+        return self._normalize_configurations(data, configuration_file)
 
     def render(self, template: str, **kwargs) -> str:
         """Render a template."""

@@ -309,6 +309,24 @@ class NosTest(unittest.TestCase):
         assert "polluting command" not in nos.commands
         assert nos.device is None
 
+    def test_from_module_override_logs_debug(self):
+        """A py module overriding already-loaded commands logs at debug (#241 / P-7).
+
+        Pins the observable yaml-vs-py precedence: same-named commands
+        are replaced wholesale (per-command full replacement, no deep
+        merge) and the override is logged so a plugin author can see
+        which already-loaded commands the py module shadows.
+        """
+        nos = Nos()
+        nos.from_dict({"commands": {"show clock": {"output": "from yaml", "help": "static"}}})
+        with self.assertLogs("simnos.core.nos", level="DEBUG") as captured:
+            nos.from_file("tests/assets/module.py")
+        self.assertTrue(
+            any("overrides 1 already-loaded command(s)" in msg and "show clock" in msg for msg in captured.output)
+        )
+        # Full replacement: the module's callable output wins over the yaml str.
+        assert callable(nos.commands["show clock"]["output"])
+
     def test_register_nos_plugin_directly(self):
         """
         Test that we can register a nos model directly.
