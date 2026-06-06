@@ -7,8 +7,9 @@ It also validates the host object using pydantic.
 import logging
 from typing import TYPE_CHECKING
 
-from simnos.core.nos import Nos, available_platforms
+from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelHost
+from simnos.plugins.nos import assert_platform_supported
 
 if TYPE_CHECKING:
     from simnos.core.simnos import SimNOS
@@ -58,7 +59,18 @@ class Host:
         self._validate()
 
     def start(self):
-        """Method to start server instance for this host."""
+        """Method to start server instance for this host.
+
+        No-op if the server is already running (``self.running``),
+        symmetric with the double-stop guard in ``stop()``. This protects
+        direct ``host.start()`` callers from spawning a duplicate server
+        instance (and orphaning the first one); the SimNOS-level
+        orchestration already filters on ``host_running=False`` and never
+        double-starts.
+        """
+        if self.running:
+            log.debug("Host %s is already running; start() is a no-op", self.name)
+            return
         self.server_plugin = self.simnos.servers_plugins[self.server_inventory["plugin"]]
         self.shell_plugin = self.simnos.shell_plugins[self.shell_inventory["plugin"]]
         self.nos_plugin = self.simnos.nos_plugins.get(self.nos_inventory["plugin"], self.nos_inventory["plugin"])
@@ -87,6 +99,7 @@ class Host:
         (``self.server is None``); this guards against double-stop calls.
         """
         if self.server is None:
+            log.debug("Host %s has no running server; stop() is a no-op", self.name)
             return
         self.server.stop()
         self.server = None
@@ -99,7 +112,9 @@ class Host:
         ModelHost(**self.__dict__)
 
     def _check_if_platform_is_supported(self, platform: str):
-        """Check if the platform is supported"""
-        if platform not in available_platforms:
-            msg = f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {available_platforms}"
-            raise ValueError(msg)
+        """Check if the platform is supported.
+
+        Thin wrapper around the registry-level helper; kept as a method
+        because tests patch / call it as the Host-level seam (#237).
+        """
+        assert_platform_supported(platform)

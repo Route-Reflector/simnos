@@ -24,7 +24,7 @@ from simnos.core.timeouts import (
     SHUTDOWN_SAFETY_NET_PER_THREAD,
 )
 from simnos.core.utils import _is_in_docker
-from simnos.plugins.nos import available_platforms, nos_plugins
+from simnos.plugins.nos import assert_platform_supported, nos_plugins
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.shell import shell_plugins
 
@@ -473,11 +473,8 @@ def simnos(platform: str | None = None, inventory: dict | None = None, return_in
         raise ValueError("platform and inventory cannot be used together")
     if not platform and not inventory:
         raise ValueError("platform or inventory must be set")
-    if platform and platform not in available_platforms:
-        raise ValueError(
-            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {available_platforms}"
-        )
     if platform:
+        assert_platform_supported(platform)
         inventory = {
             "hosts": {
                 "SimNOS": {

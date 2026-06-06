@@ -46,5 +46,21 @@ for file in py_files:
 
 # Single source of truth for "supported platform" — derived from `nos_plugins`
 # so that adding a yaml/py file under platforms_yaml/ or platforms_py/ is the
-# only step needed to extend the registry. Sorted for deterministic order.
-available_platforms: list[str] = sorted(nos_plugins.keys())
+# only step needed to extend the registry. Sorted for deterministic order;
+# a tuple so consumers cannot mutate the registry view in place (#237).
+available_platforms: tuple[str, ...] = tuple(sorted(nos_plugins.keys()))
+
+
+def assert_platform_supported(platform: str) -> None:
+    """Raise ValueError if `platform` is not a registered NOS plugin.
+
+    Shared by `Host._validate` and the `@simnos` test decorator so the
+    check and its error message live next to the registry they guard
+    (#237, G1 follow-up).
+    """
+    if platform not in available_platforms:
+        # Join the names so the user-facing message does not leak the
+        # registry container type (tuple vs list repr).
+        raise ValueError(
+            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {', '.join(available_platforms)}"
+        )
