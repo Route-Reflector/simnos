@@ -362,6 +362,22 @@ class TestCmdShell(TestCase):
         shell.default("test")
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
 
+    def test_default_alias_target_missing_falls_back_default(self):
+        """An alias whose target command is gone degrades to `_default_`.
+
+        Pins #241 (G4/D4 例外境界): the alias-merge KeyError is a lenient
+        unknown-command path — it must answer with the `_default_` output
+        like any unknown command, never with the handler-crash response.
+        Guards the `_resolve_command` decomposition against widening the
+        exception boundary (1st design review 🦊 #2).
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken alias"] = {"alias": "no such target"}
+        shell.default("broken alias")
+        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+
     def test_default_silent_fallback_on_keyerror(self):
         """`KeyError` failure mode of `.format()` is silently logged.
 
