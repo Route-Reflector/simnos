@@ -35,6 +35,12 @@ class CommandHandler(Protocol):
     then binds as ``self``. ``device`` is None for platforms without a
     device class.
 
+    The returned ``output`` must be fully rendered: cmd_shell does NOT
+    apply ``{base_prompt}`` formatting to callable output (handlers
+    receive ``base_prompt`` as an argument and format themselves) — only
+    yaml-static output strings are formatted. Literal braces in device
+    output therefore need no escaping.
+
     Raising is allowed for "should never happen" states (see
     ``AristaEOS.make_exit``): cmd_shell logs the full traceback and
     answers the client with the fixed ``HANDLER_ERROR_OUTPUT`` line —

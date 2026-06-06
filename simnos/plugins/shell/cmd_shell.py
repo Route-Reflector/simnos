@@ -256,18 +256,28 @@ class CMDShell(Cmd):
         # cannot narrow the TypedDict member out of the union by isinstance.
         return {"output": cast("str | None", ret)}
 
-    def _render_output(self, ret, line: str) -> None:
-        """Format `ret` with `_safe_format` and write it to the client.
+    def _render_output(self, ret, line: str, *, format_output: bool) -> None:
+        """Write `ret` to the client; only yaml-static output is formatted.
 
-        Failure falls back to the raw template (information beats
-        dropping the whole output); lenient policy in `_safe_format`.
+        Callable output is passed through verbatim (`format_output=False`):
+        handlers receive `base_prompt` as an argument and format
+        themselves (see `CommandHandler`), so a second `.format()` here
+        would only mis-render device output containing literal braces or
+        an accidental `{base_prompt}` (#241 / D-b). For yaml-static
+        output, a format failure falls back to the raw template
+        (information beats dropping the whole output); lenient policy in
+        `_safe_format`.
         """
+        if not format_output:
+            self.writeline(ret)
+            return
         formatted = self._safe_format(ret, where=f"output for command {line!r}")
         self.writeline(formatted if formatted is not None else ret)
 
     def default(self, line):
         """Dispatch `line`: resolve -> prompt check -> invoke -> render."""
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
+        from_callable = False
         cmd_data = self._resolve_command(line)
         if cmd_data is not None and self._check_prompt(cmd_data.get("prompt"), command=line):
             if cmd_data.get("exit"):
@@ -291,6 +301,7 @@ class CMDShell(Cmd):
             ret = self.commands["_default_"]["output"]
             cmd_data = None  # the `_default_` answer never applies cmd_data's new_prompt
         if callable(ret):
+            from_callable = True
             try:
                 result = self._invoke_callable(ret, line)
             except Exception:
@@ -314,5 +325,5 @@ class CMDShell(Cmd):
         if not self.is_running.is_set():
             return True
         if ret is not None:
-            self._render_output(ret, line)
+            self._render_output(ret, line, format_output=not from_callable)
         return False
