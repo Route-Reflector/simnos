@@ -18,7 +18,7 @@ import yaml
 
 from simnos.core.nos import Nos
 from simnos.core.simnos import SimNOS, simnos
-from simnos.plugins.shell.cmd_shell import CMDShell
+from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell
 
 
 # pylint: disable=too-many-public-methods
@@ -292,13 +292,15 @@ class TestCmdShell(TestCase):
         shell.writeline.assert_called_once_with(time.ctime())
 
     def _make_callable_dict_shell(self, output_callable):
-        """Build a shell whose 'cmd' command is a dict-returning callable.
+        """Build a shell whose 'cmd' command output is `output_callable`.
 
-        Consumer-side pins for the callable-dict dispatch branch of
-        `default()` (new_prompt update / exit / output extraction),
-        the counterpart of the producer-side device-class tests in
-        tests/plugins/nos/ (T-14 / #230). The str-returning branch is
-        covered by test_default_command_is_function above.
+        Consumer-side pins for the callable dispatch branch of
+        `default()` — originally the dict-returning cases (new_prompt
+        update / exit / output extraction, the counterpart of the
+        producer-side device-class tests in tests/plugins/nos/, T-14 /
+        #230), since #241 also the str-passthrough (D-b) and crash (D4)
+        pins. Plugin-loaded str returns are additionally covered by
+        test_default_command_is_function above.
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
@@ -361,6 +363,201 @@ class TestCmdShell(TestCase):
         shell.writeline = Mock()
         shell.default("test")
         shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+
+    def test_default_alias_target_missing_falls_back_default(self):
+        """An alias whose target command is gone degrades to `_default_`.
+
+        Pins #241 (G4/D4 例外境界): the alias-merge KeyError is a lenient
+        unknown-command path — it must answer with the `_default_` output
+        like any unknown command, never with the handler-crash response.
+        Guards the `_resolve_command` decomposition against widening the
+        exception boundary (1st design review 🦊 #2).
+        """
+        self.arguments["is_running"].set()
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        shell.commands["broken alias"] = {"alias": "no such target"}
+        shell.default("broken alias")
+        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+
+    def test_resolve_command_unknown_returns_none(self):
+        """`_resolve_command` degrades an unknown command to None.
+
+        Unit pin for the #241 decomposition: the unknown-command KeyError
+        is consumed inside the helper so `default()` needs no try block
+        around resolution.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        self.assertIsNone(shell._resolve_command("no such command"))
+
+    def test_resolve_command_alias_target_missing_returns_none(self):
+        """`_resolve_command` degrades a missing alias target to None.
+
+        Unit counterpart of test_default_alias_target_missing_falls_back
+        _default (#241): the alias-merge KeyError must stay inside the
+        helper, on the same lenient path as an unknown command.
+        """
+        shell = CMDShell(**self.arguments)
+        shell.commands["broken alias"] = {"alias": "no such target"}
+        # pylint: disable=protected-access
+        self.assertIsNone(shell._resolve_command("broken alias"))
+
+    def test_resolve_command_alias_merges_target(self):
+        """`_resolve_command` merges the alias target under the alias keys.
+
+        Pins the `{**commands[target], **cmd_data}` merge order (#241):
+        the alias entry's own keys win over the target's.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        merged = shell._resolve_command("sh clock")
+        self.assertEqual(merged["output"], "*21:01:33.000 AET 01 01 01 2022")
+        self.assertEqual(merged["alias"], "show clock")
+
+    def test_invoke_callable_str_return_normalized(self):
+        """`_invoke_callable` wraps a str return into a CommandResult dict.
+
+        Pins the #241/D2 consumer-side normalization: a plain str return
+        is sugar for `{"output": <str>}`, so the dispatch body only ever
+        consumes the dict form.
+        """
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: "body", "cmd")
+        self.assertEqual(result, {"output": "body"})
+
+    def test_invoke_callable_none_return_normalized(self):
+        """`_invoke_callable` wraps a None return (= write nothing) too."""
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: None, "cmd")
+        self.assertEqual(result, {"output": None})
+
+    def test_invoke_callable_dict_return_passthrough(self):
+        """`_invoke_callable` passes a CommandResult dict through unchanged."""
+        shell = CMDShell(**self.arguments)
+        # pylint: disable=protected-access
+        result = shell._invoke_callable(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")
+        self.assertEqual(result, {"output": "x", "exit": True})
+
+    def _make_callable_default_shell(self):
+        """Build a shell whose `_default_` output is a callable.
+
+        No shipped plugin has a callable `_default_` (yaml cannot express
+        one; the py plugins use strings), but the Python API
+        (`SimNOS(inventory=dict)`) can reach it — these pins fix the #241
+        unification: both the unknown-command and the prompt-mismatch
+        fallback invoke the callable through `_invoke_callable` (the old
+        code degraded to a fixed error string / leaked the function repr
+        respectively).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "known": {
+                        "output": "static",
+                        "help": "enable-mode only",
+                        "prompt": "{base_prompt}#",
+                    },
+                    "_default_": {
+                        "output": lambda device, **kwargs: f"dynamic unknown: {kwargs['command']}",
+                        "help": "callable default",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        return shell
+
+    def test_default_callable_default_invoked_on_unknown_command(self):
+        """An unknown command invokes a callable `_default_` (#241)."""
+        shell = self._make_callable_default_shell()
+        stop = shell.default("nope")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("dynamic unknown: nope")
+
+    def test_default_callable_default_invoked_on_prompt_mismatch(self):
+        """A prompt mismatch invokes a callable `_default_` (#241).
+
+        The old code never invoked it on this path — `_safe_format`
+        swallowed the AttributeError and the function repr leaked to the
+        wire. The unification fixes that display bug.
+        """
+        shell = self._make_callable_default_shell()
+        stop = shell.default("known")  # requires "test#", current prompt is "test>"
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("dynamic unknown: known")
+
+    def test_default_callable_default_dict_return_gets_full_dispatch(self):
+        """A dict-returning callable `_default_` gets the same dispatch (#241).
+
+        Pins that the unification is complete: a callable `_default_`
+        flows through `_invoke_callable` like any handler, so its dict
+        return's `new_prompt` (and `exit`) take effect. Unreachable in
+        the old code (the callable was never invoked on these paths).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "_default_": {
+                        "output": lambda device, **kwargs: {"output": "locked out", "new_prompt": "{base_prompt}#"},
+                        "help": "dict-returning callable default",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        stop = shell.default("nope")
+        self.assertFalse(stop)
+        self.assertEqual(shell.prompt, "test#")
+        shell.writeline.assert_called_once_with("locked out")
+
+    def test_default_handler_crash_writes_fixed_error_line(self):
+        """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
+
+        Pins #241/D4: real NOSes never print Python tracebacks, and the
+        old behavior (traceback.format_exc() sent to the SSH client) made
+        Netmiko-side parsers chew on stack frames and leaked internal
+        paths. The wire now gets the fixed one-liner; the session stays up.
+        """
+
+        def crash(device, **kwargs):
+            raise RuntimeError("boom")
+
+        shell = self._make_callable_dict_shell(crash)
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with(HANDLER_ERROR_OUTPUT)
+
+    def test_default_handler_crash_logs_full_traceback(self):
+        """A crashing handler's traceback goes to the server log.
+
+        Pins #241/D4 (the diagnosability half): dropping the wire
+        traceback must not lose the information — the log carries the
+        full `traceback.format_exc()` including the original exception,
+        same shape as the hot-reload guard (#232).
+        """
+
+        def crash(device, **kwargs):
+            raise RuntimeError("boom-for-log")
+
+        shell = self._make_callable_dict_shell(crash)
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.default("cmd")
+        self.assertEqual(len(captured.output), 1)
+        self.assertIn("handler crashed", captured.output[0])
+        self.assertIn("RuntimeError: boom-for-log", captured.output[0])
+        self.assertIn("Traceback", captured.output[0])
 
     def test_default_silent_fallback_on_keyerror(self):
         """`KeyError` failure mode of `.format()` is silently logged.
@@ -503,7 +700,8 @@ class TestCmdShell(TestCase):
         Pins #172 (callable dict path, symmetric to the cmd_data path
         above): format failure is a silent log + no transition, and no
         traceback reaches the wire. The callable's own exceptions are
-        out of scope here (still the broad-except path, see G4).
+        out of scope here — they answer with HANDLER_ERROR_OUTPUT since
+        #241/D4 (see test_default_handler_crash_writes_fixed_error_line).
         """
         shell = self._make_callable_dict_shell(
             lambda device, **kwargs: {"output": "body", "new_prompt": "{base_prompt.foo}#"}
@@ -516,21 +714,36 @@ class TestCmdShell(TestCase):
         self.assertTrue(any("error formatting new_prompt" in msg and "'cmd'" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("body")
 
-    def test_default_callable_dict_broken_output_falls_back_raw(self):
-        """A broken template in a callable-dict output is raw-passthrough.
+    def test_default_callable_dict_output_passed_through_unformatted(self):
+        """Callable-dict output skips `_safe_format` entirely (#241 / D-b).
 
-        Pins the callable -> dict -> output -> `_safe_format` chain
-        end-to-end (1st code review 反映): the dict's output str flows
-        into the same lenient output path as yaml strings — silent log +
-        raw template on the wire, session intact.
+        New contract pin (rewritten from the pre-#241 raw-fallback pin):
+        handlers format themselves, so brace-containing device output is
+        written verbatim — no format attempt, hence **no error log**
+        (the old chain logged a FORMAT_ERRORS failure before falling back
+        to the same raw string). The skip applies to dict output exactly
+        like str returns: the flag is set at invoke time, not by return
+        shape.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+        with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
             stop = shell.default("cmd")
         self.assertFalse(stop)
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "'cmd'" in msg for msg in captured.output))
         shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+
+    def test_default_callable_str_output_passed_through_unformatted(self):
+        """Callable str output skips `_safe_format` too (#241 / D-b).
+
+        The str-return twin of the dict pin above: literal braces in a
+        handler's rendered output (e.g. JSON-ish device output) reach the
+        wire untouched instead of tripping FORMAT_ERRORS into a logged
+        raw fallback.
+        """
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: "literal {brace} stays")
+        with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("literal {brace} stays")
 
     def test_default_broken_prompt_treated_as_non_match(self):
         """A command with a broken prompt template is just unreachable.

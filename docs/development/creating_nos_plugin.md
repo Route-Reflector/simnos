@@ -99,7 +99,7 @@ Configuration register is 0x2102
 9. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
 10. The only prompt where this command is valid
 11. Default response content used for undefined commands
-12. The returned output can contain the `base_prompt` formatter
+12. A returned static string output can contain the `base_prompt` formatter; callable output formats itself (see [The callable contract](#the-callable-contract))
 
 Attributes supported by the commands dictionary:
 
@@ -118,7 +118,9 @@ The value of the `output` attribute of the commands dictionary can be of these t
 - `string` - string of one or more lines to return in the response, that string
    can contain the `base_prompt` formatter.
 - `None` - no response is returned
-- `callable` - a callable object that will be executed to produce the response content
+- `callable` - a callable object that will be executed to produce the response
+   content; its output is **not** formatted by the shell (see
+   [The callable contract](#the-callable-contract))
 
 The `exit` attribute:
 
@@ -262,14 +264,44 @@ Let's break it down. SIMNOS allows loading modules dynamically, but it needs the
 
 First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), CONFIG_PROMPT (optional), and DEVICE_NAME. These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, CONFIG_PROMPT is the shell indicator for the config mode, and DEVICE_NAME is the name of the device.
 
-Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid. A callable command can return:
+Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
+
+### The callable contract
+
+The typed contract lives in `simnos.core.command_contract` (`CommandHandler`
+Protocol + `CommandResult` TypedDict) — import it for type annotations if you
+like; plain functions matching the shape work as-is.
+
+The shell invokes a callable output as:
+
+```python
+output(device, base_prompt=..., current_prompt=..., command=...)
+```
+
+where `device` is the instance of your `BaseDevice` subclass (or `None` for a
+platform without a device class). Putting an unbound method like
+`TestModule.make_show_clock` in the commands dictionary satisfies this:
+`device` binds as `self`.
+
+A callable command can return:
 
 - `str` - output string to display
 - `None` - no response
-- `dict` - a dictionary with optional keys:
+- `dict` (`CommandResult`) - a dictionary with optional keys:
     - `"output"` - string to display
     - `"new_prompt"` - new prompt value (can use `{base_prompt}` formatter)
     - `"exit"` - if `True`, close the shell session (output is not displayed)
+
+Two rules that differ from yaml-static output:
+
+- **Format yourself.** The shell does *not* apply `{base_prompt}` formatting
+  to callable output — handlers receive `base_prompt` as an argument and
+  render their own strings. Literal braces in device output need no escaping.
+  (`new_prompt` *is* still formatted by the shell; prompt templates are the
+  shell's concern.)
+- **Raising is allowed** for "should never happen" states: the shell logs the
+  full traceback server-side and answers the client with the fixed
+  `% Internal error` line — no traceback ever reaches the wire.
 
 Lastly, we have a class that inherits from BaseDevice. This class is necessary for SIMNOS to be able to load the module correctly. Internally, it initializes the module with an attribute `self.configurations`. If the module defines an optional `DEFAULT_CONFIGURATION` attribute pointing to a YAML/Jinja2 [configuration](../usage/configurations.md) file, that file is loaded into `self.configurations` as a dictionary; otherwise `self.configurations` is an empty dict (only the bundled `HuaweiSmartAX` plugin currently uses this hook). It also includes a method `render(self, template: str, **kwargs) -> str` that allows rendering a Jinja2 template under the `simnos/plugins/nos/platforms_py/templates/` directory. Having this class with these attributes helps to standardize the modules. At the same time, having it in a class instead of separate functions allows you to share variables between commands or even modify the state of the device. For example, if I create a command to modify the IP of the device, I can modify the state of the device in the class and have the rest of the commands take this change into account, returning the string with the new IP.
 

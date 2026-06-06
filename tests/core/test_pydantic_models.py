@@ -6,7 +6,7 @@ This module can be found at simnos/core/pydantic_models.py
 from pydantic import ValidationError
 import pytest
 
-from simnos.core.pydantic_models import InventoryDefaultSection, ModelHost
+from simnos.core.pydantic_models import InventoryDefaultSection, ModelHost, ModelNosCommand
 
 
 class TestPortRange:
@@ -40,3 +40,26 @@ class TestPortRange:
         """A single out-of-range element fails the whole list."""
         with pytest.raises(ValidationError, match="port"):
             InventoryDefaultSection(port=ports)
+
+
+class TestCommandHandlerField:
+    """Pins for the `output` field's CommandHandlerField annotation (#241).
+
+    `CommandHandlerField = Annotated[CommandHandler, GetPydanticSchema(
+    callable_schema)]` exists to keep the runtime validation at "is
+    callable" — identical to the bare `Callable` it replaced — while the
+    annotation documents the G4 contract. These pins fix that equivalence
+    directly so a future change to the schema hook (e.g. attempting
+    signature validation) is a conscious decision, not a drive-by.
+    """
+
+    def test_output_accepts_callable(self):
+        """A callable output passes validation and survives round-trip."""
+        handler = lambda device, **kwargs: "body"  # noqa: E731 — minimal contract-shaped stand-in
+        model = ModelNosCommand(output=handler)
+        assert model.output is handler
+
+    def test_output_rejects_non_callable_non_str(self):
+        """A non-callable, non-str output (int) is rejected."""
+        with pytest.raises(ValidationError, match="output"):
+            ModelNosCommand(output=42)

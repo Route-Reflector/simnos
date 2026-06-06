@@ -2,23 +2,37 @@
 File to contain pydantic models for plugins input/output data validation
 """
 
-from collections.abc import Callable
 from typing import Annotated, Literal
 
 from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
+    GetPydanticSchema,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
     StrictStr,
     model_validator,
 )
+from pydantic_core import core_schema
+
+from simnos.core.command_contract import CommandHandler
 
 # Valid TCP port. Restores the range constraint lost in the pydantic v1 -> v2
 # migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
 Port = Annotated[StrictInt, Field(ge=1, le=65535)]
+
+# Dynamic command output. The type annotation documents the G4 contract
+# (`CommandHandler` Protocol — signature and return shape, #241); pydantic
+# cannot derive a schema from a Protocol, so the attached schema keeps the
+# runtime validation at "is callable", identical to the bare `Callable`
+# this replaces. Signature/return conformance is checked statically and by
+# the e2e callable sweep, not here.
+CommandHandlerField = Annotated[
+    CommandHandler,
+    GetPydanticSchema(lambda tp, handler: core_schema.callable_schema()),
+]
 
 # ---------------------------------------------------------------------------------------
 # NOS plugin commands model
@@ -30,7 +44,7 @@ class ModelNosCommand(BaseModel):
     Pydantic model for NOS command attributes.
     """
 
-    output: StrictStr | Callable | None = None
+    output: StrictStr | CommandHandlerField | None = None
     exit: StrictBool | None = None
     help: StrictStr | None = None
     prompt: StrictStr | list[StrictStr] | None = None
