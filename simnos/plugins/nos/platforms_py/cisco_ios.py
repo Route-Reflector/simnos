@@ -10,7 +10,6 @@ NAME: str = "cisco_ios"
 INITIAL_PROMPT: str = "{base_prompt}>"
 ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
-DEVICE_NAME: str = "CiscoIOS"
 
 
 class CiscoIOS(BaseDevice):

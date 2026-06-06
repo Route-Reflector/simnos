@@ -10,7 +10,6 @@ NAME: str = "arista_eos"
 INITIAL_PROMPT: str = "{base_prompt}>"
 ENABLE_PROMPT: str = "{base_prompt}#"
 CONFIG_PROMPT: str = "{base_prompt}(config)#"
-DEVICE_NAME: str = "AristaEOS"
 
 
 class AristaEOS(BaseDevice):

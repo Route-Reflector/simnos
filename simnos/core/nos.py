@@ -13,6 +13,34 @@ from simnos.core.pydantic_models import ModelNosAttributes
 log = logging.getLogger(__name__)
 
 
+def _find_device_classes(module) -> list[type]:
+    """Return the BaseDevice subclasses defined locally in `module`.
+
+    Locally defined means ``obj.__module__ == module.__name__``: a class
+    defined while executing the module carries the module's own name
+    (the fixed spec name under `_from_module`, the package name under a
+    regular import — both sides of the comparison track the same load
+    mechanism), while an imported class keeps its origin module name.
+    Import-mixins (helper devices, type-annotation imports) are
+    therefore never picked up (#241 / D5). Shared with the platform
+    contract test (tests/plugins/test_platforms.py), which applies the
+    same criterion over package-imported plugin modules.
+    """
+    # Lazy import: simnos.plugins packages are kept out of this module's
+    # import time on purpose (see the `available_platforms` re-export note
+    # at the end of this file).
+    from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+
+    return [
+        obj
+        for obj in vars(module).values()
+        if isinstance(obj, type)
+        and issubclass(obj, BaseDevice)
+        and obj is not BaseDevice
+        and obj.__module__ == module.__name__
+    ]
+
+
 class Nos:
     """
     Base class to build NOS plugins instances to use with SIMNOS.
@@ -135,8 +163,11 @@ class Nos:
 
         The module is expected to define module-level constants (``NAME``,
         ``INITIAL_PROMPT``, optional ``ENABLE_PROMPT`` / ``CONFIG_PROMPT`` /
-        ``DEVICE_NAME`` / ``DEFAULT_CONFIGURATION``) and a ``commands`` dict;
-        see :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
+        ``DEFAULT_CONFIGURATION``) and a ``commands`` dict; the device class
+        is auto-detected as the module's single locally-defined `BaseDevice`
+        subclass, if any (see `_find_device_classes` — the legacy
+        ``DEVICE_NAME`` constant is ignored with a warning since #241).
+        See :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
 
         :param filename: OS path string to Python .py file
         """
@@ -155,24 +186,31 @@ class Nos:
         # Build/validate everything that can still fail BEFORE mutating self,
         # so a broken plugin raises without leaving partial state behind
         # (#232 cross-review: attrs/commands used to be committed before the
-        # DEVICE_NAME validation, so the hot-reload per-file guard skipped the
-        # file but a later `commands.update(nos.commands)` leaked the broken
-        # plugin's commands into the running shell).
+        # device-class validation, so the hot-reload per-file guard skipped
+        # the file but a later `commands.update(nos.commands)` leaked the
+        # broken plugin's commands into the running shell).
         module_commands = getattr(module, "commands", {})
         if not isinstance(module_commands, dict):
             raise ValueError(f"Module '{filename}' 'commands' must be a mapping (got {type(module_commands).__name__})")
+        device_classes = _find_device_classes(module)
+        if len(device_classes) > 1:
+            raise ValueError(
+                f"Module '{filename}' defines multiple BaseDevice subclasses "
+                f"({', '.join(sorted(c.__name__ for c in device_classes))}); expected exactly one"
+            )
+        if hasattr(module, "DEVICE_NAME"):
+            # G4 (#241) removed the DEVICE_NAME indirection; the device class
+            # is auto-detected now. Nudge plugin authors to drop the leftover.
+            log.warning(
+                "Module '%s' still defines DEVICE_NAME; it is deprecated and ignored (auto-detection is used)",
+                filename,
+            )
         device = None
-        classname = getattr(module, "DEVICE_NAME", None)
-        if classname is None:
-            log.warning("Module '%s' does not define DEVICE_NAME; device will be None", filename)
-        else:
-            device_class = getattr(module, classname, None)
-            if device_class is None:
-                raise AttributeError(
-                    f"Module '{filename}' defines DEVICE_NAME='{classname}' but class '{classname}' was not found"
-                )
+        if device_classes:
             configuration_file = self.configuration_file or getattr(module, "DEFAULT_CONFIGURATION", None)
-            device = device_class(configuration_file=configuration_file)
+            device = device_classes[0](configuration_file=configuration_file)
+        else:
+            log.warning("Module '%s' defines no BaseDevice subclass; no device will be set from this module", filename)
         # Commit phase — nothing below is expected to raise.
         for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
             setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
@@ -194,7 +232,11 @@ class Nos:
                 "(plugin will be registered under that key)",
                 filename,
             )
-        if classname is not None:
+        if device_classes:
+            # Only a detected class updates the device — a no-device module
+            # keeps whatever a previously loaded file set (same "existing
+            # device survives" semantics as the pre-#241
+            # `if classname is not None` commit).
             self.device = device
 
     def from_file(self, filename: str) -> None:
