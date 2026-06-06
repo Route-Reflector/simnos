@@ -542,10 +542,21 @@ class TestPlatformsManifest:
         catches both a missing entry (platform added without regenerating)
         and a stale one (platform removed). Parsed as text because
         mkdocs.yml holds material python tags that `yaml.safe_load` rejects.
+
+        The parse is scoped to the Platforms section (and intentionally
+        independent of `tasks.rewrite_mkdocs_platforms_nav`'s locator, so a
+        locator bug cannot silently satisfy its own pin): an entry surviving
+        in some other nav section must not count as "reachable".
         """
         with open("mkdocs.yml", encoding="utf-8") as file:
-            mkdocs_text = file.read()
-        nav_platforms = set(re.findall(r'"platforms/([a-z0-9_]+)\.md"', mkdocs_text)) - {"index"}
+            lines = file.read().splitlines()
+        start = lines.index("  - Platforms:")
+        section_lines = []
+        for line in lines[start + 1 :]:
+            if not line.startswith("      - "):
+                break
+            section_lines.append(line)
+        nav_platforms = set(re.findall(r'"platforms/([a-z0-9_]+)\.md"', "\n".join(section_lines))) - {"index"}
         assert nav_platforms == set(available_platforms)
 
     def test_available_platforms_in_py_file_are_ordered(self):

@@ -35,7 +35,7 @@ for file in yaml_files:
 # platforms (#239 — previously a filename filter excluded base_template.py).
 platforms_directory_py: str = os.path.join(current_directory, "platforms_py")
 py_files = glob.glob(os.path.join(platforms_directory_py, "*.py"))
-py_files = [file for file in py_files if not file.endswith("__init__.py")]
+py_files = [file for file in py_files if os.path.basename(file) != "__init__.py"]
 for file in py_files:
     platform_name: str = os.path.basename(file).replace(".py", "")
     if platform_name in nos_plugins:

@@ -172,7 +172,11 @@ def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "m
     """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
 
     The caller passes the same yaml-derived platform list the docs pages
-    are generated from, so every nav entry has a backing page.
+    are generated from, so every nav entry has a backing page. This is
+    intentional: a hypothetical yaml-less py-only platform has no docs page
+    to link, so it must not get a nav entry here — the registry-truth pin
+    (`test_available_platforms_match_mkdocs_nav`) failing is the designed
+    loud signal to decide how to document such a platform.
     Closes the M-1 failure mode (#239): a new platform used to need a manual
     nav entry, and a forgotten one silently produced a docs page unreachable
     from the site nav. The section is replaced as a text block (instead of a
