@@ -16,6 +16,33 @@
 **Prompt:**
 - cisco_ios>
 
+### configure terminal
+
+**Output:** None
+
+**Help:** enter global configuration mode
+
+**Prompt:**
+- cisco_ios#
+
+### end
+
+**Output:** None
+
+**Help:** exit configuration mode and return to enable mode
+
+**Prompt:**
+- cisco_ios(config)#
+
+### exit
+
+**Output:** None
+
+**Help:** exit current configuration sub-mode (from config mode returns to enable)
+
+**Prompt:**
+- cisco_ios(config)#
+
 ### show rep topology
 
 **Output:**
@@ -7676,6 +7703,16 @@ Configuration register is 0x0
 **Output:** None
 
 **Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
+
+### terminal width 512
+
+**Output:** None
+
+**Help:** Execute the command terminal width 512. Used by scrapli for privilege escalation preparation.
 
 **Prompt:**
 - cisco_ios>

@@ -27,7 +27,7 @@ import os
 import pytest
 import yaml
 
-from tasks import render_template, sweep_orphaned_platform_docs
+from tasks import platform_display_name, render_template, rewrite_mkdocs_platforms_nav, sweep_orphaned_platform_docs
 
 PLATFORMS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
 
@@ -286,3 +286,72 @@ class TestSweepOrphanedPlatformDocs:
         )
 
         assert removed == ["aaa.md", "mmm.md", "zzz.md"]
+
+
+class TestPlatformDisplayName:
+    """Pin the nav display-name derivation (#239)."""
+
+    def test_override_wins(self):
+        """A curated override beats the default derivation."""
+        assert platform_display_name("aruba_aoscx") == "Aruba AOS-CX"
+
+    def test_default_title_cases_tokens(self):
+        """An unknown slug falls back to title-casing each token."""
+        assert platform_display_name("acme_router") == "Acme Router"
+
+
+class TestRewriteMkdocsPlatformsNav:
+    """Pin the Platforms nav regeneration semantics (#239).
+
+    Operates on a minimal mkdocs-like file so the pins are independent of
+    the real mkdocs.yml content (which the manifest test in
+    `tests/core/test_simnos.py` checks against the registry).
+    """
+
+    MKDOCS_STUB = (
+        "site_name: stub\n"
+        "nav:\n"
+        '  - Home: "index.md"\n'
+        "  - Platforms:\n"
+        '      - Index: "platforms/index.md"\n'
+        '      - Stale Entry: "platforms/removed_platform.md"\n'
+        "  - Development:\n"
+        '      - Index: "development/index.md"\n'
+    )
+
+    def test_rewrites_only_platforms_section(self, tmp_path):
+        """Entries are regenerated sorted; surrounding sections untouched."""
+        mkdocs = tmp_path / "mkdocs.yml"
+        mkdocs.write_text(self.MKDOCS_STUB, encoding="utf-8")
+
+        rewrite_mkdocs_platforms_nav(["cisco_ios", "arista_eos"], mkdocs_path=str(mkdocs))
+
+        text = mkdocs.read_text(encoding="utf-8")
+        assert (
+            "  - Platforms:\n"
+            '      - Index: "platforms/index.md"\n'
+            '      - Arista EOS: "platforms/arista_eos.md"\n'
+            '      - Cisco IOS: "platforms/cisco_ios.md"\n'
+            "  - Development:\n"
+        ) in text
+        assert "removed_platform" not in text  # stale entry swept
+        assert '  - Home: "index.md"\n' in text  # other sections preserved
+
+    def test_idempotent(self, tmp_path):
+        """A second run produces byte-identical output."""
+        mkdocs = tmp_path / "mkdocs.yml"
+        mkdocs.write_text(self.MKDOCS_STUB, encoding="utf-8")
+
+        rewrite_mkdocs_platforms_nav(["cisco_ios"], mkdocs_path=str(mkdocs))
+        first = mkdocs.read_text(encoding="utf-8")
+        rewrite_mkdocs_platforms_nav(["cisco_ios"], mkdocs_path=str(mkdocs))
+
+        assert mkdocs.read_text(encoding="utf-8") == first
+
+    def test_missing_platforms_section_raises(self, tmp_path):
+        """A file without the Platforms section fails loud, not silent."""
+        mkdocs = tmp_path / "mkdocs.yml"
+        mkdocs.write_text("site_name: stub\nnav:\n  - Home: 'index.md'\n", encoding="utf-8")
+
+        with pytest.raises(RuntimeError, match=r"Could not locate the '  - Platforms:' nav section"):
+            rewrite_mkdocs_platforms_nav(["cisco_ios"], mkdocs_path=str(mkdocs))

@@ -4,7 +4,7 @@ NOS module for Huawei SmartAX
 
 import os
 
-from simnos.plugins.nos.platforms_py.base_template import BaseDevice
+from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
 NAME: str = "huawei_smartax"
 INITIAL_PROMPT: str = "{base_prompt}>"

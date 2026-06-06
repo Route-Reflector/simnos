@@ -118,6 +118,88 @@ def render_template(template: str, platform: str, command: str, field: str) -> s
 
 _PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"})
 
+# Curated nav display names that the default derivation (title-casing each
+# underscore-separated token) cannot produce. New platforms fall back to the
+# default and can be added here when the vendor spelling differs (#239).
+NAV_DISPLAY_NAME_OVERRIDES: dict[str, str] = {
+    "alcatel_aos": "Alcatel AOS",
+    "alcatel_sros": "Alcatel SROS",
+    "arista_eos": "Arista EOS",
+    "aruba_aoscx": "Aruba AOS-CX",
+    "aruba_os": "Aruba OS",
+    "avaya_ers": "Avaya ERS",
+    "avaya_vsp": "Avaya VSP",
+    "broadcom_icos": "Broadcom ICOS",
+    "ciena_saos": "Ciena SAOS",
+    "cisco_apic": "Cisco APIC",
+    "cisco_asa": "Cisco ASA",
+    "cisco_ftd": "Cisco FTD",
+    "cisco_ios": "Cisco IOS",
+    "cisco_nxos": "Cisco NXOS",
+    "cisco_wlc_ssh": "Cisco WLC SSH",
+    "cisco_xr": "Cisco XR",
+    "dell_force10": "Dell Force 10",
+    "dell_powerconnect": "Dell PowerConnect",
+    "dlink_ds": "DLink DS",
+    "ericsson_ipos": "Ericsson IPOS",
+    "extreme_exos": "Extreme EXOS",
+    "extreme_slxos": "Extreme SLX-OS",
+    "hp_comware": "HP Comware",
+    "hp_procurve": "HP Procurve",
+    "huawei_smartax": "Huawei SmartAX",
+    "huawei_vrp": "Huawei VRP",
+    "ipinfusion_ocnos": "IP Infusion OcNOS",
+    "juniper_junos": "Juniper JunOS",
+    "juniper_screenos": "Juniper ScreenOS",
+    "mikrotik_routeros": "Mikrotik RouterOS",
+    "oneaccess_oneos": "OneAccess OneOS",
+    "paloalto_panos": "PaloAlto PanOS",
+    "ubiquiti_edgerouter": "Ubiquiti EdgeRouter",
+    "ubiquiti_edgeswitch": "Ubiquiti EdgeSwitch",
+    "vyatta_vyos": "Vyatta VyOS",
+    "watchguard_firebox": "WatchGuard Firebox",
+    "zte_zxros": "ZTE ZXROS",
+    "zyxel_os": "Zyxel OS",
+}
+
+
+def platform_display_name(platform: str) -> str:
+    """Return the nav display name for a platform slug."""
+    return NAV_DISPLAY_NAME_OVERRIDES.get(platform, platform.replace("_", " ").title())
+
+
+def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "mkdocs.yml") -> None:
+    """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
+
+    The caller passes the same yaml-derived platform list the docs pages
+    are generated from, so every nav entry has a backing page. This is
+    intentional: a hypothetical yaml-less py-only platform has no docs page
+    to link, so it must not get a nav entry here — the registry-truth pin
+    (`test_available_platforms_match_mkdocs_nav`) failing is the designed
+    loud signal to decide how to document such a platform.
+    Closes the M-1 failure mode (#239): a new platform used to need a manual
+    nav entry, and a forgotten one silently produced a docs page unreachable
+    from the site nav. The section is replaced as a text block (instead of a
+    yaml round-trip) so comments, ordering and the material python tags in
+    the rest of mkdocs.yml are preserved byte-for-byte.
+
+    Raises RuntimeError if the Platforms section cannot be located.
+    """
+    with open(mkdocs_path, encoding="utf-8") as file:
+        lines = file.readlines()
+    try:
+        start = lines.index("  - Platforms:\n")
+    except ValueError:
+        raise RuntimeError(f"Could not locate the '  - Platforms:' nav section in {mkdocs_path}") from None
+    end = start + 1
+    while end < len(lines) and lines[end].startswith("      - "):
+        end += 1
+    generated = ['      - Index: "platforms/index.md"\n']
+    generated += [f'      - {platform_display_name(p)}: "platforms/{p}.md"\n' for p in sorted(platforms)]
+    lines[start + 1 : end] = generated
+    with open(mkdocs_path, "w", encoding="utf-8") as file:
+        file.writelines(lines)
+
 
 def sweep_orphaned_platform_docs(
     docs_folder: str,
@@ -184,6 +266,9 @@ def gen_docs_platform_commands(ctx):
 
     for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
         print(f"Removed orphaned doc: {orphan}")
+
+    rewrite_mkdocs_platforms_nav(platforms)
+    print("Regenerated mkdocs.yml Platforms nav")
 
 
 @task(help={"device_type": "The device type to connect to."})

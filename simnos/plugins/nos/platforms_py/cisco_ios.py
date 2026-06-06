@@ -4,7 +4,7 @@ NOS module for Cisco IOS
 
 import time
 
-from simnos.plugins.nos.platforms_py.base_template import BaseDevice
+from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
 NAME: str = "cisco_ios"
 INITIAL_PROMPT: str = "{base_prompt}>"
