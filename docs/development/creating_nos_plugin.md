@@ -272,10 +272,10 @@ ignored with a deprecation warning — delete it from older plugins.
 
 !!! note
     When a platform has both a yaml file and a Python module, the module is
-    loaded second and **replaces same-named commands wholesale** (per-command
-    full replacement — no deep merge of `help` / `prompt` / `output`). The
-    override is logged at debug level so you can see which yaml commands the
-    module shadows.
+    loaded second and **replaces same-named already-loaded commands
+    wholesale** (typically yaml-defined ones; per-command full replacement —
+    no deep merge of `help` / `prompt` / `output`). The override is logged
+    at debug level so you can see which commands the module shadows.
 
 Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
 

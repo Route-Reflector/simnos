@@ -258,9 +258,10 @@ warning 付きで無視されます — 古い plugin からは削除してく�
 
 !!! note
     platform が yaml と Python module の両方を持つ場合、module は後から
-    ロードされ、同名 command を **command 単位で全置換**します (`help` /
-    `prompt` / `output` の deep merge はしません)。override は debug level で
-    log されるため、module がどの yaml command を上書きしたか確認できます。
+    ロードされ、**ロード済みの同名 command** (典型的には yaml 由来) を
+    **command 単位で全置換**します (`help` / `prompt` / `output` の deep
+    merge はしません)。override は debug level で log されるため、module が
+    どの command を上書きしたか確認できます。
 
 次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列、`None`、またはレスポンス内容を生成する callable にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。
 
