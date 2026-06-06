@@ -45,8 +45,9 @@ class CommandHandler(Protocol):
 
     Raising is allowed for "should never happen" states (see
     ``AristaEOS.make_exit``): cmd_shell logs the full traceback and
-    answers the client with the fixed ``HANDLER_ERROR_OUTPUT`` line —
-    no traceback reaches the wire.
+    answers the client with the fixed one-liner
+    ``simnos.plugins.shell.cmd_shell.HANDLER_ERROR_OUTPUT`` — no
+    traceback reaches the wire.
     """
 
     def __call__(

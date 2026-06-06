@@ -292,13 +292,15 @@ class TestCmdShell(TestCase):
         shell.writeline.assert_called_once_with(time.ctime())
 
     def _make_callable_dict_shell(self, output_callable):
-        """Build a shell whose 'cmd' command is a dict-returning callable.
+        """Build a shell whose 'cmd' command output is `output_callable`.
 
-        Consumer-side pins for the callable-dict dispatch branch of
-        `default()` (new_prompt update / exit / output extraction),
-        the counterpart of the producer-side device-class tests in
-        tests/plugins/nos/ (T-14 / #230). The str-returning branch is
-        covered by test_default_command_is_function above.
+        Consumer-side pins for the callable dispatch branch of
+        `default()` — originally the dict-returning cases (new_prompt
+        update / exit / output extraction, the counterpart of the
+        producer-side device-class tests in tests/plugins/nos/, T-14 /
+        #230), since #241 also the str-passthrough (D-b) and crash (D4)
+        pins. Plugin-loaded str returns are additionally covered by
+        test_default_command_is_function above.
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
@@ -698,7 +700,8 @@ class TestCmdShell(TestCase):
         Pins #172 (callable dict path, symmetric to the cmd_data path
         above): format failure is a silent log + no transition, and no
         traceback reaches the wire. The callable's own exceptions are
-        out of scope here (still the broad-except path, see G4).
+        out of scope here — they answer with HANDLER_ERROR_OUTPUT since
+        #241/D4 (see test_default_handler_crash_writes_fixed_error_line).
         """
         shell = self._make_callable_dict_shell(
             lambda device, **kwargs: {"output": "body", "new_prompt": "{base_prompt.foo}#"}
