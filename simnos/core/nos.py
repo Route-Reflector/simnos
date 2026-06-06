@@ -5,6 +5,7 @@ Network Operating Systems (NOS). Base class to build NOS plugins instances to us
 import importlib.util
 import logging
 import os
+import types
 
 import yaml
 
@@ -13,7 +14,7 @@ from simnos.core.pydantic_models import ModelNosAttributes
 log = logging.getLogger(__name__)
 
 
-def _find_device_classes(module) -> list[type]:
+def _find_device_classes(module: types.ModuleType) -> list[type]:
     """Return the BaseDevice subclasses defined locally in `module`.
 
     Locally defined means ``obj.__module__ == module.__name__``: a class
