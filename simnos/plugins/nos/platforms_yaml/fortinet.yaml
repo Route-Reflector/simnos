@@ -238,18 +238,18 @@ commands:
       1 power.status: 0\n1 power.status.txt: PD\n1 power.pair: 0\n1 power.class: 0\n\
       1 max-frame-size: 10240\n\n"
     help: execute the command "diagnose lldprx port neighbor details port-name"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   diagnose sys top:
     output: "Run Time:  12 days, 3 hours and 4 minutes\n0U, 0N, 0S, 100I, 0WA, 0HI,
       0SI, 0ST; 1919T, 1214F\n          newcli    29806      R       0.1     0.5\n\
       \            sshd    29800      S       0.1     0.4\n       ipshelper      199\
       \      S <     0.0     1.8\n          httpsd      211      S       0.0     1.5\n"
     help: execute the command "diagnose sys top"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   execute date:
     output: "current date is: 2023-08-07\n"
     help: execute the command "execute date"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   execute dhcp lease-list:
     output: "Staff_Wifi\nIP            MAC-Address             Hostname        VCI\
       \             Expiry\n10.0.0.4      cc:cc:cc:cc:cc:cc       MyOtherPhone   \
@@ -261,7 +261,7 @@ commands:
       \     VCI             Expiry\n192.168.4.101 08:5b:0e:48:48:48       FortiAP-FP221C\
       \                  Sat Aug 10 14:10:44 2019\n"
     help: execute the command "execute dhcp lease-list"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
     - "Vlan1\n  IP            MAC-Address             Hostname            VCI    \
       \             SSID                AP                  Expiry\n  10.32.159.11\
@@ -316,7 +316,7 @@ commands:
       \ srchwversion=\"SPA112\" mastersrcmac=\"50:67:ae:f0:6c:80\" srcmac=\"50:67:ae:f0:6c:80\"\
       \ srcserver=0\n"
     help: execute the command "execute log display"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
     - "0 logs found.\n0 logs returned.\n"
   execute ping:
@@ -327,7 +327,7 @@ commands:
       ms\n\n--- 8.8.8.8 ping statistics ---\n5 packets transmitted, 5 packets received,
       0% packet loss\nround-trip min/avg/max = 25.8/25.8/25.9 ms\n"
     help: execute the command "execute ping"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
     - "PING 8.8.8.8 (8.8.8.8): 56 data bytes\nsendto failed\nsendto failed\nsendto
       failed\nsendto failed\n\n--- 8.8.8.8 ping statistics ---\n10 packets transmitted,
@@ -337,14 +337,14 @@ commands:
   execute time:
     output: "current time is: 21:05:34\nlast ntp sync: never\n"
     help: execute the command "execute time"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   execute traceroute:
     output: "traceroute to 8.8.8.8 (8.8.8.8), 32 hops max, 10 probe packets per hop,
       84 byte packets\n 1  1.2.3.4  0.454 ms  0.503 ms  0.262 ms  0.191 ms  0.187
       ms  0.191 ms  0.191 ms  0.192 ms  0.193 ms  0.185 ms\n 2  5.6.7.8  1.225 ms
       * * *\n"
     help: execute the command "execute traceroute"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
     - "traceroute to 8.8.8.8 (8.8.8.8), 32 hops max, 3 probe packets per hop, 84 byte
       packets\n 1  1.2.3.4  0.423 ms  2.123 ms  0.274 ms\n 2  5.6.7.8  0.389 ms  0.445
@@ -405,7 +405,7 @@ commands:
       \      TX packets:0 errors:0 dropped:0 overruns:0 carrier:0\n        collisions:0
       txqueuelen:0\n        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)\n"
     help: execute the command "fnsysctl ifconfig"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
     - "eth0    Link encap:Ethernet  HWaddr 70:4C:A5:C8:7F:C2\n        UP BROADCAST
       RUNNING MULTICAST  MTU:1500  Metric:1\n        RX packets:160120833 errors:0
@@ -480,7 +480,7 @@ commands:
       \        lan2\n        lan3\n        npu0_vlink0\n        npu0_vlink1\n    \
       \    wan\n"
     help: execute the command "get hardware nic"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   get hardware nic nic-name:
     output: "Description     :FortiASIC NP6XLITE Adapter\nDriver Name     :FortiASIC
       NP6XLITE Driver\nBoard           :40F\nlif id          :7\nlif oid         :71\n\
@@ -495,7 +495,7 @@ commands:
       \ :0\nMember Ports    :\n                [00]: a\n                [01]: lan1\n\
       \                [02]: lan2\n"
     help: execute the command "get hardware nic nic-name"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   get router info bgp neighbors:
     output: "VRF 0 neighbor table:\nBGP neighbor is 10.105.1.254, remote AS 65400,
       local AS 65400, internal link\n  BGP version 4, remote router ID 10.105.3.254\n\
@@ -543,9 +543,9 @@ commands:
       non shared network\nLast Reset: 12:55:18, due to BGP Notification sent\nNotification
       Error Message: (Hold Timer Expired/Unspecified Error Subcode)\n\n\n"
     help: execute the command "get router info bgp neighbors"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
     output_variants:
-    - ''
+    - ""
   get router info ospf status:
     output: " Routing Process \"ospf 0\" with ID 10.123.105.1\n Process is not up\n\
       \ Process bound to VRF default\n Conforms to RFC2328, and RFC1583Compatibility
@@ -562,7 +562,7 @@ commands:
       last executed 00:00:22.990 ago\n        SPF algorithm executed 35480 times\n\
       \        Number of LSA 68. Checksum 0x207089\n\n"
     help: execute the command "get router info ospf status"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "
   get router info routing-table all:
     output: "Codes: K - kernel, C - connected, S - static, R - RIP, B - BGP\n    \
       \   O - OSPF, IA - OSPF inter area\n       N1 - OSPF NSSA external type 1, N2
@@ -578,4 +578,4 @@ commands:
       10.142.0.74, port3, 2d18h02m\nS       1.2.3.4/32 [10/0] via 10.152.1.229, lan\n\
       \                   [10/0] via 4.3.2.1, wan\n"
     help: execute the command "get router info routing-table all"
-    prompt: '{base_prompt} # '
+    prompt: "{base_prompt} # "

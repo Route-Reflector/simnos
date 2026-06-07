@@ -24,7 +24,7 @@ commands:
     - "{base_prompt}~$"
     - "{base_prompt}#"
   show arp:
-    output: 'Address                  HWtype  HWaddress           Flags Mask            Iface
+    output: "Address                  HWtype  HWaddress           Flags Mask            Iface
 
       192.168.2.10             ether   34:29:8f:76:0f:e8   C                     eth1
 
@@ -40,7 +40,7 @@ commands:
 
       172.16.37.21             ether   90:b1:1c:2f:92:82   C                     eth7
 
-      '
+      "
     help: execute the command "show arp"
     prompt:
     - "{base_prompt}~$"
@@ -61,7 +61,7 @@ commands:
     - "{base_prompt}~$"
     - "{base_prompt}#"
   show dhcpv6 server leases:
-    output: 'There are 6 DHCPv6 leases:
+    output: "There are 6 DHCPv6 leases:
 
 
       IPv6 Address                            Expiration          State
@@ -80,7 +80,7 @@ commands:
 
       2001:d98:5554::219                      2011/06/01 06:02:16 expired
 
-      '
+      "
     help: execute the command "show dhcpv6 server leases"
     prompt:
     - "{base_prompt}~$"
@@ -178,15 +178,13 @@ commands:
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}~$"
     - "{base_prompt}#"
   terminal width 512:
     output: null
-    help: Execute the command terminal width 512. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 512. This automatically generated.
     prompt:
     - "{base_prompt}~$"
     - "{base_prompt}#"

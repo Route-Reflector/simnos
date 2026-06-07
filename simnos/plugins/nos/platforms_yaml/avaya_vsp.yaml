@@ -21,7 +21,6 @@ commands:
   terminal more disable:
     output: null
     help: Execute the command terminal more disable. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

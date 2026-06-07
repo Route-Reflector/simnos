@@ -16,6 +16,9 @@ from simnos.plugins.shell.utils import get_files_changed
 
 log = logging.getLogger(__name__)
 
+# Contract note (#244 / D3): these entries bypass the `Nos` load path and
+# its prompt normalization, so they must NOT carry a `prompt` key — the
+# read side assumes every present `prompt` is already a list.
 BASIC_COMMANDS: dict = {
     "exit": {"exit": True, "help": "Exit commands shell"},
     "_default_": {
@@ -69,11 +72,14 @@ class CMDShell(Cmd):
         self.prompt = formatted if formatted is not None else nos.initial_prompt
         self.is_running = is_running
 
-        # form commands
+        # form commands. Inventory-defined commands are the one source
+        # that does not pass through the `Nos` load path, so their
+        # `prompt` is normalized here (str -> [str], on our own deepcopy)
+        # to uphold the lists-only read-side contract (#244 / D3).
         self.commands = {
             **copy.deepcopy(BASIC_COMMANDS),
             **copy.deepcopy(nos.commands or {}),
-            **copy.deepcopy(nos_inventory_config.get("commands", {})),
+            **Nos.normalize_command_prompts(copy.deepcopy(nos_inventory_config.get("commands", {}))),
         }
         # call the base constructor of cmd.Cmd, with our own stdin and stdout
         super().__init__(
@@ -184,18 +190,20 @@ class CMDShell(Cmd):
             )
             return None
 
-    def _check_prompt(self, prompt_: str | list[str] | None, command: str = ""):
+    def _check_prompt(self, prompt_: list[str] | None, command: str = ""):
         """
         Helper method to check if prompt_ matches current prompt
 
-        :param prompt_: (string, list of strings, or None) prompt to check
+        :param prompt_: (list of strings, or None) prompt to check — every
+            load path normalizes a bare-str authoring form to a list
+            before commit (#244 / D3), so no str branch is needed here
         :param command: command name for the error log; callers without it
             keep working (the log just omits the command context)
         """
         # prompt_ is None if no 'prompt' key defined for command
         if prompt_ is None:
             return True
-        candidates = [prompt_] if isinstance(prompt_, str) else prompt_
+        candidates = prompt_
         where = f"prompt for command {command!r}" if command else "prompt"
         # A broken candidate is just a non-match; the remaining candidates
         # are still evaluated independently.
@@ -303,11 +311,9 @@ class CMDShell(Cmd):
                 log.warning(
                     "'%s' command prompt '%s' not matching current prompt '%s'",
                     line,
-                    (
-                        ", ".join(cmd_data.get("prompt", []))
-                        if isinstance(cmd_data.get("prompt"), list)
-                        else cmd_data.get("prompt", "")
-                    ),
+                    # Always a list here: a mismatch requires a non-None,
+                    # normalized prompt (#244 / D3).
+                    ", ".join(cmd_data.get("prompt", [])),
                     self.prompt,
                 )
             # Unknown command and prompt mismatch both answer with the

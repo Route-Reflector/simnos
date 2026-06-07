@@ -1,0 +1,1083 @@
+# Platform yaml lint baseline (#244) — frozen drift, ratchet-only.
+#
+# Consumed by `invoke lint-platform-yaml` (tasks.py:check_platform_yaml).
+# Keys are repo-root relative paths. This file only ever SHRINKS:
+#   - missing_default: files allowed to lack a `_default_` command.
+#     New platform files must define one (vendor-accurate wording, see
+#     docs/development/creating_new_platforms.md).
+#   - stub_help: per file, the commands frozen with an auto-generated
+#     stub help. Adding a stub to a new command fails CI; replacing a
+#     stub with real help requires removing the entry here (the lint
+#     fails on stale entries in both directions).
+# Regenerate-from-scratch is intentionally NOT provided: the whole point
+# is that the frozen set never grows back.
+missing_default:
+- simnos/plugins/nos/platforms_yaml/alcatel_aos.yaml
+- simnos/plugins/nos/platforms_yaml/alcatel_sros.yaml
+- simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml
+- simnos/plugins/nos/platforms_yaml/arista_eos.yaml
+- simnos/plugins/nos/platforms_yaml/aruba_os.yaml
+- simnos/plugins/nos/platforms_yaml/avaya_ers.yaml
+- simnos/plugins/nos/platforms_yaml/avaya_vsp.yaml
+- simnos/plugins/nos/platforms_yaml/broadcom_icos.yaml
+- simnos/plugins/nos/platforms_yaml/brocade_fastiron.yaml
+- simnos/plugins/nos/platforms_yaml/brocade_netiron.yaml
+- simnos/plugins/nos/platforms_yaml/checkpoint_gaia.yaml
+- simnos/plugins/nos/platforms_yaml/ciena_saos.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_asa.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_ftd.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_ios.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_nxos.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_s300.yaml
+- simnos/plugins/nos/platforms_yaml/cisco_xr.yaml
+- simnos/plugins/nos/platforms_yaml/dell_force10.yaml
+- simnos/plugins/nos/platforms_yaml/dell_powerconnect.yaml
+- simnos/plugins/nos/platforms_yaml/dlink_ds.yaml
+- simnos/plugins/nos/platforms_yaml/eltex.yaml
+- simnos/plugins/nos/platforms_yaml/ericsson_ipos.yaml
+- simnos/plugins/nos/platforms_yaml/extreme_exos.yaml
+- simnos/plugins/nos/platforms_yaml/fortinet.yaml
+- simnos/plugins/nos/platforms_yaml/hp_comware.yaml
+- simnos/plugins/nos/platforms_yaml/hp_procurve.yaml
+- simnos/plugins/nos/platforms_yaml/huawei_smartax.yaml
+- simnos/plugins/nos/platforms_yaml/huawei_vrp.yaml
+- simnos/plugins/nos/platforms_yaml/ipinfusion_ocnos.yaml
+- simnos/plugins/nos/platforms_yaml/juniper_junos.yaml
+- simnos/plugins/nos/platforms_yaml/juniper_screenos.yaml
+- simnos/plugins/nos/platforms_yaml/linux.yaml
+- simnos/plugins/nos/platforms_yaml/mikrotik_routeros.yaml
+- simnos/plugins/nos/platforms_yaml/paloalto_panos.yaml
+- simnos/plugins/nos/platforms_yaml/ruckus_fastiron.yaml
+- simnos/plugins/nos/platforms_yaml/ubiquiti_edgerouter.yaml
+- simnos/plugins/nos/platforms_yaml/ubiquiti_edgeswitch.yaml
+- simnos/plugins/nos/platforms_yaml/vyatta_vyos.yaml
+- simnos/plugins/nos/platforms_yaml/yamaha.yaml
+- simnos/plugins/nos/platforms_yaml/zyxel_os.yaml
+stub_help:
+  simnos/plugins/nos/platforms_yaml/alcatel_aos.yaml:
+  - show chassis
+  - show interfaces alias
+  - show interfaces ethernet
+  - show interfaces port
+  - show interfaces status
+  - show linkagg alias
+  - show linkagg port
+  - show lldp remote-system
+  - show mac-address-table
+  - show port-security
+  - show system
+  - show vlan
+  - show vlan port
+  simnos/plugins/nos/platforms_yaml/alcatel_sros.yaml:
+  - //environment more false
+  - environment no more
+  - oam mac-ping
+  - ping
+  - show lag
+  - show lag port
+  - show port
+  - show port description
+  - show router bgp routes vpn-ipv4
+  - show router bgp summary family
+  - show router interface
+  - show router isis adjacency
+  - show router isis interface
+  - show router ldp interface
+  - show router mpls interface
+  - show router mpls lsp
+  - show router ospf interface
+  - show router pim interface
+  - show router rsvp interface
+  - show service id 0 sap
+  - show service id base
+  - show service id interface
+  - show service sap-using
+  - show service sdp
+  - show service sdp-using
+  - show service service-name-using
+  - show service service-using
+  - show system cpu
+  simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml:
+  - show arp
+  - show etherchannel summary
+  - show interface
+  - show interface switchport
+  - show ip route
+  - show lldp neighbors detail
+  - show mac address-table
+  - show static-channel-group
+  - show system
+  - show vlan all
+  - terminal length 0
+  simnos/plugins/nos/platforms_yaml/arista_eos.yaml:
+  - bash df -h
+  - dir
+  - dir flash
+  - show bgp evpn summary
+  - show boot-config
+  - show clock
+  - show environment cooling
+  - show environment power
+  - show environment temperature
+  - show hostname
+  - show interfaces
+  - show interfaces description
+  - show interfaces status
+  - show interfaces transceiver
+  - show interfaces transceiver detail
+  - show interfaces transceiver hardware
+  - show inventory
+  - show ip access-lists
+  - show ip arp
+  - show ip bgp
+  - show ip bgp detail
+  - show ip bgp summary
+  - show ip helper-address
+  - show ip interface brief
+  - show ip mroute vrf all detail
+  - show ip ospf database
+  - show ip ospf interface brief
+  - show ip ospf neighbor
+  - show ip ospf summary
+  - show ip route
+  - show ipv6 bgp summary
+  - show isis neighbors
+  - show lldp neighbors
+  - show lldp neighbors detail
+  - show mac address-table
+  - show mac security interface
+  - show mac security mka counters
+  - show mac security participants detail
+  - show mlag
+  - show module
+  - show pim ipv4 interface
+  - show pim ipv4 neighbor
+  - show port-channel summary
+  - show processes top once
+  - show reload cause
+  - show snmp community
+  - show version
+  - show vlan
+  - show vrf
+  simnos/plugins/nos/platforms_yaml/aruba_aoscx.yaml:
+  - show aaa authentication port-access interface all client-status
+  - show arp all-vrfs
+  - show bfd all-vrfs
+  - show bgp all-vrfs all summary
+  - show interface
+  - show interface dom detail
+  - show ip route all-vrfs
+  - show lldp neighbors-info detail
+  - show mac-address-table
+  - show ntp associations
+  - show system
+  - show vlan
+  - show vrf
+  - show vsf detail
+  simnos/plugins/nos/platforms_yaml/aruba_os.yaml:
+  - show ap bss-table details
+  - show ap database
+  - show ap database long
+  - show ap radio-database
+  - show arp
+  - show hostname
+  - show inventory
+  - show ip interface brief
+  - show ipv6 interface brief
+  - show version
+  - show vlan
+  simnos/plugins/nos/platforms_yaml/avaya_ers.yaml:
+  - logout
+  - no page
+  - show interface name
+  - show logging config
+  - show mac-address-table
+  - show mlt
+  - show mlt all-members
+  - show sys-info
+  - show vlan
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/avaya_vsp.yaml:
+  - show software
+  - terminal more disable
+  simnos/plugins/nos/platforms_yaml/broadcom_icos.yaml:
+  - show isdp neighbors
+  - show lldp remote-device all
+  - show mac-addr-table
+  - show version
+  - show vlan brief
+  - terminal length 0
+  simnos/plugins/nos/platforms_yaml/brocade_fastiron.yaml:
+  - show arp
+  - show interfaces
+  - show interfaces brief
+  - show lag brief
+  - show lldp neighbors
+  - show lldp neighbors detail
+  - show mac-address
+  - show metro
+  - show monitor
+  - show running-config vlan
+  - show span
+  - show topo
+  - show trunk
+  - show version
+  simnos/plugins/nos/platforms_yaml/brocade_netiron.yaml:
+  - show interfaces
+  - show interfaces brief
+  - show lag brief
+  - show lldp neighbors detail
+  - show metro
+  - show monitor actual
+  - show running-config interface
+  - show running-config vlan
+  - show span
+  - show topo
+  - skip-page-display
+  simnos/plugins/nos/platforms_yaml/checkpoint_gaia.yaml:
+  - fw stat
+  - show arp dynamic all
+  - show asset all
+  - show dns
+  - show domainname
+  - show interfaces all
+  - show ipv6 route
+  - show lom
+  - show ntp servers
+  - show route
+  - show version all
+  - show virtual-system all
+  simnos/plugins/nos/platforms_yaml/ciena_saos.yaml:
+  - chassis show temperature
+  - lldp show neighbors
+  - port show
+  - port show ethernet-config
+  - port show network-config
+  - port show status
+  - port xcvr show
+  - rstp show
+  - software show
+  - ssh server show key
+  - traffic-profiling standard-profile show
+  - vlan show
+  simnos/plugins/nos/platforms_yaml/cisco_apic.yaml:
+  - fabric show vlan extended
+  simnos/plugins/nos/platforms_yaml/cisco_asa.yaml:
+  - dir
+  - ping
+  - show access-list
+  - show access-list brief
+  - show arp
+  - show asp drop
+  - show asp table vpn-context detail
+  - show bgp summary
+  - show cpu usage detailed
+  - show crypto ikev1 sa detail
+  - show crypto ipsec sa
+  - show curpriv
+  - show failover
+  - show interface
+  - show interface detail
+  - show interface ip brief
+  - show inventory
+  - show license all
+  - show logging
+  - show module
+  - show name
+  - show nat
+  - show object-group network
+  - show ospf interface brief
+  - show ospf neighbor
+  - show port-channel summary
+  - show resource usage
+  - show route
+  - show running-config access-group
+  - show running-config all crypto map
+  - show running-config crypto ikev1
+  - show running-config crypto map
+  - show running-config ipsec
+  - show running-config object network
+  - show running-config object service
+  - show running-config object-group service
+  - show running-config tunnel-group
+  - show version
+  - show vpn-sessiondb
+  - show vpn-sessiondb anyconnect
+  - show vpn-sessiondb detail l2l
+  - show xlate
+  - terminal pager 0
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/cisco_ftd.yaml:
+  - enable clipaging
+  - ping
+  - show arp
+  - show vpn-sessiondb anyconnect
+  simnos/plugins/nos/platforms_yaml/cisco_ios.yaml:
+  - dir
+  - ping
+  - show access-list
+  - show access-session
+  - show adjacency
+  - show alert counters
+  - show aliases
+  - show ap cdp neighbors
+  - show ap summary
+  - show archive
+  - show arp
+  - show authentication sessions
+  - show authentication sessions method details
+  - show bfd neighbors details
+  - show boot
+  - show capability feature routing
+  - show cdp neighbors
+  - show cdp neighbors detail
+  - show clock
+  - show controller t1
+  - show crypto ipsec sa detail
+  - show crypto pki certificates
+  - show crypto session detail
+  - show cts credentials
+  - show cts pacs
+  - show dhcp lease
+  - show dmvpn
+  - show dot1x all
+  - show endpoint-tracker
+  - show endpoint-tracker tracker-group
+  - show environment power all
+  - show environment temperature
+  - show etherchannel summary
+  - show file systems
+  - show hosts summary
+  - show interface link
+  - show interface transceiver
+  - show interfaces
+  - show interfaces description
+  - show interfaces status
+  - show interfaces status err-disabled
+  - show interfaces switchport
+  - show inventory
+  - show ip access-lists
+  - show ip arp
+  - show ip bgp
+  - show ip bgp neighbors
+  - show ip bgp neighbors advertised-routes
+  - show ip bgp summary
+  - show ip bgp vpnv4 all neighbors
+  - show ip cef
+  - show ip cef detail
+  - show ip device tracking all
+  - show ip dhcp binding
+  - show ip dhcp snooping binding
+  - show ip eigrp interfaces detail
+  - show ip eigrp neighbors
+  - show ip eigrp neighbors detail
+  - show ip eigrp topology
+  - show ip flow toptalkers
+  - show ip http server status
+  - show ip interface
+  - show ip interface brief
+  - show ip mroute
+  - show ip nat translations
+  - show ip ospf database
+  - show ip ospf database network
+  - show ip ospf database router
+  - show ip ospf interface brief
+  - show ip ospf neighbor
+  - show ip ospf neighbor detail
+  - show ip prefix-list
+  - show ip route
+  - show ip route summary
+  - show ip source binding
+  - show ip vrf interfaces
+  - show ipv6 access-lists
+  - show ipv6 interface brief
+  - show ipv6 neighbors
+  - show ipv6 route
+  - show isdn status
+  - show isis neighbors
+  - show license
+  - show license status
+  - show lldp neighbors
+  - show lldp neighbors detail
+  - show logging
+  - show mac-address-table
+  - show module
+  - show mpls interfaces
+  - show mpls l2transport vc
+  - show nve peers
+  - show nve vni
+  - show object-group
+  - show platform
+  - show platform diag
+  - show policy-map
+  - show port-security interface interface
+  - show power available
+  - show power inline
+  - show power status
+  - show power supplies
+  - show power used
+  - show privilege
+  - show processes cpu
+  - show processes memory sorted
+  - show redundancy
+  - show rep topology
+  - show route-map
+  - show running-config interface
+  - show running-config partition access-list
+  - show running-config partition route-map
+  - show sdwan bfd sessions table
+  - show sdwan bfd summary
+  - show sdwan control connections
+  - show sdwan omp peers
+  - show sdwan tunnel statistics table
+  - show snmp community
+  - show snmp group
+  - show snmp user
+  - show spanning-tree
+  - show spanning-tree root
+  - show stack-power
+  - show standby
+  - show standby brief
+  - show switch detail
+  - show switch virtual
+  - show tacacs
+  - show users
+  - show version
+  - show vlan
+  - show vlan group
+  - show vlans
+  - show vrf
+  - show vrf detail
+  - show vrrp all
+  - show vrrp brief
+  - show vtp status
+  - show wireless tag policy summary
+  - terminal length 0
+  - terminal width 511
+  - terminal width 512
+  - traceroute
+  simnos/plugins/nos/platforms_yaml/cisco_nxos.yaml:
+  - dir
+  - show access-lists
+  - show bfd neighbors
+  - show bgp vrf all ipv4 unicast detail
+  - show bgp vrf all ipv4 unicast neighbors routes
+  - show cdp neighbors
+  - show cdp neighbors detail
+  - show clock
+  - show configuration session summary
+  - show cts interface all
+  - show cts interface brief
+  - show environment
+  - show environment temperature
+  - show fabricpath route
+  - show feature
+  - show fex
+  - show fex id
+  - show flogi database
+  - show forwarding adjacency
+  - show forwarding ipv4 route
+  - show hardware internal bigsur all-ports detail
+  - show hostname
+  - show hsrp all
+  - show interface
+  - show interface breakout
+  - show interface brief
+  - show interface capabilities
+  - show interface description
+  - show interface snmp-ifindex
+  - show interface status
+  - show interface status err-disabled
+  - show interface switchport
+  - show interface transceiver
+  - show interface transceiver details
+  - show interfaces switchport
+  - show inventory
+  - show ip adjacency
+  - show ip arp
+  - show ip arp detail
+  - show ip arp detail vrf all
+  - show ip bgp
+  - show ip bgp neighbors
+  - show ip bgp summary
+  - show ip bgp summary vrf
+  - show ip community-list
+  - show ip dhcp relay address
+  - show ip dhcp snooping statistics
+  - show ip eigrp neighbors
+  - show ip interface
+  - show ip interface brief
+  - show ip interface vrf all
+  - show ip mroutes vrf all
+  - show ip msdp summary vrf all
+  - show ip ospf database
+  - show ip ospf interface brief
+  - show ip ospf neighbor
+  - show ip pim group-range vrf all
+  - show ip pim interface brief vrf all
+  - show ip pim neighbor vrf all
+  - show ip pim rp vrf all
+  - show ip route
+  - show ipv6 interface brief
+  - show l2rib internal permanently-frozen-list
+  - show license usage
+  - show lldp neighbors
+  - show lldp neighbors detail
+  - show mac address-table
+  - show module
+  - show nve peers
+  - show nve vni
+  - show nve vni interface nve 1 detail
+  - show port-channel summary
+  - show processes cpu
+  - show route-map
+  - show spanning-tree root
+  - show switching-mode
+  - show vdc
+  - show version
+  - show vlan
+  - show vpc
+  - show vrf
+  - show vrf detail
+  - show vrf interface
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/cisco_s300.yaml:
+  - show interfaces description
+  - show interfaces status
+  - show interfaces switchport
+  - show ip interface
+  - show lldp neighbors
+  - show mac address-table
+  - show system
+  - show system id
+  - show version
+  - show vlan
+  - terminal datadump
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/cisco_viptela.yaml:
+  - show arp
+  - show control connections
+  - show interface
+  - show omp peers
+  simnos/plugins/nos/platforms_yaml/cisco_wlc_ssh.yaml:
+  - show 802.11a
+  - show 802.11a cleanair config
+  - show advanced 802.11a channel
+  - show ap config general
+  - show ap image all
+  - show ap summary
+  - show band-select
+  - show boot
+  - show cdp neighbors detail
+  - show client detail
+  - show exclusionlist
+  - show flexconnect group summary
+  - show interface detailed id
+  - show interface group summary
+  - show interface summary
+  - show inventory
+  - show mobility anchor
+  - show mobility sum
+  - show port summary
+  - show radius summary
+  - show redundancy detail
+  - show redundancy summary
+  - show rf-profile summary
+  - show stats port summary
+  - show sysinfo
+  - show tacacs summary
+  - show time
+  - show wlan sum
+  simnos/plugins/nos/platforms_yaml/cisco_xr.yaml:
+  - admin show controller fabric health
+  - admin show environment fan
+  - admin show environment power
+  - admin show inventory
+  - admin show platform
+  - admin show vm
+  - dir
+  - ping
+  - show arp
+  - show asic-errors all location
+  - show bfd sessions
+  - show bgp
+  - show bgp instance all summary
+  - show bgp neighbors
+  - show bgp vrf all ipv4 unicast summary
+  - show bgp vrf all neighbors advertised-routes
+  - show cdp neighbors detail
+  - show cef drops location
+  - show configuration commit list
+  - show controller fabric plane all
+  - show controllers HundredGigabitEthernet
+  - show controllers all phy
+  - show controllers fabric fia drops egress location
+  - show controllers fabric fia drops ingress location
+  - show controllers fabric fia errors egress location
+  - show controllers fabric fia errors ingress location
+  - show controllers hundredgige all
+  - show dhcp ipv4 proxy binding
+  - show drops np all
+  - show eigrp neighbors
+  - show hsrp
+  - show install active
+  - show interface brief
+  - show interfaces
+  - show interfaces description
+  - show interfaces summary
+  - show inventory
+  - show ip bgp summary
+  - show ip interface brief
+  - show ip route
+  - show ipv4 interface
+  - show ipv4 vrf all interface brief
+  - show ipv6 neighbors
+  - show isis neighbors
+  - show l2vpn mac-learning mac all location
+  - show lldp neighbors
+  - show lldp neighbors detail
+  - show lpts pifib hardware police location
+  - show mpls ldp neighbor brief
+  - show ospf neighbor
+  - show ospf vrf all interface brief
+  - show ospf vrf all neighbor
+  - show pim ipv4 group-map
+  - show pim ipv4 interface
+  - show pim ipv4 neighbor
+  - show pim neighbor
+  - show platform
+  - show platform summary location all
+  - show processes cpu
+  - show redundancy summary
+  - show rsvp neighbors
+  - show running-config hostname
+  - show version
+  - show version brief
+  - show vrf all detail
+  - terminal length 0
+  - terminal width 511
+  - terminal width 512
+  simnos/plugins/nos/platforms_yaml/dell_force10.yaml:
+  - show arp
+  - show ip interface brief
+  - show version
+  - show vlan
+  - show vlan brief
+  - terminal length 0
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/dell_powerconnect.yaml:
+  - show bridge address table
+  - show interfaces description
+  - show interfaces status
+  simnos/plugins/nos/platforms_yaml/dlink_ds.yaml:
+  - show arpentry
+  simnos/plugins/nos/platforms_yaml/edgecore.yaml:
+  - show interfaces brief
+  - show interfaces status
+  - show interfaces switchport
+  - show ip interface
+  - show system
+  - show version
+  - show vlan
+  simnos/plugins/nos/platforms_yaml/eltex.yaml:
+  - show interface
+  - show interfaces description
+  - show interfaces status
+  - show interfaces switchport
+  - show ip interface
+  - show system
+  - show system id
+  - show vlan
+  simnos/plugins/nos/platforms_yaml/ericsson_ipos.yaml:
+  - enable clipaging
+  - login
+  - set cli screen-width 511
+  - show arp
+  - show curpriv
+  - show isis adjacency
+  - show version
+  - terminal length 0
+  - terminal width 511
+  - terminal width 512
+  simnos/plugins/nos/platforms_yaml/extreme_exos.yaml:
+  - disable clipaging
+  - show fdb
+  - show iparp
+  - show ipconfig
+  - show ports description
+  - show ports information
+  - show ports information detail
+  - show sharing
+  - show vlan description
+  simnos/plugins/nos/platforms_yaml/extreme_slxos.yaml:
+  - show clock
+  - show ip interface brief
+  simnos/plugins/nos/platforms_yaml/fortinet.yaml:
+  - diagnose lldprx port neighbor details port-name
+  - diagnose sys top
+  - execute date
+  - execute dhcp lease-list
+  - execute log display
+  - execute ping
+  - execute time
+  - execute traceroute
+  - fnsysctl ifconfig
+  - get hardware nic
+  - get hardware nic nic-name
+  - get router info bgp neighbors
+  - get router info bgp summary
+  - get router info ospf status
+  - get router info routing-table all
+  - get system arp
+  - get system ha status
+  - get system interface
+  - get system interface physical
+  - get system status
+  simnos/plugins/nos/platforms_yaml/hp_comware.yaml:
+  - display arp
+  - display bgp peer ipv4
+  - display clock
+  - display counters bound interface
+  - display device manuinfo
+  - display interface
+  - display interface brief
+  - display ip interface
+  - display ip routing-table
+  - display ip vpn-instance
+  - display ip vpn-instance instance-name
+  - display link-aggregation member-port
+  - display link-aggregation verbose
+  - display lldp neighbor-information list
+  - display lldp neighbor-information verbose
+  - display mac-address
+  - display vlan all
+  - display vlan brief
+  simnos/plugins/nos/platforms_yaml/hp_procurve.yaml:
+  - disable cli prompting
+  - disable clipaging
+  - screen-length 0 temporary
+  - screen-length disable
+  - show arp
+  - show cdp neighbors detail
+  - show interfaces
+  - show interfaces brief
+  - show ip
+  - show ip route
+  - show lldp info remote-device
+  - show lldp info remote-device detail
+  - show mac-address
+  - show port-security
+  - show system
+  - show tech buffers
+  - show trunks
+  - show version
+  - show vlans
+  - show vsf detail
+  - terminal datadump
+  - terminal length 0
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/huawei_smartax.yaml:
+  - display board
+  - display board serial-number
+  - display cpu
+  - display location
+  - display location aaaa-aaaa-aaaa ont
+  - display mac-address
+  - display mac-address ont 0 1 2 0
+  - display mem
+  - display ont autofind
+  - display ont capability all
+  - display ont gemport 0 ontid 0
+  - display ont info 0
+  - display ont info 0 1
+  - display ont info 0 1 2
+  - display ont info 0 1 2 3
+  - display ont info by-sn ABC
+  - display ont info by-sn sn
+  - display ont info fsp
+  - display ont info summary ont
+  - display ont optical-info 0 all
+  - display ont port state 0 1 eth-port
+  - display ont port vlan 0 1 byport eth 0
+  - display ont port vlan 0 1 byvlan 0
+  - display ont snmp-profile 0 all
+  - display ont version summary 0
+  - display ont wan-info 0 1 2 0
+  - display ont wlan-info 0 1 2 0
+  - display ont wlan-status 0 1
+  - display ont-lineprofile gpon all
+  - display ont-srvprofile gpon all
+  - display port info
+  - display service-port all
+  - display sysman service state
+  - display sysuptime
+  - display temperature
+  - display version
+  - ont add
+  - port vlan
+  simnos/plugins/nos/platforms_yaml/huawei_vrp.yaml:
+  - dir
+  - display acl all
+  - display ap all
+  - display arp all
+  - display arp brief
+  - display bgp peer
+  - display device
+  - display eth-trunk
+  - display http server
+  - display interface
+  - display interface brief
+  - display interface description
+  - display ip routing-table verbose
+  - display ip vpn-instance
+  - display ip vpn-instance interface
+  - display ipv6 neighbors
+  - display isis peer
+  - display license verbose
+  - display lldp neighbor
+  - display mac-address
+  - display module-information verbose
+  - display mpls te tunnel
+  - display nat server
+  - display ntp status
+  - display patch-information
+  - display port vlan
+  - display service-set all
+  - display service-set id id
+  - display sn license
+  - display snmp-agent community read
+  - display startup
+  - display telnet server status
+  - display temperature
+  - display traffic-filter applied-record
+  - display version
+  - display vlan
+  - display vlan brief
+  - screen-length 0 temporary
+  - virtual-cable-test
+  simnos/plugins/nos/platforms_yaml/ipinfusion_ocnos.yaml:
+  - login
+  - set cli screen-width 511
+  - show curpriv
+  - show lldp table
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/juniper_junos.yaml:
+  - set cli complete-on-space off
+  - set cli screen-length 0
+  - show arp no-resolve
+  - show bgp summary
+  - show chassis cluster interfaces
+  - show chassis cluster status
+  - show chassis firmware
+  - show chassis hardware
+  - show ethernet-switching interfaces
+  - show ethernet-switching table
+  - show interfaces
+  - show isis adjacency
+  - show lacp interfaces
+  - show lldp neighbors
+  - show ospf neighbor
+  - show route summary
+  - show rsvp interface
+  - show system configuration database usage
+  - show system processes brief
+  - show system processes summary
+  - show system uptime
+  - show version
+  - show vlans
+  simnos/plugins/nos/platforms_yaml/juniper_screenos.yaml:
+  - get route
+  simnos/plugins/nos/platforms_yaml/linux.yaml:
+  - arp -a
+  - bluetoothctl show
+  - dmidecode -t bios
+  - dmidecode -t memory
+  - dmidecode -t processor
+  - dmidecode -t system
+  - ip address show
+  - ip link show
+  - ip route show
+  - ip vrf show
+  - iwconfig
+  - iwlist wlan0 scanning
+  - nmcli connection show
+  - pct config 1
+  - pct list
+  - pveversion
+  - qm config 1
+  - qm list
+  - top
+  - vzlist
+  simnos/plugins/nos/platforms_yaml/mikrotik_routeros.yaml:
+  - interface bonding print detail
+  - interface bridge host print terse without-paging
+  - interface ethernet monitor name once
+  - interface ethernet poe print without-paging
+  - interface ethernet print
+  - interface print brief
+  - interface print detail
+  - interface print terse without-paging
+  - interface vlan print detail
+  - interface wireguard peers print terse without-paging
+  - interface wireguard print terse without-paging
+  - ip address export verbose
+  - ip address print
+  - ip arp print
+  - ip arp print terse without-paging
+  - ip arp print without-paging
+  - ip dhcp-server lease print
+  - ip dhcp-server lease print terse without-paging
+  - ip dhcp-server lease print without-paging
+  - ip dns cache print terse without-paging
+  - ip firewall address-list print terse
+  - ip firewall connection print terse without-paging
+  - ip firewall filter print all without-paging
+  - ip firewall nat print all without-paging
+  - ip hotspot ip-binding print terse without-paging
+  - ip neighbor print detail
+  - ip route print detail
+  - ip route print terse
+  - ip route print terse without-paging
+  - ipv6 neighbor print without-paging
+  - log print detail without-paging
+  - ping
+  - routing bgp peer print status
+  - routing bgp peer print status without-paging
+  - routing ospf interface print terse
+  - routing ospf neighbor print
+  - routing ospf neighbor print terse without-paging
+  - snmp community print without-paging
+  - system clock print
+  - system identity print
+  - system resource print
+  - system routerboard print
+  - tool profile
+  - tool speed-test address
+  - user active print
+  - user print
+  simnos/plugins/nos/platforms_yaml/oneaccess_oneos.yaml:
+  - cat bsa bsaboot.inf
+  - hostname
+  - ls
+  - show cellular-radio context
+  - show cellular-radio equipment
+  - show cellular-radio network
+  - show helpers
+  - show interfaces
+  - show ip access-lists
+  - show ip as-path-access-list
+  - show ip bgp summary
+  - show ip interface brief
+  - show ip prefix-list
+  - show ip ssh
+  - show ip vrf brief
+  - show isdn active
+  - show isdn led-status
+  - show isdn status all
+  - show memory
+  - show policy-interface output
+  - show product-info-area
+  - show reboot counters
+  - show route-map
+  - show running-config aaa
+  - show running-config bind
+  - show running-config ip dhcp
+  - show running-config ip route
+  - show snmp community
+  - show sntp
+  - show soft-file info
+  - show software-image
+  - show system hardware
+  - show system secure-crashlog
+  - show system status
+  - show tacacs
+  - show tacacs-server
+  - show track all
+  - show transceiver equipment
+  - show voice dial-peer voice voip all
+  - show voice mos
+  - show voice sip-gateway
+  - show voice voice-port all
+  - show voice voice-port pri all
+  - show voice voice-port pri all histo
+  - show voice voip-call active all
+  - show voice voip-call any all
+  - show vrrp interface
+  simnos/plugins/nos/platforms_yaml/paloalto_panos.yaml:
+  - debug swm status
+  - request license info
+  - show arp all
+  - show counter global
+  - show high-availability all
+  - show high-availability path-monitoring
+  - show interface all
+  - show interface hardware
+  - show interface logical
+  - show interface management
+  - show jobs all
+  - show lacp aggregate-ethernet all
+  - show mac all
+  - show routing protocol bgp summary
+  - show routing resource
+  - show routing route
+  - show running nat-policy
+  - show running security-policy
+  - show system info
+  - test security-policy-match
+  simnos/plugins/nos/platforms_yaml/ruckus_fastiron.yaml:
+  - show arp
+  - show interfaces
+  - show interfaces brief
+  - show mac-address
+  - show media validation
+  - show version
+  - show vlan
+  simnos/plugins/nos/platforms_yaml/ubiquiti_edgerouter.yaml:
+  - show arp
+  - show dhcp leases
+  - show dhcpv6 server leases
+  - show interfaces
+  - show interfaces ethernet physical
+  - show ip route
+  - show ipv6 neighbors
+  - show ipv6 route
+  - show nat rules
+  - show version
+  - terminal length 0
+  - terminal width 512
+  simnos/plugins/nos/platforms_yaml/ubiquiti_edgeswitch.yaml:
+  - show arp
+  - show version
+  - show vlan
+  - terminal width 511
+  simnos/plugins/nos/platforms_yaml/vyatta_vyos.yaml:
+  - show arp
+  - show interfaces
+  - show ip bgp summary
+  simnos/plugins/nos/platforms_yaml/watchguard_firebox.yaml:
+  - show arp
+  simnos/plugins/nos/platforms_yaml/yamaha.yaml:
+  - show environment
+  - show ip route
+  simnos/plugins/nos/platforms_yaml/zte_zxros.yaml:
+  - show arp
+  - show interface
+  - show interface brief
+  - show isis adjacency
+  - show mpls traffic-eng tunnels
+  - show version
+  simnos/plugins/nos/platforms_yaml/zyxel_os.yaml:
+  - cfg firewall acl get
+  - cfg intf group get
+  - cfg ipalias get
+  - cfg lan get
+  - cfg lan get --Name name
+  - cfg lanhosts get
+  - cfg nat addr map get
+  - cfg nat get
+  - cfg snmp get
+  - cfg static dhcp get
+  - cfg static route get
+  - cfg wlan get
+  - sys atsh
+  - zycli Ethctl media-type

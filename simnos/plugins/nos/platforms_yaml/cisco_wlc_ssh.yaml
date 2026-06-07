@@ -1,13 +1,13 @@
 name: cisco_wlc_ssh
-initial_prompt: '{base_prompt}>'
-enable_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}>"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show 802.11a:
     output: "\n802.11a Network.................................. Disabled\n11acSupport......................................\
       \ Enabled\n11nSupport....................................... Enabled\n      802.11a Low Band...........................\
@@ -68,8 +68,8 @@ commands:
       \ Disabled\nMaximum Number of Clients per AP Radio........... 200\n"
     help: execute the command "show 802.11a"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show 802.11a cleanair config:
     output: "\nClean Air Solution............................... Disabled\nAir Quality Settings:\n    Air Quality Reporting........................\
       \ Enabled\n    Air Quality Reporting Period (min)........... 15\n    Air Quality Alarms........................... Enabled\n\
@@ -208,11 +208,11 @@ commands:
     help: execute the command "show band-select"
     prompt: *id001
   show boot:
-    output: 'Primary Boot Image............................... 8.10.183.0 (default) (active)
+    output: "Primary Boot Image............................... 8.10.183.0 (default) (active)
 
       Backup Boot Image................................ 8.8.125.0
 
-      '
+      "
     help: execute the command "show boot"
     prompt: *id001
   show cdp neighbors detail:
@@ -320,7 +320,7 @@ commands:
     help: execute the command "show client detail"
     prompt: *id001
   show exclusionlist:
-    output: 'Manually Disabled Clients
+    output: "Manually Disabled Clients
 
       -------------------------
 
@@ -338,11 +338,11 @@ commands:
 
 
 
-      No dynamically excluded clients.'
+      No dynamically excluded clients."
     help: execute the command "show exclusionlist"
     prompt: *id001
   show flexconnect group summary:
-    output: 'FlexConnect Group Summary: Count: 4
+    output: "FlexConnect Group Summary: Count: 4
 
       Group Name            # Aps
 
@@ -355,11 +355,11 @@ commands:
 
       default-flex-group                0
 
-      default-flex-group-1826280552     0'
+      default-flex-group-1826280552     0"
     help: execute the command "show flexconnect group summary"
     prompt: *id001
   show interface detailed id:
-    output: '
+    output: "
 
 
       Interface Name................................... my-interface
@@ -427,11 +427,11 @@ commands:
       L2 Multicast..................................... Enabled
 
 
-      '
+      "
     help: execute the command "show interface detailed id"
     prompt: *id001
   show interface group summary:
-    output: 'Interface Group Name             Total Interfaces  Total Wlans  Total AP Groups  Quarantine
+    output: "Interface Group Name             Total Interfaces  Total Wlans  Total AP Groups  Quarantine
 
       -------------------------------- ----------------  -----------  ---------------  ----------
 
@@ -441,7 +441,7 @@ commands:
 
       intgrp_byod                              1              2              11             No
 
-      '
+      "
     help: execute the command "show interface group summary"
     prompt: *id001
   show interface summary:
@@ -453,6 +453,8 @@ commands:
     help: execute the command "show interface summary"
     prompt: *id001
   show inventory:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     output: '
 
       Burned-in MAC Address............................ 70:1F:53:12:34:56
@@ -518,7 +520,7 @@ commands:
     help: execute the command "show radius summary"
     prompt: *id001
   show redundancy detail:
-    output: 'Redundancy Management IP Address................. 10.128.1.2
+    output: "Redundancy Management IP Address................. 10.128.1.2
 
       Peer Redundancy Management IP Address............ 10.128.1.3
 
@@ -554,7 +556,7 @@ commands:
 
       -------------------    -------------------   -------------------
 
-      '
+      "
     help: execute the command "show redundancy detail"
     prompt: *id001
   show redundancy summary:
@@ -591,9 +593,9 @@ commands:
     help: execute the command "show stats port summary"
     prompt: *id001
   show sysinfo:
-    output: '
+    output: "
 
-      Manufacturer''s Name.............................. Cisco Systems Inc.
+      Manufacturer's Name.............................. Cisco Systems Inc.
 
       Product Name..................................... Cisco Controller
 
@@ -668,7 +670,7 @@ commands:
       Maximum number of APs supported.................. 25
 
 
-      '
+      "
     help: execute the command "show sysinfo"
     prompt: *id001
   show tacacs summary:
@@ -704,8 +706,8 @@ commands:
     help: execute the command "show wlan sum"
     prompt: *id001
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"

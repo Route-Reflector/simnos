@@ -757,19 +757,19 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip ospf neighbor:
-    output: 'Neighbor ID     VRF    Pri   State            Dead Time   Address         Interface
+    output: "Neighbor ID     VRF    Pri   State            Dead Time   Address         Interface
 
       3.3.3.3         default    1   FULL/BDR         00:00:34    10.3.4.3        Ethernet2
 
       2.2.2.2         default    1   FULL             00:00:38    10.2.4.2        Ethernet3
 
-      '
+      "
     help: execute the command "show ip ospf neighbor"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show reload cause:
-    output: 'Reload Cause 1:
+    output: "Reload Cause 1:
 
       -------------------
 
@@ -794,7 +794,7 @@ commands:
 
       ----------------------
 
-      None available.'
+      None available."
     help: execute the command "show reload cause"
     prompt:
     - "{base_prompt}>"
@@ -861,7 +861,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show vlan:
-    output: 'VLAN  Name                             Status    Ports
+    output: "VLAN  Name                             Status    Ports
 
       ----- -------------------------------- --------- -------------------------------
 
@@ -873,25 +873,25 @@ commands:
 
       30    VLAN0030                         suspended
 
-      '
+      "
     help: execute the command "show vlan"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show hostname:
-    output: 'eos-spine1#show hostname
+    output: "eos-spine1#show hostname
 
       Hostname: spine1
 
       FQDN:     spine1.company.com
 
-      '
+      "
     help: execute the command "show hostname"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip interface brief:
-    output: 'Interface              IP Address         Status     Protocol         MTU
+    output: "Interface              IP Address         Status     Protocol         MTU
 
       Loopback0              1.1.1.1/32         up         up             65535
 
@@ -904,7 +904,7 @@ commands:
       Port-Channel1          11.11.11.11/24     down       lowerlayerdown  1500
 
 
-      '
+      "
     help: execute the command "show ip interface brief"
     prompt:
     - "{base_prompt}>"
@@ -1039,11 +1039,11 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show boot-config:
-    output: 'Software image: flash:/EOS-2.2.0.swi
+    output: "Software image: flash:/EOS-2.2.0.swi
 
       Console speed: (not set)
 
-      Aboot password (encrypted): $1$ap1QMbmz$DTqsFYeauuMSa7/Qxbi2l1'
+      Aboot password (encrypted): $1$ap1QMbmz$DTqsFYeauuMSa7/Qxbi2l1"
     help: execute the command "show boot-config"
     prompt:
     - "{base_prompt}>"
@@ -1134,7 +1134,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   bash df -h:
-    output: 'Filesystem      Size  Used Avail Use% Mounted on
+    output: "Filesystem      Size  Used Avail Use% Mounted on
 
       none            4.6G   44M  4.5G   1% /
 
@@ -1160,13 +1160,13 @@ commands:
 
       tmpfs           1.0G  218M  807M  22% /var/shmem
 
-      /dev/sda1       3.3G  1.2G  2.2G  35% /mnt/flash'
+      /dev/sda1       3.3G  1.2G  2.2G  35% /mnt/flash"
     help: execute the command "bash df -h"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show environment cooling:
-    output: 'System cooling status is: Ok
+    output: "System cooling status is: Ok
 
       Ambient temperature: 22C
 
@@ -1250,13 +1250,13 @@ commands:
 
       PowerSupply7/1   Ok                           70%              70%
 
-      PowerSupply8     Not Inserted                 N/A              N/A'
+      PowerSupply8     Not Inserted                 N/A              N/A"
     help: execute the command "show environment cooling"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show interfaces description:
-    output: 'Interface                      Status         Protocol           Description
+    output: "Interface                      Status         Protocol           Description
 
       Et1                            admin down     down               ThiS iS a TeSt
       DeScriPtiON
@@ -1312,7 +1312,7 @@ commands:
       Vl4094                         up             up                 MLAG local
       int
 
-      '
+      "
     help: execute the command "show interfaces description"
     prompt:
     - "{base_prompt}>"
@@ -1412,7 +1412,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show mlag:
-    output: 'MLAG Configuration:
+    output: "MLAG Configuration:
 
       domain-id           :          mlagDomain
 
@@ -1449,13 +1449,13 @@ commands:
       Active-full         :                   0
 
 
-      '
+      "
     help: execute the command "show mlag"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show pim ipv4 neighbor:
-    output: 'PIM Neighbor Table for default VRF
+    output: "PIM Neighbor Table for default VRF
 
       Neighbor Address  Interface             Uptime    Expires   Mode    Transport
 
@@ -1465,13 +1465,13 @@ commands:
 
       192.0.2.6         Vlan100               02:04:47  00:01:32  sparse  datagram
 
-      192.0.2.8         Vlan200               02:04:47  00:01:35  sparse  datagram'
+      192.0.2.8         Vlan200               02:04:47  00:01:35  sparse  datagram"
     help: execute the command "show pim ipv4 neighbor"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip arp:
-    output: 'Address      Age (min) Hardware Addr  Interface
+    output: "Address      Age (min) Hardware Addr  Interface
 
       172.25.0.2           0 004c.6211.021e Vlan101, Port-Channel2
 
@@ -1481,18 +1481,18 @@ commands:
 
       10.10.1.1          N/A 0002.00ff.0001 Vlan1, not learned
 
-      '
+      "
     help: execute the command "show ip arp"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show clock:
-    output: 'Mon Jan 14 18:42:49 2013
+    output: "Mon Jan 14 18:42:49 2013
 
       timezone is US/Central
 
 
-      '
+      "
     help: execute the command "show clock"
     prompt:
     - "{base_prompt}>"
@@ -1543,8 +1543,8 @@ commands:
       total (3029774336 bytes free)\n"
     help: execute the command "dir"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
     output_variants:
     - "Directory of flash:/\n\n       -rwx   591941836            Aug 2  2017  EOS-4.18.3.1F.swi\n\
       \       -rwx   609823300           Feb 14 02:03  EOS-4.19.5M.swi\n       -rwx\

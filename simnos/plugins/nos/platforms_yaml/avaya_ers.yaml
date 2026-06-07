@@ -155,7 +155,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show logging config:
-    output: 'Event Logging: Enabled
+    output: "Event Logging: Enabled
 
       Volatile Logging Option: Latch
 
@@ -173,7 +173,7 @@ commands:
 
       Facility: Daemon
 
-      '
+      "
     help: execute the command "show logging config"
     prompt:
     - "{base_prompt}>"
@@ -317,22 +317,19 @@ commands:
     - "{base_prompt}#"
   logout:
     output: null
-    help: Execute the command logout. This automatically generated. Feel free to change
-      it!
+    help: Execute the command logout. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   no page:
     output: null
-    help: Execute the command no page. This automatically generated. Feel free to
-      change it!
+    help: Execute the command no page. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

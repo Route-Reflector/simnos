@@ -1,49 +1,49 @@
 name: oneaccess_oneos
-initial_prompt: '{base_prompt}>'
-enable_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}>"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   term len 0:
-    output: ''
+    output: ""
     help: disable paging
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   screen-width 512:
-    output: 'error: unknown command'
+    output: "error: unknown command"
     help: set terminal width (ONEOS6, returns error to trigger ONEOS5 fallback)
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   stty columns 255:
-    output: ''
+    output: ""
     help: set terminal width (ONEOS5 fallback)
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   cat bsa bsaboot.inf:
-    output: 'flash:/BSA/binaries/OneOs
+    output: "flash:/BSA/binaries/OneOs
 
       flash:/BSA/config/bsaStart.cfg
 
-      '
+      "
     help: execute the command "cat bsa bsaboot.inf"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   hostname:
-    output: 'dops-lab-02
+    output: "dops-lab-02
 
-      '
+      "
     help: execute the command "hostname"
     prompt: *id001
   ls:
-    output: 'Listing the directory /BSA/binaries
+    output: "Listing the directory /BSA/binaries
 
       .                                       0
 
@@ -53,7 +53,7 @@ commands:
 
       ONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593
 
-      '
+      "
     help: execute the command "ls"
     prompt: *id001
   show cellular-radio context:
@@ -226,7 +226,7 @@ commands:
     help: execute the command "show ip as-path-access-list"
     prompt: *id001
   show ip bgp summary:
-    output: 'BGP router identifier 194.5.12.148, local AS number 65000, vrf (null)
+    output: "BGP router identifier 194.5.12.148, local AS number 65000, vrf (null)
 
       6 BGP AS-PATH entries
 
@@ -240,7 +240,7 @@ commands:
 
       Total number of neighbors 1
 
-      '
+      "
     help: execute the command "show ip bgp summary"
     prompt: *id001
   show ip interface brief:
@@ -276,7 +276,7 @@ commands:
     help: execute the command "show ip prefix-list"
     prompt: *id001
   show ip ssh:
-    output: 'SSH Enabled
+    output: "SSH Enabled
 
       Authentication timeout 30 secs, retries 3
 
@@ -298,7 +298,7 @@ commands:
 
       SCP server enabled
 
-      '
+      "
     help: execute the command "show ip ssh"
     prompt: *id001
   show ip vrf brief:
@@ -339,7 +339,7 @@ commands:
     help: execute the command "show isdn status all"
     prompt: *id001
   show memory:
-    output: '===============================================
+    output: "===============================================
 
       | Memory status report  |   Kbytes  |         |
 
@@ -393,7 +393,7 @@ commands:
 
       ===============================================
 
-      '
+      "
     help: execute the command "show memory"
     prompt: *id001
   show policy-interface output:
@@ -674,7 +674,7 @@ commands:
     help: execute the command "show policy-interface output"
     prompt: *id001
   show product-info-area:
-    output: '+----------------------------------------------------------------+
+    output: "+----------------------------------------------------------------+
 
       |                       Product Info Area                        |
 
@@ -760,7 +760,7 @@ commands:
 
       +------------------------------+---------------------------------+
 
-      '
+      "
     help: execute the command "show product-info-area"
     prompt: *id001
   show reboot counters:
@@ -778,7 +778,7 @@ commands:
     help: execute the command "show route-map"
     prompt: *id001
   show running-config aaa:
-    output: 'aaa group server tacacs TACGROUP
+    output: "aaa group server tacacs TACGROUP
 
       aaa authentication login default TACGROUP
 
@@ -812,11 +812,11 @@ commands:
 
       aaa authentication banner sequence 1 *-TACACS SERVER UNAVAILABLE-*
 
-      '
+      "
     help: execute the command "show running-config aaa"
     prompt: *id001
   show running-config bind:
-    output: 'bind ssh acl MANAGEMENT_IN_SSH
+    output: "bind ssh acl MANAGEMENT_IN_SSH
 
       bind ssh loopback 1
 
@@ -852,7 +852,7 @@ commands:
 
       bind telnet vrf default-router
 
-      '
+      "
     help: execute the command "show running-config bind"
     prompt: *id001
   show running-config ip dhcp:
@@ -869,17 +869,17 @@ commands:
     help: execute the command "show running-config ip dhcp"
     prompt: *id001
   show running-config ip route:
-    output: 'ip route 94.105.1.119 255.255.255.255 192.168.100.2
+    output: "ip route 94.105.1.119 255.255.255.255 192.168.100.2
 
       ip route 94.105.16.130 255.255.255.255 Bvi 200
 
       ip route 94.105.34.2 255.255.255.255 192.168.100.3
 
-      '
+      "
     help: execute the command "show running-config ip route"
     prompt: *id001
   show snmp community:
-    output: 'SNMP write community: Kl3t5k0p
+    output: "SNMP write community: Kl3t5k0p
 
       SNMP access control lists :52
 
@@ -887,7 +887,7 @@ commands:
 
       SNMP access control lists :52
 
-      '
+      "
     help: execute the command "show snmp community"
     prompt: *id001
   show sntp:
@@ -904,7 +904,7 @@ commands:
     help: execute the command "show soft-file info"
     prompt: *id001
   show software-image:
-    output: '--------------- Active bank ---------------
+    output: "--------------- Active bank ---------------
 
       Software version : OneOS-pCPE-ARM_pi1-6.8.4
 
@@ -921,7 +921,7 @@ commands:
 
       Header checksum  : 0x73ED8876
 
-      '
+      "
     help: execute the command "show software-image"
     prompt: *id001
   show system hardware:
@@ -967,7 +967,7 @@ commands:
     help: execute the command "show system secure-crashlog"
     prompt: *id001
   show system status:
-    output: 'System Information for device MB420SAVad0UFPE0BNW S/N T1703006230033175
+    output: "System Information for device MB420SAVad0UFPE0BNW S/N T1703006230033175
 
 
       Software version    : ONEOS16-MONO_FT-V5.2R2E7_HA8
@@ -1006,7 +1006,7 @@ commands:
 
       Free / Max RAM      :  163,04 /  208,59 MB
 
-      '
+      "
     help: execute the command "show system status"
     prompt: *id001
   show tacacs:
@@ -1040,11 +1040,11 @@ commands:
     help: execute the command "show track all"
     prompt: *id001
   show transceiver equipment:
-    output: '
+    output: "
 
       No SFP module present
 
-      '
+      "
     help: execute the command "show transceiver equipment"
     prompt: *id001
   show voice dial-peer voice voip all:
@@ -1139,7 +1139,7 @@ commands:
     help: execute the command "show voice voice-port pri all histo"
     prompt: *id001
   show voice voip-call active all:
-    output: ''
+    output: ""
     help: execute the command "show voice voip-call active all"
     prompt: *id001
   show voice voip-call any all:
@@ -1850,8 +1850,8 @@ commands:
     help: execute the command "show vrrp interface"
     prompt: *id001
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"

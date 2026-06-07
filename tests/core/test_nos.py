@@ -3,6 +3,7 @@ Test module for simnos.core.nos module.
 This module can be found at simnos/core/nos.py
 """
 
+import copy
 import pathlib
 import tempfile
 import unittest
@@ -32,6 +33,15 @@ class NosTest(unittest.TestCase):
         with open("tests/assets/yaml_nos.yaml", encoding="utf-8") as yml_file:
             cls.commands = yaml.safe_load(yml_file)["commands"]
 
+    def _normalized_commands(self, commands: dict | None = None) -> dict:
+        """Expected runtime form of authored commands (#244 / D3).
+
+        Every load path normalizes `prompt` str -> [str] on a deepcopied
+        candidate, so equality assertions against authored dicts compare
+        through this helper.
+        """
+        return Nos.normalize_command_prompts(copy.deepcopy(commands if commands is not None else self.commands))
+
     def test_init_without_arguments(self):
         """
         Test that the init method works when no arguments are provided.
@@ -48,7 +58,7 @@ class NosTest(unittest.TestCase):
         nos = Nos(name="MySimNOS", initial_prompt="MySimNOS>", commands=self.commands)
         assert nos.name == "MySimNOS"
         assert nos.initial_prompt == "MySimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_init_with_argument_name(self):
         """
@@ -76,7 +86,7 @@ class NosTest(unittest.TestCase):
         nos = Nos(commands=self.commands)
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_validate(self):
         """
@@ -101,7 +111,7 @@ class NosTest(unittest.TestCase):
         )
         assert nos.name == "MySimNOS"
         assert nos.initial_prompt == "MySimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_dict_incorrect_name(self):
         """
@@ -154,7 +164,7 @@ class NosTest(unittest.TestCase):
         nos.from_dict({"commands": self.commands})
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_dict_no_data(self):
         """
@@ -166,6 +176,132 @@ class NosTest(unittest.TestCase):
         assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
+    def test_from_dict_unknown_top_level_key_raises(self):
+        """A typo'd top-level key is rejected loudly, nothing is committed.
+
+        Pins the D8 (#244) flip of the old lenient contract: `enable_promt`
+        used to be dropped silently by the targeted `data.get()` reads.
+        The allowed key set is `ModelNosAttributes.model_fields` (SSoT),
+        and the check runs before any attribute commit (no-partial-state,
+        #232).
+        """
+        nos = Nos()
+        with pytest.raises(ValueError, match=r"unknown top-level field\(s\): \['enable_promt'\]"):
+            nos.from_dict({"name": "polluted", "enable_promt": "{base_prompt}#"})
+        assert nos.name == "SimNOS"
+
+    def test_from_file_schema_invalid_yaml_leaves_nos_untouched(self):
+        """A schema-invalid yaml raises ValidationError before any commit.
+
+        Pins the D8 (#244) merged-view validation on the `from_file` path:
+        hot reload (`reload_commands`) calls `from_file` directly and never
+        reaches `__init__`'s trailing `validate()`, so a yaml with e.g. an
+        int `output` used to be committed silently into a running shell.
+        """
+        bad_yaml = self._write_tmp_file(
+            "schema_invalid_nos.yaml",
+            "name: polluted\ncommands:\n  cmd:\n    output: 123\n    help: int output\n",
+        )
+        nos = Nos()
+        with pytest.raises(ValidationError, match=r"output"):
+            nos.from_file(bad_yaml)
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
+
+    def test_from_dict_unknown_command_field_raises(self):
+        """A typo'd command field fails validation before any commit.
+
+        Pins the D5 (#244) flip of the old lenient contract:
+        `ModelNosCommand` is `extra="forbid"` now, so a typo'd field
+        (`outptu`) raises ValidationError out of the pre-commit merged-view
+        validation instead of being silently accepted.
+        """
+        nos = Nos()
+        with pytest.raises(ValidationError, match=r"outptu"):
+            nos.from_dict(
+                {
+                    "name": "polluted",
+                    "commands": {"cmd": {"output": "x", "help": "x", "outptu": "typo"}},
+                }
+            )
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
+
+    def test_from_dict_accepts_output_variants(self):
+        """`output_variants` is a declared data-only field, not a typo.
+
+        Pins the D5 (#244) declaration: 16 platform yamls carry alternate
+        captures under this key (#234) and must keep loading under
+        `extra="forbid"`.
+        """
+        nos = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "cmd": {
+                        "output": "primary",
+                        "help": "x",
+                        "output_variants": ["alternate capture"],
+                    },
+                },
+            }
+        )
+        assert nos.commands["cmd"]["output_variants"] == ["alternate capture"]
+
+    def test_from_dict_does_not_mutate_caller_dict(self):
+        """Caller-owned data must stay untouched by a load (#244 / D3).
+
+        `from_dict` normalizes `prompt` str -> [str] on a deepcopied
+        candidate, so the caller's dict (and, symmetrically, a py plugin's
+        module-level `commands` constant) keeps its original authoring
+        form — an accidental switch to in-place normalization turns into
+        a test failure here.
+        """
+        caller_commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}
+        nos = Nos()
+        nos.from_dict({"name": "synth", "commands": caller_commands})
+        assert caller_commands["cmd"]["prompt"] == "{base_prompt}>"
+        assert isinstance(caller_commands["cmd"]["prompt"], str)
+
+    def test_from_dict_normalizes_str_prompt_to_list(self):
+        """A bare-str `prompt` authoring form lands as a list at runtime.
+
+        Pins the load-path normalization (#244 / D3): authoring keeps the
+        str/list sugar, runtime consumers (cmd_shell dispatch + mismatch
+        log) see lists only — the read-side isinstance branches are gone.
+        """
+        nos = Nos()
+        nos.from_dict(
+            {
+                "name": "synth",
+                "commands": {
+                    "str form": {"output": "x", "help": "x", "prompt": "{base_prompt}>"},
+                    "list form": {"output": "x", "help": "x", "prompt": ["{base_prompt}>"]},
+                    "no prompt": {"output": "x", "help": "x"},
+                },
+            }
+        )
+        assert nos.commands["str form"]["prompt"] == ["{base_prompt}>"]
+        assert nos.commands["list form"]["prompt"] == ["{base_prompt}>"]
+        assert "prompt" not in nos.commands["no prompt"]
+
+    def test_from_module_normalizes_str_prompt_to_list(self):
+        """The py-plugin path normalizes prompts the same way as from_dict.
+
+        Same #244 / D3 pin for `_from_module`, which commits through its
+        own deepcopied candidate (module-level `commands` constants keep
+        their authoring form).
+        """
+        plugin = self._write_tmp_file(
+            "str_prompt_module.py",
+            'NAME = "str_prompt"\nINITIAL_PROMPT = "{base_prompt}>"\n'
+            'commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}\n',
+        )
+        nos = Nos()
+        nos.from_file(plugin)
+        assert nos.commands["cmd"]["prompt"] == ["{base_prompt}>"]
+
     def test_from_yaml_file(self):
         """
         Test that the from_file method works .yaml.
@@ -174,7 +310,7 @@ class NosTest(unittest.TestCase):
         nos.from_file("tests/assets/yaml_nos.yaml")
         assert nos.name == "Custom Nos 0.1.0"
         assert nos.initial_prompt == "{base_prompt}>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_file_incorrect_yaml_file(self):
         """
@@ -239,8 +375,9 @@ class NosTest(unittest.TestCase):
         assert nos.name == "test_module"
         assert nos.initial_prompt == "{base_prompt}>"
         assert nos.device.__class__.__name__ == "TestModule"
+        expected = self._normalized_commands(module.commands)
         self.assertTrue(
-            all(item in nos.commands.items() for item in module.commands.items() if not callable(item[1]["output"]))
+            all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
         )
 
     def test_from_file_incorrect_py_file(self):
@@ -261,8 +398,9 @@ class NosTest(unittest.TestCase):
         nos._from_module("tests/assets/module.py")
         assert nos.name == "test_module"
         assert nos.initial_prompt == "{base_prompt}>"
+        expected = self._normalized_commands(module.commands)
         self.assertTrue(
-            all(item in nos.commands.items() for item in module.commands.items() if not callable(item[1]["output"]))
+            all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
         )
 
     def test_from_module_incorrect_file(self):
@@ -454,7 +592,7 @@ class NosTest(unittest.TestCase):
 
         assert nos.name == "Custom Nos 0.1.0"
         assert nos.initial_prompt == "{base_prompt}>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_register_nos_plugin_incorrect_commands(self):
         """

@@ -63,7 +63,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   traffic-profiling standard-profile show:
-    output: '+---------------------------------------- STANDARD PROFILE TABLE -----------------------------------------+
+    output: "+---------------------------------------- STANDARD PROFILE TABLE -----------------------------------------+
 
       |  Port |      Profile       |    |Parent|        BW (Kbps)    |   Max Burst
       KB  |       CLASSIFIERS      |
@@ -85,7 +85,7 @@ commands:
       |24     |1   |V4096          | N  |    0 |       32 |        0 |   3000 |      0
       | VS | TestC             |
 
-      +-------+----+---------------+----+------+----------+----------+--------+--------+------------------------+'
+      +-------+----+---------------+----+------+----------+----------+--------+--------+------------------------+"
     help: execute the command "traffic-profiling standard-profile show"
     prompt:
     - "{base_prompt}>"
@@ -209,7 +209,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   lldp show neighbors:
-    output: '+--------------------------------------------------------------------------------------------------------------+
+    output: "+--------------------------------------------------------------------------------------------------------------+
 
       |                                                LLDP Neighbors                                                |
 
@@ -279,13 +279,13 @@ commands:
 
       +-------------+--------------------------------+---------------------------------------------------------------+
 
-      '
+      "
     help: execute the command "lldp show neighbors"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   port show ethernet-config:
-    output: '+------------------------ PORT ETHERNET CONFIGURATION -------------------------+
+    output: "+------------------------ PORT ETHERNET CONFIGURATION -------------------------+
 
       |        |         |       |      |     |    |    |     |      |    Mirror     |
 
@@ -316,11 +316,11 @@ commands:
 
       +--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
 
-      '
+      "
     help: execute the command "port show ethernet-config"
     prompt: *id001
   port show network-config:
-    output: '+----------------------------- PORT NETWORK CONFIGURATION ------------------------------+
+    output: "+----------------------------- PORT NETWORK CONFIGURATION ------------------------------+
 
       |         |     | Accpt  |Untag  |VLAN   |VS     |Egress |VS     |Ingress| VPLS  |Eth
       VC|
@@ -351,11 +351,11 @@ commands:
 
       +---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
 
-      '
+      "
     help: execute the command "port show network-config"
     prompt: *id001
   port show status:
-    output: '+---------------------------- PORT OPERATIONAL STATUS ----------------------------+
+    output: "+---------------------------- PORT OPERATIONAL STATUS ----------------------------+
 
       |    |                               |    |Link State|    |   |Speed/ |MTU  |Flow
       |
@@ -379,11 +379,11 @@ commands:
 
       +----+-------------------------------+----+----------+----+---+-------+-----+-----+
 
-      '
+      "
     help: execute the command "port show status"
     prompt: *id001
   port xcvr show:
-    output: '+----+-----+-----+---------Transceiver-Status------------+-----+----------------+----+
+    output: "+----+-----+-----+---------Transceiver-Status------------+-----+----------------+----+
 
       |    |Admin| Oper|                                       |Ciena|Ether Medium
       &  |Diag|
@@ -408,6 +408,6 @@ commands:
 
       +----+-----+-----+---------------------------------------+-----+----------------+----+
 
-      '
+      "
     help: execute the command "port xcvr show"
     prompt: *id001

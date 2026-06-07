@@ -25,7 +25,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   display cpu:
-    output: '  CPU occupancy: 17%'
+    output: "  CPU occupancy: 17%"
     help: execute the command "display cpu"
     prompt:
     - "{base_prompt}>"
@@ -334,7 +334,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   display mem:
-    output: '  Memory occupancy: 79%'
+    output: "  Memory occupancy: 79%"
     help: execute the command "display mem"
     prompt:
     - "{base_prompt}>"
@@ -353,7 +353,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   display sysuptime:
-    output: '  System up time: 11 day 22 hour 5 minute 17 second'
+    output: "  System up time: 11 day 22 hour 5 minute 17 second"
     help: execute the command "display sysuptime"
     prompt:
     - "{base_prompt}>"
@@ -430,8 +430,8 @@ commands:
       ip4--ipv4oe, ip6--ipv6oe\n"
     help: execute the command "display location"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   display location aaaa-aaaa-aaaa ont:
     output: "{{ <cr>||<K> }}:\n\n  Command:\n          display location aaaa-aaaa-aaaa
       ont\n  It will take several minutes, please wait or press CTRL_C to break\n\

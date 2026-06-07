@@ -34,7 +34,7 @@ commands:
     - "{base_prompt}~$"
     - "{base_prompt}#"
   show arp:
-    output: 'Address                  HWtype  HWaddress           Flags Mask            Iface
+    output: "Address                  HWtype  HWaddress           Flags Mask            Iface
 
       10.123.254.20            ether   9c:8e:99:fa:15:0a   C                     eth1.1230
 
@@ -48,13 +48,13 @@ commands:
 
       123.12.120.57            ether   11:22:33:aa:65:bb   C                     eth0.42
 
-      '
+      "
     help: execute the command "show arp"
     prompt:
     - "{base_prompt}~$"
     - "{base_prompt}#"
   show ip bgp summary:
-    output: 'IPv4 Unicast Summary:
+    output: "IPv4 Unicast Summary:
 
       BGP router identifier 10.10.10.1, local AS number 123456 vrf-id 0
 
@@ -78,7 +78,7 @@ commands:
 
       Total number of neighbors 3
 
-      '
+      "
     help: execute the command "show ip bgp summary"
     prompt:
     - "{base_prompt}~$"

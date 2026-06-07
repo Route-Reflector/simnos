@@ -1,25 +1,25 @@
 name: cisco_viptela
-initial_prompt: '{base_prompt}>'
-enable_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}>"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show arp:
-    output: 'VPN  IF NAME  IP            MAC                STATE    IDLE TIMER  UPTIME
+    output: "VPN  IF NAME  IP            MAC                STATE    IDLE TIMER  UPTIME
 
       -----------------------------------------------------------------------------
 
       0    eth0  10.10.20.70   00:50:56:bf:a0:d3  dynamic  0:00:11:33  0:00:08:28
 
-      '
+      "
     help: execute the command "show arp"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show control connections:
     output: "                                                                                             PEER           \
       \                               PEER                                          \n      PEER    PEER PEER            SITE\
@@ -93,8 +93,8 @@ commands:
     help: execute the command "show omp peers"
     prompt: *id001
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"

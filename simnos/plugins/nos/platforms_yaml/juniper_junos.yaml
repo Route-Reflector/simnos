@@ -141,7 +141,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show arp no-resolve:
-    output: 'MAC Address       Address         Interface     Flags
+    output: "MAC Address       Address         Interface     Flags
 
       00:00:00:00:00:04 10.1.100.130    vlan.20        none
 
@@ -166,7 +166,7 @@ commands:
 
       {{master:0}}
 
-      '
+      "
     help: execute the command "show arp no-resolve"
     prompt:
     - "{base_prompt}>"
@@ -395,7 +395,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show chassis cluster status:
-    output: 'Monitor Failure codes:
+    output: "Monitor Failure codes:
 
       CS  Cold Sync monitoring        FL  Fabric Connection monitoring
 
@@ -435,13 +435,13 @@ commands:
 
       node1  0        lost           n/a     n/a      n/a
 
-      '
+      "
     help: execute the command "show chassis cluster status"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show isis adjacency:
-    output: 'Interface             System         L State        Hold (secs) SNPA
+    output: "Interface             System         L State        Hold (secs) SNPA
 
       ge-0/0/2.0            CSR2           1  Up                   22  50:0:0:2:0:1
 
@@ -456,13 +456,13 @@ commands:
 
       {{master:0}}
 
-      '
+      "
     help: execute the command "show isis adjacency"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show system uptime:
-    output: 'Current time: 2021-08-31 12:29:34 MSK
+    output: "Current time: 2021-08-31 12:29:34 MSK
 
       Time Source:  NTP CLOCK
 
@@ -472,7 +472,7 @@ commands:
 
       Last configured: 2021-07-13 16:35:18 MSK (6w6d 19:54 ago) by admin
 
-      12:29PM  up 185 days, 17:59, 1 user, load averages: 0.11, 0.05, 0.01'
+      12:29PM  up 185 days, 17:59, 1 user, load averages: 0.11, 0.05, 0.01"
     help: execute the command "show system uptime"
     prompt:
     - "{base_prompt}>"
@@ -491,7 +491,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ospf neighbor:
-    output: 'Address          Interface              State     ID               Pri  Dead
+    output: "Address          Interface              State     ID               Pri  Dead
 
       10.1.2.2         ge-0/0/2.0             Full      2.2.2.2            1    37
 
@@ -500,18 +500,18 @@ commands:
 
       {{master:0}}
 
-      '
+      "
     help: execute the command "show ospf neighbor"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show lldp neighbors:
-    output: 'Local Interface    Parent Interface    Chassis Id          Port info          System
+    output: "Local Interface    Parent Interface    Chassis Id          Port info          System
       Name
 
       ge-0/0/1           -                   2c:6b:f5:a1:c2:c0   ge-0/0/1           vmx2
 
-      ge-0/0/0           -                   2c:6b:f5:a2:08:c0   ge-0/0/0           vmx3'
+      ge-0/0/0           -                   2c:6b:f5:a2:08:c0   ge-0/0/0           vmx3"
     help: execute the command "show lldp neighbors"
     prompt:
     - "{base_prompt}>"
@@ -533,14 +533,12 @@ commands:
   set cli screen-length 0:
     output: null
     help: Execute the command set cli screen-length 0. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   set cli complete-on-space off:
     output: null
     help: Execute the command set cli complete-on-space off. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -559,8 +557,8 @@ commands:
       \ Establ\n  wanUntrust.inet.0: 4/72/72/0"
     help: execute the command "show bgp summary"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show ethernet-switching interfaces:
     output: "Interface    State  VLAN members        Tag   Tagging  Blocking \n\n\
       ae0.0        up      default                   untagged unblocked\nge-0/0/2.0\
@@ -620,7 +618,7 @@ commands:
     help: execute the command "show rsvp interface"
     prompt: *id001
   show system configuration database usage:
-    output: 'Maximum size of the database: 1301.99 MB
+    output: "Maximum size of the database: 1301.99 MB
 
       Current database size on disk: 4.00 MB
 
@@ -632,13 +630,13 @@ commands:
       {{master}}
 
 
-      '
+      "
     help: execute the command "show system configuration database usage"
     prompt: *id001
     output_variants:
     - Cannot proceed, database is currently being modified
   show system processes brief:
-    output: 'last pid: 98312;  load averages:  1.72,  1.70,  1.70  up 87+21:25:46    15:51:17
+    output: "last pid: 98312;  load averages:  1.72,  1.70,  1.70  up 87+21:25:46    15:51:17
 
       302 processes: 5 running, 295 sleeping, 1 zombie, 1 waiting
 
@@ -648,11 +646,11 @@ commands:
 
       Swap: 12G Total, 12G Free
 
-      '
+      "
     help: execute the command "show system processes brief"
     prompt: *id001
     output_variants:
-    - '-------------------------------
+    - "-------------------------------
 
       node: fpc0
 
@@ -706,7 +704,7 @@ commands:
 
       {{master}}
 
-      '
+      "
   show system processes summary:
     output: "last pid: 24931;  load averages:  0.89,  0.94,  0.81  up 41+06:26:24\
       \    00:51:55\n545 threads:   9 running, 481 sleeping, 1 zombie, 54 waiting\n\

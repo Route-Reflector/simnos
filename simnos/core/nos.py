@@ -2,6 +2,7 @@
 Network Operating Systems (NOS). Base class to build NOS plugins instances to use with SIMNOS.
 """
 
+import copy
 import importlib.util
 import logging
 import os
@@ -82,7 +83,14 @@ class Nos:
         :param initial_prompt: NOS initial prompt
         """
         self.name = name
-        self.commands = commands or {}
+        # Constructor-passed commands are an inflow like any other: keep
+        # the caller's dict untouched and normalize the runtime copy
+        # (#244 / D3). A non-dict value is passed through for the trailing
+        # `validate()` to reject with the usual ValidationError.
+        commands = commands or {}
+        if isinstance(commands, dict):
+            commands = self.normalize_command_prompts(copy.deepcopy(commands))
+        self.commands = commands
         self.initial_prompt = initial_prompt
         self.auth: str | None = None
         self.enable_prompt: str | None = None
@@ -104,9 +112,33 @@ class Nos:
         Method to validate NOS attributes: commands, name,
         initial prompt - using Pydantic models,
         raises ValidationError on failure.
+
+        Only the schema fields are passed (explicitly extracted via
+        `ModelNosAttributes.model_fields`) — `self.__dict__` also holds
+        non-schema runtime state (`device`, `configuration_file`) that
+        must never reach the model (#244 / D8).
         """
-        ModelNosAttributes(**self.__dict__)
+        ModelNosAttributes(**{field: getattr(self, field) for field in ModelNosAttributes.model_fields})
         log.debug("%s NOS attributes validation succeeded", self.name)
+
+    @staticmethod
+    def normalize_command_prompts(commands: dict) -> dict:
+        """Normalize each command's `prompt` to `list[str] | None`.
+
+        Called on a deepcopied candidate (never on caller-owned dicts or
+        module-level `commands` constants). Authoring accepts both a bare
+        str (sugar) and a list; runtime consumers see lists only, so
+        read-side isinstance branches are unnecessary (#244 / P-12c).
+        """
+        for cmd in commands.values():
+            if not isinstance(cmd, dict):
+                # Malformed value — left for the ModelNosAttributes
+                # validation to reject (one error surface, not two).
+                continue
+            prompt = cmd.get("prompt")
+            if isinstance(prompt, str):
+                cmd["prompt"] = [prompt]
+        return commands
 
     def from_dict(self, data: dict) -> None:
         """
@@ -126,20 +158,52 @@ class Nos:
             }
 
         :param data: NOS dictionary
-        :raises ValueError: if the 'commands' value is not a mapping —
-            validated before any attribute is committed, so a malformed
-            dict never leaves partial state behind (same no-partial-state
-            contract as `_from_module`, #232)
+        :raises ValueError: if the 'commands' value is not a mapping, or
+            if `data` holds a top-level key outside the
+            `ModelNosAttributes` schema (a typo like `enable_promt` used
+            to be dropped silently, #244 / D8)
+        :raises pydantic.ValidationError: if the merged result would not
+            satisfy `ModelNosAttributes` — validated before any attribute
+            is committed, so malformed data never leaves partial state
+            behind (same no-partial-state contract as `_from_module`,
+            #232); this also covers the hot-reload path, which calls
+            `from_file` directly and never reaches `__init__`'s trailing
+            `validate()` (#244 / D8)
         """
+        unknown = data.keys() - ModelNosAttributes.model_fields.keys()
+        if unknown:
+            raise ValueError(f"NOS data has unknown top-level field(s): {sorted(unknown)}")
         commands = data.get("commands", {})
         if not isinstance(commands, dict):
             raise ValueError(f"NOS data 'commands' must be a mapping (got {type(commands).__name__})")
-        self.name = data.get("name", self.name)
-        self.commands.update(commands)
-        self.initial_prompt = data.get("initial_prompt", self.initial_prompt)
-        self.auth = data.get("auth", self.auth)
-        self.enable_prompt = data.get("enable_prompt", self.enable_prompt)
-        self.config_prompt = data.get("config_prompt", self.config_prompt)
+        # Normalize a deepcopied candidate — never the caller's dict, which
+        # stays in its original authoring form (#244 / D3).
+        candidate = self.normalize_command_prompts(copy.deepcopy(commands))
+        # Validate the exact post-commit state (a merged view, not `data`
+        # alone): commands merge cumulatively across multi-file loads and
+        # scalars keep their current value when absent from `data`.
+        merged_name = data.get("name", self.name)
+        merged_initial_prompt = data.get("initial_prompt", self.initial_prompt)
+        merged_auth = data.get("auth", self.auth)
+        merged_enable_prompt = data.get("enable_prompt", self.enable_prompt)
+        merged_config_prompt = data.get("config_prompt", self.config_prompt)
+        ModelNosAttributes(
+            name=merged_name,
+            initial_prompt=merged_initial_prompt,
+            auth=merged_auth,
+            enable_prompt=merged_enable_prompt,
+            config_prompt=merged_config_prompt,
+            commands={**self.commands, **candidate},
+        )
+        # Commit phase — mirrors the validated merged view (normalized
+        # candidate included), so the validated state and the committed
+        # state cannot drift apart.
+        self.name = merged_name
+        self.commands.update(candidate)
+        self.initial_prompt = merged_initial_prompt
+        self.auth = merged_auth
+        self.enable_prompt = merged_enable_prompt
+        self.config_prompt = merged_config_prompt
 
     def _from_yaml(self, filepath: str) -> None:
         """
@@ -200,6 +264,23 @@ class Nos:
         module_commands = getattr(module, "commands", {})
         if not isinstance(module_commands, dict):
             raise ValueError(f"Module '{filename}' 'commands' must be a mapping (got {type(module_commands).__name__})")
+        # Normalize a deepcopied candidate — never the module-level
+        # `commands` constant, which stays in its authoring form (#244 /
+        # D3; deepcopy treats callables as atomic, so handler identity is
+        # preserved).
+        candidate_commands = self.normalize_command_prompts(copy.deepcopy(module_commands))
+        # Validate the exact post-commit state before committing, mirroring
+        # `from_dict`'s merged view (#244 / D8) — this also covers hot
+        # reload, which calls `from_file` directly. No top-level key check
+        # here: unrelated module-level names are legitimate in a py plugin
+        # (only `_MODULE_ATTR_MAP` constants are mapped).
+        ModelNosAttributes(
+            **{
+                self_attr: getattr(module, module_attr, getattr(self, self_attr))
+                for module_attr, self_attr in self._MODULE_ATTR_MAP.items()
+            },
+            commands={**self.commands, **candidate_commands},
+        )
         device_classes = _find_device_classes(module)
         if len(device_classes) > 1:
             raise ValueError(
@@ -226,7 +307,7 @@ class Nos:
         # commands wholesale (typically yaml-defined ones, but multi-file
         # py loads count too; per-command full replacement, no deep
         # merge) — make the implicit precedence observable for authors.
-        overridden = self.commands.keys() & module_commands.keys()
+        overridden = self.commands.keys() & candidate_commands.keys()
         if overridden:
             log.debug(
                 "module '%s' overrides %d already-loaded command(s): %s",
@@ -234,7 +315,7 @@ class Nos:
                 len(overridden),
                 sorted(overridden),
             )
-        self.commands.update(module_commands)
+        self.commands.update(candidate_commands)
         if self.name == "SimNOS":
             log.warning(
                 "Module '%s' does not define NAME; falling back to default 'SimNOS' "

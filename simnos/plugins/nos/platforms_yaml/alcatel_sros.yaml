@@ -639,20 +639,18 @@ commands:
     - "{base_prompt}#"
   environment no more:
     output: null
-    help: Execute the command environment no more. This automatically generated. Feel
-      free to change it!
+    help: Execute the command environment no more. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   //environment more false:
     output: null
     help: Execute the command //environment more false. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ping:
-    output: 'PING 10.252.117.158 56 data bytes
+    output: "PING 10.252.117.158 56 data bytes
 
       64 bytes from 10.252.117.158: icmp_seq=1 ttl=255 time=1.93ms.
 
@@ -671,13 +669,13 @@ commands:
 
       round-trip min = 1.70ms, avg = 1.83ms, max = 1.93ms, stddev = 0.079ms
 
-      '
+      "
     help: execute the command "ping"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
     output_variants:
-    - 'PING 10.30.99.22 56 data bytes
+    - "PING 10.30.99.22 56 data bytes
 
       Request timed out. icmp_seq=1.
 
@@ -694,8 +692,8 @@ commands:
 
       5 packets transmitted, 5 packets bounced, 0 packets received, 100% packet loss
 
-      '
-    - 'PING 10.39.119.105 56 data bytes
+      "
+    - "PING 10.39.119.105 56 data bytes
 
       Request timed out. icmp_seq=1.
 
@@ -712,8 +710,8 @@ commands:
 
       5 packets transmitted, 0 packets received, 100% packet loss
 
-      '
-    - 'PING 10.42.255.74 56 data bytes
+      "
+    - "PING 10.42.255.74 56 data bytes
 
       !!!!!
 
@@ -723,16 +721,16 @@ commands:
 
       round-trip min = 2.36ms, avg = 2.39ms, max = 2.42ms, stddev = 0.025ms
 
-      '
-    - 'PING 10.30.99.22 56 data bytes
+      "
+    - "PING 10.30.99.22 56 data bytes
 
 
       ---- 10.30.99.22 PING Statistics ----
 
       5 packets transmitted, 5 packets bounced, 0 packets received, 100% packet loss
 
-      '
-    - 'PING 10.53.16.134 56 data bytes
+      "
+    - "PING 10.53.16.134 56 data bytes
 
       ...!!.!.
 
@@ -740,8 +738,8 @@ commands:
 
       5 packets transmitted, 0 packets received, 3 duplicates
 
-      '
-    - 'PING 10.39.119.105 56 data bytes
+      "
+    - "PING 10.39.119.105 56 data bytes
 
       .....
 
@@ -749,8 +747,8 @@ commands:
 
       5 packets transmitted, 0 packets received, 100% packet loss
 
-      '
-    - 'PING 10.52.198.114 56 data bytes
+      "
+    - "PING 10.52.198.114 56 data bytes
 
       Send failed. Source IP address is not local to the system
 
@@ -767,7 +765,7 @@ commands:
 
       5 packets transmitted, 0 packets received, 100% packet loss
 
-      '
+      "
   show lag port:
     output: "\n===============================================================================\n\
       Lag Port States\nLACP Status: e - Enabled, d - Disabled\n===============================================================================\n\
@@ -867,7 +865,7 @@ commands:
       \   up            1             -      32768\n       1/1/48          up    active\
       \   up            1             -      32768\n===============================================================================\n"
   show port description:
-    output: '===============================================================================
+    output: "===============================================================================
 
       Port Descriptions on Slot 1
 
@@ -952,7 +950,7 @@ commands:
       ===============================================================================
 
 
-      '
+      "
     help: execute the command "show port description"
     prompt: *id001
   show service id 0 sap:
@@ -979,7 +977,7 @@ commands:
     help: execute the command "show service id interface"
     prompt: *id001
   show service service-name-using:
-    output: '===============================================================================
+    output: "===============================================================================
 
       Services By Name
 
@@ -1014,11 +1012,11 @@ commands:
 
       ===============================================================================
 
-      '
+      "
     help: execute the command "show service service-name-using"
     prompt: *id001
   show service service-using:
-    output: '
+    output: "
 
       ===============================================================================
 
@@ -1046,7 +1044,7 @@ commands:
 
       ===============================================================================
 
-      '
+      "
     help: execute the command "show service service-using"
     prompt: *id001
     output_variants:

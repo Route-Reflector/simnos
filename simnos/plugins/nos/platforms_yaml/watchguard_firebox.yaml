@@ -1,9 +1,9 @@
 name: watchguard_firebox
-initial_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   show arp:
-    output: '--
+    output: "--
 
       -- ARP Table
 
@@ -21,10 +21,10 @@ commands:
 
       ? (10.5.0.4) at 00:01:02:03:04:05 [ether] PERM on eth0
 
-      '
+      "
     help: execute the command "show arp"
-    prompt: '{base_prompt}#'
+    prompt: "{base_prompt}#"
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
-    prompt: '{base_prompt}#'
+    prompt: "{base_prompt}#"

@@ -1,15 +1,15 @@
 name: extreme_slxos
-initial_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   show clock:
-    output: '2024-10-14 16:33:35 Europe/Zurich
+    output: "2024-10-14 16:33:35 Europe/Zurich
 
-      '
+      "
     help: execute the command "show clock"
-    prompt: '{base_prompt}#'
+    prompt: "{base_prompt}#"
   show ip interface brief:
-    output: 'Flags:  I - Insight Enabled     U - Unnumbered interface
+    output: "Flags:  I - Insight Enabled     U - Unnumbered interface
 
       Interface              IP-Address          Vrf                                           Status                    Protocol
 
@@ -61,10 +61,10 @@ commands:
 
       Ve 734                 10.224.8.137         ABC-PUBLIC-LEGACY                             administratively down     down
 
-      '
+      "
     help: execute the command "show ip interface brief"
-    prompt: '{base_prompt}#'
+    prompt: "{base_prompt}#"
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
-    prompt: '{base_prompt}#'
+    prompt: "{base_prompt}#"

@@ -32,7 +32,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ping:
-    output: 'Type escape sequence to abort.
+    output: "Type escape sequence to abort.
 
       Sending 5, 100-byte ICMP Echos to 10.91.108.200, timeout is 2 seconds:
 
@@ -40,15 +40,14 @@ commands:
 
       Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 
-      '
+      "
     help: execute the command "ping"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   enable clipaging:
     output: null
-    help: Execute the command enable clipaging. This automatically generated. Feel
-      free to change it!
+    help: Execute the command enable clipaging. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

@@ -43,7 +43,7 @@ commands:
     - "{base_prompt}#"
   show vlan:
     help: execute the command "show vlan"
-    output: 'VLAN ID VLAN Name                        VLAN Type
+    output: "VLAN ID VLAN Name                        VLAN Type
 
       ------- -------------------------------- -------------------
 
@@ -57,7 +57,7 @@ commands:
 
       217     server                           Static
 
-      '
+      "
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -69,8 +69,7 @@ commands:
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

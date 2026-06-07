@@ -1,13 +1,13 @@
 name: aruba_aoscx
-initial_prompt: '{base_prompt}>'
-enable_prompt: '{base_prompt}#'
-config_prompt: '{base_prompt}(config)#'
+initial_prompt: "{base_prompt}>"
+enable_prompt: "{base_prompt}#"
+config_prompt: "{base_prompt}(config)#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show aaa authentication port-access interface all client-status:
     output: "Port Access Client Status Details\n\nClient 90:4c:81:cf:10:30, ap-0148-0125\n============================\n \
       \ Session Details\n  ---------------\n    Port         : 2/1/15\n    Session Time : 5340956s\n    IPv4 Address : \n\
@@ -88,10 +88,10 @@ commands:
       \ : Applied"
     help: execute the command "show aaa authentication port-access interface all client-status"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show arp all-vrfs:
-    output: 'IPv4 Address     MAC                Port         Physical Port              State      VRF
+    output: "IPv4 Address     MAC                Port         Physical Port              State      VRF
 
       ------------------------------------------------------------------------------------------------------------------
 
@@ -101,11 +101,11 @@ commands:
 
       Total Number Of ARP Entries Listed- 2.
 
-      ------------------------------------------------------------------------------------------------------------------'
+      ------------------------------------------------------------------------------------------------------------------"
     help: execute the command "show arp all-vrfs"
     prompt: *id001
   show bfd all-vrfs:
-    output: 'Admin status: enabled
+    output: "Admin status: enabled
 
       Echo source IP: <none>
 
@@ -126,7 +126,7 @@ commands:
 
       2       1/1/28    default   172.25.0.186                            172.25.0.185                            enabled  up           bgp
 
-      '
+      "
     help: execute the command "show bfd all-vrfs"
     prompt: *id001
   show bgp all-vrfs all summary:
@@ -409,7 +409,7 @@ commands:
     help: execute the command "show lldp neighbors-info detail"
     prompt: *id001
   show mac-address-table:
-    output: 'MAC age-time            : 300 seconds
+    output: "MAC age-time            : 300 seconds
 
       Number of MAC addresses : 5
 
@@ -428,7 +428,7 @@ commands:
 
       88:3a:30:a3:86:80    3590     dynamic                   lag100
 
-      80:5e:0c:76:ed:bb    2015     port-access-security      1/1/30'
+      80:5e:0c:76:ed:bb    2015     port-access-security      1/1/30"
     help: execute the command "show mac-address-table"
     prompt: *id001
   show ntp associations:
@@ -439,7 +439,7 @@ commands:
     help: execute the command "show ntp associations"
     prompt: *id001
   show system:
-    output: 'Hostname           : 6300
+    output: "Hostname           : 6300
 
       System Description : FL.10.11.1021
 
@@ -468,7 +468,7 @@ commands:
 
       Memory Usage (%)   : 26
 
-      '
+      "
     help: execute the command "show system"
     prompt: *id001
   show vlan:
@@ -588,15 +588,15 @@ commands:
       \        vlan310                  up\n        vlan928                  up\n"
     help: execute the command "show vrf"
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
     output_variants:
     - "VRF Configuration:\n------------------\nVRF Name   : default\n        Interfaces\
       \             Status\n        -----------------------------\n        vlan1 \
       \                   up\n        vlan61                   up\n"
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"

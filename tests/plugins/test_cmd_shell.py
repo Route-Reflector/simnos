@@ -248,11 +248,21 @@ class TestCmdShell(TestCase):
         # pylint: disable=protected-access
         self.assertTrue(shell._check_prompt(None))
 
-    def test__check_prompt_is_string(self):
-        """Test that the _check_prompt method returns the prompt."""
+    def test__check_prompt_str_is_normalized_before_reaching_here(self):
+        """A bare-str prompt never reaches `_check_prompt` at runtime.
+
+        Pins the lists-only read-side contract (#244 / D3): every load
+        path (yaml/py via `Nos`, inventory commands at shell init)
+        normalizes str -> [str] before commit, so the str branch was
+        removed here. The authoring sugar itself is covered end-to-end by
+        test_default_prompt_str_authoring_dispatches.
+        """
+        self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        self.assertTrue(shell._check_prompt("{base_prompt}>"))
+        # yaml_nos.yaml authors prompts as bare strings; the shell must
+        # see them as lists after the load-path normalization.
+        prompt = shell.commands["show clock"]["prompt"]
+        self.assertIsInstance(prompt, list)
 
     def test__check_prompt_is_list(self):
         """Test that the _check_prompt method returns the prompt."""
@@ -347,6 +357,72 @@ class TestCmdShell(TestCase):
         self.assertFalse(stop)
         self.assertEqual(shell.prompt, "test>")
         shell.writeline.assert_called_once_with("dynamic body")
+
+    def _make_prompt_form_shell(self, prompt_value):
+        """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
+
+        Both a bare str and a list are valid authoring sugar for `prompt`
+        (#244 / P-12c); these pins guard that the two forms keep
+        dispatching identically across the load-path normalization
+        (str -> [str] inside `Nos`).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "cmd": {
+                        "output": "form ok",
+                        "help": "prompt-form pin",
+                        "prompt": prompt_value,
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        return shell
+
+    def test_default_prompt_str_authoring_dispatches(self):
+        """A bare-str `prompt` matches the current prompt and dispatches."""
+        shell = self._make_prompt_form_shell("{base_prompt}>")
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("form ok")
+
+    def test_default_prompt_list_authoring_dispatches(self):
+        """A list `prompt` matches the current prompt and dispatches."""
+        shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("form ok")
+
+    def test_inventory_commands_prompt_str_is_normalized_and_dispatches(self):
+        """Inventory-defined commands get the same str -> [str] normalization.
+
+        Pins the third commands inflow (#244 / D3, found during
+        implementation): `nos_inventory_config["commands"]` bypasses the
+        `Nos` load path, so the shell normalizes it at init — without
+        this, a bare-str prompt would be iterated char by char after the
+        read-side isinstance branch removal (a silent never-match).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos_inventory_config"] = {
+            "commands": {
+                "inv cmd": {
+                    "output": "inventory ok",
+                    "help": "inventory-defined",
+                    "prompt": "{base_prompt}>",
+                },
+            },
+        }
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        self.assertEqual(shell.commands["inv cmd"]["prompt"], ["{base_prompt}>"])
+        stop = shell.default("inv cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("inventory ok")
 
     def test_default_command_not_matching_prompt(self):
         """Test that the default method does nothing."""
@@ -756,9 +832,11 @@ class TestCmdShell(TestCase):
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         shell.writeline = Mock()
+        # Injected directly into shell.commands (bypassing the load
+        # paths), so the list form is used per the #244 / D3 contract.
         shell.commands["broken_prompt_cmd"] = {
             "output": "should not appear",
-            "prompt": "{base_prompt.foo}>",
+            "prompt": ["{base_prompt.foo}>"],
         }
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("broken_prompt_cmd")
@@ -776,9 +854,10 @@ class TestCmdShell(TestCase):
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         shell.writeline = Mock()
+        # Direct injection -> list form per the #244 / D3 contract.
         shell.commands["broken_prompt_cmd"] = {
             "output": "x",
-            "prompt": "{base_prompt.foo}>",
+            "prompt": ["{base_prompt.foo}>"],
             "help": "never listed",
         }
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:

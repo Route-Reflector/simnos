@@ -315,7 +315,7 @@ commands:
       Issued: January 13, 2020\nExpires: March 08, 2023\nExpired?: no\nBase license:
       PA-VM\nAuthcode: abc def\n"
     help: execute the command "request license info"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show high-availability path-monitoring:
     output: "--------------------------------------------------------------------------------\n\
       total paths monitored :                         2\nhold time to send probe packets
@@ -326,7 +326,7 @@ commands:
       \      10/1000    \nHA_PATH_NORTH/VR_HANDOFF/virtual-router 217.111.187.217
       10/10     2.36/2.75/2.58      10/1000    \n--------------------------------------------------------------------------------"
     help: execute the command "show high-availability path-monitoring"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show routing protocol bgp summary:
     output: "  ==========\n  router id:                     1.1.1.1\n  virtual router:\
       \                VR_HANDOFF\n  reject default route:          no\n  redist default
@@ -350,7 +350,7 @@ commands:
       AS 65303, Established, IP 192.168.3.18\n      bgpAfiIpv4/unicast pfx:    Accepted
       pfx: 2, Advertised pfx: 3\n"
     help: execute the command "show routing protocol bgp summary"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show routing resource:
     output: "GLOBAL ROUTING RESOURCE USAGE:\n  ==========\n  All      Routes (total):\
       \             18 \t(limit    10000)\n  All IPv4 Routes (total):            \
@@ -360,7 +360,7 @@ commands:
       \ 4\n  BGP      Routes (total):              9\n  OSPF     Routes (total): \
       \             0\n  RIP      Routes (total):              0"
     help: execute the command "show routing resource"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show routing route:
     output: "flags: A:active, ?:loose, C:connect, H:host, S:static, ~:internal, R:rip,
       O:ospf, B:bgp, \n       Oi:ospf intra-area, Oo:ospf inter-area, O1:ospf ext-type-1,
@@ -422,7 +422,7 @@ commands:
       \                         A?B        121661                    65213      \n\
       total routes shown: 98"
     help: execute the command "show routing route"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show interface all:
     output: "total configured hardware interfaces: 12\nname                    id\
       \    speed/duplex/state/fec        mac address\n--------------------------------------------------------------------------------\n\
@@ -463,7 +463,7 @@ commands:
       \                      8     0                     N/A                     \
       \ 0      198.51.100.5/30\n"
     help: execute the command "show interface all"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
   show lacp aggregate-ethernet all:
     output: "**********************************************************************************\n\
       AE group: ae1\nMembers:                Bndl Rx state       Mux state  Sel state\n\
@@ -506,7 +506,7 @@ commands:
       ethernet1/11         100      100      0    0        0        0        0   \
       \     0\n"
     help: execute the command "show lacp aggregate-ethernet all"
-    prompt: '{base_prompt}>'
+    prompt: "{base_prompt}>"
     output_variants:
     - "LACP:\n\n**********************************************************************************\n\
       AE group: ae1\nMembers:                Bndl Rx state       Mux state  Sel state\n\

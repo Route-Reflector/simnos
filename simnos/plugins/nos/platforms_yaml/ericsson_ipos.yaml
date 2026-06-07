@@ -51,7 +51,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show isis adjacency:
-    output: 'IS-IS Adjacenc(ies) for tag XL:
+    output: "IS-IS Adjacenc(ies) for tag XL:
 
       SystemId        Interface          L  MT   Stat Hold   SNPA            Uptime
 
@@ -66,7 +66,7 @@ commands:
 
       Total IS-IS Adjacenc(ies):   4
 
-      '
+      "
     help: execute the command "show isis adjacency"
     prompt:
     - "{base_prompt}>"
@@ -90,50 +90,43 @@ commands:
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 512:
     output: null
-    help: Execute the command terminal width 512. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 512. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show curpriv:
     output: null
-    help: Execute the command show curpriv. This automatically generated. Feel free
-      to change it!
+    help: Execute the command show curpriv. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   set cli screen-width 511:
     output: null
     help: Execute the command set cli screen-width 511. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   enable clipaging:
     output: null
-    help: Execute the command enable clipaging. This automatically generated. Feel
-      free to change it!
+    help: Execute the command enable clipaging. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   login:
     output: null
-    help: Execute the command login. This automatically generated. Feel free to change
-      it!
+    help: Execute the command login. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
