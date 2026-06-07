@@ -55,6 +55,12 @@ def is_stub_help(help_text: str) -> bool:
 
     Covers the lower/upper-case `execute the command ...` prefix and the
     `This automatically generated` marker (#244 / P-13).
+
+    Deliberately prefix/marker-based, so a hand-edited help that keeps
+    the stub prefix still counts as a stub — improving a help means
+    dropping the prefix, not appending to it (conservative direction:
+    the false-positive side only freezes an entry in the baseline, it
+    never lets new drift through).
     """
     lowered = help_text.lower()
     return lowered.startswith("execute the command") or "this automatically generated" in lowered

@@ -4,7 +4,7 @@
 # Keys are repo-root relative paths. This file only ever SHRINKS:
 #   - missing_default: files allowed to lack a `_default_` command.
 #     New platform files must define one (vendor-accurate wording, see
-#     docs/development/creating_nos_plugin.md).
+#     docs/development/creating_new_platforms.md).
 #   - stub_help: per file, the commands frozen with an auto-generated
 #     stub help. Adding a stub to a new command fails CI; replacing a
 #     stub with real help requires removing the entry here (the lint
