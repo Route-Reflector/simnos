@@ -89,7 +89,7 @@ class Nos:
         # `validate()` to reject with the usual ValidationError.
         commands = commands or {}
         if isinstance(commands, dict):
-            commands = self._normalize_command_prompts(copy.deepcopy(commands))
+            commands = self.normalize_command_prompts(copy.deepcopy(commands))
         self.commands = commands
         self.initial_prompt = initial_prompt
         self.auth: str | None = None
@@ -122,7 +122,7 @@ class Nos:
         log.debug("%s NOS attributes validation succeeded", self.name)
 
     @staticmethod
-    def _normalize_command_prompts(commands: dict) -> dict:
+    def normalize_command_prompts(commands: dict) -> dict:
         """Normalize each command's `prompt` to `list[str] | None`.
 
         Called on a deepcopied candidate (never on caller-owned dicts or
@@ -178,7 +178,7 @@ class Nos:
             raise ValueError(f"NOS data 'commands' must be a mapping (got {type(commands).__name__})")
         # Normalize a deepcopied candidate — never the caller's dict, which
         # stays in its original authoring form (#244 / D3).
-        candidate = self._normalize_command_prompts(copy.deepcopy(commands))
+        candidate = self.normalize_command_prompts(copy.deepcopy(commands))
         # Validate the exact post-commit state (a merged view, not `data`
         # alone): commands merge cumulatively across multi-file loads and
         # scalars keep their current value when absent from `data`.
@@ -268,7 +268,7 @@ class Nos:
         # `commands` constant, which stays in its authoring form (#244 /
         # D3; deepcopy treats callables as atomic, so handler identity is
         # preserved).
-        candidate_commands = self._normalize_command_prompts(copy.deepcopy(module_commands))
+        candidate_commands = self.normalize_command_prompts(copy.deepcopy(module_commands))
         # Validate the exact post-commit state before committing, mirroring
         # `from_dict`'s merged view (#244 / D8) — this also covers hot
         # reload, which calls `from_file` directly. No top-level key check

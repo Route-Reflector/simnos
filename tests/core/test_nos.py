@@ -40,7 +40,7 @@ class NosTest(unittest.TestCase):
         candidate, so equality assertions against authored dicts compare
         through this helper.
         """
-        return Nos._normalize_command_prompts(copy.deepcopy(commands if commands is not None else self.commands))
+        return Nos.normalize_command_prompts(copy.deepcopy(commands if commands is not None else self.commands))
 
     def test_init_without_arguments(self):
         """
@@ -250,14 +250,13 @@ class NosTest(unittest.TestCase):
         assert nos.commands["cmd"]["output_variants"] == ["alternate capture"]
 
     def test_from_dict_does_not_mutate_caller_dict(self):
-        """Caller-owned data must stay untouched by a load (#244 / D3 前段 pin).
+        """Caller-owned data must stay untouched by a load (#244 / D3).
 
-        Pins the no-side-effect contract before the prompt normalization
-        lands: once `from_dict` normalizes `prompt` str -> [str] on a
-        deepcopied candidate, the caller's dict (and, symmetrically, a py
-        plugin's module-level `commands` constant) must keep its original
-        authoring form. Today this holds trivially; the pin turns an
-        accidental in-place normalization into a test failure.
+        `from_dict` normalizes `prompt` str -> [str] on a deepcopied
+        candidate, so the caller's dict (and, symmetrically, a py plugin's
+        module-level `commands` constant) keeps its original authoring
+        form — an accidental switch to in-place normalization turns into
+        a test failure here.
         """
         caller_commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}
         nos = Nos()

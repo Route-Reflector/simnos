@@ -79,7 +79,7 @@ class CMDShell(Cmd):
         self.commands = {
             **copy.deepcopy(BASIC_COMMANDS),
             **copy.deepcopy(nos.commands or {}),
-            **Nos._normalize_command_prompts(copy.deepcopy(nos_inventory_config.get("commands", {}))),
+            **Nos.normalize_command_prompts(copy.deepcopy(nos_inventory_config.get("commands", {}))),
         }
         # call the base constructor of cmd.Cmd, with our own stdin and stdout
         super().__init__(
@@ -190,7 +190,7 @@ class CMDShell(Cmd):
             )
             return None
 
-    def _check_prompt(self, prompt_: str | list[str] | None, command: str = ""):
+    def _check_prompt(self, prompt_: list[str] | None, command: str = ""):
         """
         Helper method to check if prompt_ matches current prompt
 
