@@ -1713,3 +1713,7 @@ commands:
       (S,G): True\n      No interfaces in inherited olist (S,G): True\n"
     help: execute the command "show ip mroute vrf all detail"
     prompt: *id001
+  # source: https://www.arista.com/en/um-eos/eos-command-line-interface-cli (retrieved 2026-06-07)
+  _default_:
+    output: "% Invalid input"
+    help: default output for unknown commands

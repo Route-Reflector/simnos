@@ -425,3 +425,7 @@ commands:
       ARP Sender-Mac Learning   :   Disabled
 
       '
+  # source: https://community.extremenetworks.com/t5/extremeswitching-exos-switch/invalid-input-detected-at-marker-when-portforwarding/td-p/27455 (retrieved 2026-06-07)
+  _default_:
+    output: "%% Invalid input detected at '^' marker."
+    help: default output for unknown commands

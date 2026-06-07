@@ -43,3 +43,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://www.rtpro.yamaha.co.jp/RT/docs/cli/vamh.html (retrieved 2026-06-07)
+  _default_:
+    output: "Error: Invalid command name"
+    help: default output for unknown commands

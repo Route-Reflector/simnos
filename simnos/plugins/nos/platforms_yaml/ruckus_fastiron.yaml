@@ -634,3 +634,9 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://community.ruckuswireless.com/t5/ICX-Switches/ICX6610-invalid-input-when-trying-to-creating-ve-interface/m-p/43638 (retrieved 2026-06-07)
+  _default_:
+    output: |-
+      Invalid input ->
+      Type ? for a list
+    help: default output for unknown commands

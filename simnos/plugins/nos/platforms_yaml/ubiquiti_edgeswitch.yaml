@@ -73,3 +73,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://www.manualslib.com/manual/858408/Ubiquiti-Edgeswitch-Es-24-250w.html?page=34 (retrieved 2026-06-07)
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: default output for unknown commands

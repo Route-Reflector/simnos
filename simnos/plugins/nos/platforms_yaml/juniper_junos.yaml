@@ -748,3 +748,9 @@ commands:
       24931 root         20    0    14M  3636K CPU5     5   0:00   0.00% top\n"
     help: execute the command "show system processes summary"
     prompt: *id001
+  # source: https://www.juniper.net/documentation/us/en/software/junos/user-access/topics/topic-map/junos-os-access-privileges.html (retrieved 2026-06-07)
+  #   note: indirect — the doc shows the `unknown command.` parse error in an
+  #   access-privileges example rather than a dedicated CLI-error page.
+  _default_:
+    output: "unknown command."
+    help: default output for unknown commands

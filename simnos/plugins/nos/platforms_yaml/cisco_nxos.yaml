@@ -5093,3 +5093,7 @@ commands:
       \ : DOWN [vrf-id: 0] [L3VNI: 0]\n\n"
     help: execute the command "show nve vni interface nve 1 detail"
     prompt: *id001
+  # source: https://github.com/ktbyers/netmiko/issues/2682 (retrieved 2026-06-07)
+  _default_:
+    output: "% Invalid command at '^' marker."
+    help: default output for unknown commands

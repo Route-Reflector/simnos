@@ -333,3 +333,9 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://shrubbery.net/pipermail/rancid-discuss/2023-April/011289.html (retrieved 2026-06-07)
+  #   note: one real-device capture covering both VSP and ERS in the same
+  #   thread (shared with avaya_vsp); not two independent captures.
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: default output for unknown commands

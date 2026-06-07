@@ -796,3 +796,7 @@ commands:
       \               full                      jul/18/2023 05:12:46\n"
     help: execute the command "user print"
     prompt: "[admin@{base_prompt}] >"
+  # source: https://forum.mikrotik.com/t/bad-command-name-dude-line-1-column-1/100423 (retrieved 2026-06-07)
+  _default_:
+    output: "bad command name (line 1 column 1)"
+    help: default output for unknown commands

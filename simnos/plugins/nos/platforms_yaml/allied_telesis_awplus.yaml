@@ -336,3 +336,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://www.alliedtelesis.com/sites/default/files/getting_started_with_alliedware_plus.pdf (retrieved 2026-06-07)
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: default output for unknown commands

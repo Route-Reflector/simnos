@@ -78,7 +78,7 @@ class TestPlatforms:
         At least all the commands need to have the following with any conflict:
         - output
         - help
-        - prompt
+        - prompt (except `_default_`, see below)
         """
         with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -87,14 +87,22 @@ class TestPlatforms:
                 exceptions.append(data["enable_prompt"])
             if "config_prompt" in data:
                 exceptions.append(data["config_prompt"])
-            for values in data["commands"].values():
+            for command, values in data["commands"].items():
                 assert "output" in values or "exit" in values
                 if "output" in values:
                     assert not has_single_curly_brackets(values["output"], exceptions)
                 assert "help" in values
                 assert not has_single_curly_brackets(values["help"], exceptions)
-                assert "prompt" in values
-                assert not has_single_curly_brackets(values["prompt"], exceptions)
+                # `_default_` is the unknown-command fallback: the shell
+                # answers with its output regardless of the current prompt
+                # (mismatch path), so a `prompt` key is meaningless there —
+                # BASIC_COMMANDS' own `_default_` carries none either. The
+                # #244 / D6 wording entries are authored minimal (no prompt);
+                # pre-#244 entries that still carry one stay valid.
+                if command != "_default_":
+                    assert "prompt" in values
+                if "prompt" in values:
+                    assert not has_single_curly_brackets(values["prompt"], exceptions)
 
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_has_correct_format(self, platform: str):
@@ -207,6 +215,86 @@ class TestPlatforms:
                     for command in config_commands:
                         output = conn.send_command(command)
                         assert isinstance(output, str)
+
+    # Vendor-signature literal pins (#244 / D6): the wire test below reads
+    # its expectation from the yaml (SSoT), so it confirms the plumbing but
+    # NOT that the wording itself stays vendor-accurate — a regression that
+    # also rewrites the yaml would pass it (cross-review 🦊#5). These
+    # literals guard the distinctive signatures that are easy to drift back
+    # to a Cisco-style copy: "command" vs "input" (NX-OS), the `%%` double
+    # percent (EXOS), the `"^"` double-quoted caret (Force10), the two-line
+    # IronWare block (Brocade) and the multi-line listing (D-Link flat CLI).
+    # An intentional wording change updates both this map and the yaml.
+    _VENDOR_SIGNATURE_DEFAULTS = {
+        "cisco_nxos": "% Invalid command at '^' marker.",
+        "extreme_exos": "%% Invalid input detected at '^' marker.",
+        "dell_force10": '% Error: Invalid input at "^" marker.',
+        "brocade_netiron": "Invalid input ->\nType ? for a list",
+        "dlink_ds": (
+            "Available commands:\n"
+            "..                  ?                   cable_diag          clear\n"
+            "config              create              delete              dir\n"
+            "disable             download            drv                 enable\n"
+            "login               logout              ping                reboot\n"
+            "reconfig            reset               save                show\n"
+            "telnet              upload"
+        ),
+    }
+
+    @pytest.mark.parametrize("platform", sorted(_VENDOR_SIGNATURE_DEFAULTS))
+    def test_default_wording_keeps_vendor_signature(self, platform: str):
+        """The `_default_` output keeps its distinctive vendor signature (#244 / D6).
+
+        Literal guard against drifting a vendor-specific message back to a
+        generic Cisco-style one — the wire test reads from the yaml so it
+        cannot catch that (cross-review 🦊#5). A deliberate wording change
+        must update both this expectation and the yaml.
+        """
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+            actual = yaml.safe_load(file)["commands"]["_default_"]["output"]
+        assert actual == self._VENDOR_SIGNATURE_DEFAULTS[platform]
+
+    @pytest.mark.timeout(300)
+    # cisco_ios: single Cisco-style line / juniper_junos: lowercase + trailing
+    # period / brocade_netiron: two-line block / dell_force10: escaped `"^"`
+    # caret (the one wire pin that exercises a backslash-escaped scalar over
+    # the SSH channel, cross-review 🐙#5).
+    @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron", "dell_force10"])
+    def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str):
+        """The yaml-authored `_default_` answers an unknown command verbatim (#244 / D6).
+
+        Pins the wording PR end to end over a real netmiko session, one
+        platform per output shape (see the parametrize comment). The
+        expected text is read from the platform yaml itself (SSoT) so the
+        pin survives future wording refinements without duplicating data;
+        the vendor-signature literals are guarded separately by
+        test_default_wording_keeps_vendor_signature.
+        """
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+            expected = yaml.safe_load(file)["commands"]["_default_"]["output"]
+        device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
+        free_port: int = get_free_port()
+        credentials: dict = {
+            "host": "localhost",
+            "username": "test_user",
+            "password": "test_password",
+            "port": free_port,
+            "device_type": device_type,
+        }
+        inventory: dict = {
+            "hosts": {
+                "test_device": {
+                    "username": credentials["username"],
+                    "password": credentials["password"],
+                    "port": credentials["port"],
+                    "platform": platform,
+                }
+            }
+        }
+        with SimNOS(inventory=inventory) as net:  # noqa: F841
+            with ConnectHandler(**credentials) as conn:
+                output = conn.send_command("simnos pin unknown command")
+                assert expected in output
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_platforms())

@@ -252,3 +252,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://community.cisco.com/t5/switches-small-business/why-am-i-getting-unrecognized-command-when-i-run-quot-ip-routing/td-p/2595094 (retrieved 2026-06-07)
+  _default_:
+    output: "Unrecognized command"
+    help: default output for unknown commands

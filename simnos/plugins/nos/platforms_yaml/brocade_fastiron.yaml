@@ -857,3 +857,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
     - "{base_prompt}(config)#"
+  # source: https://smhk.net/note/2023/11/configuring-a-brocade-fastiron-switch/ (retrieved 2026-06-07)
+  _default_:
+    output: |-
+      Invalid input ->
+      Type ? for a list
+    help: default output for unknown commands

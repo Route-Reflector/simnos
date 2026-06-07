@@ -560,3 +560,9 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://github.com/ktbyers/netmiko/issues/2924 (retrieved 2026-06-07)
+  _default_:
+    output: |-
+      Invalid input ->
+      Type ? for a list
+    help: default output for unknown commands

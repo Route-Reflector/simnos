@@ -13,46 +13,19 @@
 # is that the frozen set never grows back.
 missing_default:
 - simnos/plugins/nos/platforms_yaml/alcatel_aos.yaml
-- simnos/plugins/nos/platforms_yaml/alcatel_sros.yaml
-- simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml
-- simnos/plugins/nos/platforms_yaml/arista_eos.yaml
 - simnos/plugins/nos/platforms_yaml/aruba_os.yaml
-- simnos/plugins/nos/platforms_yaml/avaya_ers.yaml
-- simnos/plugins/nos/platforms_yaml/avaya_vsp.yaml
-- simnos/plugins/nos/platforms_yaml/broadcom_icos.yaml
-- simnos/plugins/nos/platforms_yaml/brocade_fastiron.yaml
-- simnos/plugins/nos/platforms_yaml/brocade_netiron.yaml
-- simnos/plugins/nos/platforms_yaml/checkpoint_gaia.yaml
 - simnos/plugins/nos/platforms_yaml/ciena_saos.yaml
-- simnos/plugins/nos/platforms_yaml/cisco_asa.yaml
 - simnos/plugins/nos/platforms_yaml/cisco_ftd.yaml
-- simnos/plugins/nos/platforms_yaml/cisco_ios.yaml
-- simnos/plugins/nos/platforms_yaml/cisco_nxos.yaml
-- simnos/plugins/nos/platforms_yaml/cisco_s300.yaml
 - simnos/plugins/nos/platforms_yaml/cisco_xr.yaml
-- simnos/plugins/nos/platforms_yaml/dell_force10.yaml
 - simnos/plugins/nos/platforms_yaml/dell_powerconnect.yaml
-- simnos/plugins/nos/platforms_yaml/dlink_ds.yaml
 - simnos/plugins/nos/platforms_yaml/eltex.yaml
 - simnos/plugins/nos/platforms_yaml/ericsson_ipos.yaml
-- simnos/plugins/nos/platforms_yaml/extreme_exos.yaml
 - simnos/plugins/nos/platforms_yaml/fortinet.yaml
-- simnos/plugins/nos/platforms_yaml/hp_comware.yaml
-- simnos/plugins/nos/platforms_yaml/hp_procurve.yaml
 - simnos/plugins/nos/platforms_yaml/huawei_smartax.yaml
-- simnos/plugins/nos/platforms_yaml/huawei_vrp.yaml
 - simnos/plugins/nos/platforms_yaml/ipinfusion_ocnos.yaml
-- simnos/plugins/nos/platforms_yaml/juniper_junos.yaml
 - simnos/plugins/nos/platforms_yaml/juniper_screenos.yaml
 - simnos/plugins/nos/platforms_yaml/linux.yaml
-- simnos/plugins/nos/platforms_yaml/mikrotik_routeros.yaml
 - simnos/plugins/nos/platforms_yaml/paloalto_panos.yaml
-- simnos/plugins/nos/platforms_yaml/ruckus_fastiron.yaml
-- simnos/plugins/nos/platforms_yaml/ubiquiti_edgerouter.yaml
-- simnos/plugins/nos/platforms_yaml/ubiquiti_edgeswitch.yaml
-- simnos/plugins/nos/platforms_yaml/vyatta_vyos.yaml
-- simnos/plugins/nos/platforms_yaml/yamaha.yaml
-- simnos/plugins/nos/platforms_yaml/zyxel_os.yaml
 stub_help:
   simnos/plugins/nos/platforms_yaml/alcatel_aos.yaml:
   - show chassis
