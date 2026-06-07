@@ -822,3 +822,7 @@ commands:
       D state: Ok\nInfo: The test result is only for reference."
     help: execute the command "virtual-cable-test"
     prompt: *id001
+  # source: https://support.huawei.com/enterprise/en/doc/EDOC1100082539/941a7a88/interpreting-command-line-error-messages (retrieved 2026-06-07)
+  _default_:
+    output: "Error: Unrecognized command found at '^' position."
+    help: default output for unknown commands

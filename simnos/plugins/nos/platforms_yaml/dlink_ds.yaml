@@ -1,6 +1,5 @@
 name: dlink_ds
 initial_prompt: "{base_prompt}#"
-enable_prompt: "{base_prompt}(config)#"
 commands:
   enable:
     output: null
@@ -34,3 +33,14 @@ commands:
     help: execute the command "show arpentry"
     prompt:
     - "{base_prompt}#"
+  # source: https://www.dlink.com/en/-/media/business_products/des/des-3526/manual/des_3526_cli_manual_v5_1.pdf (retrieved 2026-06-07)
+  _default_:
+    output: |-
+      Available commands:
+      ..                  ?                   cable_diag          clear
+      config              create              delete              dir
+      disable             download            drv                 enable
+      login               logout              ping                reboot
+      reconfig            reset               save                show
+      telnet              upload
+    help: default output for unknown commands

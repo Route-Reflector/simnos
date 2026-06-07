@@ -203,3 +203,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://github.com/ktbyers/netmiko/issues/1283 (retrieved 2026-06-07)
+  _default_:
+    output: "% Error: Invalid input at \"^\" marker."
+    help: default output for unknown commands

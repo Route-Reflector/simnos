@@ -240,3 +240,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://netbergtw.com/wp-content/uploads/Files/ICOS_cli_guide.pdf (retrieved 2026-06-07)
+  _default_:
+    output: "% Invalid input detected at '^' marker."
+    help: default output for unknown commands

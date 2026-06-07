@@ -206,3 +206,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://supportcenter.checkpoint.com/supportcenter/portal?eventSubmit_doGoviewsolutiondetails=&solutionid=sk108033 (retrieved 2026-06-07)
+  _default_:
+    output: "CLINFR0329 Invalid command:"
+    help: default output for unknown commands

@@ -1060,3 +1060,7 @@ commands:
       -------------------------------------------------------------------------------\n\
       Matching Services : 8\n-------------------------------------------------------------------------------\n\
       ===============================================================================\n"
+  # source: https://documentation.nokia.com/html/0_add-h-f/93-0070-10-01/7750_SR_OS_System_Basics_Guide/CLI%20Usage.html (retrieved 2026-06-07)
+  _default_:
+    output: "Error: Bad command."
+    help: default output for unknown commands

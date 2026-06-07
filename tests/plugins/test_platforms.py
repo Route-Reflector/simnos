@@ -78,7 +78,7 @@ class TestPlatforms:
         At least all the commands need to have the following with any conflict:
         - output
         - help
-        - prompt
+        - prompt (except `_default_`, see below)
         """
         with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             data = yaml.safe_load(file)
@@ -87,14 +87,22 @@ class TestPlatforms:
                 exceptions.append(data["enable_prompt"])
             if "config_prompt" in data:
                 exceptions.append(data["config_prompt"])
-            for values in data["commands"].values():
+            for command, values in data["commands"].items():
                 assert "output" in values or "exit" in values
                 if "output" in values:
                     assert not has_single_curly_brackets(values["output"], exceptions)
                 assert "help" in values
                 assert not has_single_curly_brackets(values["help"], exceptions)
-                assert "prompt" in values
-                assert not has_single_curly_brackets(values["prompt"], exceptions)
+                # `_default_` is the unknown-command fallback: the shell
+                # answers with its output regardless of the current prompt
+                # (mismatch path), so a `prompt` key is meaningless there —
+                # BASIC_COMMANDS' own `_default_` carries none either. The
+                # #244 / D6 wording entries are authored minimal (no prompt);
+                # pre-#244 entries that still carry one stay valid.
+                if command != "_default_":
+                    assert "prompt" in values
+                if "prompt" in values:
+                    assert not has_single_curly_brackets(values["prompt"], exceptions)
 
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_has_correct_format(self, platform: str):

@@ -253,3 +253,7 @@ commands:
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
+  # source: https://github.com/ktbyers/netmiko/issues/3299 (retrieved 2026-06-07)
+  _default_:
+    output: "Unknown command"
+    help: default output for unknown commands

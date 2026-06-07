@@ -1423,3 +1423,7 @@ commands:
     new_prompt: "{base_prompt}#"
     help: exit configuration mode
     prompt: "{base_prompt}(config)#"
+  # source: https://community.cisco.com/t5/security-knowledge-base/the-quot-error-invalid-input-detected-at-marker-quot-error/ta-p/3121294 (retrieved 2026-06-07)
+  _default_:
+    output: "ERROR: % Invalid input detected at '^' marker."
+    help: default output for unknown commands

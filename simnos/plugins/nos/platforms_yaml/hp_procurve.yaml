@@ -573,3 +573,7 @@ commands:
       Serial Number    : SN0000005A\nUptime           : 454d 7h 42m\nCPU Utilization\
       \  : 0%\nMemory - Total   : 338,285,056 bytes\nFree             : 247,712,468\
       \ bytes\nVSF Links -\n#1 : Active, Peer member 1\n#2 : Active, Peer member 2\n"
+  # source: https://www.manualslib.com/manual/1638710/Hp-Aruba-Jl253a.html?page=462 (retrieved 2026-06-07)
+  _default_:
+    output: "Invalid input: "
+    help: default output for unknown commands

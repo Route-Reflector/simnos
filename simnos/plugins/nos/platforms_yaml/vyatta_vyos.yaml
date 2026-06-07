@@ -83,3 +83,7 @@ commands:
     prompt:
     - "{base_prompt}~$"
     - "{base_prompt}#"
+  # source: https://forum.vyos.io/t/all-specific-vyos-commands-are-invalid/7005 (retrieved 2026-06-07)
+  _default_:
+    output: "Invalid command: [ ]"
+    help: default output for unknown commands
