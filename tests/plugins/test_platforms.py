@@ -216,6 +216,44 @@ class TestPlatforms:
                         output = conn.send_command(command)
                         assert isinstance(output, str)
 
+    @pytest.mark.timeout(300)
+    @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron"])
+    def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str):
+        """The yaml-authored `_default_` answers an unknown command verbatim (#244 / D6).
+
+        Pins the wording PR end to end over a real netmiko session, one
+        platform per output shape: single Cisco-style line (cisco_ios),
+        lowercase + trailing period (juniper_junos) and a two-line block
+        (brocade_netiron). The expected text is read from the platform
+        yaml itself (SSoT) so the pin survives future wording refinements
+        without duplicating data.
+        """
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+            expected = yaml.safe_load(file)["commands"]["_default_"]["output"]
+        device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
+        free_port: int = get_free_port()
+        credentials: dict = {
+            "host": "localhost",
+            "username": "test_user",
+            "password": "test_password",
+            "port": free_port,
+            "device_type": device_type,
+        }
+        inventory: dict = {
+            "hosts": {
+                "test_device": {
+                    "username": credentials["username"],
+                    "password": credentials["password"],
+                    "port": credentials["port"],
+                    "platform": platform,
+                }
+            }
+        }
+        with SimNOS(inventory=inventory) as net:  # noqa: F841
+            with ConnectHandler(**credentials) as conn:
+                output = conn.send_command("simnos pin unknown command")
+                assert expected in output
+
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_all_commands_are_running(self, platform: str):
