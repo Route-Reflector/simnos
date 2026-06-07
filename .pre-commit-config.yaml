@@ -35,5 +35,8 @@ repos:
         name: lint-platform-yaml
         language: system
         entry: invoke lint-platform-yaml
-        files: ^(simnos/plugins/nos/platforms_yaml/.*\.ya?ml|platform_yaml_lint_baseline\.yaml)$
+        # Fires on data changes AND on edits to the lint logic / its
+        # self-test, so touching the lint itself gets local feedback
+        # instead of waiting for CI (code 2nd round 🦊#4).
+        files: ^(simnos/plugins/nos/platforms_yaml/.*\.ya?ml|platform_yaml_lint_baseline\.yaml|tasks\.py|tests/test_lint_platform_yaml\.py)$
         pass_filenames: false
