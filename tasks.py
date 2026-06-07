@@ -44,7 +44,9 @@ def bandit(context):
 # --- platform yaml conventions lint (#244) -----------------------------------
 
 # Real path — a shorthand here would make the glob empty and the lint a
-# silent pass, which defeats the ratchet entirely.
+# silent pass, which defeats the ratchet entirely. The `*.yaml` glob below
+# mirrors the plugin discovery glob (simnos/plugins/nos/__init__.py), which
+# also only picks up `.yaml` — a stray `.yml` is invisible to both.
 PLATFORMS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
 PLATFORM_YAML_LINT_BASELINE = "platform_yaml_lint_baseline.yaml"
 HERITAGE_HELP_SENTENCE = "Feel free to change it!"
