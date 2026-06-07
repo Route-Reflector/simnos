@@ -348,6 +348,46 @@ class TestCmdShell(TestCase):
         self.assertEqual(shell.prompt, "test>")
         shell.writeline.assert_called_once_with("dynamic body")
 
+    def _make_prompt_form_shell(self, prompt_value):
+        """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
+
+        Both a bare str and a list are valid authoring sugar for `prompt`
+        (#244 / P-12c); these pins guard that the two forms keep
+        dispatching identically across the load-path normalization
+        (str -> [str] inside `Nos`).
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {
+                    "cmd": {
+                        "output": "form ok",
+                        "help": "prompt-form pin",
+                        "prompt": prompt_value,
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        shell.writeline = Mock()
+        return shell
+
+    def test_default_prompt_str_authoring_dispatches(self):
+        """A bare-str `prompt` matches the current prompt and dispatches."""
+        shell = self._make_prompt_form_shell("{base_prompt}>")
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("form ok")
+
+    def test_default_prompt_list_authoring_dispatches(self):
+        """A list `prompt` matches the current prompt and dispatches."""
+        shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
+        stop = shell.default("cmd")
+        self.assertFalse(stop)
+        shell.writeline.assert_called_once_with("form ok")
+
     def test_default_command_not_matching_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()

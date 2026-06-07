@@ -166,6 +166,51 @@ class NosTest(unittest.TestCase):
         assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
+    def test_from_dict_unknown_top_level_key_is_silently_ignored(self):
+        """Pin the pre-#244 lenient contract: top-level typos vanish quietly.
+
+        A typo'd top-level key (`enable_promt`) is dropped by the targeted
+        `data.get()` reads without any error today. D8 (#244) flips this
+        pin to a loud ValueError — kept here first so the behavioral change
+        shows up as an explicit pin rewrite, not a silent test edit.
+        """
+        nos = Nos()
+        nos.from_dict({"name": "MySimNOS", "enable_promt": "{base_prompt}#"})
+        assert nos.name == "MySimNOS"
+        assert nos.enable_prompt is None
+
+    def test_from_dict_unknown_command_field_is_silently_ignored(self):
+        """Pin the pre-#244 lenient contract: command-field typos pass validation.
+
+        `ModelNosCommand` has no `extra="forbid"` yet, so a typo'd field
+        (`outptu`) is silently accepted by `validate()`. D5 (#244) flips
+        this pin to a ValidationError.
+        """
+        nos = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "commands": {"cmd": {"output": "x", "help": "x", "outptu": "typo"}},
+            }
+        )
+        assert nos.commands["cmd"]["outptu"] == "typo"
+
+    def test_from_dict_does_not_mutate_caller_dict(self):
+        """Caller-owned data must stay untouched by a load (#244 / D3 前段 pin).
+
+        Pins the no-side-effect contract before the prompt normalization
+        lands: once `from_dict` normalizes `prompt` str -> [str] on a
+        deepcopied candidate, the caller's dict (and, symmetrically, a py
+        plugin's module-level `commands` constant) must keep its original
+        authoring form. Today this holds trivially; the pin turns an
+        accidental in-place normalization into a test failure.
+        """
+        caller_commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}
+        nos = Nos()
+        nos.from_dict({"name": "synth", "commands": caller_commands})
+        assert caller_commands["cmd"]["prompt"] == "{base_prompt}>"
+        assert isinstance(caller_commands["cmd"]["prompt"], str)
+
     def test_from_yaml_file(self):
         """
         Test that the from_file method works .yaml.
