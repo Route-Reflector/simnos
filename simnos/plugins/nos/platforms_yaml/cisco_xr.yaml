@@ -9,7 +9,7 @@ commands:
     help: enter enable mode
     prompt: "{base_prompt}>"
   show interfaces summary:
-    output: 'Interface Type          Total    UP       Down     Admin Down
+    output: "Interface Type          Total    UP       Down     Admin Down
 
       --------------          -----    --       ----     ----------
 
@@ -30,13 +30,13 @@ commands:
       IFT_TENGETHERNET        40       36       0        4
 
 
-      '
+      "
     help: execute the command "show interfaces summary"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   admin show vm:
-    output: 'Wed Mar 14 10:04:35.018 UTC
+    output: "Wed Mar 14 10:04:35.018 UTC
 
 
       Location: 0/0
@@ -174,7 +174,7 @@ commands:
 
       -------------------------------------------------------------
 
-      sysadmin          running       192.0.120.1      NA/NA'
+      sysadmin          running       192.0.120.1      NA/NA"
     help: execute the command "admin show vm"
     prompt:
     - "{base_prompt}>"
@@ -498,7 +498,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show arp:
-    output: '
+    output: "
 
       Mon Oct 17 02:44:29.814 UTC
 
@@ -536,7 +536,7 @@ commands:
 
       192.168.57.1    00:00:02   5254.004e.1156  Dynamic    ARPA  MgmtEth0/RP0/CPU0/0
 
-      192.168.57.10   -          0c99.6869.0000  Interface  ARPA  MgmtEth0/RP0/CPU0/0'
+      192.168.57.10   -          0c99.6869.0000  Interface  ARPA  MgmtEth0/RP0/CPU0/0"
     help: execute the command "show arp"
     prompt:
     - "{base_prompt}>"
@@ -4029,7 +4029,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip interface brief:
-    output: 'Interface                      IP-Address      Status          Protocol
+    output: "Interface                      IP-Address      Status          Protocol
       Vrf-Name
 
       GigabitEthernet0/0/1/18        unassigned      Shutdown        Down     default
@@ -4044,13 +4044,13 @@ commands:
 
       TenGigE0/0/2/0.2397            10.79.255.80    Up              Up       WAG:ABC
 
-      '
+      "
     help: execute the command "show ip interface brief"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show isis neighbors:
-    output: 'Tue Jan  3 14:57:35.234 UTC
+    output: "Tue Jan  3 14:57:35.234 UTC
 
 
       IS-IS 1 neighbors:
@@ -4068,7 +4068,7 @@ commands:
 
       Total neighbor count: 4
 
-      '
+      "
     help: execute the command "show isis neighbors"
     prompt:
     - "{base_prompt}>"
@@ -4514,7 +4514,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show controller fabric plane all:
-    output: 'Sun Feb  25 06:32:34.404 UTC
+    output: "Sun Feb  25 06:32:34.404 UTC
 
 
       Plane Admin Plane    up->dn  up->mcast
@@ -4533,7 +4533,7 @@ commands:
 
       4     UP    UP             0         0
 
-      5     UP    UP             0         0'
+      5     UP    UP             0         0"
     help: execute the command "show controller fabric plane all"
     prompt:
     - "{base_prompt}>"
@@ -5102,7 +5102,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ospf vrf all interface brief:
-    output: '
+    output: "
 
       Wed Jul 27 17:18:34.807 CST
 
@@ -5138,7 +5138,7 @@ commands:
 
       Gi300/0/0/0        1     0               192.0.2.1/30       1     DR    0/0
 
-      '
+      "
     help: execute the command "show ospf vrf all interface brief"
     prompt:
     - "{base_prompt}>"
@@ -5490,7 +5490,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ipv4 vrf all interface brief:
-    output: '
+    output: "
 
       Wed Jul 27 17:18:32.918 CST
 
@@ -5531,7 +5531,7 @@ commands:
 
       TenGigE0/2/0/0.10              192.0.2.1       Up              Up       green
 
-      '
+      "
     help: execute the command "show ipv4 vrf all interface brief"
     prompt:
     - "{base_prompt}>"
@@ -5632,7 +5632,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ping:
-    output: 'Fri Dec 22 17:30:39.512 BRA
+    output: "Fri Dec 22 17:30:39.512 BRA
 
       Type escape sequence to abort.
 
@@ -5642,13 +5642,13 @@ commands:
 
       Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 
-      '
+      "
     help: execute the command "ping"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show processes cpu:
-    output: 'Thu Mar 23 17:16:01.625 EDT
+    output: "Thu Mar 23 17:16:01.625 EDT
 
 
       CPU utilization for one minute: 5%; five minutes: 3%; fifteen minutes: 3%
@@ -6420,7 +6420,7 @@ commands:
 
       48337168   0%      0%       0% exec
 
-      48337277   0%      0%       0% 48337277_unknown'
+      48337277   0%      0%       0% 48337277_unknown"
     help: execute the command "show processes cpu"
     prompt:
     - "{base_prompt}>"
@@ -6474,22 +6474,19 @@ commands:
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 512:
     output: null
-    help: Execute the command terminal width 512. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 512. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -6543,8 +6540,8 @@ commands:
       \nProcessed 57 prefixes, 57 paths\n"
     help: execute the command "show bgp vrf all neighbors advertised-routes"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
     output_variants:
     - "Tue Nov 26 00:00:10.176 BRA\n\nVRF: CITY_GER:7688\n-------------------\n% Neighbor
       not found\n\nVRF: MARKET_INT_2:4776\n---------------------\nNetwork        \

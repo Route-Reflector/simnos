@@ -246,7 +246,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ospf interface brief:
-    output: 'Interface    PID   Area            IP Address/Mask    Cost  State Nbrs
+    output: "Interface    PID   Area            IP Address/Mask    Cost  State Nbrs
       F/C
 
       Outside      101   101             10.10.100.10/255.255.255.248    10   P2P
@@ -257,7 +257,7 @@ commands:
 
       Inside       100   110             10.25.1.17/255.255.255.240    10    DR 2/2
 
-      CustA        101   0.0.1.1         10.200.0.1/255.255.255.240    10    DR 0/0'
+      CustA        101   0.0.1.1         10.200.0.1/255.255.255.240    10    DR 0/0"
     help: execute the command "show ospf interface brief"
     prompt:
     - "{base_prompt}>"
@@ -417,7 +417,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show resource usage:
-    output: 'Resource                 Current        Peak      Limit        Denied
+    output: "Resource                 Current        Peak      Limit        Denied
       Context
 
       Telnet                         0           1          5             0 admin
@@ -463,7 +463,7 @@ commands:
       S = System: Combined context limits exceed the system limit; the system limit
       is shown
 
-      '
+      "
     help: execute the command "show resource usage"
     prompt:
     - "{base_prompt}>"
@@ -635,6 +635,8 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show inventory:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     output: 'Name: "Chassis", DESCR: "ASA 5506-X with FirePOWER services, 8GE, AC,
       DES"
 
@@ -822,7 +824,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ospf neighbor:
-    output: 'Neighbor ID     Pri   State           Dead Time   Address         Interface
+    output: "Neighbor ID     Pri   State           Dead Time   Address         Interface
 
       10.10.100.9       0   FULL/  -        0:00:07    10.255.100.9    Outside
 
@@ -832,7 +834,7 @@ commands:
 
       10.25.1.19        1   FULL/DROTHER    0:00:07    10.253.1.19     Inside
 
-      '
+      "
     help: execute the command "show ospf neighbor"
     prompt:
     - "{base_prompt}>"
@@ -875,7 +877,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ping:
-    output: 'Type escape sequence to abort.
+    output: "Type escape sequence to abort.
 
       Sending 5, 100-byte ICMP Echos to 10.245.179.14, timeout is 2 seconds:
 
@@ -883,7 +885,7 @@ commands:
 
       Success rate is 0 percent (0/5)
 
-      '
+      "
     help: execute the command "ping"
     prompt:
     - "{base_prompt}>"
@@ -1323,8 +1325,8 @@ commands:
       00000000 00000003 61695d26\n"
     help: execute the command "show access-list brief"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show running-config access-group:
     output: "access-group INSIDE_acl in interface inside\naccess-group dmz1_acl in
       interface dmz1\naccess-group dmz2_acl in interface dmz2\naccess-group dmz3_acl
@@ -1392,24 +1394,21 @@ commands:
   # section.
   show curpriv:
     output: "Username : enable_15\nCurrent privilege level : 15\nCurrent Mode/s : P_PRIV\n"
-    help: Execute the command show curpriv. This automatically generated. Feel
-      free to change it!
+    help: Execute the command show curpriv. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
     - "{base_prompt}(config)#"
   terminal pager 0:
     output: null
-    help: Execute the command terminal pager 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal pager 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
     - "{base_prompt}(config)#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

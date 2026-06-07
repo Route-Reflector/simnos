@@ -43,8 +43,8 @@ commands:
       \              00:00:00:00:00:00,\n\n"
     help: execute the command "show chassis"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
     output_variants:
     - "Local Chassis ID 1 (Master)\n  Model Name:                    OS6360-PH24,\n\
       \  Module Type:                   0xa0a0000,\n  Description:               \
@@ -395,10 +395,10 @@ commands:
       \   5,\n  Violating MAC    :                   NULL,\n  Pkt-Relay        : \
       \              DISABLED\n\n            MAC             VLAN       MAC TYPE \
       \         OPERATION    \n-------------------------+--------+-----------------+-----------------\n"
-    - 'No Port Security is configured in the system.
+    - "No Port Security is configured in the system.
 
 
-      '
+      "
   show system:
     output: "System:\n  Description:  Alcatel-Lucent Enterprise OS6350-P24 6.7.1.001.R01\
       \ GA, January 01, 2000.,\n  Object ID:    0.0.0.0.0.0.0000.000.0.0.0.0.00.0.0,\n\

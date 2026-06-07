@@ -41,9 +41,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show system id:
-    output: 'Serial number : ES12345678
+    output: "Serial number : ES12345678
 
-      '
+      "
     help: execute the command "show system id"
     prompt:
     - "{base_prompt}>"

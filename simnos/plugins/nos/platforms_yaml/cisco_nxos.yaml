@@ -21,7 +21,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show l2rib internal permanently-frozen-list:
-    output: '
+    output: "
 
       Topology    Mac Address    Frozen time
 
@@ -77,13 +77,13 @@ commands:
 
       192         0050.5699.6083 Sat Jan 27 08:52:46.851 UTC
 
-      '
+      "
     help: execute the command "show l2rib internal permanently-frozen-list"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show vrf interface:
-    output: 'Interface                 VRF-Name                        VRF-ID  Site-of-Origin
+    output: "Interface                 VRF-Name                        VRF-ID  Site-of-Origin
 
       Vlan6001                  ADMIN                                6  --
 
@@ -121,7 +121,7 @@ commands:
 
       mgmt0                     management                           2  --
 
-      '
+      "
     help: execute the command "show vrf interface"
     prompt:
     - "{base_prompt}>"
@@ -372,6 +372,8 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip pim group-range vrf all:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     output: 'PIM Group-Range Configuration for VRF "default"
 
       Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
@@ -853,7 +855,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show interface snmp-ifindex:
-    output: '
+    output: "
 
       --------------------------------------------------------------------------------
 
@@ -905,7 +907,7 @@ commands:
 
       Lo0             335544320  (0x14000000)
 
-      Vlan1           151126017  (0x9020001)'
+      Vlan1           151126017  (0x9020001)"
     help: execute the command "show interface snmp-ifindex"
     prompt:
     - "{base_prompt}>"
@@ -943,7 +945,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show spanning-tree root:
-    output: '                                        Root  Hello Max Fwd
+    output: "                                        Root  Hello Max Fwd
 
       Vlan                   Root ID          Cost  Time  Age Dly  Root Port
 
@@ -957,7 +959,7 @@ commands:
       VLAN0003          1111 1211.a111.1113       1    2   20  10     port-channel1
 
       VLAN0004            11 1211.a111.1114       0    2   20  10  This bridge is
-      root'
+      root"
     help: execute the command "show spanning-tree root"
     prompt:
     - "{base_prompt}>"
@@ -1059,7 +1061,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show vdc:
-    output: '
+    output: "
 
       Switchwide mode is m1 f1 m1xl f2 m2xl f2e f3
 
@@ -1074,13 +1076,13 @@ commands:
 
       3       foo2.bar2.bazz2                   active              e4:c7:22:0c:67:c3   Ethernet    f2e
 
-      '
+      "
     help: execute the command "show vdc"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show forwarding adjacency:
-    output: 'IPv4 adjacency information
+    output: "IPv4 adjacency information
 
 
       next-hop         rewrite info    interface    Origin AS  Peer AS  Neighbor
@@ -1103,7 +1105,7 @@ commands:
 
       10.6.140.234    000e.b6b2.ff01 Ethernet1/16
 
-      10.6.140.238    54a2.72da.b651 Ethernet1/16'
+      10.6.140.238    54a2.72da.b651 Ethernet1/16"
     help: execute the command "show forwarding adjacency"
     prompt:
     - "{base_prompt}>"
@@ -1230,7 +1232,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show vlan:
-    output: '
+    output: "
 
       VLAN Name                             Status    Ports
 
@@ -1258,7 +1260,7 @@ commands:
 
 
 
-      '
+      "
     help: execute the command "show vlan"
     prompt:
     - "{base_prompt}>"
@@ -1290,7 +1292,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show vrf:
-    output: 'VRF-Name                           VRF-ID State   Reason
+    output: "VRF-Name                           VRF-ID State   Reason
 
       VPC_KEEPALIVE                           3 Up      --
 
@@ -1306,7 +1308,7 @@ commands:
 
       VRFNAME5                                6 Up      --
 
-      management                              2 Up      --'
+      management                              2 Up      --"
     help: execute the command "show vrf"
     prompt:
     - "{base_prompt}>"
@@ -1521,7 +1523,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show feature:
-    output: 'Feature Name          Instance  State
+    output: "Feature Name          Instance  State
 
       --------------------  --------  --------
 
@@ -1649,7 +1651,7 @@ commands:
 
       ospf                   13         enabled (not-running)
 
-      '
+      "
     help: execute the command "show feature"
     prompt:
     - "{base_prompt}>"
@@ -4217,7 +4219,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show configuration session summary:
-    output: 'Session Manager Database:
+    output: "Session Manager Database:
 
       --------------------------------------------------------------------
 
@@ -4233,7 +4235,7 @@ commands:
       Number of active configuration sessions = 2
 
 
-      '
+      "
     help: execute the command "show configuration session summary"
     prompt:
     - "{base_prompt}>"
@@ -4443,6 +4445,8 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip msdp summary vrf all:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     output: 'MSDP Peer Status Summary for VRF "default"
 
       Local ASN: 64520, originator-id: 10.10.100.10
@@ -4471,11 +4475,11 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip pim neighbor vrf all:
-    output: '                                    ^
+    output: "                                    ^
 
-      % Invalid command at ''^'' marker.
+      % Invalid command at '^' marker.
 
-      '
+      "
     help: execute the command "show ip pim neighbor vrf all"
     prompt:
     - "{base_prompt}>"
@@ -4674,9 +4678,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show clock:
-    output: '18:57:38.347 UTC Mon Oct 19 2015
+    output: "18:57:38.347 UTC Mon Oct 19 2015
 
-      '
+      "
     help: execute the command "show clock"
     prompt:
     - "{base_prompt}>"
@@ -4762,8 +4766,7 @@ commands:
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -4779,8 +4782,8 @@ commands:
       \                          SH\n"
     help: execute the command "show bfd neighbors"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show fabricpath route:
     output: "FabricPath Unicast Route Table\n'a/b/c' denotes ftag/switch-id/subswitch-id\n\
       '[x/y]' denotes [admin distance/metric]\nftag 0 is local ftag\nsubswitch-id

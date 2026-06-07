@@ -556,8 +556,7 @@ commands:
     - "{base_prompt}#"
   skip-page-display:
     output: null
-    help: Execute the command skip-page-display. This automatically generated. Feel
-      free to change it!
+    help: Execute the command skip-page-display. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

@@ -1,12 +1,12 @@
 name: cisco_apic
-initial_prompt: '{base_prompt}$'
-enable_prompt: '{base_prompt}#'
+initial_prompt: "{base_prompt}$"
+enable_prompt: "{base_prompt}#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}$'
+    prompt: "{base_prompt}$"
   fabric show vlan extended:
     output: "apic1# fabric 203 show vlan extended\n----------------------------------------------------------------\n Node\
       \ 203 (lab1r00002-ne-RDC-LF3)\n----------------------------------------------------------------\n\n VLAN Name      \
@@ -31,11 +31,11 @@ commands:
       \                          vlan-3914\n"
     help: execute the command "fabric show vlan extended"
     prompt:
-    - '{base_prompt}$'
-    - '{base_prompt}#'
+    - "{base_prompt}$"
+    - "{base_prompt}#"
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}$'
-    - '{base_prompt}#'
+    - "{base_prompt}$"
+    - "{base_prompt}#"

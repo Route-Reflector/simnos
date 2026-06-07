@@ -467,55 +467,48 @@ commands:
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   screen-length 0 temporary:
     output: null
     help: Execute the command screen-length 0 temporary. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal datadump:
     output: null
-    help: Execute the command terminal datadump. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal datadump. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   disable cli prompting:
     output: null
     help: Execute the command disable cli prompting. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   disable clipaging:
     output: null
-    help: Execute the command disable clipaging. This automatically generated. Feel
-      free to change it!
+    help: Execute the command disable clipaging. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   screen-length disable:
     output: null
     help: Execute the command screen-length disable. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show version:
-    output: 'Aruba Operating System Software.
+    output: "Aruba Operating System Software.
 
       ArubaOS (MODEL: 310), Version 01.01.0.1 SSR
 
@@ -532,11 +525,11 @@ commands:
 
       Reboot Time and Cause: AP rebooted caused by cold HW reset(power loss)
 
-      '
+      "
     help: execute the command "show version"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show vsf detail:
     output: "VSF Domain ID    : 1\n MAC Address      : 94f128-aabbcc\n VSF Topology\
       \     : Chain\n VSF Status       : Active\n Uptime           : 134d 1h 55m\n\

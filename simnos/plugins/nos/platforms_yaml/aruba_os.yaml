@@ -175,13 +175,13 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show hostname:
-    output: '
+    output: "
 
-      Hostname is WLC-AMC72-LAB01'
+      Hostname is WLC-AMC72-LAB01"
     help: execute the command "show hostname"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show inventory:
     output: "\nSupervisor Card slot            : 0\nSystem Serial#               \
       \   : CV123ABC2 (Date:08/25/18)\nCPU Card Serial#                : ABC123XYZ\

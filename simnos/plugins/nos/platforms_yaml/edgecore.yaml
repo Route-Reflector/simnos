@@ -1,14 +1,14 @@
 name: edgecore
-initial_prompt: '{base_prompt}$'
-enable_prompt: '{base_prompt}#'
+initial_prompt: "{base_prompt}$"
+enable_prompt: "{base_prompt}#"
 commands:
   enable:
     output: null
-    new_prompt: '{base_prompt}#'
+    new_prompt: "{base_prompt}#"
     help: enter enable mode
-    prompt: '{base_prompt}$'
+    prompt: "{base_prompt}$"
   show interfaces brief:
-    output: 'Interface Name               Status   PVID Pri Speed/Duplex  Type         Trunk
+    output: "Interface Name               Status   PVID Pri Speed/Duplex  Type         Trunk
 
       --------- ------------------ -------- ---- --- ------------- ------------ -----
 
@@ -32,11 +32,11 @@ commands:
 
       Eth 1/10  Uplink             Up          1   0 Auto-1000full 1000Base SFP None
 
-      '
+      "
     help: execute the command "show interfaces brief"
     prompt: &id001
-    - '{base_prompt}$'
-    - '{base_prompt}#'
+    - "{base_prompt}$"
+    - "{base_prompt}#"
   show interfaces status:
     output: "Information of Eth 1/1\n Basic Information:\n  Port Type:              100TX\n  Mac Address:            12-34-56-78-AA-00\n\
       \ Configuration:\n  Name:                   PC1\n  Port Admin:             Up\n  MDIX mode:              Auto\n  Speed-duplex:\
@@ -247,8 +247,8 @@ commands:
     help: execute the command "show vlan"
     prompt: *id001
   _default_:
-    output: '% Invalid input detected'
+    output: "% Invalid input detected"
     help: default output for unknown commands
     prompt:
-    - '{base_prompt}$'
-    - '{base_prompt}#'
+    - "{base_prompt}$"
+    - "{base_prompt}#"

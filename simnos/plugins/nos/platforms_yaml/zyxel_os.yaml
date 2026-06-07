@@ -44,7 +44,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   cfg snmp get:
-    output: 'SNMP Agent          : Enabled
+    output: "SNMP Agent          : Enabled
 
       Get Community       : Monitoring
 
@@ -64,7 +64,7 @@ commands:
 
       Command Successful.
 
-      '
+      "
     help: execute the command "cfg snmp get"
     prompt:
     - "{base_prompt}>"
@@ -84,7 +84,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   cfg static dhcp get:
-    output: 'Index      Status     Mac Address                    IP Address
+    output: "Index      Status     Mac Address                    IP Address
 
       1          1          eb:fa:ae:cf:34:15              192.168.1.25
 
@@ -94,7 +94,7 @@ commands:
 
       Command Successful.
 
-      '
+      "
     help: execute the command "cfg static dhcp get"
     prompt:
     - "{base_prompt}>"
@@ -184,7 +184,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   cfg lan get:
-    output: 'Group Name      LAN IP Address       IPv4 DHCP Server     IPv6 Enable
+    output: "Group Name      LAN IP Address       IPv4 DHCP Server     IPv6 Enable
 
       Default                              Disable              false
 
@@ -192,7 +192,7 @@ commands:
 
       Command Successful.
 
-      '
+      "
     help: execute the command "cfg lan get"
     prompt:
     - "{base_prompt}>"
@@ -217,19 +217,19 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   zycli Ethctl media-type:
-    output: 'Auto-negotiation enabled.
+    output: "Auto-negotiation enabled.
 
       The autonegotiated media type is Auto Full Duplex
 
       Link is down
 
-      '
+      "
     help: execute the command "zycli Ethctl media-type"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   cfg nat get:
-    output: 'Index Description     Enable  Originating IP  Server IP Address WAN Interface   Start
+    output: "Index Description     Enable  Originating IP  Server IP Address WAN Interface   Start
       Port End Port   Translation Start Port    Translation End Port      Protocol
 
       1     rabbitmq0       0       185.24.67.123   192.168.1.13      ADSL            15672      15672      15672                     15672                     ALL
@@ -248,7 +248,7 @@ commands:
 
       Command Successful.
 
-      '
+      "
     help: execute the command "cfg nat get"
     prompt:
     - "{base_prompt}>"

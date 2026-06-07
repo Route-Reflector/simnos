@@ -361,9 +361,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   display sn license:
-    output: ' ESN of device: 21500104792SM8504636
+    output: " ESN of device: 21500104792SM8504636
 
-      '
+      "
     help: execute the command "display sn license"
     prompt:
     - "{base_prompt}>"
@@ -587,7 +587,6 @@ commands:
   screen-length 0 temporary:
     output: null
     help: Execute the command screen-length 0 temporary. This automatically generated.
-      Feel free to change it!
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -604,8 +603,8 @@ commands:
       11 2019 21:01:39   logfile\n\n2,994,228 KB total (801,664 KB free)\n"
     help: execute the command "dir"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   display ap all:
     output: "Total AP information:\nfault : fault           [1]\nidle  : idle    \
       \        [1]\nnor   : normal          [1]\nstdby : standby         [1]\nExtraInfo
@@ -714,7 +713,7 @@ commands:
     help: execute the command "display eth-trunk"
     prompt: *id001
     output_variants:
-    - 'Info: No valid trunk in the system.'
+    - "Info: No valid trunk in the system."
   display http server:
     output: "   HTTP Server Status              : disabled\n   HTTP Server Port  \
       \              : 80(80)\n   HTTP Timeout Interval           : 20\n   Current

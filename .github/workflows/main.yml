@@ -33,6 +33,8 @@ jobs:
         run: "uv run invoke ruff"
       - name: "Linting: yamllint"
         run: "uv run invoke yamllint"
+      - name: "Linting: platform yaml conventions (#244)"
+        run: "uv run invoke lint-platform-yaml"
       - name: "Security: bandit"
         run: "uv run invoke bandit"
       # Typecheck: ty is blocking since Phase 2 (#218).

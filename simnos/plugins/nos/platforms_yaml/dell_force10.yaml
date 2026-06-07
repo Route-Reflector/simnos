@@ -9,7 +9,7 @@ commands:
     help: enter enable mode
     prompt: "{base_prompt}>"
   show arp:
-    output: 'Protocol    Address         Age(min)  Hardware Address    Interface  VLAN             CPU
+    output: "Protocol    Address         Age(min)  Hardware Address    Interface  VLAN             CPU
 
       -----------------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ commands:
 
       Internet    192.168.186.254       -   5d:7c:2f:d5:62:58      -       Vl 10            CP
 
-      '
+      "
     help: execute the command "show arp"
     prompt:
     - "{base_prompt}>"
@@ -50,7 +50,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip interface brief:
-    output: 'Interface                     IP-Address      OK  Method Status                Protocol
+    output: "Interface                     IP-Address      OK  Method Status                Protocol
 
       TenGigabitEthernet 0/1        unassigned      NO  None   up                    down
 
@@ -158,7 +158,7 @@ commands:
 
       ManagementEthernet 0/0        10.151.5.208    YES Manual up                    up
 
-      Port-channel 128              unassigned      YES None   up                    up'
+      Port-channel 128              unassigned      YES None   up                    up"
     help: execute the command "show ip interface brief"
     prompt:
     - "{base_prompt}>"
@@ -193,15 +193,13 @@ commands:
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

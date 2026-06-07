@@ -36,7 +36,7 @@ rules:
   # so the workflow idiom passes while keeping key-level enforcement on (narrow
   # to this set, instead of disabling key checks entirely).
   truthy:
-    allowed-values: ['true', 'false', 'on', 'off']
+    allowed-values: ["true", "false", "on", "off"]
     check-keys: true
 
   # Allow up to 3 consecutive blank lines (excluding platform YAMLs which
@@ -50,3 +50,11 @@ rules:
   comments-indentation: disable
   comments:
     min-spaces-from-content: 1
+
+  # Quote style: if a scalar is quoted, use double quotes (#244 / P-12a).
+  # Unquoted scalars are fine (required: false). The 8 platform-yaml
+  # scalars whose real device output contains double quotes keep single
+  # quotes via inline `# yamllint disable-line` directives.
+  quoted-strings:
+    quote-type: double
+    required: false

@@ -30,7 +30,7 @@ commands:
     - "{base_prompt}#"
   show lldp remote-device all:
     help: execute the command "show lldp remote-device all"
-    output: '
+    output: "
 
       LLDP Remote Device Summary
 
@@ -106,13 +106,13 @@ commands:
 
       0/50       2       A8:00:B5:57:CB:01     A8:00:B5:57:CB:02   abc-ff-abc-sw0102
 
-      '
+      "
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show mac-addr-table:
     help: execute the command "show mac-addr-table"
-    output: '
+    output: "
 
       VLAN ID  MAC Address         Interface              IfIndex  Status
 
@@ -156,7 +156,7 @@ commands:
 
       112      00:00:58:13:E4:67   0/13                   13       Learned
 
-      '
+      "
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -184,7 +184,7 @@ commands:
     - "{base_prompt}#"
   show vlan brief:
     help: execute the command "show vlan brief"
-    output: '
+    output: "
 
       VLAN ID VLAN Name                        VLAN Type
 
@@ -230,13 +230,12 @@ commands:
 
       999     VLAN0999                         Static
 
-      '
+      "
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal length 0:
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     output: null
     prompt:
     - "{base_prompt}>"

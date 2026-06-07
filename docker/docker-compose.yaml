@@ -1,6 +1,6 @@
 services:
   simnos:
-    hostname: 'simnos'
+    hostname: "simnos"
     build:
       context: ..
       dockerfile: docker/Dockerfile

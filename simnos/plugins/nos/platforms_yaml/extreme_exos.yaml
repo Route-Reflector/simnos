@@ -47,7 +47,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ports description:
-    output: 'Port   Display String        Description String
+    output: "Port   Display String        Description String
 
       =====  ====================  ==================================================
 
@@ -149,7 +149,7 @@ commands:
 
       =====  ====================  ==================================================
 
-      '
+      "
     help: execute the command "show ports description"
     prompt:
     - "{base_prompt}>"
@@ -344,8 +344,7 @@ commands:
     - "{base_prompt}#"
   disable clipaging:
     output: null
-    help: Execute the command disable clipaging. This automatically generated. Feel
-      free to change it!
+    help: Execute the command disable clipaging. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -369,8 +368,8 @@ commands:
       \ 1  Locked: 0  Locked with Timeout: 0\nFDB Aging time: 300\n"
     help: execute the command "show fdb"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show iparp:
     output: "VR            Destination      Mac                Age  Static  VLAN \
       \         VID   Port\nVR-Default    10.128.32.4      00:d0:59:17:74:83   20\
@@ -386,6 +385,8 @@ commands:
     help: execute the command "show iparp"
     prompt: *id001
     output_variants:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     - 'VR            Destination      Mac                Age  Static  VLAN          VID  Port
 
       VR-Default    10.10.10.6       00:04:96:1f:a5:71    8      NO  bluered       4092  1

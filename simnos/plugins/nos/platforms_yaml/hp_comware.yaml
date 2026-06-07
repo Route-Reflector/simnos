@@ -42,7 +42,7 @@ commands:
     - "<{base_prompt}>"
     - "[{base_prompt}]"
   display interface brief:
-    output: 'The brief information of interface(s) under route mode:
+    output: "The brief information of interface(s) under route mode:
 
       Link: ADM - administratively down; Stby - standby
 
@@ -84,7 +84,7 @@ commands:
 
       GE0/4                DOWN auto    A      A    1
 
-      '
+      "
     help: execute the command "display interface brief"
     prompt:
     - "<{base_prompt}>"

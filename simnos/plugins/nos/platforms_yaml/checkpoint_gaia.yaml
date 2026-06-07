@@ -15,15 +15,15 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show domainname:
-    output: 'Domain name  example.com
+    output: "Domain name  example.com
 
-      '
+      "
     help: execute the command "show domainname"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show version all:
-    output: 'Product version Check Point Gaia R77.30
+    output: "Product version Check Point Gaia R77.30
 
       OS build 204
 
@@ -31,7 +31,7 @@ commands:
 
       OS edition 32-bit
 
-      '
+      "
     help: execute the command "show version all"
     prompt:
     - "{base_prompt}>"
@@ -48,7 +48,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show virtual-system all:
-    output: 'Virtual systems list
+    output: "Virtual systems list
 
       VS ID       VS NAME
 
@@ -56,7 +56,7 @@ commands:
 
       1           gandalf_VR01
 
-      2           gandalf_SRCXT-VS01'
+      2           gandalf_SRCXT-VS01"
     help: execute the command "show virtual-system all"
     prompt:
     - "{base_prompt}>"
@@ -122,7 +122,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show arp dynamic all:
-    output: 'Dynamic Arp Parameters
+    output: "Dynamic Arp Parameters
 
 
       IP Address                 Mac Address
@@ -139,7 +139,7 @@ commands:
 
       192.168.13.146                  A4:5D:36:2B:58:7C
 
-      '
+      "
     help: execute the command "show arp dynamic all"
     prompt:
     - "{base_prompt}>"
@@ -178,12 +178,12 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   fw stat:
-    output: 'HOST      POLICY     DATE
+    output: "HOST      POLICY     DATE
 
       localhost Example-Policy 19Oct2017 16:34:20 :  [>Mgmt] [<Mgmt] [>eth1-01.100]
       [<eth1-01.100] [>eth1-01] [<eth1-01]
 
-      '
+      "
     help: execute the command "fw stat"
     prompt:
     - "{base_prompt}>"
@@ -197,11 +197,11 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show lom:
-    output: 'Firmware Revision : 2.2
+    output: "Firmware Revision : 2.2
 
       IP Address : 192.168.0.100
 
-      '
+      "
     help: execute the command "show lom"
     prompt:
     - "{base_prompt}>"

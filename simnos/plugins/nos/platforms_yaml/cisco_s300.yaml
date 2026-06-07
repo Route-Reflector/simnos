@@ -40,9 +40,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show system id:
-    output: 'Serial number : IDN123456AA
+    output: "Serial number : IDN123456AA
 
-      '
+      "
     help: execute the command "show system id"
     prompt:
     - "{base_prompt}>"
@@ -117,7 +117,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show interfaces description:
-    output: 'Port      Description
+    output: "Port      Description
 
       -------   -----------
 
@@ -198,7 +198,7 @@ commands:
 
       Po8
 
-      '
+      "
     help: execute the command "show interfaces description"
     prompt:
     - "{base_prompt}>"
@@ -229,28 +229,26 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show version:
-    output: 'SW version    1.3.7.18 ( date  12-Jan-2014 time  18:02:59 )
+    output: "SW version    1.3.7.18 ( date  12-Jan-2014 time  18:02:59 )
 
       Boot version    1.1.0.6 ( date  11-May-2011 time  18:31:00 )
 
       HW version    V02
 
-      '
+      "
     help: execute the command "show version"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal datadump:
     output: null
-    help: Execute the command terminal datadump. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal datadump. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

@@ -24,7 +24,7 @@ commands:
     help: exit current configuration sub-mode (from config mode returns to enable)
     prompt: "{base_prompt}(config)#"
   show rep topology:
-    output: 'REP Segment 1
+    output: "REP Segment 1
 
       BridgeName       PortName   Edge Role
 
@@ -32,7 +32,7 @@ commands:
 
       Switch01          Fa0/2      Pri  Alt
 
-      Switch02          Fa1/0/23   Sec  Open'
+      Switch02          Fa1/0/23   Sec  Open"
     help: execute the command "show rep topology"
     prompt:
     - "{base_prompt}>"
@@ -161,7 +161,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show interface link:
-    output: 'Port    Name               Down Time        Down Since
+    output: "Port    Name               Down Time        Down Since
 
       Gi1/1                      37 weeks, 3 days, 5 hours, 52 minutes 18 secs      08:07:10  Mon
       Feb 14 2022
@@ -214,7 +214,7 @@ commands:
 
       Tw1/0/48   WERFBZW5236KARA   00 secs
 
-      Te6/1    ICN-DOFKYLW5823TV000 secs'
+      Te6/1    ICN-DOFKYLW5823TV000 secs"
     help: execute the command "show interface link"
     prompt:
     - "{base_prompt}>"
@@ -754,7 +754,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip cef:
-    output: 'Prefix               Next Hop             Interface
+    output: "Prefix               Next Hop             Interface
 
       0.0.0.0/0            10.180.122.153       GigabitEthernet0/1
 
@@ -780,13 +780,13 @@ commands:
 
       255.255.255.255/32   receive
 
-      '
+      "
     help: execute the command "show ip cef"
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show nve peers:
-    output: 'Interface  VNI      Type Peer-IP          RMAC/Num_RTs   eVNI     state
+    output: "Interface  VNI      Type Peer-IP          RMAC/Num_RTs   eVNI     state
       flags UP time
 
       nve1       1033 L3CP 192.168.111.81   0200.c0a8.433c 1033   UP   A/M 6d22h
@@ -801,7 +801,7 @@ commands:
 
       nve1       1036 L3CP 192.168.111.48   cc7f.76a5.3c56 1036   UP   A/M 6d22h
 
-      '
+      "
     help: execute the command "show nve peers"
     prompt:
     - "{base_prompt}>"
@@ -876,7 +876,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show snmp community:
-    output: 'Community name: ILMI
+    output: "Community name: ILMI
 
       Community Index: cisco0
 
@@ -905,7 +905,7 @@ commands:
       storage-type: nonvolatile        active
 
 
-      '
+      "
     help: execute the command "show snmp community"
     prompt:
     - "{base_prompt}>"
@@ -927,11 +927,11 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show power supplies:
-    output: 'Power supplies needed by system    : 1
+    output: "Power supplies needed by system    : 1
 
       Power supplies currently available : 2
 
-      '
+      "
     help: execute the command "show power supplies"
     prompt:
     - "{base_prompt}>"
@@ -957,6 +957,8 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show alert counters:
+    # real device output contains double quotes; keep single quotes
+    # yamllint disable-line rule:quoted-strings
     output: 'Interface: Fa1/1
 
       Error Code: ALERT-5-STP_BLOCK
@@ -1138,7 +1140,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip ospf neighbor:
-    output: 'Neighbor ID     Pri   State           Dead Time   Address         Interface
+    output: "Neighbor ID     Pri   State           Dead Time   Address         Interface
 
       10.0.0.1          0   FULL/  -        00:00:32    10.0.1.1        Port-channel1
 
@@ -1146,7 +1148,7 @@ commands:
 
       10.0.0.3          0   FULL/  -        00:00:39    10.0.3.1        Vlan1000
 
-      '
+      "
     help: execute the command "show ip ospf neighbor"
     prompt:
     - "{base_prompt}>"
@@ -1193,7 +1195,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show environment power all:
-    output: 'SW  PID                 Serial#     Status           Sys Pwr  PoE Pwr  Watts
+    output: "SW  PID                 Serial#     Status           Sys Pwr  PoE Pwr  Watts
 
       --  ------------------  ----------  ---------------  -------  -------  -----
 
@@ -1205,7 +1207,7 @@ commands:
 
       2B  PWR-C1-1100WAC      DEF123456GH  OK              Good     Good     1100
 
-      '
+      "
     help: execute the command "show environment power all"
     prompt:
     - "{base_prompt}>"
@@ -1588,7 +1590,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip interface brief:
-    output: 'Interface                  IP-Address      OK? Method Status                Protocol
+    output: "Interface                  IP-Address      OK? Method Status                Protocol
 
       Ethernet0/0                unassigned      YES NVRAM  up                    up
 
@@ -1604,7 +1606,7 @@ commands:
 
       Loopback0                  10.0.1.2        YES NVRAM  up                    up
 
-      '
+      "
     help: execute the command "show ip interface brief"
     prompt:
     - "{base_prompt}>"
@@ -1642,7 +1644,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show isis neighbors:
-    output: '
+    output: "
 
       System Id       Type Interface     IP Address      State Holdtime Circuit Id
 
@@ -1656,7 +1658,7 @@ commands:
 
       vEOS4           L2   Gi3           10.2.4.4        UP    23       0F
 
-      '
+      "
     help: execute the command "show isis neighbors"
     prompt:
     - "{base_prompt}>"
@@ -1696,7 +1698,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show adjacency:
-    output: 'Protocol Interface                 Address
+    output: "Protocol Interface                 Address
 
       IP       Vlan1                     10.255.1.1(11)
 
@@ -1704,7 +1706,7 @@ commands:
 
       IP       Vlan1                     10.255.1.250(8)
 
-      IP       Vlan1                     227.0.0.0(3)'
+      IP       Vlan1                     227.0.0.0(3)"
     help: execute the command "show adjacency"
     prompt:
     - "{base_prompt}>"
@@ -1763,13 +1765,13 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ip flow toptalkers:
-    output: 'SrcIf         SrcIPaddress    DstIf         DstIPaddress    Pr SrcP DstP  Pkts
+    output: "SrcIf         SrcIPaddress    DstIf         DstIPaddress    Pr SrcP DstP  Pkts
 
       Gi0/2/0.30    10.2.100.83     Null          224.0.0.2       11 07C1 07C1   414
 
       Gi0/2/0.40    10.2.100.99     Null          224.0.0.2       11 07C1 07C1   410
 
-      '
+      "
     help: execute the command "show ip flow toptalkers"
     prompt:
     - "{base_prompt}>"
@@ -1978,7 +1980,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show ipv6 neighbors:
-    output: 'IPv6 Address                              Age Link-layer Addr State Interface
+    output: "IPv6 Address                              Age Link-layer Addr State Interface
 
       2402:1234:106:100:793A:F08D:5B3A:EF89      33 54e1.addb.200f  STALE Vl6
 
@@ -2000,7 +2002,7 @@ commands:
 
       FE80::9277:EEFF:FE9B:4E00                   - -               REACH Di0
 
-      '
+      "
     help: execute the command "show ipv6 neighbors"
     prompt:
     - "{base_prompt}>"
@@ -2018,7 +2020,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show archive:
-    output: ' Archive feature not enabled'
+    output: " Archive feature not enabled"
     help: execute the command "show archive"
     prompt:
     - "{base_prompt}>"
@@ -2946,7 +2948,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show interfaces description:
-    output: 'Interface                      Status         Protocol Description
+    output: "Interface                      Status         Protocol Description
 
       Vl1                            admin down     down
 
@@ -2978,7 +2980,7 @@ commands:
 
       Gi0/10.30                      reset          down     Garbage
 
-      '
+      "
     help: execute the command "show interfaces description"
     prompt:
     - "{base_prompt}>"
@@ -3867,7 +3869,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   ping:
-    output: 'Type escape sequence to abort.
+    output: "Type escape sequence to abort.
 
       Sending 5, 100-byte ICMP Echos to 10.245.179.14, timeout is 2 seconds:
 
@@ -3875,7 +3877,7 @@ commands:
 
       Success rate is 0 percent (0/5)
 
-      '
+      "
     help: execute the command "ping"
     prompt:
     - "{base_prompt}>"
@@ -4232,7 +4234,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show hosts summary:
-    output: 'Default domain is test.com
+    output: "Default domain is test.com
 
       Name servers are 127.0.0.2, 127.0.0.3
 
@@ -4240,7 +4242,7 @@ commands:
 
       Dynamic cache entries: 0
 
-      '
+      "
     help: execute the command "show hosts summary"
     prompt:
     - "{base_prompt}>"
@@ -4291,7 +4293,7 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show access-list:
-    output: 'Standard IP access list 1
+    output: "Standard IP access list 1
 
       10 permit 4.5.6.0 log
 
@@ -4303,7 +4305,7 @@ commands:
 
       20 permit any (11665 matches)
 
-      '
+      "
     help: execute the command "show access-list"
     prompt:
     - "{base_prompt}>"
@@ -4373,9 +4375,9 @@ commands:
     - "{base_prompt}>"
     - "{base_prompt}#"
   show clock:
-    output: '*18:57:38.347 UTC Mon Oct 19 2015
+    output: "*18:57:38.347 UTC Mon Oct 19 2015
 
-      '
+      "
     help: execute the command "show clock"
     prompt:
     - "{base_prompt}>"
@@ -4577,15 +4579,13 @@ commands:
     - "{base_prompt}#"
   terminal length 0:
     output: null
-    help: Execute the command terminal length 0. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal length 0. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
   terminal width 511:
     output: null
-    help: Execute the command terminal width 511. This automatically generated. Feel
-      free to change it!
+    help: Execute the command terminal width 511. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"
@@ -4605,8 +4605,8 @@ commands:
       \        -   c4f7.d564.b71a  ARPA   FastEthernet4\n"
     help: execute the command "show arp"
     prompt: &id001
-    - '{base_prompt}>'
-    - '{base_prompt}#'
+    - "{base_prompt}>"
+    - "{base_prompt}#"
   show cts credentials:
     output: No CTS credentials exist.
     help: execute the command "show cts credentials"
@@ -4996,8 +4996,7 @@ commands:
   # `sync_ntc_commands.py` will not affect this section.
   show privilege:
     output: "Current privilege level is 15\n"
-    help: Execute the command show privilege. This automatically generated. Feel
-      free to change it!
+    help: Execute the command show privilege. This automatically generated.
     prompt:
     - "{base_prompt}>"
     - "{base_prompt}#"

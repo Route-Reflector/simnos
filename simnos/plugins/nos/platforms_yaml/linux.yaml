@@ -113,8 +113,8 @@ commands:
       \ 2M\n        SupportedSecondaryChannels: Coded\n"
     help: execute the command "bluetoothctl show"
     prompt: &id001
-    - '{base_prompt}$'
-    - '{base_prompt}#'
+    - "{base_prompt}$"
+    - "{base_prompt}#"
     output_variants:
     - "Controller AA:AA:AA:AA:AA:AA (public)\n        Manufacturer: 0x005d (93)\n\
       \        Version: 0x0a (10)\n        Name: ntc-AA-AAAA\n        Alias: ntc-AA-AAAA\n\
@@ -615,7 +615,7 @@ commands:
     help: execute the command "nmcli connection show"
     prompt: *id001
   pct config 1:
-    output: '
+    output: "
 
       arch: amd11
 
@@ -655,7 +655,7 @@ commands:
 
       tags: tag1,tag2,tag3
 
-      '
+      "
     help: execute the command "pct config 1"
     prompt: *id001
   pct list:
@@ -665,11 +665,11 @@ commands:
     help: execute the command "pct list"
     prompt: *id001
   pveversion:
-    output: 'pve-manager/1.1-1/101a1111 (running kernel: 1.1.11-11-pve)'
+    output: "pve-manager/1.1-1/101a1111 (running kernel: 1.1.11-11-pve)"
     help: execute the command "pveversion"
     prompt: *id001
   qm config 1:
-    output: '
+    output: "
 
       bootdisk: ide0
 
@@ -697,7 +697,7 @@ commands:
 
       sockets: 1
 
-      '
+      "
     help: execute the command "qm config 1"
     prompt: *id001
   qm list:
