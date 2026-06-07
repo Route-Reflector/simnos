@@ -166,18 +166,37 @@ class NosTest(unittest.TestCase):
         assert nos.initial_prompt == "SimNOS>"
         assert nos.commands == {}
 
-    def test_from_dict_unknown_top_level_key_is_silently_ignored(self):
-        """Pin the pre-#244 lenient contract: top-level typos vanish quietly.
+    def test_from_dict_unknown_top_level_key_raises(self):
+        """A typo'd top-level key is rejected loudly, nothing is committed.
 
-        A typo'd top-level key (`enable_promt`) is dropped by the targeted
-        `data.get()` reads without any error today. D8 (#244) flips this
-        pin to a loud ValueError — kept here first so the behavioral change
-        shows up as an explicit pin rewrite, not a silent test edit.
+        Pins the D8 (#244) flip of the old lenient contract: `enable_promt`
+        used to be dropped silently by the targeted `data.get()` reads.
+        The allowed key set is `ModelNosAttributes.model_fields` (SSoT),
+        and the check runs before any attribute commit (no-partial-state,
+        #232).
         """
         nos = Nos()
-        nos.from_dict({"name": "MySimNOS", "enable_promt": "{base_prompt}#"})
-        assert nos.name == "MySimNOS"
-        assert nos.enable_prompt is None
+        with pytest.raises(ValueError, match=r"unknown top-level field\(s\): \['enable_promt'\]"):
+            nos.from_dict({"name": "polluted", "enable_promt": "{base_prompt}#"})
+        assert nos.name == "SimNOS"
+
+    def test_from_file_schema_invalid_yaml_leaves_nos_untouched(self):
+        """A schema-invalid yaml raises ValidationError before any commit.
+
+        Pins the D8 (#244) merged-view validation on the `from_file` path:
+        hot reload (`reload_commands`) calls `from_file` directly and never
+        reaches `__init__`'s trailing `validate()`, so a yaml with e.g. an
+        int `output` used to be committed silently into a running shell.
+        """
+        bad_yaml = self._write_tmp_file(
+            "schema_invalid_nos.yaml",
+            "name: polluted\ncommands:\n  cmd:\n    output: 123\n    help: int output\n",
+        )
+        nos = Nos()
+        with pytest.raises(ValidationError, match=r"output"):
+            nos.from_file(bad_yaml)
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
 
     def test_from_dict_unknown_command_field_is_silently_ignored(self):
         """Pin the pre-#244 lenient contract: command-field typos pass validation.

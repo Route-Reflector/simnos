@@ -104,8 +104,13 @@ class Nos:
         Method to validate NOS attributes: commands, name,
         initial prompt - using Pydantic models,
         raises ValidationError on failure.
+
+        Only the schema fields are passed (explicitly extracted via
+        `ModelNosAttributes.model_fields`) — `self.__dict__` also holds
+        non-schema runtime state (`device`, `configuration_file`) that
+        must never reach the model (#244 / D8).
         """
-        ModelNosAttributes(**self.__dict__)
+        ModelNosAttributes(**{field: getattr(self, field) for field in ModelNosAttributes.model_fields})
         log.debug("%s NOS attributes validation succeeded", self.name)
 
     def from_dict(self, data: dict) -> None:
@@ -126,20 +131,48 @@ class Nos:
             }
 
         :param data: NOS dictionary
-        :raises ValueError: if the 'commands' value is not a mapping —
-            validated before any attribute is committed, so a malformed
-            dict never leaves partial state behind (same no-partial-state
-            contract as `_from_module`, #232)
+        :raises ValueError: if the 'commands' value is not a mapping, or
+            if `data` holds a top-level key outside the
+            `ModelNosAttributes` schema (a typo like `enable_promt` used
+            to be dropped silently, #244 / D8)
+        :raises pydantic.ValidationError: if the merged result would not
+            satisfy `ModelNosAttributes` — validated before any attribute
+            is committed, so malformed data never leaves partial state
+            behind (same no-partial-state contract as `_from_module`,
+            #232); this also covers the hot-reload path, which calls
+            `from_file` directly and never reaches `__init__`'s trailing
+            `validate()` (#244 / D8)
         """
+        unknown = data.keys() - ModelNosAttributes.model_fields.keys()
+        if unknown:
+            raise ValueError(f"NOS data has unknown top-level field(s): {sorted(unknown)}")
         commands = data.get("commands", {})
         if not isinstance(commands, dict):
             raise ValueError(f"NOS data 'commands' must be a mapping (got {type(commands).__name__})")
-        self.name = data.get("name", self.name)
+        # Validate the exact post-commit state (a merged view, not `data`
+        # alone): commands merge cumulatively across multi-file loads and
+        # scalars keep their current value when absent from `data`.
+        merged_name = data.get("name", self.name)
+        merged_initial_prompt = data.get("initial_prompt", self.initial_prompt)
+        merged_auth = data.get("auth", self.auth)
+        merged_enable_prompt = data.get("enable_prompt", self.enable_prompt)
+        merged_config_prompt = data.get("config_prompt", self.config_prompt)
+        ModelNosAttributes(
+            name=merged_name,
+            initial_prompt=merged_initial_prompt,
+            auth=merged_auth,
+            enable_prompt=merged_enable_prompt,
+            config_prompt=merged_config_prompt,
+            commands={**self.commands, **commands},
+        )
+        # Commit phase — mirrors the validated merged view, so the
+        # validated state and the committed state cannot drift apart.
+        self.name = merged_name
         self.commands.update(commands)
-        self.initial_prompt = data.get("initial_prompt", self.initial_prompt)
-        self.auth = data.get("auth", self.auth)
-        self.enable_prompt = data.get("enable_prompt", self.enable_prompt)
-        self.config_prompt = data.get("config_prompt", self.config_prompt)
+        self.initial_prompt = merged_initial_prompt
+        self.auth = merged_auth
+        self.enable_prompt = merged_enable_prompt
+        self.config_prompt = merged_config_prompt
 
     def _from_yaml(self, filepath: str) -> None:
         """
@@ -200,6 +233,18 @@ class Nos:
         module_commands = getattr(module, "commands", {})
         if not isinstance(module_commands, dict):
             raise ValueError(f"Module '{filename}' 'commands' must be a mapping (got {type(module_commands).__name__})")
+        # Validate the exact post-commit state before committing, mirroring
+        # `from_dict`'s merged view (#244 / D8) — this also covers hot
+        # reload, which calls `from_file` directly. No top-level key check
+        # here: unrelated module-level names are legitimate in a py plugin
+        # (only `_MODULE_ATTR_MAP` constants are mapped).
+        ModelNosAttributes(
+            **{
+                self_attr: getattr(module, module_attr, getattr(self, self_attr))
+                for module_attr, self_attr in self._MODULE_ATTR_MAP.items()
+            },
+            commands={**self.commands, **module_commands},
+        )
         device_classes = _find_device_classes(module)
         if len(device_classes) > 1:
             raise ValueError(
