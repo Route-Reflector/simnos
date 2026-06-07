@@ -216,17 +216,59 @@ class TestPlatforms:
                         output = conn.send_command(command)
                         assert isinstance(output, str)
 
+    # Vendor-signature literal pins (#244 / D6): the wire test below reads
+    # its expectation from the yaml (SSoT), so it confirms the plumbing but
+    # NOT that the wording itself stays vendor-accurate — a regression that
+    # also rewrites the yaml would pass it (cross-review 🦊#5). These
+    # literals guard the distinctive signatures that are easy to drift back
+    # to a Cisco-style copy: "command" vs "input" (NX-OS), the `%%` double
+    # percent (EXOS), the `"^"` double-quoted caret (Force10), the two-line
+    # IronWare block (Brocade) and the multi-line listing (D-Link flat CLI).
+    # An intentional wording change updates both this map and the yaml.
+    _VENDOR_SIGNATURE_DEFAULTS = {
+        "cisco_nxos": "% Invalid command at '^' marker.",
+        "extreme_exos": "%% Invalid input detected at '^' marker.",
+        "dell_force10": '% Error: Invalid input at "^" marker.',
+        "brocade_netiron": "Invalid input ->\nType ? for a list",
+        "dlink_ds": (
+            "Available commands:\n"
+            "..                  ?                   cable_diag          clear\n"
+            "config              create              delete              dir\n"
+            "disable             download            drv                 enable\n"
+            "login               logout              ping                reboot\n"
+            "reconfig            reset               save                show\n"
+            "telnet              upload"
+        ),
+    }
+
+    @pytest.mark.parametrize("platform", sorted(_VENDOR_SIGNATURE_DEFAULTS))
+    def test_default_wording_keeps_vendor_signature(self, platform: str):
+        """The `_default_` output keeps its distinctive vendor signature (#244 / D6).
+
+        Literal guard against drifting a vendor-specific message back to a
+        generic Cisco-style one — the wire test reads from the yaml so it
+        cannot catch that (cross-review 🦊#5). A deliberate wording change
+        must update both this expectation and the yaml.
+        """
+        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
+            actual = yaml.safe_load(file)["commands"]["_default_"]["output"]
+        assert actual == self._VENDOR_SIGNATURE_DEFAULTS[platform]
+
     @pytest.mark.timeout(300)
-    @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron"])
+    # cisco_ios: single Cisco-style line / juniper_junos: lowercase + trailing
+    # period / brocade_netiron: two-line block / dell_force10: escaped `"^"`
+    # caret (the one wire pin that exercises a backslash-escaped scalar over
+    # the SSH channel, cross-review 🐙#5).
+    @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron", "dell_force10"])
     def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str):
         """The yaml-authored `_default_` answers an unknown command verbatim (#244 / D6).
 
         Pins the wording PR end to end over a real netmiko session, one
-        platform per output shape: single Cisco-style line (cisco_ios),
-        lowercase + trailing period (juniper_junos) and a two-line block
-        (brocade_netiron). The expected text is read from the platform
-        yaml itself (SSoT) so the pin survives future wording refinements
-        without duplicating data.
+        platform per output shape (see the parametrize comment). The
+        expected text is read from the platform yaml itself (SSoT) so the
+        pin survives future wording refinements without duplicating data;
+        the vendor-signature literals are guarded separately by
+        test_default_wording_keeps_vendor_signature.
         """
         with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             expected = yaml.safe_load(file)["commands"]["_default_"]["output"]
