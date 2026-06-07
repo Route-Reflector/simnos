@@ -3,6 +3,7 @@ Test module for simnos.core.nos module.
 This module can be found at simnos/core/nos.py
 """
 
+import copy
 import pathlib
 import tempfile
 import unittest
@@ -32,6 +33,15 @@ class NosTest(unittest.TestCase):
         with open("tests/assets/yaml_nos.yaml", encoding="utf-8") as yml_file:
             cls.commands = yaml.safe_load(yml_file)["commands"]
 
+    def _normalized_commands(self, commands: dict | None = None) -> dict:
+        """Expected runtime form of authored commands (#244 / D3).
+
+        Every load path normalizes `prompt` str -> [str] on a deepcopied
+        candidate, so equality assertions against authored dicts compare
+        through this helper.
+        """
+        return Nos._normalize_command_prompts(copy.deepcopy(commands if commands is not None else self.commands))
+
     def test_init_without_arguments(self):
         """
         Test that the init method works when no arguments are provided.
@@ -48,7 +58,7 @@ class NosTest(unittest.TestCase):
         nos = Nos(name="MySimNOS", initial_prompt="MySimNOS>", commands=self.commands)
         assert nos.name == "MySimNOS"
         assert nos.initial_prompt == "MySimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_init_with_argument_name(self):
         """
@@ -76,7 +86,7 @@ class NosTest(unittest.TestCase):
         nos = Nos(commands=self.commands)
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_validate(self):
         """
@@ -101,7 +111,7 @@ class NosTest(unittest.TestCase):
         )
         assert nos.name == "MySimNOS"
         assert nos.initial_prompt == "MySimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_dict_incorrect_name(self):
         """
@@ -154,7 +164,7 @@ class NosTest(unittest.TestCase):
         nos.from_dict({"commands": self.commands})
         assert nos.name == "SimNOS"
         assert nos.initial_prompt == "SimNOS>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_dict_no_data(self):
         """
@@ -230,6 +240,44 @@ class NosTest(unittest.TestCase):
         assert caller_commands["cmd"]["prompt"] == "{base_prompt}>"
         assert isinstance(caller_commands["cmd"]["prompt"], str)
 
+    def test_from_dict_normalizes_str_prompt_to_list(self):
+        """A bare-str `prompt` authoring form lands as a list at runtime.
+
+        Pins the load-path normalization (#244 / D3): authoring keeps the
+        str/list sugar, runtime consumers (cmd_shell dispatch + mismatch
+        log) see lists only — the read-side isinstance branches are gone.
+        """
+        nos = Nos()
+        nos.from_dict(
+            {
+                "name": "synth",
+                "commands": {
+                    "str form": {"output": "x", "help": "x", "prompt": "{base_prompt}>"},
+                    "list form": {"output": "x", "help": "x", "prompt": ["{base_prompt}>"]},
+                    "no prompt": {"output": "x", "help": "x"},
+                },
+            }
+        )
+        assert nos.commands["str form"]["prompt"] == ["{base_prompt}>"]
+        assert nos.commands["list form"]["prompt"] == ["{base_prompt}>"]
+        assert "prompt" not in nos.commands["no prompt"]
+
+    def test_from_module_normalizes_str_prompt_to_list(self):
+        """The py-plugin path normalizes prompts the same way as from_dict.
+
+        Same #244 / D3 pin for `_from_module`, which commits through its
+        own deepcopied candidate (module-level `commands` constants keep
+        their authoring form).
+        """
+        plugin = self._write_tmp_file(
+            "str_prompt_module.py",
+            'NAME = "str_prompt"\nINITIAL_PROMPT = "{base_prompt}>"\n'
+            'commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}\n',
+        )
+        nos = Nos()
+        nos.from_file(plugin)
+        assert nos.commands["cmd"]["prompt"] == ["{base_prompt}>"]
+
     def test_from_yaml_file(self):
         """
         Test that the from_file method works .yaml.
@@ -238,7 +286,7 @@ class NosTest(unittest.TestCase):
         nos.from_file("tests/assets/yaml_nos.yaml")
         assert nos.name == "Custom Nos 0.1.0"
         assert nos.initial_prompt == "{base_prompt}>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_from_file_incorrect_yaml_file(self):
         """
@@ -303,8 +351,9 @@ class NosTest(unittest.TestCase):
         assert nos.name == "test_module"
         assert nos.initial_prompt == "{base_prompt}>"
         assert nos.device.__class__.__name__ == "TestModule"
+        expected = self._normalized_commands(module.commands)
         self.assertTrue(
-            all(item in nos.commands.items() for item in module.commands.items() if not callable(item[1]["output"]))
+            all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
         )
 
     def test_from_file_incorrect_py_file(self):
@@ -325,8 +374,9 @@ class NosTest(unittest.TestCase):
         nos._from_module("tests/assets/module.py")
         assert nos.name == "test_module"
         assert nos.initial_prompt == "{base_prompt}>"
+        expected = self._normalized_commands(module.commands)
         self.assertTrue(
-            all(item in nos.commands.items() for item in module.commands.items() if not callable(item[1]["output"]))
+            all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
         )
 
     def test_from_module_incorrect_file(self):
@@ -518,7 +568,7 @@ class NosTest(unittest.TestCase):
 
         assert nos.name == "Custom Nos 0.1.0"
         assert nos.initial_prompt == "{base_prompt}>"
-        assert nos.commands == self.commands
+        assert nos.commands == self._normalized_commands()
 
     def test_register_nos_plugin_incorrect_commands(self):
         """
