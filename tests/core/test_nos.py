@@ -208,21 +208,46 @@ class NosTest(unittest.TestCase):
         assert nos.name == "SimNOS"
         assert nos.commands == {}
 
-    def test_from_dict_unknown_command_field_is_silently_ignored(self):
-        """Pin the pre-#244 lenient contract: command-field typos pass validation.
+    def test_from_dict_unknown_command_field_raises(self):
+        """A typo'd command field fails validation before any commit.
 
-        `ModelNosCommand` has no `extra="forbid"` yet, so a typo'd field
-        (`outptu`) is silently accepted by `validate()`. D5 (#244) flips
-        this pin to a ValidationError.
+        Pins the D5 (#244) flip of the old lenient contract:
+        `ModelNosCommand` is `extra="forbid"` now, so a typo'd field
+        (`outptu`) raises ValidationError out of the pre-commit merged-view
+        validation instead of being silently accepted.
+        """
+        nos = Nos()
+        with pytest.raises(ValidationError, match=r"outptu"):
+            nos.from_dict(
+                {
+                    "name": "polluted",
+                    "commands": {"cmd": {"output": "x", "help": "x", "outptu": "typo"}},
+                }
+            )
+        assert nos.name == "SimNOS"
+        assert nos.commands == {}
+
+    def test_from_dict_accepts_output_variants(self):
+        """`output_variants` is a declared data-only field, not a typo.
+
+        Pins the D5 (#244) declaration: 16 platform yamls carry alternate
+        captures under this key (#234) and must keep loading under
+        `extra="forbid"`.
         """
         nos = Nos(
             dict_args={
                 "name": "synth",
                 "initial_prompt": "{base_prompt}>",
-                "commands": {"cmd": {"output": "x", "help": "x", "outptu": "typo"}},
+                "commands": {
+                    "cmd": {
+                        "output": "primary",
+                        "help": "x",
+                        "output_variants": ["alternate capture"],
+                    },
+                },
             }
         )
-        assert nos.commands["cmd"]["outptu"] == "typo"
+        assert nos.commands["cmd"]["output_variants"] == ["alternate capture"]
 
     def test_from_dict_does_not_mutate_caller_dict(self):
         """Caller-owned data must stay untouched by a load (#244 / D3 前段 pin).

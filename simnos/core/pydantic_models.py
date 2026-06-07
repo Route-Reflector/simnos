@@ -42,7 +42,15 @@ CommandHandlerField = Annotated[
 class ModelNosCommand(BaseModel):
     """
     Pydantic model for NOS command attributes.
+
+    Unknown fields are rejected loudly (`extra="forbid"`, #244 / D5) so a
+    typo'd field (`outptu`) fails the pre-commit validation instead of
+    being dropped silently. Safe because every load path validates a
+    merged view before commit and `Nos.validate()` passes schema fields
+    only (#244 / D8).
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     output: StrictStr | CommandHandlerField | None = None
     exit: StrictBool | None = None
@@ -50,12 +58,24 @@ class ModelNosCommand(BaseModel):
     prompt: StrictStr | list[StrictStr] | None = None
     new_prompt: StrictStr | None = None
     alias: StrictStr | None = None
+    # Data-only field: alternate captures of the same command's output
+    # (16 platform yamls, #234). Not consumed by the runtime — declared
+    # so `extra="forbid"` keeps accepting the existing data while still
+    # rejecting typos.
+    output_variants: list[StrictStr] | None = None
 
 
 class ModelNosAttributes(BaseModel):
     """
     Pydantic model for NOS attributes.
+
+    `extra="forbid"` (#244 / D5) restores symmetry with the inventory
+    models below; safe only because `Nos.validate()` extracts schema
+    fields explicitly (never `**self.__dict__`, which also carries
+    `device` / `configuration_file`, #244 / D8).
     """
+
+    model_config = ConfigDict(extra="forbid")
 
     commands: dict[StrictStr, ModelNosCommand]
     name: StrictStr
