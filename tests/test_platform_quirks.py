@@ -2,7 +2,8 @@
 
 These guard against metadata rot in ``tests/_platform_quirks.py``: every
 ``Quirk`` must carry a non-empty reason, a well-formed (or absent) issue
-reference, and an ISO ``YYYY-MM-DD`` review date.
+reference, and a real ISO ``YYYY-MM-DD`` review date, and every registry key
+must be a known platform (typo / stale-entry guard).
 """
 
 import datetime
