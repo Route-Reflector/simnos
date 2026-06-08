@@ -1026,6 +1026,9 @@ class ParamikoSshServerTest(unittest.TestCase):
 
         def create_server(port):
             barrier.wait()
+            # port は仮引数 (literal でない) なので spread しても ty の union widening を誘発しない。
+            # helper 化すると make_paramiko_server_args() が thread ごとに走り共有 mock 前提が変わるため、
+            # この concurrency test では inline spread を維持する。
             return ParamikoSshServer(**{**self.arguments, "port": port})
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as ex:
@@ -1118,6 +1121,9 @@ class ParamikoSshServerTest(unittest.TestCase):
 
             def create_server(port):
                 barrier.wait()
+                # port は仮引数 (literal でない) なので spread しても ty の union widening を誘発しない。
+                # helper 化すると make_paramiko_server_args() が thread ごとに走り共有 mock 前提が変わるため、
+                # この concurrency test では inline spread を維持する。
                 return ParamikoSshServer(**{**self.arguments, "port": port})
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as ex:
