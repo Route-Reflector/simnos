@@ -20,36 +20,33 @@ import pytest
 from simnos import SimNOS
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
-from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_platforms_from_md, get_py_platforms
+from tests._platform_quirks import INIT_UNKNOWN_CMD_ALLOWED
+from tests.utils import (
+    TEST_PASSWORD,
+    TEST_USERNAME,
+    build_inventory,
+    get_free_port,
+    get_platforms_from_md,
+    get_py_platforms,
+    netmiko_device,
+)
 
 HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output formatting
 
-# Platforms where "Unknown command" is expected during init due to
-# missing command definitions for netmiko's session_preparation().
-# These should be fixed individually as separate issues.
-INIT_UNKNOWN_CMD_ALLOWED = {
-    "aruba_os",  # no paging
-    "brocade_fastiron",  # enable (repeated)
-    "dlink_ds",  # disable clipaging
-    "huawei_smartax",  # enable password (#70)
-    "ruckus_fastiron",  # enable (repeated), skip-page-display
-    "vyatta_vyos",  # set terminal width 512
-}
-
 
 def _make_simnos(device_type, port):
-    """Create a SimNOS instance for a single device."""
-    inventory = {
-        "hosts": {
-            HOSTNAME: {
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "platform": device_type,
-            }
-        }
-    }
-    return SimNOS(inventory=inventory)
+    """Create a SimNOS instance for a single device.
+
+    `HOSTNAME` is kept as the host key because it doubles as the base_prompt
+    used in the output-formatting assertions below.
+    """
+    return SimNOS(inventory=build_inventory(device_type, host_key=HOSTNAME, port=port))
+
+
+def _device(device_type, port, **extra):
+    """Build netmiko ConnectHandler kwargs for a single-device SimNOS on `port`."""
+    creds = {"username": TEST_USERNAME, "password": TEST_PASSWORD, "port": port}
+    return netmiko_device(device_type, creds, **extra)
 
 
 class TestNetmikoInitCompat:
@@ -60,21 +57,14 @@ class TestNetmikoInitCompat:
     def test_no_unknown_command_on_init(self, device_type, tmp_path):
         """ConnectHandler init should not produce 'Unknown command'."""
         if device_type in INIT_UNKNOWN_CMD_ALLOWED:
-            pytest.skip(f"{device_type} is in the init exclusion list (#70)")
+            pytest.skip(f"{device_type}: {INIT_UNKNOWN_CMD_ALLOWED[device_type].reason}")
 
         port = get_free_port()
         log_file = tmp_path / f"session_{device_type}.log"
         net = _make_simnos(device_type, port)
         try:
             net.start()
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
-                "session_log": str(log_file),
-            }
+            device = _device(device_type, port, session_log=str(log_file))
             with ConnectHandler(**device):
                 pass
             session_output = log_file.read_text()
@@ -92,13 +82,7 @@ class TestNetmikoInitCompat:
         net = _make_simnos(device_type, port)
         try:
             net.start()
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
-            }
+            device = _device(device_type, port)
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(
                     "this_command_does_not_exist_12345",
@@ -286,13 +270,7 @@ class TestSendCommandResponse:
         net = _make_simnos(device_type, port)
         try:
             net.start()
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
-            }
+            device = _device(device_type, port)
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(cmd, read_timeout=15)
                 assert output.strip() == expected.strip(), (
@@ -332,13 +310,7 @@ class TestSendCommandResponse:
         net = _make_simnos(device_type, port)
         try:
             net.start()
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
-            }
+            device = _device(device_type, port)
             with ConnectHandler(**device) as conn:
 
                 def check(cmds: list[tuple[str, str]], phase: str) -> None:
@@ -474,13 +446,7 @@ class TestShutdownEOF:
         net = _make_simnos("cisco_ios", port)
         try:
             net.start()
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": "cisco_ios",
-            }
+            device = _device("cisco_ios", port)
             with ConnectHandler(**device):
                 pass
         finally:
@@ -497,13 +463,7 @@ class TestShutdownEOF:
         net = _make_simnos("cisco_ios", port)
         net.start()
         try:
-            device = {
-                "host": "localhost",
-                "username": "test",
-                "password": "test",
-                "port": port,
-                "device_type": "cisco_ios",
-            }
+            device = _device("cisco_ios", port)
             conn = ConnectHandler(**device)
             # Stop server while connection is still open
             net.stop()

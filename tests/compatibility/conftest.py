@@ -9,25 +9,19 @@ CI; they are skipped by default in the normal test suite via
 import pytest
 
 from simnos import SimNOS
-from tests.utils import get_free_port
+from tests.utils import TEST_PASSWORD, TEST_USERNAME, build_inventory, get_free_port
 
 
 @pytest.fixture
 def cisco_ios_simnos():
     """Start a simnos cisco_ios instance on a free port; yield connection creds."""
+    port = get_free_port()
+    inventory = build_inventory("cisco_ios", port=port)
     creds = {
         "host": "localhost",
-        "username": "test_user",
-        "password": "test_pass",
-        "port": get_free_port(),
-    }
-    inventory = {
-        "hosts": {
-            "test_device": {
-                **{k: creds[k] for k in ("username", "password", "port")},
-                "platform": "cisco_ios",
-            }
-        }
+        "username": TEST_USERNAME,
+        "password": TEST_PASSWORD,
+        "port": port,
     }
     with SimNOS(inventory=inventory) as _net:
         yield creds

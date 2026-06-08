@@ -14,9 +14,9 @@ import pytest
 import yaml
 
 from simnos.core.nos import _find_device_classes, available_platforms
-from simnos.core.simnos import SimNOS
 from simnos.plugins.nos import nos_plugins
-from tests.utils import NETMIKO_DEVICE_TYPE_MAP, get_free_port, get_host_commands, get_py_platforms
+from tests._platform_quirks import SKIP_ENABLE, XFAIL_PY_ALL_COMMANDS
+from tests.utils import creds_from_host, get_host_commands, get_py_platforms, netmiko_device
 
 
 def get_yaml_only_platforms() -> list[str]:
@@ -164,57 +164,30 @@ class TestPlatforms:
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_yaml_only_platforms())
-    def test_platforms_yaml_all_commands_are_running(self, platform: str):
+    def test_platforms_yaml_all_commands_are_running(self, platform: str, simnos_factory):
         """
         Test that all YAML-only platform commands can
         run without any error via netmiko.
         """
-        # Platforms where enable() or config_mode() fails due to missing secret/sudo/commands.
-        # Initial (show) commands are still tested for these platforms.
-        skip_enable_platforms = {
-            "alcatel_sros": "requires enable-admin with secret",
-            "cisco_apic": "Linux-based, requires sudo -s for enable",
-            "edgecore": "Linux-based (SONiC), requires sudo -s for enable",
-            "ericsson_ipos": "requires administrator with secret",
-            "linux": "Linux-based, requires sudo -s for enable",
-            "yamaha": "requires enable with secret",
-        }
-        device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
-        free_port: int = get_free_port()
-        credentials: dict = {
-            "host": "localhost",
-            "username": "test_user",
-            "password": "test_password",
-            "port": free_port,
-            "device_type": device_type,
-        }
-        inventory: dict = {
-            "hosts": {
-                "test_device": {
-                    "username": credentials["username"],
-                    "password": credentials["password"],
-                    "port": credentials["port"],
-                    "platform": platform,
-                }
-            }
-        }
-        with SimNOS(inventory=inventory) as net:
-            host = next(iter(net.hosts.values()))
-            initial_commands, enable_commands, config_commands = get_host_commands(host)
-            with ConnectHandler(**credentials) as conn:
-                for command in initial_commands:
+        net = simnos_factory(platform)
+        host = next(iter(net.hosts.values()))
+        initial_commands, enable_commands, config_commands = get_host_commands(host)
+        with ConnectHandler(**netmiko_device(platform, creds_from_host(host))) as conn:
+            for command in initial_commands:
+                output = conn.send_command(command)
+                assert isinstance(output, str)
+            # SKIP_ENABLE platforms cannot enter enable()/config_mode() (need a
+            # secret or sudo); their initial (show) commands above still run.
+            if enable_commands and platform not in SKIP_ENABLE:
+                conn.enable()
+                for command in enable_commands:
                     output = conn.send_command(command)
                     assert isinstance(output, str)
-                if enable_commands and platform not in skip_enable_platforms:
-                    conn.enable()
-                    for command in enable_commands:
-                        output = conn.send_command(command)
-                        assert isinstance(output, str)
-                if config_commands and platform not in skip_enable_platforms:
-                    conn.config_mode()
-                    for command in config_commands:
-                        output = conn.send_command(command)
-                        assert isinstance(output, str)
+            if config_commands and platform not in SKIP_ENABLE:
+                conn.config_mode()
+                for command in config_commands:
+                    output = conn.send_command(command)
+                    assert isinstance(output, str)
 
     # Vendor-signature literal pins (#244 / D6): the wire test below reads
     # its expectation from the yaml (SSoT), so it confirms the plumbing but
@@ -260,7 +233,7 @@ class TestPlatforms:
     # caret (the one wire pin that exercises a backslash-escaped scalar over
     # the SSH channel, cross-review 🐙#5).
     @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron", "dell_force10"])
-    def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str):
+    def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str, simnos_factory):
         """The yaml-authored `_default_` answers an unknown command verbatim (#244 / D6).
 
         Pins the wording PR end to end over a real netmiko session, one
@@ -272,74 +245,35 @@ class TestPlatforms:
         """
         with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
             expected = yaml.safe_load(file)["commands"]["_default_"]["output"]
-        device_type = NETMIKO_DEVICE_TYPE_MAP.get(platform, platform)
-        free_port: int = get_free_port()
-        credentials: dict = {
-            "host": "localhost",
-            "username": "test_user",
-            "password": "test_password",
-            "port": free_port,
-            "device_type": device_type,
-        }
-        inventory: dict = {
-            "hosts": {
-                "test_device": {
-                    "username": credentials["username"],
-                    "password": credentials["password"],
-                    "port": credentials["port"],
-                    "platform": platform,
-                }
-            }
-        }
-        with SimNOS(inventory=inventory) as net:  # noqa: F841
-            with ConnectHandler(**credentials) as conn:
-                output = conn.send_command("simnos pin unknown command")
-                assert expected in output
+        net = simnos_factory(platform)
+        host = next(iter(net.hosts.values()))
+        with ConnectHandler(**netmiko_device(platform, creds_from_host(host))) as conn:
+            output = conn.send_command("simnos pin unknown command")
+            assert expected in output
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_platforms())
-    def test_platforms_py_all_commands_are_running(self, platform: str):
+    def test_platforms_py_all_commands_are_running(self, platform: str, simnos_factory):
         """
         Test that all the platforms commands can
         run without any error.
         """
-        if platform == "huawei_smartax":
-            pytest.xfail(
-                "huawei_smartax has callable commands (return/disable) that "
-                "dynamically change the prompt, causing netmiko ReadTimeout"
-            )
-        free_port: int = get_free_port()
-        credentials: dict = {
-            "host": "localhost",
-            "username": "test_user",
-            "password": "test_password",
-            "port": free_port,
-            "device_type": platform,
-        }
-        inventory: dict = {
-            "hosts": {
-                "test_device": {
-                    "username": credentials["username"],
-                    "password": credentials["password"],
-                    "port": credentials["port"],
-                    "platform": platform,
-                }
-            }
-        }
-        with SimNOS(inventory=inventory) as net:
-            host = next(iter(net.hosts.values()))
-            initial_commands, enable_commands, config_commands = get_host_commands(host)
-            with ConnectHandler(**credentials) as conn:
-                for command in initial_commands:
+        if platform in XFAIL_PY_ALL_COMMANDS:
+            pytest.xfail(XFAIL_PY_ALL_COMMANDS[platform].reason)
+        net = simnos_factory(platform)
+        host = next(iter(net.hosts.values()))
+        initial_commands, enable_commands, config_commands = get_host_commands(host)
+        with ConnectHandler(**netmiko_device(platform, creds_from_host(host))) as conn:
+            for command in initial_commands:
+                output = conn.send_command(command)
+                assert isinstance(output, str)
+            if enable_commands:
+                conn.enable()
+                for command in enable_commands:
                     output = conn.send_command(command)
                     assert isinstance(output, str)
-                if enable_commands:
-                    conn.enable()
-                    for command in enable_commands:
-                        output = conn.send_command(command)
-                        assert isinstance(output, str)
-                if config_commands:
-                    conn.config_mode()
-                    for command in config_commands:
-                        output = conn.send_command(command)
-                        assert isinstance(output, str)
+            if config_commands:
+                conn.config_mode()
+                for command in config_commands:
+                    output = conn.send_command(command)
+                    assert isinstance(output, str)
