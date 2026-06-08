@@ -40,40 +40,40 @@ class _Step(NamedTuple):
 # "replicas must be greater than 0" branch; #220 switched to ``if replicas is None`` and
 # moved the ``replicas < 1`` check ahead of the port-type checks.
 _REPLICAS_REJECT_CASES = [
-    (
-        "not_set_port_list",
+    pytest.param(
         {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}},
         r"replicas is not set, port must be an integer",
+        id="not_set_port_list",
     ),
-    (
-        "set_port_int",
+    pytest.param(
         {"default": {"port": 5000}, "hosts": {"R1": {"replicas": 2}}},
         r"port must be a list of two integers",
+        id="set_port_int",
     ),
-    (
-        "port_list_too_few",
+    pytest.param(
         {"default": {"port": [5000]}, "hosts": {"R1": {"replicas": 2}}},
         r"port must be a list of two integers",
+        id="port_list_too_few",
     ),
-    (
-        "port_list_too_many",
+    pytest.param(
         {"default": {"port": [5000, 5001, 5002]}, "hosts": {"R1": {"replicas": 2}}},
         r"port must be a list of two integers",
+        id="port_list_too_many",
     ),
-    (
-        "port0_ge_port1",
+    pytest.param(
         {"default": {"port": [5001, 5000]}, "hosts": {"R1": {"replicas": 2}}},
         r"port\[0\] must be less than port\[1\]",
+        id="port0_ge_port1",
     ),
-    (
-        "replicas_zero",
+    pytest.param(
         {"default": {"port": [5000, 5001]}, "hosts": {"R1": {"replicas": 0}}},
         r"replicas must be greater than 0",
+        id="replicas_zero",
     ),
-    (
-        "len_mismatch",
+    pytest.param(
         {"default": {"port": [5000, 5001]}, "hosts": {"R1": {"replicas": 3}}},
         r"port range must be equal to the number of replicas",
+        id="len_mismatch",
     ),
 ]
 
@@ -309,11 +309,7 @@ class TestSimNOS:
         net._allocate_port_single(65535)
         assert {1, 65535}.issubset(net.allocated_ports)
 
-    @pytest.mark.parametrize(
-        "inventory, match",
-        [(inventory, match) for _, inventory, match in _REPLICAS_REJECT_CASES],
-        ids=[case_id for case_id, _, _ in _REPLICAS_REJECT_CASES],
-    )
+    @pytest.mark.parametrize("inventory, match", _REPLICAS_REJECT_CASES)
     def test_check_ports_and_replicas_rejects(self, inventory, match):
         """``_check_ports_and_replicas`` rejects invalid port/replicas combinations.
 

@@ -14,9 +14,9 @@ from simnos.plugins.nos import nos_plugins
 # before building ConnectHandler kwargs (see netmiko_device()).
 # netmiko canonical names: https://github.com/ktbyers/netmiko/blob/master/PLATFORMS.md
 NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
-    "edgecore": "edgecore_sonic",  # netmiko canonical: edgecore_sonic
-    "extreme_slxos": "extreme_slx",  # netmiko canonical: extreme_slx
-    "watchguard_firebox": "watchguard_fireware",  # netmiko canonical: watchguard_fireware
+    "edgecore": "edgecore_sonic",
+    "extreme_slxos": "extreme_slx",
+    "watchguard_firebox": "watchguard_fireware",
 }
 
 # Default credentials used to build single-host test inventories.
