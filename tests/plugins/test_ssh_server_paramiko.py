@@ -517,7 +517,7 @@ class ChannelToShellTapTest(unittest.TestCase):
         )
         # NUL byte must NOT be echoed to channel
         for call_args in self.mock_channel.sendall.call_args_list:
-            self.assertNotEqual(call_args, unittest.mock.call(b"\x00"))
+            self.assertNotEqual(call_args, mock.call(b"\x00"))
         # "a" echoed + "\r\n" for newline = 2 writes
         self.assertEqual(self.mock_channel.sendall.call_count, 2)
         self.mock_shell_stdin.write.assert_called_with("a\n")
@@ -1003,7 +1003,8 @@ class ParamikoSshServerTest(unittest.TestCase):
         self.addCleanup(setattr, ParamikoSshServer, "_default_key", None)
 
         server1 = ParamikoSshServer(**self.arguments)
-        server2_args = {**self.arguments, "port": 23}
+        server2_args = make_paramiko_server_args()
+        server2_args["port"] = 23
         server2 = ParamikoSshServer(**server2_args)
 
         mock_generate.assert_called_once_with(2048)
@@ -1327,14 +1328,7 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
     """Test cases for _channel_login in ParamikoSshServer."""
 
     def setUp(self):
-        self.arguments = {
-            "shell": Mock(),
-            "nos": Mock(),
-            "nos_inventory_config": {},
-            "port": 22,
-            "username": "admin",
-            "password": "admin",
-        }
+        self.arguments = make_paramiko_server_args()
 
     def _make_channel(self, input_bytes: bytes):
         """Create a mock channel that returns input_bytes one byte at a time."""
@@ -1653,14 +1647,7 @@ class TeardownFixTests(unittest.TestCase):
     def setUp(self):
         """Set up common fixtures."""
         ParamikoSshServer._default_key = None
-        self.arguments = {
-            "shell": Mock(),
-            "nos": Mock(),
-            "nos_inventory_config": {},
-            "port": 22,
-            "username": "admin",
-            "password": "admin",
-        }
+        self.arguments = make_paramiko_server_args()
 
     # -- Watchdog tests --------------------------------------------------------
 
