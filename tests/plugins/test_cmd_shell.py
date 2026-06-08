@@ -39,50 +39,52 @@ def cmd_shell_args():
     return make_cmd_shell_args()
 
 
-def test_init_defaults(cmd_shell_args):
-    """With no optional kwargs, every CMDShell attribute takes its default."""
-    shell = CMDShell(**cmd_shell_args)
-    assert shell.intro == "Custom SSH Shell"
-    assert shell.ruler == ""
-    assert shell.completekey == "tab"
-    assert shell.newline == "\r\n"
-    assert shell.prompt == "test>"
-    assert shell.is_running is cmd_shell_args["is_running"]
-    assert shell.commands != {}
-    assert shell.nos is cmd_shell_args["nos"]
-    assert shell.base_prompt == cmd_shell_args["base_prompt"]
+def _expected_baseline(args: dict) -> dict:
+    """Attribute values a CMDShell takes with no optional kwargs."""
+    return {
+        "intro": "Custom SSH Shell",
+        "ruler": "",
+        "completekey": "tab",
+        "newline": "\r\n",
+        "prompt": "test>",
+        "base_prompt": args["base_prompt"],
+    }
 
 
 @pytest.mark.parametrize(
-    "kwargs, attr, expected",
+    "override_kwargs, expected_override",
     [
-        ({"intro": "Test Intro"}, "intro", "Test Intro"),
-        ({"ruler": "Test Ruler"}, "ruler", "Test Ruler"),
-        ({"completekey": "Test Completekey"}, "completekey", "Test Completekey"),
-        ({"newline": "Test Newline"}, "newline", "Test Newline"),
+        ({}, {}),  # no optional kwargs (baseline)
+        ({"intro": "Test Intro"}, {"intro": "Test Intro"}),
+        ({"ruler": "Test Ruler"}, {"ruler": "Test Ruler"}),
+        ({"completekey": "Test Completekey"}, {"completekey": "Test Completekey"}),
+        ({"newline": "Test Newline"}, {"newline": "Test Newline"}),
+        (
+            {
+                "intro": "Test Intro",
+                "ruler": "Test Ruler",
+                "completekey": "Test Completekey",
+                "newline": "Test Newline",
+            },
+            {
+                "intro": "Test Intro",
+                "ruler": "Test Ruler",
+                "completekey": "Test Completekey",
+                "newline": "Test Newline",
+            },
+        ),
     ],
 )
-def test_init_optional_kwarg(cmd_shell_args, kwargs, attr, expected):
-    """Each optional kwarg lands on its attribute; base_prompt stays invariant."""
-    shell = CMDShell(**cmd_shell_args, **kwargs)
-    assert getattr(shell, attr) == expected
-    assert shell.base_prompt == "test"  # side-effect guard
-
-
-def test_init_all_optional_kwargs(cmd_shell_args):
-    """All optional kwargs at once each land on their own attribute."""
-    shell = CMDShell(
-        **cmd_shell_args,
-        intro="Test Intro",
-        ruler="Test Ruler",
-        completekey="Test Completekey",
-        newline="Test Newline",
-    )
-    assert shell.intro == "Test Intro"
-    assert shell.ruler == "Test Ruler"
-    assert shell.completekey == "Test Completekey"
-    assert shell.newline == "Test Newline"
-    assert shell.prompt == "test>"
+def test_init_kwargs(cmd_shell_args, override_kwargs, expected_override):
+    """baseline + each optional kwarg; untouched attrs stay at their defaults."""
+    shell = CMDShell(**cmd_shell_args, **override_kwargs)
+    expected = {**_expected_baseline(cmd_shell_args), **expected_override}
+    for attr, value in expected.items():
+        assert getattr(shell, attr) == value
+    # identity-pinned attrs (excluded from the equality table)
+    assert shell.is_running is cmd_shell_args["is_running"]
+    assert shell.nos is cmd_shell_args["nos"]
+    assert shell.commands != {}
 
 
 # pylint: disable=too-many-public-methods
