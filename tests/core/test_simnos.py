@@ -35,7 +35,7 @@ class _Step(NamedTuple):
 # Every case puts ``replicas`` on the host (not ``default``): ``InventoryDefaultSection``
 # uses ``extra="forbid"``, so keeping ``port`` in ``default`` while moving ``replicas`` to
 # the host lets the merged params reach ``_check_ports_and_replicas`` without pydantic
-# rejecting them first.  The ``replicas_zero`` case is the #220 regression pin: the old
+# rejecting them first. The ``replicas_zero`` case is the #220 regression pin: the old
 # ``if not replicas`` falsy guard short-circuited ``replicas=0`` past the intended
 # "replicas must be greater than 0" branch; #220 switched to ``if replicas is None`` and
 # moved the ``replicas < 1`` check ahead of the port-type checks.
