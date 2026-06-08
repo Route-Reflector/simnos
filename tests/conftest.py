@@ -9,7 +9,7 @@ port for a client before starting).
 
 import pytest
 
-from simnos.core.simnos import SimNOS
+from simnos import SimNOS
 from tests.utils import build_inventory
 
 
@@ -20,8 +20,10 @@ def simnos_factory():
 
     def _make(platform: str, **overrides) -> SimNOS:
         net = SimNOS(inventory=build_inventory(platform, **overrides))
-        net.start()
+        # Register before start() so a mid-start failure (partly-started hosts)
+        # is still torn down. SimNOS.stop() is a no-op for unstarted hosts.
         started.append(net)
+        net.start()
         return net
 
     yield _make

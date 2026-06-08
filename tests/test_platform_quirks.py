@@ -5,10 +5,12 @@ These guard against metadata rot in ``tests/_platform_quirks.py``: every
 reference, and an ISO ``YYYY-MM-DD`` review date.
 """
 
+import datetime
 import re
 
 import pytest
 
+from simnos.core.nos import available_platforms
 from tests._platform_quirks import (
     INIT_UNKNOWN_CMD_ALLOWED,
     SKIP_ENABLE,
@@ -23,7 +25,6 @@ _ALL_QUIRKS: dict[str, dict[str, Quirk]] = {
 }
 
 _ISSUE_RE = re.compile(r"^(#\d+|https?://\S+)$")
-_DATE_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def _all_entries() -> list[tuple[str, str, Quirk]]:
@@ -46,8 +47,15 @@ def test_quirk_issue_is_well_formed_or_none(registry_name: str, platform: str, q
 
 
 @pytest.mark.parametrize("registry_name, platform, quirk", _all_entries())
-def test_quirk_last_reviewed_is_iso_date(registry_name: str, platform: str, quirk: Quirk):
-    """`last_reviewed` is an ISO YYYY-MM-DD date."""
-    assert _DATE_RE.match(quirk.last_reviewed), (
-        f"{registry_name}[{platform!r}] has a non-ISO last_reviewed: {quirk.last_reviewed!r}"
-    )
+def test_quirk_last_reviewed_is_real_iso_date(registry_name: str, platform: str, quirk: Quirk):
+    """`last_reviewed` is a real ISO YYYY-MM-DD date (rejects e.g. 2026-99-99)."""
+    try:
+        datetime.date.fromisoformat(quirk.last_reviewed)
+    except ValueError:
+        pytest.fail(f"{registry_name}[{platform!r}] has an invalid last_reviewed: {quirk.last_reviewed!r}")
+
+
+@pytest.mark.parametrize("registry_name, platform, quirk", _all_entries())
+def test_quirk_platform_is_a_known_platform(registry_name: str, platform: str, quirk: Quirk):
+    """Quirk keys must be real platforms (guards against typos / stale entries)."""
+    assert platform in available_platforms, f"{registry_name}[{platform!r}] is not a known platform (typo or removed?)"
