@@ -14,6 +14,8 @@ from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
 from tests.assets import module
 
+_NOS_LOGGER = "simnos.core.nos"
+
 
 def _normalized_commands(commands: dict) -> dict:
     """Expected runtime form of authored commands (#244 / D3).
@@ -46,6 +48,15 @@ def _assert_module_static_commands_loaded(nos: Nos) -> None:
     expected_static = {name: cmd for name, cmd in expected.items() if not callable(cmd["output"])}
     actual_static = {name: cmd for name, cmd in nos.commands.items() if not callable(cmd["output"])}
     assert actual_static == expected_static
+
+
+def _nos_log_messages(caplog, level: int) -> list[str]:
+    """Messages logged to the nos logger at ``level`` or above.
+
+    Filtering by logger name + level keeps the assertLogs-style scope (the old
+    `assertLogs(_NOS_LOGGER, level=...)` only saw that logger's records).
+    """
+    return [r.getMessage() for r in caplog.records if r.name == _NOS_LOGGER and r.levelno >= level]
 
 
 @pytest.fixture(scope="module")
@@ -528,9 +539,9 @@ def test_from_module_device_name_leftover_warns_and_is_ignored(tmp_path, caplog)
     )
     nos = Nos()
     caplog.clear()
-    with caplog.at_level(logging.WARNING, logger="simnos.core.nos"):
+    with caplog.at_level(logging.WARNING, logger=_NOS_LOGGER):
         nos.from_file(legacy_py)
-    warnings = [r.getMessage() for r in caplog.records if r.name == "simnos.core.nos" and r.levelno >= logging.WARNING]
+    warnings = _nos_log_messages(caplog, logging.WARNING)
     assert any("DEVICE_NAME" in msg and "deprecated and ignored" in msg for msg in warnings)
     assert nos.device.__class__.__name__ == "LegacyDevice"
 
@@ -567,9 +578,9 @@ def test_from_module_override_logs_debug(caplog):
     nos = Nos()
     nos.from_dict({"commands": {"show clock": {"output": "from yaml", "help": "static"}}})
     caplog.clear()
-    with caplog.at_level(logging.DEBUG, logger="simnos.core.nos"):
+    with caplog.at_level(logging.DEBUG, logger=_NOS_LOGGER):
         nos.from_file("tests/assets/module.py")
-    debug_msgs = [r.getMessage() for r in caplog.records if r.name == "simnos.core.nos" and r.levelno >= logging.DEBUG]
+    debug_msgs = _nos_log_messages(caplog, logging.DEBUG)
     assert any("overrides 1 already-loaded command(s)" in msg and "show clock" in msg for msg in debug_msgs)
     # Full replacement: the module's callable output wins over the yaml str.
     assert callable(nos.commands["show clock"]["output"])
