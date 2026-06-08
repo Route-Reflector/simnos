@@ -16,6 +16,49 @@ NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
     "watchguard_firebox": "watchguard_fireware",
 }
 
+# Default credentials used to build single-host test inventories.
+TEST_USERNAME = "test_user"
+TEST_PASSWORD = "test_password"
+
+
+def build_inventory(
+    platform: str,
+    *,
+    host_key: str = "device",
+    username: str = TEST_USERNAME,
+    password: str = TEST_PASSWORD,
+    port: int | None = None,
+    **extra,
+) -> dict:
+    """Build a single-host SimNOS inventory dict (test SSoT).
+
+    Single-host only -- multi-host inventories are out of scope here.
+    A free port is allocated when ``port`` is not given.
+    """
+    port = port if port is not None else get_free_port()
+    host = {"username": username, "password": password, "port": port, "platform": platform, **extra}
+    return {"hosts": {host_key: host}}
+
+
+def creds_from_host(host: Host) -> dict:
+    """Return the username/password/port a netmiko client needs to reach ``host``."""
+    return {"username": host.username, "password": host.password, "port": host.port}
+
+
+def netmiko_device(platform: str, creds: dict, **extra) -> dict:
+    """Build netmiko ``ConnectHandler`` kwargs (applies NETMIKO_DEVICE_TYPE_MAP).
+
+    ``**extra`` merges additional kwargs such as ``session_log``.
+    """
+    return {
+        "host": "localhost",
+        "username": creds["username"],
+        "password": creds["password"],
+        "port": creds["port"],
+        "device_type": NETMIKO_DEVICE_TYPE_MAP.get(platform, platform),
+        **extra,
+    }
+
 
 def get_running_hosts(hosts: dict[str, Host]) -> dict[str, bool]:
     """
