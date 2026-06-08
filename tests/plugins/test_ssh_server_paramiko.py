@@ -1328,7 +1328,7 @@ class ParamikoSshServerChannelLoginTest(unittest.TestCase):
     """Test cases for _channel_login in ParamikoSshServer."""
 
     def setUp(self):
-        self.arguments = make_paramiko_server_args()
+        self.arguments: dict = make_paramiko_server_args()
 
     def _make_channel(self, input_bytes: bytes):
         """Create a mock channel that returns input_bytes one byte at a time."""
@@ -1647,7 +1647,7 @@ class TeardownFixTests(unittest.TestCase):
     def setUp(self):
         """Set up common fixtures."""
         ParamikoSshServer._default_key = None
-        self.arguments = make_paramiko_server_args()
+        self.arguments: dict = make_paramiko_server_args()
 
     # -- Watchdog tests --------------------------------------------------------
 
