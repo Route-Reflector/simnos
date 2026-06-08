@@ -21,104 +21,80 @@ from simnos.core.simnos import SimNOS, simnos
 from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell
 
 
+def make_cmd_shell_args() -> dict:
+    """Build the CMDShell constructor kwargs shared across cmd_shell tests (SSoT)."""
+    return {
+        "stdin": None,
+        "stdout": None,
+        "nos": Nos(filename="tests/assets/yaml_nos.yaml"),
+        "nos_inventory_config": {},
+        "base_prompt": "test",
+        "is_running": threading.Event(),
+    }
+
+
+@pytest.fixture
+def cmd_shell_args():
+    """CMDShell kwargs as a fixture (thin wrapper over make_cmd_shell_args)."""
+    return make_cmd_shell_args()
+
+
+def _expected_baseline(args: dict) -> dict:
+    """Attribute values a CMDShell takes with no optional kwargs."""
+    return {
+        "intro": "Custom SSH Shell",
+        "ruler": "",
+        "completekey": "tab",
+        "newline": "\r\n",
+        "prompt": "test>",
+        "base_prompt": args["base_prompt"],
+    }
+
+
+@pytest.mark.parametrize(
+    "override_kwargs, expected_override",
+    [
+        ({}, {}),  # no optional kwargs (baseline)
+        ({"intro": "Test Intro"}, {"intro": "Test Intro"}),
+        ({"ruler": "Test Ruler"}, {"ruler": "Test Ruler"}),
+        ({"completekey": "Test Completekey"}, {"completekey": "Test Completekey"}),
+        ({"newline": "Test Newline"}, {"newline": "Test Newline"}),
+        (
+            {
+                "intro": "Test Intro",
+                "ruler": "Test Ruler",
+                "completekey": "Test Completekey",
+                "newline": "Test Newline",
+            },
+            {
+                "intro": "Test Intro",
+                "ruler": "Test Ruler",
+                "completekey": "Test Completekey",
+                "newline": "Test Newline",
+            },
+        ),
+    ],
+    ids=["baseline", "intro", "ruler", "completekey", "newline", "all"],
+)
+def test_init_kwargs(cmd_shell_args, override_kwargs, expected_override):
+    """baseline + each optional kwarg; untouched attrs stay at their defaults."""
+    shell = CMDShell(**cmd_shell_args, **override_kwargs)
+    expected = {**_expected_baseline(cmd_shell_args), **expected_override}
+    for attr, value in expected.items():
+        assert getattr(shell, attr) == value
+    # identity-pinned attrs (excluded from the equality table)
+    assert shell.is_running is cmd_shell_args["is_running"]
+    assert shell.nos is cmd_shell_args["nos"]
+    assert shell.commands != {}
+
+
 # pylint: disable=too-many-public-methods
 class TestCmdShell(TestCase):
     """Test the CmdShell class."""
 
     def setUp(self):
         """Setup the test."""
-        self.arguments = {
-            "stdin": None,
-            "stdout": None,
-            "nos": Nos(filename="tests/assets/yaml_nos.yaml"),
-            "nos_inventory_config": {},
-            "base_prompt": "test",
-            "is_running": threading.Event(),
-        }
-
-    def test_init(self):
-        """Test the init method."""
-        shell = CMDShell(**self.arguments)
-        self.assertEqual(shell.intro, "Custom SSH Shell")
-        self.assertEqual(shell.ruler, "")
-        self.assertEqual(shell.completekey, "tab")
-        self.assertEqual(shell.newline, "\r\n")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
-
-    def test_init_with_intro(self):
-        """Test the init method with intro."""
-        shell = CMDShell(**self.arguments, intro="Test Intro")
-        self.assertEqual(shell.intro, "Test Intro")
-        self.assertEqual(shell.ruler, "")
-        self.assertEqual(shell.completekey, "tab")
-        self.assertEqual(shell.newline, "\r\n")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
-
-    def test_init_with_ruler(self):
-        """Test the init method with ruler."""
-        shell = CMDShell(**self.arguments, ruler="Test Ruler")
-        self.assertEqual(shell.intro, "Custom SSH Shell")
-        self.assertEqual(shell.ruler, "Test Ruler")
-        self.assertEqual(shell.completekey, "tab")
-        self.assertEqual(shell.newline, "\r\n")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
-
-    def test_init_with_completekey(self):
-        """Test the init method with completekey."""
-        shell = CMDShell(**self.arguments, completekey="Test Completekey")
-        self.assertEqual(shell.intro, "Custom SSH Shell")
-        self.assertEqual(shell.ruler, "")
-        self.assertEqual(shell.completekey, "Test Completekey")
-        self.assertEqual(shell.newline, "\r\n")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
-
-    def test_init_with_newline(self):
-        """Test the init method with newline."""
-        shell = CMDShell(**self.arguments, newline="Test Newline")
-        self.assertEqual(shell.intro, "Custom SSH Shell")
-        self.assertEqual(shell.ruler, "")
-        self.assertEqual(shell.completekey, "tab")
-        self.assertEqual(shell.newline, "Test Newline")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
-
-    def test_init_all_args(self):
-        """Test the init method with all args."""
-        shell = CMDShell(
-            **self.arguments,
-            intro="Test Intro",
-            ruler="Test Ruler",
-            completekey="Test Completekey",
-            newline="Test Newline",
-        )
-        self.assertEqual(shell.intro, "Test Intro")
-        self.assertEqual(shell.ruler, "Test Ruler")
-        self.assertEqual(shell.completekey, "Test Completekey")
-        self.assertEqual(shell.newline, "Test Newline")
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(shell.is_running, self.arguments["is_running"])
-        self.assertNotEqual(shell.commands, {})
-        self.assertEqual(shell.nos, self.arguments["nos"])
-        self.assertEqual(shell.base_prompt, self.arguments["base_prompt"])
+        self.arguments = make_cmd_shell_args()
 
     def test_init_error_if_nos_not_provided(self):
         """Test the init method raises an error if nos is not provided."""
@@ -914,14 +890,7 @@ class HotReloadTest(TestCase):
     """
 
     def setUp(self):
-        self.arguments = {
-            "stdin": None,
-            "stdout": None,
-            "nos": Nos(filename="tests/assets/yaml_nos.yaml"),
-            "nos_inventory_config": {},
-            "base_prompt": "test",
-            "is_running": threading.Event(),
-        }
+        self.arguments = make_cmd_shell_args()
         os.environ["SIMNOS_RELOAD_COMMANDS"] = "ON"
 
     def tearDown(self):

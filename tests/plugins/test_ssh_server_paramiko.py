@@ -14,6 +14,7 @@ from unittest import mock
 from unittest.mock import MagicMock, Mock
 
 import paramiko
+import pytest
 
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.ssh_server_paramiko import (
@@ -791,6 +792,105 @@ class ShellToChannelTapTest(unittest.TestCase):
         self.mock_run_srv.clear.assert_called_once()
 
 
+def make_paramiko_server_args() -> dict:
+    """Build the ParamikoSshServer constructor kwargs (SSoT, no side effects)."""
+    return {
+        "shell": Mock(),
+        "nos": Mock(),
+        "nos_inventory_config": {},
+        "port": 22,
+        "username": "admin",
+        "password": "admin",
+    }
+
+
+@pytest.fixture
+def paramiko_server_args():
+    """ParamikoSshServer kwargs; the class-state reset lives here, not in the builder."""
+    ParamikoSshServer._default_key = None
+    ParamikoSshServer._moduli_loaded = None
+    return make_paramiko_server_args()
+
+
+def _expected_baseline(args: dict) -> dict:
+    """Attribute values a ParamikoSshServer takes with no optional kwargs."""
+    return {
+        "nos": args["nos"],
+        "nos_inventory_config": args["nos_inventory_config"],
+        "shell": args["shell"],
+        "shell_configuration": {},
+        "ssh_banner": "SIMNOS Paramiko SSH Server",
+        "username": args["username"],
+        "password": args["password"],
+        "port": args["port"],
+        "address": "127.0.0.1",
+        "timeout": 1,
+        "watchdog_interval": 1,
+    }
+
+
+@pytest.mark.parametrize(
+    "override_kwargs, expected_override",
+    [
+        ({}, {}),  # minimum arguments (baseline)
+        ({"ssh_banner": "SSH Banner"}, {"ssh_banner": "SSH Banner"}),
+        ({"shell_configuration": {"shell": "configuration"}}, {"shell_configuration": {"shell": "configuration"}}),
+        ({"address": "127.0.0.2"}, {"address": "127.0.0.2"}),
+        ({"timeout": 2}, {"timeout": 2}),
+        ({"watchdog_interval": 2}, {"watchdog_interval": 2}),
+        (
+            {
+                "ssh_banner": "SSH Banner",
+                "shell_configuration": {"shell": "configuration"},
+                "address": "127.0.0.2",
+                "timeout": 2,
+                "watchdog_interval": 2,
+            },
+            {
+                "ssh_banner": "SSH Banner",
+                "shell_configuration": {"shell": "configuration"},
+                "address": "127.0.0.2",
+                "timeout": 2,
+                "watchdog_interval": 2,
+            },
+        ),
+    ],
+    ids=["baseline", "ssh_banner", "shell_configuration", "address", "timeout", "watchdog_interval", "all"],
+)
+def test_init_kwargs(paramiko_server_args, override_kwargs, expected_override):
+    """baseline + each optional kwarg; the default-key identity is pinned per case."""
+    server = ParamikoSshServer(**paramiko_server_args, **override_kwargs)
+    expected = {**_expected_baseline(paramiko_server_args), **expected_override}
+    for attr, value in expected.items():
+        assert getattr(server, attr) == value
+    # No ssh_key_file: a generated RSAKey shared via the class-level cache.
+    assert isinstance(server._ssh_server_key, paramiko.RSAKey)
+    assert server._ssh_server_key is ParamikoSshServer._default_key
+
+
+def test_init_with_ssh_key_file(paramiko_server_args):
+    """ssh_key_file loads the key from disk instead of the default cache."""
+    server = ParamikoSshServer(**paramiko_server_args, ssh_key_file="tests/assets/ssh_host_rsa_key")
+    for attr, value in _expected_baseline(paramiko_server_args).items():
+        assert getattr(server, attr) == value
+    assert server._ssh_server_key == paramiko.RSAKey(filename="tests/assets/ssh_host_rsa_key")
+
+
+def test_init_with_ssh_key_file_and_password(paramiko_server_args):
+    """ssh_key_file + password loads the encrypted key from disk."""
+    server = ParamikoSshServer(
+        **paramiko_server_args,
+        ssh_key_file="tests/assets/ssh_host_rsa_key_with_password",
+        ssh_key_file_password="password",
+    )
+    for attr, value in _expected_baseline(paramiko_server_args).items():
+        assert getattr(server, attr) == value
+    assert server._ssh_server_key == paramiko.RSAKey(
+        filename="tests/assets/ssh_host_rsa_key_with_password",
+        password="password",
+    )
+
+
 class ParamikoSshServerTest(unittest.TestCase):
     """
     Test cases for the ParamikoSshServer class.
@@ -800,230 +900,7 @@ class ParamikoSshServerTest(unittest.TestCase):
         """Set up the ParamikoSshServer tests."""
         ParamikoSshServer._default_key = None
         ParamikoSshServer._moduli_loaded = None
-        self.arguments: dict = {
-            "shell": Mock(),
-            "nos": Mock(),
-            "nos_inventory_config": {},
-            "port": 22,
-            "username": "admin",
-            "password": "admin",
-        }
-
-    def test_init_with_minimum_arguments(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the minimum parameters needed.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments)
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_ssh_key_file(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the ssh_key_file parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            ssh_key_file="tests/assets/ssh_host_rsa_key",
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(filename="tests/assets/ssh_host_rsa_key"),
-        )
-
-    def test_init_with_ssh_key_file_and_password(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the ssh_key_file and ssh_key_password parameters.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            ssh_key_file="tests/assets/ssh_host_rsa_key_with_password",
-            ssh_key_file_password="password",
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertEqual(
-            paramiko_server._ssh_server_key,
-            paramiko.RSAKey(
-                filename="tests/assets/ssh_host_rsa_key_with_password",
-                password="password",
-            ),
-        )
-
-    def test_init_with_ssh_banner(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the ssh_banner parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            ssh_banner="SSH Banner",
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SSH Banner")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_shell_configuration(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the shell_configuration parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            shell_configuration={"shell": "configuration"},
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {"shell": "configuration"})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_address(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the address parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            address="127.0.0.2",
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.2")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_timeout(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the timeout parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            timeout=2,
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 2)
-        self.assertEqual(paramiko_server.watchdog_interval, 1)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_watchdog_interval(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        the watchdog_interval parameter.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            watchdog_interval=2,
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {})
-        self.assertEqual(paramiko_server.ssh_banner, "SIMNOS Paramiko SSH Server")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.1")
-        self.assertEqual(paramiko_server.timeout, 1)
-        self.assertEqual(paramiko_server.watchdog_interval, 2)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
-
-    def test_init_with_all_parameters(self):
-        """
-        Check that the ParamikoSshServer object is initialized correctly with
-        all the parameters.
-        """
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(
-            **self.arguments,
-            ssh_banner="SSH Banner",
-            shell_configuration={"shell": "configuration"},
-            address="127.0.0.2",
-            timeout=2,
-            watchdog_interval=2,
-        )
-        self.assertEqual(paramiko_server.nos, self.arguments["nos"])
-        self.assertEqual(paramiko_server.nos_inventory_config, self.arguments["nos_inventory_config"])
-        self.assertEqual(paramiko_server.shell, self.arguments["shell"])
-        self.assertEqual(paramiko_server.shell_configuration, {"shell": "configuration"})
-        self.assertEqual(paramiko_server.ssh_banner, "SSH Banner")
-        self.assertEqual(paramiko_server.username, self.arguments["username"])
-        self.assertEqual(paramiko_server.password, self.arguments["password"])
-        self.assertEqual(paramiko_server.port, self.arguments["port"])
-        self.assertEqual(paramiko_server.address, "127.0.0.2")
-        self.assertEqual(paramiko_server.timeout, 2)
-        self.assertEqual(paramiko_server.watchdog_interval, 2)
-        self.assertIsInstance(paramiko_server._ssh_server_key, paramiko.RSAKey)
-        self.assertIs(paramiko_server._ssh_server_key, ParamikoSshServer._default_key)
+        self.arguments: dict = make_paramiko_server_args()
 
     def test_watchdog_run_srv_loop(self):
         """Check that the watchdog run_srv loop is executed."""

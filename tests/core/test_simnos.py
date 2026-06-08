@@ -9,6 +9,7 @@ import os
 import platform
 import re
 import threading
+from typing import NamedTuple
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -16,10 +17,18 @@ import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
-from simnos.core.simnos import SimNOS, simnos
+from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import nos_plugins
 from tests.utils import get_platforms_from_md, get_running_hosts
+
+
+class _Step(NamedTuple):
+    """One start/stop step + the cumulative running state expected afterwards."""
+
+    action: str  # "start" or "stop"
+    target: str  # host name to toggle
+    running: dict[str, bool]  # expected running state of every host after the step
 
 
 # pylint: disable=too-many-public-methods
@@ -29,30 +38,24 @@ class TestSimNOS:
     """
 
     def test_create_simnos_without_arguments(self):
+        """SimNOS() with no args builds exactly the hosts declared in default_inventory.
+
+        Host names / ports / credentials are derived from default_inventory
+        (the SSoT) instead of hardcoded, so this stays correct if the default
+        set changes. server/shell plugins, address (WSL/docker aware) and the
+        host_key-derived base_prompt are pinned per host.
         """
-        Test that SimNOS creates two hosts when no
-        arguments are passed.
-        Those routers should have the following:
-        - names are router0 and router1
-        - port are 6000 and 6001
-        - address is localhost
-        - timeout is 1
-        - username is user
-        - password is user
-        - server plugin is ParamikoSshServer
-        - shell plugin is CMDShell
-        """
+        expected_hosts = default_inventory["hosts"]
+        default_config = default_inventory["default"]
+
         net = SimNOS()
-        assert len(net.hosts) == 3
+        assert set(net.hosts) == set(expected_hosts)
         for router_name, host in net.hosts.items():
-            assert router_name in [
-                "router_cisco_ios",
-                "router_huawei_smartax",
-                "router_arista_eos",
-            ]
-            assert host.username in ["user"]
-            assert host.password in ["user"]
-            assert host.port in {6000, 6001, 6002}
+            # Mirror production's merge: host config overrides the shared default.
+            expected = {**default_config, **expected_hosts[router_name]}
+            assert host.username == expected["username"]
+            assert host.password == expected["password"]
+            assert host.port == expected["port"]
             assert host.server_inventory["plugin"] == "ParamikoSshServer"
             if _is_in_docker() and "WSL2" in platform.release():
                 assert host.server_inventory["configuration"]["address"] == "0.0.0.0"
@@ -419,42 +422,30 @@ class TestSimNOS:
             assert host.nos.device.configurations == configurations
 
     def test_simnos_start_stop_hosts(self):
+        """start/stop by host name; each step pins the cumulative running state.
+
+        Driven as one sequence over a single SimNOS() instance (not parametrized
+        per row) because each step's expectation depends on the prior steps'
+        accumulated state.
         """
-        Test that the function start and stop hosts by the name.
-        """
+        # Host names come from default_inventory (SSoT); the sequence + expected
+        # per-step states are hand-authored because they encode the cumulative order.
+        c, h, a = default_inventory["hosts"]
+        steps = [
+            _Step("start", c, {c: True, h: False, a: False}),
+            _Step("start", h, {c: True, h: True, a: False}),
+            _Step("start", a, {c: True, h: True, a: True}),
+            _Step("stop", c, {c: False, h: True, a: True}),
+            _Step("stop", h, {c: False, h: False, a: True}),
+            _Step("stop", a, {c: False, h: False, a: False}),
+        ]
         net = SimNOS()
-
-        net.start(hosts="router_cisco_ios")
-        assert net.hosts["router_cisco_ios"].running
-        assert not net.hosts["router_huawei_smartax"].running
-        assert not net.hosts["router_arista_eos"].running
-
-        net.start(hosts="router_huawei_smartax")
-        assert net.hosts["router_cisco_ios"].running
-        assert net.hosts["router_huawei_smartax"].running
-        assert not net.hosts["router_arista_eos"].running
-
-        net.start(hosts="router_arista_eos")
-        assert net.hosts["router_cisco_ios"].running
-        assert net.hosts["router_huawei_smartax"].running
-        assert net.hosts["router_arista_eos"].running
-
-        net.stop(hosts="router_cisco_ios")
-        assert not net.hosts["router_cisco_ios"].running
-        assert net.hosts["router_huawei_smartax"].running
-        assert net.hosts["router_arista_eos"].running
-
-        net.stop(hosts="router_huawei_smartax")
-        assert not net.hosts["router_cisco_ios"].running
-        assert not net.hosts["router_huawei_smartax"].running
-        assert net.hosts["router_arista_eos"].running
-
-        net.stop(hosts="router_arista_eos")
-        assert not net.hosts["router_cisco_ios"].running
-        assert not net.hosts["router_huawei_smartax"].running
-        assert not net.hosts["router_arista_eos"].running
-
-        net.stop()
+        try:
+            for step in steps:
+                getattr(net, step.action)(hosts=step.target)
+                assert get_running_hosts(net.hosts) == step.running
+        finally:
+            net.stop()
 
     def test_simnos_base_inventory(self):
         """
