@@ -31,6 +31,53 @@ class _Step(NamedTuple):
     running: dict[str, bool]  # expected running state of every host after the step
 
 
+# Invalid port/replicas combinations rejected by ``_check_ports_and_replicas``.
+# Every case puts ``replicas`` on the host (not ``default``): ``InventoryDefaultSection``
+# uses ``extra="forbid"``, so keeping ``port`` in ``default`` while moving ``replicas`` to
+# the host lets the merged params reach ``_check_ports_and_replicas`` without pydantic
+# rejecting them first.  The ``replicas_zero`` case is the #220 regression pin: the old
+# ``if not replicas`` falsy guard short-circuited ``replicas=0`` past the intended
+# "replicas must be greater than 0" branch; #220 switched to ``if replicas is None`` and
+# moved the ``replicas < 1`` check ahead of the port-type checks.
+_REPLICAS_REJECT_CASES = [
+    (
+        "not_set_port_list",
+        {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}},
+        r"replicas is not set, port must be an integer",
+    ),
+    (
+        "set_port_int",
+        {"default": {"port": 5000}, "hosts": {"R1": {"replicas": 2}}},
+        r"port must be a list of two integers",
+    ),
+    (
+        "port_list_too_few",
+        {"default": {"port": [5000]}, "hosts": {"R1": {"replicas": 2}}},
+        r"port must be a list of two integers",
+    ),
+    (
+        "port_list_too_many",
+        {"default": {"port": [5000, 5001, 5002]}, "hosts": {"R1": {"replicas": 2}}},
+        r"port must be a list of two integers",
+    ),
+    (
+        "port0_ge_port1",
+        {"default": {"port": [5001, 5000]}, "hosts": {"R1": {"replicas": 2}}},
+        r"port\[0\] must be less than port\[1\]",
+    ),
+    (
+        "replicas_zero",
+        {"default": {"port": [5000, 5001]}, "hosts": {"R1": {"replicas": 0}}},
+        r"replicas must be greater than 0",
+    ),
+    (
+        "len_mismatch",
+        {"default": {"port": [5000, 5001]}, "hosts": {"R1": {"replicas": 3}}},
+        r"port range must be equal to the number of replicas",
+    ),
+]
+
+
 # pylint: disable=too-many-public-methods
 class TestSimNOS:
     """
@@ -262,90 +309,19 @@ class TestSimNOS:
         net._allocate_port_single(65535)
         assert {1, 65535}.issubset(net.allocated_ports)
 
-    def test_replicas_not_set_and_port_list(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is not set.
-        """
-        inventory = {"default": {"port": [5000, 5001]}, "hosts": {"R1": {}}}
-        with pytest.raises(ValueError, match=r"replicas is not set, port must be an integer"):
-            SimNOS(inventory=inventory)
+    @pytest.mark.parametrize(
+        "inventory, match",
+        [(inventory, match) for _, inventory, match in _REPLICAS_REJECT_CASES],
+        ids=[case_id for case_id, _, _ in _REPLICAS_REJECT_CASES],
+    )
+    def test_check_ports_and_replicas_rejects(self, inventory, match):
+        """``_check_ports_and_replicas`` rejects invalid port/replicas combinations.
 
-    def test_replicas_set_and_port_int(self):
+        See ``_REPLICAS_REJECT_CASES`` for the per-case rationale (including the
+        ``extra="forbid"`` placement constraint and the #220 ``replicas_zero``
+        regression pin).
         """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and port is an int.
-
-        Note: ``replicas`` lives on each host (not in ``default``) because
-        ``InventoryDefaultSection`` uses ``extra="forbid"``. Keeping ``port`` in
-        ``default`` while moving ``replicas`` to the host lets the merged params
-        reach ``_check_ports_and_replicas`` without tripping pydantic first.
-        """
-        inventory = {"default": {"port": 5000}, "hosts": {"R1": {"replicas": 2}}}
-        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
-            SimNOS(inventory=inventory)
-
-    def test_replicas_set_and_port_list_not_enough_ports(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and there are not enough ports.
-        """
-        inventory = {"default": {"port": [5000]}, "hosts": {"R1": {"replicas": 2}}}
-        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
-            SimNOS(inventory=inventory)
-
-    def test_replicas_set_and_port_list_too_many_ports(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and there are too many ports.
-        """
-        inventory = {
-            "default": {"port": [5000, 5001, 5002]},
-            "hosts": {"R1": {"replicas": 2}},
-        }
-        with pytest.raises(ValueError, match=r"port must be a list of two integers"):
-            SimNOS(inventory=inventory)
-
-    def test_replicas_set_and_port_1_larger_than_port_2(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and the first port is larger than the second port.
-        """
-        inventory = {
-            "default": {"port": [5001, 5000]},
-            "hosts": {"R1": {"replicas": 2}},
-        }
-        with pytest.raises(ValueError, match=r"port\[0\] must be less than port\[1\]"):
-            SimNOS(inventory=inventory)
-
-    def test_replicas_set_and_replicas_less_than_1(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and the replicas are less than 1.
-
-        Fix in #220 promoted the ``replicas < 1`` check above the ``port`` type
-        checks and switched the entry guard from ``if not replicas`` to
-        ``if replicas is None``, so ``replicas=0`` now reaches the intended
-        "replicas must be greater than 0" branch instead of short-circuiting
-        on the falsy-replicas path.
-        """
-        inventory = {
-            "default": {"port": [5000, 5001]},
-            "hosts": {"R1": {"replicas": 0}},
-        }
-        with pytest.raises(ValueError, match=r"replicas must be greater than 0"):
-            SimNOS(inventory=inventory)
-
-    def test_replicas_set_and_ports_set_not_same_length(self):
-        """
-        Test that the function _check_ports_and_replicas raises an exception
-        when replicas is set and the ports are not the same length.
-        """
-        inventory = {
-            "default": {"port": [5000, 5001]},
-            "hosts": {"R1": {"replicas": 3}},
-        }
-        with pytest.raises(ValueError, match=r"port range must be equal to the number of replicas"):
+        with pytest.raises(ValueError, match=match):
             SimNOS(inventory=inventory)
 
     def test_wrong_plugin_name(self):
