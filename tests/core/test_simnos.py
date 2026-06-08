@@ -46,15 +46,16 @@ class TestSimNOS:
         host_key-derived base_prompt are pinned per host.
         """
         expected_hosts = default_inventory["hosts"]
-        expected_user = default_inventory["default"]["username"]
-        expected_password = default_inventory["default"]["password"]
+        default_config = default_inventory["default"]
 
         net = SimNOS()
         assert set(net.hosts) == set(expected_hosts)
         for router_name, host in net.hosts.items():
-            assert host.username == expected_user
-            assert host.password == expected_password
-            assert host.port == expected_hosts[router_name]["port"]
+            # Mirror production's merge: host config overrides the shared default.
+            expected = {**default_config, **expected_hosts[router_name]}
+            assert host.username == expected["username"]
+            assert host.password == expected["password"]
+            assert host.port == expected["port"]
             assert host.server_inventory["plugin"] == "ParamikoSshServer"
             if _is_in_docker() and "WSL2" in platform.release():
                 assert host.server_inventory["configuration"]["address"] == "0.0.0.0"
@@ -427,7 +428,9 @@ class TestSimNOS:
         per row) because each step's expectation depends on the prior steps'
         accumulated state.
         """
-        c, h, a = "router_cisco_ios", "router_huawei_smartax", "router_arista_eos"
+        # Host names come from default_inventory (SSoT); the sequence + expected
+        # per-step states are hand-authored because they encode the cumulative order.
+        c, h, a = default_inventory["hosts"]
         steps = [
             _Step("start", c, {c: True, h: False, a: False}),
             _Step("start", h, {c: True, h: True, a: False}),

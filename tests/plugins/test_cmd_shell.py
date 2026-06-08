@@ -74,6 +74,7 @@ def _expected_baseline(args: dict) -> dict:
             },
         ),
     ],
+    ids=["baseline", "intro", "ruler", "completekey", "newline", "all"],
 )
 def test_init_kwargs(cmd_shell_args, override_kwargs, expected_override):
     """baseline + each optional kwarg; untouched attrs stay at their defaults."""

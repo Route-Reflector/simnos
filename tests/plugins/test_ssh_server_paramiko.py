@@ -855,6 +855,7 @@ def _expected_baseline(args: dict) -> dict:
             },
         ),
     ],
+    ids=["baseline", "ssh_banner", "shell_configuration", "address", "timeout", "watchdog_interval", "all"],
 )
 def test_init_kwargs(paramiko_server_args, override_kwargs, expected_override):
     """baseline + each optional kwarg; the default-key identity is pinned per case."""
