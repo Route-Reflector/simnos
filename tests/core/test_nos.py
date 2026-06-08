@@ -34,6 +34,16 @@ def _write_tmp_file(tmp_path, name: str, content: str) -> str:
     return str(tmp_file)
 
 
+def _assert_module_static_commands_loaded(nos) -> None:
+    """Every non-callable-output command from the test module landed in ``nos``.
+
+    The py plugin's callable outputs are skipped (functions don't compare by
+    value); the remaining static commands must be present in normalized form.
+    """
+    expected = _normalized_commands(module.commands)
+    assert all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
+
+
 @pytest.fixture(scope="module")
 def commands() -> dict:
     """Authored commands loaded once from the shared yaml fixture.
@@ -383,8 +393,7 @@ def test_from_py_file():
     assert nos.name == "test_module"
     assert nos.initial_prompt == "{base_prompt}>"
     assert nos.device.__class__.__name__ == "TestModule"
-    expected = _normalized_commands(module.commands)
-    assert all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
+    _assert_module_static_commands_loaded(nos)
 
 
 def test_from_file_incorrect_py_file():
@@ -406,8 +415,7 @@ def test_from_module():
     nos._from_module("tests/assets/module.py")
     assert nos.name == "test_module"
     assert nos.initial_prompt == "{base_prompt}>"
-    expected = _normalized_commands(module.commands)
-    assert all(item in nos.commands.items() for item in expected.items() if not callable(item[1]["output"]))
+    _assert_module_static_commands_loaded(nos)
 
 
 def test_from_module_incorrect_file():
