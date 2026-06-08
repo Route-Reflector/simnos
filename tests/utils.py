@@ -9,7 +9,10 @@ import string
 from simnos.core.host import Host
 from simnos.plugins.nos import nos_plugins
 
-# Mapping for platforms where simnos name differs from netmiko device_type
+# Platforms where the simnos platform name differs from netmiko's device_type.
+# netmiko expects its own canonical device_type string, so these must be mapped
+# before building ConnectHandler kwargs (see netmiko_device()).
+# netmiko canonical names: https://github.com/ktbyers/netmiko/blob/master/PLATFORMS.md
 NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
     "edgecore": "edgecore_sonic",
     "extreme_slxos": "extreme_slx",
