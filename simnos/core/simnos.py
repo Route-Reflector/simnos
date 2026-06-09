@@ -158,8 +158,8 @@ class SimNOS:
         and store them in self.hosts, this
         method called automatically on SimNOS object instantiation.
         """
-        # _load_inventory() が先に走り str パスは dict に解決済 (str/非 dict は raise) なので
-        # ここでは dict 確定。ty 向けに invariant を明示 narrow する。
+        # narrow for ty; _load_inventory() ran first and resolved/validated the
+        # inventory to a dict (str paths loaded, non-dict raised), so it is a dict here.
         assert isinstance(self.inventory, dict)  # noqa: S101 — caller-side invariant
         for host_name, host_config in self.inventory["hosts"].items():
             params = {
