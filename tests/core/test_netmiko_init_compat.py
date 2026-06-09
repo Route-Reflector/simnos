@@ -273,6 +273,7 @@ class TestSendCommandResponse:
             device = _device(device_type, port)
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(cmd, read_timeout=15)
+                assert isinstance(output, str)
                 assert output.strip() == expected.strip(), (
                     f"{device_type}: '{cmd}' returned unexpected output.\n"
                     f"  expected: {expected.strip()!r}\n"
@@ -316,6 +317,7 @@ class TestSendCommandResponse:
                 def check(cmds: list[tuple[str, str]], phase: str) -> None:
                     for cmd, expected in cmds:
                         output = conn.send_command(cmd, read_timeout=15)
+                        assert isinstance(output, str)
                         assert output.strip() == expected.strip(), (
                             f"{device_type}: '{cmd}' ({phase}) returned unexpected output.\n"
                             f"  expected: {expected.strip()!r}\n"

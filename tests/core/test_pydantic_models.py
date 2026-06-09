@@ -62,4 +62,4 @@ class TestCommandHandlerField:
     def test_output_rejects_non_callable_non_str(self):
         """A non-callable, non-str output (int) is rejected."""
         with pytest.raises(ValidationError, match="output"):
-            ModelNosCommand(output=42)
+            ModelNosCommand(output=42)  # ty: ignore[invalid-argument-type]
