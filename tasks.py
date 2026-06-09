@@ -163,10 +163,11 @@ def lint_platform_yaml(context):
 def ty(context, exit_zero=False):
     """Run ty type-checker (blocking since Phase 2, see #218).
 
-    Phase 2 brought production code to 0 diagnostics; tests/ is excluded
-    via pyproject.toml ``[tool.ty.src]``. CI now treats ty as blocking
-    (exit_zero=False default + no continue-on-error). New type errors in
-    production code break the build.
+    Phase 2 brought production code to 0 diagnostics; Phase 3 (#251) then
+    removed the tests/ and ssh_server_paramiko exclusions from pyproject.toml
+    ``[tool.ty.src]``, so the whole tree is now scanned with 0 diagnostics.
+    CI treats ty as blocking (exit_zero=False default + no continue-on-error),
+    so new type errors anywhere (production or tests) break the build.
 
     Args:
         exit_zero: When True, pass ``--exit-zero`` so ty never exits
