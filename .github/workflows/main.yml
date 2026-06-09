@@ -38,8 +38,9 @@ jobs:
       - name: "Security: bandit"
         run: "uv run invoke bandit"
       # Typecheck: ty is blocking since Phase 2 (#218).
-      # Production code (simnos/) is ty-clean; tests/ excluded via
-      # pyproject.toml [tool.ty.src]. New type errors in production fail CI.
+      # Phase 3 (#251) removed the tests/ and ssh_server_paramiko exclusions
+      # from pyproject.toml [tool.ty.src]; the whole tree is now ty-clean and
+      # scanned, so new type errors anywhere (production or tests) fail CI.
       # GitHub Actions annotation format surfaces error locations directly in
       # PR review's "Files changed" tab.
       - name: "Typecheck: ty"
