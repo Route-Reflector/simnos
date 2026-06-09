@@ -86,10 +86,11 @@ uv run pre-commit install
 ### テストの実行
 
 ```bash
-# すべてのチェック（lint + security + tests）
+# すべてのチェック（lint + security + type-check + tests）
 uv run invoke ruff       # リンティングとフォーマット
 uv run invoke yamllint   # YAML リンティング
 uv run invoke bandit     # セキュリティチェック
+uv run invoke ty         # 型チェック（blocking、#251 以降は全ツリー）
 uv run pytest -n auto    # ユニットテスト
 ```
 
