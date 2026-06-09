@@ -127,7 +127,7 @@ def test_validate():
     when the NOS attributes are invalid.
     """
     with pytest.raises(ValidationError, match=r"commands"):
-        nos = Nos(commands="invalid_commands")
+        nos = Nos(commands="invalid_commands")  # ty: ignore[invalid-argument-type]
         nos.validate()
 
 
@@ -163,7 +163,7 @@ def test_init_rejects_invalid_field(commands, override, match):
     commands from the shared fixture) so the rejection is attributable to the
     overridden field alone.
     """
-    kwargs = {"name": "MySimNOS", "initial_prompt": "MySimNOS>", "commands": commands}
+    kwargs: dict = {"name": "MySimNOS", "initial_prompt": "MySimNOS>", "commands": commands}
     kwargs.update(override)
     with pytest.raises(ValidationError, match=match):
         Nos(**kwargs)
@@ -610,7 +610,7 @@ def test_register_nos_plugin_from_dict():
     """
     Test that we can register a nos model from a dict.
     """
-    nos_dict = {
+    nos_dict: dict = {
         "name": "MySimNOSPlugin",
         "initial_prompt": "{base_prompt}>",
         "commands": {
@@ -661,7 +661,7 @@ def test_register_nos_plugin_incorrect_name():
     """
     with pytest.raises(ValidationError, match=r"\bname\b"):
         Nos(
-            name=123,
+            name=123,  # ty: ignore[invalid-argument-type]
             initial_prompt="{base_prompt}>",
             commands={
                 "show clock": {"output": ""},
@@ -722,4 +722,5 @@ def test_configuration_file_is_loaded():
         data = file.read()
     nos = Nos(filename="tests/assets/module.py", configuration_file=configuration_file)
     assert nos.configuration_file == configuration_file
+    assert nos.device is not None
     assert nos.device.configurations == yaml.safe_load(data)

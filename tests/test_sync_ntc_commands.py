@@ -22,6 +22,7 @@ import sys
 # it explicitly rather than via a package import.
 _SYNC_PATH = Path(__file__).resolve().parents[1] / "sync_ntc_commands.py"
 _spec = importlib.util.spec_from_file_location("sync_ntc_commands", _SYNC_PATH)
+assert _spec is not None and _spec.loader is not None
 sync_ntc_commands = importlib.util.module_from_spec(_spec)
 sys.modules["sync_ntc_commands"] = sync_ntc_commands
 _spec.loader.exec_module(sync_ntc_commands)

@@ -83,10 +83,10 @@ class SimNOS:
 
     def __init__(
         self,
-        inventory: dict | None = None,
+        inventory: dict | str | None = None,
         plugins: list | None = None,
     ) -> None:
-        self.inventory: dict = inventory or default_inventory
+        self.inventory: dict | str = inventory or default_inventory
         self.plugins: list = plugins or []
 
         self.hosts: dict[str, Host] = {}
@@ -158,6 +158,9 @@ class SimNOS:
         and store them in self.hosts, this
         method called automatically on SimNOS object instantiation.
         """
+        # narrow for ty; _load_inventory() ran first and resolved/validated the
+        # inventory to a dict (str paths loaded, non-dict raised), so it is a dict here.
+        assert isinstance(self.inventory, dict)  # noqa: S101 — caller-side invariant
         for host_name, host_config in self.inventory["hosts"].items():
             params = {
                 **copy.deepcopy(self.inventory["default"]),
@@ -465,7 +468,7 @@ def _get_free_port() -> int:
         return s.getsockname()[1]
 
 
-def simnos(platform: str | None = None, inventory: dict | None = None, return_instance: bool = False):
+def simnos(platform: str | None = None, inventory: dict | str | None = None, return_instance: bool = False):
     """
     Decorator to run a test with SimNOS server.
     """

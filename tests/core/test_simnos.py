@@ -9,7 +9,7 @@ import os
 import platform
 import re
 import threading
-from typing import NamedTuple
+from typing import Any, NamedTuple, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -92,8 +92,8 @@ class TestSimNOS:
         set changes. server/shell plugins, address (WSL/docker aware) and the
         host_key-derived base_prompt are pinned per host.
         """
-        expected_hosts = default_inventory["hosts"]
-        default_config = default_inventory["default"]
+        expected_hosts = cast(dict, default_inventory["hosts"])
+        default_config = cast(dict, default_inventory["default"])
 
         net = SimNOS()
         assert set(net.hosts) == set(expected_hosts)
@@ -270,7 +270,7 @@ class TestSimNOS:
         when the port is already allocated.
         """
         net = SimNOS()
-        net.allocated_ports = [5000]
+        net.allocated_ports = {5000}
         with pytest.raises(ValueError, match=r"already in use"):
             net._allocate_port(5000)
 
@@ -356,6 +356,7 @@ class TestSimNOS:
             }
         }
         net = SimNOS(inventory=inventory)
+        assert isinstance(net.inventory, dict)
         assert net.inventory["hosts"]["R1"]["shell"]["plugin"] == "CMDShell"
 
     def test_inventory_configuration_dict(self):
@@ -557,7 +558,11 @@ class TestPlatformsManifest:
     @simnos(platform="cisco_ios", return_instance=True)
     def test_decorator_with_platform(self, net: SimNOS):
         """Test that the decorator works with a platform."""
-        platforms_used = [host.nos.name for host in net.hosts.values()]
+        platforms_used = []
+        for host in net.hosts.values():
+            nos = host.nos
+            assert nos is not None
+            platforms_used.append(nos.name)
         assert len(net.hosts) == 1
         assert "cisco_ios" in platforms_used
         assert "huawei_smartax" not in platforms_used
@@ -726,7 +731,7 @@ class TestJoinThreadsDeadline:
             return base_time + 16  # past deadline
 
         with patch("simnos.core.servers.time.monotonic", side_effect=mock_monotonic):
-            net._join_threads(mock_threads)
+            net._join_threads(cast(list[threading.Thread], mock_threads))
 
         # First 2 threads should have been joined, rest skipped
         mock_threads[0].join.assert_called_once()
@@ -759,7 +764,7 @@ class TestGlobalDeadline:
             call_count[0] += 1
 
         for h in hosts:
-            h.stop = slow_stop
+            cast(Any, h).stop = slow_stop
 
         # Deadline already in the past → all hosts skipped
         with patch("simnos.core.simnos.time.monotonic", return_value=1000.0):
@@ -778,7 +783,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = True
-            h.stop = Mock()
+            cast(Any, h).stop = Mock()
 
         mock_ex = MagicMock()
         mock_future = MagicMock()
@@ -811,7 +816,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = False
-            h.start = Mock()
+            cast(Any, h).start = Mock()
 
         mock_ex = MagicMock()
         mock_future = MagicMock()
@@ -842,7 +847,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = False
-            h.start = Mock()
+            cast(Any, h).start = Mock()
 
         mock_ex = MagicMock()
         mock_future = MagicMock()

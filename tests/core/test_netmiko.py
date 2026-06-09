@@ -152,4 +152,5 @@ class TestNetmiko:
         }
         with SimNOS(inventory=inventory), ConnectHandler(**credentials) as conn:
             output = conn.send_command("show clock")
+            assert isinstance(output, str)
             assert re.match(r"^\w{3} \w{3}\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \d{4}$", output)

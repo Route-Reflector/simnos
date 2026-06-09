@@ -3,7 +3,7 @@
 import pytest
 
 pytest.importorskip("scrapli")
-from scrapli.driver.core import IOSXEDriver
+from scrapli.driver.core import IOSXEDriver  # ty: ignore[unresolved-import]
 
 
 def _scrapli_creds(creds: dict) -> dict:

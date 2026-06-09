@@ -130,7 +130,9 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
     It gets the initial, enable and config commands.
     """
     initial_commands, enable_commands, config_commands = [], [], []
-    for command, options in host.nos.commands.items():
+    nos = host.nos
+    assert nos is not None
+    for command, options in nos.commands.items():
         if command.startswith("_") and command.endswith("_"):
             continue
         if "prompt" not in options:
@@ -142,10 +144,10 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
         if isinstance(prompts, str):
             prompts = [prompts]
         for prompt in prompts:
-            if prompt == host.nos.initial_prompt:
+            if prompt == nos.initial_prompt:
                 initial_commands.append(command)
-            elif host.nos.enable_prompt and prompt == host.nos.enable_prompt:
+            elif nos.enable_prompt and prompt == nos.enable_prompt:
                 enable_commands.append(command)
-            elif host.nos.config_prompt and prompt == host.nos.config_prompt:
+            elif nos.config_prompt and prompt == nos.config_prompt:
                 config_commands.append(command)
     return initial_commands, enable_commands, config_commands
