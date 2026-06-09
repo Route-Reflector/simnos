@@ -157,16 +157,16 @@ class TestCmdShell(TestCase):
     def test_stop(self):
         """Test that the stop method writes "exit" to stdin."""
         shell = CMDShell(**self.arguments)
-        shell.stdin = Mock()
+        cast(Any, shell).stdin = Mock()
         shell.stop()
-        shell.stdin.write.assert_called_once_with("exit\r\n")
+        cast(Mock, shell.stdin).write.assert_called_once_with("exit\r\n")
 
     def test_writeline(self):
         """Test that the writeline method writes a line to stdout with a newline at the end."""
         shell = CMDShell(**self.arguments)
-        shell.stdout = Mock()
+        cast(Any, shell).stdout = Mock()
         shell.writeline("test")
-        shell.stdout.write.assert_called_once_with("test\r\n")
+        cast(Mock, shell.stdout).write.assert_called_once_with("test\r\n")
 
     def test_emptyline(self):
         """Test that the emptyline method does nothing."""
