@@ -9,6 +9,7 @@ import sys
 import tempfile
 import threading
 import time
+from typing import Any, cast
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -100,25 +101,25 @@ class TestCmdShell(TestCase):
         """Test the init method raises an error if nos is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell()
+            CMDShell()  # ty: ignore[missing-argument]  # intentional: missing required kwargs
 
     def test_init_error_if_nos_inventory_config_not_provided(self):
         """Test the init method raises an error if nos_inventory_config is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"))
+            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"))  # ty: ignore[missing-argument]
 
     def test_init_error_if_base_prompt_not_provided(self):
         """Test the init method raises an error if base_prompt is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"), nos_inventory_config={})
+            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"), nos_inventory_config={})  # ty: ignore[missing-argument]
 
     def test_init_error_if_is_running_not_provided(self):
         """Test the init method raises an error if is_running is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(
+            CMDShell(  # ty: ignore[missing-argument]
                 nos=Nos(filename="tests/assets/yaml_nos.yaml"),
                 nos_inventory_config={},
                 base_prompt="test",
@@ -149,23 +150,23 @@ class TestCmdShell(TestCase):
         """Test that the start method calls cmdloop."""
         shell = CMDShell(**self.arguments)
         mock_cmdloop = Mock()
-        shell.cmdloop = mock_cmdloop
+        cast(Any, shell).cmdloop = mock_cmdloop
         shell.start()
         mock_cmdloop.assert_called_once()
 
     def test_stop(self):
         """Test that the stop method writes "exit" to stdin."""
         shell = CMDShell(**self.arguments)
-        shell.stdin = Mock()
+        cast(Any, shell).stdin = Mock()
         shell.stop()
-        shell.stdin.write.assert_called_once_with("exit\r\n")
+        cast(Mock, shell.stdin).write.assert_called_once_with("exit\r\n")
 
     def test_writeline(self):
         """Test that the writeline method writes a line to stdout with a newline at the end."""
         shell = CMDShell(**self.arguments)
-        shell.stdout = Mock()
+        cast(Any, shell).stdout = Mock()
         shell.writeline("test")
-        shell.stdout.write.assert_called_once_with("test\r\n")
+        cast(Mock, shell.stdout).write.assert_called_once_with("test\r\n")
 
     def test_emptyline(self):
         """Test that the emptyline method does nothing."""
@@ -206,7 +207,7 @@ class TestCmdShell(TestCase):
     def test_do_help(self):
         """Test that the do_help method writes the help message to stdout."""
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.do_help("")
         expected_output: list[str] = [
             "exit                Exit commands shell",
@@ -216,7 +217,7 @@ class TestCmdShell(TestCase):
             "terminal width 511  Set terminal width to 511",
             "terminal length 0   Set terminal length to 0",
         ]
-        shell.writeline.assert_called_once_with("\r\n".join(expected_output))
+        cast(Mock, shell.writeline).assert_called_once_with("\r\n".join(expected_output))
 
     def test__check_prompt_is_none(self):
         """Test that the _check_prompt method returns the prompt."""
@@ -250,32 +251,34 @@ class TestCmdShell(TestCase):
         """Test that the _check_prompt method returns False."""
         shell = CMDShell(**self.arguments)
         # pylint: disable=protected-access
-        self.assertFalse(shell._check_prompt("{base_prompt}"))
+        # list form (the read-side contract is lists-only, #244/D3); formats to
+        # "test" which does not match the current prompt "test>", so -> False.
+        self.assertFalse(shell._check_prompt(["{base_prompt}"]))
 
     def test_default_command_correct(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("show clock")
-        shell.writeline.assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
+        cast(Mock, shell.writeline).assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
 
     def test_default_command_with_alias(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("sh clock")
-        shell.writeline.assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
+        cast(Mock, shell.writeline).assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
 
     def test_default_command_is_function(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(filename="tests/assets/module.py")
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("show clock")
-        shell.writeline.assert_called_once_with(time.ctime())
+        cast(Mock, shell.writeline).assert_called_once_with(time.ctime())
 
     def _make_callable_dict_shell(self, output_callable):
         """Build a shell whose 'cmd' command output is `output_callable`.
@@ -308,7 +311,7 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         return shell
 
     def test_default_callable_dict_new_prompt(self):
@@ -317,14 +320,14 @@ class TestCmdShell(TestCase):
         stop = shell.default("cmd")
         self.assertFalse(stop)
         self.assertEqual(shell.prompt, "test#")
-        shell.writeline.assert_called_once_with("")
+        cast(Mock, shell.writeline).assert_called_once_with("")
 
     def test_default_callable_dict_exit(self):
         """Callable dict with exit=True signals shell termination."""
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"exit": True})
         stop = shell.default("cmd")
         self.assertTrue(stop)
-        shell.writeline.assert_not_called()
+        cast(Mock, shell.writeline).assert_not_called()
 
     def test_default_callable_dict_output_only(self):
         """Callable dict with output only writes it, prompt unchanged."""
@@ -332,7 +335,7 @@ class TestCmdShell(TestCase):
         stop = shell.default("cmd")
         self.assertFalse(stop)
         self.assertEqual(shell.prompt, "test>")
-        shell.writeline.assert_called_once_with("dynamic body")
+        cast(Mock, shell.writeline).assert_called_once_with("dynamic body")
 
     def _make_prompt_form_shell(self, prompt_value):
         """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
@@ -357,7 +360,7 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         return shell
 
     def test_default_prompt_str_authoring_dispatches(self):
@@ -365,14 +368,14 @@ class TestCmdShell(TestCase):
         shell = self._make_prompt_form_shell("{base_prompt}>")
         stop = shell.default("cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("form ok")
+        cast(Mock, shell.writeline).assert_called_once_with("form ok")
 
     def test_default_prompt_list_authoring_dispatches(self):
         """A list `prompt` matches the current prompt and dispatches."""
         shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
         stop = shell.default("cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("form ok")
+        cast(Mock, shell.writeline).assert_called_once_with("form ok")
 
     def test_inventory_commands_prompt_str_is_normalized_and_dispatches(self):
         """Inventory-defined commands get the same str -> [str] normalization.
@@ -394,27 +397,27 @@ class TestCmdShell(TestCase):
             },
         }
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         self.assertEqual(shell.commands["inv cmd"]["prompt"], ["{base_prompt}>"])
         stop = shell.default("inv cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("inventory ok")
+        cast(Mock, shell.writeline).assert_called_once_with("inventory ok")
 
     def test_default_command_not_matching_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("show version")
-        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        cast(Mock, shell.writeline).assert_called_once_with("% Invalid input detected at '^' marker.")
 
     def test_default_command_incorrect(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("test")
-        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        cast(Mock, shell.writeline).assert_called_once_with("% Invalid input detected at '^' marker.")
 
     def test_default_alias_target_missing_falls_back_default(self):
         """An alias whose target command is gone degrades to `_default_`.
@@ -427,10 +430,10 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken alias"] = {"alias": "no such target"}
         shell.default("broken alias")
-        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        cast(Mock, shell.writeline).assert_called_once_with("% Invalid input detected at '^' marker.")
 
     def test_resolve_command_unknown_returns_none(self):
         """`_resolve_command` degrades an unknown command to None.
@@ -464,6 +467,7 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         # pylint: disable=protected-access
         merged = shell._resolve_command("sh clock")
+        assert merged is not None
         self.assertEqual(merged["output"], "*21:01:33.000 AET 01 01 01 2022")
         self.assertEqual(merged["alias"], "show clock")
 
@@ -523,7 +527,7 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         return shell
 
     def test_default_callable_default_invoked_on_unknown_command(self):
@@ -531,7 +535,7 @@ class TestCmdShell(TestCase):
         shell = self._make_callable_default_shell()
         stop = shell.default("nope")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("dynamic unknown: nope")
+        cast(Mock, shell.writeline).assert_called_once_with("dynamic unknown: nope")
 
     def test_default_callable_default_invoked_on_prompt_mismatch(self):
         """A prompt mismatch invokes a callable `_default_` (#241).
@@ -543,7 +547,7 @@ class TestCmdShell(TestCase):
         shell = self._make_callable_default_shell()
         stop = shell.default("known")  # requires "test#", current prompt is "test>"
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("dynamic unknown: known")
+        cast(Mock, shell.writeline).assert_called_once_with("dynamic unknown: known")
 
     def test_default_callable_default_dict_return_gets_full_dispatch(self):
         """A dict-returning callable `_default_` gets the same dispatch (#241).
@@ -567,11 +571,11 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         stop = shell.default("nope")
         self.assertFalse(stop)
         self.assertEqual(shell.prompt, "test#")
-        shell.writeline.assert_called_once_with("locked out")
+        cast(Mock, shell.writeline).assert_called_once_with("locked out")
 
     def test_default_handler_crash_writes_fixed_error_line(self):
         """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
@@ -589,7 +593,7 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
             stop = shell.default("cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with(HANDLER_ERROR_OUTPUT)
+        cast(Mock, shell.writeline).assert_called_once_with(HANDLER_ERROR_OUTPUT)
 
     def test_default_handler_crash_logs_full_traceback(self):
         """A crashing handler's traceback goes to the server log.
@@ -624,7 +628,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_key_cmd"] = {
             "output": "value is {unknown_key}",
             "prompt": ["{base_prompt}>"],
@@ -633,7 +637,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_key_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("value is {unknown_key}")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {unknown_key}")
 
     def test_default_silent_fallback_on_valueerror(self):
         """`ValueError` failure mode of `.format()` is silently logged.
@@ -645,7 +649,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_brace_cmd"] = {
             "output": "value is {broken",
             "prompt": ["{base_prompt}>"],
@@ -654,7 +658,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_brace_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("value is {broken")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {broken")
 
     def test_default_silent_fallback_on_indexerror(self):
         """`IndexError` failure mode of `.format()` is silently logged.
@@ -667,7 +671,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_pos_cmd"] = {
             "output": "value is {}",
             "prompt": ["{base_prompt}>"],
@@ -676,7 +680,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_pos_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("value is {}")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {}")
 
     def test_default_silent_fallback_on_attributeerror(self):
         """`AttributeError` failure mode of `.format()` is silently logged.
@@ -689,7 +693,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_attr_cmd"] = {
             "output": "value is {base_prompt.foo}",
             "prompt": ["{base_prompt}>"],
@@ -698,7 +702,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_attr_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_attr_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {base_prompt.foo}")
 
     def test_default_silent_fallback_on_typeerror(self):
         """`TypeError` failure mode of `.format()` is silently logged.
@@ -711,7 +715,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_item_cmd"] = {
             "output": "value is {base_prompt[bad]}",
             "prompt": ["{base_prompt}>"],
@@ -720,7 +724,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_item_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting output" in msg and "broken_item_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("value is {base_prompt[bad]}")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {base_prompt[bad]}")
 
     def test_default_new_prompt_format_failure_keeps_prompt(self):
         """A broken cmd_data new_prompt does not transition the prompt.
@@ -732,7 +736,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["broken_np_cmd"] = {
             "output": "mode change attempted",
             "prompt": ["{base_prompt}>"],
@@ -744,7 +748,7 @@ class TestCmdShell(TestCase):
         self.assertEqual(shell.prompt, "test>")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting new_prompt" in msg and "broken_np_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("mode change attempted")
+        cast(Mock, shell.writeline).assert_called_once_with("mode change attempted")
 
     def test_default_callable_dict_new_prompt_format_failure(self):
         """A broken callable-dict new_prompt does not transition the prompt.
@@ -764,7 +768,7 @@ class TestCmdShell(TestCase):
         self.assertEqual(shell.prompt, "test>")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting new_prompt" in msg and "'cmd'" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("body")
+        cast(Mock, shell.writeline).assert_called_once_with("body")
 
     def test_default_callable_dict_output_passed_through_unformatted(self):
         """Callable-dict output skips `_safe_format` entirely (#241 / D-b).
@@ -781,7 +785,7 @@ class TestCmdShell(TestCase):
         with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
             stop = shell.default("cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("value is {base_prompt.foo}")
+        cast(Mock, shell.writeline).assert_called_once_with("value is {base_prompt.foo}")
 
     def test_default_callable_str_output_passed_through_unformatted(self):
         """Callable str output skips `_safe_format` too (#241 / D-b).
@@ -795,7 +799,7 @@ class TestCmdShell(TestCase):
         with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
             stop = shell.default("cmd")
         self.assertFalse(stop)
-        shell.writeline.assert_called_once_with("literal {brace} stays")
+        cast(Mock, shell.writeline).assert_called_once_with("literal {brace} stays")
 
     def test_default_broken_prompt_treated_as_non_match(self):
         """A command with a broken prompt template is just unreachable.
@@ -807,7 +811,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         # Injected directly into shell.commands (bypassing the load
         # paths), so the list form is used per the #244 / D3 contract.
         shell.commands["broken_prompt_cmd"] = {
@@ -818,7 +822,7 @@ class TestCmdShell(TestCase):
             shell.default("broken_prompt_cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertTrue(any("error formatting prompt" in msg and "broken_prompt_cmd" in msg for msg in captured.output))
-        shell.writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        cast(Mock, shell.writeline).assert_called_once_with("% Invalid input detected at '^' marker.")
 
     def test_do_help_broken_prompt_command_hidden(self):
         """`do_help` survives a broken prompt template (command hidden).
@@ -829,7 +833,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         # Direct injection -> list form per the #244 / D3 contract.
         shell.commands["broken_prompt_cmd"] = {
             "output": "x",
@@ -839,7 +843,7 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.do_help("")
         self.assertEqual(len(captured.output), 1)
-        help_text = shell.writeline.call_args[0][0]
+        help_text = cast(Mock, shell.writeline).call_args[0][0]
         self.assertNotIn("broken_prompt_cmd", help_text)
         self.assertIn("show clock", help_text)  # healthy commands still listed
 
@@ -853,7 +857,7 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.commands["partial_prompt_cmd"] = {
             "output": "reached",
             "prompt": ["{base_prompt.foo}>", "{base_prompt}>"],
@@ -861,13 +865,13 @@ class TestCmdShell(TestCase):
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("partial_prompt_cmd")
         self.assertEqual(len(captured.output), 1)  # the broken candidate, once
-        shell.writeline.assert_called_once_with("reached")
+        cast(Mock, shell.writeline).assert_called_once_with("reached")
 
     def test_default_command_new_prompt(self):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        shell.writeline = Mock()
+        cast(Any, shell).writeline = Mock()
         shell.default("enable")
         shell.prompt = "test#"
 
@@ -902,7 +906,7 @@ class HotReloadTest(TestCase):
         os.environ.pop("SIMNOS_RELOAD_COMMANDS")
         mock_get_files_changed = Mock()
         shell = CMDShell(**self.arguments)
-        shell.get_files_changed = mock_get_files_changed
+        cast(Any, shell).get_files_changed = mock_get_files_changed
         shell.precmd("show clock")
         mock_get_files_changed.assert_not_called()
 
@@ -940,8 +944,8 @@ class HotReloadTest(TestCase):
         broken file is logged and skipped while remaining files reload.
         """
         shell = CMDShell(**self.arguments)
-        shell.nos.from_file = Mock(side_effect=[ValueError("boom"), None])
-        shell.nos.commands = {"healthy": {"output": "ok"}}
+        cast(Any, shell.nos).from_file = Mock(side_effect=[ValueError("boom"), None])
+        cast(Any, shell.nos).commands = {"healthy": {"output": "ok"}}
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.reload_commands(["broken.yaml", "healthy.yaml"])
         self.assertEqual(len(captured.output), 1)
@@ -956,8 +960,8 @@ class HotReloadTest(TestCase):
         broken file raises, and the error is still logged.
         """
         shell = CMDShell(**self.arguments)
-        shell.nos.from_file = Mock(side_effect=[None, ValueError("boom")])
-        shell.nos.commands = {"healthy": {"output": "ok"}}
+        cast(Any, shell.nos).from_file = Mock(side_effect=[None, ValueError("boom")])
+        cast(Any, shell.nos).commands = {"healthy": {"output": "ok"}}
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.reload_commands(["healthy.yaml", "broken.yaml"])
         self.assertEqual(len(captured.output), 1)
