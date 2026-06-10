@@ -175,8 +175,10 @@ class DrainPendingInputTest(unittest.TestCase):
         self.sock.settimeout.assert_has_calls([mock.call(_IAC_DRAIN_TIMEOUT), mock.call(7)])
 
     def test_drain_exits_at_total_budget_with_noisy_client(self):
-        """A client that never goes quiet cannot pin the thread: the drain
-        exits once _DRAIN_TOTAL_BUDGET elapses (#268 cross-review)."""
+        """A client that keeps sending data bytes is bounded: the drain
+        exits once _DRAIN_TOTAL_BUDGET elapses (#268 cross-review). The
+        deadline is only checked between _recv_byte calls — a pure-IAC
+        stream is out of this guarantee (see the constant's scope note)."""
         self.sock.recv.return_value = b"x"  # Endless chatter
         with mock.patch(
             "simnos.plugins.servers.telnet_server.time.monotonic",
@@ -510,20 +512,25 @@ class TelnetIntegrationTest(unittest.TestCase):
                     with contextlib.suppress(TimeoutError):
                         sock.recv(4096)  # Drain Password prompt
                     sock.sendall(b"wrong\r\n")
-                    # (1) The failure message must arrive (collect until seen)
+                    # Collect everything until EOF so the FIN check cannot
+                    # race a message split across recv boundaries. An RST
+                    # (pre-fix) raises ConnectionResetError here instead.
                     deadline = time.monotonic() + 3.0
                     buf = b""
-                    while time.monotonic() < deadline and b"Authentication failed" not in buf:
+                    eof = False
+                    while time.monotonic() < deadline:
                         try:
                             chunk = sock.recv(4096)
                         except TimeoutError:
                             continue
                         if not chunk:
-                            break  # FIN before message — assertIn below fails loudly
+                            eof = True
+                            break
                         buf += chunk
+                    # (1) The failure message reached the client
                     self.assertIn(b"Authentication failed", buf)
                     # (2) Graceful FIN, not RST (pre-fix: ConnectionResetError)
-                    self.assertEqual(sock.recv(4096), b"")
+                    self.assertTrue(eof)
                     # (3) Drain ran after negotiation AND on the failure path
                     self.assertEqual(drain.call_count, 2)
                     shell_cls.assert_not_called()

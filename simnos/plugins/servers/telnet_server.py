@@ -47,8 +47,12 @@ _IAC_DRAIN_TIMEOUT = 0.05
 
 # Total wall-clock budget (seconds) for one _drain_pending_input() call.
 # The per-recv idle timeout above ends a drain once the client goes quiet;
-# this deadline additionally bounds the case where a client keeps sending,
-# so an unauthenticated peer cannot pin the connection thread (#268 review).
+# this deadline additionally bounds a client that keeps sending data bytes
+# (#268 review). Scope note: the deadline is only checked between
+# _recv_byte() calls, so a continuous pure-IAC stream is still consumed
+# inside _recv_byte() without deadline checks — bounding that (and the
+# pre-existing unauthenticated read_line path) is deliberately out of
+# scope here.
 _DRAIN_TOTAL_BUDGET = 1.0
 
 
@@ -170,8 +174,9 @@ class TelnetServer(TCPServerBase):
         disappears (#268). A short blocking timeout is used instead of
         non-blocking mode so that multi-byte IAC sequences split across TCP
         segments are received completely rather than raising mid-sequence;
-        ``_DRAIN_TOTAL_BUDGET`` additionally bounds a client that never
-        goes quiet. The socket's original timeout is restored on exit.
+        ``_DRAIN_TOTAL_BUDGET`` additionally bounds a client that keeps
+        sending data bytes (see the constant's scope note for what it does
+        NOT bound). The socket's original timeout is restored on exit.
         """
         original_timeout = sock.gettimeout()
         deadline = time.monotonic() + _DRAIN_TOTAL_BUDGET
