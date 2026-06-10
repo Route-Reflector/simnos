@@ -45,6 +45,12 @@ NAWS = 0x1F  # Negotiate About Window Size
 # is sub-millisecond, so 50 ms gives ample margin.
 _IAC_DRAIN_TIMEOUT = 0.05
 
+# Total wall-clock budget (seconds) for one _drain_pending_input() call.
+# The per-recv idle timeout above ends a drain once the client goes quiet;
+# this deadline additionally bounds the case where a client keeps sending,
+# so an unauthenticated peer cannot pin the connection thread (#268 review).
+_DRAIN_TOTAL_BUDGET = 1.0
+
 
 def _is_loopback(address: str) -> bool:
     """Check whether *address* resolves to a loopback IP."""
@@ -155,25 +161,29 @@ class TelnetServer(TCPServerBase):
         """Drain bytes the client already sent, answering IAC sequences.
 
         Used after the initial negotiation window (answering queued IAC
-        responses) and right before abandoning a connection on the
-        authentication-failure path. The failure-path call matters because
-        closing a socket whose receive buffer still holds unread data makes
-        TCP send RST instead of FIN (RFC 2525 2.17); on Windows an RST also
-        discards data the client has not read yet, so anything we just sent
-        (e.g. ``Authentication failed.``) silently disappears (#268). A
-        short blocking timeout is used instead of non-blocking mode so that
-        multi-byte IAC sequences split across TCP segments are received
-        completely rather than raising mid-sequence.
+        responses) and right before abandoning a connection (authentication
+        failure / disconnect during authentication). The abandonment calls
+        matter because closing a socket whose receive buffer still holds
+        unread data makes TCP send RST instead of FIN (RFC 2525 2.17); on
+        Windows an RST also discards data the client has not read yet, so
+        anything we just sent (e.g. ``Authentication failed.``) silently
+        disappears (#268). A short blocking timeout is used instead of
+        non-blocking mode so that multi-byte IAC sequences split across TCP
+        segments are received completely rather than raising mid-sequence;
+        ``_DRAIN_TOTAL_BUDGET`` additionally bounds a client that never
+        goes quiet. The socket's original timeout is restored on exit.
         """
+        original_timeout = sock.gettimeout()
+        deadline = time.monotonic() + _DRAIN_TOTAL_BUDGET
         sock.settimeout(_IAC_DRAIN_TIMEOUT)
         try:
-            while True:
+            while time.monotonic() < deadline:
                 if self._recv_byte(sock) is None:
                     break  # EOF — client disconnected
         except TimeoutError:
             pass  # No more data available — expected
         finally:
-            sock.settimeout(self.timeout)
+            sock.settimeout(original_timeout)
 
     def _handle_negotiation(self, sock: socket.socket, cmd: int, opt: int) -> None:
         """Respond to a Telnet negotiation command."""
@@ -284,6 +294,11 @@ class TelnetServer(TCPServerBase):
                 auth_ok, skip_lf = self._authenticate(client)
             except (TimeoutError, OSError):
                 log.debug("Client disconnected during authentication")
+                # Same FIN-not-RST treatment as the auth-failure branch
+                # below: a server-side timeout can leave client bytes
+                # pending, and closing over them would RST (#268 review).
+                with contextlib.suppress(OSError):
+                    self._drain_pending_input(client)
                 return
             if not auth_ok:
                 log.warning("Telnet authentication failed, closing connection")
