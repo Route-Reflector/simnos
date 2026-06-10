@@ -15,6 +15,7 @@ from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.servers.tap_bridge import client_to_shell_tap, read_line, shell_to_client_tap
 from simnos.plugins.servers.telnet_server import (
+    _IAC_DRAIN_TIMEOUT,
     DO,
     DONT,
     ECHO,
@@ -143,6 +144,51 @@ class SkipSubnegotiationTest(unittest.TestCase):
         ]
         # Should not raise
         self.server._skip_subnegotiation(self.sock)
+
+
+class DrainPendingInputTest(unittest.TestCase):
+    """Test cases for TelnetServer._drain_pending_input() (#268 regression pin).
+
+    The auth-failure path must consume input left pending by read_line's
+    skip_lf deferral; closing with unread receive data RSTs the connection
+    and Windows clients never see the failure message.
+    """
+
+    def setUp(self):
+        self.server = _make_server()
+        self.sock = MagicMock(spec=socket.socket)
+        self.sock.gettimeout.return_value = 7  # Distinct sentinel for restore
+
+    def test_drains_until_quiet_and_restores_timeout(self):
+        """Pending bytes are consumed until the socket goes quiet; the
+        drain timeout is applied and the original timeout restored."""
+        self.sock.recv.side_effect = [b"\n", b"x", TimeoutError()]
+        self.server._drain_pending_input(self.sock)
+        self.assertEqual(self.sock.recv.call_count, 3)
+        # Contract: short drain timeout applied, then original restored.
+        self.sock.settimeout.assert_has_calls([mock.call(_IAC_DRAIN_TIMEOUT), mock.call(7)])
+
+    def test_drain_stops_at_eof_and_restores_timeout(self):
+        """EOF (empty recv) stops the drain without raising."""
+        self.sock.recv.side_effect = [b"\n", b""]
+        self.server._drain_pending_input(self.sock)
+        self.sock.settimeout.assert_has_calls([mock.call(_IAC_DRAIN_TIMEOUT), mock.call(7)])
+
+    def test_drain_exits_at_total_budget_with_noisy_client(self):
+        """A client that keeps sending data bytes is bounded: the drain
+        exits once _DRAIN_TOTAL_BUDGET elapses (#268 cross-review). The
+        deadline is only checked between _recv_byte calls — a pure-IAC
+        stream is out of this guarantee (see the constant's scope note)."""
+        self.sock.recv.return_value = b"x"  # Endless chatter
+        with mock.patch(
+            "simnos.plugins.servers.telnet_server.time.monotonic",
+            # deadline calc at t=0 (budget 1.0), loop checks at 0.1 / 0.5
+            # (recv), then 1.5 (>= deadline -> exit)
+            side_effect=[0.0, 0.1, 0.5, 1.5],
+        ):
+            self.server._drain_pending_input(self.sock)
+        self.assertEqual(self.sock.recv.call_count, 2)
+        self.sock.settimeout.assert_called_with(7)
 
 
 class HandleNegotiationTest(unittest.TestCase):
@@ -441,6 +487,57 @@ class TelnetIntegrationTest(unittest.TestCase):
                 sock.close()
         finally:
             server.stop()
+
+    def test_telnet_wrong_credentials_drains_before_close(self):
+        """Auth failure must deliver the message and close with FIN (#268 pin).
+
+        read_line's skip_lf defers the password line's trailing LF to the
+        next reader; on the failure path that reader never comes, and
+        closing with unread receive data makes TCP RST the connection —
+        Windows clients then never see ``Authentication failed.``. Pins:
+        (1) the failure message reaches the client, (2) the close is a
+        graceful FIN — the RST is sent on Linux too, so pre-fix the
+        collecting recv raised ConnectionResetError even here — and (3) the
+        structural shape: _drain_pending_input runs twice (negotiation
+        window + auth-failure path).
+        """
+        server, port, shell_cls = self._create_server_on_free_port()
+        with mock.patch.object(server, "_drain_pending_input", wraps=server._drain_pending_input) as drain:
+            server.start()
+            try:
+                sock, _initial_data = self._telnet_connect(port)
+                try:
+                    sock.sendall(b"wrong\r\n")
+                    time.sleep(0.2)
+                    with contextlib.suppress(TimeoutError):
+                        sock.recv(4096)  # Drain Password prompt
+                    sock.sendall(b"wrong\r\n")
+                    # Collect everything until EOF so the FIN check cannot
+                    # race a message split across recv boundaries. An RST
+                    # (pre-fix) raises ConnectionResetError here instead.
+                    deadline = time.monotonic() + 3.0
+                    buf = b""
+                    eof = False
+                    while time.monotonic() < deadline:
+                        try:
+                            chunk = sock.recv(4096)
+                        except TimeoutError:
+                            continue
+                        if not chunk:
+                            eof = True
+                            break
+                        buf += chunk
+                    # (1) The failure message reached the client
+                    self.assertIn(b"Authentication failed", buf)
+                    # (2) Graceful FIN, not RST (pre-fix: ConnectionResetError)
+                    self.assertTrue(eof)
+                    # (3) Drain ran after negotiation AND on the failure path
+                    self.assertEqual(drain.call_count, 2)
+                    shell_cls.assert_not_called()
+                finally:
+                    sock.close()
+            finally:
+                server.stop()
 
     def test_telnet_connection_auth_starts_shell(self):
         """Successful auth should start the shell."""

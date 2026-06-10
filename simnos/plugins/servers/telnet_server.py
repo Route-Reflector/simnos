@@ -45,6 +45,15 @@ NAWS = 0x1F  # Negotiate About Window Size
 # is sub-millisecond, so 50 ms gives ample margin.
 _IAC_DRAIN_TIMEOUT = 0.05
 
+# Total wall-clock budget (seconds) for one _drain_pending_input() call.
+# The per-recv idle timeout above ends a drain once the client goes quiet;
+# this deadline additionally bounds a client that keeps sending data bytes
+# (#268 review). Scope note: the deadline is only checked between
+# _recv_byte() calls, so a continuous pure-IAC stream is still consumed
+# inside _recv_byte() without deadline checks — bounding that (and the
+# pre-existing unauthenticated read_line path) is tracked in #269.
+_DRAIN_TOTAL_BUDGET = 1.0
+
 
 def _is_loopback(address: str) -> bool:
     """Check whether *address* resolves to a loopback IP."""
@@ -151,6 +160,35 @@ class TelnetServer(TCPServerBase):
                 continue
             continue  # Other IAC commands (NOP, GA) → skip
 
+    def _drain_pending_input(self, sock: socket.socket) -> None:
+        """Drain bytes the client already sent, answering IAC sequences.
+
+        Used after the initial negotiation window (answering queued IAC
+        responses) and right before abandoning a connection (authentication
+        failure / disconnect during authentication). The abandonment calls
+        matter because closing a socket whose receive buffer still holds
+        unread data makes TCP send RST instead of FIN (RFC 2525 2.17); on
+        Windows an RST also discards data the client has not read yet, so
+        anything we just sent (e.g. ``Authentication failed.``) silently
+        disappears (#268). A short blocking timeout is used instead of
+        non-blocking mode so that multi-byte IAC sequences split across TCP
+        segments are received completely rather than raising mid-sequence;
+        ``_DRAIN_TOTAL_BUDGET`` additionally bounds a client that keeps
+        sending data bytes (see the constant's scope note for what it does
+        NOT bound). The socket's original timeout is restored on exit.
+        """
+        original_timeout = sock.gettimeout()
+        deadline = time.monotonic() + _DRAIN_TOTAL_BUDGET
+        sock.settimeout(_IAC_DRAIN_TIMEOUT)
+        try:
+            while time.monotonic() < deadline:
+                if self._recv_byte(sock) is None:
+                    break  # EOF — client disconnected
+        except TimeoutError:
+            pass  # No more data available — expected
+        finally:
+            sock.settimeout(original_timeout)
+
     def _handle_negotiation(self, sock: socket.socket, cmd: int, opt: int) -> None:
         """Respond to a Telnet negotiation command."""
         if cmd == DO:
@@ -248,19 +286,8 @@ class TelnetServer(TCPServerBase):
             # then drain them using _recv_byte so that negotiation commands
             # (e.g. DO SGA, DO ECHO, WILL NAWS) are properly answered via
             # _handle_negotiation instead of being silently discarded.
-            # A short blocking timeout is used instead of non-blocking mode
-            # so that multi-byte IAC sequences split across TCP segments
-            # are received completely rather than raising mid-sequence.
             time.sleep(0.1)
-            client.settimeout(_IAC_DRAIN_TIMEOUT)
-            try:
-                while True:
-                    if self._recv_byte(client) is None:
-                        break  # EOF — client disconnected
-            except TimeoutError:
-                pass  # No more data available — expected
-            finally:
-                client.settimeout(self.timeout)
+            self._drain_pending_input(client)
 
             # Send banner
             if self.banner:
@@ -271,11 +298,23 @@ class TelnetServer(TCPServerBase):
                 auth_ok, skip_lf = self._authenticate(client)
             except (TimeoutError, OSError):
                 log.debug("Client disconnected during authentication")
+                # Same FIN-not-RST treatment as the auth-failure branch
+                # below: a server-side timeout can leave client bytes
+                # pending, and closing over them would RST (#268 review).
+                with contextlib.suppress(OSError):
+                    self._drain_pending_input(client)
                 return
             if not auth_ok:
                 log.warning("Telnet authentication failed, closing connection")
                 with contextlib.suppress(OSError):
                     client.sendall(b"Authentication failed.\r\n")
+                # Consume the input left pending on the failure path (the
+                # LF/NUL that read_line's skip_lf defers from the password
+                # line's CR is forwarded to client_to_shell_tap only on
+                # success) — otherwise close() RSTs and the failure message
+                # never reaches Windows clients (#268).
+                with contextlib.suppress(OSError):
+                    self._drain_pending_input(client)
                 return
 
             # Create stdio for the shell
