@@ -154,17 +154,23 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
 
 
 def set_attr[T](obj: object, name: str, value: T) -> T:
-    """Assign ``value`` to ``obj.name`` (ty-clean, no cast/B010) and return it.
+    """Test helper: assign ``value`` to ``obj.name`` (ty-clean, no cast/B010) and return it.
 
-    Tests mock attributes that are typed as methods (e.g. ``shell.writeline``),
-    which ty rejects on plain assignment and ruff B010 rejects via
-    ``setattr(obj, "literal", ...)``. Routing the assignment through this helper
-    (variable ``name`` → not B010; ``obj: object`` → ty accepts) sidesteps both.
+    For tests only — it deliberately bypasses static type checks, so do not use
+    it in production code. Tests mock attributes that are typed as methods
+    (e.g. ``shell.writeline``), which ty rejects on plain assignment and ruff
+    B010 rejects via ``setattr(obj, "literal", ...)``. Routing the assignment
+    through this helper (variable ``name`` → not B010; ``obj: object`` → ty
+    accepts) sidesteps both.
 
     ``value`` is generic so a single helper covers every test assignment:
     ``Mock()``, ``Mock(side_effect=...)``, a plain function, or a dict literal.
-    Returning ``value`` (typed ``T``) lets call sites bind the result and drop
-    the access-side ``cast(Mock, ...)`` when asserting on the mock.
+
+    Two call styles are both intended:
+    - bound: ``wl = set_attr(shell, "writeline", Mock())`` then ``wl.assert_*``
+      — the ``-> T`` return drops the access-side ``cast(Mock, ...)``.
+    - bare: ``set_attr(shell, "writeline", Mock())`` — return ignored, used when
+      the mock only guards a side effect (e.g. stdout=None) and is not asserted.
     """
     setattr(obj, name, value)
     return value

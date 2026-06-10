@@ -612,6 +612,9 @@ class TestCmdShell(TestCase):
             raise RuntimeError("boom-for-log")
 
         shell = self._make_callable_dict_shell(crash)
+        # crash-path guard: default() writes HANDLER_ERROR_OUTPUT via writeline,
+        # and stdout is None, so writeline must be mocked even though this test
+        # only asserts on the log (return unused → bare set_attr).
         set_attr(shell, "writeline", Mock())
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
             shell.default("cmd")
@@ -879,6 +882,8 @@ class TestCmdShell(TestCase):
         """Test that the default method does nothing."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
+        # writeline guard only (stdout is None); this test asserts on prompt,
+        # not on the mock (return unused → bare set_attr).
         set_attr(shell, "writeline", Mock())
         shell.default("enable")
         shell.prompt = "test#"
