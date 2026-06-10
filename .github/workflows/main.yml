@@ -8,6 +8,9 @@ on:
     branches:
       - main
       - dev
+      # v3.0 long-lived integration branch (epic #263): main = v2.x
+      # maintenance only, all v3 development PRs target v3.
+      - v3
     tags:
       - "v*"
   pull_request: ~
