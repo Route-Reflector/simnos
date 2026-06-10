@@ -9,7 +9,7 @@ import os
 import platform
 import re
 import threading
-from typing import Any, NamedTuple, cast
+from typing import NamedTuple, cast
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
@@ -20,7 +20,7 @@ from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import nos_plugins
-from tests.utils import get_platforms_from_md, get_running_hosts
+from tests.utils import get_platforms_from_md, get_running_hosts, set_attr
 
 
 class _Step(NamedTuple):
@@ -764,7 +764,7 @@ class TestGlobalDeadline:
             call_count[0] += 1
 
         for h in hosts:
-            cast(Any, h).stop = slow_stop
+            set_attr(h, "stop", slow_stop)
 
         # Deadline already in the past → all hosts skipped
         with patch("simnos.core.simnos.time.monotonic", return_value=1000.0):
@@ -783,7 +783,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = True
-            cast(Any, h).stop = Mock()
+            set_attr(h, "stop", Mock())
 
         mock_ex = MagicMock()
         mock_future = MagicMock()
@@ -816,7 +816,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = False
-            cast(Any, h).start = Mock()
+            set_attr(h, "start", Mock())
 
         mock_ex = MagicMock()
         mock_future = MagicMock()
@@ -847,7 +847,7 @@ class TestGlobalDeadline:
         hosts = list(net.hosts.values())
         for h in hosts:
             h.running = False
-            cast(Any, h).start = Mock()
+            set_attr(h, "start", Mock())
 
         mock_ex = MagicMock()
         mock_future = MagicMock()
