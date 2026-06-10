@@ -496,10 +496,10 @@ class TelnetIntegrationTest(unittest.TestCase):
         closing with unread receive data makes TCP RST the connection —
         Windows clients then never see ``Authentication failed.``. Pins:
         (1) the failure message reaches the client, (2) the close is a
-        graceful FIN — the RST is sent on Linux too, so pre-fix the second
-        recv raised ConnectionResetError even here — and (3) the structural
-        shape: _drain_pending_input runs twice (negotiation window +
-        auth-failure path).
+        graceful FIN — the RST is sent on Linux too, so pre-fix the
+        collecting recv raised ConnectionResetError even here — and (3) the
+        structural shape: _drain_pending_input runs twice (negotiation
+        window + auth-failure path).
         """
         server, port, shell_cls = self._create_server_on_free_port()
         with mock.patch.object(server, "_drain_pending_input", wraps=server._drain_pending_input) as drain:

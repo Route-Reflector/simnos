@@ -51,8 +51,7 @@ _IAC_DRAIN_TIMEOUT = 0.05
 # (#268 review). Scope note: the deadline is only checked between
 # _recv_byte() calls, so a continuous pure-IAC stream is still consumed
 # inside _recv_byte() without deadline checks — bounding that (and the
-# pre-existing unauthenticated read_line path) is deliberately out of
-# scope here.
+# pre-existing unauthenticated read_line path) is tracked in #269.
 _DRAIN_TOTAL_BUDGET = 1.0
 
 
