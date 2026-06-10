@@ -145,6 +145,34 @@ class SkipSubnegotiationTest(unittest.TestCase):
         self.server._skip_subnegotiation(self.sock)
 
 
+class DrainPendingInputTest(unittest.TestCase):
+    """Test cases for TelnetServer._drain_pending_input() (#268 regression pin).
+
+    The auth-failure path must consume input left pending by read_line's
+    skip_lf deferral; closing with unread receive data RSTs the connection
+    and Windows clients never see the failure message.
+    """
+
+    def setUp(self):
+        self.server = _make_server()
+        self.sock = MagicMock(spec=socket.socket)
+
+    def test_drains_until_quiet_and_restores_timeout(self):
+        """Pending bytes are consumed until the socket goes quiet; the
+        configured timeout is restored afterwards."""
+        self.sock.recv.side_effect = [b"\n", b"x", TimeoutError()]
+        self.server._drain_pending_input(self.sock)
+        self.assertEqual(self.sock.recv.call_count, 3)
+        # Last settimeout call must restore the configured timeout.
+        self.sock.settimeout.assert_called_with(self.server.timeout)
+
+    def test_drain_stops_at_eof_and_restores_timeout(self):
+        """EOF (empty recv) stops the drain without raising."""
+        self.sock.recv.side_effect = [b"\n", b""]
+        self.server._drain_pending_input(self.sock)
+        self.sock.settimeout.assert_called_with(self.server.timeout)
+
+
 class HandleNegotiationTest(unittest.TestCase):
     """Test cases for TelnetServer._handle_negotiation()."""
 
@@ -441,6 +469,35 @@ class TelnetIntegrationTest(unittest.TestCase):
                 sock.close()
         finally:
             server.stop()
+
+    def test_telnet_wrong_credentials_drains_before_close(self):
+        """Auth failure must drain pending input before closing (#268 pin).
+
+        read_line's skip_lf defers the password line's trailing LF to the
+        next reader; on the failure path that reader never comes, and
+        closing with unread receive data makes TCP RST the connection —
+        Windows clients then never see ``Authentication failed.``. Pin that
+        _drain_pending_input runs twice: once after the negotiation window
+        and once on the auth-failure path (the #268 fix).
+        """
+        server, port, shell_cls = self._create_server_on_free_port()
+        with mock.patch.object(server, "_drain_pending_input", wraps=server._drain_pending_input) as drain:
+            server.start()
+            try:
+                sock, _initial_data = self._telnet_connect(port)
+                try:
+                    sock.sendall(b"wrong\r\n")
+                    time.sleep(0.2)
+                    with contextlib.suppress(TimeoutError):
+                        sock.recv(4096)  # Drain Password prompt
+                    sock.sendall(b"wrong\r\n")
+                    time.sleep(0.3)
+                    self.assertEqual(drain.call_count, 2)
+                    shell_cls.assert_not_called()
+                finally:
+                    sock.close()
+            finally:
+                server.stop()
 
     def test_telnet_connection_auth_starts_shell(self):
         """Successful auth should start the shell."""

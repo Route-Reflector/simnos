@@ -154,15 +154,16 @@ class TelnetServer(TCPServerBase):
     def _drain_pending_input(self, sock: socket.socket) -> None:
         """Drain bytes the client already sent, answering IAC sequences.
 
-        Closing a socket whose receive buffer still holds unread data makes
+        Used after the initial negotiation window (answering queued IAC
+        responses) and right before abandoning a connection on the
+        authentication-failure path. The failure-path call matters because
+        closing a socket whose receive buffer still holds unread data makes
         TCP send RST instead of FIN (RFC 2525 2.17); on Windows an RST also
         discards data the client has not read yet, so anything we just sent
-        (e.g. ``Authentication failed.``) silently disappears (#268). Callers
-        run this right before giving up on a connection so the close
-        degrades to a graceful FIN. A short blocking timeout is used instead
-        of non-blocking mode so that multi-byte IAC sequences split across
-        TCP segments are received completely rather than raising
-        mid-sequence.
+        (e.g. ``Authentication failed.``) silently disappears (#268). A
+        short blocking timeout is used instead of non-blocking mode so that
+        multi-byte IAC sequences split across TCP segments are received
+        completely rather than raising mid-sequence.
         """
         sock.settimeout(_IAC_DRAIN_TIMEOUT)
         try:
