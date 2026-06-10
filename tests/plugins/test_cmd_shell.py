@@ -149,8 +149,7 @@ class TestCmdShell(TestCase):
     def test_start(self):
         """Test that the start method calls cmdloop."""
         shell = CMDShell(**self.arguments)
-        mock_cmdloop = Mock()
-        set_attr(shell, "cmdloop", mock_cmdloop)
+        mock_cmdloop = set_attr(shell, "cmdloop", Mock())
         shell.start()
         mock_cmdloop.assert_called_once()
 
@@ -913,9 +912,8 @@ class HotReloadTest(TestCase):
     def test_hot_reload_not_activated_doesnt_enter(self):
         """Test that the if is not set  hot_reload method does nothing."""
         os.environ.pop("SIMNOS_RELOAD_COMMANDS")
-        mock_get_files_changed = Mock()
         shell = CMDShell(**self.arguments)
-        set_attr(shell, "get_files_changed", mock_get_files_changed)
+        mock_get_files_changed = set_attr(shell, "get_files_changed", Mock())
         shell.precmd("show clock")
         mock_get_files_changed.assert_not_called()
 
