@@ -151,3 +151,20 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
             elif nos.config_prompt and prompt == nos.config_prompt:
                 config_commands.append(command)
     return initial_commands, enable_commands, config_commands
+
+
+def set_attr[T](obj: object, name: str, value: T) -> T:
+    """Assign ``value`` to ``obj.name`` (ty-clean, no cast/B010) and return it.
+
+    Tests mock attributes that are typed as methods (e.g. ``shell.writeline``),
+    which ty rejects on plain assignment and ruff B010 rejects via
+    ``setattr(obj, "literal", ...)``. Routing the assignment through this helper
+    (variable ``name`` → not B010; ``obj: object`` → ty accepts) sidesteps both.
+
+    ``value`` is generic so a single helper covers every test assignment:
+    ``Mock()``, ``Mock(side_effect=...)``, a plain function, or a dict literal.
+    Returning ``value`` (typed ``T``) lets call sites bind the result and drop
+    the access-side ``cast(Mock, ...)`` when asserting on the mock.
+    """
+    setattr(obj, name, value)
+    return value
