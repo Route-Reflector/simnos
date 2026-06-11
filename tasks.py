@@ -234,6 +234,15 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     return violations
 
 
+def _variant_output_refs(command_data: dict) -> list[str]:
+    """The output file each variant references (str-typed entries only)."""
+    return [
+        variant["output"]
+        for variant in command_data.get("variants") or []
+        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
+    ]
+
+
 def _output_refs(command_data: dict) -> list[str]:
     """Every output file a command yaml references (output / output_template / variants)."""
     refs: list[str] = []
@@ -241,22 +250,14 @@ def _output_refs(command_data: dict) -> list[str]:
         value = command_data.get(key)
         if isinstance(value, str):
             refs.append(value)
-    refs.extend(
-        variant["output"]
-        for variant in command_data.get("variants") or []
-        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
-    )
+    refs.extend(_variant_output_refs(command_data))
     return refs
 
 
 def _check_ref_extensions(command_data: dict, platform: str, yaml_name: str) -> list[str]:
     """Literal channels must use ``.txt``; ``output_template`` must use ``.j2`` (D8 convention)."""
     literal_refs = [command_data["output"]] if isinstance(command_data.get("output"), str) else []
-    literal_refs += [
-        variant["output"]
-        for variant in command_data.get("variants") or []
-        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
-    ]
+    literal_refs += _variant_output_refs(command_data)
     violations = [
         f"{platform}/commands/{yaml_name}: literal output {ref!r} uses .j2 (literal channels are .txt)"
         for ref in literal_refs
