@@ -76,6 +76,16 @@ class TestAdaptCommandModes:
         with pytest.raises(ValueError, match="cannot map"):
             adapt_commands({"weird": {"output": "x", "prompt": "alien$"}}, reverse)
 
+    def test_explicit_empty_prompt_list_is_loud(self):
+        """`prompt: []` is rejected, not silently treated as all-modes (#264 / claude #3).
+
+        v2 `_check_prompt([])` was always False (unreachable); an empty mode set
+        means the opposite ("all modes"), so the inversion must be loud.
+        """
+        _, _, reverse = _cisco_modes()
+        with pytest.raises(ValueError, match=r"empty prompt list"):
+            adapt_commands({"cmd": {"output": "x", "prompt": []}}, reverse)
+
     def test_format_failing_prompt_is_context_tagged_loud(self):
         """An unknown-field prompt fails with a context-tagged ValueError, not a bare KeyError."""
         _, _, reverse = _cisco_modes()

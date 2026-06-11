@@ -215,6 +215,23 @@ class TestCmdShell(TestCase):
         ]
         writeline.assert_called_once_with("\r\n".join(expected_output))
 
+    def test_do_help_alias_hidden_outside_target_modes(self):
+        """do_help lists a prompt-less alias only in its target modes (#264 / claude #2).
+
+        Intentional refinement over v2 (which listed prompt-less aliases in
+        every mode via the raw unmerged entry): `sh clock` aliases `show clock`
+        (modes user/enable), so it is listed in user mode but hidden in config.
+        Dispatch was already mode-scoped in v2; only the help listing changes.
+        """
+        shell = CMDShell(**self.arguments)  # current_mode == "user"
+        writeline = set_attr(shell, "writeline", Mock())
+        shell.do_help("")
+        self.assertIn("sh clock", writeline.call_args[0][0])
+        shell.current_mode = "config"
+        writeline.reset_mock()
+        shell.do_help("")
+        self.assertNotIn("sh clock", writeline.call_args[0][0])
+
     def test__in_current_mode_empty_modes_always_visible(self):
         """A command with no declared modes is valid in every mode (#264 / D5).
 
@@ -317,6 +334,34 @@ class TestCmdShell(TestCase):
         self.assertEqual(shell.current_mode, "user")  # unchanged
         self.assertTrue(any("unknown mode 'nope'" in msg for msg in captured.output))
         writeline.assert_called_once_with("body")
+
+    def test_default_static_new_mode_wins_over_handler(self):
+        """A command's static new_mode overrides a handler-returned one (#264 / claude #8).
+
+        Replicates v2's write order (handler new_prompt applied first, the
+        command's own new_prompt last): when a command declares new_mode AND
+        its handler returns a different one, the static one is the final state.
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
+                "config_prompt": "{base_prompt}(config)#",
+                "commands": {
+                    "cmd": {
+                        "output": lambda device, **kwargs: {"output": "", "new_mode": "config"},
+                        "new_prompt": "{base_prompt}#",  # static -> enable, wins
+                        "prompt": "{base_prompt}>",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        set_attr(shell, "writeline", Mock())
+        shell.default("cmd")
+        self.assertEqual(shell.current_mode, "enable")  # static new_mode, not handler's "config"
 
     def test_default_callable_dict_exit(self):
         """Callable dict with exit=True signals shell termination."""
@@ -718,6 +763,31 @@ class HotReloadTest(TestCase):
         self.assertEqual(len(captured.output), 1)
         self.assertIn("broken.yaml", captured.output[0])
         self.assertIn("healthy", shell.commands)
+
+    def test_reload_commands_adapter_failure_rolls_back_and_unblocks_rest(self):
+        """A file that loads but fails normalization is rolled back from nos (#264 / codex #1).
+
+        `from_file` commits to `self.nos` before `_rebuild` validates via the
+        adapter, so a canonical-外 prompt that passes the legacy schema but
+        fails normalization would, without rollback, persist in `nos.commands`
+        and re-fail every later file in the batch. The per-file rollback must
+        drop it so a following healthy file still applies.
+        """
+        shell = CMDShell(**self.arguments)
+
+        def fake_from_file(filename):
+            if filename == "bad.yaml":
+                # passes pydantic, fails the adapter (no mode renders to this)
+                shell.nos.commands["bad cmd"] = {"output": "x", "prompt": "{base_prompt}ALIEN>"}
+            else:
+                shell.nos.commands["good cmd"] = {"output": "ok", "prompt": "{base_prompt}>"}
+
+        set_attr(shell.nos, "from_file", Mock(side_effect=fake_from_file))
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.reload_commands(["bad.yaml", "good.yaml"])
+        self.assertEqual(len(captured.output), 1)  # only the bad file
+        self.assertNotIn("bad cmd", shell.nos.commands)  # rolled back, not poisoning the batch
+        self.assertIn("good cmd", shell.commands)  # the healthy file still applied
 
     def test_reload_commands_broken_file_last_still_applies_rest(self):
         """The per-file guard is order-independent: broken file last.

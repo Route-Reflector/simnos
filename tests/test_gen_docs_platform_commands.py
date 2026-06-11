@@ -17,9 +17,11 @@ Also pin the sweep semantics so that deleting a yaml causes the matching
 markdown to be removed on the next regeneration, while hand-authored
 `index.md` / `index.ja.md` are preserved.
 
-Since #171/#172 the catch set is the 5-tuple `FORMAT_ERRORS` shared with
-the lenient runtime (`cmd_shell._safe_format`), and the platform-yaml
-template sweep below keeps the "build-time loud" side CI-resident.
+The catch set is the 5-tuple `FORMAT_ERRORS` local to
+`tasks.render_template` (the runtime shell dropped `str.format` /
+`_safe_format` in #264; this build-time docs path keeps reading the legacy
+yaml until PR-3), and the platform-yaml template sweep below keeps the
+"build-time loud" side CI-resident.
 """
 
 import os
@@ -38,7 +40,7 @@ def _yaml_platforms() -> list[str]:
 
 
 class TestRenderTemplate:
-    """Pin formatting semantics shared with `cmd_shell.default`."""
+    """Pin the build-time docs `str.format` semantics (tasks.render_template)."""
 
     def test_substitutes_base_prompt(self):
         """`{base_prompt}` must be replaced by the platform name."""
@@ -142,19 +144,17 @@ class TestRenderTemplate:
 
 
 class TestPlatformYamlTemplateSweep:
-    """CI-resident loud counterpart of the lenient runtime (#171/#172).
+    """CI-resident loud check over the legacy platform-yaml templates.
 
-    The runtime shell silently logs malformed `{base_prompt}` templates
-    (`cmd_shell._safe_format`), so a yaml authoring mistake in this repo
-    would otherwise surface only as a runtime log line. This sweep renders
-    every str template field of every platform yaml through
-    `render_template`, turning such a mistake into a contextual
-    RuntimeError in CI.
+    A malformed `{base_prompt}` template in a shipped yaml would surface late
+    (the legacy adapter loud-fails at load since #264, or v2 logged at
+    runtime). This sweep renders every str template field of every platform
+    yaml through the build-time `render_template`, turning such a mistake into
+    a contextual RuntimeError in CI.
 
     Covered fields: top-level initial_prompt / enable_prompt /
-    config_prompt (the latter two are not formatted by cmd_shell today,
-    but are written as `{base_prompt}` templates in yaml — covered
-    preventively) + per-command output (str only; callable outputs are
+    config_prompt (all written as `{base_prompt}` templates in yaml) +
+    per-command output (str only; callable outputs are
     covered by the T-14 / #230 device-class tests) / prompt (each list
     candidate gets an indexed field name like `prompt[0]`) / new_prompt.
     """

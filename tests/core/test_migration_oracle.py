@@ -19,6 +19,21 @@ the set of modes the command is visible in, the transition target mode, and
 fallback v2 never prompt-matches, so its mode visibility / transition are
 excluded from the comparison (Decision 3 / D5).
 
+Scope: this gate covers the **static / mechanically-converted** surface
+(string output, prompt->mode, static new_prompt->new_mode). Callable handler
+output is collapsed to a sentinel — handler dynamic transitions
+(``make_exit`` / ``_return`` / ``disable``) are NOT projected here, because the
+v2 handler code was rewritten in place (no frozen v2 handler exists to compare
+against); those conversions are pinned per-mode by the device-class tests in
+tests/plugins/nos/ (2nd round codex #2 / claude #6).
+
+Two further fidelity limits, harmless on shipped data (claude #6):
+- `_v2_new_mode` projects a canonical-外 new_prompt to None (no transition);
+  the adapter loud-raises on the same input, so the comparison is never
+  reached (shipped data is 100% canonical).
+- do_help's alias-visibility refinement (claude #2) is shared by the replica
+  (both read merged modes), so it is not a comparison axis here.
+
 One-shot gate — removable once the A3 migration completes (PR-3).
 """
 

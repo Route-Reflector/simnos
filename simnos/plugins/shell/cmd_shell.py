@@ -127,6 +127,10 @@ class CMDShell(Cmd):
     def emptyline(self):
         """This method to do nothing if empty line entered"""
 
+    # `Nos` state `from_file` mutates; snapshotted per reloaded file so a file
+    # that loads but fails to normalize can be rolled back (2nd round codex #1).
+    _NOS_RELOAD_ATTRS = ("name", "initial_prompt", "enable_prompt", "config_prompt", "auth", "device")
+
     def reload_commands(self, changed_files: list):
         """Method to reload commands
 
@@ -134,17 +138,30 @@ class CMDShell(Cmd):
         half-written or malformed plugin file (e.g. an editor's partial
         save, or a file that vanished after detection). One broken file
         must not kill the SSH session nor block reloading the remaining
-        files — log and retry on the next change. `_rebuild` is atomic, so a
-        file that loads but fails to normalize leaves the live commands intact.
+        files — log and retry on the next change.
+
+        `from_file` commits to `self.nos` *before* the adapter validates it in
+        `_rebuild`, so a file that loads under the legacy schema but fails
+        normalization (e.g. a canonical-外 prompt) would leave broken commands
+        in `self.nos` and re-fail every later file in the batch. Snapshot the
+        mutated nos state and roll it back on failure to keep the per-file
+        contract; `_rebuild` itself is atomic, so live `self.commands` is never
+        touched by a failed reload (2nd round codex #1).
         """
         for file in changed_files:
+            snapshot_commands = dict(self.nos.commands)
+            snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
             try:
                 self.nos.from_file(file)
                 self._rebuild()
             except Exception:
                 # Broad except, like `default()`: any plugin error must not
-                # crash the session. The traceback goes to the log so a
-                # genuine plugin bug surfacing here stays diagnosable.
+                # crash the session. Roll back the partial nos mutation so the
+                # broken file does not poison subsequent reloads, then log the
+                # traceback so a genuine plugin bug stays diagnosable.
+                self.nos.commands = snapshot_commands
+                for attr, value in snapshot_attrs.items():
+                    setattr(self.nos, attr, value)
                 log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, file, traceback.format_exc())
                 continue
 
@@ -166,7 +183,17 @@ class CMDShell(Cmd):
         return not cmd.modes or self.current_mode in cmd.modes
 
     def do_help(self, arg):
-        """Method to return help for commands visible in the current mode"""
+        """List help for commands valid in the current mode.
+
+        Intentional refinement over v2 (2nd round claude #2): v2 `do_help`
+        read the raw unmerged entries, so an alias without its own prompt was
+        listed in *every* mode even where typing it fell through to
+        `_default_`. Listing by the resolved mode set instead matches
+        dispatchability — e.g. arista_eos's prompt-less aliases (``config
+        term``) now appear only in their target mode. Dispatch behavior is
+        unchanged (v2 already matched on the merged prompt); only the help
+        listing is affected.
+        """
         lines = {}  # dict of {cmd: cmd_help}
         width = 0  # record longest command width for padding
         for name, cmd in self.commands.items():
@@ -252,6 +279,11 @@ class CMDShell(Cmd):
                     self.current_mode,
                     ", ".join(sorted(cmd.modes)) if cmd.modes else "all",
                 )
+            else:
+                # Keep the unknown-command trail v2 logged (observability for
+                # typo / undefined-command diagnosis); the wire answer is the
+                # same `_default_` output (2nd round claude #5).
+                log.debug("shell.default '%s' command %r not found", self.base_prompt, line)
             # Unknown command and mode mismatch both answer with the `_default_`
             # output — a silent shell would make clients (e.g. Netmiko) wait for
             # a timeout. The `_default_` answer never applies a transition.

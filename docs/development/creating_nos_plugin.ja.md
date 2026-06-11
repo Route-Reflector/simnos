@@ -288,7 +288,8 @@ callable コマンドは以下の値を返せます:
 - `None` - レスポンスなし
 - `dict` (`CommandResult`) - 以下のオプションキーを持つ辞書:
     - `"output"` - 表示する文字列
-    - `"new_prompt"` - 新しいプロンプト値（`{base_prompt}` フォーマッターが使用可能）
+    - `"new_mode"` - 遷移先の mode 名（例: `"enable"`）。シェルがその mode の
+      prompt を render します。prompt 文字列ではなく引数 `current_mode` で分岐します。
     - `"exit"` - `True` の場合、シェルセッションを終了（output は表示されない）
 
 yaml static な output と異なるルールが 2 つあります:
@@ -296,8 +297,6 @@ yaml static な output と異なるルールが 2 つあります:
 - **format は自分で行う。** シェルは callable output に `{base_prompt}` format を
   適用**しません** — handler は `base_prompt` を引数で受け取り自分で文字列を
   render します。device 出力に literal な brace が含まれていても escape 不要です。
-  (`new_prompt` は従来通りシェル側で format されます — prompt template はシェルの
-  関心事です。)
 - **raise してもよい。**「起きてはならない」状態 (想定外の prompt 等) では例外を
   投げて構いません: シェルは full traceback を server log に記録し、client には
   固定の `% Internal error` 1 行を返します — traceback が wire に出ることは

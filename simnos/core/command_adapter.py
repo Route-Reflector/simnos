@@ -4,7 +4,9 @@ This is the bridge that lets PR-1 ship the new runtime representation
 (:mod:`simnos.core.resolved_command`) and mode engine while the data is still
 in the v2 ``platforms_yaml`` / py-plugin / inventory form. Every legacy inflow
 is normalized here into `ResolvedPlatform` / `ResolvedCommand`, so the shell,
-docs gen and tests see one semantics regardless of authoring form.
+tests and new consumers see one semantics regardless of authoring form. (The
+docs generator still reads the legacy yaml via ``tasks.render_template`` until
+it moves to this representation in PR-3 — D9.)
 
 The normalization faithfully replicates v2 render semantics — that fidelity
 is exactly what the migration oracle (b') verifies (v2 frozen-replica
@@ -193,8 +195,19 @@ def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> Resol
     if is_default:
         modes: frozenset[str] = frozenset()
     else:
+        raw_prompt = entry.get("prompt")
+        # An explicit empty list is rejected loudly: v2 `_check_prompt([])` was
+        # always False (command unreachable), but an empty mode set here means
+        # "all modes" — the opposite. "All modes" is expressed by omitting
+        # prompt, so `[]` is an authoring error, symmetric with Decision 7's
+        # `mode: []` reject (2nd round claude #3).
+        if isinstance(raw_prompt, list) and not raw_prompt:
+            raise ValueError(
+                f"command {name!r}: explicit empty prompt list [] is rejected — "
+                "omit prompt to mean all modes (#264 / Decision 7)"
+            )
         modes = frozenset(
-            _lookup_mode(p, reverse_map, where=f"command {name!r} prompt") for p in _prompt_list(entry.get("prompt"))
+            _lookup_mode(p, reverse_map, where=f"command {name!r} prompt") for p in _prompt_list(raw_prompt)
         )
 
     new_prompt = entry.get("new_prompt")
