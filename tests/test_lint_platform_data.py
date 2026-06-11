@@ -69,6 +69,38 @@ class TestReferences:
         assert any("missing" in v for v in violations)
 
 
+class TestConventions:
+    def test_stray_yml_flagged(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(commands / "a.yml", "command: a\ntype: ntc\n")  # .yml, not .yaml
+        violations = check_platform_data(str(tmp_path))
+        assert any(".yml" in v for v in violations)
+
+    def test_literal_output_with_j2_extension_flagged(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(commands / "a.yaml", "command: a\ntype: ntc\noutput: a.j2\n")
+        _write(commands / "a.j2", "x\n")
+        violations = check_platform_data(str(tmp_path))
+        assert any("literal output" in v and ".j2" in v for v in violations)
+
+    def test_variant_with_j2_extension_flagged(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(
+            commands / "a.yaml",
+            "command: a\ntype: ntc\nvariants:\n  - name: default\n    output: a.j2\n",
+        )
+        _write(commands / "a.j2", "x\n")
+        violations = check_platform_data(str(tmp_path))
+        assert any("literal output" in v for v in violations)
+
+    def test_output_template_non_j2_flagged(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(commands / "a.yaml", "command: a\ntype: ntc\noutput_template: a.txt\n")
+        _write(commands / "a.txt", "x\n")
+        violations = check_platform_data(str(tmp_path))
+        assert any("output_template" in v and "must use .j2" in v for v in violations)
+
+
 def test_absent_dir_is_clean(tmp_path):
     # No platforms dir at all (the state before any A3 migration) is not an error.
     assert check_platform_data(str(tmp_path / "nonexistent")) == []

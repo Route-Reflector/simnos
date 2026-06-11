@@ -167,6 +167,10 @@ def _platform_meta_yaml(legacy: dict) -> str:
         lines.append(f"  {mode}:")
         lines.append(f'    prompt: "{jinja_prompt}"')
     lines.append("initial_mode: user")
+    # `auth` has live SSH behavior (e.g. dell_powerconnect's `auth: none`); carry
+    # it through so the A3 form does not silently drop it (1st round claude #2).
+    if legacy.get("auth") is not None:
+        lines.append(f"auth: {legacy['auth']}")
     lines.append(f"netmiko_device_type: {legacy['name']}")
     lines.append(f"ntc_platform: {legacy['name']}")
     return "\n".join(lines) + "\n"

@@ -220,8 +220,9 @@ class Nos:
 
         The YAML mirrors the dict schema accepted by :meth:`from_dict`;
         see :class:`simnos.core.pydantic_models.ModelNosCommand` for the
-        per-command schema and ``simnos/plugins/nos/platforms_yaml/cisco_ios.yaml``
-        for a live example.
+        per-command schema and ``simnos/plugins/nos/platforms_yaml/arista_eos.yaml``
+        for a live example (this is the legacy form; A3 platforms load via
+        :meth:`_from_platform_dir` instead — #264).
 
         :param filepath: OS path to YAML file with NOS data
         :raises ValueError: if the file holds no YAML mapping (empty file
@@ -352,6 +353,11 @@ class Nos:
         """
         self.resolved_platform = load_platform_dir(path)
         self.name = os.path.basename(os.path.normpath(path))
+        # `auth` has live behavior (ssh_server allows auth-none when nos.auth ==
+        # "none"); wire it from the A3 meta so it is not a silent dead field
+        # (1st round claude #2). Other meta (netmiko_device_type / ntc_platform)
+        # stay unconsumed placeholders until #266.
+        self.auth = self.resolved_platform.auth
 
     def from_file(self, filename: str) -> None:
         """

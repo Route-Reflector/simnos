@@ -48,7 +48,7 @@ def load_platform_dir(path: str) -> ResolvedPlatform:
     commands_dir = os.path.join(path, COMMANDS_SUBDIR)
     authored = _load_command_files(commands_dir)
     commands = _resolve_commands(authored, modes, commands_dir)
-    return ResolvedPlatform(modes=modes, initial_mode=meta.initial_mode, commands=commands)
+    return ResolvedPlatform(modes=modes, initial_mode=meta.initial_mode, commands=commands, auth=meta.auth)
 
 
 def _read_yaml_mapping(filepath: str) -> dict:

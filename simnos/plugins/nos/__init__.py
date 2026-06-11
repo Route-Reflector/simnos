@@ -3,11 +3,14 @@ This module is the point of entry for all NOS plugins.
 
 It gets the names and filenames to load the NOS plugins
 later whenever needed (lazy loading).
-The NOS plugins are loaded first from YAML files, then Python modules
-override or extend any existing entries.
+Registration order (#264 / D6): A3 platform dirs (``platforms/<name>/``) are
+registered first; a legacy ``platforms_yaml/<name>.yaml`` for an already-
+registered A3 platform is shadowed (skipped with a warning) so a command can
+never load under two semantics; finally Python modules append and override or
+extend any existing entries for the same platform.
 
-With .py modules we can have functionality, while using YAML is only
-intended for quick development of new NOS plugins.
+With .py modules we can have functionality, while the A3 dir / legacy YAML
+carry the static command data.
 
 ``available_platforms`` is the public derived view of this registry —
 ``simnos.core.nos.available_platforms`` re-exports it for backward

@@ -231,8 +231,15 @@ class ResolvedPlatform:
     ``functools.cache`` D6 introduces) MUST treat them as read-only; hardening
     to a read-only mapping is deferred to that caching increment (1st round
     codex #1).
+
+    `auth` carries the platform's ``auth`` setting (e.g. ``"none"`` to disable
+    SSH auth, as dell_powerconnect uses); the A3 loader populates it from
+    ``platform.yaml`` so `Nos._from_platform_dir` can wire ``nos.auth`` —
+    without it the field would be a silent dead end (1st round claude #2). The
+    legacy adapter leaves it None (legacy NOS keeps `auth` on the Nos directly).
     """
 
     modes: dict[str, ModeDef]
     initial_mode: str
     commands: dict[str, ResolvedCommand]
+    auth: str | None = None

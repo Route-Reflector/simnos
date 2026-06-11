@@ -8,6 +8,8 @@ over the A3 statics with the right precedence and the A3 modes.
 
 import threading
 
+import pytest
+
 from simnos.core.nos import Nos
 from simnos.plugins.shell.cmd_shell import CMDShell
 
@@ -17,17 +19,19 @@ def _write(path, content):
     path.write_text(content, encoding="utf-8")
 
 
-def _a3_platform(tmp_path):
+def _a3_platform(tmp_path, *, auth=None):
     """A minimal A3 cisco-like platform dir with user/enable/config modes."""
     root = tmp_path / "cisco_ios"
-    _write(
-        root / "platform.yaml",
+    meta = (
         "modes:\n"
         '  user:\n    prompt: "{{ base_prompt }}>"\n'
         '  enable:\n    prompt: "{{ base_prompt }}#"\n'
         '  config:\n    prompt: "{{ base_prompt }}(config)#"\n'
-        "initial_mode: user\n",
+        "initial_mode: user\n"
     )
+    if auth is not None:
+        meta += f"auth: {auth}\n"
+    _write(root / "platform.yaml", meta)
     commands = root / "commands"
     _write(
         commands / "show_version.yaml", "command: show version\ntype: ntc\nmode: [enable]\noutput: show_version.txt\n"
@@ -64,6 +68,17 @@ class TestNosFromPlatformDir:
         # The A3 path does not populate the legacy command dict / scalar prompts.
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         assert nos.commands == {}
+
+    def test_auth_is_wired_from_platform_meta(self, tmp_path):
+        # `auth` has live SSH behavior, so it must reach nos.auth, not be a dead
+        # schema field (#264 / claude #2).
+        nos = Nos(filename=str(_a3_platform(tmp_path, auth="none")))
+        assert nos.auth == "none"
+        assert nos.resolved_platform.auth == "none"
+
+    def test_auth_defaults_none(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        assert nos.auth is None
 
 
 class TestShellA3Path:
@@ -106,3 +121,16 @@ class TestShellA3Path:
         shell = _shell_for(nos, inventory_config=inventory)
         assert shell.commands["show inventory"].output.render("R1") == "INV"
         assert shell.commands["show inventory"].modes == frozenset({"user"})
+
+    def test_a3_rebuild_is_atomic_on_broken_inflow(self, tmp_path):
+        # A broken legacy inflow (canonical-外 prompt the A3 reverse map cannot
+        # resolve) must raise without leaving self.* half-updated — same atomic
+        # contract the legacy path keeps (#264 / claude #7, D5).
+        shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path))))
+        good_commands = shell.commands
+        good_prompt = shell.prompt
+        shell._inventory_commands = {"bad": {"output": "x", "prompt": "{base_prompt}@@unmappable"}}
+        with pytest.raises(ValueError):
+            shell._rebuild()
+        assert shell.commands is good_commands  # unchanged reference
+        assert shell.prompt == good_prompt

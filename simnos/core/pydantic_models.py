@@ -115,8 +115,12 @@ def _reject_unsafe_output_ref(value: str | None) -> str | None:
 class ModelCommandVariant(BaseModel):
     """One alternate capture of a multi-output command (#264 / D3).
 
-    Each variant points at a literal output file; `.j2` templates in variants
-    are out of scope for P1-1 (Decision 6) and rejected by the loader.
+    Each variant points at an output file read verbatim as literal wire text:
+    the authoring *field* decides the channel, not the extension (the loader's
+    `_resolve_output_file` reads variants with ``as_template=False``). ``.j2``
+    templates in variants are out of scope for P1-1 (Decision 6) — a variant
+    must reference a literal ``.txt`` (the file-name convention is enforced by
+    the data lint, not the loader).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -174,6 +178,23 @@ class ModelCommandAuthoring(BaseModel):
             raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
         return value
 
+    @field_validator("variants")
+    @classmethod
+    def _check_variants(cls, value: list[ModelCommandVariant] | None) -> list[ModelCommandVariant] | None:
+        # `variants: []` would pass the channel-exclusivity check as "present"
+        # yet leave the loader's `variants[0]` with a bare IndexError — reject it
+        # loudly here (1st round codex/claude #1). Duplicate variant names break
+        # the (name, output) selection contract, so reject those too.
+        if value is None:
+            return value
+        if not value:
+            raise ValueError("variants: [] is rejected — omit `variants` for a no-output command (#264 / Decision 6)")
+        names = [v.name for v in value]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"variants have duplicate name(s) {duplicates} — each variant name must be unique")
+        return value
+
     @model_validator(mode="after")
     def _check_combination(self) -> "ModelCommandAuthoring":
         if self.alias is not None:
@@ -209,11 +230,22 @@ class ModelCommandAuthoring(BaseModel):
                 raise ValueError(
                     f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
                 )
-        if self.command == "_default_" and (self.mode is not None or self.new_mode is not None):
-            raise ValueError(
-                "command '_default_': `mode` / `new_mode` are rejected — the fallback is mode-agnostic "
-                "(runtime never matches its mode, would be dead data) (#264 / Decision 7)"
-            )
+        if self.command == "_default_":
+            if self.mode is not None or self.new_mode is not None:
+                raise ValueError(
+                    "command '_default_': `mode` / `new_mode` are rejected — the fallback is mode-agnostic "
+                    "(runtime never matches its mode, would be dead data) (#264 / Decision 7)"
+                )
+            # An aliased `_default_` would inherit the target's modes/new_mode via
+            # the loader's `replace(target, ...)`, splitting `_default_` semantics
+            # from the legacy adapter (which forces empty modes). Reject so the
+            # fallback can never become mode-bearing through the alias backdoor
+            # (1st round claude #6).
+            if self.alias is not None:
+                raise ValueError(
+                    "command '_default_': `alias` is rejected — the fallback must not inherit a target's "
+                    "modes / transition (#264 / Decision 7)"
+                )
         return self
 
 

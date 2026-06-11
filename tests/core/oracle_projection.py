@@ -9,8 +9,9 @@ through this one function, so the snapshot and the test can never drift apart.
 The projection captures the client-observable behavior: rendered output as
 ``splitlines()`` (wire-equivalent — ``writeline`` absorbs trailing newlines),
 the modes a command is visible in, the transition target, and exit / help /
-variant count. ``_default_`` is the mode-agnostic fallback, so its mode
-visibility / transition are excluded (Decision 3 / D5).
+variant count. For ``_default_`` (the mode-agnostic fallback) the ``modes``
+axis is excluded (set to None); its ``new_mode`` stays in the projection but is
+always None, since the fallback never transitions (Decision 3 / D5).
 """
 
 from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput

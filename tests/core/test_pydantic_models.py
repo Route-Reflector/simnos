@@ -111,6 +111,26 @@ class TestModelCommandAuthoring:
         with pytest.raises(ValidationError, match="mode-agnostic"):
             ModelCommandAuthoring(command="_default_", type="simnos", mode=["user"])
 
+    def test_rejects_default_with_alias(self):
+        # An aliased _default_ would inherit the target's modes via the loader,
+        # splitting _default_ semantics from the legacy adapter (#264 / claude #6).
+        with pytest.raises(ValidationError, match="must not inherit"):
+            ModelCommandAuthoring(command="_default_", alias="show version")
+
+    def test_rejects_empty_variants(self):
+        # variants: [] would pass the channel-exclusivity check yet leave the
+        # loader's variants[0] a bare IndexError (#264 / codex+claude #1).
+        with pytest.raises(ValidationError, match=r"variants: \[\] is rejected"):
+            ModelCommandAuthoring(command="x", type="ntc", variants=[])
+
+    def test_rejects_duplicate_variant_names(self):
+        with pytest.raises(ValidationError, match="duplicate name"):
+            ModelCommandAuthoring(
+                command="x",
+                type="ntc",
+                variants=[{"name": "default", "output": "a.txt"}, {"name": "default", "output": "b.txt"}],
+            )
+
     def test_allows_default_without_mode(self):
         model = ModelCommandAuthoring(command="_default_", type="simnos", output="d.txt")
         assert model.command == "_default_"

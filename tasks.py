@@ -164,6 +164,17 @@ def lint_platform_yaml(context):
 PLATFORMS_A3_DIR = "simnos/plugins/nos/platforms"
 
 
+def _a3_platform_names(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Names of A3 platforms (dirs holding a ``platform.yaml``), sorted."""
+    if not os.path.isdir(platforms_dir):
+        return []
+    return sorted(
+        entry
+        for entry in os.listdir(platforms_dir)
+        if os.path.isfile(os.path.join(platforms_dir, entry, "platform.yaml"))
+    )
+
+
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     """Lint the A3 platform data directories (#264 / D8, D9).
 
@@ -175,6 +186,12 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
        (1st round claude #6c).
     3. shared reference: an output file referenced by more than one command yaml
        is flagged — the 1-yaml:1-output principle (2nd round gemini #3).
+    4. extension convention: a literal channel (``output`` / a variant's output)
+       must reference ``.txt`` and ``output_template`` must reference ``.j2`` —
+       the loader reads by field, so a variant pointing at ``.j2`` would emit raw
+       jinja verbatim (1st round claude #5). Enforced here, not in the loader.
+    5. stray ``.yml``: a command file uses the ``.yml`` extension, which the
+       loader's ``*.yaml`` glob silently ignores (1st round claude #8).
 
     Returns a list of human-readable violation strings (empty = clean). Filename
     convention + ``type: ntc`` source-presence warnings are deferred (see the
@@ -187,12 +204,17 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
         commands_dir = os.path.join(platforms_dir, platform, "commands")
         if not os.path.isdir(commands_dir):
             continue
+        violations.extend(
+            f"{platform}/commands/{os.path.basename(stray)}: uses .yml; the loader only globs .yaml"
+            for stray in sorted(glob.glob(os.path.join(commands_dir, "*.yml")))
+        )
         referenced: dict[str, list[str]] = {}
         for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
             with open(command_yaml, encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
             for ref in _output_refs(data):
                 referenced.setdefault(ref, []).append(os.path.basename(command_yaml))
+            violations.extend(_check_ref_extensions(data, platform, os.path.basename(command_yaml)))
 
         output_files = {
             os.path.basename(p) for ext in ("*.txt", "*.j2") for p in glob.glob(os.path.join(commands_dir, ext))
@@ -225,6 +247,25 @@ def _output_refs(command_data: dict) -> list[str]:
         if isinstance(variant, dict) and isinstance(variant.get("output"), str)
     )
     return refs
+
+
+def _check_ref_extensions(command_data: dict, platform: str, yaml_name: str) -> list[str]:
+    """Literal channels must use ``.txt``; ``output_template`` must use ``.j2`` (D8 convention)."""
+    literal_refs = [command_data["output"]] if isinstance(command_data.get("output"), str) else []
+    literal_refs += [
+        variant["output"]
+        for variant in command_data.get("variants") or []
+        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
+    ]
+    violations = [
+        f"{platform}/commands/{yaml_name}: literal output {ref!r} uses .j2 (literal channels are .txt)"
+        for ref in literal_refs
+        if ref.endswith(".j2")
+    ]
+    template_ref = command_data.get("output_template")
+    if isinstance(template_ref, str) and not template_ref.endswith(".j2"):
+        violations.append(f"{platform}/commands/{yaml_name}: output_template {template_ref!r} must use .j2")
+    return violations
 
 
 def _check_output_encoding(path: str, rel: str) -> list[str]:
@@ -461,6 +502,13 @@ def gen_docs_platform_commands(ctx):
     files: list[str] = os.listdir(platforms_folder)
     platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
 
+    # A3-migrated platforms have no legacy yaml to read here; their doc
+    # generation moves to the ResolvedCommand path in PR-3 (#264 / D9). Until
+    # then their existing docs must be preserved (not swept) and kept in the
+    # nav — otherwise running this task after the pilot's yaml deletion would
+    # delete docs/platforms/<a3>.md and drop it from mkdocs.yml (1st round claude #4).
+    a3_platforms: list[str] = _a3_platform_names()
+
     for platform in platforms:
         print(f"Generating Platform: {platform}")
         with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
@@ -487,10 +535,11 @@ def gen_docs_platform_commands(ctx):
                     platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
 
-    for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
+    all_platforms = sorted(platforms + a3_platforms)
+    for orphan in sweep_orphaned_platform_docs(docs_folder, all_platforms):
         print(f"Removed orphaned doc: {orphan}")
 
-    rewrite_mkdocs_platforms_nav(platforms)
+    rewrite_mkdocs_platforms_nav(all_platforms)
     print("Regenerated mkdocs.yml Platforms nav")
 
 
