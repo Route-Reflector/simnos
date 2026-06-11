@@ -21,6 +21,7 @@ legacy data actually uses (#264 / D6, D8).
 """
 
 from dataclasses import dataclass
+import re
 import string
 from typing import TYPE_CHECKING, Literal
 
@@ -36,11 +37,13 @@ if TYPE_CHECKING:
 # never a "missing var" (#264 / D4, 2nd round gemini #4).
 KNOWN_RENDER_VARS: frozenset[str] = frozenset({"base_prompt"})
 
-# Jinja2 environment for output/prompt templates. `keep_trailing_newline`
-# keeps the final newline jinja2 would otherwise strip (wire output is
-# compared byte-for-byte by the migration oracle); `StrictUndefined` makes an
+# Jinja2 environment for output/prompt templates. `StrictUndefined` makes an
 # undefined fact loud at render time instead of rendering an empty string
 # (#264 / D5, Decision 7). No trim/lstrip: output whitespace is significant.
+# `keep_trailing_newline` keeps the final newline jinja2 would otherwise strip
+# — inert for legacy-adapter inflow (its converted source always ends in
+# ``{% endraw %}`` / ``{{ base_prompt }}``, never a bare newline), but needed
+# for the hand-written ``.j2`` templates A3 authoring introduces in PR-2.
 _TEMPLATE_ENV = Environment(
     undefined=StrictUndefined,
     autoescape=False,  # noqa: S701 — output is CLI text, not HTML
@@ -48,6 +51,12 @@ _TEMPLATE_ENV = Environment(
 )
 
 _FORMATTER = string.Formatter()
+
+# A `{% endraw %}` tag (jinja2 tolerates whitespace and the +/- trim markers)
+# is the only sequence that can break out of a `{% raw %}` wrapping. Match just
+# that, not the bare word "endraw" — real CLI output can legitimately contain
+# the word without the surrounding delimiters (1st round codex #2 / claude #4a).
+_ENDRAW_DELIMITER = re.compile(r"\{%[-+]?\s*endraw\b")
 
 
 def _jinja_raw(literal: str) -> str:
@@ -59,7 +68,7 @@ def _jinja_raw(literal: str) -> str:
     could break out is a literal ``{% endraw %}``, which never appears in
     NOS CLI output — guarded loudly just in case (#264 / D6, D8).
     """
-    if "endraw" in literal:
+    if _ENDRAW_DELIMITER.search(literal):
         raise ValueError(f"output literal contains a jinja2 raw-block delimiter, cannot convert: {literal!r}")
     return "{% raw %}" + literal + "{% endraw %}"
 
@@ -79,9 +88,22 @@ def format_template_to_jinja(template: str) -> tuple[str, bool]:
     `string.Formatter.parse` already unescapes ``{{`` -> ``{`` in the literal
     segments it yields, so a template with no field round-trips to its
     unescaped literal text.
+
+    Consecutive literal segments are concatenated before being wrapped in one
+    ``{% raw %}`` block: ``{{`` splits a literal run in two (the ``{`` lands at
+    the end of one segment, the rest in the next), so wrapping per-segment
+    could leave a ``{% endraw %}`` straddling the boundary that the per-segment
+    guard cannot see. Joining first means the guard inspects the full literal.
     """
     parts: list[str] = []
     has_field = False
+    literal_run: list[str] = []
+
+    def flush_literal() -> None:
+        if literal_run:
+            parts.append(_jinja_raw("".join(literal_run)))
+            literal_run.clear()
+
     try:
         segments = list(_FORMATTER.parse(template))
     except ValueError as e:
@@ -90,9 +112,10 @@ def format_template_to_jinja(template: str) -> tuple[str, bool]:
         raise ValueError(f"malformed format template {template!r}: {e}") from e
     for literal_text, field_name, format_spec, conversion in segments:
         if literal_text:
-            parts.append(_jinja_raw(literal_text))
+            literal_run.append(literal_text)
         if field_name is None:
             continue
+        flush_literal()  # a field ends the current literal run
         if field_name != "base_prompt" or format_spec or conversion:
             raise ValueError(
                 f"unsupported format field in template {template!r}: "
@@ -101,6 +124,7 @@ def format_template_to_jinja(template: str) -> tuple[str, bool]:
             )
         has_field = True
         parts.append("{{ base_prompt }}")
+    flush_literal()
     return "".join(parts), has_field
 
 
@@ -140,7 +164,9 @@ class ResolvedOutput:
 
         Handler output is produced by the shell (it owns the device handle
         and the dispatch-time error boundary), so `render` returns None for
-        it — the caller dispatches handlers separately.
+        it — the caller dispatches handlers separately. Callers MUST branch on
+        `kind` first (handler/none and a genuinely empty body both surface as
+        None here, so a None return is not by itself "write nothing").
         """
         if self.kind == "literal":
             return self.text
@@ -161,6 +187,14 @@ class ResolvedCommand:
     means "valid in every mode" (the successor of legacy ``prompt`` omission,
     used by ``_default_`` and unconditional commands). `new_mode` is the mode
     to transition to after running, or None for no transition.
+
+    `output` is always the served/primary capture (the only one the runtime
+    sends). `variants` is the canonical contract for multi-capture commands:
+    empty for a single-output command, otherwise the full ordered capture list
+    with ``variants[0]`` mirroring `output` as the primary (``variant_1``) and
+    the alternates following (``variant_2`` ..). This is the one semantics all
+    inflows normalize to — the legacy adapter rebuilds it from v2's separate
+    ``output`` / ``output_variants`` (#264 / D3, D7).
     """
 
     name: str
@@ -188,7 +222,14 @@ class ModeDef:
 
 @dataclass(frozen=True)
 class ResolvedPlatform:
-    """A platform's modes + resolved commands, ready for the shell (#264 / D4)."""
+    """A platform's modes + resolved commands, ready for the shell (#264 / D4).
+
+    ``frozen`` prevents reassigning the fields, not mutating the `modes` /
+    `commands` dicts they point at. Consumers (notably the platform-level
+    ``functools.cache`` D6 introduces) MUST treat them as read-only; hardening
+    to a read-only mapping is deferred to that caching increment (1st round
+    codex #1).
+    """
 
     modes: dict[str, ModeDef]
     initial_mode: str

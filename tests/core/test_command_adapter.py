@@ -76,6 +76,17 @@ class TestAdaptCommandModes:
         with pytest.raises(ValueError, match="cannot map"):
             adapt_commands({"weird": {"output": "x", "prompt": "alien$"}}, reverse)
 
+    def test_format_failing_prompt_is_context_tagged_loud(self):
+        """An unknown-field prompt fails with a context-tagged ValueError, not a bare KeyError."""
+        _, _, reverse = _cisco_modes()
+        with pytest.raises(ValueError, match=r"command 'weird'"):
+            adapt_commands({"weird": {"output": "x", "prompt": "{hostname}>"}}, reverse)
+
+    def test_unmappable_new_prompt_is_loud(self):
+        _, _, reverse = _cisco_modes()
+        with pytest.raises(ValueError, match="new_prompt"):
+            adapt_commands({"go": {"output": None, "prompt": "{base_prompt}>", "new_prompt": "alien$"}}, reverse)
+
     def test_new_prompt_maps_to_new_mode(self):
         _, _, reverse = _cisco_modes()
         resolved = adapt_commands(
@@ -124,6 +135,17 @@ class TestAdaptOutput:
         assert out.kind == "template"
         assert out.render("R9") == "host R9"
 
+    def test_non_dict_entry_is_loud(self):
+        _, _, reverse = _cisco_modes()
+        with pytest.raises(ValueError, match="expected a mapping"):
+            adapt_commands({"bad": ["not", "a", "dict"]}, reverse)
+
+    def test_non_str_non_callable_output_is_loud(self):
+        """v2 output is only str/callable/None; anything else fails at load, not via str() on wire."""
+        _, _, reverse = _cisco_modes()
+        with pytest.raises(ValueError, match="unsupported output type"):
+            adapt_commands({"cmd": {"output": 123, "prompt": "{base_prompt}>"}}, reverse)
+
     def test_callable_output_is_handler(self):
         _, _, reverse = _cisco_modes()
         handler = lambda device, **kw: "dynamic"  # noqa: E731
@@ -132,15 +154,29 @@ class TestAdaptOutput:
         assert out.kind == "handler"
         assert out.handler is handler
 
-    def test_output_variants_named(self):
+    def test_output_variants_canonical_contract(self):
+        """variants[0] mirrors `output` (variant_1); alternates follow as variant_2.. (D3/D7)."""
         _, _, reverse = _cisco_modes()
         resolved = adapt_commands(
             {"cmd": {"output": "primary", "output_variants": ["a", "b"], "prompt": "{base_prompt}>"}}, reverse
         )
         rc = resolved["cmd"]
         assert rc.output.text == "primary"
-        assert [name for name, _ in rc.variants] == ["variant_1", "variant_2"]
-        assert [o.text for _, o in rc.variants] == ["a", "b"]
+        assert [name for name, _ in rc.variants] == ["variant_1", "variant_2", "variant_3"]
+        assert [o.text for _, o in rc.variants] == ["primary", "a", "b"]
+        assert rc.variants[0][1] is rc.output  # primary mirrored at variants[0]
+
+    def test_single_output_has_no_variants(self):
+        """A command without output_variants carries an empty variants tuple."""
+        _, _, reverse = _cisco_modes()
+        resolved = adapt_commands({"cmd": {"output": "only", "prompt": "{base_prompt}>"}}, reverse)
+        assert resolved["cmd"].variants == ()
+
+    def test_template_output_required_vars_excludes_base_prompt(self):
+        """A {base_prompt}-only output template carries no host facts (#265 placeholder)."""
+        _, _, reverse = _cisco_modes()
+        resolved = adapt_commands({"cmd": {"output": "host {base_prompt}", "prompt": "{base_prompt}>"}}, reverse)
+        assert resolved["cmd"].output.required_vars == frozenset()
 
 
 class TestAdaptAlias:

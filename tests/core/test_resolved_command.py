@@ -73,6 +73,18 @@ class TestFormatTemplateToJinja:
         with pytest.raises(ValueError, match="raw-block"):
             format_template_to_jinja("text {{% endraw %}} more")
 
+    def test_plain_endraw_word_is_allowed(self):
+        """The bare word ``endraw`` (no jinja delimiters) is valid literal output.
+
+        Guards against the over-broad substring check (1st round codex #2 /
+        claude #4a): real CLI output can contain the word without the
+        ``{% endraw %}`` delimiters.
+        """
+        source, has = format_template_to_jinja("status: endraw counter not reset")
+        compiled, _ = compile_template(source)
+        assert has is False
+        assert compiled.render(base_prompt="x") == "status: endraw counter not reset"
+
 
 class TestCompileTemplate:
     """`compile_template` extracts host facts, excluding `base_prompt`."""

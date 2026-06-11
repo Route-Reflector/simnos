@@ -97,7 +97,17 @@ def _lookup_mode(prompt_template: str, reverse_map: dict[str, str], *, where: st
     `reverse_map` keys were built by rendering the mode templates with jinja2;
     the two are equivalent for these templates (verified by the converter,
     `format_template_to_jinja`), so the lookup matches.
+
+    A malformed / unknown-field prompt (e.g. inventory data with
+    ``{hostname}``) is validated through that same converter, so it fails with
+    a context-tagged ``ValueError`` instead of a bare ``KeyError`` escaping
+    from ``str.format`` — symmetric with the output loud boundary (1st round
+    claude #2 / gemini #4).
     """
+    try:
+        format_template_to_jinja(prompt_template)
+    except ValueError as e:
+        raise ValueError(f"cannot map {where} prompt {prompt_template!r} to a mode: {e}") from e
     rendered = prompt_template.format(base_prompt=_REVERSE_SENTINEL)
     mode = reverse_map.get(rendered)
     if mode is None:
@@ -189,15 +199,22 @@ def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> Resol
         new_mode = _lookup_mode(new_prompt, reverse_map, where=f"command {name!r} new_prompt")
 
     # v2 keeps the served capture in `output` and any alternates in the
-    # data-only `output_variants` (the runtime never serves them), so here
-    # `output` is the primary and `variants` carries the alternates — they are
-    # NOT `output == variants[0]`. The A3 form reconciles the two (D4); the
-    # legacy adapter stays faithful to v2's split.
+    # data-only `output_variants`. Project that onto the canonical contract
+    # (ResolvedCommand docstring): single-output commands carry no variants;
+    # multi-capture commands list every capture with `output` mirrored at
+    # `variants[0]` (variant_1) and the alternates as variant_2.. (D3, D7).
     output = _adapt_output(entry.get("output"), where=f"command {name!r}")
-    variants = tuple(
-        (f"variant_{i + 1}", _adapt_output(v, where=f"command {name!r} variant {i + 1}"))
-        for i, v in enumerate(entry.get("output_variants") or [])
-    )
+    alternates = entry.get("output_variants") or []
+    if alternates:
+        variants: tuple[tuple[str, ResolvedOutput], ...] = (
+            ("variant_1", output),
+            *(
+                (f"variant_{i + 2}", _adapt_output(v, where=f"command {name!r} variant {i + 2}"))
+                for i, v in enumerate(alternates)
+            ),
+        )
+    else:
+        variants = ()
 
     return ResolvedCommand(
         name=name,
