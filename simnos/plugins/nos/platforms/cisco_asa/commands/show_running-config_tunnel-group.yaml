@@ -1,0 +1,7 @@
+command: show running-config tunnel-group
+type: simnos
+help: execute the command "show running-config tunnel-group"
+mode:
+- user
+- enable
+output: show_running-config_tunnel-group.txt

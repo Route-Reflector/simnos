@@ -1,0 +1,7 @@
+command: display mem
+type: simnos
+help: execute the command "display mem"
+mode:
+- user
+- enable
+output: display_mem.txt

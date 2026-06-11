@@ -1,0 +1,7 @@
+command: display vlan brief
+type: simnos
+help: execute the command "display vlan brief"
+mode:
+- user
+- enable
+output: display_vlan_brief.txt

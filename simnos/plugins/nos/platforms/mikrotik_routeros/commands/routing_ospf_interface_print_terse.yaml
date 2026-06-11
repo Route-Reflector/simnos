@@ -1,0 +1,10 @@
+command: routing ospf interface print terse
+type: simnos
+help: execute the command "routing ospf interface print terse"
+mode:
+- user
+variants:
+- name: variant_1
+  output: routing_ospf_interface_print_terse__variant_1.txt
+- name: variant_2
+  output: routing_ospf_interface_print_terse__variant_2.txt

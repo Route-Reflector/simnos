@@ -1,0 +1,6 @@
+command: ip arp print terse without-paging
+type: simnos
+help: execute the command "ip arp print terse without-paging"
+mode:
+- user
+output: ip_arp_print_terse_without-paging.txt

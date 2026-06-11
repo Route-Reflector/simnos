@@ -1,0 +1,10 @@
+command: get router info bgp neighbors
+type: simnos
+help: execute the command "get router info bgp neighbors"
+mode:
+- user
+variants:
+- name: variant_1
+  output: get_router_info_bgp_neighbors__variant_1.txt
+- name: variant_2
+  output: get_router_info_bgp_neighbors__variant_2.txt

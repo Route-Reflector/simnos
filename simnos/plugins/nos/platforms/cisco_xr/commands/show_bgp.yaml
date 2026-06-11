@@ -1,0 +1,7 @@
+command: show bgp
+type: simnos
+help: execute the command "show bgp"
+mode:
+- user
+- enable
+output: show_bgp.txt

@@ -1,0 +1,7 @@
+command: show voice voice-port pri all histo
+type: simnos
+help: execute the command "show voice voice-port pri all histo"
+mode:
+- user
+- enable
+output: show_voice_voice-port_pri_all_histo.txt

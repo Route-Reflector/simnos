@@ -1,0 +1,7 @@
+command: show service sdp
+type: simnos
+help: execute the command "show service sdp"
+mode:
+- user
+- enable
+output: show_service_sdp.txt

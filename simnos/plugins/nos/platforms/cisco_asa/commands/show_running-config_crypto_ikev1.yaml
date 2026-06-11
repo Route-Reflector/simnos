@@ -1,0 +1,7 @@
+command: show running-config crypto ikev1
+type: simnos
+help: execute the command "show running-config crypto ikev1"
+mode:
+- user
+- enable
+output: show_running-config_crypto_ikev1.txt

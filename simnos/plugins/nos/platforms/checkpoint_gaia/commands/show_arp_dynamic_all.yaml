@@ -1,0 +1,7 @@
+command: show arp dynamic all
+type: simnos
+help: execute the command "show arp dynamic all"
+mode:
+- user
+- enable
+output: show_arp_dynamic_all.txt

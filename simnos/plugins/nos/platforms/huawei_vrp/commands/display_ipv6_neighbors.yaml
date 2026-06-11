@@ -1,0 +1,7 @@
+command: display ipv6 neighbors
+type: simnos
+help: execute the command "display ipv6 neighbors"
+mode:
+- user
+- enable
+output: display_ipv6_neighbors.txt

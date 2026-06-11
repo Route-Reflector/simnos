@@ -1,0 +1,7 @@
+command: show ip ssh
+type: simnos
+help: execute the command "show ip ssh"
+mode:
+- user
+- enable
+output: show_ip_ssh.txt

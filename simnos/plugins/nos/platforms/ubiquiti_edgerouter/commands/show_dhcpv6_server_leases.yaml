@@ -1,0 +1,7 @@
+command: show dhcpv6 server leases
+type: simnos
+help: execute the command "show dhcpv6 server leases"
+mode:
+- user
+- enable
+output: show_dhcpv6_server_leases.txt

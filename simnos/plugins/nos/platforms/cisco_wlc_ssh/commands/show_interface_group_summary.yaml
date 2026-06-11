@@ -1,0 +1,7 @@
+command: show interface group summary
+type: simnos
+help: execute the command "show interface group summary"
+mode:
+- user
+- enable
+output: show_interface_group_summary.txt

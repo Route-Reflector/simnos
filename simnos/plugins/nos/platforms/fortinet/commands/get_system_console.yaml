@@ -1,0 +1,6 @@
+command: get system console
+type: simnos
+help: get system console settings
+mode:
+- user
+output: get_system_console.txt

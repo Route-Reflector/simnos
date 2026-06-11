@@ -1,0 +1,6 @@
+command: undo smart
+type: simnos
+help: undo the command completion mode (smart mode)
+mode:
+- user
+- enable

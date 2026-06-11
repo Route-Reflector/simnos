@@ -1,0 +1,7 @@
+command: show advanced 802.11a channel
+type: simnos
+help: execute the command "show advanced 802.11a channel"
+mode:
+- user
+- enable
+output: show_advanced_802.11a_channel.txt

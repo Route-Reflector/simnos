@@ -1,0 +1,7 @@
+command: display cpu
+type: simnos
+help: execute the command "display cpu"
+mode:
+- user
+- enable
+output: display_cpu.txt

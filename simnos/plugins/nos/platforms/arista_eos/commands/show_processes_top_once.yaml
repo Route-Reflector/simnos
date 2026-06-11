@@ -1,0 +1,7 @@
+command: show processes top once
+type: simnos
+help: execute the command "show processes top once"
+mode:
+- user
+- enable
+output: show_processes_top_once.txt

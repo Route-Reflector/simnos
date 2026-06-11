@@ -1,0 +1,6 @@
+command: debug swm status
+type: simnos
+help: execute the command "debug swm status"
+mode:
+- user
+output: debug_swm_status.txt

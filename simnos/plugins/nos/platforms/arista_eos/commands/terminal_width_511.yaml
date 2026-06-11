@@ -1,0 +1,7 @@
+command: terminal width 511
+type: simnos
+help: set the terminal width to maximum
+mode:
+- user
+- enable
+output: terminal_width_511.txt

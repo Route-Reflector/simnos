@@ -1,0 +1,7 @@
+command: show router mpls lsp
+type: simnos
+help: execute the command "show router mpls lsp"
+mode:
+- user
+- enable
+output: show_router_mpls_lsp.txt

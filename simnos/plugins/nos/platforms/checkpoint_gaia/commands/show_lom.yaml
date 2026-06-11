@@ -1,0 +1,7 @@
+command: show lom
+type: simnos
+help: execute the command "show lom"
+mode:
+- user
+- enable
+output: show_lom.txt

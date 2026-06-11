@@ -1,0 +1,11 @@
+command: show vsf detail
+type: simnos
+help: execute the command "show vsf detail"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: show_vsf_detail__variant_1.txt
+- name: variant_2
+  output: show_vsf_detail__variant_2.txt

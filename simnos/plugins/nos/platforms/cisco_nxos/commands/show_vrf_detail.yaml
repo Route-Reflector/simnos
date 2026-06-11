@@ -1,0 +1,7 @@
+command: show vrf detail
+type: simnos
+help: execute the command "show vrf detail"
+mode:
+- user
+- enable
+output: show_vrf_detail.txt

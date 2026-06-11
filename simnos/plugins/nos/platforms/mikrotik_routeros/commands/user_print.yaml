@@ -1,0 +1,6 @@
+command: user print
+type: simnos
+help: execute the command "user print"
+mode:
+- user
+output: user_print.txt

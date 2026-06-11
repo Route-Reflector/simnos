@@ -1,0 +1,6 @@
+command: screen-length 0 temporary
+type: simnos
+help: Execute the command screen-length 0 temporary. This automatically generated.
+mode:
+- user
+- enable

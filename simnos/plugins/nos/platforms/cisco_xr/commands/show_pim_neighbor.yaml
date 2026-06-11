@@ -1,0 +1,7 @@
+command: show pim neighbor
+type: simnos
+help: execute the command "show pim neighbor"
+mode:
+- user
+- enable
+output: show_pim_neighbor.txt

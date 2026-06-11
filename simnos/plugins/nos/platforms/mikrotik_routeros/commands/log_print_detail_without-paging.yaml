@@ -1,0 +1,6 @@
+command: log print detail without-paging
+type: simnos
+help: execute the command "log print detail without-paging"
+mode:
+- user
+output: log_print_detail_without-paging.txt

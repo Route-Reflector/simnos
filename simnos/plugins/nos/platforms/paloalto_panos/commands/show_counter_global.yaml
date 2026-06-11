@@ -1,0 +1,6 @@
+command: show counter global
+type: simnos
+help: execute the command "show counter global"
+mode:
+- user
+output: show_counter_global.txt

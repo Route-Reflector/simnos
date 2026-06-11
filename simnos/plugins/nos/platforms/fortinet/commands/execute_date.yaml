@@ -1,0 +1,6 @@
+command: execute date
+type: simnos
+help: execute the command "execute date"
+mode:
+- user
+output: execute_date.txt

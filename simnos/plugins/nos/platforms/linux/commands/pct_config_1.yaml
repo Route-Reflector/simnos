@@ -1,0 +1,7 @@
+command: pct config 1
+type: simnos
+help: execute the command "pct config 1"
+mode:
+- user
+- enable
+output: pct_config_1.txt

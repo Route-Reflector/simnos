@@ -1,0 +1,7 @@
+command: display ont snmp-profile 0 all
+type: simnos
+help: execute the command "display ont snmp-profile 0 all"
+mode:
+- user
+- enable
+output: display_ont_snmp-profile_0_all.txt

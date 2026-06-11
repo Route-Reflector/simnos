@@ -1,0 +1,7 @@
+command: show lldp info remote-device
+type: simnos
+help: execute the command "show lldp info remote-device"
+mode:
+- user
+- enable
+output: show_lldp_info_remote-device.txt

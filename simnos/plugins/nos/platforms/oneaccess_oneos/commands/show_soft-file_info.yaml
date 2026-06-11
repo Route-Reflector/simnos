@@ -1,0 +1,7 @@
+command: show soft-file info
+type: simnos
+help: execute the command "show soft-file info"
+mode:
+- user
+- enable
+output: show_soft-file_info.txt

@@ -1,0 +1,7 @@
+command: show isdn led-status
+type: simnos
+help: execute the command "show isdn led-status"
+mode:
+- user
+- enable
+output: show_isdn_led-status.txt

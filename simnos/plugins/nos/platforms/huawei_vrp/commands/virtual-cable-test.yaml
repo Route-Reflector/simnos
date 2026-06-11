@@ -1,0 +1,7 @@
+command: virtual-cable-test
+type: simnos
+help: execute the command "virtual-cable-test"
+mode:
+- user
+- enable
+output: virtual-cable-test.txt

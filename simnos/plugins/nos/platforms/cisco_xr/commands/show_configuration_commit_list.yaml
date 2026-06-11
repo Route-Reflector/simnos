@@ -1,0 +1,7 @@
+command: show configuration commit list
+type: simnos
+help: execute the command "show configuration commit list"
+mode:
+- user
+- enable
+output: show_configuration_commit_list.txt

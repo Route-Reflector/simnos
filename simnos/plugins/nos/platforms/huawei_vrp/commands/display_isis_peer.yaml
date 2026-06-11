@@ -1,0 +1,7 @@
+command: display isis peer
+type: simnos
+help: execute the command "display isis peer"
+mode:
+- user
+- enable
+output: display_isis_peer.txt

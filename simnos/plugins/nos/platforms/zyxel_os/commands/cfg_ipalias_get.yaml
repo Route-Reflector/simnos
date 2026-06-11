@@ -1,0 +1,7 @@
+command: cfg ipalias get
+type: simnos
+help: execute the command "cfg ipalias get"
+mode:
+- user
+- enable
+output: cfg_ipalias_get.txt

@@ -1,0 +1,6 @@
+command: ip address export verbose
+type: simnos
+help: execute the command "ip address export verbose"
+mode:
+- user
+output: ip_address_export_verbose.txt

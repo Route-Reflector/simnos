@@ -1,0 +1,7 @@
+command: show redundancy detail
+type: simnos
+help: execute the command "show redundancy detail"
+mode:
+- user
+- enable
+output: show_redundancy_detail.txt

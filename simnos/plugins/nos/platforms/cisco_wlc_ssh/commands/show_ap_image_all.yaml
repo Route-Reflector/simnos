@@ -1,0 +1,7 @@
+command: show ap image all
+type: simnos
+help: execute the command "show ap image all"
+mode:
+- user
+- enable
+output: show_ap_image_all.txt

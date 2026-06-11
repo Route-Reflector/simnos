@@ -1,0 +1,6 @@
+command: login
+type: simnos
+help: Execute the command login. This automatically generated.
+mode:
+- user
+- enable

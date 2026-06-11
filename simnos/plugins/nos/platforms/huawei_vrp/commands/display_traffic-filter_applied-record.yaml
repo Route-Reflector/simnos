@@ -1,0 +1,7 @@
+command: display traffic-filter applied-record
+type: simnos
+help: execute the command "display traffic-filter applied-record"
+mode:
+- user
+- enable
+output: display_traffic-filter_applied-record.txt

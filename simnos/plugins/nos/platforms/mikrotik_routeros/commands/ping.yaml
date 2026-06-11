@@ -1,0 +1,6 @@
+command: ping
+type: simnos
+help: execute the command "ping"
+mode:
+- user
+output: ping.txt

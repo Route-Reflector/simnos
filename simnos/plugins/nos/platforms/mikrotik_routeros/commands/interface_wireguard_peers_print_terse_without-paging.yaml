@@ -1,0 +1,6 @@
+command: interface wireguard peers print terse without-paging
+type: simnos
+help: execute the command "interface wireguard peers print terse without-paging"
+mode:
+- user
+output: interface_wireguard_peers_print_terse_without-paging.txt

@@ -1,0 +1,7 @@
+command: logout
+type: simnos
+help: not implemented the exit
+mode:
+- user
+- enable
+exit: true

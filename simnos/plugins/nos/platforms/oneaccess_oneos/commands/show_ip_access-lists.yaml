@@ -1,0 +1,7 @@
+command: show ip access-lists
+type: simnos
+help: execute the command "show ip access-lists"
+mode:
+- user
+- enable
+output: show_ip_access-lists.txt

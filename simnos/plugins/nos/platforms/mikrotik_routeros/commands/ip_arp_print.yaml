@@ -1,0 +1,6 @@
+command: ip arp print
+type: simnos
+help: execute the command "ip arp print"
+mode:
+- user
+output: ip_arp_print.txt

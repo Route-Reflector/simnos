@@ -1,0 +1,7 @@
+command: show router pim interface
+type: simnos
+help: execute the command "show router pim interface"
+mode:
+- user
+- enable
+output: show_router_pim_interface.txt

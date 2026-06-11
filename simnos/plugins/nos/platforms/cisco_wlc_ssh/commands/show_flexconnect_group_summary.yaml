@@ -1,0 +1,7 @@
+command: show flexconnect group summary
+type: simnos
+help: execute the command "show flexconnect group summary"
+mode:
+- user
+- enable
+output: show_flexconnect_group_summary.txt

@@ -1,0 +1,7 @@
+command: show bfd neighbors
+type: simnos
+help: execute the command "show bfd neighbors"
+mode:
+- user
+- enable
+output: show_bfd_neighbors.txt

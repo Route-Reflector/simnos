@@ -1,0 +1,7 @@
+command: show running-config ip dhcp
+type: simnos
+help: execute the command "show running-config ip dhcp"
+mode:
+- user
+- enable
+output: show_running-config_ip_dhcp.txt

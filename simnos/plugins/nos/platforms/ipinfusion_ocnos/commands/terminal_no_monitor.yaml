@@ -1,0 +1,6 @@
+command: terminal no monitor
+type: simnos
+help: disable monitor output (netmiko 4.7.0+ session_preparation)
+mode:
+- user
+- enable

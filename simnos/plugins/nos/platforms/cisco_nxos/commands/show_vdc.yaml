@@ -1,0 +1,7 @@
+command: show vdc
+type: simnos
+help: execute the command "show vdc"
+mode:
+- user
+- enable
+output: show_vdc.txt

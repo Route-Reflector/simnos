@@ -1,0 +1,7 @@
+command: show chassis cluster interfaces
+type: simnos
+help: execute the command "show chassis cluster interfaces"
+mode:
+- user
+- enable
+output: show_chassis_cluster_interfaces.txt

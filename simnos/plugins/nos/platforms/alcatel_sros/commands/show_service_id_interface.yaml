@@ -1,0 +1,7 @@
+command: show service id interface
+type: simnos
+help: execute the command "show service id interface"
+mode:
+- user
+- enable
+output: show_service_id_interface.txt

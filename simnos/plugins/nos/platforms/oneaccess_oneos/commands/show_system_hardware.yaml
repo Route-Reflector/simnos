@@ -1,0 +1,7 @@
+command: show system hardware
+type: simnos
+help: execute the command "show system hardware"
+mode:
+- user
+- enable
+output: show_system_hardware.txt

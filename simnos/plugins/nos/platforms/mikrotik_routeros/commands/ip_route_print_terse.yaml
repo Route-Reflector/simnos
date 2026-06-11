@@ -1,0 +1,6 @@
+command: ip route print terse
+type: simnos
+help: execute the command "ip route print terse"
+mode:
+- user
+output: ip_route_print_terse.txt

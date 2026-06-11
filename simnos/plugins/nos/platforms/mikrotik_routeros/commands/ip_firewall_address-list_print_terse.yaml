@@ -1,0 +1,6 @@
+command: ip firewall address-list print terse
+type: simnos
+help: execute the command "ip firewall address-list print terse"
+mode:
+- user
+output: ip_firewall_address-list_print_terse.txt

@@ -1,0 +1,7 @@
+command: show linkagg alias
+type: simnos
+help: execute the command "show linkagg alias"
+mode:
+- user
+- enable
+output: show_linkagg_alias.txt

@@ -1,0 +1,7 @@
+command: show bgp neighbors
+type: simnos
+help: execute the command "show bgp neighbors"
+mode:
+- user
+- enable
+output: show_bgp_neighbors.txt

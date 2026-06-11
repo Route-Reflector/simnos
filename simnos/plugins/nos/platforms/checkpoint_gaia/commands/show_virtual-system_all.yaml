@@ -1,0 +1,7 @@
+command: show virtual-system all
+type: simnos
+help: execute the command "show virtual-system all"
+mode:
+- user
+- enable
+output: show_virtual-system_all.txt

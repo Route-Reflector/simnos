@@ -1,0 +1,7 @@
+command: show mlt all-members
+type: simnos
+help: execute the command "show mlt all-members"
+mode:
+- user
+- enable
+output: show_mlt_all-members.txt

@@ -1,0 +1,7 @@
+command: display sn license
+type: simnos
+help: execute the command "display sn license"
+mode:
+- user
+- enable
+output: display_sn_license.txt

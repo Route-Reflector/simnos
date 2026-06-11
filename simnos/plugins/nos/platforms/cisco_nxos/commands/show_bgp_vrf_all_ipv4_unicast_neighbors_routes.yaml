@@ -1,0 +1,7 @@
+command: show bgp vrf all ipv4 unicast neighbors routes
+type: simnos
+help: execute the command "show bgp vrf all ipv4 unicast neighbors routes"
+mode:
+- user
+- enable
+output: show_bgp_vrf_all_ipv4_unicast_neighbors_routes.txt

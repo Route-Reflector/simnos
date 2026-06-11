@@ -1,0 +1,7 @@
+command: show ip interface
+type: simnos
+help: execute the command "show ip interface"
+mode:
+- user
+- enable
+output: show_ip_interface.txt

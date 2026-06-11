@@ -1,0 +1,7 @@
+command: display ont gemport 0 ontid 0
+type: simnos
+help: execute the command "display ont gemport 0 ontid 0"
+mode:
+- user
+- enable
+output: display_ont_gemport_0_ontid_0.txt

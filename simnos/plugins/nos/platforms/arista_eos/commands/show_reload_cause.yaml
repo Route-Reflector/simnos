@@ -1,0 +1,7 @@
+command: show reload cause
+type: simnos
+help: execute the command "show reload cause"
+mode:
+- user
+- enable
+output: show_reload_cause.txt

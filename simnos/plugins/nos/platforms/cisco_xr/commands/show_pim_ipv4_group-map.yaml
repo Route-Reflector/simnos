@@ -1,0 +1,7 @@
+command: show pim ipv4 group-map
+type: simnos
+help: execute the command "show pim ipv4 group-map"
+mode:
+- user
+- enable
+output: show_pim_ipv4_group-map.txt

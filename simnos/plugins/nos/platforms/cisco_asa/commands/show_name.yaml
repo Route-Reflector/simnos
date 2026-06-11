@@ -1,0 +1,7 @@
+command: show name
+type: simnos
+help: execute the command "show name"
+mode:
+- user
+- enable
+output: show_name.txt

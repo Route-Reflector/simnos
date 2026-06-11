@@ -1,0 +1,7 @@
+command: dmidecode -t system
+type: simnos
+help: execute the command "dmidecode -t system"
+mode:
+- user
+- enable
+output: dmidecode_-t_system.txt

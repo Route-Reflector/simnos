@@ -1,0 +1,7 @@
+command: show memory
+type: simnos
+help: execute the command "show memory"
+mode:
+- user
+- enable
+output: show_memory.txt

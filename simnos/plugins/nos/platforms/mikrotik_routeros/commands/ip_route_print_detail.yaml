@@ -1,0 +1,6 @@
+command: ip route print detail
+type: simnos
+help: execute the command "ip route print detail"
+mode:
+- user
+output: ip_route_print_detail.txt

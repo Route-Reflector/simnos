@@ -1,0 +1,7 @@
+command: show system
+type: simnos
+help: execute the command "show system"
+mode:
+- user
+- enable
+output: show_system.txt

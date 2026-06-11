@@ -1,0 +1,7 @@
+command: port show network-config
+type: simnos
+help: execute the command "port show network-config"
+mode:
+- user
+- enable
+output: port_show_network-config.txt

@@ -1,0 +1,7 @@
+command: vlan show
+type: simnos
+help: execute the command "vlan show"
+mode:
+- user
+- enable
+output: vlan_show.txt

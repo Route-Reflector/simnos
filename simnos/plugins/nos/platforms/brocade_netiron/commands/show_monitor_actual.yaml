@@ -1,0 +1,7 @@
+command: show monitor actual
+type: simnos
+help: execute the command "show monitor actual"
+mode:
+- user
+- enable
+output: show_monitor_actual.txt

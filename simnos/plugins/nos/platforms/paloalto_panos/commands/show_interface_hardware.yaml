@@ -1,0 +1,6 @@
+command: show interface hardware
+type: simnos
+help: execute the command "show interface hardware"
+mode:
+- user
+output: show_interface_hardware.txt

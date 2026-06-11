@@ -1,0 +1,6 @@
+command: show full-configuration system console
+type: simnos
+help: show console configuration
+mode:
+- user
+output: show_full-configuration_system_console.txt

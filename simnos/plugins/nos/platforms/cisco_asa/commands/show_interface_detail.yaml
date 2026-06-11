@@ -1,0 +1,7 @@
+command: show interface detail
+type: simnos
+help: execute the command "show interface detail"
+mode:
+- user
+- enable
+output: show_interface_detail.txt

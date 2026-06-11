@@ -1,0 +1,7 @@
+command: show cellular-radio context
+type: simnos
+help: execute the command "show cellular-radio context"
+mode:
+- user
+- enable
+output: show_cellular-radio_context.txt

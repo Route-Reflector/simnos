@@ -1,0 +1,7 @@
+command: show band-select
+type: simnos
+help: execute the command "show band-select"
+mode:
+- user
+- enable
+output: show_band-select.txt

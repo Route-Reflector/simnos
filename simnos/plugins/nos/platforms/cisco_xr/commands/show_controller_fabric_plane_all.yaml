@@ -1,0 +1,7 @@
+command: show controller fabric plane all
+type: simnos
+help: execute the command "show controller fabric plane all"
+mode:
+- user
+- enable
+output: show_controller_fabric_plane_all.txt

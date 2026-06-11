@@ -1,0 +1,7 @@
+command: display module-information verbose
+type: simnos
+help: execute the command "display module-information verbose"
+mode:
+- user
+- enable
+output: display_module-information_verbose.txt

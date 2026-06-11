@@ -1,0 +1,7 @@
+command: show bgp all-vrfs all summary
+type: simnos
+help: execute the command "show bgp all-vrfs all summary"
+mode:
+- user
+- enable
+output: show_bgp_all-vrfs_all_summary.txt

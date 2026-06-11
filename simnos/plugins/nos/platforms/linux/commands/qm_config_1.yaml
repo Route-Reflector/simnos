@@ -1,0 +1,7 @@
+command: qm config 1
+type: simnos
+help: execute the command "qm config 1"
+mode:
+- user
+- enable
+output: qm_config_1.txt

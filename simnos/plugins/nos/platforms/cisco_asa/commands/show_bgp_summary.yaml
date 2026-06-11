@@ -1,0 +1,7 @@
+command: show bgp summary
+type: simnos
+help: execute the command "show bgp summary"
+mode:
+- user
+- enable
+output: show_bgp_summary.txt

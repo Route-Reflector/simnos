@@ -1,0 +1,7 @@
+command: ont add
+type: simnos
+help: execute the command "ont add"
+mode:
+- user
+- enable
+output: ont_add.txt

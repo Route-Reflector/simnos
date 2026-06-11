@@ -1,0 +1,10 @@
+command: execute dhcp lease-list
+type: simnos
+help: execute the command "execute dhcp lease-list"
+mode:
+- user
+variants:
+- name: variant_1
+  output: execute_dhcp_lease-list__variant_1.txt
+- name: variant_2
+  output: execute_dhcp_lease-list__variant_2.txt

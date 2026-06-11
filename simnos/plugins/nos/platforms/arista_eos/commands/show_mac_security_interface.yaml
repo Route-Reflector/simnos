@@ -1,0 +1,7 @@
+command: show mac security interface
+type: simnos
+help: execute the command "show mac security interface"
+mode:
+- user
+- enable
+output: show_mac_security_interface.txt

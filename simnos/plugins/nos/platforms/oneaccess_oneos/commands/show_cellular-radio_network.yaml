@@ -1,0 +1,7 @@
+command: show cellular-radio network
+type: simnos
+help: execute the command "show cellular-radio network"
+mode:
+- user
+- enable
+output: show_cellular-radio_network.txt

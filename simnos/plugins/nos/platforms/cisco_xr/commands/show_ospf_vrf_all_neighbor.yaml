@@ -1,0 +1,7 @@
+command: show ospf vrf all neighbor
+type: simnos
+help: execute the command "show ospf vrf all neighbor"
+mode:
+- user
+- enable
+output: show_ospf_vrf_all_neighbor.txt

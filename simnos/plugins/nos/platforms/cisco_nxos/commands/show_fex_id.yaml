@@ -1,0 +1,7 @@
+command: show fex id
+type: simnos
+help: execute the command "show fex id"
+mode:
+- user
+- enable
+output: show_fex_id.txt

@@ -1,0 +1,7 @@
+command: show version brief
+type: simnos
+help: execute the command "show version brief"
+mode:
+- user
+- enable
+output: show_version_brief.txt

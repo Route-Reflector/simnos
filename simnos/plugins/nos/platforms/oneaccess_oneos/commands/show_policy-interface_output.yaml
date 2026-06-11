@@ -1,0 +1,7 @@
+command: show policy-interface output
+type: simnos
+help: execute the command "show policy-interface output"
+mode:
+- user
+- enable
+output: show_policy-interface_output.txt

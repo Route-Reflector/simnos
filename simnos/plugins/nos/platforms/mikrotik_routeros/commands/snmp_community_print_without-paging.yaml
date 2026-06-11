@@ -1,0 +1,6 @@
+command: snmp community print without-paging
+type: simnos
+help: execute the command "snmp community print without-paging"
+mode:
+- user
+output: snmp_community_print_without-paging.txt

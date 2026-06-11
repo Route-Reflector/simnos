@@ -1,0 +1,7 @@
+command: show product-info-area
+type: simnos
+help: execute the command "show product-info-area"
+mode:
+- user
+- enable
+output: show_product-info-area.txt

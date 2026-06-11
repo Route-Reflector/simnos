@@ -1,0 +1,7 @@
+command: show etherchannel summary
+type: simnos
+help: execute the command "show etherchannel summary"
+mode:
+- user
+- enable
+output: show_etherchannel_summary.txt

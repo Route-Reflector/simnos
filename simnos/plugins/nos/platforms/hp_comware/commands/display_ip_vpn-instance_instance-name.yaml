@@ -1,0 +1,7 @@
+command: display ip vpn-instance instance-name
+type: simnos
+help: execute the command "display ip vpn-instance instance-name"
+mode:
+- user
+- config
+output: display_ip_vpn-instance_instance-name.txt

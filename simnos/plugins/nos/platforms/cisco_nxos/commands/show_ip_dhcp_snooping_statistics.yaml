@@ -1,0 +1,7 @@
+command: show ip dhcp snooping statistics
+type: simnos
+help: execute the command "show ip dhcp snooping statistics"
+mode:
+- user
+- enable
+output: show_ip_dhcp_snooping_statistics.txt

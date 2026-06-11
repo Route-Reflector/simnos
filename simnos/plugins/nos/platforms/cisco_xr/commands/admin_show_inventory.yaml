@@ -1,0 +1,7 @@
+command: admin show inventory
+type: simnos
+help: execute the command "admin show inventory"
+mode:
+- user
+- enable
+output: admin_show_inventory.txt

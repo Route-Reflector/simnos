@@ -1,0 +1,7 @@
+command: display service-port all
+type: simnos
+help: execute the command "display service-port all"
+mode:
+- user
+- enable
+output: display_service-port_all.txt

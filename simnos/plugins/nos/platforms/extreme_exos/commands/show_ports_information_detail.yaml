@@ -1,0 +1,7 @@
+command: show ports information detail
+type: simnos
+help: execute the command "show ports information detail"
+mode:
+- user
+- enable
+output: show_ports_information_detail.txt

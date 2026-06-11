@@ -1,0 +1,8 @@
+command: show running-config vlan
+type: simnos
+help: execute the command "show running-config vlan"
+mode:
+- user
+- enable
+- config
+output: show_running-config_vlan.txt

@@ -1,0 +1,7 @@
+command: show controllers all phy
+type: simnos
+help: execute the command "show controllers all phy"
+mode:
+- user
+- enable
+output: show_controllers_all_phy.txt

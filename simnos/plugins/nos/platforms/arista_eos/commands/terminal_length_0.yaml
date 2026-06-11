@@ -1,0 +1,7 @@
+command: terminal length 0
+type: simnos
+help: It disables the pagination
+mode:
+- user
+- enable
+output: terminal_length_0.txt

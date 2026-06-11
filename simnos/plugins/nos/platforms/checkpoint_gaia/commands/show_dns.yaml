@@ -1,0 +1,7 @@
+command: show dns
+type: simnos
+help: execute the command "show dns"
+mode:
+- user
+- enable
+output: show_dns.txt

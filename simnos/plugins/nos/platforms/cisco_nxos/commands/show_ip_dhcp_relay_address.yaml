@@ -1,0 +1,7 @@
+command: show ip dhcp relay address
+type: simnos
+help: execute the command "show ip dhcp relay address"
+mode:
+- user
+- enable
+output: show_ip_dhcp_relay_address.txt

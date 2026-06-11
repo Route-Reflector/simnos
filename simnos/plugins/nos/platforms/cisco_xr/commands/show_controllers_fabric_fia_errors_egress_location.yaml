@@ -1,0 +1,7 @@
+command: show controllers fabric fia errors egress location
+type: simnos
+help: execute the command "show controllers fabric fia errors egress location"
+mode:
+- user
+- enable
+output: show_controllers_fabric_fia_errors_egress_location.txt

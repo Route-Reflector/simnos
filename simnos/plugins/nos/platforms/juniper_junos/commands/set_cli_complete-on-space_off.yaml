@@ -1,0 +1,6 @@
+command: set cli complete-on-space off
+type: simnos
+help: Execute the command set cli complete-on-space off. This automatically generated.
+mode:
+- user
+- enable

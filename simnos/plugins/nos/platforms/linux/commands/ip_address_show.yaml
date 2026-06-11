@@ -1,0 +1,7 @@
+command: ip address show
+type: simnos
+help: execute the command "ip address show"
+mode:
+- user
+- enable
+output: ip_address_show.txt

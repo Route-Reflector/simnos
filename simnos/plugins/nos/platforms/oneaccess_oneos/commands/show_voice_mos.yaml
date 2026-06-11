@@ -1,0 +1,7 @@
+command: show voice mos
+type: simnos
+help: execute the command "show voice mos"
+mode:
+- user
+- enable
+output: show_voice_mos.txt

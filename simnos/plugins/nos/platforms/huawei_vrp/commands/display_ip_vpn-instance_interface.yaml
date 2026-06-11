@@ -1,0 +1,7 @@
+command: display ip vpn-instance interface
+type: simnos
+help: execute the command "display ip vpn-instance interface"
+mode:
+- user
+- enable
+output: display_ip_vpn-instance_interface.txt

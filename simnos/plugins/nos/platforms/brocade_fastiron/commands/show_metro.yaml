@@ -1,0 +1,8 @@
+command: show metro
+type: simnos
+help: execute the command "show metro"
+mode:
+- user
+- enable
+- config
+output: show_metro.txt

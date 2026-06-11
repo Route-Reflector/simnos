@@ -1,0 +1,7 @@
+command: cfg snmp get
+type: simnos
+help: execute the command "cfg snmp get"
+mode:
+- user
+- enable
+output: cfg_snmp_get.txt

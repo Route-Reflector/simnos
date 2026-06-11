@@ -1,0 +1,6 @@
+command: system-view
+type: simnos
+help: enter system view (HP Comware equivalent of configure terminal)
+mode:
+- user
+new_mode: config

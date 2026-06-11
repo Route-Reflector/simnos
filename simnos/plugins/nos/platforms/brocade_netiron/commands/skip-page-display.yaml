@@ -1,0 +1,6 @@
+command: skip-page-display
+type: simnos
+help: Execute the command skip-page-display. This automatically generated.
+mode:
+- user
+- enable

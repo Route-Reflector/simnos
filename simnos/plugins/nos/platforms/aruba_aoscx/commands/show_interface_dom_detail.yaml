@@ -1,0 +1,7 @@
+command: show interface dom detail
+type: simnos
+help: execute the command "show interface dom detail"
+mode:
+- user
+- enable
+output: show_interface_dom_detail.txt

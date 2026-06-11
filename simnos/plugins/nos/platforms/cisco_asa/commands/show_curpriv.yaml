@@ -1,0 +1,8 @@
+command: show curpriv
+type: simnos
+help: Execute the command show curpriv. This automatically generated.
+mode:
+- user
+- enable
+- config
+output: show_curpriv.txt

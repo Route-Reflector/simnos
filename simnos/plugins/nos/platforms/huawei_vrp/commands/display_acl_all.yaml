@@ -1,0 +1,7 @@
+command: display acl all
+type: simnos
+help: execute the command "display acl all"
+mode:
+- user
+- enable
+output: display_acl_all.txt

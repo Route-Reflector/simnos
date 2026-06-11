@@ -1,0 +1,7 @@
+command: show cts interface brief
+type: simnos
+help: execute the command "show cts interface brief"
+mode:
+- user
+- enable
+output: show_cts_interface_brief.txt

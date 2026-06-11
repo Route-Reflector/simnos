@@ -1,0 +1,7 @@
+command: show interface ip brief
+type: simnos
+help: execute the command "show interface ip brief"
+mode:
+- user
+- enable
+output: show_interface_ip_brief.txt

@@ -1,0 +1,10 @@
+command: execute log display
+type: simnos
+help: execute the command "execute log display"
+mode:
+- user
+variants:
+- name: variant_1
+  output: execute_log_display__variant_1.txt
+- name: variant_2
+  output: execute_log_display__variant_2.txt

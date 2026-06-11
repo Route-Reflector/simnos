@@ -1,0 +1,12 @@
+command: interface bonding print detail
+type: simnos
+help: execute the command "interface bonding print detail"
+mode:
+- user
+variants:
+- name: variant_1
+  output: interface_bonding_print_detail__variant_1.txt
+- name: variant_2
+  output: interface_bonding_print_detail__variant_2.txt
+- name: variant_3
+  output: interface_bonding_print_detail__variant_3.txt

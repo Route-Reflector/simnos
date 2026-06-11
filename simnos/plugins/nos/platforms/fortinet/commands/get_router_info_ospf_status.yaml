@@ -1,0 +1,6 @@
+command: get router info ospf status
+type: simnos
+help: execute the command "get router info ospf status"
+mode:
+- user
+output: get_router_info_ospf_status.txt

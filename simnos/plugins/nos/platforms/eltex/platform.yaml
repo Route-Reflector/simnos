@@ -1,0 +1,10 @@
+modes:
+  user:
+    prompt: "{{ base_prompt }}>"
+  enable:
+    prompt: "{{ base_prompt }}#"
+  config:
+    prompt: "{{ base_prompt }}(config)#"
+initial_mode: user
+netmiko_device_type: eltex
+ntc_platform: eltex

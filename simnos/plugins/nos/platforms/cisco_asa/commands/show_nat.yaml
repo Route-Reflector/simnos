@@ -1,0 +1,7 @@
+command: show nat
+type: simnos
+help: execute the command "show nat"
+mode:
+- user
+- enable
+output: show_nat.txt

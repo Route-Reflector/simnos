@@ -1,0 +1,7 @@
+command: show ap radio-database
+type: simnos
+help: execute the command "show ap radio-database"
+mode:
+- user
+- enable
+output: show_ap_radio-database.txt

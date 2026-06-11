@@ -1,0 +1,7 @@
+command: show running-config object network
+type: simnos
+help: execute the command "show running-config object network"
+mode:
+- user
+- enable
+output: show_running-config_object_network.txt

@@ -1,0 +1,7 @@
+command: fw stat
+type: simnos
+help: execute the command "fw stat"
+mode:
+- user
+- enable
+output: fw_stat.txt

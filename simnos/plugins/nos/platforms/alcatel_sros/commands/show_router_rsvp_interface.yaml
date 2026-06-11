@@ -1,0 +1,7 @@
+command: show router rsvp interface
+type: simnos
+help: execute the command "show router rsvp interface"
+mode:
+- user
+- enable
+output: show_router_rsvp_interface.txt

@@ -1,0 +1,7 @@
+command: show isdn active
+type: simnos
+help: execute the command "show isdn active"
+mode:
+- user
+- enable
+output: show_isdn_active.txt

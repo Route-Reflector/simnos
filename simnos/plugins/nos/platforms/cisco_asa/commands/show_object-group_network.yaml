@@ -1,0 +1,7 @@
+command: show object-group network
+type: simnos
+help: execute the command "show object-group network"
+mode:
+- user
+- enable
+output: show_object-group_network.txt

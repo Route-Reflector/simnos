@@ -1,0 +1,6 @@
+command: show routing protocol bgp summary
+type: simnos
+help: execute the command "show routing protocol bgp summary"
+mode:
+- user
+output: show_routing_protocol_bgp_summary.txt

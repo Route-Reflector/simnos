@@ -1,0 +1,7 @@
+command: stty columns 255
+type: simnos
+help: set terminal width (ONEOS5 fallback)
+mode:
+- user
+- enable
+output: stty_columns_255.txt

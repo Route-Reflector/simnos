@@ -1,0 +1,7 @@
+command: show voice sip-gateway
+type: simnos
+help: execute the command "show voice sip-gateway"
+mode:
+- user
+- enable
+output: show_voice_sip-gateway.txt

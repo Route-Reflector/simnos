@@ -1,0 +1,7 @@
+command: show 802.11a
+type: simnos
+help: execute the command "show 802.11a"
+mode:
+- user
+- enable
+output: show_802.11a.txt

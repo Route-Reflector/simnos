@@ -1,0 +1,6 @@
+command: ip firewall connection print terse without-paging
+type: simnos
+help: execute the command "ip firewall connection print terse without-paging"
+mode:
+- user
+output: ip_firewall_connection_print_terse_without-paging.txt

@@ -1,0 +1,7 @@
+command: show ip adjacency
+type: simnos
+help: execute the command "show ip adjacency"
+mode:
+- user
+- enable
+output: show_ip_adjacency.txt

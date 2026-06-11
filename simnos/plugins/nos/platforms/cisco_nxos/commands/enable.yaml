@@ -1,0 +1,6 @@
+command: enable
+type: simnos
+help: enter enable mode
+mode:
+- user
+new_mode: enable

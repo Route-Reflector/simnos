@@ -1,0 +1,7 @@
+command: show system status
+type: simnos
+help: execute the command "show system status"
+mode:
+- user
+- enable
+output: show_system_status.txt

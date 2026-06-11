@@ -1,0 +1,7 @@
+command: show switching-mode
+type: simnos
+help: execute the command "show switching-mode"
+mode:
+- user
+- enable
+output: show_switching-mode.txt

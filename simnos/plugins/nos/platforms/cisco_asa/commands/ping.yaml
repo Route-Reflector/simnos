@@ -1,0 +1,7 @@
+command: ping
+type: simnos
+help: execute the command "ping"
+mode:
+- user
+- enable
+output: ping.txt

@@ -1,0 +1,7 @@
+command: show vsf detail
+type: simnos
+help: execute the command "show vsf detail"
+mode:
+- user
+- enable
+output: show_vsf_detail.txt

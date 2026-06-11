@@ -1,0 +1,7 @@
+command: show control connections
+type: simnos
+help: execute the command "show control connections"
+mode:
+- user
+- enable
+output: show_control_connections.txt

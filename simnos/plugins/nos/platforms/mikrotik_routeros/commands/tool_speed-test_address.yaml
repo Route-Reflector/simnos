@@ -1,0 +1,6 @@
+command: tool speed-test address
+type: simnos
+help: execute the command "tool speed-test address"
+mode:
+- user
+output: tool_speed-test_address.txt

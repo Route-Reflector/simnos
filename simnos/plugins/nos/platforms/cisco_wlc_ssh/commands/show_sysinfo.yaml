@@ -1,0 +1,7 @@
+command: show sysinfo
+type: simnos
+help: execute the command "show sysinfo"
+mode:
+- user
+- enable
+output: show_sysinfo.txt

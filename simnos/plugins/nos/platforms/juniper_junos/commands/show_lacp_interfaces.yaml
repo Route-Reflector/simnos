@@ -1,0 +1,7 @@
+command: show lacp interfaces
+type: simnos
+help: execute the command "show lacp interfaces"
+mode:
+- user
+- enable
+output: show_lacp_interfaces.txt

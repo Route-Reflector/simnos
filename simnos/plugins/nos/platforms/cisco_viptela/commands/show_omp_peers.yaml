@@ -1,0 +1,7 @@
+command: show omp peers
+type: simnos
+help: execute the command "show omp peers"
+mode:
+- user
+- enable
+output: show_omp_peers.txt

@@ -1,0 +1,7 @@
+command: cfg intf group get
+type: simnos
+help: execute the command "cfg intf group get"
+mode:
+- user
+- enable
+output: cfg_intf_group_get.txt

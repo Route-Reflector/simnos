@@ -1,0 +1,6 @@
+command: set cli screen-length 0
+type: simnos
+help: Execute the command set cli screen-length 0. This automatically generated.
+mode:
+- user
+- enable

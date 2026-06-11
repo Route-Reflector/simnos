@@ -1,0 +1,7 @@
+command: rstp show
+type: simnos
+help: execute the command "rstp show"
+mode:
+- user
+- enable
+output: rstp_show.txt

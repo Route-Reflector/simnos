@@ -1,0 +1,7 @@
+command: ssh server show key
+type: simnos
+help: execute the command "ssh server show key"
+mode:
+- user
+- enable
+output: ssh_server_show_key.txt

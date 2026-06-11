@@ -1,0 +1,102 @@
+{
+  "enable": {
+    "exit": false,
+    "help": "enter enable mode",
+    "modes": [
+      "user"
+    ],
+    "new_mode": "enable",
+    "output": null,
+    "variants": []
+  },
+  "login": {
+    "exit": false,
+    "help": "Execute the command login. This automatically generated.",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "set cli screen-width 511": {
+    "exit": false,
+    "help": "Execute the command set cli screen-width 511. This automatically generated.",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "show curpriv": {
+    "exit": false,
+    "help": "Execute the command show curpriv. This automatically generated.",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "show lldp table": {
+    "exit": false,
+    "help": "execute the command \"show lldp table\"",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": [
+      "Capability codes: (R) Router, (B) Bridge, (O) Other",
+      "LocalPort    RemoteDevice     RemotePortID    Capability    RemotePortDescr",
+      "-----------  ---------------  --------------  ------------  -----------------",
+      "Ethernet0    spine01          fortyGigE0/20   BR            Ethernet20",
+      "Ethernet4    spine02          fortyGigE0/20   BR            Ethernet20",
+      "Ethernet8    leaf01           fortyGigE0/20   BR            Ethernet20",
+      "Ethernet12   leaf02           fortyGigE0/20   BR            Ethernet20",
+      "Ethernet16   leaf03           fortyGigE0/24   BR            Ethernet24",
+      "Ethernet20   leaf04           fortyGigE0/24   BR            Ethernet24",
+      "eth0         mgmt-switch      swp14           BR            swp14",
+      "--------------------------------------------------",
+      "Total entries displayed:  7"
+    ],
+    "variants": []
+  },
+  "terminal length 0": {
+    "exit": false,
+    "help": "disable pagination (netmiko session_preparation)",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "terminal no monitor": {
+    "exit": false,
+    "help": "disable monitor output (netmiko 4.7.0+ session_preparation)",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "terminal width 511": {
+    "exit": false,
+    "help": "Execute the command terminal width 511. This automatically generated.",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  }
+}

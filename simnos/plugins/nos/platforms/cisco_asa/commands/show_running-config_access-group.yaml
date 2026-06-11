@@ -1,0 +1,7 @@
+command: show running-config access-group
+type: simnos
+help: execute the command "show running-config access-group"
+mode:
+- user
+- enable
+output: show_running-config_access-group.txt

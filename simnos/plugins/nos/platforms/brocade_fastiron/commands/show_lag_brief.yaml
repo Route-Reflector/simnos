@@ -1,0 +1,8 @@
+command: show lag brief
+type: simnos
+help: execute the command "show lag brief"
+mode:
+- user
+- enable
+- config
+output: show_lag_brief.txt

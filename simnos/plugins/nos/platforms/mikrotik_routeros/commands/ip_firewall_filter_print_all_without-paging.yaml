@@ -1,0 +1,6 @@
+command: ip firewall filter print all without-paging
+type: simnos
+help: execute the command "ip firewall filter print all without-paging"
+mode:
+- user
+output: ip_firewall_filter_print_all_without-paging.txt

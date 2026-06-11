@@ -1,0 +1,7 @@
+command: show vrrp interface
+type: simnos
+help: execute the command "show vrrp interface"
+mode:
+- user
+- enable
+output: show_vrrp_interface.txt

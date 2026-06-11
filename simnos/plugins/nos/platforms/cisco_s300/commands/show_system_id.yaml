@@ -1,0 +1,7 @@
+command: show system id
+type: simnos
+help: execute the command "show system id"
+mode:
+- user
+- enable
+output: show_system_id.txt

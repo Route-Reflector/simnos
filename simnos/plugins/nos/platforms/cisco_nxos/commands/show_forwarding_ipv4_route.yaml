@@ -1,0 +1,7 @@
+command: show forwarding ipv4 route
+type: simnos
+help: execute the command "show forwarding ipv4 route"
+mode:
+- user
+- enable
+output: show_forwarding_ipv4_route.txt

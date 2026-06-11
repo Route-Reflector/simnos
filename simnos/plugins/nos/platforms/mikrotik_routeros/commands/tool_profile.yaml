@@ -1,0 +1,6 @@
+command: tool profile
+type: simnos
+help: execute the command "tool profile"
+mode:
+- user
+output: tool_profile.txt

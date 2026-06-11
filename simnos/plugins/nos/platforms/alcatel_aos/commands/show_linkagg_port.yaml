@@ -1,0 +1,11 @@
+command: show linkagg port
+type: simnos
+help: execute the command "show linkagg port"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: show_linkagg_port__variant_1.txt
+- name: variant_2
+  output: show_linkagg_port__variant_2.txt

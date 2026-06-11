@@ -1,0 +1,7 @@
+command: ip route show
+type: simnos
+help: execute the command "ip route show"
+mode:
+- user
+- enable
+output: ip_route_show.txt

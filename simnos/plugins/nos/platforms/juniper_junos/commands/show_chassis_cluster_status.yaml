@@ -1,0 +1,7 @@
+command: show chassis cluster status
+type: simnos
+help: execute the command "show chassis cluster status"
+mode:
+- user
+- enable
+output: show_chassis_cluster_status.txt

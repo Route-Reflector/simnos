@@ -1,0 +1,8 @@
+command: show mac-address
+type: simnos
+help: execute the command "show mac-address"
+mode:
+- user
+- enable
+- config
+output: show_mac-address.txt

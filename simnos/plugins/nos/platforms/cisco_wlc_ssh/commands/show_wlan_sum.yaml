@@ -1,0 +1,7 @@
+command: show wlan sum
+type: simnos
+help: execute the command "show wlan sum"
+mode:
+- user
+- enable
+output: show_wlan_sum.txt

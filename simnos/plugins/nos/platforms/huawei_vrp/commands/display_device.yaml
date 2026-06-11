@@ -1,0 +1,13 @@
+command: display device
+type: simnos
+help: execute the command "display device"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: display_device__variant_1.txt
+- name: variant_2
+  output: display_device__variant_2.txt
+- name: variant_3
+  output: display_device__variant_3.txt

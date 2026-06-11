@@ -1,0 +1,7 @@
+command: pct list
+type: simnos
+help: execute the command "pct list"
+mode:
+- user
+- enable
+output: pct_list.txt

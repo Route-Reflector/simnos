@@ -1,0 +1,7 @@
+command: show platform summary location all
+type: simnos
+help: execute the command "show platform summary location all"
+mode:
+- user
+- enable
+output: show_platform_summary_location_all.txt

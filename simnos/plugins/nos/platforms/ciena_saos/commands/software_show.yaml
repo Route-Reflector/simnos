@@ -1,0 +1,7 @@
+command: software show
+type: simnos
+help: execute the command "software show"
+mode:
+- user
+- enable
+output: software_show.txt

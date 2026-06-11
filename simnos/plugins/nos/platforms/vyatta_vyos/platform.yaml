@@ -1,0 +1,8 @@
+modes:
+  user:
+    prompt: "{{ base_prompt }}~$"
+  enable:
+    prompt: "{{ base_prompt }}#"
+initial_mode: user
+netmiko_device_type: vyatta_vyos
+ntc_platform: vyatta_vyos

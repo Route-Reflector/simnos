@@ -1,0 +1,6 @@
+command: no page
+type: simnos
+help: Execute the command no page. This automatically generated.
+mode:
+- user
+- enable

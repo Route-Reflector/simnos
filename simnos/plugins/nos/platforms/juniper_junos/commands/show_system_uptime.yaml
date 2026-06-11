@@ -1,0 +1,7 @@
+command: show system uptime
+type: simnos
+help: execute the command "show system uptime"
+mode:
+- user
+- enable
+output: show_system_uptime.txt

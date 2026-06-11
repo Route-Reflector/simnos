@@ -1,0 +1,6 @@
+command: terminal datadump
+type: simnos
+help: Execute the command terminal datadump. This automatically generated.
+mode:
+- user
+- enable

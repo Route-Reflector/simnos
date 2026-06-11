@@ -1,0 +1,6 @@
+command: return
+type: simnos
+help: return to user view from system view
+mode:
+- config
+new_mode: user

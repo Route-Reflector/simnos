@@ -1,0 +1,7 @@
+command: show nve vni
+type: simnos
+help: execute the command "show nve vni"
+mode:
+- user
+- enable
+output: show_nve_vni.txt

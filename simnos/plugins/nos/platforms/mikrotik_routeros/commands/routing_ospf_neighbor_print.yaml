@@ -1,0 +1,6 @@
+command: routing ospf neighbor print
+type: simnos
+help: execute the command "routing ospf neighbor print"
+mode:
+- user
+output: routing_ospf_neighbor_print.txt

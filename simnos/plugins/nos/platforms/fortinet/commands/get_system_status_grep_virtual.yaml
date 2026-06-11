@@ -1,0 +1,6 @@
+command: get system status | grep Virtual
+type: simnos
+help: get virtual domain status (filtered)
+mode:
+- user
+output: get_system_status_grep_virtual.txt

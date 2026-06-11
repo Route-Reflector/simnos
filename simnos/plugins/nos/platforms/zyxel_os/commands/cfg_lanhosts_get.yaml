@@ -1,0 +1,7 @@
+command: cfg lanhosts get
+type: simnos
+help: execute the command "cfg lanhosts get"
+mode:
+- user
+- enable
+output: cfg_lanhosts_get.txt

@@ -1,0 +1,7 @@
+command: quit
+type: simnos
+help: exit the terminal (user view only; from system view use `return` to go back
+  to user view)
+mode:
+- user
+exit: true

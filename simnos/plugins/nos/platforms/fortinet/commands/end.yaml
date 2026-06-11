@@ -1,0 +1,5 @@
+command: end
+type: simnos
+help: exit current mode
+mode:
+- user

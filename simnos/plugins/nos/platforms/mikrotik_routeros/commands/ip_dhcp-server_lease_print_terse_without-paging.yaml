@@ -1,0 +1,10 @@
+command: ip dhcp-server lease print terse without-paging
+type: simnos
+help: execute the command "ip dhcp-server lease print terse without-paging"
+mode:
+- user
+variants:
+- name: variant_1
+  output: ip_dhcp-server_lease_print_terse_without-paging__variant_1.txt
+- name: variant_2
+  output: ip_dhcp-server_lease_print_terse_without-paging__variant_2.txt

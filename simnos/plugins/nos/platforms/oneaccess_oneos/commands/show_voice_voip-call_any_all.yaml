@@ -1,0 +1,7 @@
+command: show voice voip-call any all
+type: simnos
+help: execute the command "show voice voip-call any all"
+mode:
+- user
+- enable
+output: show_voice_voip-call_any_all.txt

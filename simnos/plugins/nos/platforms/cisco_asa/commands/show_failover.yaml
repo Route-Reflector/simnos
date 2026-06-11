@@ -1,0 +1,7 @@
+command: show failover
+type: simnos
+help: execute the command "show failover"
+mode:
+- user
+- enable
+output: show_failover.txt

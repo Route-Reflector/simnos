@@ -1,0 +1,7 @@
+command: display vlan all
+type: simnos
+help: execute the command "display vlan all"
+mode:
+- user
+- config
+output: display_vlan_all.txt

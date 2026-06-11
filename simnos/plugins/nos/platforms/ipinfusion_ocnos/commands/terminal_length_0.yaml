@@ -1,0 +1,6 @@
+command: terminal length 0
+type: simnos
+help: disable pagination (netmiko session_preparation)
+mode:
+- user
+- enable

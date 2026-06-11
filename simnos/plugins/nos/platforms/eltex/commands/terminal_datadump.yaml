@@ -1,0 +1,6 @@
+command: terminal datadump
+type: simnos
+help: set terminal width to maximum
+mode:
+- user
+- enable

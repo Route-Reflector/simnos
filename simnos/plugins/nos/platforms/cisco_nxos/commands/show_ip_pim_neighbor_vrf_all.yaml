@@ -1,0 +1,7 @@
+command: show ip pim neighbor vrf all
+type: simnos
+help: execute the command "show ip pim neighbor vrf all"
+mode:
+- user
+- enable
+output: show_ip_pim_neighbor_vrf_all.txt

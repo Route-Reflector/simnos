@@ -1,0 +1,7 @@
+command: show sntp
+type: simnos
+help: execute the command "show sntp"
+mode:
+- user
+- enable
+output: show_sntp.txt

@@ -1,0 +1,7 @@
+command: show lag
+type: simnos
+help: execute the command "show lag"
+mode:
+- user
+- enable
+output: show_lag.txt

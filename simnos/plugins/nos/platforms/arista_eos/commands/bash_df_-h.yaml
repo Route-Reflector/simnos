@@ -1,0 +1,7 @@
+command: bash df -h
+type: simnos
+help: execute the command "bash df -h"
+mode:
+- user
+- enable
+output: bash_df_-h.txt

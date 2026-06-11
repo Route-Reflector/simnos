@@ -1,0 +1,6 @@
+command: show running nat-policy
+type: simnos
+help: execute the command "show running nat-policy"
+mode:
+- user
+output: show_running_nat-policy.txt

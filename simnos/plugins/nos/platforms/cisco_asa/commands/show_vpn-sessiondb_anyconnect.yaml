@@ -1,0 +1,7 @@
+command: show vpn-sessiondb anyconnect
+type: simnos
+help: execute the command "show vpn-sessiondb anyconnect"
+mode:
+- user
+- enable
+output: show_vpn-sessiondb_anyconnect.txt

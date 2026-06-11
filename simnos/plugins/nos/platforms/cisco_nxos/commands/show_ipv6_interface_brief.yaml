@@ -1,0 +1,7 @@
+command: show ipv6 interface brief
+type: simnos
+help: execute the command "show ipv6 interface brief"
+mode:
+- user
+- enable
+output: show_ipv6_interface_brief.txt

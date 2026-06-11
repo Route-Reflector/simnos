@@ -1,0 +1,6 @@
+command: get system status | grep Version
+type: simnos
+help: get system version (filtered)
+mode:
+- user
+output: get_system_status_grep_version.txt

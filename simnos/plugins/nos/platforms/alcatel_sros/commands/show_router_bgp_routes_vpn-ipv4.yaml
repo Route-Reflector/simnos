@@ -1,0 +1,7 @@
+command: show router bgp routes vpn-ipv4
+type: simnos
+help: execute the command "show router bgp routes vpn-ipv4"
+mode:
+- user
+- enable
+output: show_router_bgp_routes_vpn-ipv4.txt

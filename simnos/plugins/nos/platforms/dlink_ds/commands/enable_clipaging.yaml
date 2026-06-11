@@ -1,0 +1,7 @@
+command: enable clipaging
+type: simnos
+help: enters the mmi mode (machine-machine interface)
+mode:
+- user
+new_mode: user
+output: enable_clipaging.txt

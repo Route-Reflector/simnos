@@ -1,0 +1,6 @@
+command: screen-length disable
+type: simnos
+help: Execute the command screen-length disable. This automatically generated.
+mode:
+- user
+- enable

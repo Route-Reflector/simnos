@@ -1,0 +1,7 @@
+command: show radius summary
+type: simnos
+help: execute the command "show radius summary"
+mode:
+- user
+- enable
+output: show_radius_summary.txt

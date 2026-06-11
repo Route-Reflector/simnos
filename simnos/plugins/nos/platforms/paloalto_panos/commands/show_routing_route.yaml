@@ -1,0 +1,6 @@
+command: show routing route
+type: simnos
+help: execute the command "show routing route"
+mode:
+- user
+output: show_routing_route.txt

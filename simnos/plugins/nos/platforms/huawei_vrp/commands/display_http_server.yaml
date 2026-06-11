@@ -1,0 +1,7 @@
+command: display http server
+type: simnos
+help: execute the command "display http server"
+mode:
+- user
+- enable
+output: display_http_server.txt

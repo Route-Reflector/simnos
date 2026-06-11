@@ -1,0 +1,11 @@
+command: display eth-trunk
+type: simnos
+help: execute the command "display eth-trunk"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: display_eth-trunk__variant_1.txt
+- name: variant_2
+  output: display_eth-trunk__variant_2.txt

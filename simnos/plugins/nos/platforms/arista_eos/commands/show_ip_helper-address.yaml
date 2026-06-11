@@ -1,0 +1,7 @@
+command: show ip helper-address
+type: simnos
+help: execute the command "show ip helper-address"
+mode:
+- user
+- enable
+output: show_ip_helper-address.txt

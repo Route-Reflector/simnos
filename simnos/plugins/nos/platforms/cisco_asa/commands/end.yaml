@@ -1,0 +1,6 @@
+command: end
+type: simnos
+help: exit configuration mode
+mode:
+- config
+new_mode: enable

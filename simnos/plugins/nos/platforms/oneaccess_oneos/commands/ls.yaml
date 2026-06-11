@@ -1,0 +1,7 @@
+command: ls
+type: simnos
+help: execute the command "ls"
+mode:
+- user
+- enable
+output: ls.txt

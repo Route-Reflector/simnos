@@ -1,0 +1,7 @@
+command: show mobility sum
+type: simnos
+help: execute the command "show mobility sum"
+mode:
+- user
+- enable
+output: show_mobility_sum.txt

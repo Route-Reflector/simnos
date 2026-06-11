@@ -1,0 +1,6 @@
+command: interface print brief
+type: simnos
+help: execute the command "interface print brief"
+mode:
+- user
+output: interface_print_brief.txt

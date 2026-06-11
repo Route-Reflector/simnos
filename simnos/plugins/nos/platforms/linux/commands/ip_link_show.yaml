@@ -1,0 +1,7 @@
+command: ip link show
+type: simnos
+help: execute the command "ip link show"
+mode:
+- user
+- enable
+output: ip_link_show.txt

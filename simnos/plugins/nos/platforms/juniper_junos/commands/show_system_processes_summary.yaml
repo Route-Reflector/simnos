@@ -1,0 +1,7 @@
+command: show system processes summary
+type: simnos
+help: execute the command "show system processes summary"
+mode:
+- user
+- enable
+output: show_system_processes_summary.txt

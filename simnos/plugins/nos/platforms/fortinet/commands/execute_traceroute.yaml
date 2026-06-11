@@ -1,0 +1,10 @@
+command: execute traceroute
+type: simnos
+help: execute the command "execute traceroute"
+mode:
+- user
+variants:
+- name: variant_1
+  output: execute_traceroute__variant_1.txt
+- name: variant_2
+  output: execute_traceroute__variant_2.txt

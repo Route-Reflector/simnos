@@ -1,0 +1,7 @@
+command: show controllers hundredgige all
+type: simnos
+help: execute the command "show controllers hundredgige all"
+mode:
+- user
+- enable
+output: show_controllers_hundredgige_all.txt

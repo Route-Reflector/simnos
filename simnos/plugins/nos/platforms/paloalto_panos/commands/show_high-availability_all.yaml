@@ -1,0 +1,6 @@
+command: show high-availability all
+type: simnos
+help: execute the command "show high-availability all"
+mode:
+- user
+output: show_high-availability_all.txt

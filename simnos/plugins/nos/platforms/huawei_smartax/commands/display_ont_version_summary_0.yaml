@@ -1,0 +1,7 @@
+command: display ont version summary 0
+type: simnos
+help: execute the command "display ont version summary 0"
+mode:
+- user
+- enable
+output: display_ont_version_summary_0.txt

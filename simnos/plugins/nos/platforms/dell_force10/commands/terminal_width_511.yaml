@@ -1,0 +1,6 @@
+command: terminal width 511
+type: simnos
+help: Execute the command terminal width 511. This automatically generated.
+mode:
+- user
+- enable

@@ -1,0 +1,6 @@
+command: system clock print
+type: simnos
+help: execute the command "system clock print"
+mode:
+- user
+output: system_clock_print.txt

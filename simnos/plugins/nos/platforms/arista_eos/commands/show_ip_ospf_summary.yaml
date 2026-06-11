@@ -1,0 +1,7 @@
+command: show ip ospf summary
+type: simnos
+help: execute the command "show ip ospf summary"
+mode:
+- user
+- enable
+output: show_ip_ospf_summary.txt

@@ -1,0 +1,6 @@
+modes:
+  user:
+    prompt: "{{ base_prompt }}#"
+initial_mode: user
+netmiko_device_type: dlink_ds
+ntc_platform: dlink_ds

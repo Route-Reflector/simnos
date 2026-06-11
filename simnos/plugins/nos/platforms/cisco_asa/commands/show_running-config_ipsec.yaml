@@ -1,0 +1,7 @@
+command: show running-config ipsec
+type: simnos
+help: execute the command "show running-config ipsec"
+mode:
+- user
+- enable
+output: show_running-config_ipsec.txt

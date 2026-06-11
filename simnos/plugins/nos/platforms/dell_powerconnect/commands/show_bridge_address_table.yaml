@@ -1,0 +1,7 @@
+command: show bridge address table
+type: simnos
+help: execute the command "show bridge address table"
+mode:
+- user
+- enable
+output: show_bridge_address_table.txt

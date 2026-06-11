@@ -1,0 +1,6 @@
+command: show routing resource
+type: simnos
+help: execute the command "show routing resource"
+mode:
+- user
+output: show_routing_resource.txt

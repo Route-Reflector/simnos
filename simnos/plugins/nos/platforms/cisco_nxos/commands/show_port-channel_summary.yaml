@@ -1,0 +1,7 @@
+command: show port-channel summary
+type: simnos
+help: execute the command "show port-channel summary"
+mode:
+- user
+- enable
+output: show_port-channel_summary.txt

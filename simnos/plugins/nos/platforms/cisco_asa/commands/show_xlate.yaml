@@ -1,0 +1,7 @@
+command: show xlate
+type: simnos
+help: execute the command "show xlate"
+mode:
+- user
+- enable
+output: show_xlate.txt

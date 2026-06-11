@@ -1,0 +1,6 @@
+command: login
+type: simnos
+help: It enters the terminal
+mode:
+- user
+new_mode: enable

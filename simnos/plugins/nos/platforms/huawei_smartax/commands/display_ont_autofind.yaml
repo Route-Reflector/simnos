@@ -1,0 +1,7 @@
+command: display ont autofind
+type: simnos
+help: execute the command "display ont autofind"
+mode:
+- user
+- enable
+output: display_ont_autofind.txt

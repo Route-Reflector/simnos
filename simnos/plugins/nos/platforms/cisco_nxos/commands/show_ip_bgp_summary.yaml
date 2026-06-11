@@ -1,0 +1,7 @@
+command: show ip bgp summary
+type: simnos
+help: execute the command "show ip bgp summary"
+mode:
+- user
+- enable
+output: show_ip_bgp_summary.txt

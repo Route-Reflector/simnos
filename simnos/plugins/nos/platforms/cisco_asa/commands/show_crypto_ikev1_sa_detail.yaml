@@ -1,0 +1,7 @@
+command: show crypto ikev1 sa detail
+type: simnos
+help: execute the command "show crypto ikev1 sa detail"
+mode:
+- user
+- enable
+output: show_crypto_ikev1_sa_detail.txt

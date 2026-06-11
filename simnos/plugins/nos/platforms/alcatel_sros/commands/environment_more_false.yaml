@@ -1,0 +1,6 @@
+command: //environment more false
+type: simnos
+help: Execute the command //environment more false. This automatically generated.
+mode:
+- user
+- enable

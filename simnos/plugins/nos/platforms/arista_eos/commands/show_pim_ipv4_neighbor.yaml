@@ -1,0 +1,7 @@
+command: show pim ipv4 neighbor
+type: simnos
+help: execute the command "show pim ipv4 neighbor"
+mode:
+- user
+- enable
+output: show_pim_ipv4_neighbor.txt

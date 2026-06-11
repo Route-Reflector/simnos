@@ -1,0 +1,6 @@
+command: enable clipaging
+type: simnos
+help: Execute the command enable clipaging. This automatically generated.
+mode:
+- user
+- enable

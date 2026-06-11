@@ -1,0 +1,7 @@
+command: admin show vm
+type: simnos
+help: execute the command "admin show vm"
+mode:
+- user
+- enable
+output: admin_show_vm.txt

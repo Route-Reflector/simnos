@@ -1,0 +1,6 @@
+command: set cli screen-width 511
+type: simnos
+help: Execute the command set cli screen-width 511. This automatically generated.
+mode:
+- user
+- enable

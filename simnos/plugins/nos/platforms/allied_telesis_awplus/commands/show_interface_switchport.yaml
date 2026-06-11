@@ -1,0 +1,7 @@
+command: show interface switchport
+type: simnos
+help: execute the command "show interface switchport"
+mode:
+- user
+- enable
+output: show_interface_switchport.txt

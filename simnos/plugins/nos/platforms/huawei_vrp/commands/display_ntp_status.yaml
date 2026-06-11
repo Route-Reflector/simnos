@@ -1,0 +1,7 @@
+command: display ntp status
+type: simnos
+help: execute the command "display ntp status"
+mode:
+- user
+- enable
+output: display_ntp_status.txt

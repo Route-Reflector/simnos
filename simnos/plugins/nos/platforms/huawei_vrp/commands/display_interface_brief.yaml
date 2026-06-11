@@ -1,0 +1,7 @@
+command: display interface brief
+type: simnos
+help: execute the command "display interface brief"
+mode:
+- user
+- enable
+output: display_interface_brief.txt

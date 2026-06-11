@@ -1,0 +1,6 @@
+command: interface ethernet monitor name once
+type: simnos
+help: execute the command "interface ethernet monitor name once"
+mode:
+- user
+output: interface_ethernet_monitor_name_once.txt

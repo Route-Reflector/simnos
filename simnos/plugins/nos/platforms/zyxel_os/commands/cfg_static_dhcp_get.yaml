@@ -1,0 +1,7 @@
+command: cfg static dhcp get
+type: simnos
+help: execute the command "cfg static dhcp get"
+mode:
+- user
+- enable
+output: cfg_static_dhcp_get.txt

@@ -1,0 +1,6 @@
+command: ipv6 neighbor print without-paging
+type: simnos
+help: execute the command "ipv6 neighbor print without-paging"
+mode:
+- user
+output: ipv6_neighbor_print_without-paging.txt

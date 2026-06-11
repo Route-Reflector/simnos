@@ -1,0 +1,7 @@
+command: hostname
+type: simnos
+help: execute the command "hostname"
+mode:
+- user
+- enable
+output: hostname.txt

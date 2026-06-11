@@ -1,0 +1,7 @@
+command: qm list
+type: simnos
+help: execute the command "qm list"
+mode:
+- user
+- enable
+output: qm_list.txt

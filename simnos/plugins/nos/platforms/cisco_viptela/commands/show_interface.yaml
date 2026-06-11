@@ -1,0 +1,7 @@
+command: show interface
+type: simnos
+help: execute the command "show interface"
+mode:
+- user
+- enable
+output: show_interface.txt

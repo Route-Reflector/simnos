@@ -1,0 +1,7 @@
+command: cfg nat addr map get
+type: simnos
+help: execute the command "cfg nat addr map get"
+mode:
+- user
+- enable
+output: cfg_nat_addr_map_get.txt

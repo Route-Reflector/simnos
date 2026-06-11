@@ -1,0 +1,7 @@
+command: display link-aggregation verbose
+type: simnos
+help: execute the command "display link-aggregation verbose"
+mode:
+- user
+- config
+output: display_link-aggregation_verbose.txt

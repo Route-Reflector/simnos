@@ -1,0 +1,7 @@
+command: show ip arp detail vrf all
+type: simnos
+help: execute the command "show ip arp detail vrf all"
+mode:
+- user
+- enable
+output: show_ip_arp_detail_vrf_all.txt

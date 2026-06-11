@@ -1,0 +1,7 @@
+command: show ap config general
+type: simnos
+help: execute the command "show ap config general"
+mode:
+- user
+- enable
+output: show_ap_config_general.txt

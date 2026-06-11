@@ -1,0 +1,7 @@
+command: cfg lan get --Name name
+type: simnos
+help: execute the command "cfg lan get --Name name"
+mode:
+- user
+- enable
+output: cfg_lan_get_--name_name.txt

@@ -1,0 +1,7 @@
+command: show mac-addr-table
+type: simnos
+help: execute the command "show mac-addr-table"
+mode:
+- user
+- enable
+output: show_mac-addr-table.txt

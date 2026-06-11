@@ -1,0 +1,7 @@
+command: display version
+type: simnos
+help: execute the command "display version"
+mode:
+- user
+- enable
+output: display_version.txt

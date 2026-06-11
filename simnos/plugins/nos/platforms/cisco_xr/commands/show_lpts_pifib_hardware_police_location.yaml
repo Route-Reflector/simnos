@@ -1,0 +1,7 @@
+command: show lpts pifib hardware police location
+type: simnos
+help: execute the command "show lpts pifib hardware police location"
+mode:
+- user
+- enable
+output: show_lpts_pifib_hardware_police_location.txt

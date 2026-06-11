@@ -1,0 +1,7 @@
+command: show dhcp leases
+type: simnos
+help: execute the command "show dhcp leases"
+mode:
+- user
+- enable
+output: show_dhcp_leases.txt

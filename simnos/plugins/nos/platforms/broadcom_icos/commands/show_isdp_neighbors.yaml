@@ -1,0 +1,7 @@
+command: show isdp neighbors
+type: simnos
+help: execute the command "show isdp neighbors"
+mode:
+- user
+- enable
+output: show_isdp_neighbors.txt

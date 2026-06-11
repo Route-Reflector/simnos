@@ -1,0 +1,7 @@
+command: show sharing
+type: simnos
+help: execute the command "show sharing"
+mode:
+- user
+- enable
+output: show_sharing.txt

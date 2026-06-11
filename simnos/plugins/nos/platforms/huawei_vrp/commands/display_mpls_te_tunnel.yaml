@@ -1,0 +1,7 @@
+command: display mpls te tunnel
+type: simnos
+help: execute the command "display mpls te tunnel"
+mode:
+- user
+- enable
+output: display_mpls_te_tunnel.txt

@@ -1,0 +1,7 @@
+command: show mac security participants detail
+type: simnos
+help: execute the command "show mac security participants detail"
+mode:
+- user
+- enable
+output: show_mac_security_participants_detail.txt

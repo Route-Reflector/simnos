@@ -1,0 +1,7 @@
+command: show controllers fabric fia drops ingress location
+type: simnos
+help: execute the command "show controllers fabric fia drops ingress location"
+mode:
+- user
+- enable
+output: show_controllers_fabric_fia_drops_ingress_location.txt

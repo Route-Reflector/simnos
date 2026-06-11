@@ -1,0 +1,7 @@
+command: show mpls traffic-eng tunnels
+type: simnos
+help: execute the command "show mpls traffic-eng tunnels"
+mode:
+- user
+- enable
+output: show_mpls_traffic-eng_tunnels.txt

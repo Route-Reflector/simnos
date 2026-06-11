@@ -1,0 +1,7 @@
+command: fabric show vlan extended
+type: simnos
+help: execute the command "fabric show vlan extended"
+mode:
+- user
+- enable
+output: fabric_show_vlan_extended.txt

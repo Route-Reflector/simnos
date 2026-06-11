@@ -1,0 +1,7 @@
+command: show interface name
+type: simnos
+help: execute the command "show interface name"
+mode:
+- user
+- enable
+output: show_interface_name.txt

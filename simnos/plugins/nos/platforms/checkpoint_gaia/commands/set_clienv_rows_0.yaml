@@ -1,0 +1,6 @@
+command: set clienv rows 0
+type: simnos
+help: set the terminal width to full
+mode:
+- user
+- enable

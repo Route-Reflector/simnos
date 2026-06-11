@@ -1,0 +1,7 @@
+command: show interfaces all
+type: simnos
+help: execute the command "show interfaces all"
+mode:
+- user
+- enable
+output: show_interfaces_all.txt

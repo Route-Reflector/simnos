@@ -1,0 +1,7 @@
+command: vzlist
+type: simnos
+help: execute the command "vzlist"
+mode:
+- user
+- enable
+output: vzlist.txt

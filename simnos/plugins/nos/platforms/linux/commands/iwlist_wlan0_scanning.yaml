@@ -1,0 +1,11 @@
+command: iwlist wlan0 scanning
+type: simnos
+help: execute the command "iwlist wlan0 scanning"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: iwlist_wlan0_scanning__variant_1.txt
+- name: variant_2
+  output: iwlist_wlan0_scanning__variant_2.txt

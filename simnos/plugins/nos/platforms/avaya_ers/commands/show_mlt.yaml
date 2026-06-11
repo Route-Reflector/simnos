@@ -1,0 +1,7 @@
+command: show mlt
+type: simnos
+help: execute the command "show mlt"
+mode:
+- user
+- enable
+output: show_mlt.txt

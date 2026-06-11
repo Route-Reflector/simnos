@@ -1,0 +1,6 @@
+command: routing bgp peer print status
+type: simnos
+help: execute the command "routing bgp peer print status"
+mode:
+- user
+output: routing_bgp_peer_print_status.txt

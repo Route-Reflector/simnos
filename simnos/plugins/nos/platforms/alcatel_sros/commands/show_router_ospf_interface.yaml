@@ -1,0 +1,7 @@
+command: show router ospf interface
+type: simnos
+help: execute the command "show router ospf interface"
+mode:
+- user
+- enable
+output: show_router_ospf_interface.txt

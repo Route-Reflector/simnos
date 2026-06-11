@@ -1,0 +1,7 @@
+command: display ont wlan-info 0 1 2 0
+type: simnos
+help: execute the command "display ont wlan-info 0 1 2 0"
+mode:
+- user
+- enable
+output: display_ont_wlan-info_0_1_2_0.txt

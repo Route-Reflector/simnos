@@ -1,0 +1,7 @@
+command: show client detail
+type: simnos
+help: execute the command "show client detail"
+mode:
+- user
+- enable
+output: show_client_detail.txt

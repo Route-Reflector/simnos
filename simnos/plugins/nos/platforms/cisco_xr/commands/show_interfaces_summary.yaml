@@ -1,0 +1,7 @@
+command: show interfaces summary
+type: simnos
+help: execute the command "show interfaces summary"
+mode:
+- user
+- enable
+output: show_interfaces_summary.txt

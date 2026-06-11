@@ -1,0 +1,7 @@
+command: show rf-profile summary
+type: simnos
+help: execute the command "show rf-profile summary"
+mode:
+- user
+- enable
+output: show_rf-profile_summary.txt

@@ -1,0 +1,7 @@
+command: show chassis firmware
+type: simnos
+help: execute the command "show chassis firmware"
+mode:
+- user
+- enable
+output: show_chassis_firmware.txt

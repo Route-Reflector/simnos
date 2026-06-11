@@ -1,0 +1,7 @@
+command: show software-image
+type: simnos
+help: execute the command "show software-image"
+mode:
+- user
+- enable
+output: show_software-image.txt

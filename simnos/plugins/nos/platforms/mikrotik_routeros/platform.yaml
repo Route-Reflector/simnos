@@ -1,0 +1,6 @@
+modes:
+  user:
+    prompt: "[admin@{{ base_prompt }}] >"
+initial_mode: user
+netmiko_device_type: mikrotik_routeros
+ntc_platform: mikrotik_routeros

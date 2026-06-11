@@ -1,0 +1,7 @@
+command: show asp drop
+type: simnos
+help: execute the command "show asp drop"
+mode:
+- user
+- enable
+output: show_asp_drop.txt

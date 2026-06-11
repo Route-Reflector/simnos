@@ -1,0 +1,7 @@
+command: show vlan description
+type: simnos
+help: execute the command "show vlan description"
+mode:
+- user
+- enable
+output: show_vlan_description.txt

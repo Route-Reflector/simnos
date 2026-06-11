@@ -1,0 +1,7 @@
+command: screen-width 512
+type: simnos
+help: set terminal width (ONEOS6, returns error to trigger ONEOS5 fallback)
+mode:
+- user
+- enable
+output: screen-width_512.txt

@@ -1,0 +1,6 @@
+command: no page
+type: simnos
+help: Disable pagination
+mode:
+- user
+- enable

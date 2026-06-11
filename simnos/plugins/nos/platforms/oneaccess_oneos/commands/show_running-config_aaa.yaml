@@ -1,0 +1,7 @@
+command: show running-config aaa
+type: simnos
+help: execute the command "show running-config aaa"
+mode:
+- user
+- enable
+output: show_running-config_aaa.txt

@@ -1,0 +1,7 @@
+command: display patch-information
+type: simnos
+help: execute the command "display patch-information"
+mode:
+- user
+- enable
+output: display_patch-information.txt

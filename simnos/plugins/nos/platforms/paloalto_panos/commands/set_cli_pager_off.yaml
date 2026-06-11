@@ -1,0 +1,5 @@
+command: set cli pager off
+type: simnos
+help: disable paging
+mode:
+- user

@@ -1,0 +1,7 @@
+command: show ip arp
+type: simnos
+help: execute the command "show ip arp"
+mode:
+- user
+- enable
+output: show_ip_arp.txt

@@ -1,0 +1,10 @@
+command: fnsysctl ifconfig
+type: simnos
+help: execute the command "fnsysctl ifconfig"
+mode:
+- user
+variants:
+- name: variant_1
+  output: fnsysctl_ifconfig__variant_1.txt
+- name: variant_2
+  output: fnsysctl_ifconfig__variant_2.txt
