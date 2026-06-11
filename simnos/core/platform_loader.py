@@ -17,7 +17,6 @@ boundary just above.
 
 from dataclasses import replace
 import glob
-import logging
 import os
 
 from jinja2 import TemplateSyntaxError
@@ -32,8 +31,6 @@ from simnos.core.resolved_command import (
     ResolvedPlatform,
     compile_template,
 )
-
-log = logging.getLogger(__name__)
 
 PLATFORM_META_FILENAME = "platform.yaml"
 COMMANDS_SUBDIR = "commands"
