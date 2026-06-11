@@ -6,7 +6,13 @@ This module can be found at simnos/core/pydantic_models.py
 from pydantic import ValidationError
 import pytest
 
-from simnos.core.pydantic_models import InventoryDefaultSection, ModelHost, ModelNosCommand
+from simnos.core.pydantic_models import (
+    InventoryDefaultSection,
+    ModelCommandAuthoring,
+    ModelHost,
+    ModelNosCommand,
+    ModelPlatformMeta,
+)
 
 
 class TestPortRange:
@@ -63,3 +69,77 @@ class TestCommandHandlerField:
         """A non-callable, non-str output (int) is rejected."""
         with pytest.raises(ValidationError, match="output"):
             ModelNosCommand(output=42)  # ty: ignore[invalid-argument-type]
+
+
+class TestModelCommandAuthoring:
+    """Structural validation surface for the A3 per-command schema (#264 / D3).
+
+    These pin the boundary validation done by the model itself; the
+    filesystem/jinja semantic checks (file existence, mode-name resolution)
+    live in `test_platform_loader.py`.
+    """
+
+    def test_minimal_real_command(self):
+        model = ModelCommandAuthoring(command="show version", type="ntc", output="show_version.txt")
+        assert model.command == "show version"
+
+    def test_pure_alias(self):
+        model = ModelCommandAuthoring(command="sh ver", alias="show version", help="abbrev")
+        assert model.alias == "show version"
+
+    def test_rejects_two_output_channels(self):
+        with pytest.raises(ValidationError, match="at most one output channel"):
+            ModelCommandAuthoring(command="x", type="ntc", output="a.txt", output_template="a.j2")
+
+    def test_rejects_empty_mode_list(self):
+        with pytest.raises(ValidationError, match=r"mode: \[\] is rejected"):
+            ModelCommandAuthoring(command="x", type="ntc", mode=[])
+
+    def test_rejects_missing_type_on_real_command(self):
+        with pytest.raises(ValidationError, match="`type` is required"):
+            ModelCommandAuthoring(command="x", output="a.txt")
+
+    def test_rejects_alias_with_dispatch_fields(self):
+        with pytest.raises(ValidationError, match="pure reference"):
+            ModelCommandAuthoring(command="x", alias="y", output="a.txt")
+
+    def test_rejects_alias_with_type(self):
+        with pytest.raises(ValidationError, match="pure reference"):
+            ModelCommandAuthoring(command="x", alias="y", type="ntc")
+
+    def test_rejects_default_with_mode(self):
+        with pytest.raises(ValidationError, match="mode-agnostic"):
+            ModelCommandAuthoring(command="_default_", type="simnos", mode=["user"])
+
+    def test_allows_default_without_mode(self):
+        model = ModelCommandAuthoring(command="_default_", type="simnos", output="d.txt")
+        assert model.command == "_default_"
+
+    @pytest.mark.parametrize("ref", ["../evil.txt", "/etc/passwd", "sub/a.txt"])
+    def test_rejects_unsafe_output_path(self, ref):
+        with pytest.raises(ValidationError, match="bare filename"):
+            ModelCommandAuthoring(command="x", type="ntc", output=ref)
+
+    def test_rejects_unknown_field(self):
+        with pytest.raises(ValidationError, match="bogus"):
+            ModelCommandAuthoring(command="x", type="ntc", bogus=1)  # ty: ignore[unknown-argument]
+
+    def test_rejects_bad_type_literal(self):
+        with pytest.raises(ValidationError):
+            ModelCommandAuthoring(command="x", type="bogus")  # ty: ignore[invalid-argument-type]
+
+
+class TestModelPlatformMeta:
+    """Structural validation for the A3 per-platform schema (#264 / D2)."""
+
+    def test_minimal_platform(self):
+        model = ModelPlatformMeta(modes={"user": {"prompt": "{{ base_prompt }}>"}}, initial_mode="user")
+        assert model.initial_mode == "user"
+
+    def test_rejects_empty_modes(self):
+        with pytest.raises(ValidationError, match="at least one mode"):
+            ModelPlatformMeta(modes={}, initial_mode="user")
+
+    def test_rejects_initial_mode_not_in_modes(self):
+        with pytest.raises(ValidationError, match="initial_mode"):
+            ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="enable")
