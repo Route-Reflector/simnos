@@ -9,7 +9,6 @@ local docs serving (`docs`), platform docs generation
 from collections.abc import Iterable
 import glob
 import os
-import string
 import time
 
 from invoke import Exit, task
@@ -333,54 +332,6 @@ WARNING_MESSAGE = """
 """
 
 
-def render_template(template: str, platform: str, command: str, field: str) -> str:
-    """Render a YAML string template for the docs generator (build time).
-
-    Uses `str.format(base_prompt=platform)` against the legacy
-    ``platforms_yaml`` data: substitutes `{base_prompt}` and unescapes
-    `{{` / `}}` literals from `sync_ntc_commands.escape_format_braces`.
-
-    Build time is strict: besides re-raising the `FORMAT_ERRORS` catch set,
-    this rejects unsupported constructs that `str.format()` would happily
-    render (e.g. `{base_prompt!r}` or `{base_prompt:>20}`) — only a plain
-    `{base_prompt}` field and `{{` / `}}` escapes are supported. Every
-    failure surfaces as `RuntimeError` carrying the platform / command /
-    field context, so CI failures pinpoint the offending YAML entry
-    instead of dumping a contextless stack trace.
-
-    The runtime shell no longer uses `str.format` (it renders the A3
-    `ResolvedCommand` representation, #264); this build-time path still reads
-    the legacy yaml and is replaced when the docs generator moves to the new
-    loader (#264 PR-3 / D9). `FORMAT_ERRORS` is the frozen `str.format`
-    failure set, kept here until then.
-    """
-    # str.format failure modes, formerly shared with the runtime shell's
-    # _safe_format (removed in #264). Local to this build-time renderer now.
-    FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
-
-    try:
-        # Strict authoring check first: a malformed template raises ValueError
-        # out of parse() (caught below); a well-formed but unsupported
-        # construct (conversion / format spec / non-base_prompt field) would
-        # render silently, so it must be rejected explicitly.
-        for _, field_name, format_spec, conversion in string.Formatter().parse(template):
-            if field_name is None:
-                continue
-            if field_name != "base_prompt" or conversion is not None or format_spec:
-                raise RuntimeError(
-                    f"Failed to format {field} for {platform}/{command!r}: unsupported template "
-                    f"construct (field_name={field_name!r}, conversion={conversion!r}, "
-                    f"format_spec={format_spec!r}). Only '{{base_prompt}}' substitution and "
-                    f"'{{{{' / '}}}}' escapes are supported."
-                )
-        return template.format(base_prompt=platform)
-    except FORMAT_ERRORS as exc:
-        raise RuntimeError(
-            f"Failed to format {field} for {platform}/{command!r}: {exc!r}. "
-            f"Check that any literal '{{' / '}}' in YAML is escaped as '{{{{' / '}}}}'."
-        ) from exc
-
-
 _PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"})
 
 # Curated nav display names that the default derivation (title-casing each
@@ -498,55 +449,54 @@ def sweep_orphaned_platform_docs(
 
 @task
 def gen_docs_platform_commands(ctx):
-    """
-    Generate platform specific commands in the docs.
-    """
-    platforms_folder: str = PLATFORMS_YAML_DIR
-    docs_folder: str = "docs/platforms"
-    files: list[str] = os.listdir(platforms_folder)
-    platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
+    """Generate platform-specific command docs from the A3 ``ResolvedCommand``.
 
-    # A3-migrated platforms have no legacy yaml to read here; their doc
-    # generation moves to the ResolvedCommand path in PR-3 (#264 / D9). Until
-    # then their existing docs must be preserved (not swept) and kept in the
-    # nav — otherwise running this task after the pilot's yaml deletion would
-    # delete docs/platforms/<a3>.md and drop it from mkdocs.yml (1st round claude #4).
-    a3_platforms: list[str] = _a3_platform_names()
+    Reads each A3 platform through the runtime loader (#264 / D9) instead of the
+    legacy ``platforms_yaml`` + ``str.format`` path: literal output is emitted
+    verbatim, template output is rendered with the platform name as the device
+    ``base_prompt`` (matching the old build-time substitution). Only the A3
+    static surface is documented — py-module dynamic handlers were never in the
+    docs (the old generator read yaml only), so the coverage is unchanged.
+    """
+    # Lazy import: keep `invoke --list` / lint-only tasks free of the pydantic /
+    # jinja2 load cost unless this task actually runs (same paradigm as
+    # `netmiko_check`).
+    from simnos.core.platform_loader import load_platform_dir
+
+    docs_folder: str = "docs/platforms"
+    platforms: list[str] = _a3_platform_names()
 
     for platform in platforms:
         print(f"Generating Platform: {platform}")
-        with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
+        resolved = load_platform_dir(os.path.join(PLATFORMS_A3_DIR, platform))
         with open(f"{docs_folder}/{platform}.md", "w", encoding="utf-8") as platforms_file:
             platforms_file.write(f"# {platform}\n\n")
             platforms_file.write(WARNING_MESSAGE)
             platforms_file.write("## Commands\n\n")
-            for command, details in data["commands"].items():
+            for command, rc in resolved.commands.items():
                 platforms_file.write(f"### {command}\n\n")
-                output = details.get("output")
-                if not output:
+                if rc.output.kind == "none":
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    rendered = render_template(output, platform, command, "output")
+                    # `base_prompt` = platform name (the old build-time choice);
+                    # strip the file-convention trailing newline for display.
+                    rendered = (rc.output.render(platform) or "").rstrip("\n")
                     platforms_file.write(f"**Output:**\n```\n{rendered}\n```\n\n")
-                platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
+                platforms_file.write(f"**Help:** {rc.help}\n\n")
                 platforms_file.write("**Prompt:**\n")
-                prompts = details.get("prompt", [])
-                if not isinstance(prompts, list):
-                    prompts = [prompts]
-                for prompt in prompts:
-                    rendered = render_template(prompt, platform, command, "prompt")
-                    platforms_file.write(f"- {rendered}\n")
+                # The modes the command is visible in, rendered in canonical
+                # order (user/enable/config). An all-modes command (empty `modes`,
+                # the legacy prompt-omission successor) lists none — same as the
+                # old generator emitting no prompt lines for an omitted prompt.
+                for mode_name, mode in resolved.modes.items():
+                    if mode_name in rc.modes:
+                        platforms_file.write(f"- {mode.render_prompt(platform)}\n")
                 platforms_file.write("\n")
 
-    # dedupe: during the PR-3 migration window both forms can briefly coexist
-    # (the converter does not delete the legacy yaml), which would otherwise put
-    # a platform in the nav twice (2nd round claude #5b).
-    all_platforms = sorted(set(platforms) | set(a3_platforms))
-    for orphan in sweep_orphaned_platform_docs(docs_folder, all_platforms):
+    for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
         print(f"Removed orphaned doc: {orphan}")
 
-    rewrite_mkdocs_platforms_nav(all_platforms)
+    rewrite_mkdocs_platforms_nav(platforms)
     print("Regenerated mkdocs.yml Platforms nav")
 
 

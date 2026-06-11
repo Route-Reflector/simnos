@@ -16,6 +16,36 @@
 **Prompt:**
 - ericsson_ipos>
 
+### enable clipaging
+
+**Output:** None
+
+**Help:** Execute the command enable clipaging. This automatically generated.
+
+**Prompt:**
+- ericsson_ipos>
+- ericsson_ipos#
+
+### login
+
+**Output:** None
+
+**Help:** Execute the command login. This automatically generated.
+
+**Prompt:**
+- ericsson_ipos>
+- ericsson_ipos#
+
+### set cli screen-width 511
+
+**Output:** None
+
+**Help:** Execute the command set cli screen-width 511. This automatically generated.
+
+**Prompt:**
+- ericsson_ipos>
+- ericsson_ipos#
+
 ### show arp
 
 **Output:**
@@ -91,10 +121,19 @@ Context   :OM-Power                       Context id  : 0x40080007
 Host              Hardware address    Ttl    Type  Circuit
 10.10.10.161      98:a4:04:a2:dc:e5   -      ARPA  1/5 vlan-id 3911
 10.10.10.162      00:20:85:ef:bb:aa   2657   ARPA  1/5 vlan-id 3911
-
 ```
 
 **Help:** execute the command "show arp"
+
+**Prompt:**
+- ericsson_ipos>
+- ericsson_ipos#
+
+### show curpriv
+
+**Output:** None
+
+**Help:** Execute the command show curpriv. This automatically generated.
 
 **Prompt:**
 - ericsson_ipos>
@@ -112,7 +151,6 @@ C-BJAHY-01      Virtual_Interface_ 1p U    Up   22     801a.8811.f1a4  04d20h01
 0102.1905.0009  Virtual_Interface_ 3p U    Up   23     9aac.0480.2d1a  04d20h01
 
 Total IS-IS Adjacenc(ies):   4
-
 ```
 
 **Help:** execute the command "show isis adjacency"
@@ -146,7 +184,6 @@ slad / mloam-service-layer component version: 0.0.0
 Built by nobody Sat Jan 1 00:00:00 UTC 2000
 Copyright (C) 1998-2020, Ericsson AB. All rights reserved.
 Router Up Time -  10 hours 48 minutes 41 seconds
-
 ```
 
 **Help:** execute the command "show version"
@@ -159,37 +196,7 @@ Router Up Time -  10 hours 48 minutes 41 seconds
 
 **Output:** None
 
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ericsson_ipos>
-- ericsson_ipos#
-
-### terminal width 512
-
-**Output:** None
-
-**Help:** Execute the command terminal width 512. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ericsson_ipos>
-- ericsson_ipos#
-
-### show curpriv
-
-**Output:** None
-
-**Help:** Execute the command show curpriv. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ericsson_ipos>
-- ericsson_ipos#
-
-### set cli screen-width 511
-
-**Output:** None
-
-**Help:** Execute the command set cli screen-width 511. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal length 0. This automatically generated.
 
 **Prompt:**
 - ericsson_ipos>
@@ -199,27 +206,17 @@ Router Up Time -  10 hours 48 minutes 41 seconds
 
 **Output:** None
 
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - ericsson_ipos>
 - ericsson_ipos#
 
-### enable clipaging
+### terminal width 512
 
 **Output:** None
 
-**Help:** Execute the command enable clipaging. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ericsson_ipos>
-- ericsson_ipos#
-
-### login
-
-**Output:** None
-
-**Help:** Execute the command login. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal width 512. This automatically generated.
 
 **Prompt:**
 - ericsson_ipos>

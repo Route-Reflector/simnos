@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -400,7 +411,6 @@ Session Interface VRF       Source IP                               Destination 
 ------- --------- --------- --------------------------------------- --------------------------------------- -------- ------------ ------------
 1       2/1/28    default   172.25.0.190                            172.25.0.189                            enabled  up           bgp
 2       1/1/28    default   172.25.0.186                            172.25.0.185                            enabled  up           bgp
-
 ```
 
 **Help:** execute the command "show bfd all-vrfs"
@@ -951,7 +961,6 @@ Interface 1/1/17 is down
  Auto-negotiation is on
  Flow-control: off 
  Error-control: off 
-
 ```
 
 **Help:** execute the command "show interface"
@@ -1401,7 +1410,6 @@ Neighbor Port-ID               : 1/1/1
 Neighbor Port-Desc             : 1/1/1
 Neighbor Port VLAN ID          : 3560
 TTL                            : 120
-
 ```
 
 **Help:** execute the command "show lldp neighbors-info detail"
@@ -1472,7 +1480,6 @@ Time Zone          : UTC
 Up Time            : 12 minutes
 CPU Util (%)       : 15
 Memory Usage (%)   : 26
-
 ```
 
 **Help:** execute the command "show system"
@@ -1491,57 +1498,9 @@ VLAN  Name                              Status  Reason                  Type    
 1     DEFAULT_VLAN_1                    up      ok                      default     1/1/34-1/1/52
 3072  mgmt                              up      ok                      static      1/1/2-1/1/4,1/1/6-1/1/8,
                                                                                     1/1/17-1/1/19,1/1/47-1/1/52
-
 ```
 
 **Help:** execute the command "show vlan"
-
-**Prompt:**
-- aruba_aoscx>
-- aruba_aoscx#
-
-### show vsf detail
-
-**Output:**
-```
-VSF Stack
-	MAC Address              : 88:3a:30:97:d0:40
-	Secondary                : 2
-	Topology                 : chain
-	Status                   : No Split
-	Split Detection Method   : None
-	Software Version         : FL.10.05.0021
-	Name                     : Aruba-VSF-6300
-	Contact                  : email@address.com
-	Location                 : ThisIsaRoom Somewhere
-Member ID                        : 1
-	MAC Address              : 88:3a:30:97:d0:40
-	Type                     : JL658A
-	Model                    : 6300M 24-port SFP+ and 4-port SFP56 Switch
-	Status                   : Master
-	ROM Version              : FL.01.07.0002
-	Serial Number            : LTRSN123124
-	Uptime                   : 8 weeks, 6 days, 18 hours, 26 minutes
-	CPU Utilization          : 9%
-	Memory Utilization       : 18%
-	VSF Link 1               : Up, connected to peer member 2, link 1
-	VSF Link 2               :
-Member ID                        : 2
-	MAC Address              : 88:3a:30:96:4d:c0
-	Type                     : JL658A
-	Model                    : 6300M 24-port SFP+ and 4-port SFP56 Switch
-	Status                   : Standby
-	ROM Version              : FL.01.07.0002
-	Serial Number            : LTRSN123124
-	Uptime                   : 8 weeks, 6 days, 18 hours, 25 minutes
-	CPU Utilization          : 1%
-	Memory Utilization       : 11%
-	VSF Link 1               : Up, connected to peer member 1, link 1
-	VSF Link 2
-
-```
-
-**Help:** execute the command "show vsf detail"
 
 **Prompt:**
 - aruba_aoscx>
@@ -1772,7 +1731,6 @@ VRF Name   : VOIP
         vlan305                  up
         vlan310                  up
         vlan928                  up
-
 ```
 
 **Help:** execute the command "show vrf"
@@ -1781,14 +1739,47 @@ VRF Name   : VOIP
 - aruba_aoscx>
 - aruba_aoscx#
 
-### _default_
+### show vsf detail
 
 **Output:**
 ```
-% Invalid input detected
+VSF Stack
+	MAC Address              : 88:3a:30:97:d0:40
+	Secondary                : 2
+	Topology                 : chain
+	Status                   : No Split
+	Split Detection Method   : None
+	Software Version         : FL.10.05.0021
+	Name                     : Aruba-VSF-6300
+	Contact                  : email@address.com
+	Location                 : ThisIsaRoom Somewhere
+Member ID                        : 1
+	MAC Address              : 88:3a:30:97:d0:40
+	Type                     : JL658A
+	Model                    : 6300M 24-port SFP+ and 4-port SFP56 Switch
+	Status                   : Master
+	ROM Version              : FL.01.07.0002
+	Serial Number            : LTRSN123124
+	Uptime                   : 8 weeks, 6 days, 18 hours, 26 minutes
+	CPU Utilization          : 9%
+	Memory Utilization       : 18%
+	VSF Link 1               : Up, connected to peer member 2, link 1
+	VSF Link 2               :
+Member ID                        : 2
+	MAC Address              : 88:3a:30:96:4d:c0
+	Type                     : JL658A
+	Model                    : 6300M 24-port SFP+ and 4-port SFP56 Switch
+	Status                   : Standby
+	ROM Version              : FL.01.07.0002
+	Serial Number            : LTRSN123124
+	Uptime                   : 8 weeks, 6 days, 18 hours, 25 minutes
+	CPU Utilization          : 1%
+	Memory Utilization       : 11%
+	VSF Link 1               : Up, connected to peer member 1, link 1
+	VSF Link 2
 ```
 
-**Help:** default output for unknown commands
+**Help:** execute the command "show vsf detail"
 
 **Prompt:**
 - aruba_aoscx>

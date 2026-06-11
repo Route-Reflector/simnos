@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+CLINFR0329 Invalid command:
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -15,6 +26,20 @@
 
 **Prompt:**
 - checkpoint_gaia>
+
+### fw stat
+
+**Output:**
+```
+HOST      POLICY     DATE
+localhost Example-Policy 19Oct2017 16:34:20 :  [>Mgmt] [<Mgmt] [>eth1-01.100] [<eth1-01.100] [>eth1-01] [<eth1-01]
+```
+
+**Help:** execute the command "fw stat"
+
+**Prompt:**
+- checkpoint_gaia>
+- checkpoint_gaia#
 
 ### set clienv rows 0
 
@@ -26,32 +51,22 @@
 - checkpoint_gaia>
 - checkpoint_gaia#
 
-### show domainname
+### show arp dynamic all
 
 **Output:**
 ```
-Domain name  example.com
+Dynamic Arp Parameters
 
+IP Address                 Mac Address
+192.168.13.233                  BC:30:5B:B5:76:DB
+10.19.252.42                    74:8E:F8:A4:59:60
+172.31.254.101                  60:9C:9F:3B:7E:40
+172.19.4.144                    00:50:56:9A:41:8A
+10.200.12.61                    A0:D3:C1:FB:61:31
+192.168.13.146                  A4:5D:36:2B:58:7C
 ```
 
-**Help:** execute the command "show domainname"
-
-**Prompt:**
-- checkpoint_gaia>
-- checkpoint_gaia#
-
-### show version all
-
-**Output:**
-```
-Product version Check Point Gaia R77.30
-OS build 204
-OS kernel version 2.6.18-92cp
-OS edition 32-bit
-
-```
-
-**Help:** execute the command "show version all"
+**Help:** execute the command "show arp dynamic all"
 
 **Prompt:**
 - checkpoint_gaia>
@@ -75,9 +90,6 @@ Power supply 1 name: Power Supply #1
 Power supply 1 status: Up
 Power supply 2 name: Power Supply #2
  Power supply 2 status: Up
-
-
-
 ```
 
 **Help:** execute the command "show asset all"
@@ -86,18 +98,33 @@ Power supply 2 name: Power Supply #2
 - checkpoint_gaia>
 - checkpoint_gaia#
 
-### show virtual-system all
+### show dns
 
 **Output:**
 ```
-Virtual systems list
-VS ID       VS NAME
-0           0
-1           gandalf_VR01
-2           gandalf_SRCXT-VS01
+DNS setup
+Name                  Value                 
+
+Domain                test.com            
+DNS server            1.1.1.1
+DNS server            2.2.2.2
+DNS server              
 ```
 
-**Help:** execute the command "show virtual-system all"
+**Help:** execute the command "show dns"
+
+**Prompt:**
+- checkpoint_gaia>
+- checkpoint_gaia#
+
+### show domainname
+
+**Output:**
+```
+Domain name  example.com
+```
+
+**Help:** execute the command "show domainname"
 
 **Prompt:**
 - checkpoint_gaia>
@@ -274,23 +301,52 @@ Statistics:
 - checkpoint_gaia>
 - checkpoint_gaia#
 
-### show arp dynamic all
+### show ipv6 route
 
 **Output:**
 ```
-Dynamic Arp Parameters
+Codes: C - Connected, S - Static, B - BGP, A - Aggregate,
+       O - OSPFv3 IntraArea (IA - InterArea, E - External),
+       K - Kernel Remnant, H - Hidden, P - Suppressed,
+       U - Unreachable, i - Inactive
 
-IP Address                 Mac Address
-192.168.13.233                  BC:30:5B:B5:76:DB
-10.19.252.42                    74:8E:F8:A4:59:60
-172.31.254.101                  60:9C:9F:3B:7E:40
-172.19.4.144                    00:50:56:9A:41:8A
-10.200.12.61                    A0:D3:C1:FB:61:31
-192.168.13.146                  A4:5D:36:2B:58:7C
-
+C         ::1/128                  is directly connected, lo
+C         2001:db8:a::/64  is directly connected, eth1-02.100
+                                       Comment-Network-1
+S         2001:db8:b::/64  via fe80::aaa:65:111, eth1-01.100, cost 0, age 4237508
+                                       Comment-static-Route-1
 ```
 
-**Help:** execute the command "show arp dynamic all"
+**Help:** execute the command "show ipv6 route"
+
+**Prompt:**
+- checkpoint_gaia>
+- checkpoint_gaia#
+
+### show lom
+
+**Output:**
+```
+Firmware Revision : 2.2
+IP Address : 192.168.0.100
+```
+
+**Help:** execute the command "show lom"
+
+**Prompt:**
+- checkpoint_gaia>
+- checkpoint_gaia#
+
+### show ntp servers
+
+**Output:**
+```
+IP Address               Type              Version  
+1.1.1.1                  Primary           3        
+2.2.2.2                  Secondary         3   
+```
+
+**Help:** execute the command "show ntp servers"
 
 **Prompt:**
 - checkpoint_gaia>
@@ -311,7 +367,6 @@ S         10.0.0.0/24        via 10.1.1.254, eth1-01.100, cost 0, age 4238351
                                   Comment-static-Route-1
 C         10.1.1.0/24      is directly connected, eth1.111
                                   Comment-Network-1
-
 ```
 
 **Help:** execute the command "show route"
@@ -320,90 +375,34 @@ C         10.1.1.0/24      is directly connected, eth1.111
 - checkpoint_gaia>
 - checkpoint_gaia#
 
-### show ntp servers
+### show version all
 
 **Output:**
 ```
-IP Address               Type              Version  
-1.1.1.1                  Primary           3        
-2.2.2.2                  Secondary         3   
-
+Product version Check Point Gaia R77.30
+OS build 204
+OS kernel version 2.6.18-92cp
+OS edition 32-bit
 ```
 
-**Help:** execute the command "show ntp servers"
+**Help:** execute the command "show version all"
 
 **Prompt:**
 - checkpoint_gaia>
 - checkpoint_gaia#
 
-### show ipv6 route
+### show virtual-system all
 
 **Output:**
 ```
-Codes: C - Connected, S - Static, B - BGP, A - Aggregate,
-       O - OSPFv3 IntraArea (IA - InterArea, E - External),
-       K - Kernel Remnant, H - Hidden, P - Suppressed,
-       U - Unreachable, i - Inactive
-
-C         ::1/128                  is directly connected, lo
-C         2001:db8:a::/64  is directly connected, eth1-02.100
-                                       Comment-Network-1
-S         2001:db8:b::/64  via fe80::aaa:65:111, eth1-01.100, cost 0, age 4237508
-                                       Comment-static-Route-1
-
+Virtual systems list
+VS ID       VS NAME
+0           0
+1           gandalf_VR01
+2           gandalf_SRCXT-VS01
 ```
 
-**Help:** execute the command "show ipv6 route"
-
-**Prompt:**
-- checkpoint_gaia>
-- checkpoint_gaia#
-
-### fw stat
-
-**Output:**
-```
-HOST      POLICY     DATE
-localhost Example-Policy 19Oct2017 16:34:20 :  [>Mgmt] [<Mgmt] [>eth1-01.100] [<eth1-01.100] [>eth1-01] [<eth1-01]
-
-```
-
-**Help:** execute the command "fw stat"
-
-**Prompt:**
-- checkpoint_gaia>
-- checkpoint_gaia#
-
-### show dns
-
-**Output:**
-```
-DNS setup
-Name                  Value                 
-
-Domain                test.com            
-DNS server            1.1.1.1
-DNS server            2.2.2.2
-DNS server              
-
-```
-
-**Help:** execute the command "show dns"
-
-**Prompt:**
-- checkpoint_gaia>
-- checkpoint_gaia#
-
-### show lom
-
-**Output:**
-```
-Firmware Revision : 2.2
-IP Address : 192.168.0.100
-
-```
-
-**Help:** execute the command "show lom"
+**Help:** execute the command "show virtual-system all"
 
 **Prompt:**
 - checkpoint_gaia>

@@ -7,6 +7,23 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+Available commands:
+..                  ?                   cable_diag          clear
+config              create              delete              dir
+disable             download            drv                 enable
+login               logout              ping                reboot
+reconfig            reset               save                show
+telnet              upload
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -21,7 +38,8 @@
 **Output:**
 ```
 Command: disable clipaging
-Success.
+
+Success.
 ```
 
 **Help:** enters the mmi mode (machine-machine interface)

@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Error: Invalid input at "^" marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -27,43 +38,9 @@ Internet    192.168.168.11        0   e5:97:c1:0e:cb:b7   Ma 0/0      -         
 Internet    192.168.168.130       0   8a:72:f4:ef:fe:e3   Ma 0/0      -               CP
 Internet    192.168.186.99        6   5d:7c:2f:d5:62:57   Te 0/22    Vl 10            CP
 Internet    192.168.186.254       -   5d:7c:2f:d5:62:58      -       Vl 10            CP
-
 ```
 
 **Help:** execute the command "show arp"
-
-**Prompt:**
-- dell_force10>
-- dell_force10#
-
-### show vlan
-
-**Output:**
-```
-
-Codes: * - Default VLAN, G - GVRP VLANs, P - Primary, C - Community, I - Isolated
-Q: U - Untagged, T - Tagged
-   x - Dot1x untagged, X - Dot1x tagged
-   G - GVRP tagged, M - Vlan-stack, H - Hyperpull tagged
-
-    NUM    Status    Description                     Q Ports
-*   1      Inactive                                  U Te 0/42-43
-                                                     U Fo 0/48,56,60
-    12     Inactive                                  U Te 0/0-9,45-47
-    13     Inactive  myvlan13                        
-    14     Inactive                                  
-    100    Inactive  pixelrebel is awesome           T Te 0/30
-                                                     U Te 0/40-41,44
-                                                     U Fo 0/52
-    200    Inactive                                  
-    330    Inactive  tagged example                  T Te 0/30,35-37
-                                                     U Te 0/31-34,38-39
-    351    Inactive  dev 351 vlan                    U Te 0/10-19
-    380    Active    dev-VLAN 380                    U Te 0/20-29
-
-```
-
-**Help:** execute the command "show vlan"
 
 **Prompt:**
 - dell_force10>
@@ -136,27 +113,6 @@ Port-channel 128              unassigned      YES None   up                    u
 - dell_force10>
 - dell_force10#
 
-### show vlan brief
-
-**Output:**
-```
-VLAN Name                             STG   MAC Aging IP Address         
----- -------------------------------- ----  --------- ------------------ 
-1                                     0     1800      unassigned         
-12                                    0     1800      10.10.10.254/24    
-13   thirteen                         0     1800      192.168.100.0/22         
-14   fourteen                         0     1800      unassigned         
-15   fifteen                          0     1800      unassigned         
-67   sixty seven                      0     1800      unassigned         
-
-```
-
-**Help:** execute the command "show vlan brief"
-
-**Prompt:**
-- dell_force10>
-- dell_force10#
-
 ### show version
 
 **Output:**
@@ -187,11 +143,53 @@ Control Processor: Freescale QorIQ P2020 with 2 Gbytes (2147483648 bytes) of mem
 - dell_force10>
 - dell_force10#
 
-### terminal width 511
+### show vlan
 
-**Output:** None
+**Output:**
+```
 
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+Codes: * - Default VLAN, G - GVRP VLANs, P - Primary, C - Community, I - Isolated
+Q: U - Untagged, T - Tagged
+   x - Dot1x untagged, X - Dot1x tagged
+   G - GVRP tagged, M - Vlan-stack, H - Hyperpull tagged
+
+    NUM    Status    Description                     Q Ports
+*   1      Inactive                                  U Te 0/42-43
+                                                     U Fo 0/48,56,60
+    12     Inactive                                  U Te 0/0-9,45-47
+    13     Inactive  myvlan13                        
+    14     Inactive                                  
+    100    Inactive  pixelrebel is awesome           T Te 0/30
+                                                     U Te 0/40-41,44
+                                                     U Fo 0/52
+    200    Inactive                                  
+    330    Inactive  tagged example                  T Te 0/30,35-37
+                                                     U Te 0/31-34,38-39
+    351    Inactive  dev 351 vlan                    U Te 0/10-19
+    380    Active    dev-VLAN 380                    U Te 0/20-29
+```
+
+**Help:** execute the command "show vlan"
+
+**Prompt:**
+- dell_force10>
+- dell_force10#
+
+### show vlan brief
+
+**Output:**
+```
+VLAN Name                             STG   MAC Aging IP Address         
+---- -------------------------------- ----  --------- ------------------ 
+1                                     0     1800      unassigned         
+12                                    0     1800      10.10.10.254/24    
+13   thirteen                         0     1800      192.168.100.0/22         
+14   fourteen                         0     1800      unassigned         
+15   fifteen                          0     1800      unassigned         
+67   sixty seven                      0     1800      unassigned         
+```
+
+**Help:** execute the command "show vlan brief"
 
 **Prompt:**
 - dell_force10>
@@ -201,7 +199,17 @@ Control Processor: Freescale QorIQ P2020 with 2 Gbytes (2147483648 bytes) of mem
 
 **Output:** None
 
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal length 0. This automatically generated.
+
+**Prompt:**
+- dell_force10>
+- dell_force10#
+
+### terminal width 511
+
+**Output:** None
+
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - dell_force10>

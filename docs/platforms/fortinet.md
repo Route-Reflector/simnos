@@ -7,26 +7,571 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### get system status | grep Version
+### config system console
 
-**Output:**
-```
-Version: FortiGate-1500D v6.0.7,build0302,191112 (GA)
-```
+**Output:** None
 
-**Help:** get system version (filtered)
+**Help:** enter system console config
 
 **Prompt:**
 - fortinet # 
 
-### get system status | grep Virtual
+### diagnose lldprx port neighbor details port-name
 
 **Output:**
 ```
-Virtual domain configuration: disable
+1 port: 6
+1 port.txt: lan1
+1 mac: 00:11:22:33:44:55
+1 chassis.type: 4
+1 chassis.type.txt: interface-mac
+1 chassis.data: 00:11:22:33:44:55
+1 port.id.type: 5
+1 port.id.type.txt: interface-name
+1 port.id.len: 20
+1 port.id.data: GigabitEthernet1/0/5
+1 ttl: 120
+1 port.desc.len: 10
+1 port.desc.data: Port
+1 system.name.len: 15
+1 system.name.data: Switch
+1 system.desc.len: 179
+1 system.desc.data: Huawei Switch S5735-L48T4S-A1
+Huawei Versatile Routing Platform Software
+VRP (R) software, Version 5.170 (S5735 V200R022C00SPC500)
+Copyright (C) 2000-2022 HUAWEI TECH Co., Ltd.
+1 system.caps.available: 0014
+1 system.caps.available.txt: bridge router
+1 system.caps.enabled: 0014
+1 system.caps.enabled.txt: bridge router
+1 address.count: 1
+1 address.1.type: 1
+1 address.1.type.txt: ipv4
+1 address.1.len: 4
+1 address.1.addr: aaa.bbb.ccc.ddd
+1 address.1.addr.interface.type: 2
+1 address.1.addr.interface.type.txt: if-index
+1 address.1.addr.interface.number: 269
+1 vlan.id: 1
+1 vlan.protocol.count: 1
+1 vlan.protocol.1.flag: 0
+1 vlan.protocol.1.flag.txt:
+1 vlan.protocol.1.id: 0
+1 vlan.name.count: 1
+1 vlan.name.1.id: 1
+1 vlan.name.1.len: 9
+1 vlan.name.1.data: VLAN 0001
+1 aggregation.status: 1
+1 aggregation.status.txt: capable
+1 aggregation.port: 0
+1 mac_phy.auto: 3
+1 mac_phy.auto.txt: supported enabled
+1 mac_phy.pmd: 7c05
+1 mac_phy.pmd.txt: 10BaseT 10BaseTFD 100BaseT4 100BaseTX 100baseTXFD 1000baseXFd
+1 mac_phy.mau: 001e
+1 mac_phy.mau.txt: 1000baseTFD
+1 power.status: 0
+1 power.status.txt: PD
+1 power.pair: 0
+1 power.class: 0
+1 max-frame-size: 10240
 ```
 
-**Help:** get virtual domain status (filtered)
+**Help:** execute the command "diagnose lldprx port neighbor details port-name"
+
+**Prompt:**
+- fortinet # 
+
+### diagnose sys top
+
+**Output:**
+```
+Run Time:  12 days, 3 hours and 4 minutes
+0U, 0N, 0S, 100I, 0WA, 0HI, 0SI, 0ST; 1919T, 1214F
+          newcli    29806      R       0.1     0.5
+            sshd    29800      S       0.1     0.4
+       ipshelper      199      S <     0.0     1.8
+          httpsd      211      S       0.0     1.5
+```
+
+**Help:** execute the command "diagnose sys top"
+
+**Prompt:**
+- fortinet # 
+
+### end
+
+**Output:** None
+
+**Help:** exit current mode
+
+**Prompt:**
+- fortinet # 
+
+### execute date
+
+**Output:**
+```
+current date is: 2023-08-07
+```
+
+**Help:** execute the command "execute date"
+
+**Prompt:**
+- fortinet # 
+
+### execute dhcp lease-list
+
+**Output:**
+```
+Staff_Wifi
+IP            MAC-Address             Hostname        VCI             Expiry
+10.0.0.4      cc:cc:cc:cc:cc:cc       MyOtherPhone    MSFT 5.0        Sat Aug 10 04:55:47 2019
+10.0.0.6      ee:ee:ee:ee:ee:ee       Joes Phone                      Fri Aug  9 21:12:36 2019
+Guest_Wifi
+IP            MAC-Address             Hostname        VCI             Expiry
+172.16.31.3   11:11:11:11:11:11       android         android-dhcp    Mon Aug 12 07:47:46 2019
+port15
+IP            MAC-Address             Hostname        VCI             Expiry
+192.168.4.101 08:5b:0e:48:48:48       FortiAP-FP221C                  Sat Aug 10 14:10:44 2019
+```
+
+**Help:** execute the command "execute dhcp lease-list"
+
+**Prompt:**
+- fortinet # 
+
+### execute log display
+
+**Output:**
+```
+2492 logs found.
+10 logs returned.
+5.8% of logs has been searched.
+
+1: date=2023-08-10 time=19:41:18 logid="0000000013" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685678378886140 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=51753 srcintf="Vlan10" srcintfrole="lan" dstip=192.168.211.2 dstport=69 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=27409697 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="TFTP" trandisp="noop" duration=1805 sentbyte=66 rcvdbyte=0 sentpkt=1 rcvdpkt=0 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
+
+2: date=2023-08-10 time=19:40:47 logid="0000000013" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685647648897600 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=46212 srcintf="Vlan10" srcintfrole="lan" dstip=192.168.211.2 dstport=69 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=27408109 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="TFTP" trandisp="noop" duration=1804 sentbyte=66 rcvdbyte=0 sentpkt=1 rcvdpkt=0 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
+
+3: date=2023-08-10 time=19:40:28 logid="0000000020" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685628534615260 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=5060 srcintf="Vlan10" srcintfrole="lan" dstip=10.18.253.10 dstport=5060 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=1920 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="SIP" trandisp="noop" duration=1506311 sentbyte=12959083 rcvdbyte=16082785 sentpkt=27800 rcvdpkt=27778 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" sentdelta=890 rcvddelta=1158 srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
+```
+
+**Help:** execute the command "execute log display"
+
+**Prompt:**
+- fortinet # 
+
+### execute ping
+
+**Output:**
+```
+PING 8.8.8.8 (8.8.8.8): 56 data bytes
+64 bytes from 8.8.8.8: icmp_seq=0 ttl=110 time=25.9 ms
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=110 time=25.8 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=110 time=25.8 ms
+64 bytes from 8.8.8.8: icmp_seq=3 ttl=110 time=25.8 ms
+64 bytes from 8.8.8.8: icmp_seq=4 ttl=110 time=25.8 ms
+
+--- 8.8.8.8 ping statistics ---
+5 packets transmitted, 5 packets received, 0% packet loss
+round-trip min/avg/max = 25.8/25.8/25.9 ms
+```
+
+**Help:** execute the command "execute ping"
+
+**Prompt:**
+- fortinet # 
+
+### execute time
+
+**Output:**
+```
+current time is: 21:05:34
+last ntp sync: never
+```
+
+**Help:** execute the command "execute time"
+
+**Prompt:**
+- fortinet # 
+
+### execute traceroute
+
+**Output:**
+```
+traceroute to 8.8.8.8 (8.8.8.8), 32 hops max, 10 probe packets per hop, 84 byte packets
+ 1  1.2.3.4  0.454 ms  0.503 ms  0.262 ms  0.191 ms  0.187 ms  0.191 ms  0.191 ms  0.192 ms  0.193 ms  0.185 ms
+ 2  5.6.7.8  1.225 ms * * *
+```
+
+**Help:** execute the command "execute traceroute"
+
+**Prompt:**
+- fortinet # 
+
+### fnsysctl ifconfig
+
+**Output:**
+```
+nturbo_rx       Link encap:Ethernet
+        UP BROADCAST MULTICAST  MTU:1500  Metric:1
+        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:1000
+        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
+
+wan     Link encap:Ethernet  HWaddr 12:34:56:78:90:AA
+        inet addr:1.2.3.4  Bcast:1.2.3.5  Mask:255.255.255.252
+        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+        RX packets:7513822 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:12533342 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:1000
+        RX bytes:1116754241 (1.0 GB)  TX bytes:2218288063 (2.1 GB)
+
+lan1    Link encap:Ethernet  HWaddr 12:34:56:78:90:AB
+        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+        RX packets:3336406 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:3382703 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:1000
+        RX bytes:258477533 (246.5 MB)  TX bytes:365165072 (348.2 MB)
+
+ssl.root        Link encap:Unknown
+        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1
+        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:0 errors:0 dropped:2 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
+
+Loopback772     Link encap:Unknown
+        inet addr:127.0.0.1  Bcast:0.0.0.0  Mask:255.0.0.0
+        UP BROADCAST LOOPBACK RUNNING NOARP MULTICAST  MTU:1500  Metric:1
+        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:2 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:0 (0  Bytes)  TX bytes:152 (152  Bytes)
+
+lan     Link encap:Ethernet  HWaddr 12:34:56:78:90:AC
+        inet addr:10.152.1.230  Bcast:10.152.1.231  Mask:255.255.255.252
+        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+        RX packets:1695331 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:2829487 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:1000
+        RX bytes:154509025 (147.4 MB)  TX bytes:320990192 (306.1 MB)
+
+Tu-Hub01-Main   Link encap:Unknown
+        inet addr:10.149.0.69  Mask:255.255.0.0
+        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1438  Metric:1
+        RX packets:2669 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:64643 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:919078 (897.5 KB)  TX bytes:5464602 (5.2 MB)
+
+Tu-Rsnnc-Main   Link encap:Unknown  HWaddr 12:34:56:78:90:AD
+        inet addr:192.168.64.10  Mask:255.255.255.252
+        inet addr6: fdae:41a4:643b:9303::2 prefixlen 128
+        link-local6: fe80::200:aaaa:5f4f:54f4 prefixlen 64
+        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1476  Metric:1
+        RX packets:121755 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:1 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:8018365 (7.6 MB)  TX bytes:84 (84  Bytes)
+
+Vlan1   Link encap:Ethernet  HWaddr 12:34:56:78:90:AE
+        inet addr:10.100.105.1  Bcast:10.100.105.31  Mask:255.255.255.224
+        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+        RX packets:69882 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:65 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:10988958 (10.5 MB)  TX bytes:3128 (3.1 KB)
+
+port_ha Link encap:Ethernet  HWaddr 12:34:56:78:90:AF
+        UP BROADCAST MULTICAST  MTU:1496  Metric:1
+        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:0 errors:0 dropped:1 overruns:0 carrier:0
+        collisions:0 txqueuelen:1000
+        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
+
+vsys_fgfm       Link encap:Local Loopback
+        inet addr:127.0.0.1  Mask:255.0.0.0
+        UP LOOPBACK RUNNING  MTU:16436  Metric:1
+        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
+        TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
+        collisions:0 txqueuelen:0
+        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
+```
+
+**Help:** execute the command "fnsysctl ifconfig"
+
+**Prompt:**
+- fortinet # 
+
+### get hardware nic
+
+**Output:**
+```
+The following NICs are available:
+        a
+        lan
+        lan1
+        lan2
+        lan3
+        npu0_vlink0
+        npu0_vlink1
+        wan
+```
+
+**Help:** execute the command "get hardware nic"
+
+**Prompt:**
+- fortinet # 
+
+### get hardware nic nic-name
+
+**Output:**
+```
+Description     :FortiASIC NP6XLITE Adapter
+Driver Name     :FortiASIC NP6XLITE Driver
+Board           :40F
+lif id          :7
+lif oid         :71
+netdev oid      :71
+Current_HWaddr   12:34:56:78:90:ab
+Permanent_HWaddr 12:34:56:78:90:ab
+========== Link Status ==========
+Admin           :up
+netdev status   :N/A
+autonego_setting:1
+link_setting    :0
+speed_setting   :1000
+duplex_setting  :1
+Speed           :100
+Duplex          :Full
+link_status     :Up
+============ Counters ===========
+Rx Pkts         :645878
+Rx Bytes        :62442497
+Tx Pkts         :1025883
+Tx Bytes        :76984876
+Host Rx Pkts    :1395584
+Host Rx Bytes   :87501251
+Host Tx Pkts    :933331
+Host Tx Bytes   :69433499
+Host Tx dropped :0
+FragTxCreate    :0
+FragTxOk        :0
+FragTxDrop      :0
+Member Ports    :
+                [00]: a
+                [01]: lan1
+                [02]: lan2
+```
+
+**Help:** execute the command "get hardware nic nic-name"
+
+**Prompt:**
+- fortinet # 
+
+### get router info bgp neighbors
+
+**Output:**
+```
+VRF 0 neighbor table:
+BGP neighbor is 10.105.1.254, remote AS 65400, local AS 65400, internal link
+  BGP version 4, remote router ID 10.105.3.254
+  BGP state = Established, up for 4d14h28m
+  Last read 00:00:00, hold time is 3, keepalive interval is 1 seconds
+  Configured hold time is 3, keepalive interval is 1 seconds
+  Neighbor capabilities:
+    Route refresh: advertised and received (old and new)
+    Address family IPv4 Unicast: advertised and received
+    Address family IPv6 Unicast: advertised and received
+  Received 1517339 messages, 2 notifications, 0 in queue
+  Sent 1482858 messages, 6 notifications, 0 in queue
+  Route refresh request: received 0, sent 0
+  Minimum time between advertisement runs is 1 seconds
+
+ For address family: IPv4 Unicast
+  BGP table version 31, neighbor version 25
+  Index 1, Offset 0, Mask 0x2
+    Additional Path:
+      Send-mode: received
+      Receive-mode: advertised
+  NEXT_HOP is always this router
+  Community attribute sent to this neighbor (both)
+  Inbound path policy configured
+  Route map for incoming advertisements is *prefer_vpn1root
+  423 accepted prefixes, 423 prefixes in rib
+  3 announced prefixes
+
+ For address family: IPv6 Unicast
+  BGP table version 1, neighbor version 1
+  Index 1, Offset 0, Mask 0x2
+  Community attribute sent to this neighbor (both)
+  0 accepted prefixes, 0 prefixes in rib
+  0 announced prefixes
+
+ Connections established 9; dropped 8
+Local host: 10.105.1.2, Local port: 3777
+Foreign host: 10.105.1.254, Foreign port: 179
+Nexthop: 10.105.1.2
+Nexthop interface: VPN1_0
+Nexthop global: ::
+Nexthop local: ::
+BGP connection: non shared network
+Last Reset: 4d14h38m, due to BGP Notification sent
+Notification Error Message: (Hold Timer Expired/Unspecified Error Subcode)
+
+BGP neighbor is 10.105.2.254, remote AS 65400, local AS 65400, internal link
+  BGP version 4, remote router ID 10.105.3.254
+  BGP state = Established, up for 12:41:52
+  Last read 00:00:00, hold time is 3, keepalive interval is 1 seconds
+  Configured hold time is 3, keepalive interval is 1 seconds
+  Neighbor capabilities:
+    Route refresh: advertised and received (old and new)
+    Address family IPv4 Unicast: advertised and received
+    Address family IPv6 Unicast: advertised and received
+  Received 1517182 messages, 4 notifications, 0 in queue
+  Sent 1481876 messages, 16 notifications, 0 in queue
+  Route refresh request: received 0, sent 0
+  Minimum time between advertisement runs is 1 seconds
+
+ For address family: IPv4 Unicast
+  BGP table version 31, neighbor version 30
+  Index 2, Offset 0, Mask 0x4
+    Additional Path:
+      Send-mode: received
+      Receive-mode: advertised
+  NEXT_HOP is always this router
+  Community attribute sent to this neighbor (both)
+  Inbound path policy configured
+  Route map for incoming advertisements is *prefer_vpn2root
+  423 accepted prefixes, 423 prefixes in rib
+  3 announced prefixes
+
+ For address family: IPv6 Unicast
+  BGP table version 1, neighbor version 1
+  Index 2, Offset 0, Mask 0x4
+  Community attribute sent to this neighbor (both)
+  0 accepted prefixes, 0 prefixes in rib
+  0 announced prefixes
+
+ Connections established 21; dropped 20
+Local host: 10.105.2.2, Local port: 21489
+Foreign host: 10.105.2.254, Foreign port: 179
+Nexthop: 10.105.2.2
+Nexthop interface: VPN2_0
+Nexthop global: ::
+Nexthop local: ::
+BGP connection: non shared network
+Last Reset: 12:55:18, due to BGP Notification sent
+Notification Error Message: (Hold Timer Expired/Unspecified Error Subcode)
+```
+
+**Help:** execute the command "get router info bgp neighbors"
+
+**Prompt:**
+- fortinet # 
+
+### get router info bgp summary
+
+**Output:**
+```
+BGP router identifier 85.31.8.8, local AS number 65302
+BGP table version is 13
+1 BGP AS-PATH entries
+0 BGP community entries
+
+Neighbor        V         AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.204.35.84   4      65302   43173   43182        0    0    0 09w3d01h Active     
+10.205.35.95   4      65302  107081  107168       12    0    0 05:48:47        1
+169.132.250.17  4       4224       0       0        0    0    0    never Idle       
+169.132.250.21  4       4224       0       0        0    0    0    never Idle       
+
+ Total number of neighbors 4
+```
+
+**Help:** execute the command "get router info bgp summary"
+
+**Prompt:**
+- fortinet # 
+
+### get router info ospf status
+
+**Output:**
+```
+ Routing Process "ospf 0" with ID 10.123.105.1
+ Process is not up
+ Process bound to VRF default
+ Conforms to RFC2328, and RFC1583Compatibility flag is disabled
+ Supports only single TOS(TOS0) routes
+ Supports opaque LSA
+ Do not support Restarting
+ SPF schedule delay 5 secs, Hold time between two SPFs 10 secs
+ Refresh timer 10 secs
+ Number of incomming current DD exchange neighbors 0/5
+ Number of outgoing current DD exchange neighbors 0/5
+ Number of external LSA 485. Checksum 0xF53F64
+ Number of opaque AS LSA 0. Checksum 0x000000
+ Number of non-default external LSA 483
+ External LSA database is unlimited.
+ Number of LSA originated 1
+ Number of LSA received 1026789
+ Number of areas attached to this router: 1
+    Area 0.0.0.0 (BACKBONE)
+        Number of interfaces in this area is 9(11)
+        Number of fully adjacent neighbors in this area is 2
+        Area has no authentication
+        SPF algorithm last executed 00:00:22.990 ago
+        SPF algorithm executed 35480 times
+        Number of LSA 68. Checksum 0x207089
+```
+
+**Help:** execute the command "get router info ospf status"
+
+**Prompt:**
+- fortinet # 
+
+### get router info routing-table all
+
+**Output:**
+```
+Codes: K - kernel, C - connected, S - static, R - RIP, B - BGP
+       O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default
+
+Routing table for VRF=0
+O*E2    0.0.0.0/0 [110/10] via 10.149.127.253, Tu-Hub01-Main, 03w2d20h
+S       8.8.8.8/32 [200/0] via 4.3.2.1, wan
+O       10.80.58.224/27 [110/201] via 10.149.127.253, Tu-Hub01-Main, 3d13h31m
+O E2    10.80.130.0/24 [110/20] via 10.149.127.253, Tu-Hub01-Main, 22:00:53
+C       10.100.105.224/27 is directly connected, Vlan40
+C       10.149.0.0/16 is directly connected, Tu-Hub01-Main
+                      is directly connected, Tu-Hub02-Main
+B       10.160.0.0/23 [20/0] via 10.142.0.74, port3, 2d18h02m
+S       1.2.3.4/32 [10/0] via 10.152.1.229, lan
+                   [10/0] via 4.3.2.1, wan
+```
+
+**Help:** execute the command "get router info routing-table all"
+
+**Prompt:**
+- fortinet # 
+
+### get system arp
+
+**Output:**
+```
+Address           Age(min)   Hardware Addr      Interface
+192.168.1.4       0          b0:a8:6e:01:61:81 lan
+192.168.1.110     0          3c:9b:d6:66:52:ab lan
+192.168.1.111     0          18:64:72:c9:02:d2 lan
+192.168.1.114     4          40:cb:c0:ce:81:85 lan
+```
+
+**Help:** execute the command "get system arp"
 
 **Prompt:**
 - fortinet # 
@@ -43,43 +588,89 @@ output          : standard
 **Prompt:**
 - fortinet # 
 
-### show full-configuration system console
+### get system ha status
 
 **Output:**
 ```
-config system console
-    set output standard
-end
+HA Health Status: OK
+Model: FortiGate-600E
+Mode: HA A-P
+Group: 5
+ Debug: 0
+Cluster Uptime: 36 days 22:20:40
+Cluster state change time: 2020-12-02 22:40:46
+Master selected using:
+    <2020/12/02 22:40:46> FG6H0Exxxxxxxxxx is selected as the master because it has the largest value of override priority.
+ ses_pickup: enable, ses_pickup_delay=disable
+override: enable
+Configuration Status:
+    FG6H0Exxxxxxxxxx(updated 1 seconds ago): in-sync
+    FG6H0Eyyyyyyyyyy(updated 3 seconds ago): in-sync
+System Usage stats:
+    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
+        sessions=692, average-cpu-user/nice/system/idle=0%/0%/0%/100%, memory=25%
+    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
+        sessions=303, average-cpu-user/nice/system/idle=0%/0%/0%/100%, memory=23%
+HBDEV stats:
+    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
+        ha: physical/1000auto, up, rx-bytes/packets/dropped/errors=13086049757/51933375/0/0, tx=93993034207/102822032/0/0
+    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
+        ha: physical/1000auto, up, rx-bytes/packets/dropped/errors=93993244676/102822709/0/0, tx=13085729171/51934319/0/0
+ MONDEV stats:
+    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
+        x1: physical/10000full, up, rx-bytes/packets/dropped/errors=166373929414532/122946162431/0/0, tx=51746004768400/50869381172/0/0
+        x2: physical/10000full, up, rx-bytes/packets/dropped/errors=49656542180617/50909579016/0/337, tx=165637609617619/122981014444/0/0
+    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
+        x1: physical/10000full, up, rx-bytes/packets/dropped/errors=409699822/4202261/0/0, tx=0/0/0/0
+        x2: physical/10000full, up, rx-bytes/packets/dropped/errors=12425072765/11621697/0/0, tx=0/0/0/0
+Master: fgt-600e_a, FG6H0Exxxxxxxxxx, HA cluster index = 1
+Slave : fgt-600e_b, FG6H0Eyyyyyyyyyy, HA cluster index = 0
+number of vcluster: 1
+ vcluster 1: work 169.254.0.2
+Master: FG6H0Exxxxxxxxxx, HA operating index = 0
+Slave : FG6H0Eyyyyyyyyyy, HA operating index = 1
 ```
 
-**Help:** show console configuration
+**Help:** execute the command "get system ha status"
 
 **Prompt:**
 - fortinet # 
 
-### config system console
+### get system interface
 
-**Output:** None
+**Output:**
+```
+== [ ha ]
+name: ha   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ mgmt ]
+name: mgmt   mode: static    management-ip: 1.2.3.4 255.255.255.248   ip: 1.2.3.4 255.255.255.248   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ port1 ]
+name: port1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ port2 ]
+name: port2   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ s1 ]
+ name: s1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ vw1 ]
+name: vw1   status: up    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+ == [ x1 ]
+name: x1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ modem ]
+name: modem   mode: pppoe    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ ssl.root ]
+name: ssl.root   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: tunnel   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable
+== [ npu0_vlink0 ]
+name: npu0_vlink0   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ fortilink ]
+name: fortilink   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 169.254.1.1 255.255.255.0   status: up    netbios-forward: disable    type: aggregate   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ x1.113 ]
+name: x1.113   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 2.3.4.5 255.255.255.0   status: up    netbios-forward: disable    type: vlan   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
+== [ loopback.0 ]
+name: loopback.0   management-ip: 0.0.0.0 0.0.0.0   ip: 10.0.0.100 255.255.255.255   status: up    type: loopback   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable
+== [ VPN-TUN ]
+name: VPN-TUN   ip: 3.4.5.6 255.255.255.255   status: up    netbios-forward: disable    type: tunnel   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable
+```
 
-**Help:** enter system console config
-
-**Prompt:**
-- fortinet # 
-
-### set output standard
-
-**Output:** None
-
-**Help:** set output to standard mode
-
-**Prompt:**
-- fortinet # 
-
-### end
-
-**Output:** None
-
-**Help:** exit current mode
+**Help:** execute the command "get system interface"
 
 **Prompt:**
 - fortinet # 
@@ -221,7 +812,6 @@ end
                 ipv6: ::/0
                 status: down
                 speed: n/a
-
 ```
 
 **Help:** execute the command "get system interface physical"
@@ -261,7 +851,6 @@ Branch point: 0302
 Release Version Information: GA
 FortiOS x86-64: Yes
 System time: Fri Jan 10 23:10:02 2020
-
 ```
 
 **Help:** execute the command "get system status"
@@ -269,663 +858,49 @@ System time: Fri Jan 10 23:10:02 2020
 **Prompt:**
 - fortinet # 
 
-### get system ha status
+### get system status | grep Version
 
 **Output:**
 ```
-HA Health Status: OK
-Model: FortiGate-600E
-Mode: HA A-P
-Group: 5
- Debug: 0
-Cluster Uptime: 36 days 22:20:40
-Cluster state change time: 2020-12-02 22:40:46
-Master selected using:
-    <2020/12/02 22:40:46> FG6H0Exxxxxxxxxx is selected as the master because it has the largest value of override priority.
- ses_pickup: enable, ses_pickup_delay=disable
-override: enable
-Configuration Status:
-    FG6H0Exxxxxxxxxx(updated 1 seconds ago): in-sync
-    FG6H0Eyyyyyyyyyy(updated 3 seconds ago): in-sync
-System Usage stats:
-    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
-        sessions=692, average-cpu-user/nice/system/idle=0%/0%/0%/100%, memory=25%
-    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
-        sessions=303, average-cpu-user/nice/system/idle=0%/0%/0%/100%, memory=23%
-HBDEV stats:
-    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
-        ha: physical/1000auto, up, rx-bytes/packets/dropped/errors=13086049757/51933375/0/0, tx=93993034207/102822032/0/0
-    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
-        ha: physical/1000auto, up, rx-bytes/packets/dropped/errors=93993244676/102822709/0/0, tx=13085729171/51934319/0/0
- MONDEV stats:
-    FG6H0Exxxxxxxxxx(updated 1 seconds ago):
-        x1: physical/10000full, up, rx-bytes/packets/dropped/errors=166373929414532/122946162431/0/0, tx=51746004768400/50869381172/0/0
-        x2: physical/10000full, up, rx-bytes/packets/dropped/errors=49656542180617/50909579016/0/337, tx=165637609617619/122981014444/0/0
-    FG6H0Eyyyyyyyyyy(updated 3 seconds ago):
-        x1: physical/10000full, up, rx-bytes/packets/dropped/errors=409699822/4202261/0/0, tx=0/0/0/0
-        x2: physical/10000full, up, rx-bytes/packets/dropped/errors=12425072765/11621697/0/0, tx=0/0/0/0
-Master: fgt-600e_a, FG6H0Exxxxxxxxxx, HA cluster index = 1
-Slave : fgt-600e_b, FG6H0Eyyyyyyyyyy, HA cluster index = 0
-number of vcluster: 1
- vcluster 1: work 169.254.0.2
-Master: FG6H0Exxxxxxxxxx, HA operating index = 0
-Slave : FG6H0Eyyyyyyyyyy, HA operating index = 1
-
+Version: FortiGate-1500D v6.0.7,build0302,191112 (GA)
 ```
 
-**Help:** execute the command "get system ha status"
+**Help:** get system version (filtered)
 
 **Prompt:**
 - fortinet # 
 
-### get router info bgp summary
+### get system status | grep Virtual
 
 **Output:**
 ```
-BGP router identifier 85.31.8.8, local AS number 65302
-BGP table version is 13
-1 BGP AS-PATH entries
-0 BGP community entries
-
-Neighbor        V         AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.204.35.84   4      65302   43173   43182        0    0    0 09w3d01h Active     
-10.205.35.95   4      65302  107081  107168       12    0    0 05:48:47        1
-169.132.250.17  4       4224       0       0        0    0    0    never Idle       
-169.132.250.21  4       4224       0       0        0    0    0    never Idle       
-
- Total number of neighbors 4
-
-
+Virtual domain configuration: disable
 ```
 
-**Help:** execute the command "get router info bgp summary"
+**Help:** get virtual domain status (filtered)
 
 **Prompt:**
 - fortinet # 
 
-### get system interface
+### set output standard
 
-**Output:**
-```
-== [ ha ]
-name: ha   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ mgmt ]
-name: mgmt   mode: static    management-ip: 1.2.3.4 255.255.255.248   ip: 1.2.3.4 255.255.255.248   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ port1 ]
-name: port1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ port2 ]
-name: port2   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ s1 ]
- name: s1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ vw1 ]
-name: vw1   status: up    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
- == [ x1 ]
-name: x1   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ modem ]
-name: modem   mode: pppoe    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ ssl.root ]
-name: ssl.root   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: tunnel   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable
-== [ npu0_vlink0 ]
-name: npu0_vlink0   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 0.0.0.0 0.0.0.0   status: up    netbios-forward: disable    type: physical   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ fortilink ]
-name: fortilink   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 169.254.1.1 255.255.255.0   status: up    netbios-forward: disable    type: aggregate   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ x1.113 ]
-name: x1.113   mode: static    management-ip: 0.0.0.0 0.0.0.0   ip: 2.3.4.5 255.255.255.0   status: up    netbios-forward: disable    type: vlan   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    mtu-override: disable    wccp: disable    drop-overlapped-fragment: disable    drop-fragment: disable
-== [ loopback.0 ]
-name: loopback.0   management-ip: 0.0.0.0 0.0.0.0   ip: 10.0.0.100 255.255.255.255   status: up    type: loopback   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable
-== [ VPN-TUN ]
-name: VPN-TUN   ip: 3.4.5.6 255.255.255.255   status: up    netbios-forward: disable    type: tunnel   netflow-sampler: disable    sflow-sampler: disable    src-check: enable    explicit-web-proxy: disable    explicit-ftp-proxy: disable    proxy-captive-portal: disable    wccp: disable
+**Output:** None
 
-```
-
-**Help:** execute the command "get system interface"
+**Help:** set output to standard mode
 
 **Prompt:**
 - fortinet # 
 
-### get system arp
+### show full-configuration system console
 
 **Output:**
 ```
-Address           Age(min)   Hardware Addr      Interface
-192.168.1.4       0          b0:a8:6e:01:61:81 lan
-192.168.1.110     0          3c:9b:d6:66:52:ab lan
-192.168.1.111     0          18:64:72:c9:02:d2 lan
-192.168.1.114     4          40:cb:c0:ce:81:85 lan
-
+config system console
+    set output standard
+end
 ```
 
-**Help:** execute the command "get system arp"
-
-**Prompt:**
-- fortinet # 
-
-### diagnose lldprx port neighbor details port-name
-
-**Output:**
-```
-1 port: 6
-1 port.txt: lan1
-1 mac: 00:11:22:33:44:55
-1 chassis.type: 4
-1 chassis.type.txt: interface-mac
-1 chassis.data: 00:11:22:33:44:55
-1 port.id.type: 5
-1 port.id.type.txt: interface-name
-1 port.id.len: 20
-1 port.id.data: GigabitEthernet1/0/5
-1 ttl: 120
-1 port.desc.len: 10
-1 port.desc.data: Port
-1 system.name.len: 15
-1 system.name.data: Switch
-1 system.desc.len: 179
-1 system.desc.data: Huawei Switch S5735-L48T4S-A1
-Huawei Versatile Routing Platform Software
-VRP (R) software, Version 5.170 (S5735 V200R022C00SPC500)
-Copyright (C) 2000-2022 HUAWEI TECH Co., Ltd.
-1 system.caps.available: 0014
-1 system.caps.available.txt: bridge router
-1 system.caps.enabled: 0014
-1 system.caps.enabled.txt: bridge router
-1 address.count: 1
-1 address.1.type: 1
-1 address.1.type.txt: ipv4
-1 address.1.len: 4
-1 address.1.addr: aaa.bbb.ccc.ddd
-1 address.1.addr.interface.type: 2
-1 address.1.addr.interface.type.txt: if-index
-1 address.1.addr.interface.number: 269
-1 vlan.id: 1
-1 vlan.protocol.count: 1
-1 vlan.protocol.1.flag: 0
-1 vlan.protocol.1.flag.txt:
-1 vlan.protocol.1.id: 0
-1 vlan.name.count: 1
-1 vlan.name.1.id: 1
-1 vlan.name.1.len: 9
-1 vlan.name.1.data: VLAN 0001
-1 aggregation.status: 1
-1 aggregation.status.txt: capable
-1 aggregation.port: 0
-1 mac_phy.auto: 3
-1 mac_phy.auto.txt: supported enabled
-1 mac_phy.pmd: 7c05
-1 mac_phy.pmd.txt: 10BaseT 10BaseTFD 100BaseT4 100BaseTX 100baseTXFD 1000baseXFd
-1 mac_phy.mau: 001e
-1 mac_phy.mau.txt: 1000baseTFD
-1 power.status: 0
-1 power.status.txt: PD
-1 power.pair: 0
-1 power.class: 0
-1 max-frame-size: 10240
-
-
-```
-
-**Help:** execute the command "diagnose lldprx port neighbor details port-name"
-
-**Prompt:**
-- fortinet # 
-
-### diagnose sys top
-
-**Output:**
-```
-Run Time:  12 days, 3 hours and 4 minutes
-0U, 0N, 0S, 100I, 0WA, 0HI, 0SI, 0ST; 1919T, 1214F
-          newcli    29806      R       0.1     0.5
-            sshd    29800      S       0.1     0.4
-       ipshelper      199      S <     0.0     1.8
-          httpsd      211      S       0.0     1.5
-
-```
-
-**Help:** execute the command "diagnose sys top"
-
-**Prompt:**
-- fortinet # 
-
-### execute date
-
-**Output:**
-```
-current date is: 2023-08-07
-
-```
-
-**Help:** execute the command "execute date"
-
-**Prompt:**
-- fortinet # 
-
-### execute dhcp lease-list
-
-**Output:**
-```
-Staff_Wifi
-IP            MAC-Address             Hostname        VCI             Expiry
-10.0.0.4      cc:cc:cc:cc:cc:cc       MyOtherPhone    MSFT 5.0        Sat Aug 10 04:55:47 2019
-10.0.0.6      ee:ee:ee:ee:ee:ee       Joes Phone                      Fri Aug  9 21:12:36 2019
-Guest_Wifi
-IP            MAC-Address             Hostname        VCI             Expiry
-172.16.31.3   11:11:11:11:11:11       android         android-dhcp    Mon Aug 12 07:47:46 2019
-port15
-IP            MAC-Address             Hostname        VCI             Expiry
-192.168.4.101 08:5b:0e:48:48:48       FortiAP-FP221C                  Sat Aug 10 14:10:44 2019
-
-```
-
-**Help:** execute the command "execute dhcp lease-list"
-
-**Prompt:**
-- fortinet # 
-
-### execute log display
-
-**Output:**
-```
-2492 logs found.
-10 logs returned.
-5.8% of logs has been searched.
-
-1: date=2023-08-10 time=19:41:18 logid="0000000013" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685678378886140 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=51753 srcintf="Vlan10" srcintfrole="lan" dstip=192.168.211.2 dstport=69 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=27409697 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="TFTP" trandisp="noop" duration=1805 sentbyte=66 rcvdbyte=0 sentpkt=1 rcvdpkt=0 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
-
-2: date=2023-08-10 time=19:40:47 logid="0000000013" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685647648897600 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=46212 srcintf="Vlan10" srcintfrole="lan" dstip=192.168.211.2 dstport=69 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=27408109 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="TFTP" trandisp="noop" duration=1804 sentbyte=66 rcvdbyte=0 sentpkt=1 rcvdpkt=0 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
-
-3: date=2023-08-10 time=19:40:28 logid="0000000020" type="traffic" subtype="forward" level="notice" vd="root" eventtime=1691685628534615260 tz="+0300" srcip=10.18.158.26 srcname="SPA112" srcport=5060 srcintf="Vlan10" srcintfrole="lan" dstip=10.18.253.10 dstport=5060 dstintf="Tu-Hub01-Main" dstintfrole="undefined" srccountry="Reserved" dstcountry="Reserved" sessionid=1920 proto=17 action="accept" policyid=17 policytype="policy" poluuid="764f657a-c0dd-51ec-9d9c-2374a4d1b1d4" policyname="Permit IP-Phones Vlan10 OUT" service="SIP" trandisp="noop" duration=1506311 sentbyte=12959083 rcvdbyte=16082785 sentpkt=27800 rcvdpkt=27778 vpn="Tu-Hub01-Main" vpntype="ipsec-static" appcat="unscanned" sentdelta=890 rcvddelta=1158 srchwvendor="Cisco" devtype="IP Phone" srcfamily="ATA" srchwversion="SPA112" mastersrcmac="50:67:ae:f0:6c:80" srcmac="50:67:ae:f0:6c:80" srcserver=0
-
-```
-
-**Help:** execute the command "execute log display"
-
-**Prompt:**
-- fortinet # 
-
-### execute ping
-
-**Output:**
-```
-PING 8.8.8.8 (8.8.8.8): 56 data bytes
-64 bytes from 8.8.8.8: icmp_seq=0 ttl=110 time=25.9 ms
-64 bytes from 8.8.8.8: icmp_seq=1 ttl=110 time=25.8 ms
-64 bytes from 8.8.8.8: icmp_seq=2 ttl=110 time=25.8 ms
-64 bytes from 8.8.8.8: icmp_seq=3 ttl=110 time=25.8 ms
-64 bytes from 8.8.8.8: icmp_seq=4 ttl=110 time=25.8 ms
-
---- 8.8.8.8 ping statistics ---
-5 packets transmitted, 5 packets received, 0% packet loss
-round-trip min/avg/max = 25.8/25.8/25.9 ms
-
-```
-
-**Help:** execute the command "execute ping"
-
-**Prompt:**
-- fortinet # 
-
-### execute time
-
-**Output:**
-```
-current time is: 21:05:34
-last ntp sync: never
-
-```
-
-**Help:** execute the command "execute time"
-
-**Prompt:**
-- fortinet # 
-
-### execute traceroute
-
-**Output:**
-```
-traceroute to 8.8.8.8 (8.8.8.8), 32 hops max, 10 probe packets per hop, 84 byte packets
- 1  1.2.3.4  0.454 ms  0.503 ms  0.262 ms  0.191 ms  0.187 ms  0.191 ms  0.191 ms  0.192 ms  0.193 ms  0.185 ms
- 2  5.6.7.8  1.225 ms * * *
-
-```
-
-**Help:** execute the command "execute traceroute"
-
-**Prompt:**
-- fortinet # 
-
-### fnsysctl ifconfig
-
-**Output:**
-```
-nturbo_rx       Link encap:Ethernet
-        UP BROADCAST MULTICAST  MTU:1500  Metric:1
-        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:1000
-        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
-
-wan     Link encap:Ethernet  HWaddr 12:34:56:78:90:AA
-        inet addr:1.2.3.4  Bcast:1.2.3.5  Mask:255.255.255.252
-        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-        RX packets:7513822 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:12533342 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:1000
-        RX bytes:1116754241 (1.0 GB)  TX bytes:2218288063 (2.1 GB)
-
-lan1    Link encap:Ethernet  HWaddr 12:34:56:78:90:AB
-        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-        RX packets:3336406 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:3382703 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:1000
-        RX bytes:258477533 (246.5 MB)  TX bytes:365165072 (348.2 MB)
-
-ssl.root        Link encap:Unknown
-        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1500  Metric:1
-        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:0 errors:0 dropped:2 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
-
-Loopback772     Link encap:Unknown
-        inet addr:127.0.0.1  Bcast:0.0.0.0  Mask:255.0.0.0
-        UP BROADCAST LOOPBACK RUNNING NOARP MULTICAST  MTU:1500  Metric:1
-        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:2 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:0 (0  Bytes)  TX bytes:152 (152  Bytes)
-
-lan     Link encap:Ethernet  HWaddr 12:34:56:78:90:AC
-        inet addr:10.152.1.230  Bcast:10.152.1.231  Mask:255.255.255.252
-        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-        RX packets:1695331 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:2829487 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:1000
-        RX bytes:154509025 (147.4 MB)  TX bytes:320990192 (306.1 MB)
-
-Tu-Hub01-Main   Link encap:Unknown
-        inet addr:10.149.0.69  Mask:255.255.0.0
-        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1438  Metric:1
-        RX packets:2669 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:64643 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:919078 (897.5 KB)  TX bytes:5464602 (5.2 MB)
-
-Tu-Rsnnc-Main   Link encap:Unknown  HWaddr 12:34:56:78:90:AD
-        inet addr:192.168.64.10  Mask:255.255.255.252
-        inet addr6: fdae:41a4:643b:9303::2 prefixlen 128
-        link-local6: fe80::200:aaaa:5f4f:54f4 prefixlen 64
-        UP POINTOPOINT RUNNING NOARP MULTICAST  MTU:1476  Metric:1
-        RX packets:121755 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:1 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:8018365 (7.6 MB)  TX bytes:84 (84  Bytes)
-
-Vlan1   Link encap:Ethernet  HWaddr 12:34:56:78:90:AE
-        inet addr:10.100.105.1  Bcast:10.100.105.31  Mask:255.255.255.224
-        UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
-        RX packets:69882 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:65 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:10988958 (10.5 MB)  TX bytes:3128 (3.1 KB)
-
-port_ha Link encap:Ethernet  HWaddr 12:34:56:78:90:AF
-        UP BROADCAST MULTICAST  MTU:1496  Metric:1
-        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:0 errors:0 dropped:1 overruns:0 carrier:0
-        collisions:0 txqueuelen:1000
-        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
-
-vsys_fgfm       Link encap:Local Loopback
-        inet addr:127.0.0.1  Mask:255.0.0.0
-        UP LOOPBACK RUNNING  MTU:16436  Metric:1
-        RX packets:0 errors:0 dropped:0 overruns:0 frame:0
-        TX packets:0 errors:0 dropped:0 overruns:0 carrier:0
-        collisions:0 txqueuelen:0
-        RX bytes:0 (0  Bytes)  TX bytes:0 (0  Bytes)
-
-```
-
-**Help:** execute the command "fnsysctl ifconfig"
-
-**Prompt:**
-- fortinet # 
-
-### get hardware nic
-
-**Output:**
-```
-The following NICs are available:
-        a
-        lan
-        lan1
-        lan2
-        lan3
-        npu0_vlink0
-        npu0_vlink1
-        wan
-
-```
-
-**Help:** execute the command "get hardware nic"
-
-**Prompt:**
-- fortinet # 
-
-### get hardware nic nic-name
-
-**Output:**
-```
-Description     :FortiASIC NP6XLITE Adapter
-Driver Name     :FortiASIC NP6XLITE Driver
-Board           :40F
-lif id          :7
-lif oid         :71
-netdev oid      :71
-Current_HWaddr   12:34:56:78:90:ab
-Permanent_HWaddr 12:34:56:78:90:ab
-========== Link Status ==========
-Admin           :up
-netdev status   :N/A
-autonego_setting:1
-link_setting    :0
-speed_setting   :1000
-duplex_setting  :1
-Speed           :100
-Duplex          :Full
-link_status     :Up
-============ Counters ===========
-Rx Pkts         :645878
-Rx Bytes        :62442497
-Tx Pkts         :1025883
-Tx Bytes        :76984876
-Host Rx Pkts    :1395584
-Host Rx Bytes   :87501251
-Host Tx Pkts    :933331
-Host Tx Bytes   :69433499
-Host Tx dropped :0
-FragTxCreate    :0
-FragTxOk        :0
-FragTxDrop      :0
-Member Ports    :
-                [00]: a
-                [01]: lan1
-                [02]: lan2
-
-```
-
-**Help:** execute the command "get hardware nic nic-name"
-
-**Prompt:**
-- fortinet # 
-
-### get router info bgp neighbors
-
-**Output:**
-```
-VRF 0 neighbor table:
-BGP neighbor is 10.105.1.254, remote AS 65400, local AS 65400, internal link
-  BGP version 4, remote router ID 10.105.3.254
-  BGP state = Established, up for 4d14h28m
-  Last read 00:00:00, hold time is 3, keepalive interval is 1 seconds
-  Configured hold time is 3, keepalive interval is 1 seconds
-  Neighbor capabilities:
-    Route refresh: advertised and received (old and new)
-    Address family IPv4 Unicast: advertised and received
-    Address family IPv6 Unicast: advertised and received
-  Received 1517339 messages, 2 notifications, 0 in queue
-  Sent 1482858 messages, 6 notifications, 0 in queue
-  Route refresh request: received 0, sent 0
-  Minimum time between advertisement runs is 1 seconds
-
- For address family: IPv4 Unicast
-  BGP table version 31, neighbor version 25
-  Index 1, Offset 0, Mask 0x2
-    Additional Path:
-      Send-mode: received
-      Receive-mode: advertised
-  NEXT_HOP is always this router
-  Community attribute sent to this neighbor (both)
-  Inbound path policy configured
-  Route map for incoming advertisements is *prefer_vpn1root
-  423 accepted prefixes, 423 prefixes in rib
-  3 announced prefixes
-
- For address family: IPv6 Unicast
-  BGP table version 1, neighbor version 1
-  Index 1, Offset 0, Mask 0x2
-  Community attribute sent to this neighbor (both)
-  0 accepted prefixes, 0 prefixes in rib
-  0 announced prefixes
-
- Connections established 9; dropped 8
-Local host: 10.105.1.2, Local port: 3777
-Foreign host: 10.105.1.254, Foreign port: 179
-Nexthop: 10.105.1.2
-Nexthop interface: VPN1_0
-Nexthop global: ::
-Nexthop local: ::
-BGP connection: non shared network
-Last Reset: 4d14h38m, due to BGP Notification sent
-Notification Error Message: (Hold Timer Expired/Unspecified Error Subcode)
-
-BGP neighbor is 10.105.2.254, remote AS 65400, local AS 65400, internal link
-  BGP version 4, remote router ID 10.105.3.254
-  BGP state = Established, up for 12:41:52
-  Last read 00:00:00, hold time is 3, keepalive interval is 1 seconds
-  Configured hold time is 3, keepalive interval is 1 seconds
-  Neighbor capabilities:
-    Route refresh: advertised and received (old and new)
-    Address family IPv4 Unicast: advertised and received
-    Address family IPv6 Unicast: advertised and received
-  Received 1517182 messages, 4 notifications, 0 in queue
-  Sent 1481876 messages, 16 notifications, 0 in queue
-  Route refresh request: received 0, sent 0
-  Minimum time between advertisement runs is 1 seconds
-
- For address family: IPv4 Unicast
-  BGP table version 31, neighbor version 30
-  Index 2, Offset 0, Mask 0x4
-    Additional Path:
-      Send-mode: received
-      Receive-mode: advertised
-  NEXT_HOP is always this router
-  Community attribute sent to this neighbor (both)
-  Inbound path policy configured
-  Route map for incoming advertisements is *prefer_vpn2root
-  423 accepted prefixes, 423 prefixes in rib
-  3 announced prefixes
-
- For address family: IPv6 Unicast
-  BGP table version 1, neighbor version 1
-  Index 2, Offset 0, Mask 0x4
-  Community attribute sent to this neighbor (both)
-  0 accepted prefixes, 0 prefixes in rib
-  0 announced prefixes
-
- Connections established 21; dropped 20
-Local host: 10.105.2.2, Local port: 21489
-Foreign host: 10.105.2.254, Foreign port: 179
-Nexthop: 10.105.2.2
-Nexthop interface: VPN2_0
-Nexthop global: ::
-Nexthop local: ::
-BGP connection: non shared network
-Last Reset: 12:55:18, due to BGP Notification sent
-Notification Error Message: (Hold Timer Expired/Unspecified Error Subcode)
-
-
-
-```
-
-**Help:** execute the command "get router info bgp neighbors"
-
-**Prompt:**
-- fortinet # 
-
-### get router info ospf status
-
-**Output:**
-```
- Routing Process "ospf 0" with ID 10.123.105.1
- Process is not up
- Process bound to VRF default
- Conforms to RFC2328, and RFC1583Compatibility flag is disabled
- Supports only single TOS(TOS0) routes
- Supports opaque LSA
- Do not support Restarting
- SPF schedule delay 5 secs, Hold time between two SPFs 10 secs
- Refresh timer 10 secs
- Number of incomming current DD exchange neighbors 0/5
- Number of outgoing current DD exchange neighbors 0/5
- Number of external LSA 485. Checksum 0xF53F64
- Number of opaque AS LSA 0. Checksum 0x000000
- Number of non-default external LSA 483
- External LSA database is unlimited.
- Number of LSA originated 1
- Number of LSA received 1026789
- Number of areas attached to this router: 1
-    Area 0.0.0.0 (BACKBONE)
-        Number of interfaces in this area is 9(11)
-        Number of fully adjacent neighbors in this area is 2
-        Area has no authentication
-        SPF algorithm last executed 00:00:22.990 ago
-        SPF algorithm executed 35480 times
-        Number of LSA 68. Checksum 0x207089
-
-
-```
-
-**Help:** execute the command "get router info ospf status"
-
-**Prompt:**
-- fortinet # 
-
-### get router info routing-table all
-
-**Output:**
-```
-Codes: K - kernel, C - connected, S - static, R - RIP, B - BGP
-       O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2
-       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
-       * - candidate default
-
-Routing table for VRF=0
-O*E2    0.0.0.0/0 [110/10] via 10.149.127.253, Tu-Hub01-Main, 03w2d20h
-S       8.8.8.8/32 [200/0] via 4.3.2.1, wan
-O       10.80.58.224/27 [110/201] via 10.149.127.253, Tu-Hub01-Main, 3d13h31m
-O E2    10.80.130.0/24 [110/20] via 10.149.127.253, Tu-Hub01-Main, 22:00:53
-C       10.100.105.224/27 is directly connected, Vlan40
-C       10.149.0.0/16 is directly connected, Tu-Hub01-Main
-                      is directly connected, Tu-Hub02-Main
-B       10.160.0.0/23 [20/0] via 10.142.0.74, port3, 2d18h02m
-S       1.2.3.4/32 [10/0] via 10.152.1.229, lan
-                   [10/0] via 4.3.2.1, wan
-
-```
-
-**Help:** execute the command "get router info routing-table all"
+**Help:** show console configuration
 
 **Prompt:**
 - fortinet # 

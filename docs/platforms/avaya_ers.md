@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -15,16 +26,6 @@
 
 **Prompt:**
 - avaya_ers>
-
-### terminal length 0
-
-**Output:** None
-
-**Help:** make the terminal full screen
-
-**Prompt:**
-- avaya_ers>
-- avaya_ers#
 
 ### ex
 
@@ -36,45 +37,21 @@
 - avaya_ers>
 - avaya_ers#
 
-### show sys-info
+### logout
 
-**Output:**
-```
-Operation Mode:        Stack, Unit # 1
-Size Of Stack:         4
-Base Unit:             1
-MAC Address:           FF-FF-FF-FF-FF-FF
-PoE Module FW:         4.1.0.4
-Reset Count:           37
-Last Reset Type:       Power Cycle
-Autotopology:          Enabled
-Pluggable Port 47:     None
-Pluggable Port 48:     None
-Pluggable Port 49:     SX
-Pluggable Port 50:     Direct Attach Cable
-Pluggable Port 51:     Direct Attach Cable
-Base Unit Selection:   Base unit using rear-panel switch
-sysDescr:              Ethernet Routing Switch 3549GTS-PWR+
-                       HW:03       FW:5.3.0.6   SW:v5.3.0.005
-                       Mfg Date:20150406    HW Dev:none
-Serial #:              1XXXXXXXXXXX
-Operational Software:  FW:5.3.0.6   SW:v5.3.0.005
-Installed software:    FW:5.3.0.6   SW:v5.3.0.005
-Operational license:   Base software
- Installed license:     Base software
-sysObjectID:           1.3.6.1.4.1.45.3.80.8
-sysUpTime:             35 days, 07:24:53
-sysNtpTime:            2015-10-21 20:26:44 GMT+00:00
-sysServices:           6
-sysContact:            sysContact
-sysName:               sysName
-sysLocation:           sysLocation
-Stack sysAssetId:      stackAssetID
-Unit sysAssetId:       unitAssetID
+**Output:** None
 
-```
+**Help:** Execute the command logout. This automatically generated.
 
-**Help:** execute the command "show sys-info"
+**Prompt:**
+- avaya_ers>
+- avaya_ers#
+
+### no page
+
+**Output:** None
+
+**Help:** Execute the command no page. This automatically generated.
 
 **Prompt:**
 - avaya_ers>
@@ -186,313 +163,9 @@ Unit/Port Name
 2/48      HALL-UPS
 2/49      
 2/50      HALL-FC4:1/25
-
 ```
 
 **Help:** execute the command "show interface name"
-
-**Prompt:**
-- avaya_ers>
-- avaya_ers#
-
-### show mlt all-members
-
-**Output:**
-```
-Id: 1
-    Name:UPLINK
-    Active Members: 1/50,2/50
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 2
-    Name:Trunk #2
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 3
-    Name:Trunk #3
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 4
-    Name:Trunk #4
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 5
-    Name:Trunk #5
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 6
-    Name:Trunk #6
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 7
-    Name:Trunk #7
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 8
-    Name:Trunk #8
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 9
-    Name:Trunk #9
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 10
-    Name:Trunk #10
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 11
-    Name:Trunk #11
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 12
-    Name:Trunk #12
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 13
-    Name:Trunk #13
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 14
-    Name:Trunk #14
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 15
-    Name:Trunk #15
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 16
-    Name:Trunk #16
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 17
-    Name:Trunk #17
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 18
-    Name:Trunk #18
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 19
-    Name:Trunk #19
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 20
-    Name:Trunk #20
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 21
-    Name:Trunk #21
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 22
-    Name:Trunk #22
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 23
-    Name:Trunk #23
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 24
-    Name:Trunk #24
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 25
-    Name:Trunk #25
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 26
-    Name:Trunk #26
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 27
-    Name:Trunk #27
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 28
-    Name:Trunk #28
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 29
-    Name:Trunk #29
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 30
-    Name:Trunk #30
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 31
-    Name:Trunk #31
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
- Id: 32
-    Name:Trunk #32
-    Active Members: NONE
-    Inactive Members: NONE
-    Bpdu: All
-    Mode: Basic
-    Status: Disabled
-    LACP key: NONE
-
-```
-
-**Help:** execute the command "show mlt all-members"
-
-**Prompt:**
-- avaya_ers>
-- avaya_ers#
-
-### show vlan
-
-**Output:**
-```
-Id   Name                 Type     Protocol         PID     Active IVL/SVL Mgmt
----- -------------------- -------- ---------------- ------- ------ ------- ----
-1    VLAN #1              Port     None             0x0000  Yes    IVL     No
-	Port Members: NONE
-2    Dead_VLAN            Port     None             0x0000  Yes    IVL     No
-	Port Members: 17-42,49-50
-17   Network_Services     Port     None             0x0000  Yes    IVL     No
-	Port Members: 5-10,47
-27   Lab_Mgmt             Port     None             0x0000  Yes    IVL     Yes
- 	Port Members: 1,11,13,16,43-46,48
-47   IoT_Devices          Port     None             0x0000  Yes    IVL     No
-	Port Members: 14,48
-300  Trusted Wifi         Port     None             0x0000  Yes    IVL     No
-	Port Members: 3-4,11-13,47
-301  Untrusted Wifi       Port     None             0x0000  Yes    IVL     No
-	Port Members: 11,13,48
-477  VM Environment       Port     None             0x0000  Yes    IVL     No
-	Port Members: 2,15,48
-999  Native_VLAN          Port     None             0x0000  Yes    IVL     No
- 	Port Members: NONE
-Total VLANs: 9
-
-```
-
-**Help:** execute the command "show vlan"
 
 **Prompt:**
 - avaya_ers>
@@ -511,7 +184,6 @@ Remote Logging Address: 0.0.0.0
 Secondary Remote Logging Address: 0.0.0.0
 Event Types To Log Remotely: Critical, Serious, Informational
 Facility: Daemon
-
 ```
 
 **Help:** execute the command "show logging config"
@@ -1012,7 +684,6 @@ Id: 63
     Bpdu: All
     Mode: Basic
     Status: Disabled
-
 ```
 
 **Help:** execute the command "show mlt"
@@ -1021,21 +692,355 @@ Id: 63
 - avaya_ers>
 - avaya_ers#
 
-### logout
+### show mlt all-members
 
-**Output:** None
+**Output:**
+```
+Id: 1
+    Name:UPLINK
+    Active Members: 1/50,2/50
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 2
+    Name:Trunk #2
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 3
+    Name:Trunk #3
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 4
+    Name:Trunk #4
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 5
+    Name:Trunk #5
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 6
+    Name:Trunk #6
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 7
+    Name:Trunk #7
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 8
+    Name:Trunk #8
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 9
+    Name:Trunk #9
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 10
+    Name:Trunk #10
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 11
+    Name:Trunk #11
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 12
+    Name:Trunk #12
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 13
+    Name:Trunk #13
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 14
+    Name:Trunk #14
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 15
+    Name:Trunk #15
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 16
+    Name:Trunk #16
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 17
+    Name:Trunk #17
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 18
+    Name:Trunk #18
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 19
+    Name:Trunk #19
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 20
+    Name:Trunk #20
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 21
+    Name:Trunk #21
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 22
+    Name:Trunk #22
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 23
+    Name:Trunk #23
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 24
+    Name:Trunk #24
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 25
+    Name:Trunk #25
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 26
+    Name:Trunk #26
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 27
+    Name:Trunk #27
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 28
+    Name:Trunk #28
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 29
+    Name:Trunk #29
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 30
+    Name:Trunk #30
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 31
+    Name:Trunk #31
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+ Id: 32
+    Name:Trunk #32
+    Active Members: NONE
+    Inactive Members: NONE
+    Bpdu: All
+    Mode: Basic
+    Status: Disabled
+    LACP key: NONE
+```
 
-**Help:** Execute the command logout. This automatically generated. Feel free to change it!
+**Help:** execute the command "show mlt all-members"
 
 **Prompt:**
 - avaya_ers>
 - avaya_ers#
 
-### no page
+### show sys-info
+
+**Output:**
+```
+Operation Mode:        Stack, Unit # 1
+Size Of Stack:         4
+Base Unit:             1
+MAC Address:           FF-FF-FF-FF-FF-FF
+PoE Module FW:         4.1.0.4
+Reset Count:           37
+Last Reset Type:       Power Cycle
+Autotopology:          Enabled
+Pluggable Port 47:     None
+Pluggable Port 48:     None
+Pluggable Port 49:     SX
+Pluggable Port 50:     Direct Attach Cable
+Pluggable Port 51:     Direct Attach Cable
+Base Unit Selection:   Base unit using rear-panel switch
+sysDescr:              Ethernet Routing Switch 3549GTS-PWR+
+                       HW:03       FW:5.3.0.6   SW:v5.3.0.005
+                       Mfg Date:20150406    HW Dev:none
+Serial #:              1XXXXXXXXXXX
+Operational Software:  FW:5.3.0.6   SW:v5.3.0.005
+Installed software:    FW:5.3.0.6   SW:v5.3.0.005
+Operational license:   Base software
+ Installed license:     Base software
+sysObjectID:           1.3.6.1.4.1.45.3.80.8
+sysUpTime:             35 days, 07:24:53
+sysNtpTime:            2015-10-21 20:26:44 GMT+00:00
+sysServices:           6
+sysContact:            sysContact
+sysName:               sysName
+sysLocation:           sysLocation
+Stack sysAssetId:      stackAssetID
+Unit sysAssetId:       unitAssetID
+```
+
+**Help:** execute the command "show sys-info"
+
+**Prompt:**
+- avaya_ers>
+- avaya_ers#
+
+### show vlan
+
+**Output:**
+```
+Id   Name                 Type     Protocol         PID     Active IVL/SVL Mgmt
+---- -------------------- -------- ---------------- ------- ------ ------- ----
+1    VLAN #1              Port     None             0x0000  Yes    IVL     No
+	Port Members: NONE
+2    Dead_VLAN            Port     None             0x0000  Yes    IVL     No
+	Port Members: 17-42,49-50
+17   Network_Services     Port     None             0x0000  Yes    IVL     No
+	Port Members: 5-10,47
+27   Lab_Mgmt             Port     None             0x0000  Yes    IVL     Yes
+ 	Port Members: 1,11,13,16,43-46,48
+47   IoT_Devices          Port     None             0x0000  Yes    IVL     No
+	Port Members: 14,48
+300  Trusted Wifi         Port     None             0x0000  Yes    IVL     No
+	Port Members: 3-4,11-13,47
+301  Untrusted Wifi       Port     None             0x0000  Yes    IVL     No
+	Port Members: 11,13,48
+477  VM Environment       Port     None             0x0000  Yes    IVL     No
+	Port Members: 2,15,48
+999  Native_VLAN          Port     None             0x0000  Yes    IVL     No
+ 	Port Members: NONE
+Total VLANs: 9
+```
+
+**Help:** execute the command "show vlan"
+
+**Prompt:**
+- avaya_ers>
+- avaya_ers#
+
+### terminal length 0
 
 **Output:** None
 
-**Help:** Execute the command no page. This automatically generated. Feel free to change it!
+**Help:** make the terminal full screen
 
 **Prompt:**
 - avaya_ers>
@@ -1045,7 +1050,7 @@ Id: 63
 
 **Output:** None
 
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - avaya_ers>

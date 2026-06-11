@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -23,7 +34,6 @@
 VPN  IF NAME  IP            MAC                STATE    IDLE TIMER  UPTIME
 -----------------------------------------------------------------------------
 0    eth0  10.10.20.70   00:50:56:bf:a0:d3  dynamic  0:00:11:33  0:00:08:28
-
 ```
 
 **Help:** execute the command "show arp"
@@ -58,7 +68,6 @@ INDEX TYPE    PROT SYSTEM IP       ID         ID     PRIVATE IP                 
 2     vedge   dtls 172.31.127.6    65124      1      185.81.153.72                           12386 182.89.193.72                           12386 network-SDWAN             silver          up     51:02:00:34
 2     vedge   dtls 172.31.127.6    65124      1      192.138.17.14                           12426 222.121.2.79                            12426 network-SDWAN             gold            up     103:02:15:50
 2     vedge   dtls 172.31.127.1    65124      1      213.86.117.170                          12346 203.86.147.170                          12346 network-SDWAN             gold            up     110:18:19:14
-
 ```
 
 **Help:** execute the command "show control connections"
@@ -113,23 +122,9 @@ PEER             TYPE    ID        ID        ID        STATE    UPTIME          
 192.168.255.6    vedge   1         1         65153     up       108:21:31:55     219/0/714
 192.168.127.1    vedge   1         1         65154     up       108:21:32:09     180/0/726
 192.168.127.6    vedge   1         1         65154     up       108:21:32:15     183/0/723
-
 ```
 
 **Help:** execute the command "show omp peers"
-
-**Prompt:**
-- cisco_viptela>
-- cisco_viptela#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - cisco_viptela>

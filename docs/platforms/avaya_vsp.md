@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -30,7 +41,6 @@ VOSS8K.6.0.1.2.GA (Primary Release)
  ----------------------------------------------------------------------------------------------------
  Auto Commit     : enabled
 Commit Timeout  : 10 minutes
-
 ```
 
 **Help:** execute the command "show software"
@@ -43,7 +53,7 @@ Commit Timeout  : 10 minutes
 
 **Output:** None
 
-**Help:** Execute the command terminal more disable. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal more disable. This automatically generated.
 
 **Prompt:**
 - avaya_vsp>

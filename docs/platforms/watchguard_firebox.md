@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### show arp
 
 **Output:**
@@ -20,22 +31,9 @@
 ? (10.3.0.8) at <incomplete>  on vlan4
 ? (10.4.0.4) at 00:01:02:03:04:ee [ether]  on vlan5
 ? (10.5.0.4) at 00:01:02:03:04:05 [ether] PERM on eth0
-
 ```
 
 **Help:** execute the command "show arp"
-
-**Prompt:**
-- watchguard_firebox#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - watchguard_firebox#

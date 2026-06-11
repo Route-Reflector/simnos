@@ -16,71 +16,33 @@
 **Prompt:**
 - aruba_os>
 
-### show arp
+### show ap bss-table details
 
 **Output:**
 ```
+fm (forward mode): T-Tunnel, S-Split, D-Decrypt Tunnel, B-Bridge (s-standard, p-persistent, b-backup, a-always), n-anyspot
 
-Codes: * - Local Addresses, S - Static, A - Auth
+cluster (cluster role): U-UAC, A-AAC, sU-Standby UAC, sA-Standby AAC
 
-Total ARP entries: 2
+Aruba AP BSS Table
+------------------
+bss                ess                     port  ip             band/ht-mode/bandwidth  ch/EIRP/max-EIRP  type  cur-cl  ap name                in-t(s)  tot-t        mtu   acl-state  acl  fm  flags  cluster  active-clients  standby-clients  datazone
+---                ---                     ----  --             ----------------------  ----------------  ----  ------  -------                -------  -----        ---   ---------  ---  --  -----  -------  --------------  ---------------  --------
+aa:bb:cc:dd:ee:ff  test1               N/A   192.168.1.2   5GHz/HE/40MHz           136-/19.0/27.1    ap    0       test1-ap           0        11h:0m:35s   1500  -          2    T   KrT    A        0               0                no
+aa:bb:cc:dd:ee:fa  test1                  N/A   192.168.1.2   2.4GHz/HE/20MHz         6/9.0/26.9        ap    0       test1-ap           0        11h:1m:17s   1500  -          119  T   KT     A        0               0                no
+aa:bb:cc:dd:ee:fb  test1                  N/A   192.168.1.2   6GHz/HE/160MHz           197S/16.0/24.3    ap    0       test1-ap          0        11h:0m:56s   1500  -          119  T   KT     A        0               0                no
+aa:bb:cc:dd:ee:fc  multi word ssid                 N/A   192.168.1.3    2.4GHz/HE/20MHz           6/9.0/26.9    ap    0       test2-ap             0        11h:0m:57s   1500  -          2    T   KrT    A        0               0                no
+aa:bb:cc:dd:ee:fd  test 2                  N/A   192.168.1.3  5GHz/HE/40MHz           120-/19.0/28.7    ap    0       test2-ap  0        11h:1m:28s   1500  -          119  T   KT     A        0               0                no
 
-IPV4 ARP Table
---------------
- Protocol    IP Address    Hardware Address   Interface  Age (min)
-----------   ----------    ----------------   ---------  ---------
-   Internet  10.13.68.113  24:be:05:28:10:71  vlan10     78
-   Internet  10.13.68.114  b0:5a:da:38:7e:0d  vlan10     19
-   Internet  10.13.68.117  10:e7:c6:05:d3:22  vlan10     62
-   Internet  10.13.68.118  9c:eb:e8:75:0d:89  vlan10     1376
-   Internet  10.13.68.119  70:5a:0f:d8:fc:cc  vlan10     65
-   Internet  10.13.68.120  10:e7:c6:6e:6a:d2  vlan10     25
-   Internet  10.13.68.121  80:ce:62:5e:c4:d1  vlan10     63
-   Internet  10.13.68.123  10:e7:c6:6e:3a:fe  vlan10     12
-   Internet  10.13.68.124  50:65:f3:1b:53:67  vlan10     46
-   Internet  10.13.68.126  78:ac:c0:82:83:9c  vlan10     1376
-   Internet  10.13.68.128  d4:95:24:ee:bd:d6  vlan10     1353
-   Internet  10.13.68.150  78:f2:9e:90:f1:72  vlan10     1376
+Channel followed by "*" indicates channel selected due to unsupported configured channel.
+"Spectrum" followed by "^" indicates Local Spectrum Override in effect.
 
+ fm (forward mode): T-Tunnel, S-Split, D-Decrypt Tunnel, B-Bridge (s-standard, p-persistent, b-backup, a-always), n-anyspot
+
+cluster (cluster role): U-UAC, A-AAC, sU-Standby UAC, sA-Standby AAC
 ```
 
-**Help:** execute the command "show arp"
-
-**Prompt:**
-- aruba_os>
-- aruba_os#
-
-### show ap database long
-
-**Output:**
-```
-
-AP Database
------------
-Name                Group       AP Type  IP Address     Status             Flags  Switch IP       Standby IP       Wired MAC Address  Serial #    Port  FQLN  Outer IP  User
-----                -----       -------  ----------     ------             -----  ---------       ----------       -----------------  --------    ----  ----  --------  ----
-ap-building-1    building      635      192.168.1.1    Up 2d:17h:8m:4s    2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:33  CNM12345  N/A   N/A   N/A   N/A
-ap-building-2     building      515      192.168.1.2  Up 2d:17h:8m:23s   2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:34  CNM12346  N/A   N/A   N/A   N/A
-ap-building-3    building      505H      192.168.1.3  Up 2d:16h:57m:55s  2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:35  CNM12347  N/A   N/A   N/A   N/A
-
-
-Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 802.1x use factory cert
-       2 = Using IKE version 2;                    4 = WiFi Uplink
-       B = Built-in AP;                            C = Cellular RAP;       D = Dirty or no config
-       E = Regulatory Domain Mismatch;             F = AP failed 802.1x authentication
-       G = No such group;        I = Inactive;     J = USB cert at AP;     L = Unlicensed
-       M = Mesh node
-       N = Duplicate name;       P = PPPoe AP;     R = Remote AP;          R- = Remote AP requires Auth
-       S = Standby-mode AP;      T = Thermal ShutDown;    U = Unprovisioned;    X = Maintenance Mode
-       Y = Mesh Recovery
-       b = bypass of AP1x timeout;    c = CERT-based RAP;    e = Custom EST cert;    f = No Spectrum FFT support
-       i = Indoor;                    o = Outdoor;           l = LAG 802.3ad;        m = Protocol Mismatch
-       p = In deep-sleep status;      r = Power Restricted;  s = LACP striping;      t = Temperature Restricted
-       u = Custom-Cert RAP;           z = Datazone AP
-
-```
-
-**Help:** execute the command "show ap database long"
+**Help:** execute the command "show ap bss-table details"
 
 **Prompt:**
 - aruba_os>
@@ -113,7 +75,6 @@ Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 
        i = Indoor;                    o = Outdoor;           l = LAG 802.3ad;        m = Protocol Mismatch
        p = In deep-sleep status;      r = Power Restricted;  s = LACP striping;      t = Temperature Restricted
        u = Custom-Cert RAP;           z = Datazone AP
-
 ```
 
 **Help:** execute the command "show ap database"
@@ -122,54 +83,36 @@ Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 
 - aruba_os>
 - aruba_os#
 
-### show ap bss-table details
+### show ap database long
 
 **Output:**
 ```
-fm (forward mode): T-Tunnel, S-Split, D-Decrypt Tunnel, B-Bridge (s-standard, p-persistent, b-backup, a-always), n-anyspot
 
-cluster (cluster role): U-UAC, A-AAC, sU-Standby UAC, sA-Standby AAC
+AP Database
+-----------
+Name                Group       AP Type  IP Address     Status             Flags  Switch IP       Standby IP       Wired MAC Address  Serial #    Port  FQLN  Outer IP  User
+----                -----       -------  ----------     ------             -----  ---------       ----------       -----------------  --------    ----  ----  --------  ----
+ap-building-1    building      635      192.168.1.1    Up 2d:17h:8m:4s    2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:33  CNM12345  N/A   N/A   N/A   N/A
+ap-building-2     building      515      192.168.1.2  Up 2d:17h:8m:23s   2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:34  CNM12346  N/A   N/A   N/A   N/A
+ap-building-3    building      505H      192.168.1.3  Up 2d:16h:57m:55s  2Sf    192.168.2.2  192.168.2.3    cc:88:c7:11:22:35  CNM12347  N/A   N/A   N/A   N/A
 
-Aruba AP BSS Table
-------------------
-bss                ess                     port  ip             band/ht-mode/bandwidth  ch/EIRP/max-EIRP  type  cur-cl  ap name                in-t(s)  tot-t        mtu   acl-state  acl  fm  flags  cluster  active-clients  standby-clients  datazone
----                ---                     ----  --             ----------------------  ----------------  ----  ------  -------                -------  -----        ---   ---------  ---  --  -----  -------  --------------  ---------------  --------
-aa:bb:cc:dd:ee:ff  test1               N/A   192.168.1.2   5GHz/HE/40MHz           136-/19.0/27.1    ap    0       test1-ap           0        11h:0m:35s   1500  -          2    T   KrT    A        0               0                no
-aa:bb:cc:dd:ee:fa  test1                  N/A   192.168.1.2   2.4GHz/HE/20MHz         6/9.0/26.9        ap    0       test1-ap           0        11h:1m:17s   1500  -          119  T   KT     A        0               0                no
-aa:bb:cc:dd:ee:fb  test1                  N/A   192.168.1.2   6GHz/HE/160MHz           197S/16.0/24.3    ap    0       test1-ap          0        11h:0m:56s   1500  -          119  T   KT     A        0               0                no
-aa:bb:cc:dd:ee:fc  multi word ssid                 N/A   192.168.1.3    2.4GHz/HE/20MHz           6/9.0/26.9    ap    0       test2-ap             0        11h:0m:57s   1500  -          2    T   KrT    A        0               0                no
-aa:bb:cc:dd:ee:fd  test 2                  N/A   192.168.1.3  5GHz/HE/40MHz           120-/19.0/28.7    ap    0       test2-ap  0        11h:1m:28s   1500  -          119  T   KT     A        0               0                no
 
-Channel followed by "*" indicates channel selected due to unsupported configured channel.
-"Spectrum" followed by "^" indicates Local Spectrum Override in effect.
-
- fm (forward mode): T-Tunnel, S-Split, D-Decrypt Tunnel, B-Bridge (s-standard, p-persistent, b-backup, a-always), n-anyspot
-
-cluster (cluster role): U-UAC, A-AAC, sU-Standby UAC, sA-Standby AAC
-
+Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 802.1x use factory cert
+       2 = Using IKE version 2;                    4 = WiFi Uplink
+       B = Built-in AP;                            C = Cellular RAP;       D = Dirty or no config
+       E = Regulatory Domain Mismatch;             F = AP failed 802.1x authentication
+       G = No such group;        I = Inactive;     J = USB cert at AP;     L = Unlicensed
+       M = Mesh node
+       N = Duplicate name;       P = PPPoe AP;     R = Remote AP;          R- = Remote AP requires Auth
+       S = Standby-mode AP;      T = Thermal ShutDown;    U = Unprovisioned;    X = Maintenance Mode
+       Y = Mesh Recovery
+       b = bypass of AP1x timeout;    c = CERT-based RAP;    e = Custom EST cert;    f = No Spectrum FFT support
+       i = Indoor;                    o = Outdoor;           l = LAG 802.3ad;        m = Protocol Mismatch
+       p = In deep-sleep status;      r = Power Restricted;  s = LACP striping;      t = Temperature Restricted
+       u = Custom-Cert RAP;           z = Datazone AP
 ```
 
-**Help:** execute the command "show ap bss-table details"
-
-**Prompt:**
-- aruba_os>
-- aruba_os#
-
-### show ip interface brief
-
-**Output:**
-```
-Interface                   IP Address / IP Netmask        Admin   Protocol
- vlan 93                    162.25.53.4 / 255.255.255.192   up      up  
-vlan 1                      unassigned / unassigned        up      up  
-vlan 69                    162.25.53.9 / 255.255.255.192   up      up  
-vlan 999                 162.21.33.196 / 255.255.255.240   up      up  
-loopback                    unassigned / unassigned        up      up  
-
-
-```
-
-**Help:** execute the command "show ip interface brief"
+**Help:** execute the command "show ap database long"
 
 **Prompt:**
 - aruba_os>
@@ -202,8 +145,6 @@ Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 
        u = Custom-Cert RAP;           z = Datazone AP
 
 "Spectrum" followed by "^" indicates Local Spectrum Override in effect.
-
-
 ```
 
 **Help:** execute the command "show ap radio-database"
@@ -212,27 +153,34 @@ Flags: 1 = 802.1x authenticated AP use EAP-PEAP;   1+ = 802.1x use EST;    1- = 
 - aruba_os>
 - aruba_os#
 
-### show ipv6 interface brief
+### show arp
 
 **Output:**
 ```
-Interface                   [Status/Protocol]
-vlan 1                      [  up/up  ]
-    fe80::1a:3e00:6ed1:1585/64
-    2001::1/64
-vlan 390                     [  up/up  ]
-    unassigned
-vlan 991                     [  up/up  ]
-    fe80::1a:3e00:6ed1:1585/64
-    2a01:9e73:433f:109::6/64
- vlan 992                    [  up/up  ]
-    unassigned
-loopback                    [  up/up  ]
-    fe80::1a:3e00:6ed1:1585/64
 
+Codes: * - Local Addresses, S - Static, A - Auth
+
+Total ARP entries: 2
+
+IPV4 ARP Table
+--------------
+ Protocol    IP Address    Hardware Address   Interface  Age (min)
+----------   ----------    ----------------   ---------  ---------
+   Internet  10.13.68.113  24:be:05:28:10:71  vlan10     78
+   Internet  10.13.68.114  b0:5a:da:38:7e:0d  vlan10     19
+   Internet  10.13.68.117  10:e7:c6:05:d3:22  vlan10     62
+   Internet  10.13.68.118  9c:eb:e8:75:0d:89  vlan10     1376
+   Internet  10.13.68.119  70:5a:0f:d8:fc:cc  vlan10     65
+   Internet  10.13.68.120  10:e7:c6:6e:6a:d2  vlan10     25
+   Internet  10.13.68.121  80:ce:62:5e:c4:d1  vlan10     63
+   Internet  10.13.68.123  10:e7:c6:6e:3a:fe  vlan10     12
+   Internet  10.13.68.124  50:65:f3:1b:53:67  vlan10     46
+   Internet  10.13.68.126  78:ac:c0:82:83:9c  vlan10     1376
+   Internet  10.13.68.128  d4:95:24:ee:bd:d6  vlan10     1353
+   Internet  10.13.68.150  78:f2:9e:90:f1:72  vlan10     1376
 ```
 
-**Help:** execute the command "show ipv6 interface brief"
+**Help:** execute the command "show arp"
 
 **Prompt:**
 - aruba_os>
@@ -338,6 +286,49 @@ ispPAC_POWR6AT6                 :
 - aruba_os>
 - aruba_os#
 
+### show ip interface brief
+
+**Output:**
+```
+Interface                   IP Address / IP Netmask        Admin   Protocol
+ vlan 93                    162.25.53.4 / 255.255.255.192   up      up  
+vlan 1                      unassigned / unassigned        up      up  
+vlan 69                    162.25.53.9 / 255.255.255.192   up      up  
+vlan 999                 162.21.33.196 / 255.255.255.240   up      up  
+loopback                    unassigned / unassigned        up      up  
+```
+
+**Help:** execute the command "show ip interface brief"
+
+**Prompt:**
+- aruba_os>
+- aruba_os#
+
+### show ipv6 interface brief
+
+**Output:**
+```
+Interface                   [Status/Protocol]
+vlan 1                      [  up/up  ]
+    fe80::1a:3e00:6ed1:1585/64
+    2001::1/64
+vlan 390                     [  up/up  ]
+    unassigned
+vlan 991                     [  up/up  ]
+    fe80::1a:3e00:6ed1:1585/64
+    2a01:9e73:433f:109::6/64
+ vlan 992                    [  up/up  ]
+    unassigned
+loopback                    [  up/up  ]
+    fe80::1a:3e00:6ed1:1585/64
+```
+
+**Help:** execute the command "show ipv6 interface brief"
+
+**Prompt:**
+- aruba_os>
+- aruba_os#
+
 ### show version
 
 **Output:**
@@ -351,7 +342,6 @@ Boot Image:     Primary
 
 Boot ROM Version:    WC.16.01.0005
 Active Boot ROM:     Primary
-
 ```
 
 **Help:** execute the command "show version"
@@ -380,7 +370,6 @@ Active Boot ROM:     Primary
   106     WiFi_ot                          | Port-based No    No
   107     WiFi_main                        | Port-based No    No
   108     WiFi_guest                       | Port-based No    No
-
 ```
 
 **Help:** execute the command "show vlan"

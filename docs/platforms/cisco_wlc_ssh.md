@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -145,7 +156,6 @@ Video AC:
    Best-effort AC - Admission control (ACM)...... Disabled
    Background AC - Admission control (ACM)....... Disabled
 Maximum Number of Clients per AP Radio........... 200
-
 ```
 
 **Help:** execute the command "show 802.11a"
@@ -202,7 +212,6 @@ Additional Clean Air Settings:
     CleanAir Rogue Duty-Cycle Threshold.......... 80
     CleanAir Persistent Devices state............ Disabled
     CleanAir Persistent Device Propagation....... Disabled
-
 ```
 
 **Help:** execute the command "show 802.11a cleanair config"
@@ -252,7 +261,6 @@ Additional Clean Air Settings:
                                                   13,14,15,16,17,18,19,20,21,
                                                   22,23,24,25,26
   DCA Outdoor AP option.......................... Disabled
-
 ```
 
 **Help:** execute the command "show advanced 802.11a channel"
@@ -389,7 +397,6 @@ AP TCP MSS Adjust................................ Disabled
 Hotspot Venue Group.............................. Unspecified
 Hotspot Venue Type............................... Unspecified
       DNS server IP ............................. 192.168.1.1
-
 ```
 
 **Help:** execute the command "show ap config general"
@@ -417,8 +424,6 @@ AP Name            Primary Image  Backup Image   Status          Version        
 ------------------ -------------- -------------- --------------- -------------- ---------------- ------------ --------------
 ESP1-05-NAP01      8.5.161.0      0.0.0.0        None            None           NA               NA                       
 ESP1-05-NAP02      8.5.161.0      0.0.0.0        None            None           NA               NA                       
-
-
 ```
 
 **Help:** execute the command "show ap image all"
@@ -442,7 +447,6 @@ AP Name                         Slots  AP Model              Ethernet MAC       
 ------------------------------  -----  --------------------  -----------------  --------------------  ----------  ---------------  -------  --------------
 2800-Default                    3      AIR-AP2802I-E-K9       c0:ff:ee:c0:ff:ee  default location      IT          172.25.81.216    0        [0 ,0 ,0 ]
 2700-Server                     2      AIR-CAP2702E-E-K9      ca:fe:ca:fe:ca:fe  Server room           IT          172.25.81.221    0        [0 ,0 ,0 ]
-
 ```
 
 **Help:** execute the command "show ap summary"
@@ -462,7 +466,6 @@ Band Select Probe Response....................... per WLAN enabling
    Age Out Dual Band............................. 60 seconds
    Client RSSI................................... -80 dBm
    Client Mid RSSI............................... -80 dBm
-
 ```
 
 **Help:** execute the command "show band-select"
@@ -477,7 +480,6 @@ Band Select Probe Response....................... per WLAN enabling
 ```
 Primary Boot Image............................... 8.10.183.0 (default) (active)
 Backup Boot Image................................ 8.8.125.0
-
 ```
 
 **Help:** execute the command "show boot"
@@ -533,8 +535,6 @@ Cisco IOS Software, C3750 Software (C3750-IPSERVICESK9-M), Version 12.2(55)SE11,
 
 Advertisement version: 2
 Duplex: Full
-
-
 ```
 
 **Help:** execute the command "show cdp neighbors detail"
@@ -746,7 +746,6 @@ Allowed (URL)IP Addresses
 -------------------------
 
 AVC Profile Name: ............................... Internal Wireless AVC
-
 ```
 
 **Help:** execute the command "show client detail"
@@ -836,8 +835,6 @@ AP Manager....................................... No
 Guest Interface.................................. No
 3G VLAN.......................................... Disabled
 L2 Multicast..................................... Enabled
-
-
 ```
 
 **Help:** execute the command "show interface detailed id"
@@ -855,7 +852,6 @@ Interface Group Name             Total Interfaces  Total Wlans  Total AP Groups 
 intgrp_guest                             1              1              2              No
 intgrp_prod                              1              1              6              No
 intgrp_byod                              1              2              11             No
-
 ```
 
 **Help:** execute the command "show interface group summary"
@@ -877,7 +873,6 @@ Interface Name                   Port Vlan Id  IP Address      Type    Ap Mgr Gu
 management                       1    untagged 192.168.1.11    Static  Yes    N/A  
 service-port                     N/A  N/A      11.1.1.1        Static  No     N/A  
 virtual                          N/A  N/A      1.1.1.1         Static  No     N/A  
-
 ```
 
 **Help:** execute the command "show interface summary"
@@ -895,7 +890,6 @@ Burned-in MAC Address............................ 70:1F:53:12:34:56
 Maximum number of APs supported.................. 150
 NAME: "Chassis"    , DESCR: "Cisco 3500 Series Wireless LAN Controller"
 PID: AIR-CT3504-K9,  VID: V01,  SN: ABC1234D567
-
 ```
 
 **Help:** execute the command "show inventory"
@@ -924,7 +918,6 @@ Mobility Anchor Export List
  GLAN ID     IP Address            Status
  -------     ---------------       ------
  99          192.168.180.1         Down
-
 ```
 
 **Help:** execute the command "show mobility anchor"
@@ -951,7 +944,6 @@ Controllers configured in the Mobility Group
  MAC Address        IP Address                                       Group Name                        Multicast IP                                     Status
  08:00:27:0a:04:25  192.168.1.12                                     data                              0.0.0.0                                          Control and Data Path Down
  08:00:27:1d:a4:d4  192.168.1.11                                     data                              0.0.0.0                                          Up
-
 ```
 
 **Help:** execute the command "show mobility sum"
@@ -975,7 +967,6 @@ Pr  Type   Stat   Mode     Mode      Status   Status  Trap     POE
 5  Normal  Disa Enable  Auto       Auto       Down   Enable  N/A     
 RP Normal  Forw Enable  Auto       Auto       Up     Enable  N/A     
 SP Normal  Disa Enable  Auto       Auto       Down   Enable  N/A     
-
 ```
 
 **Help:** execute the command "show port summary"
@@ -1017,7 +1008,6 @@ Idx  Type  Server Address    Port    State     Tout  MgmtTout  RFC3576  IPSec - 
 ---  ----  ----------------  ------  --------  ----  --------  -------  -------------------------------------------------------
 3  * N     10.255.255.26       1813    Enabled   5     5         N/A       Disabled - /none
 4  * N     10.255.255.27       1813    Enabled   5     5         N/A       Disabled - /none
-
 ```
 
 **Help:** execute the command "show radius summary"
@@ -1051,7 +1041,6 @@ Number of Routes................................. 0
 
 Destination Network          Netmask               Gateway
 -------------------    -------------------   -------------------
-
 ```
 
 **Help:** execute the command "show redundancy detail"
@@ -1075,7 +1064,6 @@ Destination Network          Netmask               Gateway
             BulkSync Status = Complete
 Average Redundancy Peer Reachability Latency = 199 Micro Seconds
 Average Management Gateway Reachability Latency = 570 Micro Seconds
-
 ```
 
 **Help:** execute the command "show redundancy summary"
@@ -1106,7 +1094,6 @@ Typical-Client-Density-802.11bg    2.4 GHz  <none>                              
 VSW_OFFICE                         5 GHz    <none>                               disable             Yes       
 VSW_OUTDOOR                        5 GHz    <none>                               disable             Yes       
 VSW_WAREHOUSE                      5 GHz    <none>                               disable             Yes       
-
 ```
 
 **Help:** execute the command "show rf-profile summary"
@@ -1128,7 +1115,6 @@ Pr Status Pkts In  Pkts Out Bcast    Errors   Errors   Collisions
 4  Up     335582045 124686415  3515026        0        0        0
 5  Down          0        0        0        0        0        0
    Total  2700091950 2597254439 69988443        0        0        0
-
 ```
 
 **Help:** execute the command "show stats port summary"
@@ -1183,8 +1169,6 @@ CPU Average Usage................................ Unknown
 
 Burned-in MAC Address............................ D0:C2:82:11:22:33
 Maximum number of APs supported.................. 25
-
-
 ```
 
 **Help:** execute the command "show sysinfo"
@@ -1223,7 +1207,6 @@ Idx      Server Address        Port    State   Tout   MgmtTout
 1    10.255.255.28              49      Enabled  5      5       
 2    10.255.255.29              49      Enabled  5      5       
 3    10.255.255.128             49      Enabled  5      5       
-
 ```
 
 **Help:** execute the command "show tacacs summary"
@@ -1250,7 +1233,6 @@ NTP Servers
     -------  ---------------------------------------------------------------------
        1              0                                  1.1.1.1     In Sync              AUTH DISABLED
        2              0                                    128.138.141.172     Not Tried            AUTH DISABLED
-
 ```
 
 **Help:** execute the command "show time"
@@ -1271,23 +1253,9 @@ WLAN ID  WLAN Profile Name / SSID                                               
 17       Test_lab / Test_lab                                                      Enabled   office_wireless       none        
 18       Public_lab / Public_lab                                                  Enabled   publicwifi            none        
 19       C_Fabric_test / C_Fabric_test                                            Disabled  management            none        
-
 ```
 
 **Help:** execute the command "show wlan sum"
-
-**Prompt:**
-- cisco_wlc_ssh>
-- cisco_wlc_ssh#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - cisco_wlc_ssh>

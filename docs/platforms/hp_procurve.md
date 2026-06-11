@@ -7,6 +7,37 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+Invalid input: 
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
+### disable cli prompting
+
+**Output:** None
+
+**Help:** Execute the command disable cli prompting. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### disable clipaging
+
+**Output:** None
+
+**Help:** Execute the command disable clipaging. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
 ### enable
 
 **Output:** None
@@ -15,6 +46,229 @@
 
 **Prompt:**
 - hp_procurve>
+
+### logout
+
+**Output:** None
+
+**Help:** not implemented the exit
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### no page
+
+**Output:** None
+
+**Help:** Disable pagination
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### screen-length 0 temporary
+
+**Output:** None
+
+**Help:** Execute the command screen-length 0 temporary. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### screen-length disable
+
+**Output:** None
+
+**Help:** Execute the command screen-length disable. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show arp
+
+**Output:**
+```
+
+ IP ARP table
+
+  IP Address      MAC Address       Type    Port
+  --------------- ----------------- ------- ----
+  10.11.12.11     0015b2-a45078     dynamic
+```
+
+**Help:** execute the command "show arp"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show cdp neighbors detail
+
+**Output:**
+```
+ CDP neighbors information
+
+  Port : 1   
+  Device ID : AP01-Site
+  Address Type : IP          
+  Address      : 10.11.11.16                                                 
+  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
+
+------------------------------------------------------------------------------
+
+  Port : 1   
+  Device ID : 5c 0e 8b 11 11 11                                             
+  Address Type : IP          
+  Address      : 10.11.11.16                                                 
+  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+
+------------------------------------------------------------------------------
+
+  Port : 2   
+  Device ID : 5c 0e 8b 12 22 22                                             
+  Address Type : IP          
+  Address      : Unsupported format                                          
+  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
+
+------------------------------------------------------------------------------
+
+  Port : 2   
+  Device ID : AP02-Site
+  Address Type : IP          
+  Address      : 10.11.11.17                                                 
+  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
+  Capability   : Router                                                     
+  Device Port  : ge1                                                        
+  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
+```
+
+**Help:** execute the command "show cdp neighbors detail"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show interfaces
+
+**Output:**
+```
+Status and Counters - Port Counters
+
+                                                                    Flow
+ Port       Total Bytes    Total Frames   Errors Rx    Drops Tx     Ctrl
+ ---------- -------------- -------------- ------------ ------------ ----
+ 1          200,205        1861           0            0            off
+ 2          0              0              0            0            off
+ 3          0              0              0            0            off
+ 4          0              0              0            0            off
+ 5          0              0              0            0            off
+ 6          0              0              0            0            off
+ 7          0              0              0            0            off
+ 8          0              0              0            0            off
+ 9          0              0              0            0            off
+ 10         0              0              0            0            off
+ 11         0              0              0            0            off
+ 12         0              0              0            0            off
+ 13         0              0              0            0            off
+ 14         0              0              0            0            off
+ 15         0              0              0            0            off
+ 16         0              0              0            0            off
+ 17         0              0              0            0            off
+ 18         0              0              0            0            off
+ 19         0              0              0            0            off
+ 20         0              0              0            0            off
+ 21         0              0              0            0            off
+ 22         0              0              0            0            off
+ 23         0              0              0            0            off
+ 24         0              0              0            0            off
+ 25         0              0              0            0            off
+ 26         0              0              0            0            off
+ 27         0              0              0            0            off
+ 28         0              0              0            0            off
+ 29         0              0              0            0            off
+ 30         0              0              0            0            off
+ 31         0              0              0            0            off
+ 32         0              0              0            0            off
+ 33         0              0              0            0            off
+ 34         0              0              0            0            off
+ 35         0              0              0            0            off
+ 36         0              0              0            0            off
+ 37         0              0              0            0            off
+ 38         0              0              0            0            off
+ 39         0              0              0            0            off
+ 40         0              0              0            0            off
+ 41         0              0              0            0            off
+ 42         0              0              0            0            off
+ 43         0              0              0            0            off
+ 44         0              0              0            0            off
+ 45         0              0              0            0            off
+ 46         0              0              0            0            off
+ 47         0              0              0            0            off
+ 48         0              0              0            0            off
+ 49         0              0              0            0            off
+ 50         0              0              0            0            off
+ 51         0              0              0            0            off
+ 52         0              0              0            0            off
+```
+
+**Help:** execute the command "show interfaces"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show interfaces brief
+
+**Output:**
+```
+ Status and Counters - Port Status
+
+                          | Intrusion                           MDI  Flow Bcast
+  Port         Type       | Alert     Enabled Status Mode       Mode Ctrl Limit
+  ------------ ---------- + --------- ------- ------ ---------- ---- ---- -----
+  1            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  2            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  3            100/1000T  | Yes       Yes     Down   1000FDx    Auto off  0
+  4            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  5            100/1000T  | No        No      Down   1000FDx    Auto off  0
+  6            100/1000T  | No        Yes     Down   1000FDx    Auto on   0    
+  7            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  8            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  9            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  10           100/1000T  | No        Yes     Down   1000FDx    Auto on   50
+  11           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  12           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  13           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  14           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  15           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  16           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  17           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  18           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  19           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  20           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  21           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  22           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  23           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
+  24           100/1000T  | No        Yes     Up     100FDx     MDI  off  0
+```
+
+**Help:** execute the command "show interfaces brief"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
 
 ### show ip
 
@@ -41,21 +295,48 @@
 - hp_procurve>
 - hp_procurve#
 
-### no page
+### show ip route
 
-**Output:** None
+**Output:**
+```
 
-**Help:** Disable pagination
+                                                                                                                                                                                                                                                       IP Route Entries
+
+  Destination        Gateway         VLAN Type      Sub-Type   Metric     Dist.
+  ------------------ --------------- ---- --------- ---------- ---------- -----
+  0.0.0.0/0          10.11.11.254    1111 static               250        1
+  10.11.11.0/24      mgmt            1111 connected            1          0
+  127.0.0.0/8        reject               static               0          0
+  127.0.0.1/32                            connected            1          0    
+```
+
+**Help:** execute the command "show ip route"
 
 **Prompt:**
 - hp_procurve>
 - hp_procurve#
 
-### logout
+### show lldp info remote-device
 
-**Output:** None
+**Output:**
+```
 
-**Help:** not implemented the exit
+ LLDP Remote Devices Information
+
+  LocalPort | ChassisId          PortId             PortDescr SysName           
+  --------- + ------------------ ------------------ --------- ------------------
+  1         | 3821c7-c1cd00      1                  1         65432p-swi006-g...
+  3         | 3ce1a1-2218f0      3c e1 a1 22 18 f0                              
+  7         | bcf310-1f8b40      mgt0                         AH-cust-AP21      
+  25        | d8cb8a-6d303c      d8 cb 8a 6d 30 3c                              
+  29        | 484d7e-e66c42      48 4d 7e e6 6c 42                              
+  36        | 603197-7aa548      1                  UPLINK    NAP203            
+  37        | b00cd1-359a98      b0 0c d1 35 9a 98                              
+  42        | d8cb8a-894644      d8 cb 8a 89 46 44                              
+ 
+```
+
+**Help:** execute the command "show lldp info remote-device"
 
 **Prompt:**
 - hp_procurve>
@@ -246,9 +527,6 @@
 
   MED Information Detail 
     EndpointClass          :Class1
-
-
-
 ```
 
 **Help:** execute the command "show lldp info remote-device detail"
@@ -257,95 +535,22 @@
 - hp_procurve>
 - hp_procurve#
 
-### show vlans
+### show mac-address
 
 **Output:**
 ```
- Status and Counters - VLAN Information
 
-  Maximum VLANs to support : 256                  
-  Primary VLAN : DEFAULT_VLAN
-  Management VLAN :             
+ Status and Counters - Port Address Table
 
-  VLAN ID Name                             | Status     Voice Jumbo
-  ------- -------------------------------- + ---------- ----- -----
-  1       DEFAULT_VLAN                     | Port-based No    No   
-  10      Router Vlan                      | Port-based No    No   
-  50      Voice                            | Port-based Yes   No   
-
+  MAC Address   Port
+  ------------- -----
+  00000d-600000 10
+  000424-731040 10
+  0010f3-841dea 10
+  5c0e8b-97d9db 3
 ```
 
-**Help:** execute the command "show vlans"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show interfaces
-
-**Output:**
-```
-Status and Counters - Port Counters
-
-                                                                    Flow
- Port       Total Bytes    Total Frames   Errors Rx    Drops Tx     Ctrl
- ---------- -------------- -------------- ------------ ------------ ----
- 1          200,205        1861           0            0            off
- 2          0              0              0            0            off
- 3          0              0              0            0            off
- 4          0              0              0            0            off
- 5          0              0              0            0            off
- 6          0              0              0            0            off
- 7          0              0              0            0            off
- 8          0              0              0            0            off
- 9          0              0              0            0            off
- 10         0              0              0            0            off
- 11         0              0              0            0            off
- 12         0              0              0            0            off
- 13         0              0              0            0            off
- 14         0              0              0            0            off
- 15         0              0              0            0            off
- 16         0              0              0            0            off
- 17         0              0              0            0            off
- 18         0              0              0            0            off
- 19         0              0              0            0            off
- 20         0              0              0            0            off
- 21         0              0              0            0            off
- 22         0              0              0            0            off
- 23         0              0              0            0            off
- 24         0              0              0            0            off
- 25         0              0              0            0            off
- 26         0              0              0            0            off
- 27         0              0              0            0            off
- 28         0              0              0            0            off
- 29         0              0              0            0            off
- 30         0              0              0            0            off
- 31         0              0              0            0            off
- 32         0              0              0            0            off
- 33         0              0              0            0            off
- 34         0              0              0            0            off
- 35         0              0              0            0            off
- 36         0              0              0            0            off
- 37         0              0              0            0            off
- 38         0              0              0            0            off
- 39         0              0              0            0            off
- 40         0              0              0            0            off
- 41         0              0              0            0            off
- 42         0              0              0            0            off
- 43         0              0              0            0            off
- 44         0              0              0            0            off
- 45         0              0              0            0            off
- 46         0              0              0            0            off
- 47         0              0              0            0            off
- 48         0              0              0            0            off
- 49         0              0              0            0            off
- 50         0              0              0            0            off
- 51         0              0              0            0            off
- 52         0              0              0            0            off
-
-```
-
-**Help:** execute the command "show interfaces"
+**Help:** execute the command "show mac-address"
 
 **Prompt:**
 - hp_procurve>
@@ -411,7 +616,6 @@ Status and Counters - Port Counters
   50    Continuous         | None                     Enabled
   51    Continuous         | None                     Enabled
   52    Continuous         | None                     Enabled
-
 ```
 
 **Help:** execute the command "show port-security"
@@ -420,110 +624,37 @@ Status and Counters - Port Counters
 - hp_procurve>
 - hp_procurve#
 
-### show lldp info remote-device
+### show system
 
 **Output:**
 ```
 
- LLDP Remote Devices Information
+ Status and Counters - General System Information
 
-  LocalPort | ChassisId          PortId             PortDescr SysName           
-  --------- + ------------------ ------------------ --------- ------------------
-  1         | 3821c7-c1cd00      1                  1         65432p-swi006-g...
-  3         | 3ce1a1-2218f0      3c e1 a1 22 18 f0                              
-  7         | bcf310-1f8b40      mgt0                         AH-cust-AP21      
-  25        | d8cb8a-6d303c      d8 cb 8a 6d 30 3c                              
-  29        | 484d7e-e66c42      48 4d 7e e6 6c 42                              
-  36        | 603197-7aa548      1                  UPLINK    NAP203            
-  37        | b00cd1-359a98      b0 0c d1 35 9a 98                              
-  42        | d8cb8a-894644      d8 cb 8a 89 46 44                              
- 
+  System Name        : HP_Procurve-01                           
+  System Contact     : John Smith
+  System Location    : Downtown DC2
 
+  MAC Age Time (sec) : 300    
+
+  Time Zone          : -480 
+  Daylight Time Rule : Continental-US-and-Canada 
+
+
+  Software revision  : K.15.06.0017         Base MAC Addr      : 7446a0-41a56f
+  ROM Version        : K.15.29              Serial Number      : AB12CDE3FG  
+  Allow V1 Modules   : Yes
+
+  Up Time            : 15 days              Memory   - Total   : 128,380,928 
+  CPU Util (%)       : 22                              Free    : 61,999,280  
+
+  IP Mgmt  - Pkts Rx : 39,808,402           Packet   - Total   : 6750        
+             Pkts Tx : 4,524,902            Buffers    Free    : 5086        
+                                                       Lowest  : 3416        
+                                                       Missed  : 0           
 ```
 
-**Help:** execute the command "show lldp info remote-device"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show arp
-
-**Output:**
-```
-
- IP ARP table
-
-  IP Address      MAC Address       Type    Port
-  --------------- ----------------- ------- ----
-  10.11.12.11     0015b2-a45078     dynamic
-
-```
-
-**Help:** execute the command "show arp"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show trunks
-
-**Output:**
-```
-
- Load Balancing Method:  L3-based (default)
-
-  Port   | Name                             Type       | Group Type    
-  ------ + -------------------------------- ---------- + ----- --------
-  49     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
-  50     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
- 
-
-```
-
-**Help:** execute the command "show trunks"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show interfaces brief
-
-**Output:**
-```
- Status and Counters - Port Status
-
-                          | Intrusion                           MDI  Flow Bcast
-  Port         Type       | Alert     Enabled Status Mode       Mode Ctrl Limit
-  ------------ ---------- + --------- ------- ------ ---------- ---- ---- -----
-  1            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  2            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  3            100/1000T  | Yes       Yes     Down   1000FDx    Auto off  0
-  4            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  5            100/1000T  | No        No      Down   1000FDx    Auto off  0
-  6            100/1000T  | No        Yes     Down   1000FDx    Auto on   0    
-  7            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  8            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  9            100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  10           100/1000T  | No        Yes     Down   1000FDx    Auto on   50
-  11           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  12           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  13           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  14           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  15           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  16           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  17           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  18           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  19           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  20           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  21           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  22           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  23           100/1000T  | No        Yes     Down   1000FDx    Auto off  0
-  24           100/1000T  | No        Yes     Up     100FDx     MDI  off  0
-
-```
-
-**Help:** execute the command "show interfaces brief"
+**Help:** execute the command "show system"
 
 **Prompt:**
 - hp_procurve>
@@ -719,8 +850,6 @@ Allocation statistics for MSG buffer pool:
      muiAgent   1b1f76c0       1    01/16/90 15:15:59
     INTERRUPT          0     199    01/16/90 15:15:06
   Note: (null) indicates buffer allocated at init time (not used since).
-
-
 ```
 
 **Help:** execute the command "show tech buffers"
@@ -729,207 +858,21 @@ Allocation statistics for MSG buffer pool:
 - hp_procurve>
 - hp_procurve#
 
-### show system
+### show trunks
 
 **Output:**
 ```
 
- Status and Counters - General System Information
+ Load Balancing Method:  L3-based (default)
 
-  System Name        : HP_Procurve-01                           
-  System Contact     : John Smith
-  System Location    : Downtown DC2
-
-  MAC Age Time (sec) : 300    
-
-  Time Zone          : -480 
-  Daylight Time Rule : Continental-US-and-Canada 
-
-
-  Software revision  : K.15.06.0017         Base MAC Addr      : 7446a0-41a56f
-  ROM Version        : K.15.29              Serial Number      : AB12CDE3FG  
-  Allow V1 Modules   : Yes
-
-  Up Time            : 15 days              Memory   - Total   : 128,380,928 
-  CPU Util (%)       : 22                              Free    : 61,999,280  
-
-  IP Mgmt  - Pkts Rx : 39,808,402           Packet   - Total   : 6750        
-             Pkts Tx : 4,524,902            Buffers    Free    : 5086        
-                                                       Lowest  : 3416        
-                                                       Missed  : 0           
-
-
+  Port   | Name                             Type       | Group Type    
+  ------ + -------------------------------- ---------- + ----- --------
+  49     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
+  50     | Uplink 65432p-swi001             1000LX     | Trk2  LACP    
+ 
 ```
 
-**Help:** execute the command "show system"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show cdp neighbors detail
-
-**Output:**
-```
- CDP neighbors information
-
-  Port : 1   
-  Device ID : AP01-Site
-  Address Type : IP          
-  Address      : 10.11.11.16                                                 
-  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
-  Capability   : Router                                                     
-  Device Port  : ge1                                                        
-  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
-
-------------------------------------------------------------------------------
-
-  Port : 1   
-  Device ID : 5c 0e 8b 11 11 11                                             
-  Address Type : IP          
-  Address      : 10.11.11.16                                                 
-  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
-  Capability   : Router                                                     
-  Device Port  : ge1                                                        
-  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
-
-------------------------------------------------------------------------------
-
-  Port : 2   
-  Device ID : 5c 0e 8b 12 22 22                                             
-  Address Type : IP          
-  Address      : Unsupported format                                          
-  Platform     : AP-6521-60020-WR, Version 5.9.1.5-001R                     
-  Capability   : Router                                                     
-  Device Port  : ge1                                                        
-  Version      : AP-6521-60020-WR, Version 5.9.1.5-001R                     
-
-------------------------------------------------------------------------------
-
-  Port : 2   
-  Device ID : AP02-Site
-  Address Type : IP          
-  Address      : 10.11.11.17                                                 
-  Platform     : 5.9.1.5-001RAP-6521-60020-WR                               
-  Capability   : Router                                                     
-  Device Port  : ge1                                                        
-  Version      : 5.9.1.5-001RAP-6521-60020-WR                               
-```
-
-**Help:** execute the command "show cdp neighbors detail"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show mac-address
-
-**Output:**
-```
-
- Status and Counters - Port Address Table
-
-  MAC Address   Port
-  ------------- -----
-  00000d-600000 10
-  000424-731040 10
-  0010f3-841dea 10
-  5c0e8b-97d9db 3
-```
-
-**Help:** execute the command "show mac-address"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### show ip route
-
-**Output:**
-```
-
-                                                                                                                                                                                                                                                       IP Route Entries
-
-  Destination        Gateway         VLAN Type      Sub-Type   Metric     Dist.
-  ------------------ --------------- ---- --------- ---------- ---------- -----
-  0.0.0.0/0          10.11.11.254    1111 static               250        1
-  10.11.11.0/24      mgmt            1111 connected            1          0
-  127.0.0.0/8        reject               static               0          0
-  127.0.0.1/32                            connected            1          0    
-
-```
-
-**Help:** execute the command "show ip route"
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### terminal width 511
-
-**Output:** None
-
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### screen-length 0 temporary
-
-**Output:** None
-
-**Help:** Execute the command screen-length 0 temporary. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### terminal datadump
-
-**Output:** None
-
-**Help:** Execute the command terminal datadump. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### terminal length 0
-
-**Output:** None
-
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### disable cli prompting
-
-**Output:** None
-
-**Help:** Execute the command disable cli prompting. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### disable clipaging
-
-**Output:** None
-
-**Help:** Execute the command disable clipaging. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- hp_procurve>
-- hp_procurve#
-
-### screen-length disable
-
-**Output:** None
-
-**Help:** Execute the command screen-length disable. This automatically generated. Feel free to change it!
+**Help:** execute the command "show trunks"
 
 **Prompt:**
 - hp_procurve>
@@ -948,10 +891,32 @@ FIPS Mode :disabled
 
 AP uptime is 01 hours 01 minutes 01 seconds
 Reboot Time and Cause: AP rebooted caused by cold HW reset(power loss)
-
 ```
 
 **Help:** execute the command "show version"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### show vlans
+
+**Output:**
+```
+ Status and Counters - VLAN Information
+
+  Maximum VLANs to support : 256                  
+  Primary VLAN : DEFAULT_VLAN
+  Management VLAN :             
+
+  VLAN ID Name                             | Status     Voice Jumbo
+  ------- -------------------------------- + ---------- ----- -----
+  1       DEFAULT_VLAN                     | Port-based No    No   
+  10      Router Vlan                      | Port-based No    No   
+  50      Voice                            | Port-based Yes   No   
+```
+
+**Help:** execute the command "show vlans"
 
 **Prompt:**
 - hp_procurve>
@@ -1008,10 +973,39 @@ Free             : 227,871,324 bytes
 VSF Links -
 #1 : Active, Peer member 1
 #2 : Inactive
-
 ```
 
 **Help:** execute the command "show vsf detail"
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### terminal datadump
+
+**Output:** None
+
+**Help:** Execute the command terminal datadump. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### terminal length 0
+
+**Output:** None
+
+**Help:** Execute the command terminal length 0. This automatically generated.
+
+**Prompt:**
+- hp_procurve>
+- hp_procurve#
+
+### terminal width 511
+
+**Output:** None
+
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - hp_procurve>
