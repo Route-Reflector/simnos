@@ -107,12 +107,12 @@ def _lookup_mode(prompt_template: str, reverse_map: dict[str, str], *, where: st
     try:
         format_template_to_jinja(prompt_template)
     except ValueError as e:
-        raise ValueError(f"cannot map {where} prompt {prompt_template!r} to a mode: {e}") from e
+        raise ValueError(f"cannot map {where} {prompt_template!r} to a mode: {e}") from e
     rendered = prompt_template.format(base_prompt=_REVERSE_SENTINEL)
     mode = reverse_map.get(rendered)
     if mode is None:
         raise ValueError(
-            f"cannot map {where} prompt {prompt_template!r} to a mode (known modes render to {sorted(reverse_map)!r})"
+            f"cannot map {where} {prompt_template!r} to a mode (known modes render to {sorted(reverse_map)!r})"
         )
     return mode
 
@@ -189,7 +189,7 @@ def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> Resol
         modes: frozenset[str] = frozenset()
     else:
         modes = frozenset(
-            _lookup_mode(p, reverse_map, where=f"command {name!r}") for p in _prompt_list(entry.get("prompt"))
+            _lookup_mode(p, reverse_map, where=f"command {name!r} prompt") for p in _prompt_list(entry.get("prompt"))
         )
 
     new_prompt = entry.get("new_prompt")

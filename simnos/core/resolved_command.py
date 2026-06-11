@@ -60,13 +60,15 @@ _ENDRAW_DELIMITER = re.compile(r"\{%[-+]?\s*endraw\b")
 
 
 def _jinja_raw(literal: str) -> str:
-    """Wrap a literal segment so jinja2 emits it verbatim.
+    """Wrap a literal run so jinja2 emits it verbatim.
 
-    A literal segment may contain ``{``/``}`` (router output, JSON, brace
-    art) that jinja2 would otherwise read as ``{{`` / ``{%`` delimiters.
+    A literal run may contain ``{``/``}`` (router output, JSON, brace art)
+    that jinja2 would otherwise read as ``{{`` / ``{%`` delimiters.
     ``{% raw %}`` disables jinja2 parsing inside; the only sequence that
     could break out is a literal ``{% endraw %}``, which never appears in
-    NOS CLI output — guarded loudly just in case (#264 / D6, D8).
+    NOS CLI output — guarded loudly just in case (#264 / D6, D8). The caller
+    passes the full concatenated run so this guard sees a ``{% endraw %}``
+    even when ``{{`` split it across formatter segments.
     """
     if _ENDRAW_DELIMITER.search(literal):
         raise ValueError(f"output literal contains a jinja2 raw-block delimiter, cannot convert: {literal!r}")
