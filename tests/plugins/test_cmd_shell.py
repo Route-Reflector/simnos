@@ -338,10 +338,9 @@ class TestCmdShell(TestCase):
     def _make_prompt_form_shell(self, prompt_value):
         """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
 
-        Both a bare str and a list are valid authoring sugar for `prompt`
-        (#244 / P-12c); these pins guard that the two forms keep
-        dispatching identically across the load-path normalization
-        (str -> [str] inside `Nos`).
+        Both a bare str and a list are valid authoring sugar for `prompt`;
+        these pins guard that the two forms resolve to the same mode set and
+        dispatch identically through the adapter (#264 / D6).
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
@@ -362,7 +361,7 @@ class TestCmdShell(TestCase):
         return shell
 
     def test_default_prompt_str_authoring_dispatches(self):
-        """A bare-str `prompt` matches the current prompt and dispatches."""
+        """A bare-str `prompt` resolves to the current mode and dispatches."""
         shell = self._make_prompt_form_shell("{base_prompt}>")
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("cmd")
@@ -370,21 +369,19 @@ class TestCmdShell(TestCase):
         writeline.assert_called_once_with("form ok")
 
     def test_default_prompt_list_authoring_dispatches(self):
-        """A list `prompt` matches the current prompt and dispatches."""
+        """A list `prompt` resolves to a mode set including the current mode."""
         shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("cmd")
         self.assertFalse(stop)
         writeline.assert_called_once_with("form ok")
 
-    def test_inventory_commands_prompt_str_is_normalized_and_dispatches(self):
-        """Inventory-defined commands get the same str -> [str] normalization.
+    def test_inventory_commands_resolve_through_adapter_and_dispatch(self):
+        """Inventory-defined commands are normalized through the adapter too.
 
-        Pins the third commands inflow (#244 / D3, found during
-        implementation): `nos_inventory_config["commands"]` bypasses the
-        `Nos` load path, so the shell normalizes it at init — without
-        this, a bare-str prompt would be iterated char by char after the
-        read-side isinstance branch removal (a silent never-match).
+        Pins the third commands inflow (#264 / D6): `nos_inventory_config
+        ["commands"]` is merged and adapted at shell (re)build like the BASIC
+        and NOS inflows, so its prompt resolves to a mode set and dispatches.
         """
         self.arguments["is_running"].set()
         self.arguments["nos_inventory_config"] = {
@@ -605,15 +602,11 @@ class TestCmdShell(TestCase):
         self.assertIn("Traceback", captured.output[0])
 
     def test_default_callable_dict_output_passed_through_unformatted(self):
-        """Callable-dict output skips `_safe_format` entirely (#241 / D-b).
+        """Callable-dict output is written verbatim, never re-rendered (#241 / D-b).
 
-        New contract pin (rewritten from the pre-#241 raw-fallback pin):
-        handlers format themselves, so brace-containing device output is
-        written verbatim — no format attempt, hence **no error log**
-        (the old chain logged a FORMAT_ERRORS failure before falling back
-        to the same raw string). The skip applies to dict output exactly
-        like str returns: the flag is set at invoke time, not by return
-        shape.
+        Handlers render themselves, so brace-containing device output reaches
+        the wire untouched — the shell applies no template step to handler
+        output, hence **no error log**. Holds for dict and str returns alike.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
         writeline = set_attr(shell, "writeline", Mock())
@@ -623,12 +616,11 @@ class TestCmdShell(TestCase):
         writeline.assert_called_once_with("value is {base_prompt.foo}")
 
     def test_default_callable_str_output_passed_through_unformatted(self):
-        """Callable str output skips `_safe_format` too (#241 / D-b).
+        """Callable str output is written verbatim too (#241 / D-b).
 
         The str-return twin of the dict pin above: literal braces in a
         handler's rendered output (e.g. JSON-ish device output) reach the
-        wire untouched instead of tripping FORMAT_ERRORS into a logged
-        raw fallback.
+        wire untouched, with no render step and no error log.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: "literal {brace} stays")
         writeline = set_attr(shell, "writeline", Mock())
@@ -637,15 +629,19 @@ class TestCmdShell(TestCase):
         self.assertFalse(stop)
         writeline.assert_called_once_with("literal {brace} stays")
 
-    def test_default_command_new_prompt(self):
-        """Test that the default method does nothing."""
+    def test_default_command_transitions_mode(self):
+        """A command with a new_mode transitions the shell and re-renders the prompt.
+
+        `enable` (yaml_nos) declares new_mode=enable; dispatching it from the
+        initial user mode moves current_mode to enable and the prompt to
+        "test#" (the enable prompt rendered at base_prompt "test").
+        """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        # writeline guard only (stdout is None); this test asserts on prompt,
-        # not on the mock (return unused → bare set_attr).
-        set_attr(shell, "writeline", Mock())
+        set_attr(shell, "writeline", Mock())  # stdout is None; guard only
         shell.default("enable")
-        shell.prompt = "test#"
+        self.assertEqual(shell.current_mode, "enable")
+        self.assertEqual(shell.prompt, "test#")
 
     def test_default_command_exit(self):
         """Test that the default method does nothing."""
