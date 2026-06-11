@@ -232,6 +232,12 @@ class ParamikoSshServer(TCPServerBase):
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
         self.shell_configuration: dict = shell_configuration or {}
+        # Normalize the merged command platform once, here at Host.start, instead
+        # of per connection: it is per-host invariant (#264 / Impact). This also
+        # surfaces malformed inventory/data at startup rather than on the first
+        # connection. Optional so a shell without the hook still self-builds.
+        build_shared = getattr(self.shell, "build_shared_platform", None)
+        self._shared_platform = build_shared(nos, self.nos_inventory_config) if build_shared else None
         self.ssh_banner: str = ssh_banner
         self.username: str = username
         self.password: str = password
@@ -456,6 +462,7 @@ class ParamikoSshServer(TCPServerBase):
                 nos=self.nos,
                 nos_inventory_config=self.nos_inventory_config,
                 is_running=is_running,
+                resolved_platform=self._shared_platform,
                 **self.shell_configuration,
             )
 

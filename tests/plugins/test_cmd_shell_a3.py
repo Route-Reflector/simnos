@@ -11,7 +11,7 @@ import threading
 import pytest
 
 from simnos.core.nos import Nos
-from simnos.plugins.shell.cmd_shell import CMDShell
+from simnos.plugins.shell.cmd_shell import CMDShell, build_resolved_platform
 
 
 def _write(path, content):
@@ -127,6 +127,33 @@ class TestShellA3Path:
         shell = _shell_for(nos, inventory_config=inventory)
         assert shell.commands["show inventory"].output.render("R1") == "INV"
         assert shell.commands["show inventory"].modes == frozenset({"user"})
+
+    def test_shell_reuses_shared_platform(self, tmp_path):
+        # The server builds the merged platform once (per host) and passes it in;
+        # the shell installs that exact object instead of re-normalizing (#264 / Impact).
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        shared = build_resolved_platform(nos, {})
+        shell = CMDShell(
+            stdin=None,
+            stdout=None,
+            nos=nos,
+            nos_inventory_config={},
+            base_prompt="R1",
+            is_running=threading.Event(),
+            resolved_platform=shared,
+        )
+        assert shell.platform is shared
+        assert shell.current_mode == "user"
+        assert shell.prompt == "R1>"
+
+    def test_build_shared_platform_none_when_reload_enabled(self, tmp_path, monkeypatch):
+        # Dev hot-reload mode: no frozen snapshot, so each connection rebuilds
+        # from live nos and file edits propagate to new connections.
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
+        assert CMDShell.build_shared_platform(nos, {}) is None
+        monkeypatch.delenv("SIMNOS_RELOAD_COMMANDS")
+        assert CMDShell.build_shared_platform(nos, {}) is not None
 
     def test_a3_rebuild_is_atomic_on_broken_inflow(self, tmp_path):
         # A broken legacy inflow (canonical-外 prompt the A3 reverse map cannot

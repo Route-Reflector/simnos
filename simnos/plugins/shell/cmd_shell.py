@@ -37,6 +37,46 @@ BASIC_COMMANDS: dict = {
 HANDLER_ERROR_OUTPUT = "% Internal error"
 
 
+def build_resolved_platform(nos: "Nos", inventory_commands: dict) -> ResolvedPlatform:
+    """Merge the command inflows into one `ResolvedPlatform` (#264 / D6).
+
+    The shell consumes one representation regardless of authoring form. Inflows
+    merge under one precedence — BASIC < NOS < inventory, later inflows winning:
+
+    - **legacy NOS** (`nos.resolved_platform is None`): the merged dict (BASIC +
+      NOS commands + inventory, all legacy form) goes through the legacy adapter,
+      which synthesizes the modes from the 3 scalar prompts.
+    - **A3 NOS** (`nos.resolved_platform` set): modes come from the A3 platform;
+      its resolved static commands sit between the still-legacy BASIC (below) and
+      the legacy py-module / inventory inflows (above, keeping the py-override
+      precedence). The legacy inflows are normalized with the A3 platform's
+      prompt->mode reverse map. Inventory / py aliases resolve within their own
+      inflow only; a cross-inflow alias (e.g. inventory aliasing an A3 command)
+      is out of scope until the inventory rework (#266) — shipped data has none.
+
+    Pure (no session state): the result is per-host invariant, so the server
+    builds it once and shares it across connections.
+    """
+    a3 = nos.resolved_platform
+    if a3 is None:
+        merged = {
+            **copy.deepcopy(BASIC_COMMANDS),
+            **copy.deepcopy(nos.commands or {}),
+            **copy.deepcopy(inventory_commands),
+        }
+        return adapt_legacy_commands(nos.initial_prompt, nos.enable_prompt, nos.config_prompt, merged)
+    reverse_map = reverse_map_from_modes(a3.modes)
+    commands: dict = {}
+    commands.update(adapt_commands(copy.deepcopy(BASIC_COMMANDS), reverse_map))
+    commands.update(a3.commands)
+    commands.update(adapt_commands(copy.deepcopy(nos.commands or {}), reverse_map))
+    commands.update(adapt_commands(copy.deepcopy(inventory_commands), reverse_map))
+    # Carry `auth` so the merged platform mirrors the A3 source — auth is consumed
+    # via `nos.auth`, but dropping it would re-introduce the silent-dead-end
+    # asymmetry the auth wiring fixed (2nd round codex/claude #3).
+    return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands, auth=a3.auth)
+
+
 class CMDShell(Cmd):
     """
     Custom shell class to interact with NOS.
@@ -56,6 +96,7 @@ class CMDShell(Cmd):
         ruler="",
         completekey="tab",
         newline="\r\n",
+        resolved_platform=None,
     ):
         self.nos: Nos = nos
         self.ruler = ruler
@@ -65,12 +106,17 @@ class CMDShell(Cmd):
         self.is_running = is_running
         # Inventory-defined commands are a third inflow alongside BASIC and the
         # NOS data; kept in authoring form and normalized through the adapter on
-        # every (re)build (#264 / D6).
+        # a hot-reload rebuild (#264 / D6).
         self._inventory_commands: dict = nos_inventory_config.get("commands", {})
-        # Builds self.platform / self.commands / self.current_mode / self.prompt.
-        # A malformed prompt template now fails loudly here (the #172 lenient
-        # fallback is gone — prompt rendering is load-time validated, #264 / D5).
-        self._rebuild()
+        # The merged platform is per-host invariant (base_prompt is the host name,
+        # nos/inventory are shared), so the server normalizes it once at
+        # Host.start and passes it to every connection's shell (#264 / Impact —
+        # normalize once, fail at startup). When not supplied (tests / direct
+        # construction) the shell builds its own. A malformed prompt template
+        # fails loudly here (the #172 lenient fallback is gone, #264 / D5).
+        if resolved_platform is None:
+            resolved_platform = build_resolved_platform(self.nos, self._inventory_commands)
+        self._apply_platform(resolved_platform)
 
         # call the base constructor of cmd.Cmd, with our own stdin and stdout
         super().__init__(
@@ -79,40 +125,24 @@ class CMDShell(Cmd):
             stdout=stdout,
         )
 
-    def _rebuild(self) -> None:
-        """Merge the command inflows and normalize them to `ResolvedCommand`.
+    @staticmethod
+    def build_shared_platform(nos: Nos, nos_inventory_config: dict) -> ResolvedPlatform | None:
+        """Build the per-host merged platform the server shares across connections.
 
-        The shell consumes one representation regardless of authoring form. Two
-        inflow shapes are merged under the same precedence (BASIC < NOS < inventory,
-        later inflows winning, as before):
+        Called once at Host.start (by the server) so inventory/data errors fail
+        there rather than on each connection, and so the normalization is not
+        repeated per connection (#264 / Impact).
 
-        - **legacy NOS** (`self.nos.resolved_platform is None`): the merged dict
-          (BASIC + NOS commands + inventory, all legacy form) is run through the
-          legacy adapter, which synthesizes the modes from the 3 scalar prompts.
-        - **A3 NOS** (`self.nos.resolved_platform` set): modes come from the A3
-          platform; its resolved static commands sit between the still-legacy
-          BASIC (below) and the legacy py-module/inventory inflows (above, which
-          keep the py-override precedence). The legacy inflows are normalized
-          with the A3 platform's prompt->mode reverse map.
-
-        Atomic: if normalization raises (malformed data), self.* keep their prior
-        values, so a broken hot reload leaves the running session intact
-        (#264 / D5, D6).
+        Returns None when hot-reload is enabled (`SIMNOS_RELOAD_COMMANDS`): in
+        that dev mode each connection must rebuild from the live `nos` so file
+        edits propagate to new connections, so there is no shared snapshot.
         """
-        if self.nos.resolved_platform is not None:
-            platform = self._rebuild_a3(self.nos.resolved_platform)
-        else:
-            merged = {
-                **copy.deepcopy(BASIC_COMMANDS),
-                **copy.deepcopy(self.nos.commands or {}),
-                **copy.deepcopy(self._inventory_commands),
-            }
-            platform = adapt_legacy_commands(
-                self.nos.initial_prompt,
-                self.nos.enable_prompt,
-                self.nos.config_prompt,
-                merged,
-            )
+        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
+            return None
+        return build_resolved_platform(nos, nos_inventory_config.get("commands", {}))
+
+    def _apply_platform(self, platform: ResolvedPlatform) -> None:
+        """Install a (built or shared) platform + refresh session mode / prompt."""
         self.platform = platform
         self.commands = platform.commands
         # Keep the user's current mode across a hot reload when it still exists;
@@ -122,30 +152,14 @@ class CMDShell(Cmd):
             self.current_mode = platform.initial_mode
         self.prompt = platform.modes[self.current_mode].render_prompt(self.base_prompt)
 
-    def _rebuild_a3(self, a3: ResolvedPlatform) -> ResolvedPlatform:
-        """Merge BASIC + py-module + inventory inflows over an A3 platform (#264 / D6).
+    def _rebuild(self) -> None:
+        """Re-merge the inflows and install the result (hot-reload path).
 
-        Modes come from the A3 platform. The still-legacy inflows are normalized
-        with the A3 platform's prompt->mode reverse map and layered under/over the
-        A3 static commands to keep the legacy precedence (BASIC < A3 static <
-        py module < inventory). A py module loaded after the A3 dir populated
-        ``self.nos.commands`` with its dynamic handlers — those override the A3
-        statics, as the legacy py-override did.
-
-        Inventory/py aliases are resolved within their own inflow only; an alias
-        crossing inflows (e.g. inventory aliasing an A3 command) is out of scope
-        until the inventory rework (#266) — shipped data has no such aliases.
+        Atomic: `build_resolved_platform` raises before `_apply_platform` mutates
+        anything, so a broken hot reload leaves the running session intact
+        (#264 / D5, D6).
         """
-        reverse_map = reverse_map_from_modes(a3.modes)
-        commands: dict = {}
-        commands.update(adapt_commands(copy.deepcopy(BASIC_COMMANDS), reverse_map))
-        commands.update(a3.commands)
-        commands.update(adapt_commands(copy.deepcopy(self.nos.commands or {}), reverse_map))
-        commands.update(adapt_commands(copy.deepcopy(self._inventory_commands), reverse_map))
-        # Carry `auth` so the merged platform mirrors the A3 source — auth is
-        # consumed via `nos.auth`, but dropping it here would re-introduce the
-        # silent-dead-end asymmetry the auth wiring fixed (2nd round codex/claude #3).
-        return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands, auth=a3.auth)
+        self._apply_platform(build_resolved_platform(self.nos, self._inventory_commands))
 
     def start(self):
         """Method to start the shell"""
