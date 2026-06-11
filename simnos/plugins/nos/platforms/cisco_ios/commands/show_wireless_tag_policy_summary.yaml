@@ -1,0 +1,7 @@
+command: show wireless tag policy summary
+type: simnos
+help: execute the command "show wireless tag policy summary"
+mode:
+- user
+- enable
+output: show_wireless_tag_policy_summary.txt

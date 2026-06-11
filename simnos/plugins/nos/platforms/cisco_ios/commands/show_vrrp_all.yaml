@@ -1,0 +1,7 @@
+command: show vrrp all
+type: simnos
+help: execute the command "show vrrp all"
+mode:
+- user
+- enable
+output: show_vrrp_all.txt

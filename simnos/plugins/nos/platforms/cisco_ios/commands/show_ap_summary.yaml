@@ -1,0 +1,7 @@
+command: show ap summary
+type: simnos
+help: execute the command "show ap summary"
+mode:
+- user
+- enable
+output: show_ap_summary.txt

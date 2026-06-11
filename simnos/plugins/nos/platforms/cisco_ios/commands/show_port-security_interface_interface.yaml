@@ -1,0 +1,7 @@
+command: show port-security interface interface
+type: simnos
+help: execute the command "show port-security interface interface"
+mode:
+- user
+- enable
+output: show_port-security_interface_interface.txt

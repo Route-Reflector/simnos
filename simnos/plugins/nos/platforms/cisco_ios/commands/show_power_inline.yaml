@@ -1,0 +1,7 @@
+command: show power inline
+type: simnos
+help: execute the command "show power inline"
+mode:
+- user
+- enable
+output: show_power_inline.txt

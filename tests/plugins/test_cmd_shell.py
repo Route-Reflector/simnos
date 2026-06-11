@@ -850,10 +850,15 @@ class HotReloadTest(TestCase):
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @pytest.mark.xdist_group("hot-reload-fs")
-    @simnos(platform="cisco_ios", return_instance=True)
+    @simnos(platform="allied_telesis_awplus", return_instance=True)
     def test_hot_reload_integration_yaml(self, net: SimNOS):
         """
-        Test that the hot reload feature works correctly
+        Test that the hot reload feature works correctly for a legacy yaml platform.
+
+        Uses `allied_telesis_awplus` (a still-legacy `platforms_yaml/*.yaml`
+        platform): cisco_ios moved to the A3 form in #264, which has no
+        monolithic yaml to hot-edit. The `_default_` wording is read from the
+        yaml so the pin survives vendor-wording changes.
 
         Both hot-reload integration tests mutate the same real
         `simnos/plugins/nos/` tree that every reload-enabled server in
@@ -862,8 +867,10 @@ class HotReloadTest(TestCase):
         non-watched `.bak` extension (#232: a sibling worker observed
         a mid-`copyfile` empty `.yaml` and crashed its shell thread).
         """
-        original_filename = "simnos/plugins/nos/platforms_yaml/cisco_ios.yaml"
-        copy_filename = "simnos/plugins/nos/platforms_yaml/cisco_ios.yaml.bak"
+        original_filename = "simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml"
+        copy_filename = "simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml.bak"
+        with open(original_filename, encoding="utf-8") as file:
+            default_output = yaml.safe_load(file)["commands"]["_default_"]["output"]
         test_commands = {
             "test": {
                 "output": "test output",
@@ -889,11 +896,11 @@ class HotReloadTest(TestCase):
             "username": device[0].username,
             "password": device[0].password,
             "port": device[0].port,
-            "device_type": "cisco_ios",
+            "device_type": "allied_telesis_awplus",
         }
         with ConnectHandler(**credentials) as conn:
             output = conn.send_command("test")
-            assert output == "% Invalid input detected at '^' marker."
+            assert output == default_output
             change_file()
             try:
                 output = conn.send_command("test")

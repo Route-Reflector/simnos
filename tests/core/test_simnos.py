@@ -469,10 +469,10 @@ class TestSimNOS:
                 workers=0,
             )
 
-    def test_nos_load_inventory_from_py_and_yaml(self):
+    def test_nos_load_inventory_from_py_and_data_source(self):
         """
-        Test cisco_ios NOS loaded correctly as it has both
-        cisco_ios.py and cisco_ios.yaml definitions
+        Test cisco_ios NOS loaded correctly as it has two sources: the A3
+        platform dir (#264 — replaced the legacy cisco_ios.yaml) and cisco_ios.py.
         """
         inventory = {"hosts": {"R1": {"port": 5001, "platform": "cisco_ios"}}}
         net = SimNOS(inventory)
@@ -618,20 +618,23 @@ class TestPlatformsManifest:
         assert "base_template" not in available_platforms
         assert "base_template" not in nos_plugins
 
-    def test_available_platforms_have_yaml_source(self):
-        """Pin that every supported platform has a backing yaml file.
+    def test_available_platforms_have_data_source(self):
+        """Pin that every supported platform has a backing data source.
 
-        Catches "dangling key" drift: if a yaml is deleted in a future PR
-        but `available_platforms` is not updated (e.g. via a stale registry
-        cache), this test fails. All current platforms ship at least a yaml
-        definition; py-only entries (BaseDevice subclasses) live alongside
-        yaml entries.
+        Catches "dangling key" drift: if a data source is deleted in a future
+        PR but `available_platforms` is not updated (e.g. via a stale registry
+        cache), this test fails. A data source is either a legacy
+        ``platforms_yaml/<p>.yaml`` or an A3 ``platforms/<p>/`` directory
+        (#264 / D6); py-only entries live alongside one of those.
         """
         yaml_dir = "simnos/plugins/nos/platforms_yaml"
+        a3_dir = "simnos/plugins/nos/platforms"
         for platform_name in available_platforms:
             yaml_path = f"{yaml_dir}/{platform_name}.yaml"
-            assert os.path.isfile(yaml_path), (
-                f"Platform '{platform_name}' is in available_platforms but its yaml file is missing: {yaml_path}"
+            a3_path = f"{a3_dir}/{platform_name}/platform.yaml"
+            assert os.path.isfile(yaml_path) or os.path.isfile(a3_path), (
+                f"Platform '{platform_name}' is in available_platforms but has no data source "
+                f"(neither {yaml_path} nor {a3_path})"
             )
 
     def test_simnos_decorator_rejects_unknown_platform(self):

@@ -10,7 +10,9 @@ import types
 
 import yaml
 
+from simnos.core.platform_loader import load_platform_dir
 from simnos.core.pydantic_models import ModelNosAttributes
+from simnos.core.resolved_command import ResolvedPlatform
 
 log = logging.getLogger(__name__)
 
@@ -97,6 +99,13 @@ class Nos:
         self.config_prompt: str | None = None
         self.device = None
         self.configuration_file = configuration_file
+        # A3 form (#264 / PR-2): an A3 platform dir loads straight into a
+        # `ResolvedPlatform` (modes + resolved commands) here, instead of the
+        # legacy `self.commands` dict + scalar prompts. None until an A3 dir is
+        # loaded; the shell branches on it (D4, D6). A py module loaded *after*
+        # an A3 dir still populates `self.commands` (its dynamic handlers), which
+        # the shell merges over the A3 statics — the legacy py-override precedence.
+        self.resolved_platform: ResolvedPlatform | None = None
         if isinstance(filename, str):
             self.from_file(filename)
         elif isinstance(filename, list):
@@ -211,8 +220,9 @@ class Nos:
 
         The YAML mirrors the dict schema accepted by :meth:`from_dict`;
         see :class:`simnos.core.pydantic_models.ModelNosCommand` for the
-        per-command schema and ``simnos/plugins/nos/platforms_yaml/cisco_ios.yaml``
-        for a live example.
+        per-command schema and ``simnos/plugins/nos/platforms_yaml/arista_eos.yaml``
+        for a live example (this is the legacy form; A3 platforms load via
+        :meth:`_from_platform_dir` instead — #264).
 
         :param filepath: OS path to YAML file with NOS data
         :raises ValueError: if the file holds no YAML mapping (empty file
@@ -329,12 +339,38 @@ class Nos:
             # `if classname is not None` commit).
             self.device = device
 
+    def _from_platform_dir(self, path: str) -> None:
+        """Load an A3 platform directory into `self.resolved_platform` (#264 / D6).
+
+        Unlike the legacy `_from_yaml` / `_from_module` paths, this does not
+        populate `self.commands` / the scalar prompts — the A3 form normalizes
+        straight to a `ResolvedPlatform`. The platform name is the directory
+        name (D1); a py module loaded after this dir still fills `self.commands`
+        with its dynamic handlers, which the shell merges over the A3 statics.
+
+        :param path: directory holding ``platform.yaml`` + ``commands/``
+        :raises ValueError: on any A3 schema / reference / render violation
+        """
+        self.resolved_platform = load_platform_dir(path)
+        self.name = os.path.basename(os.path.normpath(path))
+        # `auth` has live behavior (ssh_server allows auth-none when nos.auth ==
+        # "none"); wire it from the A3 meta so it is not a silent dead field
+        # (1st round claude #2). Other meta (netmiko_device_type / ntc_platform)
+        # stay unconsumed placeholders until #266.
+        self.auth = self.resolved_platform.auth
+
     def from_file(self, filename: str) -> None:
         """
-        Method to load NOS from YAML or Python file
+        Method to load NOS from an A3 platform directory, a YAML file, or a Python file
 
-        :param filename: OS path string to `.yaml/.yml` or `.py` file with NOS data
+        :param filename: OS path string to an A3 platform dir, or a
+            `.yaml/.yml` / `.py` file with NOS data
         """
+        # An A3 platform is a directory (holds platform.yaml + commands/), not a
+        # file — dispatch on that before the extension check (#264 / D6).
+        if os.path.isdir(filename):
+            self._from_platform_dir(filename)
+            return
         if not self._is_file_ending_correct(filename):
             raise ValueError(f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml')
         if not os.path.isfile(filename):

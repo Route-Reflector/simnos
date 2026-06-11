@@ -1,0 +1,7 @@
+command: show users
+type: simnos
+help: execute the command "show users"
+mode:
+- user
+- enable
+output: show_users.txt

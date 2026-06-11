@@ -1,0 +1,5 @@
+# A3 platform output files are LF-only wire text (#264 / D8). Pin the line
+# ending so a Windows checkout cannot rewrite them to CRLF and break the
+# encoding lint / wire equivalence.
+simnos/plugins/nos/platforms/**/*.txt text eol=lf
+simnos/plugins/nos/platforms/**/*.j2 text eol=lf

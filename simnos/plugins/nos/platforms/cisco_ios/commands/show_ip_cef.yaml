@@ -1,0 +1,7 @@
+command: show ip cef
+type: simnos
+help: execute the command "show ip cef"
+mode:
+- user
+- enable
+output: show_ip_cef.txt

@@ -1,0 +1,7 @@
+command: show rep topology
+type: simnos
+help: execute the command "show rep topology"
+mode:
+- user
+- enable
+output: show_rep_topology.txt

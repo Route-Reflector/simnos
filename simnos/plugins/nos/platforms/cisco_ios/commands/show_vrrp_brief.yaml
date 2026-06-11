@@ -1,0 +1,7 @@
+command: show vrrp brief
+type: simnos
+help: execute the command "show vrrp brief"
+mode:
+- user
+- enable
+output: show_vrrp_brief.txt

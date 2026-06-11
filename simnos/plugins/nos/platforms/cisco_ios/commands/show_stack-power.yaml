@@ -1,0 +1,7 @@
+command: show stack-power
+type: simnos
+help: execute the command "show stack-power"
+mode:
+- user
+- enable
+output: show_stack-power.txt

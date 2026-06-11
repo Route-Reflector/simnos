@@ -1,0 +1,7 @@
+command: show authentication sessions method details
+type: simnos
+help: execute the command "show authentication sessions method details"
+mode:
+- user
+- enable
+output: show_authentication_sessions_method_details.txt

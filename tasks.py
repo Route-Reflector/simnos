@@ -159,6 +159,146 @@ def lint_platform_yaml(context):
     print("platform yaml lint OK")
 
 
+# --- A3 platform data lint (#264 / D8, D9) -----------------------------------
+
+PLATFORMS_A3_DIR = "simnos/plugins/nos/platforms"
+
+
+def _a3_platform_names(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Names of A3 platforms (dirs holding a ``platform.yaml``), sorted."""
+    if not os.path.isdir(platforms_dir):
+        return []
+    return sorted(
+        entry
+        for entry in os.listdir(platforms_dir)
+        if os.path.isfile(os.path.join(platforms_dir, entry, "platform.yaml"))
+    )
+
+
+def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Lint the A3 platform data directories (#264 / D8, D9).
+
+    Rules:
+    1. encoding (D8): every output file (``.txt`` / ``.j2``) must decode as
+       UTF-8, contain no CR (LF-only), and end with a trailing newline. Trailing
+       whitespace is intentionally NOT checked (raw-capture fidelity).
+    2. orphan: an output file referenced by no command yaml is flagged
+       (1st round claude #6c).
+    3. shared reference: an output file referenced by more than one command yaml
+       is flagged — the 1-yaml:1-output principle (2nd round gemini #3).
+    4. extension convention: a literal channel (``output`` / a variant's output)
+       must reference ``.txt`` and ``output_template`` must reference ``.j2`` —
+       the loader reads by field, so a variant pointing at ``.j2`` would emit raw
+       jinja verbatim (1st round claude #5). Enforced here, not in the loader.
+    5. stray ``.yml``: a command file uses the ``.yml`` extension, which the
+       loader's ``*.yaml`` glob silently ignores (1st round claude #8).
+
+    Returns a list of human-readable violation strings (empty = clean). Filename
+    convention + ``type: ntc`` source-presence warnings are deferred (see the
+    PR-2 worklog Notes) — they are warning-tier polish, not gates.
+    """
+    violations: list[str] = []
+    if not os.path.isdir(platforms_dir):
+        return violations
+    for platform in sorted(os.listdir(platforms_dir)):
+        commands_dir = os.path.join(platforms_dir, platform, "commands")
+        if not os.path.isdir(commands_dir):
+            continue
+        violations.extend(
+            f"{platform}/commands/{os.path.basename(stray)}: uses .yml; the loader only globs .yaml"
+            for stray in sorted(glob.glob(os.path.join(commands_dir, "*.yml")))
+        )
+        referenced: dict[str, list[str]] = {}
+        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+            with open(command_yaml, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            for ref in _output_refs(data):
+                referenced.setdefault(ref, []).append(os.path.basename(command_yaml))
+            violations.extend(_check_ref_extensions(data, platform, os.path.basename(command_yaml)))
+
+        output_files = {
+            os.path.basename(p) for ext in ("*.txt", "*.j2") for p in glob.glob(os.path.join(commands_dir, ext))
+        }
+        for output_file in sorted(output_files):
+            rel = f"{platform}/commands/{output_file}"
+            violations.extend(_check_output_encoding(os.path.join(commands_dir, output_file), rel))
+            if output_file not in referenced:
+                violations.append(f"{rel}: orphan output file (referenced by no command yaml)")
+        for ref, sources in sorted(referenced.items()):
+            if len(sources) > 1:
+                violations.append(
+                    f"{platform}/commands/{ref}: referenced by {len(sources)} yamls {sources} (1 yaml : 1 output)"
+                )
+            if ref not in output_files:
+                violations.append(f"{platform}/commands/{ref}: referenced by {sources} but the file is missing")
+    return violations
+
+
+def _variant_output_refs(command_data: dict) -> list[str]:
+    """The output file each variant references (str-typed entries only)."""
+    return [
+        variant["output"]
+        for variant in command_data.get("variants") or []
+        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
+    ]
+
+
+def _output_refs(command_data: dict) -> list[str]:
+    """Every output file a command yaml references (output / output_template / variants)."""
+    refs: list[str] = []
+    for key in ("output", "output_template"):
+        value = command_data.get(key)
+        if isinstance(value, str):
+            refs.append(value)
+    refs.extend(_variant_output_refs(command_data))
+    return refs
+
+
+def _check_ref_extensions(command_data: dict, platform: str, yaml_name: str) -> list[str]:
+    """Literal channels must use ``.txt``; ``output_template`` must use ``.j2`` (D8 convention)."""
+    literal_refs = [command_data["output"]] if isinstance(command_data.get("output"), str) else []
+    literal_refs += _variant_output_refs(command_data)
+    violations = [
+        f"{platform}/commands/{yaml_name}: literal output {ref!r} uses .j2 (literal channels are .txt)"
+        for ref in literal_refs
+        if ref.endswith(".j2")
+    ]
+    template_ref = command_data.get("output_template")
+    if isinstance(template_ref, str) and not template_ref.endswith(".j2"):
+        violations.append(f"{platform}/commands/{yaml_name}: output_template {template_ref!r} must use .j2")
+    return violations
+
+
+def _check_output_encoding(path: str, rel: str) -> list[str]:
+    """UTF-8 / LF-only / trailing-newline checks for one output file (D8)."""
+    violations: list[str] = []
+    raw = open(path, "rb").read()  # noqa: SIM115 — short-lived, byte-level read
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as e:
+        return [f"{rel}: not valid UTF-8 ({e})"]
+    if "\r" in text:
+        violations.append(f"{rel}: contains CR (output files must be LF-only)")
+    if raw and not text.endswith("\n"):
+        violations.append(f"{rel}: missing trailing newline")
+    return violations
+
+
+@task
+def lint_platform_data(context):
+    """Lint the A3 platform data directories (#264 / D8, D9).
+
+    Encoding (UTF-8 / LF / trailing newline), orphan output files, and shared
+    output references. See `check_platform_data` for the rules.
+    """
+    violations = check_platform_data()
+    for violation in violations:
+        print(violation)
+    if violations:
+        raise Exit(f"platform data lint failed with {len(violations)} violation(s)", code=1)
+    print("platform data lint OK")
+
+
 @task
 def ty(context, exit_zero=False):
     """Run ty type-checker (blocking since Phase 2, see #218).
@@ -296,12 +436,15 @@ def platform_display_name(platform: str) -> str:
 def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "mkdocs.yml") -> None:
     """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
 
-    The caller passes the same yaml-derived platform list the docs pages
-    are generated from, so every nav entry has a backing page. This is
-    intentional: a hypothetical yaml-less py-only platform has no docs page
-    to link, so it must not get a nav entry here — the registry-truth pin
-    (`test_available_platforms_match_mkdocs_nav`) failing is the designed
-    loud signal to decide how to document such a platform.
+    The caller passes the platform list the docs pages are generated from. For
+    the legacy yaml platforms every nav entry has a backing page. A3-migrated
+    platforms (#264) are also included to keep their existing page in the nav
+    until docs generation moves to the ResolvedCommand path (PR-3); an
+    "A3-born" platform with no pre-existing page would get a nav entry without a
+    backing page until then — a known PR-3 follow-up (2nd round claude #5b).
+    A yaml-less, A3-less py-only platform still gets no nav entry — the
+    registry-truth pin (`test_available_platforms_match_mkdocs_nav`) failing is
+    the designed loud signal to decide how to document such a platform.
     Closes the M-1 failure mode (#239): a new platform used to need a manual
     nav entry, and a forgotten one silently produced a docs page unreachable
     from the site nav. The section is replaced as a text block (instead of a
@@ -363,6 +506,13 @@ def gen_docs_platform_commands(ctx):
     files: list[str] = os.listdir(platforms_folder)
     platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
 
+    # A3-migrated platforms have no legacy yaml to read here; their doc
+    # generation moves to the ResolvedCommand path in PR-3 (#264 / D9). Until
+    # then their existing docs must be preserved (not swept) and kept in the
+    # nav — otherwise running this task after the pilot's yaml deletion would
+    # delete docs/platforms/<a3>.md and drop it from mkdocs.yml (1st round claude #4).
+    a3_platforms: list[str] = _a3_platform_names()
+
     for platform in platforms:
         print(f"Generating Platform: {platform}")
         with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
@@ -389,10 +539,14 @@ def gen_docs_platform_commands(ctx):
                     platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
 
-    for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
+    # dedupe: during the PR-3 migration window both forms can briefly coexist
+    # (the converter does not delete the legacy yaml), which would otherwise put
+    # a platform in the nav twice (2nd round claude #5b).
+    all_platforms = sorted(set(platforms) | set(a3_platforms))
+    for orphan in sweep_orphaned_platform_docs(docs_folder, all_platforms):
         print(f"Removed orphaned doc: {orphan}")
 
-    rewrite_mkdocs_platforms_nav(platforms)
+    rewrite_mkdocs_platforms_nav(all_platforms)
     print("Regenerated mkdocs.yml Platforms nav")
 
 

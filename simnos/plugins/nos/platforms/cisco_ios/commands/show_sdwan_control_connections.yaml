@@ -1,0 +1,7 @@
+command: show sdwan control connections
+type: simnos
+help: execute the command "show sdwan control connections"
+mode:
+- user
+- enable
+output: show_sdwan_control_connections.txt

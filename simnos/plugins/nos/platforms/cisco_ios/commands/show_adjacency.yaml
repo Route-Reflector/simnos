@@ -1,0 +1,7 @@
+command: show adjacency
+type: simnos
+help: execute the command "show adjacency"
+mode:
+- user
+- enable
+output: show_adjacency.txt

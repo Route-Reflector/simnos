@@ -1,0 +1,7 @@
+command: show license
+type: simnos
+help: execute the command "show license"
+mode:
+- user
+- enable
+output: show_license.txt

@@ -1,0 +1,7 @@
+command: show privilege
+type: simnos
+help: Execute the command show privilege. This automatically generated.
+mode:
+- user
+- enable
+output: show_privilege.txt

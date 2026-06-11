@@ -2,6 +2,7 @@
 File to contain pydantic models for plugins input/output data validation
 """
 
+import os
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -13,6 +14,7 @@ from pydantic import (
     StrictBool,
     StrictInt,
     StrictStr,
+    field_validator,
     model_validator,
 )
 from pydantic_core import core_schema
@@ -83,6 +85,205 @@ class ModelNosAttributes(BaseModel):
     auth: StrictStr | None = None
     enable_prompt: StrictStr | None = None
     config_prompt: StrictStr | None = None
+
+
+# ---------------------------------------------------------------------------------------
+# A3 authoring schema (#264 / P1-1 D2, D3) — the new per-platform on-disk form
+# (`platforms/<nos>/platform.yaml` + `commands/*.yaml`). Validated at load; the
+# loader then normalizes to `ResolvedCommand` / `ResolvedPlatform`, so the shell
+# never sees this authoring form (D4). Kept structural here (types, exclusivity,
+# alias purity, path shape); semantic checks that need the filesystem or jinja2
+# (file existence, `.j2` syntax, mode-name existence, prompt render) live in the
+# loader (`simnos.core.platform_loader`).
+# ---------------------------------------------------------------------------------------
+
+
+def _reject_unsafe_output_ref(value: str | None) -> str | None:
+    """Reject an output file reference that escapes the command's own dir.
+
+    Output files are adjacent to their command yaml (D1): a bare filename, no
+    path separators, no ``..``, not absolute. This blocks references into
+    packaged-data-外 paths at the authoring boundary (#264 / D1).
+    """
+    if value is None:
+        return value
+    if value != os.path.basename(value) or value in ("", ".", "..") or os.path.isabs(value):
+        raise ValueError(f"output reference {value!r} must be a bare filename in the command's own directory")
+    return value
+
+
+class ModelCommandVariant(BaseModel):
+    """One alternate capture of a multi-output command (#264 / D3).
+
+    Each variant points at an output file read verbatim as literal wire text:
+    the authoring *field* decides the channel, not the extension (the loader's
+    `_resolve_output_file` reads variants with ``as_template=False``). ``.j2``
+    templates in variants are out of scope for P1-1 (Decision 6) — a variant
+    must reference a literal ``.txt`` (the file-name convention is enforced by
+    the data lint, not the loader).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: StrictStr
+    output: StrictStr
+
+    @field_validator("output")
+    @classmethod
+    def _safe_output(cls, value: str) -> str:
+        # A variant output is always present (non-optional str); validate for
+        # the side-effect and return the value unchanged.
+        _reject_unsafe_output_ref(value)
+        return value
+
+
+class ModelCommandAuthoring(BaseModel):
+    """A3 per-command authoring schema (#264 / D3).
+
+    One file = one command; `command` is the SSoT key (Decision 1), the
+    filename is non-semantic. Exactly one output channel may be set
+    (`output` / `output_template` / `variants`, and `variants` may not be the
+    empty list); all absent = no output. An `alias` is a pure reference: it may
+    carry only `command` + `help` (Decision 6). `_default_` is the unconditional
+    fallback, so authoring a `mode` / `new_mode` / `alias` on it is rejected — it
+    must stay mode-agnostic and must not inherit a target's modes (Decision 7).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    command: StrictStr
+    # Required for a real command, forbidden on an alias (validated below).
+    type: Literal["ntc", "simnos", "custom"] | None = None
+    source: dict | None = None
+    help: StrictStr | None = None
+    mode: list[StrictStr] | None = None
+    new_mode: StrictStr | None = None
+    output: StrictStr | None = None
+    output_template: StrictStr | None = None
+    variants: list[ModelCommandVariant] | None = None
+    exit: StrictBool | None = None
+    alias: StrictStr | None = None
+
+    @field_validator("output", "output_template")
+    @classmethod
+    def _safe_output(cls, value: str | None) -> str | None:
+        return _reject_unsafe_output_ref(value)
+
+    @field_validator("mode")
+    @classmethod
+    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
+        # An explicit empty list reads as "runnable in no mode"; "all modes" is
+        # expressed by omitting `mode`. Reject `[]` so the two never blur
+        # (Decision 7, symmetric with the legacy adapter's `prompt: []` reject).
+        if value is not None and not value:
+            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
+        return value
+
+    @field_validator("variants")
+    @classmethod
+    def _check_variants(cls, value: list[ModelCommandVariant] | None) -> list[ModelCommandVariant] | None:
+        # `variants: []` would pass the channel-exclusivity check as "present"
+        # yet leave the loader's `variants[0]` with a bare IndexError — reject it
+        # loudly here (1st round codex/claude #1). Duplicate variant names break
+        # the (name, output) selection contract, so reject those too.
+        if value is None:
+            return value
+        if not value:
+            raise ValueError("variants: [] is rejected — omit `variants` for a no-output command (#264 / Decision 6)")
+        names = [v.name for v in value]
+        duplicates = sorted({name for name in names if names.count(name) > 1})
+        if duplicates:
+            raise ValueError(f"variants have duplicate name(s) {duplicates} — each variant name must be unique")
+        return value
+
+    @model_validator(mode="after")
+    def _check_combination(self) -> "ModelCommandAuthoring":
+        if self.alias is not None:
+            forbidden = {
+                "type": self.type,
+                "source": self.source,
+                "mode": self.mode,
+                "new_mode": self.new_mode,
+                "output": self.output,
+                "output_template": self.output_template,
+                "variants": self.variants,
+                "exit": self.exit,
+            }
+            present = sorted(k for k, v in forbidden.items() if v is not None)
+            if present:
+                raise ValueError(
+                    f"command {self.command!r}: alias is a pure reference and cannot also set {present} "
+                    "(only `command` and `help` are allowed alongside `alias`) (#264 / Decision 6)"
+                )
+        else:
+            if self.type is None:
+                raise ValueError(f"command {self.command!r}: `type` is required (ntc | simnos | custom)")
+            channels = sorted(
+                name
+                for name, v in (
+                    ("output", self.output),
+                    ("output_template", self.output_template),
+                    ("variants", self.variants),
+                )
+                if v is not None
+            )
+            if len(channels) > 1:
+                raise ValueError(
+                    f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
+                )
+        if self.command == "_default_":
+            if self.mode is not None or self.new_mode is not None:
+                raise ValueError(
+                    "command '_default_': `mode` / `new_mode` are rejected — the fallback is mode-agnostic "
+                    "(runtime never matches its mode, would be dead data) (#264 / Decision 7)"
+                )
+            # An aliased `_default_` would inherit the target's modes/new_mode via
+            # the loader's `replace(target, ...)`, splitting `_default_` semantics
+            # from the legacy adapter (which forces empty modes). Reject so the
+            # fallback can never become mode-bearing through the alias backdoor
+            # (1st round claude #6).
+            if self.alias is not None:
+                raise ValueError(
+                    "command '_default_': `alias` is rejected — the fallback must not inherit a target's "
+                    "modes / transition (#264 / Decision 7)"
+                )
+        return self
+
+
+class ModelModeDef(BaseModel):
+    """One mode declaration: a prompt template rendered with `base_prompt` (#264 / D2)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    prompt: StrictStr
+
+
+class ModelPlatformMeta(BaseModel):
+    """A3 per-platform metadata schema (`platform.yaml`, #264 / D2).
+
+    Modes are declared centrally (name -> prompt template); commands reference
+    mode names only (M2). No `name` field — the platform name is the directory
+    name (D1). `netmiko_device_type` / `ntc_platform` are data placeholders the
+    consumer side wires up in #266.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    modes: dict[StrictStr, ModelModeDef]
+    initial_mode: StrictStr
+    auth: StrictStr | None = None
+    netmiko_device_type: StrictStr | None = None
+    ntc_platform: StrictStr | None = None
+
+    @model_validator(mode="after")
+    def _check_modes(self) -> "ModelPlatformMeta":
+        if not self.modes:
+            raise ValueError("platform.yaml: `modes` must declare at least one mode")
+        if self.initial_mode not in self.modes:
+            raise ValueError(
+                f"platform.yaml: initial_mode {self.initial_mode!r} is not in modes {sorted(self.modes)!r}"
+            )
+        return self
 
 
 class ModelHost(BaseModel):

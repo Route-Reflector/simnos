@@ -1,0 +1,7 @@
+command: show switch virtual
+type: simnos
+help: execute the command "show switch virtual"
+mode:
+- user
+- enable
+output: show_switch_virtual.txt

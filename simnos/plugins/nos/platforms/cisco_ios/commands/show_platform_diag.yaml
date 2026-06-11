@@ -1,0 +1,7 @@
+command: show platform diag
+type: simnos
+help: execute the command "show platform diag"
+mode:
+- user
+- enable
+output: show_platform_diag.txt

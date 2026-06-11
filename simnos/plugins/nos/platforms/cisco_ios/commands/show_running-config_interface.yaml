@@ -1,0 +1,7 @@
+command: show running-config interface
+type: simnos
+help: execute the command "show running-config interface"
+mode:
+- user
+- enable
+output: show_running-config_interface.txt

@@ -1,0 +1,7 @@
+command: show snmp user
+type: simnos
+help: execute the command "show snmp user"
+mode:
+- user
+- enable
+output: show_snmp_user.txt

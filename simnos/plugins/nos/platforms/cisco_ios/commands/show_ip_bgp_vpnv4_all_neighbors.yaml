@@ -1,0 +1,7 @@
+command: show ip bgp vpnv4 all neighbors
+type: simnos
+help: execute the command "show ip bgp vpnv4 all neighbors"
+mode:
+- user
+- enable
+output: show_ip_bgp_vpnv4_all_neighbors.txt

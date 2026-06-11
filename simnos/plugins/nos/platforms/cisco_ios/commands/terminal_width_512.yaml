@@ -1,0 +1,7 @@
+command: terminal width 512
+type: simnos
+help: Execute the command terminal width 512. Used by scrapli for privilege escalation
+  preparation.
+mode:
+- user
+- enable

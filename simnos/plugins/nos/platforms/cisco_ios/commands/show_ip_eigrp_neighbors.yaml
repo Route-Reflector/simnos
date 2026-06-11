@@ -1,0 +1,7 @@
+command: show ip eigrp neighbors
+type: simnos
+help: execute the command "show ip eigrp neighbors"
+mode:
+- user
+- enable
+output: show_ip_eigrp_neighbors.txt

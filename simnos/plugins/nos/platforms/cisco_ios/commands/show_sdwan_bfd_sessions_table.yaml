@@ -1,0 +1,7 @@
+command: show sdwan bfd sessions table
+type: simnos
+help: execute the command "show sdwan bfd sessions table"
+mode:
+- user
+- enable
+output: show_sdwan_bfd_sessions_table.txt

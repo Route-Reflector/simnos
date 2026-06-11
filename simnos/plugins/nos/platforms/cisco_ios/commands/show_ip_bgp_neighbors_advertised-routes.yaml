@@ -1,0 +1,7 @@
+command: show ip bgp neighbors advertised-routes
+type: simnos
+help: execute the command "show ip bgp neighbors advertised-routes"
+mode:
+- user
+- enable
+output: show_ip_bgp_neighbors_advertised-routes.txt

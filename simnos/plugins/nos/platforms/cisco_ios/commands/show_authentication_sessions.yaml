@@ -1,0 +1,7 @@
+command: show authentication sessions
+type: simnos
+help: execute the command "show authentication sessions"
+mode:
+- user
+- enable
+output: show_authentication_sessions.txt

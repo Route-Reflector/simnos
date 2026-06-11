@@ -1,0 +1,7 @@
+command: show access-session
+type: simnos
+help: execute the command "show access-session"
+mode:
+- user
+- enable
+output: show_access-session.txt

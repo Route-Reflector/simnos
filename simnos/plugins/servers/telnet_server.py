@@ -119,6 +119,10 @@ class TelnetServer(TCPServerBase):
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
         self.shell_configuration: dict = shell_configuration or {}
+        # Normalize the per-host command platform once (see ParamikoSshServer):
+        # built at Host.start, shared across connections (#264 / Impact).
+        build_shared = getattr(self.shell, "build_shared_platform", None)
+        self._shared_platform = build_shared(nos, self.nos_inventory_config) if build_shared else None
         self.banner: str = banner
         self.username: str = username
         self.password: str = password
@@ -348,6 +352,7 @@ class TelnetServer(TCPServerBase):
                 nos=self.nos,
                 nos_inventory_config=self.nos_inventory_config,
                 is_running=is_running,
+                resolved_platform=self._shared_platform,
                 **self.shell_configuration,
             )
 

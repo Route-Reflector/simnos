@@ -1,0 +1,7 @@
+command: show sdwan bfd summary
+type: simnos
+help: execute the command "show sdwan bfd summary"
+mode:
+- user
+- enable
+output: show_sdwan_bfd_summary.txt

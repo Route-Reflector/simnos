@@ -1,0 +1,7 @@
+command: show ip nat translations
+type: simnos
+help: execute the command "show ip nat translations"
+mode:
+- user
+- enable
+output: show_ip_nat_translations.txt

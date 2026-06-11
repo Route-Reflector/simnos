@@ -1,0 +1,7 @@
+command: show dot1x all
+type: simnos
+help: execute the command "show dot1x all"
+mode:
+- user
+- enable
+output: show_dot1x_all.txt

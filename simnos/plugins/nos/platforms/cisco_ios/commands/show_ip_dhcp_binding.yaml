@@ -1,0 +1,7 @@
+command: show ip dhcp binding
+type: simnos
+help: execute the command "show ip dhcp binding"
+mode:
+- user
+- enable
+output: show_ip_dhcp_binding.txt

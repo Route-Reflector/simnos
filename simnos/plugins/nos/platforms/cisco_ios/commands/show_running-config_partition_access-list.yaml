@@ -1,0 +1,7 @@
+command: show running-config partition access-list
+type: simnos
+help: execute the command "show running-config partition access-list"
+mode:
+- user
+- enable
+output: show_running-config_partition_access-list.txt

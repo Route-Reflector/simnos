@@ -1,0 +1,7 @@
+command: show aliases
+type: simnos
+help: execute the command "show aliases"
+mode:
+- user
+- enable
+output: show_aliases.txt

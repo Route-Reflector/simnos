@@ -1,0 +1,7 @@
+command: show environment temperature
+type: simnos
+help: execute the command "show environment temperature"
+mode:
+- user
+- enable
+output: show_environment_temperature.txt
