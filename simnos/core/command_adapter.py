@@ -174,6 +174,11 @@ def adapt_commands(commands: dict, reverse_map: dict[str, str]) -> dict[str, Res
             merged = _resolve_alias(name, entry, commands)
             if merged is None:
                 continue
+            # The merge carries the target's dispatch fields (output / modes /
+            # transition), but `help` stays the alias entry's own: v2 `do_help`
+            # lists the raw (unmerged) entry, so an alias shows its own help —
+            # usually absent, i.e. blank — not the target's (#264 / D6).
+            merged["help"] = entry.get("help", "")
             entry = merged
         resolved[name] = _adapt_command(name, entry, reverse_map)
     return resolved

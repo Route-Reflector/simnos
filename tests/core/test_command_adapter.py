@@ -189,9 +189,26 @@ class TestAdaptAlias:
             "sh clock": {"alias": "show clock"},
         }
         resolved = adapt_commands(commands, reverse)
-        assert resolved["sh clock"].output.text == "12:00"
-        assert resolved["sh clock"].help == "clock"
+        assert resolved["sh clock"].output.text == "12:00"  # dispatch fields from target
+        assert resolved["sh clock"].help == ""  # help is the alias's own (see test_alias_help_is_own_not_target)
         assert resolved["sh clock"].modes == frozenset({"user"})
+
+    def test_alias_help_is_own_not_target(self):
+        """An alias shows its own help (blank if absent), not the target's (#264 / D6).
+
+        v2 `do_help` lists the raw unmerged entry, so this is the observable
+        help; the dispatch fields still come from the target.
+        """
+        _, _, reverse = _cisco_modes()
+        commands = {
+            "show clock": {"output": "12:00", "help": "clock", "prompt": "{base_prompt}>"},
+            "sh clock": {"alias": "show clock"},
+            "sc": {"alias": "show clock", "help": "own help"},
+        }
+        resolved = adapt_commands(commands, reverse)
+        assert resolved["sh clock"].help == ""  # no own help -> blank
+        assert resolved["sc"].help == "own help"  # own help kept
+        assert resolved["sh clock"].output.text == "12:00"  # dispatch still from target
 
     def test_alias_entry_keys_win(self):
         """An alias entry's own fields override the target's (#264 / D6)."""

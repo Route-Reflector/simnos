@@ -204,6 +204,14 @@ def _classify_callable_commands(
     """
     initial_prompt = nos.initial_prompt.format(base_prompt=base_prompt)
     enable_prompt = (nos.enable_prompt or "").format(base_prompt=base_prompt)
+    # Rendered prompt -> canonical mode name, so callables get the `current_mode`
+    # their (now mode-based) branches need (#264): a dict-returning callable such
+    # as make_exit raises on an unknown mode, so the probe must pass a valid one.
+    mode_by_prompt = {initial_prompt: "user"}
+    if enable_prompt:
+        mode_by_prompt[enable_prompt] = "enable"
+    if nos.config_prompt:
+        mode_by_prompt[nos.config_prompt.format(base_prompt=base_prompt)] = "config"
 
     initial_cmds: list[tuple[str, str]] = []
     enable_cmds: list[tuple[str, str]] = []
@@ -216,20 +224,33 @@ def _classify_callable_commands(
         prompts = [prompts] if isinstance(prompts, str) else (prompts or [])
         formatted = [p.format(base_prompt=base_prompt) for p in prompts]
         if initial_prompt in formatted:
-            current_prompt, bucket = initial_prompt, initial_cmds
+            current_prompt, current_mode, bucket = initial_prompt, "user", initial_cmds
         elif enable_prompt and enable_prompt in formatted:
-            current_prompt, bucket = enable_prompt, enable_cmds
+            current_prompt, current_mode, bucket = enable_prompt, "enable", enable_cmds
         else:
             # Outside the sweep phases. Probe with the command's own
             # declared prompt to apply the eligibility contract: a dict
             # return means mode/exit logic (unit-test scope at any
             # prompt); only a str return here is real e2e coverage loss.
             probe_prompt = formatted[0] if formatted else initial_prompt
-            probe = output(nos.device, base_prompt=base_prompt, current_prompt=probe_prompt, command=cmd_name)
+            probe_mode = mode_by_prompt.get(probe_prompt, "user")
+            probe = output(
+                nos.device,
+                base_prompt=base_prompt,
+                current_mode=probe_mode,
+                current_prompt=probe_prompt,
+                command=cmd_name,
+            )
             if isinstance(probe, str):
                 unclassified.append(cmd_name)
             continue
-        expected = output(nos.device, base_prompt=base_prompt, current_prompt=current_prompt, command=cmd_name)
+        expected = output(
+            nos.device,
+            base_prompt=base_prompt,
+            current_mode=current_mode,
+            current_prompt=current_prompt,
+            command=cmd_name,
+        )
         if not isinstance(expected, str):
             continue  # dict-returning mode/exit callables -> unit tests cover these
         bucket.append((cmd_name, expected))

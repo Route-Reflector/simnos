@@ -95,6 +95,9 @@ def _replica_projection(merged: dict, rendered_modes: dict[str, str]) -> dict[st
     """Project every (alias-merged) legacy command via the frozen v2 replica."""
     projection: dict[str, dict] = {}
     for name, entry in merged.items():
+        # v2 `do_help` reads the raw (unmerged) entry, so an alias's observable
+        # help is its own, not the target's (#264 / D6).
+        own_help = entry.get("help", "")
         if "alias" in entry:
             target = merged.get(entry["alias"])
             if target is None:
@@ -108,7 +111,7 @@ def _replica_projection(merged: dict, rendered_modes: dict[str, str]) -> dict[st
             "modes": None if is_default else _v2_visible_modes(entry.get("prompt"), rendered_modes),
             "new_mode": None if is_default else _v2_new_mode(entry.get("new_prompt"), rendered_modes),
             "exit": bool(entry.get("exit")),
-            "help": entry.get("help", ""),
+            "help": own_help,
             "variant_count": (len(variants) + 1) if variants else 0,
         }
     return projection

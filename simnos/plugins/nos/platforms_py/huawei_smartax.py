@@ -27,7 +27,7 @@ class HuaweiSmartAX(BaseDevice):
         max_length = max(len(str(row)) for row in column)
         return [str(row).ljust(max_length) for row in column]
 
-    def make_display_board(self, base_prompt, current_prompt, command):
+    def make_display_board(self, base_prompt, current_mode, current_prompt, command):
         "Return String of board information"
         titles = [
             "SlotID",
@@ -58,23 +58,24 @@ class HuaweiSmartAX(BaseDevice):
         rows = [list(board.values()) for board in boards]
         return self.render("huawei_smartax/display_board.j2", titles=titles, rows=rows)
 
-    def _return(self, base_prompt, current_prompt, command):
+    def _return(self, base_prompt, current_mode, current_prompt, command):
         "Return to user prompt"
-        if current_prompt.endswith(">"):
-            return {"output": "", "new_prompt": INITIAL_PROMPT}
-        if current_prompt.endswith("#"):
-            return {"output": "", "new_prompt": ENABLE_PROMPT}
-        return {"output": "", "new_prompt": INITIAL_PROMPT}
+        # v2 keyed on the prompt suffix: ">" (user) stayed user, "#"
+        # (enable/config) went to enable. Mode names express that directly.
+        if current_mode == "user":
+            return {"output": "", "new_mode": "user"}
+        return {"output": "", "new_mode": "enable"}
 
-    def quit(self, base_prompt, current_prompt, command):
+    def quit(self, base_prompt, current_mode, current_prompt, command):
         "Exit from device"
         return {"exit": True}
 
-    def disable(self, base_prompt, current_prompt, command):
+    def disable(self, base_prompt, current_mode, current_prompt, command):
         "Exit exec prompt"
-        if current_prompt.endswith("#"):
-            return {"output": "", "new_prompt": INITIAL_PROMPT}
-        return {"output": "", "new_prompt": current_prompt}
+        # From enable/config drop to user; already in user = no transition.
+        if current_mode in ("enable", "config"):
+            return {"output": "", "new_mode": "user"}
+        return {"output": ""}
 
 
 commands = {

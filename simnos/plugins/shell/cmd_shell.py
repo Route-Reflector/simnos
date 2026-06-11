@@ -9,16 +9,18 @@ import os
 import traceback
 from typing import cast
 
+from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
+from simnos.core.resolved_command import ResolvedCommand, ResolvedPlatform
 from simnos.plugins import nos
 from simnos.plugins.shell.utils import get_files_changed
 
 log = logging.getLogger(__name__)
 
-# Contract note (#244 / D3): these entries bypass the `Nos` load path and
-# its prompt normalization, so they must NOT carry a `prompt` key — the
-# read side assumes every present `prompt` is already a list.
+# Special, always-present commands fed through the same legacy adapter as the
+# NOS data (#264 / D5). They carry no `prompt`, so the adapter resolves them to
+# an empty mode set = valid in every mode.
 BASIC_COMMANDS: dict = {
     "exit": {"exit": True, "help": "Exit commands shell"},
     "_default_": {
@@ -26,13 +28,6 @@ BASIC_COMMANDS: dict = {
         "help": "Output to print for unknown commands",
     },
 }
-
-# `str.format()` failure modes caused by a malformed template. Shared as the
-# single source of truth between the lenient runtime shell (`_safe_format`)
-# and the loud build-time docs gen (`tasks.render_template`); the runtime
-# logs and degrades while build time raises (and additionally strict-rejects
-# unsupported constructs that would render fine).
-FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
 
 # Wire response when a command handler (callable output) crashes. Real NOSes
 # never print Python tracebacks, and clients (Netmiko/KeroRoute integration
@@ -66,27 +61,51 @@ class CMDShell(Cmd):
         self.intro = intro
         self.base_prompt = base_prompt
         self.newline = newline
-        # Lenient: a malformed initial_prompt template must not kill every
-        # connection to this host; fall back to the raw template and log.
-        formatted = self._safe_format(nos.initial_prompt, where="initial_prompt")
-        self.prompt = formatted if formatted is not None else nos.initial_prompt
         self.is_running = is_running
+        # Inventory-defined commands are a third inflow alongside BASIC and the
+        # NOS data; kept in authoring form and normalized through the adapter on
+        # every (re)build (#264 / D6).
+        self._inventory_commands: dict = nos_inventory_config.get("commands", {})
+        # Builds self.platform / self.commands / self.current_mode / self.prompt.
+        # A malformed prompt template now fails loudly here (the #172 lenient
+        # fallback is gone — prompt rendering is load-time validated, #264 / D5).
+        self._rebuild()
 
-        # form commands. Inventory-defined commands are the one source
-        # that does not pass through the `Nos` load path, so their
-        # `prompt` is normalized here (str -> [str], on our own deepcopy)
-        # to uphold the lists-only read-side contract (#244 / D3).
-        self.commands = {
-            **copy.deepcopy(BASIC_COMMANDS),
-            **copy.deepcopy(nos.commands or {}),
-            **Nos.normalize_command_prompts(copy.deepcopy(nos_inventory_config.get("commands", {}))),
-        }
         # call the base constructor of cmd.Cmd, with our own stdin and stdout
         super().__init__(
             completekey=completekey,
             stdin=stdin,
             stdout=stdout,
         )
+
+    def _rebuild(self) -> None:
+        """Merge the command inflows and normalize them to `ResolvedCommand`.
+
+        The shell consumes one representation regardless of authoring form: the
+        merged dict (BASIC < NOS data < inventory, later inflows winning, same
+        precedence as before) is run through the legacy adapter. Atomic: if the
+        adapter raises (malformed data), self.* keep their prior values, so a
+        broken hot reload leaves the running session intact (#264 / D5, D6).
+        """
+        merged = {
+            **copy.deepcopy(BASIC_COMMANDS),
+            **copy.deepcopy(self.nos.commands or {}),
+            **copy.deepcopy(self._inventory_commands),
+        }
+        platform: ResolvedPlatform = adapt_legacy_commands(
+            self.nos.initial_prompt,
+            self.nos.enable_prompt,
+            self.nos.config_prompt,
+            merged,
+        )
+        self.platform = platform
+        self.commands = platform.commands
+        # Keep the user's current mode across a hot reload when it still exists;
+        # otherwise (first build, or a reload that dropped the mode) start at the
+        # platform's initial mode.
+        if getattr(self, "current_mode", None) not in platform.modes:
+            self.current_mode = platform.initial_mode
+        self.prompt = platform.modes[self.current_mode].render_prompt(self.base_prompt)
 
     def start(self):
         """Method to start the shell"""
@@ -115,18 +134,19 @@ class CMDShell(Cmd):
         half-written or malformed plugin file (e.g. an editor's partial
         save, or a file that vanished after detection). One broken file
         must not kill the SSH session nor block reloading the remaining
-        files — log and retry on the next change.
+        files — log and retry on the next change. `_rebuild` is atomic, so a
+        file that loads but fails to normalize leaves the live commands intact.
         """
         for file in changed_files:
             try:
                 self.nos.from_file(file)
+                self._rebuild()
             except Exception:
                 # Broad except, like `default()`: any plugin error must not
                 # crash the session. The traceback goes to the log so a
                 # genuine plugin bug surfacing here stays diagnosable.
                 log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, file, traceback.format_exc())
                 continue
-            self.commands.update(self.nos.commands)
 
     def precmd(self, line):
         """Method to return line before processing the command"""
@@ -141,20 +161,23 @@ class CMDShell(Cmd):
         """Method to return stop value to stop the shell"""
         return stop
 
+    def _in_current_mode(self, cmd: ResolvedCommand) -> bool:
+        """Whether `cmd` is valid in the current mode (empty modes = all)."""
+        return not cmd.modes or self.current_mode in cmd.modes
+
     def do_help(self, arg):
-        """Method to return help for commands"""
+        """Method to return help for commands visible in the current mode"""
         lines = {}  # dict of {cmd: cmd_help}
         width = 0  # record longest command width for padding
-        # form help for all commands
-        for cmd, cmd_data in self.commands.items():
+        for name, cmd in self.commands.items():
             # skip special commands
-            if cmd.startswith("_") and cmd.endswith("_"):
+            if name.startswith("_") and name.endswith("_"):
                 continue
-            # skip commands that does not match current prompt
-            if not self._check_prompt(cmd_data.get("prompt"), command=cmd):
+            # skip commands not valid in the current mode
+            if not self._in_current_mode(cmd):
                 continue
-            lines[cmd] = cmd_data.get("help", "")
-            width = max(width, len(cmd))
+            lines[name] = cmd.help
+            width = max(width, len(name))
         # form help lines
         help_msg = []
         for k, v in lines.items():
@@ -162,86 +185,27 @@ class CMDShell(Cmd):
             help_msg.append(f"{k}{padding}{v}")
         self.writeline(self.newline.join(help_msg))
 
-    def _safe_format(self, template: str, *, where: str) -> str | None:
-        """Format `template` with `base_prompt`; return None on failure.
+    def _apply_new_mode(self, mode_name: str, command: str) -> None:
+        """Transition to `mode_name`; an unknown name keeps the current mode.
 
-        The runtime shell is intentionally lenient: yaml templating errors
-        are logged but never crash the session nor leak tracebacks to the
-        wire. The build-time counterpart `tasks.render_template` shares the
-        `FORMAT_ERRORS` catch set but raises `RuntimeError` — and is
-        additionally strict about unsupported constructs that would render
-        fine (e.g. `{base_prompt!r}`). Yaml authors may use only
-        `{base_prompt}` substitution and `{{` / `}}` escapes; see
-        docs/development/creating_new_platforms.md.
-
-        :param template: format template string from yaml / plugin data
-        :param where: caller context for the error log; include the command
-            name when available (e.g. ``f"output for command {line!r}"``)
+        Static transitions (`ResolvedCommand.new_mode`) are validated at load,
+        so they always resolve. A handler-returned `new_mode` is runtime data,
+        so an unknown one is lenient: log and stay put (#264 / D5).
         """
-        try:
-            return template.format(base_prompt=self.base_prompt)
-        except FORMAT_ERRORS as e:
+        mode = self.platform.modes.get(mode_name)
+        if mode is None:
             log.error(
-                "shell '%s' error formatting %s %r: %r",
+                "shell '%s' command %r returned unknown mode %r; staying in %r",
                 self.base_prompt,
-                where,
-                template,
-                e,
+                command,
+                mode_name,
+                self.current_mode,
             )
-            return None
+            return
+        self.current_mode = mode_name
+        self.prompt = mode.render_prompt(self.base_prompt)
 
-    def _check_prompt(self, prompt_: list[str] | None, command: str = ""):
-        """
-        Helper method to check if prompt_ matches current prompt
-
-        :param prompt_: (list of strings, or None) prompt to check — every
-            load path normalizes a bare-str authoring form to a list
-            before commit (#244 / D3), so no str branch is needed here
-        :param command: command name for the error log; callers without it
-            keep working (the log just omits the command context)
-        """
-        # prompt_ is None if no 'prompt' key defined for command
-        if prompt_ is None:
-            return True
-        candidates = prompt_
-        where = f"prompt for command {command!r}" if command else "prompt"
-        # A broken candidate is just a non-match; the remaining candidates
-        # are still evaluated independently.
-        for candidate in candidates:
-            formatted = self._safe_format(candidate, where=where)
-            if formatted is not None and self.prompt == formatted:
-                return True
-        return False
-
-    def _apply_new_prompt(self, template: str, command: str) -> None:
-        """Transition the prompt; a broken template keeps the current one.
-
-        Shared by the callable-dict and cmd_data `new_prompt` paths of
-        `default()`: a format failure means no prompt transition (the
-        session stays on the current prompt); see `_safe_format`.
-        """
-        new_prompt = self._safe_format(template, where=f"new_prompt for command {command!r}")
-        if new_prompt is not None:
-            self.prompt = new_prompt
-
-    def _resolve_command(self, command: str) -> dict | None:
-        """Return the merged cmd_data for `command`, or None if unknown.
-
-        Alias resolution happens here too: a missing alias target is the
-        same lenient unknown-command path as a missing command (both used
-        to be one broad `except KeyError`) — the caller answers with the
-        `_default_` output, never with the handler-crash response.
-        """
-        try:
-            cmd_data = self.commands[command]
-            if "alias" in cmd_data:
-                cmd_data = {**self.commands[cmd_data["alias"]], **cmd_data}
-        except KeyError:
-            log.error("shell.default '%s' command '%s' not found", self.base_prompt, [command])
-            return None
-        return cmd_data
-
-    def _invoke_callable(self, func: CommandHandler, command: str) -> CommandResult:
+    def _invoke_handler(self, handler: CommandHandler, command: str) -> CommandResult:
         """Invoke a command handler and normalize its return to CommandResult.
 
         A plain str (or None) return is sugar for `{"output": <value>}`;
@@ -251,100 +215,70 @@ class CMDShell(Cmd):
         contract violations are caught statically (Protocol) and by the
         e2e callable sweep, not at runtime on the hot path.
         """
-        ret = func(
+        ret = handler(
             self.nos.device,
             base_prompt=self.base_prompt,
+            current_mode=self.current_mode,
             current_prompt=self.prompt,
             command=command,
         )
         if isinstance(ret, dict):
             return ret
-        # Declare the wrapped value as str | None for the type checker
-        # (it cannot narrow the TypedDict member out of the union by
-        # isinstance). The declaration matches the *contract*, not a
-        # runtime guarantee — a contract-breaking return (list / int)
-        # is wrapped as-is and absorbed by the lenient output path.
+        # Declare the wrapped value as str | None for the type checker (it
+        # cannot narrow the TypedDict member out of the union by isinstance).
         return {"output": cast("str | None", ret)}
 
-    def _render_output(self, ret, command: str, *, format_output: bool) -> None:
-        """Write `ret` to the client; only yaml-static output is formatted.
-
-        `ret` is untyped on purpose: the lenient path also carries
-        contract-breaking handler returns (see `_invoke_callable`), which
-        `writeline`'s `str(value)` absorbs. The caller must not pass
-        None though — `default()` guards with `if ret is not None`
-        ("write nothing"), this helper always writes.
-
-        Callable output is passed through verbatim (`format_output=False`):
-        handlers receive `base_prompt` as an argument and format
-        themselves (see `CommandHandler`), so a second `.format()` here
-        would only mis-render device output containing literal braces or
-        an accidental `{base_prompt}` (#241 / D-b). For yaml-static
-        output, a format failure falls back to the raw template
-        (information beats dropping the whole output); lenient policy in
-        `_safe_format`.
-        """
-        if not format_output:
-            self.writeline(ret)
-            return
-        formatted = self._safe_format(ret, where=f"output for command {command!r}")
-        self.writeline(formatted if formatted is not None else ret)
-
     def default(self, line):
-        """Dispatch `line`: resolve -> prompt check -> invoke -> render.
+        """Dispatch `line`: resolve -> mode check -> render/invoke -> transition.
 
-        The exception boundary is the `_invoke_callable` block only:
-        resolve / alias / prompt check / new_prompt never raise (KeyError
-        degrades inside `_resolve_command`, format errors are caught
-        inside `_safe_format`), so `HANDLER_ERROR_OUTPUT` is structurally
-        guaranteed to mean "a command handler crashed" and nothing else.
+        The exception boundary is the `_invoke_handler` block only: resolution,
+        the mode check and the transition never raise (an unknown command is a
+        plain dict miss, an unknown handler mode degrades inside
+        `_apply_new_mode`), so `HANDLER_ERROR_OUTPUT` structurally means "a
+        command handler crashed" and nothing else (#241 / #264).
         """
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
-        from_callable = False
-        cmd_data = self._resolve_command(line)
-        if cmd_data is not None and self._check_prompt(cmd_data.get("prompt"), command=line):
-            if cmd_data.get("exit"):
+        cmd = self.commands.get(line)
+        if cmd is not None and self._in_current_mode(cmd):
+            if cmd.exit:
                 return True
-            ret = cmd_data.get("output")
+            output = cmd.output
+            transition = cmd.new_mode
         else:
-            if cmd_data is not None:
+            if cmd is not None:
                 log.warning(
-                    "'%s' command prompt '%s' not matching current prompt '%s'",
+                    "'%s' command not valid in current mode '%s' (valid modes: %s)",
                     line,
-                    # Always a list here: a mismatch requires a non-None,
-                    # normalized prompt (#244 / D3).
-                    ", ".join(cmd_data.get("prompt", [])),
-                    self.prompt,
+                    self.current_mode,
+                    ", ".join(sorted(cmd.modes)) if cmd.modes else "all",
                 )
-            # Unknown command and prompt mismatch both answer with the
-            # `_default_` output — a silent shell would make clients
-            # (e.g. Netmiko) wait for a timeout instead.
-            ret = self.commands["_default_"]["output"]
-            cmd_data = None  # the `_default_` answer never applies cmd_data's new_prompt
-        if callable(ret):
-            from_callable = True
+            # Unknown command and mode mismatch both answer with the `_default_`
+            # output — a silent shell would make clients (e.g. Netmiko) wait for
+            # a timeout. The `_default_` answer never applies a transition.
+            output = self.commands["_default_"].output
+            transition = None
+        if output.kind == "handler" and output.handler is not None:
             try:
-                result = self._invoke_callable(ret, line)
+                result = self._invoke_handler(output.handler, line)
             except Exception:
                 # Same shape as the hot-reload guard (#232): full traceback
                 # to the log, the session survives, and the client gets a
                 # real-NOS-style one-liner instead of a Python traceback.
-                log.error(
-                    "shell '%s' command %r handler crashed\n%s",
-                    self.base_prompt,
-                    line,
-                    traceback.format_exc(),
-                )
+                log.error("shell '%s' command %r handler crashed\n%s", self.base_prompt, line, traceback.format_exc())
                 result = {"output": HANDLER_ERROR_OUTPUT}
-            if "new_prompt" in result:
-                self._apply_new_prompt(result["new_prompt"], line)
             if result.get("exit"):
                 return True
-            ret = result.get("output")
-        if cmd_data is not None and "new_prompt" in cmd_data:
-            self._apply_new_prompt(cmd_data["new_prompt"], line)
+            # A handler transition applies only when the command has no static
+            # one (a static `new_mode` was the last write in the v2 order).
+            if transition is None:
+                transition = result.get("new_mode")
+            body = result.get("output")
+        else:
+            body = output.render(self.base_prompt)
+        if transition is not None:
+            self._apply_new_mode(transition, line)
         if not self.is_running.is_set():
             return True
-        if ret is not None:
-            self._render_output(ret, line, format_output=not from_callable)
+        if body is not None:
+            self.writeline(body)
         return False
