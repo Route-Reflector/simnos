@@ -34,13 +34,8 @@ from simnos.core.resolved_command import (
 
 log = logging.getLogger(__name__)
 
-# Canonical mode names v2's three prompt templates map to (#264 / M2).
+# Initial mode every synthesized platform starts in (#264 / M2).
 INITIAL_MODE = "user"
-_PROMPT_ATTR_TO_MODE: tuple[tuple[str, str], ...] = (
-    ("initial_prompt", "user"),
-    ("enable_prompt", "enable"),
-    ("config_prompt", "config"),
-)
 
 # Base prompt used only to build the prompt -> mode reverse map. Any value
 # works as long as distinct mode templates render distinctly; an unusual
@@ -61,15 +56,15 @@ def synthesize_modes(
     an ambiguity the reverse lookup cannot resolve -> raises (measured 0
     occurrences in shipped data, guarded for future/external data).
     """
-    sources = {
-        "user": initial_prompt,
-        "enable": enable_prompt,
-        "config": config_prompt,
-    }
+    # v2's three prompt templates map to the canonical modes, in shell order.
+    sources: tuple[tuple[str, str | None], ...] = (
+        ("user", initial_prompt),
+        ("enable", enable_prompt),
+        ("config", config_prompt),
+    )
     modes: dict[str, ModeDef] = {}
     reverse_map: dict[str, str] = {}
-    for _attr, mode_name in _PROMPT_ATTR_TO_MODE:
-        source = sources[mode_name]
+    for mode_name, source in sources:
         if source is None:
             continue
         jinja_source, _ = format_template_to_jinja(source)
@@ -96,7 +91,13 @@ def _prompt_list(prompt) -> list[str]:
 
 
 def _lookup_mode(prompt_template: str, reverse_map: dict[str, str], *, where: str) -> str:
-    """Reverse-map one v2 prompt template string to a mode name (loud on miss)."""
+    """Reverse-map one v2 prompt template string to a mode name (loud on miss).
+
+    Command prompts render via `str.format` (the v2 mechanism) while the
+    `reverse_map` keys were built by rendering the mode templates with jinja2;
+    the two are equivalent for these templates (verified by the converter,
+    `format_template_to_jinja`), so the lookup matches.
+    """
     rendered = prompt_template.format(base_prompt=_REVERSE_SENTINEL)
     mode = reverse_map.get(rendered)
     if mode is None:
@@ -124,20 +125,12 @@ def _adapt_output(value, *, where: str) -> ResolvedOutput:
         raise ValueError(f"{where}: unsupported output type {type(value).__name__}")
     jinja_source, has_field = format_template_to_jinja(value)
     if not has_field:
-        # No render needed: the formatter already unescaped the braces.
-        literal, _ = _unescape_literal(value)
-        return ResolvedOutput(kind="literal", text=literal)
+        # No render needed; `str.format` on a field-free template collapses
+        # ``{{`` -> ``{`` and ``}}`` -> ``}`` — exactly the unescape the literal
+        # wire text needs.
+        return ResolvedOutput(kind="literal", text=value.format())
     template, required = compile_template(jinja_source)
     return ResolvedOutput(kind="template", template=template, required_vars=required)
-
-
-def _unescape_literal(value: str) -> tuple[str, frozenset[str]]:
-    """Return the verbatim wire text of a field-free v2 output string.
-
-    `str.format` on a field-free template only collapses ``{{`` -> ``{`` and
-    ``}}`` -> ``}``, which is exactly the unescape the literal needs.
-    """
-    return value.format(), frozenset()
 
 
 def _resolve_alias(name: str, entry: dict, commands: dict) -> dict | None:
@@ -195,6 +188,11 @@ def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> Resol
     else:
         new_mode = _lookup_mode(new_prompt, reverse_map, where=f"command {name!r} new_prompt")
 
+    # v2 keeps the served capture in `output` and any alternates in the
+    # data-only `output_variants` (the runtime never serves them), so here
+    # `output` is the primary and `variants` carries the alternates — they are
+    # NOT `output == variants[0]`. The A3 form reconciles the two (D4); the
+    # legacy adapter stays faithful to v2's split.
     output = _adapt_output(entry.get("output"), where=f"command {name!r}")
     variants = tuple(
         (f"variant_{i + 1}", _adapt_output(v, where=f"command {name!r} variant {i + 1}"))
