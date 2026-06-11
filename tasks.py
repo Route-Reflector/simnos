@@ -194,24 +194,29 @@ WARNING_MESSAGE = """
 
 
 def render_template(template: str, platform: str, command: str, field: str) -> str:
-    """Render a YAML string template the same way the runtime shell does.
+    """Render a YAML string template for the docs generator (build time).
 
-    Uses `str.format(base_prompt=platform)` to match `cmd_shell.default`:
-    substitutes `{base_prompt}` and unescapes `{{` / `}}` literals from
-    `sync_ntc_commands.escape_format_braces` preventive escape.
+    Uses `str.format(base_prompt=platform)` against the legacy
+    ``platforms_yaml`` data: substitutes `{base_prompt}` and unescapes
+    `{{` / `}}` literals from `sync_ntc_commands.escape_format_braces`.
 
-    Build time is strict: besides re-raising the `FORMAT_ERRORS` catch set
-    shared with the lenient runtime `cmd_shell._safe_format`, this rejects
-    unsupported constructs that `str.format()` would happily render (e.g.
-    `{base_prompt!r}` or `{base_prompt:>20}`) — only a plain
+    Build time is strict: besides re-raising the `FORMAT_ERRORS` catch set,
+    this rejects unsupported constructs that `str.format()` would happily
+    render (e.g. `{base_prompt!r}` or `{base_prompt:>20}`) — only a plain
     `{base_prompt}` field and `{{` / `}}` escapes are supported. Every
     failure surfaces as `RuntimeError` carrying the platform / command /
     field context, so CI failures pinpoint the offending YAML entry
     instead of dumping a contextless stack trace.
+
+    The runtime shell no longer uses `str.format` (it renders the A3
+    `ResolvedCommand` representation, #264); this build-time path still reads
+    the legacy yaml and is replaced when the docs generator moves to the new
+    loader (#264 PR-3 / D9). `FORMAT_ERRORS` is the frozen `str.format`
+    failure set, kept here until then.
     """
-    # Lazy import: keep `invoke --list` / lint-only tasks fast (the existing
-    # tasks.py convention, see netmiko_check); cached after the first call.
-    from simnos.plugins.shell.cmd_shell import FORMAT_ERRORS
+    # str.format failure modes, formerly shared with the runtime shell's
+    # _safe_format (removed in #264). Local to this build-time renderer now.
+    FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
 
     try:
         # Strict authoring check first: a malformed template raises ValueError

@@ -17,30 +17,27 @@ class AristaEOS(BaseDevice):
     Class that keeps track of the state of the Arista EOS device.
     """
 
-    def make_show_clock(self, base_prompt, current_prompt, command):
+    def make_show_clock(self, base_prompt, current_mode, current_prompt, command):
         """Return the current time."""
         return self.render("arista_eos/show_clock.j2", time=time.strftime("%a %b %d %H:%M:%S %Y"))
 
-    def make_exit(self, base_prompt, current_prompt, command):
+    def make_exit(self, base_prompt, current_mode, current_prompt, command):
         """Exit the current level of the CLI."""
-        initial_prompt = INITIAL_PROMPT.format(base_prompt=base_prompt)
-        enable_prompt = ENABLE_PROMPT.format(base_prompt=base_prompt)
-        config_prompt = CONFIG_PROMPT.format(base_prompt=base_prompt)
-        if current_prompt in [initial_prompt, enable_prompt]:
+        if current_mode in ("user", "enable"):
             return {"exit": True}
-        if current_prompt == config_prompt:
-            return {"output": "", "new_prompt": ENABLE_PROMPT}
-        raise RuntimeError(f"make_exit does not know how to handle '{current_prompt}' prompt")
+        if current_mode == "config":
+            return {"output": "", "new_mode": "enable"}
+        raise RuntimeError(f"make_exit does not know how to handle '{current_mode}' mode")
 
-    def make_show_ip_int_br(self, base_prompt, current_prompt, command):
+    def make_show_ip_int_br(self, base_prompt, current_mode, current_prompt, command):
         """Return the IP interface brief output."""
         return self.render("arista_eos/show_ip_int_br.j2", base_prompt=base_prompt)
 
-    def make_show_running_config(self, base_prompt, current_prompt, command):
+    def make_show_running_config(self, base_prompt, current_mode, current_prompt, command):
         """Return the running configuration."""
         return self.render("arista_eos/show_running-config.j2", base_prompt=base_prompt)
 
-    def make_show_version(self, base_prompt, current_prompt, command):
+    def make_show_version(self, base_prompt, current_mode, current_prompt, command):
         """Return the system version."""
         return self.render("arista_eos/show_version.j2", base_prompt=base_prompt)
 

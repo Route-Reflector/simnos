@@ -125,13 +125,13 @@ class TestCmdShell(TestCase):
                 base_prompt="test",
             )
 
-    def test_init_broken_initial_prompt_falls_back_to_raw(self):
-        """A malformed initial_prompt template must not crash construction.
+    def test_init_broken_initial_prompt_is_loud(self):
+        """A malformed initial_prompt template now fails loudly at construction.
 
-        Pins #172: `__init__` used to call `.format()` unguarded, so a
-        broken template killed every connection to the host. The lenient
-        fallback keeps the session usable (raw template as prompt) and
-        logs the error for diagnosis.
+        Inverts the old #172 lenient fallback: prompt templates are load-time
+        validated (#264 / D5), so a broken one (`{base_prompt.foo}>` — an
+        unsupported attribute access) raises in the adapter via `_rebuild`
+        instead of degrading to a raw-template prompt.
         """
         self.arguments["nos"] = Nos(
             dict_args={
@@ -140,11 +140,8 @@ class TestCmdShell(TestCase):
                 "commands": {"_default_": {"output": "% Unknown", "help": "default"}},
             }
         )
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell = CMDShell(**self.arguments)
-        self.assertEqual(shell.prompt, "{base_prompt.foo}>")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting initial_prompt" in msg for msg in captured.output))
+        with self.assertRaises(ValueError):
+            CMDShell(**self.arguments)
 
     def test_start(self):
         """Test that the start method calls cmdloop."""
@@ -218,41 +215,49 @@ class TestCmdShell(TestCase):
         ]
         writeline.assert_called_once_with("\r\n".join(expected_output))
 
-    def test__check_prompt_is_none(self):
-        """Test that the _check_prompt method returns the prompt."""
-        shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        self.assertTrue(shell._check_prompt(None))
+    def test_do_help_alias_hidden_outside_target_modes(self):
+        """do_help lists a prompt-less alias only in its target modes (#264 / claude #2).
 
-    def test__check_prompt_str_is_normalized_before_reaching_here(self):
-        """A bare-str prompt never reaches `_check_prompt` at runtime.
-
-        Pins the lists-only read-side contract (#244 / D3): every load
-        path (yaml/py via `Nos`, inventory commands at shell init)
-        normalizes str -> [str] before commit, so the str branch was
-        removed here. The authoring sugar itself is covered end-to-end by
-        test_default_prompt_str_authoring_dispatches.
+        Intentional refinement over v2 (which listed prompt-less aliases in
+        every mode via the raw unmerged entry): `sh clock` aliases `show clock`
+        (modes user/enable), so it is listed in user mode but hidden in config.
+        Dispatch was already mode-scoped in v2; only the help listing changes.
         """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        # yaml_nos.yaml authors prompts as bare strings; the shell must
-        # see them as lists after the load-path normalization.
-        prompt = shell.commands["show clock"]["prompt"]
-        self.assertIsInstance(prompt, list)
+        shell = CMDShell(**self.arguments)  # current_mode == "user"
+        writeline = set_attr(shell, "writeline", Mock())
+        shell.do_help("")
+        self.assertIn("sh clock", writeline.call_args[0][0])
+        shell.current_mode = "config"
+        writeline.reset_mock()
+        shell.do_help("")
+        self.assertNotIn("sh clock", writeline.call_args[0][0])
 
-    def test__check_prompt_is_list(self):
-        """Test that the _check_prompt method returns the prompt."""
-        shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        self.assertTrue(shell._check_prompt(["{base_prompt}>"]))
+    def test__in_current_mode_empty_modes_always_visible(self):
+        """A command with no declared modes is valid in every mode (#264 / D5).
 
-    def test__check_prompt_is_not_prompt(self):
-        """Test that the _check_prompt method returns False."""
+        Successor of the old `_check_prompt(None) -> True`: a command whose
+        authoring omitted `prompt` resolves to an empty mode set, which the
+        engine treats as "valid everywhere" (BASIC `exit` is such a command).
+        """
         shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        # list form (the read-side contract is lists-only, #244/D3); formats to
-        # "test" which does not match the current prompt "test>", so -> False.
-        self.assertFalse(shell._check_prompt(["{base_prompt}"]))
+        self.assertEqual(shell.commands["exit"].modes, frozenset())
+        self.assertTrue(shell._in_current_mode(shell.commands["exit"]))
+        shell.current_mode = "config"
+        self.assertTrue(shell._in_current_mode(shell.commands["exit"]))
+
+    def test__in_current_mode_membership(self):
+        """A command is visible only in the modes it declares (#264 / D5).
+
+        Replaces the `_check_prompt` string-match unit: `show clock`
+        (authored for the user/enable prompts) is visible in those modes and
+        hidden in config.
+        """
+        shell = CMDShell(**self.arguments)  # current_mode == "user"
+        clock = shell.commands["show clock"]
+        self.assertEqual(clock.modes, frozenset({"user", "enable"}))
+        self.assertTrue(shell._in_current_mode(clock))
+        shell.current_mode = "config"
+        self.assertFalse(shell._in_current_mode(clock))
 
     def test_default_command_correct(self):
         """Test that the default method does nothing."""
@@ -282,44 +287,81 @@ class TestCmdShell(TestCase):
     def _make_callable_dict_shell(self, output_callable):
         """Build a shell whose 'cmd' command output is `output_callable`.
 
-        Consumer-side pins for the callable dispatch branch of
-        `default()` — originally the dict-returning cases (new_prompt
-        update / exit / output extraction, the counterpart of the
-        producer-side device-class tests in tests/plugins/nos/, T-14 /
-        #230), since #241 also the str-passthrough (D-b) and crash (D4)
-        pins. Plugin-loaded str returns are additionally covered by
-        test_default_command_is_function above.
+        Consumer-side pins for the handler dispatch branch of `default()` —
+        the dict-returning cases (new_mode transition / exit / output
+        extraction, the counterpart of the producer-side device-class tests
+        in tests/plugins/nos/, T-14 / #230), plus the str-passthrough (D-b)
+        and crash (D4) pins. The synthetic platform declares all three
+        canonical modes so handlers can transition (#264 / D5).
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
             dict_args={
                 "name": "synth",
                 "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
+                "config_prompt": "{base_prompt}(config)#",
                 "commands": {
                     "cmd": {
                         "output": output_callable,
                         "help": "dict-returning callable",
                         "prompt": "{base_prompt}>",
                     },
-                    "_default_": {
-                        "output": "% Unknown",
-                        "help": "default",
-                        "prompt": "{base_prompt}>",
-                    },
+                    "_default_": {"output": "% Unknown", "help": "default"},
                 },
             }
         )
         shell = CMDShell(**self.arguments)
         return shell
 
-    def test_default_callable_dict_new_prompt(self):
-        """Callable dict with new_prompt updates the prompt (formatted)."""
-        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "", "new_prompt": "{base_prompt}#"})
+    def test_default_callable_dict_new_mode(self):
+        """Callable dict with new_mode transitions the shell to that mode."""
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "", "new_mode": "enable"})
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("cmd")
         self.assertFalse(stop)
+        self.assertEqual(shell.current_mode, "enable")
         self.assertEqual(shell.prompt, "test#")
         writeline.assert_called_once_with("")
+
+    def test_default_callable_dict_unknown_new_mode_is_lenient(self):
+        """A handler returning an unknown mode logs and stays put (#264 / D5)."""
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "body", "new_mode": "nope"})
+        writeline = set_attr(shell, "writeline", Mock())
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            stop = shell.default("cmd")
+        self.assertFalse(stop)
+        self.assertEqual(shell.current_mode, "user")  # unchanged
+        self.assertTrue(any("unknown mode 'nope'" in msg for msg in captured.output))
+        writeline.assert_called_once_with("body")
+
+    def test_default_static_new_mode_wins_over_handler(self):
+        """A command's static new_mode overrides a handler-returned one (#264 / claude #8).
+
+        Replicates v2's write order (handler new_prompt applied first, the
+        command's own new_prompt last): when a command declares new_mode AND
+        its handler returns a different one, the static one is the final state.
+        """
+        self.arguments["is_running"].set()
+        self.arguments["nos"] = Nos(
+            dict_args={
+                "name": "synth",
+                "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
+                "config_prompt": "{base_prompt}(config)#",
+                "commands": {
+                    "cmd": {
+                        "output": lambda device, **kwargs: {"output": "", "new_mode": "config"},
+                        "new_prompt": "{base_prompt}#",  # static -> enable, wins
+                        "prompt": "{base_prompt}>",
+                    },
+                },
+            }
+        )
+        shell = CMDShell(**self.arguments)
+        set_attr(shell, "writeline", Mock())
+        shell.default("cmd")
+        self.assertEqual(shell.current_mode, "enable")  # static new_mode, not handler's "config"
 
     def test_default_callable_dict_exit(self):
         """Callable dict with exit=True signals shell termination."""
@@ -341,16 +383,16 @@ class TestCmdShell(TestCase):
     def _make_prompt_form_shell(self, prompt_value):
         """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
 
-        Both a bare str and a list are valid authoring sugar for `prompt`
-        (#244 / P-12c); these pins guard that the two forms keep
-        dispatching identically across the load-path normalization
-        (str -> [str] inside `Nos`).
+        Both a bare str and a list are valid authoring sugar for `prompt`;
+        these pins guard that the two forms resolve to the same mode set and
+        dispatch identically through the adapter (#264 / D6).
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
             dict_args={
                 "name": "synth",
                 "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
                 "commands": {
                     "cmd": {
                         "output": "form ok",
@@ -364,7 +406,7 @@ class TestCmdShell(TestCase):
         return shell
 
     def test_default_prompt_str_authoring_dispatches(self):
-        """A bare-str `prompt` matches the current prompt and dispatches."""
+        """A bare-str `prompt` resolves to the current mode and dispatches."""
         shell = self._make_prompt_form_shell("{base_prompt}>")
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("cmd")
@@ -372,21 +414,19 @@ class TestCmdShell(TestCase):
         writeline.assert_called_once_with("form ok")
 
     def test_default_prompt_list_authoring_dispatches(self):
-        """A list `prompt` matches the current prompt and dispatches."""
+        """A list `prompt` resolves to a mode set including the current mode."""
         shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("cmd")
         self.assertFalse(stop)
         writeline.assert_called_once_with("form ok")
 
-    def test_inventory_commands_prompt_str_is_normalized_and_dispatches(self):
-        """Inventory-defined commands get the same str -> [str] normalization.
+    def test_inventory_commands_resolve_through_adapter_and_dispatch(self):
+        """Inventory-defined commands are normalized through the adapter too.
 
-        Pins the third commands inflow (#244 / D3, found during
-        implementation): `nos_inventory_config["commands"]` bypasses the
-        `Nos` load path, so the shell normalizes it at init — without
-        this, a bare-str prompt would be iterated char by char after the
-        read-side isinstance branch removal (a silent never-match).
+        Pins the third commands inflow (#264 / D6): `nos_inventory_config
+        ["commands"]` is merged and adapted at shell (re)build like the BASIC
+        and NOS inflows, so its prompt resolves to a mode set and dispatches.
         """
         self.arguments["is_running"].set()
         self.arguments["nos_inventory_config"] = {
@@ -400,7 +440,9 @@ class TestCmdShell(TestCase):
         }
         shell = CMDShell(**self.arguments)
         writeline = set_attr(shell, "writeline", Mock())
-        self.assertEqual(shell.commands["inv cmd"]["prompt"], ["{base_prompt}>"])
+        # The inventory command is normalized through the adapter like any
+        # inflow: its "{base_prompt}>" prompt resolves to the user mode.
+        self.assertEqual(shell.commands["inv cmd"].modes, frozenset({"user"}))
         stop = shell.default("inv cmd")
         self.assertFalse(stop)
         writeline.assert_called_once_with("inventory ok")
@@ -424,80 +466,62 @@ class TestCmdShell(TestCase):
     def test_default_alias_target_missing_falls_back_default(self):
         """An alias whose target command is gone degrades to `_default_`.
 
-        Pins #241 (G4/D4 例外境界): the alias-merge KeyError is a lenient
-        unknown-command path — it must answer with the `_default_` output
-        like any unknown command, never with the handler-crash response.
-        Guards the `_resolve_command` decomposition against widening the
-        exception boundary (1st design review 🦊 #2).
+        The adapter drops a broken alias at load (logged), so it never reaches
+        `self.commands`; typing it is then an unknown command answered with the
+        `_default_` output, never a handler-crash response (#264 / D6).
         """
         self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
+        with self.assertLogs("simnos.core.command_adapter", level="WARNING"):
+            self.arguments["nos"] = Nos(
+                dict_args={
+                    "name": "synth",
+                    "initial_prompt": "{base_prompt}>",
+                    "commands": {
+                        "broken alias": {"alias": "no such target"},
+                        "_default_": {"output": "% Invalid input", "help": "default"},
+                    },
+                }
+            )
+            shell = CMDShell(**self.arguments)
+        self.assertNotIn("broken alias", shell.commands)
         writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken alias"] = {"alias": "no such target"}
         shell.default("broken alias")
-        writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        writeline.assert_called_once_with("% Invalid input")
 
-    def test_resolve_command_unknown_returns_none(self):
-        """`_resolve_command` degrades an unknown command to None.
+    def test_invoke_handler_str_return_normalized(self):
+        """`_invoke_handler` wraps a str return into a CommandResult dict.
 
-        Unit pin for the #241 decomposition: the unknown-command KeyError
-        is consumed inside the helper so `default()` needs no try block
-        around resolution.
+        Pins the consumer-side normalization (#241/D2, #264): a plain str
+        return is sugar for `{"output": <str>}`, so the dispatch body only
+        ever consumes the dict form.
         """
         shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        self.assertIsNone(shell._resolve_command("no such command"))
-
-    def test_resolve_command_alias_target_missing_returns_none(self):
-        """`_resolve_command` degrades a missing alias target to None.
-
-        Unit counterpart of test_default_alias_target_missing_falls_back
-        _default (#241): the alias-merge KeyError must stay inside the
-        helper, on the same lenient path as an unknown command.
-        """
-        shell = CMDShell(**self.arguments)
-        shell.commands["broken alias"] = {"alias": "no such target"}
-        # pylint: disable=protected-access
-        self.assertIsNone(shell._resolve_command("broken alias"))
-
-    def test_resolve_command_alias_merges_target(self):
-        """`_resolve_command` merges the alias target under the alias keys.
-
-        Pins the `{**commands[target], **cmd_data}` merge order (#241):
-        the alias entry's own keys win over the target's.
-        """
-        shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        merged = shell._resolve_command("sh clock")
-        assert merged is not None
-        self.assertEqual(merged["output"], "*21:01:33.000 AET 01 01 01 2022")
-        self.assertEqual(merged["alias"], "show clock")
-
-    def test_invoke_callable_str_return_normalized(self):
-        """`_invoke_callable` wraps a str return into a CommandResult dict.
-
-        Pins the #241/D2 consumer-side normalization: a plain str return
-        is sugar for `{"output": <str>}`, so the dispatch body only ever
-        consumes the dict form.
-        """
-        shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        result = shell._invoke_callable(lambda device, **kwargs: "body", "cmd")
+        result = shell._invoke_handler(lambda device, **kwargs: "body", "cmd")
         self.assertEqual(result, {"output": "body"})
 
-    def test_invoke_callable_none_return_normalized(self):
-        """`_invoke_callable` wraps a None return (= write nothing) too."""
+    def test_invoke_handler_none_return_normalized(self):
+        """`_invoke_handler` wraps a None return (= write nothing) too."""
         shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        result = shell._invoke_callable(lambda device, **kwargs: None, "cmd")
+        result = shell._invoke_handler(lambda device, **kwargs: None, "cmd")
         self.assertEqual(result, {"output": None})
 
-    def test_invoke_callable_dict_return_passthrough(self):
-        """`_invoke_callable` passes a CommandResult dict through unchanged."""
+    def test_invoke_handler_dict_return_passthrough(self):
+        """`_invoke_handler` passes a CommandResult dict through unchanged."""
         shell = CMDShell(**self.arguments)
-        # pylint: disable=protected-access
-        result = shell._invoke_callable(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")
+        result = shell._invoke_handler(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")
         self.assertEqual(result, {"output": "x", "exit": True})
+
+    def test_invoke_handler_receives_current_mode(self):
+        """`_invoke_handler` passes the current mode name to the handler (#264)."""
+        shell = CMDShell(**self.arguments)
+        seen = {}
+
+        def handler(device, **kwargs):
+            seen.update(kwargs)
+            return "ok"
+
+        shell._invoke_handler(handler, "cmd")
+        self.assertEqual(seen["current_mode"], shell.current_mode)
 
     def _make_callable_default_shell(self):
         """Build a shell whose `_default_` output is a callable.
@@ -505,16 +529,15 @@ class TestCmdShell(TestCase):
         No shipped plugin has a callable `_default_` (yaml cannot express
         one; the py plugins use strings), but the Python API
         (`SimNOS(inventory=dict)`) can reach it — these pins fix the #241
-        unification: both the unknown-command and the prompt-mismatch
-        fallback invoke the callable through `_invoke_callable` (the old
-        code degraded to a fixed error string / leaked the function repr
-        respectively).
+        unification: both the unknown-command and the mode-mismatch fallback
+        invoke the callable through `_invoke_handler`.
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
             dict_args={
                 "name": "synth",
                 "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
                 "commands": {
                     "known": {
                         "output": "static",
@@ -539,35 +562,34 @@ class TestCmdShell(TestCase):
         self.assertFalse(stop)
         writeline.assert_called_once_with("dynamic unknown: nope")
 
-    def test_default_callable_default_invoked_on_prompt_mismatch(self):
-        """A prompt mismatch invokes a callable `_default_` (#241).
+    def test_default_callable_default_invoked_on_mode_mismatch(self):
+        """A mode mismatch invokes a callable `_default_` (#241 / #264).
 
-        The old code never invoked it on this path — `_safe_format`
-        swallowed the AttributeError and the function repr leaked to the
-        wire. The unification fixes that display bug.
+        `known` is enable-only; typed in user mode it misses, and the fallback
+        invokes the callable `_default_` through `_invoke_handler`.
         """
         shell = self._make_callable_default_shell()
         writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("known")  # requires "test#", current prompt is "test>"
+        stop = shell.default("known")  # valid only in enable, current mode is user
         self.assertFalse(stop)
         writeline.assert_called_once_with("dynamic unknown: known")
 
     def test_default_callable_default_dict_return_gets_full_dispatch(self):
-        """A dict-returning callable `_default_` gets the same dispatch (#241).
+        """A dict-returning callable `_default_` gets the same dispatch (#241 / #264).
 
-        Pins that the unification is complete: a callable `_default_`
-        flows through `_invoke_callable` like any handler, so its dict
-        return's `new_prompt` (and `exit`) take effect. Unreachable in
-        the old code (the callable was never invoked on these paths).
+        Pins that the unification is complete: a callable `_default_` flows
+        through `_invoke_handler` like any handler, so its dict return's
+        `new_mode` (and `exit`) take effect.
         """
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(
             dict_args={
                 "name": "synth",
                 "initial_prompt": "{base_prompt}>",
+                "enable_prompt": "{base_prompt}#",
                 "commands": {
                     "_default_": {
-                        "output": lambda device, **kwargs: {"output": "locked out", "new_prompt": "{base_prompt}#"},
+                        "output": lambda device, **kwargs: {"output": "locked out", "new_mode": "enable"},
                         "help": "dict-returning callable default",
                     },
                 },
@@ -577,6 +599,7 @@ class TestCmdShell(TestCase):
         writeline = set_attr(shell, "writeline", Mock())
         stop = shell.default("nope")
         self.assertFalse(stop)
+        self.assertEqual(shell.current_mode, "enable")
         self.assertEqual(shell.prompt, "test#")
         writeline.assert_called_once_with("locked out")
 
@@ -623,172 +646,12 @@ class TestCmdShell(TestCase):
         self.assertIn("RuntimeError: boom-for-log", captured.output[0])
         self.assertIn("Traceback", captured.output[0])
 
-    def test_default_silent_fallback_on_keyerror(self):
-        """`KeyError` failure mode of `.format()` is silently logged.
-
-        Pins #162: `cmd_shell.default()` is intentionally lenient about
-        yaml format errors (silent log + raw passthrough), in contrast
-        to `tasks.render_template` which raises `RuntimeError` at build
-        time. The runtime catch set is kept aligned with the build-time
-        counterpart at `(KeyError, IndexError, ValueError)`, so both
-        paths cover the same `str.format()` failure modes; only the
-        action (raise vs silent) differs.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_key_cmd"] = {
-            "output": "value is {unknown_key}",
-            "prompt": ["{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_key_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_key_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("value is {unknown_key}")
-
-    def test_default_silent_fallback_on_valueerror(self):
-        """`ValueError` failure mode of `.format()` is silently logged.
-
-        Pins #162: covers the malformed-brace path (a bare `{` with no
-        closing `}`). Same lenient-runtime contract as the `KeyError`
-        case — the catch set `(KeyError, IndexError, ValueError)`
-        mirrors `tasks.render_template`.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_brace_cmd"] = {
-            "output": "value is {broken",
-            "prompt": ["{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_brace_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_brace_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("value is {broken")
-
-    def test_default_silent_fallback_on_indexerror(self):
-        """`IndexError` failure mode of `.format()` is silently logged.
-
-        Pins #162: covers the positional-placeholder path (`{}` / `{N}`
-        against an empty positional-args tuple). Same lenient-runtime
-        contract as the other two cases; together the three tests pin
-        each member of the catch set `(KeyError, IndexError, ValueError)`
-        shared with `tasks.render_template`.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_pos_cmd"] = {
-            "output": "value is {}",
-            "prompt": ["{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_pos_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_pos_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("value is {}")
-
-    def test_default_silent_fallback_on_attributeerror(self):
-        """`AttributeError` failure mode of `.format()` is silently logged.
-
-        Pins #171: attribute access (`{base_prompt.foo}`) used to escape
-        the 3-tuple catch set — and the output format sits *outside* the
-        broad try block of `default()`, so this crashed the whole shell
-        session instead of just leaking a traceback. Now covered by the
-        shared 5-tuple `FORMAT_ERRORS`.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_attr_cmd"] = {
-            "output": "value is {base_prompt.foo}",
-            "prompt": ["{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_attr_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_attr_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("value is {base_prompt.foo}")
-
-    def test_default_silent_fallback_on_typeerror(self):
-        """`TypeError` failure mode of `.format()` is silently logged.
-
-        Pins #171: item access on the str argument (`{base_prompt[bad]}`)
-        raises `TypeError` ("string indices must be integers"), the fifth
-        and last member of `FORMAT_ERRORS`. Together the five fallback
-        tests pin every member of the catch set shared with
-        `tasks.render_template`.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_item_cmd"] = {
-            "output": "value is {base_prompt[bad]}",
-            "prompt": ["{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_item_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting output" in msg and "broken_item_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("value is {base_prompt[bad]}")
-
-    def test_default_new_prompt_format_failure_keeps_prompt(self):
-        """A broken cmd_data new_prompt does not transition the prompt.
-
-        Pins #172: the new_prompt format used to bubble into the broad
-        `except Exception`, leaking a traceback into the user output.
-        Now the failure is a silent log, the session stays on the current
-        prompt, and the command output is still written normally.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["broken_np_cmd"] = {
-            "output": "mode change attempted",
-            "prompt": ["{base_prompt}>"],
-            "new_prompt": "{base_prompt.foo}#",
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            stop = shell.default("broken_np_cmd")
-        self.assertFalse(stop)
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting new_prompt" in msg and "broken_np_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("mode change attempted")
-
-    def test_default_callable_dict_new_prompt_format_failure(self):
-        """A broken callable-dict new_prompt does not transition the prompt.
-
-        Pins #172 (callable dict path, symmetric to the cmd_data path
-        above): format failure is a silent log + no transition, and no
-        traceback reaches the wire. The callable's own exceptions are
-        out of scope here — they answer with HANDLER_ERROR_OUTPUT since
-        #241/D4 (see test_default_handler_crash_writes_fixed_error_line).
-        """
-        shell = self._make_callable_dict_shell(
-            lambda device, **kwargs: {"output": "body", "new_prompt": "{base_prompt.foo}#"}
-        )
-        writeline = set_attr(shell, "writeline", Mock())
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            stop = shell.default("cmd")
-        self.assertFalse(stop)
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting new_prompt" in msg and "'cmd'" in msg for msg in captured.output))
-        writeline.assert_called_once_with("body")
-
     def test_default_callable_dict_output_passed_through_unformatted(self):
-        """Callable-dict output skips `_safe_format` entirely (#241 / D-b).
+        """Callable-dict output is written verbatim, never re-rendered (#241 / D-b).
 
-        New contract pin (rewritten from the pre-#241 raw-fallback pin):
-        handlers format themselves, so brace-containing device output is
-        written verbatim — no format attempt, hence **no error log**
-        (the old chain logged a FORMAT_ERRORS failure before falling back
-        to the same raw string). The skip applies to dict output exactly
-        like str returns: the flag is set at invoke time, not by return
-        shape.
+        Handlers render themselves, so brace-containing device output reaches
+        the wire untouched — the shell applies no template step to handler
+        output, hence **no error log**. Holds for dict and str returns alike.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
         writeline = set_attr(shell, "writeline", Mock())
@@ -798,12 +661,11 @@ class TestCmdShell(TestCase):
         writeline.assert_called_once_with("value is {base_prompt.foo}")
 
     def test_default_callable_str_output_passed_through_unformatted(self):
-        """Callable str output skips `_safe_format` too (#241 / D-b).
+        """Callable str output is written verbatim too (#241 / D-b).
 
         The str-return twin of the dict pin above: literal braces in a
         handler's rendered output (e.g. JSON-ish device output) reach the
-        wire untouched instead of tripping FORMAT_ERRORS into a logged
-        raw fallback.
+        wire untouched, with no render step and no error log.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: "literal {brace} stays")
         writeline = set_attr(shell, "writeline", Mock())
@@ -812,81 +674,19 @@ class TestCmdShell(TestCase):
         self.assertFalse(stop)
         writeline.assert_called_once_with("literal {brace} stays")
 
-    def test_default_broken_prompt_treated_as_non_match(self):
-        """A command with a broken prompt template is just unreachable.
+    def test_default_command_transitions_mode(self):
+        """A command with a new_mode transitions the shell and re-renders the prompt.
 
-        Pins #172: `_check_prompt` used to leak the format error into the
-        broad `except Exception` (traceback in output). Now the broken
-        candidate is a logged non-match and the shell answers with the
-        unknown-command output, session intact.
+        `enable` (yaml_nos) declares new_mode=enable; dispatching it from the
+        initial user mode moves current_mode to enable and the prompt to
+        "test#" (the enable prompt rendered at base_prompt "test").
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        # Injected directly into shell.commands (bypassing the load
-        # paths), so the list form is used per the #244 / D3 contract.
-        shell.commands["broken_prompt_cmd"] = {
-            "output": "should not appear",
-            "prompt": ["{base_prompt.foo}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("broken_prompt_cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertTrue(any("error formatting prompt" in msg and "broken_prompt_cmd" in msg for msg in captured.output))
-        writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
-
-    def test_do_help_broken_prompt_command_hidden(self):
-        """`do_help` survives a broken prompt template (command hidden).
-
-        Pins #172: the `do_help` -> `_check_prompt` path had *no* guard at
-        all — a single broken prompt yaml crashed the session on `help`.
-        Now the broken command is silently omitted from the help listing.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        # Direct injection -> list form per the #244 / D3 contract.
-        shell.commands["broken_prompt_cmd"] = {
-            "output": "x",
-            "prompt": ["{base_prompt.foo}>"],
-            "help": "never listed",
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.do_help("")
-        self.assertEqual(len(captured.output), 1)
-        help_text = writeline.call_args[0][0]
-        self.assertNotIn("broken_prompt_cmd", help_text)
-        self.assertIn("show clock", help_text)  # healthy commands still listed
-
-    def test_default_list_prompt_partial_breakage_still_matches(self):
-        """A broken candidate in a prompt list does not poison the rest.
-
-        Pins the per-candidate independent evaluation of `_check_prompt`
-        (#172 design improvement): previously one broken element raised
-        out of the `any()` generator and failed the whole match; now the
-        healthy element still matches and the command works.
-        """
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.commands["partial_prompt_cmd"] = {
-            "output": "reached",
-            "prompt": ["{base_prompt.foo}>", "{base_prompt}>"],
-        }
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("partial_prompt_cmd")
-        self.assertEqual(len(captured.output), 1)  # the broken candidate, once
-        writeline.assert_called_once_with("reached")
-
-    def test_default_command_new_prompt(self):
-        """Test that the default method does nothing."""
-        self.arguments["is_running"].set()
-        shell = CMDShell(**self.arguments)
-        # writeline guard only (stdout is None); this test asserts on prompt,
-        # not on the mock (return unused → bare set_attr).
-        set_attr(shell, "writeline", Mock())
+        set_attr(shell, "writeline", Mock())  # stdout is None; guard only
         shell.default("enable")
-        shell.prompt = "test#"
+        self.assertEqual(shell.current_mode, "enable")
+        self.assertEqual(shell.prompt, "test#")
 
     def test_default_command_exit(self):
         """Test that the default method does nothing."""
@@ -963,6 +763,31 @@ class HotReloadTest(TestCase):
         self.assertEqual(len(captured.output), 1)
         self.assertIn("broken.yaml", captured.output[0])
         self.assertIn("healthy", shell.commands)
+
+    def test_reload_commands_adapter_failure_rolls_back_and_unblocks_rest(self):
+        """A file that loads but fails normalization is rolled back from nos (#264 / codex #1).
+
+        `from_file` commits to `self.nos` before `_rebuild` validates via the
+        adapter, so a canonical-外 prompt that passes the legacy schema but
+        fails normalization would, without rollback, persist in `nos.commands`
+        and re-fail every later file in the batch. The per-file rollback must
+        drop it so a following healthy file still applies.
+        """
+        shell = CMDShell(**self.arguments)
+
+        def fake_from_file(filename):
+            if filename == "bad.yaml":
+                # passes pydantic, fails the adapter (no mode renders to this)
+                shell.nos.commands["bad cmd"] = {"output": "x", "prompt": "{base_prompt}ALIEN>"}
+            else:
+                shell.nos.commands["good cmd"] = {"output": "ok", "prompt": "{base_prompt}>"}
+
+        set_attr(shell.nos, "from_file", Mock(side_effect=fake_from_file))
+        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+            shell.reload_commands(["bad.yaml", "good.yaml"])
+        self.assertEqual(len(captured.output), 1)  # only the bad file
+        self.assertNotIn("bad cmd", shell.nos.commands)  # rolled back, not poisoning the batch
+        self.assertIn("good cmd", shell.commands)  # the healthy file still applied
 
     def test_reload_commands_broken_file_last_still_applies_rest(self):
         """The per-file guard is order-independent: broken file last.

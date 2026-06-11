@@ -15,10 +15,7 @@ import pytest
 
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
-from simnos.plugins.nos.platforms_py.cisco_ios import ENABLE_PROMPT
 from tests.plugins.nos.device_helpers import BASE_PROMPT, call_command
-
-ENABLE = ENABLE_PROMPT.format(base_prompt=BASE_PROMPT)
 
 
 @pytest.fixture(scope="module")
@@ -32,18 +29,18 @@ def test_show_clock_format(nos):
 
     Example: '*11:54:03.000 UTC Sat Apr 16 2022'.
     """
-    out = call_command(nos, "show clock", ENABLE)
+    out = call_command(nos, "show clock", "enable")
     assert re.match(r"^\*\d{2}:\d{2}:\d{2}\.000 .+ \d{4}$", out)
 
 
 def test_show_version_content(nos):
-    out = call_command(nos, "show version", ENABLE)
+    out = call_command(nos, "show version", "enable")
     assert "Cisco IOS XE Software" in out
     assert f"{BASE_PROMPT} uptime is" in out  # {{base_prompt}} resolved
     assert "{" not in out  # no unresolved placeholder survives rendering
 
 
 def test_show_running_config_content(nos):
-    out = call_command(nos, "show running-config", ENABLE)
+    out = call_command(nos, "show running-config", "enable")
     assert f"hostname {BASE_PROMPT}" in out
     assert "{" not in out

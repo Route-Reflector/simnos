@@ -20,11 +20,11 @@ class TestModule(BaseDevice):
     Class that keeps track of the state of the TestModule device.
     """
 
-    def make_show_clock(self, base_prompt, current_prompt, command):
+    def make_show_clock(self, base_prompt, current_mode, current_prompt, command):
         """Return the current time."""
         return str(time.ctime())
 
-    def make_show_version(self, base_prompt, current_prompt, command):
+    def make_show_version(self, base_prompt, current_mode, current_prompt, command):
         """Return the system version."""
         return "TestModule version 1.0"
 

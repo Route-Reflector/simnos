@@ -18,12 +18,12 @@ class CommandResult(TypedDict, total=False):
     """Dict form a command handler may return.
 
     A plain ``str`` return is sugar for ``{"output": <str>}`` —
-    `CMDShell._invoke_callable` normalizes it, so handlers only build a
-    dict when they need ``new_prompt`` / ``exit``.
+    `CMDShell._invoke_handler` normalizes it, so handlers only build a
+    dict when they need ``new_mode`` / ``exit``.
     """
 
     output: str | None  # body to send to the client (None = write nothing)
-    new_prompt: str  # prompt transition template ({base_prompt} allowed)
+    new_mode: str  # name of the mode to transition to (omit = no transition)
     exit: bool  # True = terminate the session
 
 
@@ -35,13 +35,13 @@ class CommandHandler(Protocol):
     then binds as ``self``. ``device`` is None for platforms without a
     device class.
 
-    The returned ``output`` must be fully rendered: cmd_shell does NOT
-    apply ``{base_prompt}`` formatting to callable output (handlers
-    receive ``base_prompt`` as an argument and format themselves) — only
-    yaml-static output strings are formatted. Literal braces in device
-    output therefore need no escaping. A returned ``new_prompt`` is the
-    one exception: prompt templates are the shell's concern, so the
-    shell formats it like any yaml ``new_prompt``.
+    The returned ``output`` is sent verbatim: cmd_shell never reformats
+    handler output (handlers receive ``base_prompt`` and render themselves),
+    so literal braces in device output need no escaping. To change mode,
+    return ``new_mode`` (a mode name, e.g. ``"enable"``); the shell renders
+    the corresponding prompt. Branch on ``current_mode`` (the mode name), not
+    on ``current_prompt`` — the latter is the rendered prompt string, kept for
+    display/embedding only.
 
     Raising is allowed for "should never happen" states (see
     ``AristaEOS.make_exit``): cmd_shell logs the full traceback and
@@ -55,6 +55,7 @@ class CommandHandler(Protocol):
         device: "BaseDevice | None",
         *,
         base_prompt: str,
+        current_mode: str,
         current_prompt: str,
         command: str,
     ) -> "str | CommandResult | None": ...

@@ -302,7 +302,9 @@ A callable command can return:
 - `None` - no response
 - `dict` (`CommandResult`) - a dictionary with optional keys:
     - `"output"` - string to display
-    - `"new_prompt"` - new prompt value (can use `{base_prompt}` formatter)
+    - `"new_mode"` - name of the mode to transition to (e.g. `"enable"`); the
+      shell renders that mode's prompt. Branch on the `current_mode` argument,
+      not on the prompt string.
     - `"exit"` - if `True`, close the shell session (output is not displayed)
 
 Two rules that differ from yaml-static output:
@@ -310,8 +312,6 @@ Two rules that differ from yaml-static output:
 - **Format yourself.** The shell does *not* apply `{base_prompt}` formatting
   to callable output — handlers receive `base_prompt` as an argument and
   render their own strings. Literal braces in device output need no escaping.
-  (`new_prompt` *is* still formatted by the shell; prompt templates are the
-  shell's concern.)
 - **Raising is allowed** for "should never happen" states: the shell logs the
   full traceback server-side and answers the client with the fixed
   `% Internal error` line — no traceback ever reaches the wire.

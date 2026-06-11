@@ -13,11 +13,7 @@ import pytest
 
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
-from simnos.plugins.nos.platforms_py.huawei_smartax import ENABLE_PROMPT, INITIAL_PROMPT
-from tests.plugins.nos.device_helpers import BASE_PROMPT, call_command
-
-INITIAL = INITIAL_PROMPT.format(base_prompt=BASE_PROMPT)
-ENABLE = ENABLE_PROMPT.format(base_prompt=BASE_PROMPT)
+from tests.plugins.nos.device_helpers import call_command
 
 
 @pytest.fixture(scope="module")
@@ -38,7 +34,7 @@ def test_default_configuration_provides_boards(nos):
 
 
 def test_display_board_table_structure(nos):
-    out = call_command(nos, "display board", INITIAL)
+    out = call_command(nos, "display board", "user")
     lines = out.splitlines()
     header_lines = [line for line in lines if "SlotID" in line]
     assert len(header_lines) == 1
@@ -55,29 +51,30 @@ def test_display_board_table_structure(nos):
 
 
 class TestModeCallables:
-    """Pin the per-prompt branches of the dict-returning mode callables.
+    """Pin the per-mode branches of the dict-returning mode callables (#264).
 
-    The branches dispatch on the current_prompt *suffix* ('>' / '#' /
-    other), so 'bogus$' exercises the fallback branch.
+    The branches dispatch on `current_mode`: `_return` keeps user but sends
+    enable/config to enable; `disable` drops enable/config to user and is a
+    no-op (no transition) in user mode.
     """
 
-    def test_return_from_initial_prompt(self, nos):
-        assert call_command(nos, "return", INITIAL) == {"output": "", "new_prompt": INITIAL_PROMPT}
+    def test_return_from_user_mode(self, nos):
+        assert call_command(nos, "return", "user") == {"output": "", "new_mode": "user"}
 
-    def test_return_from_enable_prompt(self, nos):
-        assert call_command(nos, "return", ENABLE) == {"output": "", "new_prompt": ENABLE_PROMPT}
+    def test_return_from_enable_mode(self, nos):
+        assert call_command(nos, "return", "enable") == {"output": "", "new_mode": "enable"}
 
-    def test_return_from_other_prompt(self, nos):
-        assert call_command(nos, "return", "bogus$") == {"output": "", "new_prompt": INITIAL_PROMPT}
+    def test_return_from_config_mode(self, nos):
+        assert call_command(nos, "return", "config") == {"output": "", "new_mode": "enable"}
 
-    def test_disable_from_enable_prompt(self, nos):
-        assert call_command(nos, "disable", ENABLE) == {"output": "", "new_prompt": INITIAL_PROMPT}
+    def test_disable_from_enable_mode(self, nos):
+        assert call_command(nos, "disable", "enable") == {"output": "", "new_mode": "user"}
 
-    def test_disable_from_other_prompt_keeps_prompt(self, nos):
-        assert call_command(nos, "disable", "bogus$") == {"output": "", "new_prompt": "bogus$"}
+    def test_disable_from_user_mode_no_transition(self, nos):
+        assert call_command(nos, "disable", "user") == {"output": ""}
 
     def test_quit_exits(self, nos):
-        assert call_command(nos, "quit", INITIAL) == {"exit": True}
+        assert call_command(nos, "quit", "user") == {"exit": True}
 
 
 class TestAddWhitespaces:
