@@ -64,9 +64,16 @@ def _sanitize_filename(command: str, used: set[str]) -> str:
 
 
 def _ensure_trailing_newline(text: str) -> str:
-    """LF + a single trailing newline (D7). Wire-equivalent under splitlines()."""
+    """LF + a single trailing newline (D7). Wire-equivalent under splitlines().
+
+    Empty output (legacy ``output: ''`` / an empty ``output_variant``) stays a
+    0-byte file: a forced ``\\n`` would round-trip to ``['']`` under splitlines
+    where the legacy empty literal projects to ``[]`` — a phantom blank line the
+    variant-body oracle catches (fortinet / oneaccess_oneos). The lint's
+    trailing-newline rule already exempts empty files (`raw and ...`).
+    """
     text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if not text.endswith("\n"):
+    if text and not text.endswith("\n"):
         text += "\n"
     return text
 
