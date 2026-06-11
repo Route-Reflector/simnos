@@ -1,0 +1,7 @@
+command: show ip ospf database network
+type: simnos
+help: execute the command "show ip ospf database network"
+mode:
+- user
+- enable
+output: show_ip_ospf_database_network.txt

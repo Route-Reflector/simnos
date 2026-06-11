@@ -1,0 +1,7 @@
+command: show cts pacs
+type: simnos
+help: execute the command "show cts pacs"
+mode:
+- user
+- enable
+output: show_cts_pacs.txt

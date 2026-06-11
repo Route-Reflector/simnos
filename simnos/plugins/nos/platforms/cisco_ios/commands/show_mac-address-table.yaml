@@ -1,0 +1,7 @@
+command: show mac-address-table
+type: simnos
+help: execute the command "show mac-address-table"
+mode:
+- user
+- enable
+output: show_mac-address-table.txt

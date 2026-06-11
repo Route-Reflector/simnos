@@ -1,0 +1,7 @@
+command: show ip eigrp interfaces detail
+type: simnos
+help: execute the command "show ip eigrp interfaces detail"
+mode:
+- user
+- enable
+output: show_ip_eigrp_interfaces_detail.txt

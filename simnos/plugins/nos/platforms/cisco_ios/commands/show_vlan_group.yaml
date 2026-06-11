@@ -1,0 +1,7 @@
+command: show vlan group
+type: simnos
+help: execute the command "show vlan group"
+mode:
+- user
+- enable
+output: show_vlan_group.txt

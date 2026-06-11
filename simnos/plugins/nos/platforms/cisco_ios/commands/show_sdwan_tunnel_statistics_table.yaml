@@ -1,0 +1,7 @@
+command: show sdwan tunnel statistics table
+type: simnos
+help: execute the command "show sdwan tunnel statistics table"
+mode:
+- user
+- enable
+output: show_sdwan_tunnel_statistics_table.txt

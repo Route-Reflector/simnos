@@ -1,0 +1,7 @@
+command: show platform
+type: simnos
+help: execute the command "show platform"
+mode:
+- user
+- enable
+output: show_platform.txt

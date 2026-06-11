@@ -1,0 +1,7 @@
+command: show processes memory sorted
+type: simnos
+help: execute the command "show processes memory sorted"
+mode:
+- user
+- enable
+output: show_processes_memory_sorted.txt

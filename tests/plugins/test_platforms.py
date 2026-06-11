@@ -5,6 +5,7 @@ in the yaml and python files.
 """
 
 from importlib import import_module
+import os
 import re
 import types
 from typing import Any
@@ -13,7 +14,8 @@ from netmiko import ConnectHandler
 import pytest
 import yaml
 
-from simnos.core.nos import _find_device_classes, available_platforms
+from simnos.core.nos import _find_device_classes
+from simnos.core.platform_loader import load_platform_dir
 from simnos.plugins.nos import nos_plugins
 from tests._platform_quirks import SKIP_ENABLE, XFAIL_PY_ALL_COMMANDS
 from tests.utils import creds_from_host, get_host_commands, get_py_platforms, netmiko_device
@@ -23,6 +25,31 @@ def get_yaml_only_platforms() -> list[str]:
     """Return platforms that have YAML definitions but no Python module."""
     py_modules = set(get_py_platforms())
     return [p for p in sorted(nos_plugins) if p not in py_modules]
+
+
+def get_legacy_yaml_platforms() -> list[str]:
+    """Return platforms still authored as a legacy ``platforms_yaml/<p>.yaml``.
+
+    A3-migrated platforms (#264) have no legacy yaml — their on-disk format is
+    validated by the authoring schema + loader (and the oracle/encoding lint),
+    so the legacy-yaml format checks below skip them.
+    """
+    return sorted(p for p, sources in nos_plugins.items() if any(s.endswith(".yaml") for s in sources))
+
+
+def default_output_for(platform: str) -> str:
+    """Return a platform's `_default_` output text, legacy yaml or A3 form (#264).
+
+    The legacy yaml stored it inline; the A3 form keeps it in an adjacent file
+    (read via the loader). The trailing newline the A3 ``.txt`` carries is
+    stripped — wire comparisons use substring / are newline-insensitive.
+    """
+    legacy = f"simnos/plugins/nos/platforms_yaml/{platform}.yaml"
+    if os.path.isfile(legacy):
+        with open(legacy, encoding="utf-8") as file:
+            return yaml.safe_load(file)["commands"]["_default_"]["output"]
+    resolved = load_platform_dir(f"simnos/plugins/nos/platforms/{platform}")
+    return (resolved.commands["_default_"].output.text or "").rstrip("\n")
 
 
 def has_single_curly_brackets(text: Any, exceptions: list[str]) -> bool:
@@ -53,7 +80,7 @@ class TestPlatforms:
     and checks if they are correctly set
     """
 
-    @pytest.mark.parametrize("platform", available_platforms)
+    @pytest.mark.parametrize("platform", get_legacy_yaml_platforms())
     def test_platforms_yaml_has_correct_format(self, platform: str):
         """
         It checks if the platform yaml file can be opened correctly using
@@ -71,7 +98,7 @@ class TestPlatforms:
                     "auth",
                 ]
 
-    @pytest.mark.parametrize("platform", available_platforms)
+    @pytest.mark.parametrize("platform", get_legacy_yaml_platforms())
     def test_platforms_yaml_commands_has_correct_format(self, platform: str):
         """
         It checks if the platform has the commands correctly set.
@@ -243,13 +270,29 @@ class TestPlatforms:
         the vendor-signature literals are guarded separately by
         test_default_wording_keeps_vendor_signature.
         """
-        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
-            expected = yaml.safe_load(file)["commands"]["_default_"]["output"]
+        expected = default_output_for(platform)
         net = simnos_factory(platform)
         host = next(iter(net.hosts.values()))
         with ConnectHandler(**netmiko_device(platform, creds_from_host(host))) as conn:
             output = conn.send_command("simnos pin unknown command")
             assert expected in output
+
+    @pytest.mark.timeout(60)
+    def test_a3_raw_brace_fixture_reaches_wire_verbatim(self, simnos_factory):
+        """An A3 ``.txt`` with literal braces reaches the wire unmodified (#264 AC).
+
+        The legacy yaml had to escape braces for ``str.format`` (``{{...}}``);
+        the A3 form stores the raw NTC capture verbatim and renders nothing for
+        a literal output. cisco_ios ``show crypto ipsec sa detail`` carries
+        ``flags={origin_is_acl,}`` — a single-brace run that must survive the
+        round trip (no ``{{`` doubling, no collapsing) over a real SSH session.
+        """
+        net = simnos_factory("cisco_ios")
+        host = next(iter(net.hosts.values()))
+        with ConnectHandler(**netmiko_device("cisco_ios", creds_from_host(host))) as conn:
+            output = conn.send_command("show crypto ipsec sa detail")
+            assert "flags={origin_is_acl,}" in output
+            assert "in use settings ={Transport UDP-Encaps, }" in output
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_py_platforms())

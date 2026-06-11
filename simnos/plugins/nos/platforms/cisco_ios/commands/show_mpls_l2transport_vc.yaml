@@ -1,0 +1,7 @@
+command: show mpls l2transport vc
+type: simnos
+help: execute the command "show mpls l2transport vc"
+mode:
+- user
+- enable
+output: show_mpls_l2transport_vc.txt

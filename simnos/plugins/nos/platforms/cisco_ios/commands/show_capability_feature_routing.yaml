@@ -1,0 +1,7 @@
+command: show capability feature routing
+type: simnos
+help: execute the command "show capability feature routing"
+mode:
+- user
+- enable
+output: show_capability_feature_routing.txt

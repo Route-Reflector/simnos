@@ -1,0 +1,7 @@
+command: show dmvpn
+type: simnos
+help: execute the command "show dmvpn"
+mode:
+- user
+- enable
+output: show_dmvpn.txt

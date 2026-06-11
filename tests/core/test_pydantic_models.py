@@ -133,7 +133,9 @@ class TestModelPlatformMeta:
     """Structural validation for the A3 per-platform schema (#264 / D2)."""
 
     def test_minimal_platform(self):
-        model = ModelPlatformMeta(modes={"user": {"prompt": "{{ base_prompt }}>"}}, initial_mode="user")
+        # pydantic coerces the nested dict into ModelModeDef at runtime; ty only
+        # sees the dict literal, hence the ignore (same pattern as ModelNosCommand above).
+        model = ModelPlatformMeta(modes={"user": {"prompt": "{{ base_prompt }}>"}}, initial_mode="user")  # ty: ignore[invalid-argument-type]
         assert model.initial_mode == "user"
 
     def test_rejects_empty_modes(self):
@@ -142,4 +144,4 @@ class TestModelPlatformMeta:
 
     def test_rejects_initial_mode_not_in_modes(self):
         with pytest.raises(ValidationError, match="initial_mode"):
-            ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="enable")
+            ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="enable")  # ty: ignore[invalid-argument-type]

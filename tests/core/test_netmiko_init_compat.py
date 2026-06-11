@@ -114,6 +114,8 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
         return None
 
     nos = Nos(filename=nos_plugins[device_type])
+    if nos.resolved_platform is not None:
+        return _get_test_command_a3(nos)
     fallback = None
 
     for cmd_name, cmd_data in nos.commands.items():
@@ -142,6 +144,43 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
             return (cmd_name, output)
         if fallback is None:
             fallback = (cmd_name, output)
+
+    return fallback
+
+
+def _get_test_command_a3(nos: Nos) -> tuple[str, str] | None:
+    """Pick a testable command from an A3 platform's resolved commands (#264 / PR-2).
+
+    A3 platforms expose static commands as a `ResolvedPlatform`, not the legacy
+    `nos.commands` dict. We select a literal-output command valid in the initial
+    mode that the py module does NOT override (an override would serve a handler
+    / different body, not this literal). Returns the literal text, which the
+    caller compares to the wire output (the no-brace path makes the caller's
+    `.format(base_prompt=...)` a no-op).
+    """
+    platform = nos.resolved_platform
+    assert platform is not None  # caller guards this
+    py_overrides = set(nos.commands)  # a co-loaded py module wins over A3 statics
+    initial = platform.initial_mode
+    fallback = None
+
+    for cmd_name, rc in platform.commands.items():
+        if cmd_name.startswith("_") and cmd_name.endswith("_"):
+            continue
+        if cmd_name in ("enable", "exit", "quit", "logout", "ex"):
+            continue
+        if cmd_name in py_overrides or rc.new_mode or rc.exit:
+            continue
+        if rc.output.kind != "literal" or not rc.output.text or not rc.output.text.strip():
+            continue
+        # Valid in the initial mode? (empty mode set = valid in every mode.)
+        if rc.modes and initial not in rc.modes:
+            continue
+        text = rc.output.text
+        if "{" not in text:
+            return (cmd_name, text)
+        if fallback is None:
+            fallback = (cmd_name, text)
 
     return fallback
 

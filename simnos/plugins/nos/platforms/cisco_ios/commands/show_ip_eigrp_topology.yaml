@@ -1,0 +1,7 @@
+command: show ip eigrp topology
+type: simnos
+help: execute the command "show ip eigrp topology"
+mode:
+- user
+- enable
+output: show_ip_eigrp_topology.txt

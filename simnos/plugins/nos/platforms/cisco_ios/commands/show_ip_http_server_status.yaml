@@ -1,0 +1,7 @@
+command: show ip http server status
+type: simnos
+help: execute the command "show ip http server status"
+mode:
+- user
+- enable
+output: show_ip_http_server_status.txt

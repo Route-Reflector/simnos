@@ -1,0 +1,7 @@
+command: show controller t1
+type: simnos
+help: execute the command "show controller t1"
+mode:
+- user
+- enable
+output: show_controller_t1.txt

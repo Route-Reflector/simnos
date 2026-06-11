@@ -1,0 +1,7 @@
+command: show switch detail
+type: simnos
+help: execute the command "show switch detail"
+mode:
+- user
+- enable
+output: show_switch_detail.txt

@@ -1,0 +1,7 @@
+command: show ip flow toptalkers
+type: simnos
+help: execute the command "show ip flow toptalkers"
+mode:
+- user
+- enable
+output: show_ip_flow_toptalkers.txt

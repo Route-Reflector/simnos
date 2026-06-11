@@ -1,0 +1,7 @@
+command: traceroute
+type: simnos
+help: execute the command "traceroute"
+mode:
+- user
+- enable
+output: traceroute.txt

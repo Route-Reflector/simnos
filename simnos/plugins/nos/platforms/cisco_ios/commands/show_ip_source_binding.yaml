@@ -1,0 +1,7 @@
+command: show ip source binding
+type: simnos
+help: execute the command "show ip source binding"
+mode:
+- user
+- enable
+output: show_ip_source_binding.txt

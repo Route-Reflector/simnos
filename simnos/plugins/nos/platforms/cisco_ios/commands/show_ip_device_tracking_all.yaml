@@ -1,0 +1,7 @@
+command: show ip device tracking all
+type: simnos
+help: execute the command "show ip device tracking all"
+mode:
+- user
+- enable
+output: show_ip_device_tracking_all.txt

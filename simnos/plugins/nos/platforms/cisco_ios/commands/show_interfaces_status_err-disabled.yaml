@@ -1,0 +1,7 @@
+command: show interfaces status err-disabled
+type: simnos
+help: execute the command "show interfaces status err-disabled"
+mode:
+- user
+- enable
+output: show_interfaces_status_err-disabled.txt

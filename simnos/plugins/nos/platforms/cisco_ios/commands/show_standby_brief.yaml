@@ -1,0 +1,7 @@
+command: show standby brief
+type: simnos
+help: execute the command "show standby brief"
+mode:
+- user
+- enable
+output: show_standby_brief.txt

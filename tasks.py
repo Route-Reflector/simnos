@@ -159,6 +159,104 @@ def lint_platform_yaml(context):
     print("platform yaml lint OK")
 
 
+# --- A3 platform data lint (#264 / D8, D9) -----------------------------------
+
+PLATFORMS_A3_DIR = "simnos/plugins/nos/platforms"
+
+
+def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Lint the A3 platform data directories (#264 / D8, D9).
+
+    Rules:
+    1. encoding (D8): every output file (``.txt`` / ``.j2``) must decode as
+       UTF-8, contain no CR (LF-only), and end with a trailing newline. Trailing
+       whitespace is intentionally NOT checked (raw-capture fidelity).
+    2. orphan: an output file referenced by no command yaml is flagged
+       (1st round claude #6c).
+    3. shared reference: an output file referenced by more than one command yaml
+       is flagged — the 1-yaml:1-output principle (2nd round gemini #3).
+
+    Returns a list of human-readable violation strings (empty = clean). Filename
+    convention + ``type: ntc`` source-presence warnings are deferred (see the
+    PR-2 worklog Notes) — they are warning-tier polish, not gates.
+    """
+    violations: list[str] = []
+    if not os.path.isdir(platforms_dir):
+        return violations
+    for platform in sorted(os.listdir(platforms_dir)):
+        commands_dir = os.path.join(platforms_dir, platform, "commands")
+        if not os.path.isdir(commands_dir):
+            continue
+        referenced: dict[str, list[str]] = {}
+        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+            with open(command_yaml, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            for ref in _output_refs(data):
+                referenced.setdefault(ref, []).append(os.path.basename(command_yaml))
+
+        output_files = {
+            os.path.basename(p) for ext in ("*.txt", "*.j2") for p in glob.glob(os.path.join(commands_dir, ext))
+        }
+        for output_file in sorted(output_files):
+            rel = f"{platform}/commands/{output_file}"
+            violations.extend(_check_output_encoding(os.path.join(commands_dir, output_file), rel))
+            if output_file not in referenced:
+                violations.append(f"{rel}: orphan output file (referenced by no command yaml)")
+        for ref, sources in sorted(referenced.items()):
+            if len(sources) > 1:
+                violations.append(
+                    f"{platform}/commands/{ref}: referenced by {len(sources)} yamls {sources} (1 yaml : 1 output)"
+                )
+            if ref not in output_files:
+                violations.append(f"{platform}/commands/{ref}: referenced by {sources} but the file is missing")
+    return violations
+
+
+def _output_refs(command_data: dict) -> list[str]:
+    """Every output file a command yaml references (output / output_template / variants)."""
+    refs: list[str] = []
+    for key in ("output", "output_template"):
+        value = command_data.get(key)
+        if isinstance(value, str):
+            refs.append(value)
+    refs.extend(
+        variant["output"]
+        for variant in command_data.get("variants") or []
+        if isinstance(variant, dict) and isinstance(variant.get("output"), str)
+    )
+    return refs
+
+
+def _check_output_encoding(path: str, rel: str) -> list[str]:
+    """UTF-8 / LF-only / trailing-newline checks for one output file (D8)."""
+    violations: list[str] = []
+    raw = open(path, "rb").read()  # noqa: SIM115 — short-lived, byte-level read
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as e:
+        return [f"{rel}: not valid UTF-8 ({e})"]
+    if "\r" in text:
+        violations.append(f"{rel}: contains CR (output files must be LF-only)")
+    if raw and not text.endswith("\n"):
+        violations.append(f"{rel}: missing trailing newline")
+    return violations
+
+
+@task
+def lint_platform_data(context):
+    """Lint the A3 platform data directories (#264 / D8, D9).
+
+    Encoding (UTF-8 / LF / trailing newline), orphan output files, and shared
+    output references. See `check_platform_data` for the rules.
+    """
+    violations = check_platform_data()
+    for violation in violations:
+        print(violation)
+    if violations:
+        raise Exit(f"platform data lint failed with {len(violations)} violation(s)", code=1)
+    print("platform data lint OK")
+
+
 @task
 def ty(context, exit_zero=False):
     """Run ty type-checker (blocking since Phase 2, see #218).

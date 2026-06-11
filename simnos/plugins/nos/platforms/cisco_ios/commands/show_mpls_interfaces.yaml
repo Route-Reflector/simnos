@@ -1,0 +1,7 @@
+command: show mpls interfaces
+type: simnos
+help: execute the command "show mpls interfaces"
+mode:
+- user
+- enable
+output: show_mpls_interfaces.txt

@@ -1,0 +1,7 @@
+command: show archive
+type: simnos
+help: execute the command "show archive"
+mode:
+- user
+- enable
+output: show_archive.txt

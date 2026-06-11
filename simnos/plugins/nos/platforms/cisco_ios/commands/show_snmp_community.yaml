@@ -1,0 +1,7 @@
+command: show snmp community
+type: simnos
+help: execute the command "show snmp community"
+mode:
+- user
+- enable
+output: show_snmp_community.txt

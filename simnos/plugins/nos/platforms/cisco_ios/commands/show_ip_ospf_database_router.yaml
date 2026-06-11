@@ -1,0 +1,7 @@
+command: show ip ospf database router
+type: simnos
+help: execute the command "show ip ospf database router"
+mode:
+- user
+- enable
+output: show_ip_ospf_database_router.txt

@@ -1,0 +1,7 @@
+command: show crypto session detail
+type: simnos
+help: execute the command "show crypto session detail"
+mode:
+- user
+- enable
+output: show_crypto_session_detail.txt

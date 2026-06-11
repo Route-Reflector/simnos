@@ -1,0 +1,7 @@
+command: show ipv6 route
+type: simnos
+help: execute the command "show ipv6 route"
+mode:
+- user
+- enable
+output: show_ipv6_route.txt

@@ -1,0 +1,7 @@
+command: show endpoint-tracker tracker-group
+type: simnos
+help: execute the command "show endpoint-tracker tracker-group"
+mode:
+- user
+- enable
+output: show_endpoint-tracker_tracker-group.txt

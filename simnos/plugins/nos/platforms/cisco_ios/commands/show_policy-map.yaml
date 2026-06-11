@@ -1,0 +1,7 @@
+command: show policy-map
+type: simnos
+help: execute the command "show policy-map"
+mode:
+- user
+- enable
+output: show_policy-map.txt

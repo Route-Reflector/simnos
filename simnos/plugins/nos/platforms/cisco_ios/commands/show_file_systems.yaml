@@ -1,0 +1,7 @@
+command: show file systems
+type: simnos
+help: execute the command "show file systems"
+mode:
+- user
+- enable
+output: show_file_systems.txt

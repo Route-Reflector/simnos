@@ -1,0 +1,7 @@
+command: show hosts summary
+type: simnos
+help: execute the command "show hosts summary"
+mode:
+- user
+- enable
+output: show_hosts_summary.txt

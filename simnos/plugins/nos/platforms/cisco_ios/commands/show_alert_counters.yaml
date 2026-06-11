@@ -1,0 +1,7 @@
+command: show alert counters
+type: simnos
+help: execute the command "show alert counters"
+mode:
+- user
+- enable
+output: show_alert_counters.txt

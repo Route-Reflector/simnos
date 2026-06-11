@@ -1,0 +1,7 @@
+command: show sdwan omp peers
+type: simnos
+help: execute the command "show sdwan omp peers"
+mode:
+- user
+- enable
+output: show_sdwan_omp_peers.txt

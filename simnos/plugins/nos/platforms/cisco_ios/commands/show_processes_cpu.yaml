@@ -1,0 +1,7 @@
+command: show processes cpu
+type: simnos
+help: execute the command "show processes cpu"
+mode:
+- user
+- enable
+output: show_processes_cpu.txt

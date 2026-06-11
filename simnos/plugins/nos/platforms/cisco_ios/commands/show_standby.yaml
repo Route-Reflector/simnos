@@ -1,0 +1,7 @@
+command: show standby
+type: simnos
+help: execute the command "show standby"
+mode:
+- user
+- enable
+output: show_standby.txt

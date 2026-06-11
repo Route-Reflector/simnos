@@ -1,0 +1,7 @@
+command: show vtp status
+type: simnos
+help: execute the command "show vtp status"
+mode:
+- user
+- enable
+output: show_vtp_status.txt

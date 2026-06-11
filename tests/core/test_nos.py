@@ -5,6 +5,7 @@ This module can be found at simnos/core/nos.py
 
 import copy
 import logging
+import os
 
 from pydantic import ValidationError
 import pytest
@@ -696,20 +697,29 @@ def test_yaml_file_command_is_overwritten_by_corresponding_module():
     assert len(combined_dict) == len(nos_combined.commands)
 
 
+def _is_data_source(path: str) -> bool:
+    """A registry's data source is a legacy ``.yaml`` or an A3 platform dir (#264 / D6)."""
+    return path.endswith(".yaml") or os.path.isdir(path)
+
+
 def test_yaml_file_command_is_overwritten_by_corresponding_module_in_init():
     """
     Test that when a command in a platform is defined
-    both in YAML and Python module, the Python module
+    both in YAML/A3 dir and a Python module, the Python module
     is the one being used in the init.
+
+    The data source is either a legacy ``platforms_yaml/<p>.yaml`` or an A3
+    ``platforms/<p>/`` directory; in both cases a co-named py module is appended
+    last so it wins (#264 / D6 precedence).
     """
     # pylint: disable=duplicate-code
     for filenames in nos_plugins.values():
         for filename in filenames:
             assert isinstance(filename, str)
-            assert filename.endswith((".yaml", ".py"))
+            assert _is_data_source(filename) or filename.endswith(".py")
         assert len(filenames) <= 2
         if len(filenames) == 2:
-            assert filenames[0].endswith(".yaml")
+            assert _is_data_source(filenames[0])
             assert filenames[1].endswith(".py")
 
 

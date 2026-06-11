@@ -1,0 +1,7 @@
+command: show boot
+type: simnos
+help: execute the command "show boot"
+mode:
+- user
+- enable
+output: show_boot.txt

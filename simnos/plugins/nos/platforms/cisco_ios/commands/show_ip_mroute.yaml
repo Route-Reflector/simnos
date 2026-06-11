@@ -1,0 +1,7 @@
+command: show ip mroute
+type: simnos
+help: execute the command "show ip mroute"
+mode:
+- user
+- enable
+output: show_ip_mroute.txt

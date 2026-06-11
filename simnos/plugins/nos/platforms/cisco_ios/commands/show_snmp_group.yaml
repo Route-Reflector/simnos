@@ -1,0 +1,7 @@
+command: show snmp group
+type: simnos
+help: execute the command "show snmp group"
+mode:
+- user
+- enable
+output: show_snmp_group.txt

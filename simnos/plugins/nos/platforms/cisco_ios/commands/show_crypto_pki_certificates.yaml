@@ -1,0 +1,7 @@
+command: show crypto pki certificates
+type: simnos
+help: execute the command "show crypto pki certificates"
+mode:
+- user
+- enable
+output: show_crypto_pki_certificates.txt
