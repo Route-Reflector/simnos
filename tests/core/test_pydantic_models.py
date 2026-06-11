@@ -125,10 +125,12 @@ class TestModelCommandAuthoring:
 
     def test_rejects_duplicate_variant_names(self):
         with pytest.raises(ValidationError, match="duplicate name"):
+            # pydantic coerces the dicts into ModelCommandVariant at runtime; ty
+            # only sees the dict literals (same pattern as the modes dict above).
             ModelCommandAuthoring(
                 command="x",
                 type="ntc",
-                variants=[{"name": "default", "output": "a.txt"}, {"name": "default", "output": "b.txt"}],
+                variants=[{"name": "default", "output": "a.txt"}, {"name": "default", "output": "b.txt"}],  # ty: ignore[invalid-argument-type]
             )
 
     def test_allows_default_without_mode(self):

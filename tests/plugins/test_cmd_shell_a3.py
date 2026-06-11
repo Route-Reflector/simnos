@@ -74,6 +74,7 @@ class TestNosFromPlatformDir:
         # schema field (#264 / claude #2).
         nos = Nos(filename=str(_a3_platform(tmp_path, auth="none")))
         assert nos.auth == "none"
+        assert nos.resolved_platform is not None
         assert nos.resolved_platform.auth == "none"
 
     def test_auth_defaults_none(self, tmp_path):

@@ -142,10 +142,11 @@ class ModelCommandAuthoring(BaseModel):
 
     One file = one command; `command` is the SSoT key (Decision 1), the
     filename is non-semantic. Exactly one output channel may be set
-    (`output` / `output_template` / `variants`); all absent = no output. An
-    `alias` is a pure reference: it may carry only `command` + `help`
-    (Decision 6). `_default_` is the unconditional fallback, so authoring a
-    `mode` / `new_mode` on it is rejected (dead data — Decision 7).
+    (`output` / `output_template` / `variants`, and `variants` may not be the
+    empty list); all absent = no output. An `alias` is a pure reference: it may
+    carry only `command` + `help` (Decision 6). `_default_` is the unconditional
+    fallback, so authoring a `mode` / `new_mode` / `alias` on it is rejected — it
+    must stay mode-agnostic and must not inherit a target's modes (Decision 7).
     """
 
     model_config = ConfigDict(extra="forbid")
