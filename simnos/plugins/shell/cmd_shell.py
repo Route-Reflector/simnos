@@ -9,7 +9,7 @@ import os
 import traceback
 from typing import cast
 
-from simnos.core.command_adapter import adapt_legacy_commands
+from simnos.core.command_adapter import adapt_commands, adapt_legacy_commands, reverse_map_from_modes
 from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
 from simnos.core.resolved_command import ResolvedCommand, ResolvedPlatform
@@ -81,23 +81,37 @@ class CMDShell(Cmd):
     def _rebuild(self) -> None:
         """Merge the command inflows and normalize them to `ResolvedCommand`.
 
-        The shell consumes one representation regardless of authoring form: the
-        merged dict (BASIC < NOS data < inventory, later inflows winning, same
-        precedence as before) is run through the legacy adapter. Atomic: if the
-        adapter raises (malformed data), self.* keep their prior values, so a
-        broken hot reload leaves the running session intact (#264 / D5, D6).
+        The shell consumes one representation regardless of authoring form. Two
+        inflow shapes are merged under the same precedence (BASIC < NOS < inventory,
+        later inflows winning, as before):
+
+        - **legacy NOS** (`self.nos.resolved_platform is None`): the merged dict
+          (BASIC + NOS commands + inventory, all legacy form) is run through the
+          legacy adapter, which synthesizes the modes from the 3 scalar prompts.
+        - **A3 NOS** (`self.nos.resolved_platform` set): modes come from the A3
+          platform; its resolved static commands sit between the still-legacy
+          BASIC (below) and the legacy py-module/inventory inflows (above, which
+          keep the py-override precedence). The legacy inflows are normalized
+          with the A3 platform's prompt->mode reverse map.
+
+        Atomic: if normalization raises (malformed data), self.* keep their prior
+        values, so a broken hot reload leaves the running session intact
+        (#264 / D5, D6).
         """
-        merged = {
-            **copy.deepcopy(BASIC_COMMANDS),
-            **copy.deepcopy(self.nos.commands or {}),
-            **copy.deepcopy(self._inventory_commands),
-        }
-        platform: ResolvedPlatform = adapt_legacy_commands(
-            self.nos.initial_prompt,
-            self.nos.enable_prompt,
-            self.nos.config_prompt,
-            merged,
-        )
+        if self.nos.resolved_platform is not None:
+            platform = self._rebuild_a3(self.nos.resolved_platform)
+        else:
+            merged = {
+                **copy.deepcopy(BASIC_COMMANDS),
+                **copy.deepcopy(self.nos.commands or {}),
+                **copy.deepcopy(self._inventory_commands),
+            }
+            platform = adapt_legacy_commands(
+                self.nos.initial_prompt,
+                self.nos.enable_prompt,
+                self.nos.config_prompt,
+                merged,
+            )
         self.platform = platform
         self.commands = platform.commands
         # Keep the user's current mode across a hot reload when it still exists;
@@ -106,6 +120,28 @@ class CMDShell(Cmd):
         if getattr(self, "current_mode", None) not in platform.modes:
             self.current_mode = platform.initial_mode
         self.prompt = platform.modes[self.current_mode].render_prompt(self.base_prompt)
+
+    def _rebuild_a3(self, a3: ResolvedPlatform) -> ResolvedPlatform:
+        """Merge BASIC + py-module + inventory inflows over an A3 platform (#264 / D6).
+
+        Modes come from the A3 platform. The still-legacy inflows are normalized
+        with the A3 platform's prompt->mode reverse map and layered under/over the
+        A3 static commands to keep the legacy precedence (BASIC < A3 static <
+        py module < inventory). A py module loaded after the A3 dir populated
+        ``self.nos.commands`` with its dynamic handlers — those override the A3
+        statics, as the legacy py-override did.
+
+        Inventory/py aliases are resolved within their own inflow only; an alias
+        crossing inflows (e.g. inventory aliasing an A3 command) is out of scope
+        until the inventory rework (#266) — shipped data has no such aliases.
+        """
+        reverse_map = reverse_map_from_modes(a3.modes)
+        commands: dict = {}
+        commands.update(adapt_commands(copy.deepcopy(BASIC_COMMANDS), reverse_map))
+        commands.update(a3.commands)
+        commands.update(adapt_commands(copy.deepcopy(self.nos.commands or {}), reverse_map))
+        commands.update(adapt_commands(copy.deepcopy(self._inventory_commands), reverse_map))
+        return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands)
 
     def start(self):
         """Method to start the shell"""

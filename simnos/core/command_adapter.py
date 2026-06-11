@@ -45,34 +45,19 @@ INITIAL_MODE = "user"
 _REVERSE_SENTINEL = "\x00simnos-base-prompt\x00"
 
 
-def synthesize_modes(
-    initial_prompt: str,
-    enable_prompt: str | None,
-    config_prompt: str | None,
-) -> tuple[dict[str, ModeDef], str, dict[str, str]]:
-    """Build the mode map + initial mode + prompt->mode reverse lookup.
+def reverse_map_from_modes(modes: dict[str, ModeDef]) -> dict[str, str]:
+    """Build a rendered-prompt -> mode-name reverse lookup from mode defs.
 
-    Returns ``(modes, initial_mode, reverse_map)`` where `reverse_map` keys
-    are rendered prompt strings (at the internal sentinel base prompt) and
-    values are mode names. Two modes rendering to the same prompt string is
-    an ambiguity the reverse lookup cannot resolve -> raises (measured 0
-    occurrences in shipped data, guarded for future/external data).
+    Keys are each mode prompt rendered at the internal sentinel base prompt;
+    values are mode names. Two modes rendering to the same prompt string is an
+    ambiguity the reverse lookup cannot resolve -> raises (measured 0 in
+    shipped data, guarded for future/external data). Shared by `synthesize_modes`
+    (legacy 3-prompt inflow) and the shell's A3 path, where the modes come from
+    a `ResolvedPlatform` but inventory/BASIC commands still arrive in legacy form
+    and need the same prompt->mode reverse lookup (#264 / D6).
     """
-    # v2's three prompt templates map to the canonical modes, in shell order.
-    sources: tuple[tuple[str, str | None], ...] = (
-        ("user", initial_prompt),
-        ("enable", enable_prompt),
-        ("config", config_prompt),
-    )
-    modes: dict[str, ModeDef] = {}
     reverse_map: dict[str, str] = {}
-    for mode_name, source in sources:
-        if source is None:
-            continue
-        jinja_source, _ = format_template_to_jinja(source)
-        template, _ = compile_template(jinja_source)
-        mode = ModeDef(name=mode_name, prompt_template=template)
-        modes[mode_name] = mode
+    for mode_name, mode in modes.items():
         rendered = mode.render_prompt(_REVERSE_SENTINEL)
         if rendered in reverse_map:
             raise ValueError(
@@ -80,7 +65,33 @@ def synthesize_modes(
                 f"{mode_name!r} both render to {rendered!r}; cannot reverse-map command prompts"
             )
         reverse_map[rendered] = mode_name
-    return modes, INITIAL_MODE, reverse_map
+    return reverse_map
+
+
+def synthesize_modes(
+    initial_prompt: str,
+    enable_prompt: str | None,
+    config_prompt: str | None,
+) -> tuple[dict[str, ModeDef], str, dict[str, str]]:
+    """Build the mode map + initial mode + prompt->mode reverse lookup.
+
+    Returns ``(modes, initial_mode, reverse_map)``. v2 declares three prompt
+    templates; they map to the canonical modes ``user`` / ``enable`` / ``config``
+    in shell order. Undefined enable/config prompts produce no such mode.
+    """
+    sources: tuple[tuple[str, str | None], ...] = (
+        ("user", initial_prompt),
+        ("enable", enable_prompt),
+        ("config", config_prompt),
+    )
+    modes: dict[str, ModeDef] = {}
+    for mode_name, source in sources:
+        if source is None:
+            continue
+        jinja_source, _ = format_template_to_jinja(source)
+        template, _ = compile_template(jinja_source)
+        modes[mode_name] = ModeDef(name=mode_name, prompt_template=template)
+    return modes, INITIAL_MODE, reverse_map_from_modes(modes)
 
 
 def _prompt_list(prompt) -> list[str]:
