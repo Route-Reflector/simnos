@@ -12,6 +12,14 @@ import pytest
 from simnos.core.platform_loader import load_platform_dir
 
 
+@pytest.fixture(autouse=True)
+def _clear_loader_cache():
+    """Isolate the module-level load_platform_dir cache between tests."""
+    load_platform_dir.cache_clear()
+    yield
+    load_platform_dir.cache_clear()
+
+
 def _write(path, content):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(content, encoding="utf-8")
@@ -209,3 +217,19 @@ class TestLoadRejections:
         _write(root / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n')
         with pytest.raises(ValueError, match="commands directory not found"):
             load_platform_dir(str(root))
+
+
+class TestLoadCache:
+    def test_repeated_load_returns_cached_object(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
+        first = load_platform_dir(str(root))
+        second = load_platform_dir(str(root))
+        assert first is second  # shared parse, not re-read
+
+    def test_cache_clear_forces_reparse(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
+        first = load_platform_dir(str(root))
+        load_platform_dir.cache_clear()
+        assert load_platform_dir(str(root)) is not first

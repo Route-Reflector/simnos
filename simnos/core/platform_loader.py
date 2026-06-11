@@ -16,6 +16,7 @@ boundary just above.
 """
 
 from dataclasses import replace
+import functools
 import glob
 import os
 
@@ -36,8 +37,19 @@ PLATFORM_META_FILENAME = "platform.yaml"
 COMMANDS_SUBDIR = "commands"
 
 
+@functools.cache
 def load_platform_dir(path: str) -> ResolvedPlatform:
     """Load an A3 platform directory into a `ResolvedPlatform`.
+
+    Cached by `path` (#264 / D6): the result is immutable and
+    ``configuration_file``-independent (per-host state lives on the `BaseDevice`,
+    built separately), so every host / replica of a platform shares one parse
+    instead of re-reading platform.yaml + the command files on each
+    ``Host.start()``. Consumers MUST treat the result read-only (the shell
+    layers it into a fresh dict, never mutating it). The hot-reload path calls
+    `load_platform_dir.cache_clear()` so a changed file is re-read; an unbounded
+    `functools.cache` is fine at ~50 platforms (an LRU bound is a future option
+    if platform count grows — D6).
 
     :param path: directory holding ``platform.yaml`` and ``commands/``
     :raises ValueError: on any schema, reference, or render violation — the

@@ -12,6 +12,7 @@ from typing import cast
 from simnos.core.command_adapter import adapt_commands, adapt_legacy_commands, reverse_map_from_modes
 from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
+from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import ResolvedCommand, ResolvedPlatform
 from simnos.plugins import nos
 from simnos.plugins.shell.utils import get_files_changed
@@ -186,7 +187,12 @@ class CMDShell(Cmd):
         mutated nos state and roll it back on failure to keep the per-file
         contract; `_rebuild` itself is atomic, so live `self.commands` is never
         touched by a failed reload (2nd round codex #1).
+
+        The A3 platform parse is cached by `load_platform_dir`; drop that cache
+        first so a reload re-reads the changed files instead of the stale parse
+        (#264 / D6 cache bypass). No-op for legacy yaml/py reloads.
         """
+        load_platform_dir.cache_clear()
         for file in changed_files:
             snapshot_commands = dict(self.nos.commands)
             snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
