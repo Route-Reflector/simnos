@@ -48,8 +48,13 @@ def default_output_for(platform: str) -> str:
     if os.path.isfile(legacy):
         with open(legacy, encoding="utf-8") as file:
             return yaml.safe_load(file)["commands"]["_default_"]["output"]
-    resolved = load_platform_dir(f"simnos/plugins/nos/platforms/{platform}")
-    return (resolved.commands["_default_"].output.text or "").rstrip("\n")
+    default_output = load_platform_dir(f"simnos/plugins/nos/platforms/{platform}").commands["_default_"].output
+    # A non-literal `_default_` (output_template / no output) would make the
+    # caller's `expected in output` vacuously pass on ""; the schema allows it,
+    # so fail loudly instead of silently asserting nothing (2nd round claude #8).
+    if default_output.kind != "literal" or not default_output.text:
+        raise AssertionError(f"{platform}: _default_ has no literal output to pin (kind={default_output.kind})")
+    return default_output.text.rstrip("\n")
 
 
 def has_single_curly_brackets(text: Any, exceptions: list[str]) -> bool:

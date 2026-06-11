@@ -80,6 +80,12 @@ class TestNosFromPlatformDir:
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         assert nos.auth is None
 
+    def test_shell_merged_platform_carries_auth(self, tmp_path):
+        # The merged ResolvedPlatform the shell builds must mirror the A3 auth,
+        # not silently drop it (2nd round codex/claude #3).
+        shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path, auth="none"))))
+        assert shell.platform.auth == "none"
+
 
 class TestShellA3Path:
     def test_modes_and_prompt_from_a3(self, tmp_path):

@@ -436,12 +436,15 @@ def platform_display_name(platform: str) -> str:
 def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "mkdocs.yml") -> None:
     """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
 
-    The caller passes the same yaml-derived platform list the docs pages
-    are generated from, so every nav entry has a backing page. This is
-    intentional: a hypothetical yaml-less py-only platform has no docs page
-    to link, so it must not get a nav entry here — the registry-truth pin
-    (`test_available_platforms_match_mkdocs_nav`) failing is the designed
-    loud signal to decide how to document such a platform.
+    The caller passes the platform list the docs pages are generated from. For
+    the legacy yaml platforms every nav entry has a backing page. A3-migrated
+    platforms (#264) are also included to keep their existing page in the nav
+    until docs generation moves to the ResolvedCommand path (PR-3); an
+    "A3-born" platform with no pre-existing page would get a nav entry without a
+    backing page until then — a known PR-3 follow-up (2nd round claude #5b).
+    A yaml-less, A3-less py-only platform still gets no nav entry — the
+    registry-truth pin (`test_available_platforms_match_mkdocs_nav`) failing is
+    the designed loud signal to decide how to document such a platform.
     Closes the M-1 failure mode (#239): a new platform used to need a manual
     nav entry, and a forgotten one silently produced a docs page unreachable
     from the site nav. The section is replaced as a text block (instead of a
@@ -536,7 +539,10 @@ def gen_docs_platform_commands(ctx):
                     platforms_file.write(f"- {rendered}\n")
                 platforms_file.write("\n")
 
-    all_platforms = sorted(platforms + a3_platforms)
+    # dedupe: during the PR-3 migration window both forms can briefly coexist
+    # (the converter does not delete the legacy yaml), which would otherwise put
+    # a platform in the nav twice (2nd round claude #5b).
+    all_platforms = sorted(set(platforms) | set(a3_platforms))
     for orphan in sweep_orphaned_platform_docs(docs_folder, all_platforms):
         print(f"Removed orphaned doc: {orphan}")
 

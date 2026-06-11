@@ -141,7 +141,10 @@ class CMDShell(Cmd):
         commands.update(a3.commands)
         commands.update(adapt_commands(copy.deepcopy(self.nos.commands or {}), reverse_map))
         commands.update(adapt_commands(copy.deepcopy(self._inventory_commands), reverse_map))
-        return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands)
+        # Carry `auth` so the merged platform mirrors the A3 source — auth is
+        # consumed via `nos.auth`, but dropping it here would re-introduce the
+        # silent-dead-end asymmetry the auth wiring fixed (2nd round codex/claude #3).
+        return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands, auth=a3.auth)
 
     def start(self):
         """Method to start the shell"""

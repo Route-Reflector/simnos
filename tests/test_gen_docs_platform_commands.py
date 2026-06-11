@@ -29,7 +29,13 @@ import os
 import pytest
 import yaml
 
-from tasks import platform_display_name, render_template, rewrite_mkdocs_platforms_nav, sweep_orphaned_platform_docs
+from tasks import (
+    _a3_platform_names,
+    platform_display_name,
+    render_template,
+    rewrite_mkdocs_platforms_nav,
+    sweep_orphaned_platform_docs,
+)
 
 PLATFORMS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
 
@@ -251,6 +257,22 @@ class TestSweepOrphanedPlatformDocs:
         assert (tmp_path / "keep_me.md").exists()
         assert not (tmp_path / "index.md").exists()
 
+    def test_a3_platform_doc_is_preserved(self, tmp_path):
+        """An A3-migrated platform (no legacy yaml) must not be swept (#264 / claude #4).
+
+        gen_docs feeds `sweep` the union of legacy + A3 platform names; this pins
+        that an A3 platform listed there keeps its existing page even though gen
+        does not (yet) regenerate it.
+        """
+        self._write(tmp_path / "cisco_ios.md")  # A3-migrated, no legacy yaml
+        self._write(tmp_path / "orphan.md")
+        removed = sweep_orphaned_platform_docs(
+            str(tmp_path),
+            valid_platforms={"cisco_ios"},
+        )
+        assert removed == ["orphan.md"]
+        assert (tmp_path / "cisco_ios.md").exists()
+
     def test_ignores_non_markdown_files(self, tmp_path):
         """Non-`.md` siblings (images, indexes etc.) must not be touched."""
         self._write(tmp_path / "diagram.png", "binary")
@@ -286,6 +308,20 @@ class TestSweepOrphanedPlatformDocs:
         )
 
         assert removed == ["aaa.md", "mmm.md", "zzz.md"]
+
+
+class TestA3PlatformNames:
+    """`_a3_platform_names` discovers A3 platform dirs (those with platform.yaml)."""
+
+    def test_finds_dirs_with_platform_yaml(self, tmp_path):
+        (tmp_path / "cisco_ios").mkdir()
+        (tmp_path / "cisco_ios" / "platform.yaml").write_text("modes: {}\n", encoding="utf-8")
+        (tmp_path / "not_a_platform").mkdir()  # no platform.yaml
+        (tmp_path / "stray.txt").write_text("x", encoding="utf-8")
+        assert _a3_platform_names(str(tmp_path)) == ["cisco_ios"]
+
+    def test_absent_dir_is_empty(self, tmp_path):
+        assert _a3_platform_names(str(tmp_path / "nonexistent")) == []
 
 
 class TestPlatformDisplayName:
