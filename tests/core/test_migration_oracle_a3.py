@@ -32,11 +32,10 @@ import os
 
 import pytest
 
+from a3_paths import PLATFORMS_DIR as A3_ROOT
 from a3_paths import SNAPSHOT_DIR, list_a3_platform_names
 from simnos.core.platform_loader import load_platform_dir
 from tests.core.oracle_projection import project_resolved
-
-A3_ROOT = "simnos/plugins/nos/platforms"
 
 _snapshots = sorted(os.path.basename(p)[: -len(".json")] for p in glob.glob(os.path.join(SNAPSHOT_DIR, "*.json")))
 

@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, Mock, patch
 import pytest
 import yaml
 
+from a3_paths import PLATFORMS_DIR
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS, default_inventory, simnos
@@ -619,18 +620,22 @@ class TestPlatformsManifest:
         assert "base_template" not in nos_plugins
 
     def test_available_platforms_have_data_source(self):
-        """Pin that every supported platform has a backing A3 data source.
+        """Pin that every supported platform has a backing data source.
 
         Catches "dangling key" drift: if a data source is deleted in a future
         PR but `available_platforms` is not updated (e.g. via a stale registry
-        cache), this test fails. The data source is the A3 ``platforms/<p>/``
-        directory (#264 / D6); a py module, if any, lives alongside it.
+        cache), this test fails. A platform's data source is its A3
+        ``platforms/<p>/`` directory and/or a ``platforms_py/<p>.py`` module —
+        the same and/or the registry permits (#264 / D6), so the pin matches
+        `test_registry_data_source_is_a3_dir_and_or_py_module`.
         """
-        a3_dir = "simnos/plugins/nos/platforms"
+        py_dir = "simnos/plugins/nos/platforms_py"
         for platform_name in available_platforms:
-            a3_path = f"{a3_dir}/{platform_name}/platform.yaml"
-            assert os.path.isfile(a3_path), (
-                f"Platform '{platform_name}' is in available_platforms but has no A3 data source ({a3_path})"
+            a3_path = f"{PLATFORMS_DIR}/{platform_name}/platform.yaml"
+            py_path = f"{py_dir}/{platform_name}.py"
+            assert os.path.isfile(a3_path) or os.path.isfile(py_path), (
+                f"Platform '{platform_name}' is in available_platforms but has no data source "
+                f"(neither {a3_path} nor {py_path})"
             )
 
     def test_simnos_decorator_rejects_unknown_platform(self):
