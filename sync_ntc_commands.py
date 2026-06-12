@@ -28,7 +28,7 @@ import sys
 import yaml
 
 from a3_paths import PLATFORMS_DIR as SIMNOS_A3_DIR
-from a3_paths import list_a3_platform_names, unique_command_stem
+from a3_paths import ensure_trailing_newline, list_a3_platform_names, unique_command_stem
 from simnos.core.platform_loader import load_platform_dir
 
 NTC_REPO_URL = "https://github.com/networktocode/ntc-templates"
@@ -219,18 +219,6 @@ def compute_diff(
     }
 
 
-def _ensure_trailing_newline(text: str) -> str:
-    """LF + a single trailing newline; empty stays a 0-byte file (D7/D8).
-
-    Mirrors ``migrate_platform_yaml._ensure_trailing_newline`` so re-synced
-    output is byte-identical to a migrated literal.
-    """
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if text and not text.endswith("\n"):
-        text += "\n"
-    return text
-
-
 def _ntc_source(raw_path: str, ntc_commit: str) -> dict:
     """The A3 ``source`` block for an NTC-derived command (provenance)."""
     rel = raw_path
@@ -283,15 +271,15 @@ def write_diff_files(
         variants = cmd_data.get("output_variants") or []
         if variants:
             variant_entries = [{"name": "variant_1", "output": f"{stem}__variant_1.txt"}]
-            _write(os.path.join(commands_dir, f"{stem}__variant_1.txt"), _ensure_trailing_newline(cmd_data["output"]))
+            _write(os.path.join(commands_dir, f"{stem}__variant_1.txt"), ensure_trailing_newline(cmd_data["output"]))
             for i, variant_output in enumerate(variants):
                 vstem = f"{stem}__variant_{i + 2}"
-                _write(os.path.join(commands_dir, f"{vstem}.txt"), _ensure_trailing_newline(variant_output))
+                _write(os.path.join(commands_dir, f"{vstem}.txt"), ensure_trailing_newline(variant_output))
                 variant_entries.append({"name": f"variant_{i + 2}", "output": f"{vstem}.txt"})
             mapping["variants"] = variant_entries
         else:
             mapping["output"] = f"{stem}.txt"
-            _write(os.path.join(commands_dir, f"{stem}.txt"), _ensure_trailing_newline(cmd_data["output"]))
+            _write(os.path.join(commands_dir, f"{stem}.txt"), ensure_trailing_newline(cmd_data["output"]))
         _write(
             os.path.join(commands_dir, f"{stem}.yaml"),
             yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True, default_flow_style=False),
@@ -405,4 +393,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

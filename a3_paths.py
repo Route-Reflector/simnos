@@ -52,3 +52,20 @@ def unique_command_stem(command: str, used: set[str]) -> str:
         counter += 1
     used.add(candidate)
     return candidate
+
+
+def ensure_trailing_newline(text: str) -> str:
+    """LF + a single trailing newline for an A3 output file (D7 / D8).
+
+    Wire-equivalent under ``splitlines()``. Empty output (legacy ``output: ''`` /
+    an empty ``output_variant``) stays a 0-byte file: a forced ``\\n`` would
+    round-trip to ``['']`` under splitlines where the empty literal projects to
+    ``[]`` — a phantom blank line the variant-body oracle catches (fortinet /
+    oneaccess_oneos). The encoding lint's trailing-newline rule already exempts
+    empty files (``raw and ...``). Shared by the migrate converter and the NTC
+    sync tool so a re-synced literal is byte-identical to a migrated one.
+    """
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if text and not text.endswith("\n"):
+        text += "\n"
+    return text

@@ -39,7 +39,7 @@ import sys
 import yaml
 
 from a3_paths import PLATFORMS_DIR as A3_ROOT
-from a3_paths import SNAPSHOT_DIR, unique_command_stem
+from a3_paths import SNAPSHOT_DIR, ensure_trailing_newline, unique_command_stem
 from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import format_template_to_jinja
@@ -48,21 +48,6 @@ LEGACY_DIR = "simnos/plugins/nos/platforms_yaml"
 
 # Legacy scalar prompt -> canonical mode name (#264 / M2).
 PROMPT_FIELD_TO_MODE = (("initial_prompt", "user"), ("enable_prompt", "enable"), ("config_prompt", "config"))
-
-
-def _ensure_trailing_newline(text: str) -> str:
-    """LF + a single trailing newline (D7). Wire-equivalent under splitlines().
-
-    Empty output (legacy ``output: ''`` / an empty ``output_variant``) stays a
-    0-byte file: a forced ``\\n`` would round-trip to ``['']`` under splitlines
-    where the legacy empty literal projects to ``[]`` — a phantom blank line the
-    variant-body oracle catches (fortinet / oneaccess_oneos). The lint's
-    trailing-newline rule already exempts empty files (`raw and ...`).
-    """
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if text and not text.endswith("\n"):
-        text += "\n"
-    return text
 
 
 def _build_prompt_to_mode(legacy: dict) -> dict[str, str]:
@@ -113,10 +98,10 @@ def _convert_output(value, stem: str, commands_dir: str) -> dict:
     jinja_source, has_field = format_template_to_jinja(value)
     if not has_field:
         # No render: `str.format` collapses `{{`->`{` — the literal wire text.
-        _write(os.path.join(commands_dir, f"{stem}.txt"), _ensure_trailing_newline(value.format()))
+        _write(os.path.join(commands_dir, f"{stem}.txt"), ensure_trailing_newline(value.format()))
         return {"output": f"{stem}.txt"}
     # `{base_prompt}` present -> a jinja template file.
-    _write(os.path.join(commands_dir, f"{stem}.j2"), _ensure_trailing_newline(jinja_source))
+    _write(os.path.join(commands_dir, f"{stem}.j2"), ensure_trailing_newline(jinja_source))
     return {"output_template": f"{stem}.j2"}
 
 
@@ -139,7 +124,7 @@ def _convert_command(name: str, entry: dict, stem: str, commands_dir: str, promp
         variant_files = []
         for i, variant in enumerate(variants):
             vstem = f"{stem}__variant_{i + 2}"
-            _write(os.path.join(commands_dir, f"{vstem}.txt"), _ensure_trailing_newline(variant.format()))
+            _write(os.path.join(commands_dir, f"{vstem}.txt"), ensure_trailing_newline(variant.format()))
             variant_files.append({"name": f"variant_{i + 2}", "output": f"{vstem}.txt"})
         primary = _convert_output(entry.get("output"), f"{stem}__variant_1", commands_dir)
         out["variants"] = [{"name": "variant_1", **primary}, *variant_files]
