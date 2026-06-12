@@ -179,6 +179,21 @@ class ShellUtilsTest(TestCase):
         self.assertFalse(targets)
 
 
+def test_get_files_under_directory_filters_extensions(tmp_path):
+    """Watched extensions are included and everything else is excluded (#274 / D2).
+
+    Pinned against a tmp tree because the real `plugins/nos` tree contains no
+    non-watched files, making an `all(endswith(...))` over it vacuously true for
+    exclusion. `.bak` exclusion is load-bearing: the hot-reload integration test
+    (`HotReloadTest._atomic_write`) parks backup copies on `.bak` precisely so a
+    mid-write file is never visible to a reload watcher (#232).
+    """
+    for name in ("keep.py", "keep.j2", "keep.yaml", "keep.txt", "skip.bak", "skip.md", "__init__.py"):
+        (tmp_path / name).write_text("x", encoding="utf-8")
+    files = {os.path.basename(f) for f in get_files_under_directory(str(tmp_path))}
+    assert files == {"keep.py", "keep.j2", "keep.yaml", "keep.txt"}
+
+
 # --- resolve_reload_targets (#274 / D1) --------------------------------------
 #
 # `resolve_reload_targets` maps changed files to the reload units `from_file`
@@ -242,21 +257,6 @@ def test_resolve_targets_legacy_jinja_templates(tmp_path):
     root = _make_nos_tree(tmp_path)
     j2 = str(root / "platforms_py" / "templates" / "cisco_ios" / "show_run.j2")
     assert resolve_reload_targets([j2], str(root)) == [str(root / "platforms_py" / "cisco_ios.py")]
-
-
-def test_get_files_under_directory_filters_extensions(tmp_path):
-    """Watched extensions are included and everything else is excluded (#274 / D2).
-
-    Pinned against a tmp tree because the real `plugins/nos` tree contains no
-    non-watched files, making an `all(endswith(...))` over it vacuously true for
-    exclusion. `.bak` exclusion is load-bearing: the hot-reload integration test
-    (`HotReloadTest._atomic_write`) parks backup copies on `.bak` precisely so a
-    mid-write file is never visible to a reload watcher (#232).
-    """
-    for name in ("keep.py", "keep.j2", "keep.yaml", "keep.txt", "skip.bak", "skip.md", "__init__.py"):
-        (tmp_path / name).write_text("x", encoding="utf-8")
-    files = {os.path.basename(f) for f in get_files_under_directory(str(tmp_path))}
-    assert files == {"keep.py", "keep.j2", "keep.yaml", "keep.txt"}
 
 
 def test_resolve_targets_drops_non_plugin_and_stray(tmp_path):
