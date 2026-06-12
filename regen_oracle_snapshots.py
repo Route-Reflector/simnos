@@ -4,8 +4,8 @@
 The committed oracle (b) gate (``tests/core/test_migration_oracle_a3.py``)
 compares the A3 loader projection of each platform against a frozen
 ``tests/assets/oracle/<platform>.json``. The original snapshots were frozen by
-``migrate_platform_yaml.py`` from the *legacy adapter* and proved the migration
-was v2-equivalent (sealed in PR-3's green CI).
+the one-shot ``migrate_platform_yaml.py`` (since removed) from the *legacy
+adapter* and proved the migration was v2-equivalent (sealed in PR-3's green CI).
 
 After migration the regen path is from the A3 loader itself: an **intentional**
 edit to an A3 platform's commands changes the projection and fails the gate, so
@@ -27,7 +27,7 @@ import os
 import sys
 
 from a3_paths import PLATFORMS_DIR as A3_ROOT
-from a3_paths import SNAPSHOT_DIR, list_a3_platform_names
+from a3_paths import SNAPSHOT_DIR, list_a3_platform_names, write_text_file
 from simnos.core.platform_loader import load_platform_dir
 from tests.core.oracle_projection import project_resolved
 
@@ -38,9 +38,7 @@ def regen(platform: str) -> None:
         raise SystemExit(f"{platform}: not an A3 platform dir ({platform_dir})")
     projection = project_resolved(load_platform_dir(platform_dir).commands)
     snapshot_path = os.path.join(SNAPSHOT_DIR, f"{platform}.json")
-    os.makedirs(SNAPSHOT_DIR, exist_ok=True)
-    with open(snapshot_path, "w", encoding="utf-8") as fh:
-        fh.write(json.dumps(projection, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+    write_text_file(snapshot_path, json.dumps(projection, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
     print(f"re-baselined {platform}: {len(projection)} commands -> {snapshot_path}")
 
 

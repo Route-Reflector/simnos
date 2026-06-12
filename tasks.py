@@ -49,6 +49,22 @@ def bandit(context):
 # --- A3 platform data lint (#264 / D8, D9) -----------------------------------
 
 
+def _iter_platform_command_dirs(platforms_dir: str):
+    """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
+
+    The single walk both lint passes (`check_platform_data` /
+    `check_platform_data_warnings`) share — an absent platforms dir or a platform
+    without a ``commands/`` subdir is skipped, so callers loop over real targets
+    only.
+    """
+    if not os.path.isdir(platforms_dir):
+        return
+    for platform in sorted(os.listdir(platforms_dir)):
+        commands_dir = os.path.join(platforms_dir, platform, "commands")
+        if os.path.isdir(commands_dir):
+            yield platform, commands_dir
+
+
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     """Lint the A3 platform data directories (#264 / D8, D9).
 
@@ -72,12 +88,7 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     in `check_platform_data_warnings` (printed by the task, never gating).
     """
     violations: list[str] = []
-    if not os.path.isdir(platforms_dir):
-        return violations
-    for platform in sorted(os.listdir(platforms_dir)):
-        commands_dir = os.path.join(platforms_dir, platform, "commands")
-        if not os.path.isdir(commands_dir):
-            continue
+    for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
         violations.extend(
             f"{platform}/commands/{os.path.basename(stray)}: uses .yml; the loader only globs .yaml"
             for stray in sorted(glob.glob(os.path.join(commands_dir, "*.yml")))
@@ -122,12 +133,7 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
     Returns a list of human-readable warnings (empty = clean).
     """
     warnings: list[str] = []
-    if not os.path.isdir(platforms_dir):
-        return warnings
-    for platform in sorted(os.listdir(platforms_dir)):
-        commands_dir = os.path.join(platforms_dir, platform, "commands")
-        if not os.path.isdir(commands_dir):
-            continue
+    for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
         for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
             stem = os.path.basename(command_yaml).removesuffix(".yaml")
             with open(command_yaml, encoding="utf-8") as f:

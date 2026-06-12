@@ -1,10 +1,13 @@
 """Shared, JSON-friendly projection for the A3 migration oracle (#264 / Decision 3).
 
-Both the conversion script (``migrate_platform_yaml.py``, which freezes the
-legacy adapter projection into ``tests/assets/oracle/<platform>.json``) and the
+Both the snapshot re-baseliner (``regen_oracle_snapshots.py``, which freezes the
+A3 loader projection into ``tests/assets/oracle/<platform>.json``) and the
 committed oracle (b) test (``test_migration_oracle_a3.py``, which compares the
 A3 loader projection against that snapshot) project ``ResolvedCommand`` objects
 through this one function, so the snapshot and the test can never drift apart.
+(The original snapshots were frozen from the legacy adapter by the one-shot
+``migrate_platform_yaml.py``, removed once every platform was migrated — git
+history + design D7 hold the conversion record.)
 
 The projection captures the client-observable behavior: rendered output as
 ``splitlines()`` (wire-equivalent — ``writeline`` absorbs trailing newlines),

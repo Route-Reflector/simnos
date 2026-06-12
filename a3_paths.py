@@ -1,9 +1,9 @@
 """Shared A3 platform-data path + filename helpers (#264 / D1).
 
 A repo-root module (stdlib only — ``os`` / ``re``) so the invoke tasks
-(``tasks.py``) and the dev scripts (``migrate_platform_yaml.py`` /
-``sync_ntc_commands.py`` / ``regen_oracle_snapshots.py``) share one definition
-without any of them paying the cost of importing the ``simnos`` package. The
+(``tasks.py``) and the dev scripts (``sync_ntc_commands.py`` /
+``regen_oracle_snapshots.py``) share one definition without any of them paying
+the cost of importing the ``simnos`` package. The
 ``command`` field inside each command yaml is the SSoT; filenames are
 non-semantic, so the stem helpers drive conventions (lint warning / generated
 filenames), not load behavior.
@@ -52,6 +52,20 @@ def unique_command_stem(command: str, used: set[str]) -> str:
         counter += 1
     used.add(candidate)
     return candidate
+
+
+def write_text_file(path: str, content: str) -> None:
+    """Write UTF-8 ``content`` to ``path``, creating parent dirs as needed.
+
+    The one file-write primitive the dev scripts (migrate / sync / regen) share,
+    so an A3 output / candidate / snapshot file is written the same way
+    everywhere (parents created, UTF-8, no implicit newline — callers pass
+    :func:`ensure_trailing_newline` output when the trailing-newline convention
+    applies).
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
 
 
 def ensure_trailing_newline(text: str) -> str:
