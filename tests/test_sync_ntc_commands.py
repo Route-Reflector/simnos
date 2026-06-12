@@ -103,6 +103,22 @@ class TestWriteDiffFiles:
         assert all("/" not in f and "|" not in f for f in files)
         assert "get_system_status_grep_version.yaml" in files
 
+    def test_rerun_clears_stale_candidates(self, tmp_path):
+        """A re-run drops candidates from a command NTC no longer reports (#264)."""
+        write_diff_files(str(tmp_path), "cisco_ios", self._new_commands(), "abc123", [])
+        # second run for a different command set must not leave show_version.* behind
+        other = {
+            "show clock": {
+                "output": "12:00\n",
+                "output_variants": [],
+                "raw_path": "ntc-templates/tests/cisco_ios/show_clock/show_clock.raw",
+                "raw_path_variants": [],
+            }
+        }
+        write_diff_files(str(tmp_path), "cisco_ios", other, "abc123", [])
+        files = set(os.listdir(tmp_path / "cisco_ios" / "commands"))
+        assert files == {"show_clock.yaml", "show_clock.txt"}
+
 
 class TestSelectPrimaryRaw:
     def test_canonical_exact_match(self):

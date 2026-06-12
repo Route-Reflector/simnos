@@ -21,6 +21,12 @@ Mechanical conversions (D3 / D7):
   not recorded in the legacy data; ``source`` is backfilled by NTC re-sync).
 
 Run from the repo root:  ``python migrate_platform_yaml.py cisco_ios``
+
+Spent after PR-3 (1st round gemini #6): the legacy ``platforms_yaml/`` it reads
+was deleted once every platform was migrated, so this is no longer runnable —
+kept as the executable record of how the one-shot conversion was done (#264 /
+D7). To re-baseline an oracle snapshot after an *intentional* A3 edit, use
+``regen_oracle_snapshots.py`` (projects the A3 loader), not this script.
 """
 
 from __future__ import annotations

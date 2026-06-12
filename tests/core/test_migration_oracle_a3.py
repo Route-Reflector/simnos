@@ -8,8 +8,22 @@ asserts it equals the frozen snapshot — so the migrated data + loader reproduc
 the v2-equivalent behavior even after the legacy yaml is deleted (the "input not
 in the gate's final tree" problem, 2nd round claude #3, solved by snapshotting).
 
-One-shot gate group: removable once the A3 migration completes (PR-3), together
-with the snapshots and the legacy adapter.
+Frozen-input nuance (1st round claude #4): the snapshot was frozen from the
+*raw* legacy yaml ``commands`` dict, while the deleted b' gate validated
+``adapter == v2`` over the BASIC-merged + Nos-normalized dict. The difference is
+harmless on shipped data — the adapter reads prompt/output strings directly and
+the only BASIC-merge-sensitive construct (an alias shadowing a BASIC command)
+does not survive conversion (the migrate smoke loud-fails on a projection
+divergence), so no such alias exists in the frozen platforms.
+
+Snapshot lifecycle after migration (1st round claude #2 / codex — keep, don't
+delete): this gate keeps earning its keep — variant-body freezing caught a real
+empty-output bug during PR-3. The full-set equality means an *intentional* A3
+edit fails it; re-baseline the affected platform with
+``python regen_oracle_snapshots.py <platform>`` and review the snapshot diff as a
+golden file. Regen projects the A3 loader (not the deleted legacy adapter), which
+is correct for an ongoing edit baseline (a human reviews the diff) but no longer
+proves v2-equivalence — that proof is sealed in this PR's green CI.
 """
 
 import glob

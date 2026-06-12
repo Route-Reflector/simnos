@@ -134,11 +134,18 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
       pre-#264, the old yaml statics). Bucketed by prompt-string equality.
     - **A3 static commands** (`nos.resolved_platform`): every migrated platform's
       command data. Bucketed by the command's resolved `modes` (empty = all
-      modes, reachable from the initial mode).
+      modes, reachable from the initial mode). Aliases are already resolved into
+      their target's dispatch fields by the loader, so they sweep as ordinary
+      commands here (no alias concept survives in `ResolvedCommand`).
 
-    Transition / exit / alias commands are skipped in both (they change the
-    prompt or close the session, so a flat sweep cannot run them safely). A name
-    defined by both inflows (py overriding an A3 static) is de-duplicated.
+    Transition (`new_mode` / `new_prompt`) and exit commands are skipped in both
+    (they change the prompt or close the session, so a flat sweep cannot run them
+    safely); legacy aliases are skipped on the dict side. A name defined by both
+    inflows (py overriding an A3 static) is de-duplicated.
+
+    The A3 sweep buckets only the canonical user/enable/config modes; a command
+    valid in any other mode is asserted-out loudly rather than silently dropped
+    from the sweep (the PR-2 "sweep silently shrank" regression, 1st round claude #5).
     """
     initial_commands, enable_commands, config_commands = [], [], []
     nos = host.nos
@@ -173,6 +180,11 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
             # Empty `modes` = valid in every mode (legacy prompt-omission
             # successor); a flat sweep reaches it from the initial mode.
             modes = rc.modes or {resolved.initial_mode}
+            unknown = modes - buckets.keys()
+            assert not unknown, (
+                f"{nos.name}: command {command!r} is valid in non-canonical mode(s) {sorted(unknown)} "
+                f"outside the netmiko sweep buckets {sorted(buckets)}; extend get_host_commands"
+            )
             for mode_name, bucket in buckets.items():
                 if mode_name in modes and command not in bucket:
                     bucket.append(command)

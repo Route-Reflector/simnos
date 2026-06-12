@@ -154,7 +154,9 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
             command = data.get("command")
             if isinstance(command, str):
                 base = _command_stem(command)
-                if stem != base and not stem.startswith(f"{base}__"):
+                # Accept the exact stem or the deterministic ``__<n>`` collision
+                # suffix the migrate / sync tools append (not an arbitrary ``__x``).
+                if stem != base and not re.fullmatch(rf"{re.escape(base)}__\d+", stem):
                     warnings.append(
                         f"{platform}/commands/{stem}.yaml: filename does not match command {command!r} "
                         f"(expected stem {base!r})"

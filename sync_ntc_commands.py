@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import os
 import re
+import shutil
 import subprocess
 import sys
 
@@ -277,8 +278,19 @@ def write_diff_files(
     ``<stem>.txt`` capture file(s). The layout mirrors a real A3 platform dir so
     the files can be reviewed and copied straight under
     ``simnos/plugins/nos/platforms/<platform>/`` (#264 / D9).
+
+    Note: ``platform.yaml`` is NOT generated — for an existing platform it lives
+    in the real tree; for a brand-new platform the maintainer authors it by hand
+    (the modes/auth are not derivable from NTC fixtures). ``main`` prints this
+    for ``[NEW PLATFORM]`` rows (1st round codex #3).
+
+    The platform's commands dir is cleared first so a re-run after an NTC update
+    leaves no stale candidate from a command that NTC dropped / renamed
+    (1st round claude #6a).
     """
     commands_dir = os.path.join(output_dir, platform, "commands")
+    if os.path.isdir(commands_dir):
+        shutil.rmtree(commands_dir)
     os.makedirs(commands_dir, exist_ok=True)
 
     used_stems: set[str] = set()
@@ -386,7 +398,7 @@ def main() -> None:
             modes,
         )
 
-        marker = " [NEW PLATFORM]" if is_new_platform else ""
+        marker = " [NEW PLATFORM — author platform.yaml by hand]" if is_new_platform else ""
         print(f"  {platform}: {len(new_commands)} new commands → {output_path}{marker}")
         total_new += len(new_commands)
         platforms_with_diff += 1
