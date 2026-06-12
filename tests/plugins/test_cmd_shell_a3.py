@@ -4,13 +4,23 @@ PR-1 covered the legacy adapter end of `_rebuild`; these pin the new A3 branch:
 `Nos._from_platform_dir` loads a platform dir into `resolved_platform`, and the
 shell merges the still-legacy inflows (BASIC, py-module commands, inventory)
 over the A3 statics with the right precedence and the A3 modes.
+
+`TestA3HotReload` pins the #274 dev hot-reload path on top: watcher rollup to a
+platform-dir target, the ownership filter, the `resolved_platform` rollback,
+and the mode-degrade contract — all against tmp platforms (the real tree is
+never mutated, so no xdist serialization is needed).
 """
 
+import os
 import threading
+import time
+from types import SimpleNamespace
 
 import pytest
 
 from simnos.core.nos import Nos
+from simnos.plugins.shell import cmd_shell as cmd_shell_module
+from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.cmd_shell import CMDShell, build_resolved_platform
 
 
@@ -168,3 +178,152 @@ class TestShellA3Path:
             shell._rebuild()
         assert shell.commands is good_commands  # unchanged reference
         assert shell.prompt == good_prompt
+
+
+def _touch_future(path):
+    """Bump a file's mtime past the watcher's snapshot (defeats coarse mtime ties)."""
+    future = time.time() + 10
+    os.utime(path, (future, future))
+
+
+class TestA3HotReload:
+    """Dev hot-reload over A3 platforms (#274).
+
+    Covers the four designed behaviors: an A3 edit propagating through the real
+    `precmd` watch path (D1/D2), the post-commit `_rebuild` failure rolling back
+    `resolved_platform` (D3), the ownership filter with its build-time anchor
+    (D6), and the current-mode degrade on a reload that dropped the mode.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _reset_watcher(self):
+        # The watcher snapshot is module-global; reset around each test so a
+        # prior test's (or the real tree's) snapshot never leaks phantom
+        # changes/deletions into these tmp-root polls (#274 / D7).
+        shell_utils._files_lasttime_changed_old.clear()
+        shell_utils._watch_root = None
+        yield
+        shell_utils._files_lasttime_changed_old.clear()
+        shell_utils._watch_root = None
+
+    def test_a3_edit_propagates_via_precmd(self, tmp_path, monkeypatch):
+        """E2E: editing an A3 output file reaches the session through `precmd`.
+
+        Drives the real watch path (seed poll -> edit -> second poll), with the
+        watch root swapped to the tmp tree by replacing the `nos` module binding
+        in cmd_shell (safer than mutating the live package's `__path__`).
+        """
+        watch_root = tmp_path / "nos"
+        platform_dir = _a3_platform(watch_root / "platforms")
+        shell = _shell_for(Nos(filename=str(platform_dir)))
+        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
+        monkeypatch.setattr(cmd_shell_module, "nos", SimpleNamespace(__path__=[str(watch_root)]))
+        shell.precmd("show clock")  # first poll: seed only
+        target_txt = platform_dir / "commands" / "show_version.txt"
+        _write(target_txt, "Cisco IOS Software, Version 16.0\n")
+        _touch_future(target_txt)
+        shell.precmd("show clock")  # second poll: detects the edit, reloads the dir
+        assert shell.commands["show version"].output.render("R1") == "Cisco IOS Software, Version 16.0\n"
+
+    def test_a3_new_command_file_appears_via_precmd(self, tmp_path, monkeypatch):
+        """E2E: a brand-new command yaml surfaces its command on the next poll.
+
+        Complements the edit test above: this drives the *new-file* detection
+        (`get_new_files`, key diff — no mtime involved) through rollup and
+        reload, a chain no other test exercises (1st code review claude #3).
+        """
+        watch_root = tmp_path / "nos"
+        platform_dir = _a3_platform(watch_root / "platforms")
+        shell = _shell_for(Nos(filename=str(platform_dir)))
+        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
+        monkeypatch.setattr(cmd_shell_module, "nos", SimpleNamespace(__path__=[str(watch_root)]))
+        shell.precmd("show clock")  # first poll: seed only
+        assert "show clock" not in shell.commands
+        _write(
+            platform_dir / "commands" / "show_clock.yaml",
+            "command: show clock\ntype: simnos\nmode: [user]\noutput: show_clock.txt\n",
+        )
+        _write(platform_dir / "commands" / "show_clock.txt", "12:00:00 UTC\n")
+        shell.precmd("show clock")  # second poll: new files detected, dir reloaded
+        assert shell.commands["show clock"].output.render("R1") == "12:00:00 UTC\n"
+
+    def test_post_commit_rebuild_failure_rolls_back_resolved_platform(self, tmp_path, caplog):
+        """A reload that loads but fails `_rebuild` restores `resolved_platform` (D3).
+
+        The broken-yaml case fails *before* `_from_platform_dir` assigns, so it
+        cannot pin the D3 attr; this is the post-commit path — the platform
+        loses a mode that a legacy inflow's prompt still maps to, so `from_file`
+        succeeds and `_rebuild`'s `adapt_commands` raises. Without
+        `resolved_platform` in `_NOS_RELOAD_ATTRS` the modeless platform would
+        survive the rollback and poison every later rebuild.
+        """
+        platform_dir = _a3_platform(tmp_path)
+        inventory = {"commands": {"conf cmd": {"output": "X", "prompt": "{base_prompt}(config)#"}}}
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = _shell_for(nos_obj, inventory_config=inventory)
+        old_platform = nos_obj.resolved_platform
+        old_commands = shell.commands
+        # Drop the config mode: load still succeeds (no A3 command references
+        # it), but the inventory prompt above no longer reverse-maps.
+        _write(
+            platform_dir / "platform.yaml",
+            'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\n'
+            '  enable:\n    prompt: "{{ base_prompt }}#"\n'
+            "initial_mode: user\n",
+        )
+        with caplog.at_level("ERROR", logger="simnos.plugins.shell.cmd_shell"):
+            shell.reload_commands([str(platform_dir)])
+        assert len(caplog.records) == 1
+        assert nos_obj.resolved_platform is old_platform  # rolled back, not the modeless parse
+        assert shell.commands is old_commands  # live session untouched
+
+    def test_foreign_platform_dir_is_skipped(self, tmp_path):
+        """The ownership filter keeps a sibling platform's reload out (D6)."""
+        watch_root = tmp_path / "nos"
+        own_dir = _a3_platform(watch_root / "platforms")
+        foreign_dir = watch_root / "platforms" / "arista_eos"
+        _write(foreign_dir / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}%"\ninitial_mode: user\n')
+        _write(foreign_dir / "commands" / "default.yaml", "command: _default_\ntype: simnos\n")
+        nos_obj = Nos(filename=str(own_dir))
+        shell = _shell_for(nos_obj)
+        old_platform = nos_obj.resolved_platform
+        shell.reload_commands([str(foreign_dir)])
+        assert nos_obj.name == "cisco_ios"  # not hijacked
+        assert nos_obj.resolved_platform is old_platform
+
+    def test_ownership_anchor_survives_live_name_overwrite(self, tmp_path):
+        """The filter compares against the build-time anchor, not live `nos.name` (D6).
+
+        A foreign py reload can overwrite live `nos.name` (its commit phase sets
+        the module's NAME); if the filter read `nos.name` it would then skip
+        this session's own platform forever. The captured `_platform_name` is
+        immune to that overwrite.
+        """
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = _shell_for(nos_obj)
+        nos_obj.name = "arista_eos"  # simulate the foreign-py NAME overwrite
+        _write(platform_dir / "commands" / "show_version.txt", "Reloaded fine\n")
+        shell.reload_commands([str(platform_dir)])
+        assert shell.commands["show version"].output.render("R1") == "Reloaded fine\n"  # not skipped
+
+    def test_removed_mode_degrades_to_initial(self, tmp_path):
+        """A reload that drops the current mode resets the session to initial_mode."""
+        platform_dir = _a3_platform(tmp_path)
+        shell = _shell_for(Nos(filename=str(platform_dir)))
+        shell.default("enable")
+        assert shell.current_mode == "enable"
+        # Rewrite the platform as user-only (and retarget/remove the commands
+        # that referenced the enable mode, so the reload itself succeeds).
+        _write(
+            platform_dir / "platform.yaml",
+            'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n',
+        )
+        (platform_dir / "commands" / "enable.yaml").unlink()
+        _write(
+            platform_dir / "commands" / "show_version.yaml",
+            "command: show version\ntype: ntc\nmode: [user]\noutput: show_version.txt\n",
+        )
+        shell.reload_commands([str(platform_dir)])
+        assert shell.current_mode == "user"
+        assert shell.prompt == "R1>"
