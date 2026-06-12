@@ -5,14 +5,12 @@ in the yaml and python files.
 """
 
 from importlib import import_module
-import os
 import re
 import types
 from typing import Any
 
 from netmiko import ConnectHandler
 import pytest
-import yaml
 
 from simnos.core.nos import _find_device_classes
 from simnos.core.platform_loader import load_platform_dir
@@ -21,33 +19,23 @@ from tests._platform_quirks import SKIP_ENABLE, XFAIL_PY_ALL_COMMANDS
 from tests.utils import creds_from_host, get_host_commands, get_py_platforms, netmiko_device
 
 
-def get_yaml_only_platforms() -> list[str]:
-    """Return platforms that have YAML definitions but no Python module."""
+def get_non_py_platforms() -> list[str]:
+    """Return platforms with A3 static data but no Python module (sorted).
+
+    Their netmiko command sweep is driven entirely by the A3 statics (#264); the
+    py-backed platforms are swept by ``test_platforms_py_all_commands_are_running``.
+    """
     py_modules = set(get_py_platforms())
     return [p for p in sorted(nos_plugins) if p not in py_modules]
 
 
-def get_legacy_yaml_platforms() -> list[str]:
-    """Return platforms still authored as a legacy ``platforms_yaml/<p>.yaml``.
-
-    A3-migrated platforms (#264) have no legacy yaml — their on-disk format is
-    validated by the authoring schema + loader (and the oracle/encoding lint),
-    so the legacy-yaml format checks below skip them.
-    """
-    return sorted(p for p, sources in nos_plugins.items() if any(s.endswith(".yaml") for s in sources))
-
-
 def default_output_for(platform: str) -> str:
-    """Return a platform's `_default_` output text, legacy yaml or A3 form (#264).
+    """Return a platform's A3 `_default_` literal output text (#264).
 
-    The legacy yaml stored it inline; the A3 form keeps it in an adjacent file
-    (read via the loader). The trailing newline the A3 ``.txt`` carries is
-    stripped — wire comparisons use substring / are newline-insensitive.
+    The A3 form keeps it in an adjacent file, read via the loader. The trailing
+    newline the ``.txt`` carries is stripped — wire comparisons use substring /
+    are newline-insensitive.
     """
-    legacy = f"simnos/plugins/nos/platforms_yaml/{platform}.yaml"
-    if os.path.isfile(legacy):
-        with open(legacy, encoding="utf-8") as file:
-            return yaml.safe_load(file)["commands"]["_default_"]["output"]
     default_output = load_platform_dir(f"simnos/plugins/nos/platforms/{platform}").commands["_default_"].output
     # A non-literal `_default_` (output_template / no output) would make the
     # caller's `expected in output` vacuously pass on ""; the schema allows it,
@@ -84,57 +72,6 @@ class TestPlatforms:
     This class tests all the platforms that are supported by SimNOS
     and checks if they are correctly set
     """
-
-    @pytest.mark.parametrize("platform", get_legacy_yaml_platforms())
-    def test_platforms_yaml_has_correct_format(self, platform: str):
-        """
-        It checks if the platform yaml file can be opened correctly using
-        the yaml library.
-        """
-        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
-            data: dict = yaml.safe_load(file)
-            for key in data:
-                assert key in [
-                    "name",
-                    "initial_prompt",
-                    "enable_prompt",
-                    "config_prompt",
-                    "commands",
-                    "auth",
-                ]
-
-    @pytest.mark.parametrize("platform", get_legacy_yaml_platforms())
-    def test_platforms_yaml_commands_has_correct_format(self, platform: str):
-        """
-        It checks if the platform has the commands correctly set.
-        At least all the commands need to have the following with any conflict:
-        - output
-        - help
-        - prompt (except `_default_`, see below)
-        """
-        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
-            exceptions: list[str] = [data["initial_prompt"]]
-            if "enable_prompt" in data:
-                exceptions.append(data["enable_prompt"])
-            if "config_prompt" in data:
-                exceptions.append(data["config_prompt"])
-            for command, values in data["commands"].items():
-                assert "output" in values or "exit" in values
-                if "output" in values:
-                    assert not has_single_curly_brackets(values["output"], exceptions)
-                assert "help" in values
-                assert not has_single_curly_brackets(values["help"], exceptions)
-                # `_default_` is the unknown-command fallback: the shell
-                # answers with its output regardless of the current prompt
-                # (mismatch path), so a `prompt` key is meaningless there —
-                # BASIC_COMMANDS' own `_default_` carries none either. The
-                # #244 / D6 wording entries are authored minimal (no prompt);
-                # pre-#244 entries that still carry one stay valid.
-                if command != "_default_":
-                    assert "prompt" in values
-                if "prompt" in values:
-                    assert not has_single_curly_brackets(values["prompt"], exceptions)
 
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_has_correct_format(self, platform: str):
@@ -195,11 +132,11 @@ class TestPlatforms:
             assert "prompt" in value
 
     @pytest.mark.timeout(600)
-    @pytest.mark.parametrize("platform", get_yaml_only_platforms())
-    def test_platforms_yaml_all_commands_are_running(self, platform: str, simnos_factory):
+    @pytest.mark.parametrize("platform", get_non_py_platforms())
+    def test_platform_static_commands_are_running(self, platform: str, simnos_factory):
         """
-        Test that all YAML-only platform commands can
-        run without any error via netmiko.
+        Test that all A3 static commands of a py-less platform can
+        run without any error via netmiko (#264).
         """
         net = simnos_factory(platform)
         host = next(iter(net.hosts.values()))
@@ -222,14 +159,14 @@ class TestPlatforms:
                     assert isinstance(output, str)
 
     # Vendor-signature literal pins (#244 / D6): the wire test below reads
-    # its expectation from the yaml (SSoT), so it confirms the plumbing but
+    # its expectation from the A3 data (SSoT), so it confirms the plumbing but
     # NOT that the wording itself stays vendor-accurate — a regression that
-    # also rewrites the yaml would pass it (cross-review 🦊#5). These
+    # also rewrites the output file would pass it (cross-review 🦊#5). These
     # literals guard the distinctive signatures that are easy to drift back
     # to a Cisco-style copy: "command" vs "input" (NX-OS), the `%%` double
     # percent (EXOS), the `"^"` double-quoted caret (Force10), the two-line
     # IronWare block (Brocade) and the multi-line listing (D-Link flat CLI).
-    # An intentional wording change updates both this map and the yaml.
+    # An intentional wording change updates both this map and the A3 output file.
     _VENDOR_SIGNATURE_DEFAULTS = {
         "cisco_nxos": "% Invalid command at '^' marker.",
         "extreme_exos": "%% Invalid input detected at '^' marker.",
@@ -251,13 +188,11 @@ class TestPlatforms:
         """The `_default_` output keeps its distinctive vendor signature (#244 / D6).
 
         Literal guard against drifting a vendor-specific message back to a
-        generic Cisco-style one — the wire test reads from the yaml so it
+        generic Cisco-style one — the wire test reads from the A3 data so it
         cannot catch that (cross-review 🦊#5). A deliberate wording change
-        must update both this expectation and the yaml.
+        must update both this expectation and the A3 ``_default_`` output file.
         """
-        with open(f"simnos/plugins/nos/platforms_yaml/{platform}.yaml", encoding="utf-8") as file:
-            actual = yaml.safe_load(file)["commands"]["_default_"]["output"]
-        assert actual == self._VENDOR_SIGNATURE_DEFAULTS[platform]
+        assert default_output_for(platform) == self._VENDOR_SIGNATURE_DEFAULTS[platform]
 
     @pytest.mark.timeout(300)
     # cisco_ios: single Cisco-style line / juniper_junos: lowercase + trailing
@@ -265,15 +200,14 @@ class TestPlatforms:
     # caret (the one wire pin that exercises a backslash-escaped scalar over
     # the SSH channel, cross-review 🐙#5).
     @pytest.mark.parametrize("platform", ["cisco_ios", "juniper_junos", "brocade_netiron", "dell_force10"])
-    def test_platforms_yaml_default_wording_reaches_the_wire(self, platform: str, simnos_factory):
-        """The yaml-authored `_default_` answers an unknown command verbatim (#244 / D6).
+    def test_platform_default_wording_reaches_the_wire(self, platform: str, simnos_factory):
+        """The A3 `_default_` answers an unknown command verbatim (#244 / D6, #264).
 
-        Pins the wording PR end to end over a real netmiko session, one
-        platform per output shape (see the parametrize comment). The
-        expected text is read from the platform yaml itself (SSoT) so the
-        pin survives future wording refinements without duplicating data;
-        the vendor-signature literals are guarded separately by
-        test_default_wording_keeps_vendor_signature.
+        Pins the wording end to end over a real netmiko session, one platform
+        per output shape (see the parametrize comment). The expected text is
+        read from the A3 ``_default_`` output file (SSoT) so the pin survives
+        future wording refinements without duplicating data; the vendor-signature
+        literals are guarded separately by test_default_wording_keeps_vendor_signature.
         """
         expected = default_output_for(platform)
         net = simnos_factory(platform)

@@ -125,9 +125,20 @@ def get_py_platforms() -> list[str]:
 
 
 def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
-    """
-    Get the commands of the host.
-    It gets the initial, enable and config commands.
+    """Collect a host's per-mode runnable commands for a netmiko sweep.
+
+    Returns ``(initial, enable, config)`` command-name lists. Two inflows are
+    merged so the sweep stays comprehensive after the A3 migration (#264):
+
+    - **legacy dict commands** (`nos.commands`): py-module dynamic handlers (and,
+      pre-#264, the old yaml statics). Bucketed by prompt-string equality.
+    - **A3 static commands** (`nos.resolved_platform`): every migrated platform's
+      command data. Bucketed by the command's resolved `modes` (empty = all
+      modes, reachable from the initial mode).
+
+    Transition / exit / alias commands are skipped in both (they change the
+    prompt or close the session, so a flat sweep cannot run them safely). A name
+    defined by both inflows (py overriding an A3 static) is de-duplicated.
     """
     initial_commands, enable_commands, config_commands = [], [], []
     nos = host.nos
@@ -150,6 +161,21 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
                 enable_commands.append(command)
             elif nos.config_prompt and prompt == nos.config_prompt:
                 config_commands.append(command)
+
+    resolved = nos.resolved_platform
+    if resolved is not None:
+        buckets = {"user": initial_commands, "enable": enable_commands, "config": config_commands}
+        for command, rc in resolved.commands.items():
+            if command.startswith("_") and command.endswith("_"):
+                continue
+            if rc.new_mode or rc.exit or command in {"exit", "quit", "logout"}:
+                continue
+            # Empty `modes` = valid in every mode (legacy prompt-omission
+            # successor); a flat sweep reaches it from the initial mode.
+            modes = rc.modes or {resolved.initial_mode}
+            for mode_name, bucket in buckets.items():
+                if mode_name in modes and command not in bucket:
+                    bucket.append(command)
     return initial_commands, enable_commands, config_commands
 
 

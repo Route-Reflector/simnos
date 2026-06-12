@@ -219,22 +219,17 @@ def test_from_dict_unknown_top_level_key_raises():
     assert nos.name == "SimNOS"
 
 
-def test_from_file_schema_invalid_yaml_leaves_nos_untouched(tmp_path):
-    """A schema-invalid yaml raises ValidationError before any commit.
+def test_from_dict_schema_invalid_leaves_nos_untouched():
+    """A schema-invalid dict raises ValidationError before any commit.
 
-    Pins the D8 (#244) merged-view validation on the `from_file` path:
-    hot reload (`reload_commands`) calls `from_file` directly and never
-    reaches `__init__`'s trailing `validate()`, so a yaml with e.g. an
-    int `output` used to be committed silently into a running shell.
+    Pins the D8 (#244) merged-view validation on the `from_dict` path
+    (inventory commands + the constructor): a command with e.g. an int
+    `output` must raise before `name` / `commands` are committed, so
+    malformed data never leaves partial state behind.
     """
-    bad_yaml = _write_tmp_file(
-        tmp_path,
-        "schema_invalid_nos.yaml",
-        "name: polluted\ncommands:\n  cmd:\n    output: 123\n    help: int output\n",
-    )
     nos = Nos()
     with pytest.raises(ValidationError, match=r"output"):
-        nos.from_file(bad_yaml)
+        nos.from_dict({"name": "polluted", "commands": {"cmd": {"output": 123, "help": "int output"}}})
     assert nos.name == "SimNOS"
     assert nos.commands == {}
 
@@ -339,52 +334,20 @@ def test_from_module_normalizes_str_prompt_to_list(tmp_path):
     assert nos.commands["cmd"]["prompt"] == ["{base_prompt}>"]
 
 
-def test_from_yaml_file(commands):
+@pytest.mark.parametrize("ext", [".yaml", ".yml"])
+def test_from_file_rejects_legacy_yaml(ext):
+    """The legacy monolithic ``.yaml/.yml`` platform form was removed in v3 (#264).
+
+    ``from_file`` now loads only A3 platform dirs and ``.py`` modules; a
+    standalone yaml file is rejected at the extension guard (before the
+    isfile check), so the breaking change surfaces loudly instead of silently
+    doing nothing.
     """
-    Test that the from_file method works .yaml.
-    """
-    nos = Nos()
-    nos.from_file("tests/assets/yaml_nos.yaml")
-    assert nos.name == "Custom Nos 0.1.0"
-    assert nos.initial_prompt == "{base_prompt}>"
-    assert nos.commands == _normalized_commands(commands)
+    with pytest.raises(ValueError, match=r"Unsupported.*file extension"):
+        Nos().from_file(f"tests/assets/whatever{ext}")
 
 
-def test_from_file_incorrect_yaml_file():
-    """
-    Test that the from_file method raises a
-    FileNotFoundError when the file is incorrect.
-    """
-    with pytest.raises(FileNotFoundError, match=r"incorrect_file\.yaml"):
-        nos = Nos()
-        nos.from_file("tests/assets/incorrect_file.yaml")
-
-
-def test_from_file_empty_yaml_file(tmp_path):
-    """An empty yaml file raises ValueError instead of crashing later.
-
-    Pins the `_from_yaml` mapping guard (#232): `yaml.safe_load` returns
-    None for an empty file (e.g. a half-written file observed by hot
-    reload mid-save) and `from_dict` used to crash on `data.get` with an
-    opaque AttributeError out of the SSH shell thread.
-    """
-    empty_yaml = _write_tmp_file(tmp_path, "empty_nos.yaml", "")
-    with pytest.raises(ValueError, match=r"does not contain a mapping \(got NoneType\)"):
-        Nos().from_file(empty_yaml)
-
-
-def test_from_file_non_mapping_yaml_file(tmp_path):
-    """A yaml file with a non-dict top level raises ValueError.
-
-    Same `_from_yaml` guard as the empty-file case (#232), pinned for
-    the other non-mapping shape `yaml.safe_load` can return.
-    """
-    list_yaml = _write_tmp_file(tmp_path, "list_nos.yaml", "- not\n- a\n- mapping\n")
-    with pytest.raises(ValueError, match=r"does not contain a mapping \(got list\)"):
-        Nos().from_file(list_yaml)
-
-
-def test_from_dict_non_mapping_commands_leaves_nos_untouched(tmp_path):
+def test_from_dict_non_mapping_commands_leaves_nos_untouched():
     """A non-mapping 'commands' value raises before any mutation.
 
     Pins the validate-before-commit ordering of `from_dict` (#232):
@@ -392,10 +355,9 @@ def test_from_dict_non_mapping_commands_leaves_nos_untouched(tmp_path):
     malformed value, leaving partial state behind — the same hole
     `_from_module` had with DEVICE_NAME.
     """
-    bad_yaml = _write_tmp_file(tmp_path, "bad_commands_nos.yaml", "name: polluted\ncommands: not-a-mapping\n")
     nos = Nos()
     with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
-        nos.from_file(bad_yaml)
+        nos.from_dict({"name": "polluted", "commands": "not-a-mapping"})
     assert nos.name == "SimNOS"
     assert nos.commands == {}
 
@@ -631,17 +593,6 @@ def test_register_nos_plugin_from_dict():
     assert nos_dict["commands"] == nos.commands
 
 
-def test_register_nos_plugin_from_yaml_file(commands):
-    """
-    Test that we can register a nos model from a yaml file.
-    """
-    nos = Nos(filename="tests/assets/yaml_nos.yaml")
-
-    assert nos.name == "Custom Nos 0.1.0"
-    assert nos.initial_prompt == "{base_prompt}>"
-    assert nos.commands == _normalized_commands(commands)
-
-
 def test_register_nos_plugin_incorrect_commands():
     """
     Test that we can register a nos model from a dict.
@@ -678,48 +629,21 @@ def test_register_nos_plugin_incorrect_output():
         Nos(commands={"show clock": {"output": 42}})
 
 
-def test_yaml_file_command_is_overwritten_by_corresponding_module():
-    """
-    Test that when a command in a platform is defined
-    both in YAML and Python module, the Python module
-    is the one being used.
-    """
-    nos_yaml = Nos(filename="tests/assets/yaml_nos.yaml")
-    nos_py = Nos(filename="tests/assets/module.py")
-    nos_combined = Nos(filename="tests/assets/yaml_nos.yaml")
-    nos_combined.from_file("tests/assets/module.py")
+def test_registry_data_source_is_a3_dir_then_py_module():
+    """Every registry entry is an A3 platform dir, optionally + a co-named py module.
 
-    combined_dict = dict(nos_yaml.commands)
-    combined_dict.update(nos_py.commands)
-
-    assert callable(nos_combined.commands["show clock"]["output"])
-    assert callable(combined_dict["show clock"]["output"])
-    assert len(combined_dict) == len(nos_combined.commands)
-
-
-def _is_data_source(path: str) -> bool:
-    """A registry's data source is a legacy ``.yaml`` or an A3 platform dir (#264 / D6)."""
-    return path.endswith(".yaml") or os.path.isdir(path)
-
-
-def test_yaml_file_command_is_overwritten_by_corresponding_module_in_init():
-    """
-    Test that when a command in a platform is defined
-    both in YAML/A3 dir and a Python module, the Python module
-    is the one being used in the init.
-
-    The data source is either a legacy ``platforms_yaml/<p>.yaml`` or an A3
-    ``platforms/<p>/`` directory; in both cases a co-named py module is appended
-    last so it wins (#264 / D6 precedence).
+    The legacy ``platforms_yaml/<p>.yaml`` data source was removed in v3 (#264);
+    static command data now lives only in the A3 ``platforms/<p>/`` directory. A
+    co-named py module (dynamic handlers / device class) is appended last so it
+    wins the per-command precedence (#264 / D6).
     """
     # pylint: disable=duplicate-code
     for filenames in nos_plugins.values():
         for filename in filenames:
             assert isinstance(filename, str)
-            assert _is_data_source(filename) or filename.endswith(".py")
+        assert os.path.isdir(filenames[0])  # the A3 platform dir is always first
         assert len(filenames) <= 2
         if len(filenames) == 2:
-            assert _is_data_source(filenames[0])
             assert filenames[1].endswith(".py")
 
 

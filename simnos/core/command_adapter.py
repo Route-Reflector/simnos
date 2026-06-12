@@ -1,18 +1,16 @@
 """Legacy-form -> `ResolvedCommand` normalization core (#264 / P1-1 D6).
 
-This is the bridge that lets PR-1 ship the new runtime representation
-(:mod:`simnos.core.resolved_command`) and mode engine while the data is still
-in the v2 ``platforms_yaml`` / py-plugin / inventory form. Every legacy inflow
-is normalized here into `ResolvedPlatform` / `ResolvedCommand`, so the shell,
-tests and new consumers see one semantics regardless of authoring form. (The
-docs generator still reads the legacy yaml via ``tasks.render_template`` until
-it moves to this representation in PR-3 — D9.)
+This is the bridge that normalizes the surviving legacy command inflows —
+py-plugin command dicts and inventory commands (`nos.configuration.commands`) —
+into `ResolvedPlatform` / `ResolvedCommand`, so the shell, tests and new
+consumers see one semantics regardless of authoring form. The monolithic
+``platforms_yaml`` data form and its file loader were removed in v3 (#264 PR-3);
+this normalization core stays until the inventory commands path is reworked in
+#266 (Decision 9).
 
-The normalization faithfully replicates v2 render semantics — that fidelity
-is exactly what the migration oracle (b') verifies (v2 frozen-replica
-projection vs adapter projection, #264 / Decision 3). The file-loader half of
-this adapter is removed in PR-3; the normalization core stays until the
-inventory commands path is reworked in #266 (Decision 9).
+The normalization faithfully replicates v2 render semantics — the fidelity the
+migration oracle (b') verified against the legacy yaml before it was deleted
+(v2 frozen-replica projection vs adapter projection, #264 / Decision 3).
 
 Mode synthesis (#264 / M2): v2 declares three prompt templates
 (``initial_prompt`` / ``enable_prompt`` / ``config_prompt``); the adapter maps

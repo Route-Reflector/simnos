@@ -8,8 +8,6 @@ import logging
 import os
 import types
 
-import yaml
-
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.pydantic_models import ModelNosAttributes
 from simnos.core.resolved_command import ResolvedPlatform
@@ -214,28 +212,6 @@ class Nos:
         self.enable_prompt = merged_enable_prompt
         self.config_prompt = merged_config_prompt
 
-    def _from_yaml(self, filepath: str) -> None:
-        """
-        Method to build NOS from YAML file.
-
-        The YAML mirrors the dict schema accepted by :meth:`from_dict`;
-        see :class:`simnos.core.pydantic_models.ModelNosCommand` for the
-        per-command schema and ``simnos/plugins/nos/platforms_yaml/arista_eos.yaml``
-        for a live example (this is the legacy form; A3 platforms load via
-        :meth:`_from_platform_dir` instead — #264).
-
-        :param filepath: OS path to YAML file with NOS data
-        :raises ValueError: if the file holds no YAML mapping (empty file
-            or a non-dict top level), e.g. a half-written file caught
-            mid-save — `yaml.safe_load` returns None for it and
-            :meth:`from_dict` would crash on `data.get`
-        """
-        with open(filepath, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        if not isinstance(data, dict):
-            raise ValueError(f"NOS YAML file '{filepath}' does not contain a mapping (got {type(data).__name__})")
-        self.from_dict(data)
-
     def _from_module(self, filename: str) -> None:
         """
         Method to import NOS data from python file or python module.
@@ -342,7 +318,7 @@ class Nos:
     def _from_platform_dir(self, path: str) -> None:
         """Load an A3 platform directory into `self.resolved_platform` (#264 / D6).
 
-        Unlike the legacy `_from_yaml` / `_from_module` paths, this does not
+        Unlike the legacy `_from_module` path, this does not
         populate `self.commands` / the scalar prompts — the A3 form normalizes
         straight to a `ResolvedPlatform`. The platform name is the directory
         name (D1); a py module loaded after this dir still fills `self.commands`
@@ -361,10 +337,12 @@ class Nos:
 
     def from_file(self, filename: str) -> None:
         """
-        Method to load NOS from an A3 platform directory, a YAML file, or a Python file
+        Method to load NOS from an A3 platform directory or a Python file
 
-        :param filename: OS path string to an A3 platform dir, or a
-            `.yaml/.yml` / `.py` file with NOS data
+        :param filename: OS path string to an A3 platform dir (``platform.yaml``
+            + ``commands/``), or a `.py` file with a NOS device class / dynamic
+            handlers. The legacy monolithic ``.yaml/.yml`` platform form was
+            removed in v3 (#264); static command data now lives in the A3 dir.
         """
         # An A3 platform is a directory (holds platform.yaml + commands/), not a
         # file — dispatch on that before the extension check (#264 / D6).
@@ -372,20 +350,20 @@ class Nos:
             self._from_platform_dir(filename)
             return
         if not self._is_file_ending_correct(filename):
-            raise ValueError(f'Unsupported "{filename}" file extension. Supported: .py, .yml, .yaml')
+            raise ValueError(f'Unsupported "{filename}" file extension. Supported: an A3 platform dir or a .py file')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
-        if filename.endswith((".yaml", ".yml")):
-            self._from_yaml(filename)
-        elif filename.endswith(".py"):
-            self._from_module(filename)
+        self._from_module(filename)
 
     def _is_file_ending_correct(self, filename: str) -> bool:
         """
         Method to check if file extension is supported.
-        Supported types are: .yaml, .yml and .py
+
+        Only ``.py`` plugin files are loaded as files now; A3 platforms are
+        directories (handled before this check). The legacy ``.yaml/.yml``
+        monolithic platform form was removed in v3 (#264).
         """
-        return filename.endswith((".yaml", ".yml", ".py"))
+        return filename.endswith(".py")
 
 
 # Re-export `available_platforms` from simnos.plugins.nos so existing callers

@@ -619,22 +619,18 @@ class TestPlatformsManifest:
         assert "base_template" not in nos_plugins
 
     def test_available_platforms_have_data_source(self):
-        """Pin that every supported platform has a backing data source.
+        """Pin that every supported platform has a backing A3 data source.
 
         Catches "dangling key" drift: if a data source is deleted in a future
         PR but `available_platforms` is not updated (e.g. via a stale registry
-        cache), this test fails. A data source is either a legacy
-        ``platforms_yaml/<p>.yaml`` or an A3 ``platforms/<p>/`` directory
-        (#264 / D6); py-only entries live alongside one of those.
+        cache), this test fails. The data source is the A3 ``platforms/<p>/``
+        directory (#264 / D6); a py module, if any, lives alongside it.
         """
-        yaml_dir = "simnos/plugins/nos/platforms_yaml"
         a3_dir = "simnos/plugins/nos/platforms"
         for platform_name in available_platforms:
-            yaml_path = f"{yaml_dir}/{platform_name}.yaml"
             a3_path = f"{a3_dir}/{platform_name}/platform.yaml"
-            assert os.path.isfile(yaml_path) or os.path.isfile(a3_path), (
-                f"Platform '{platform_name}' is in available_platforms but has no data source "
-                f"(neither {yaml_path} nor {a3_path})"
+            assert os.path.isfile(a3_path), (
+                f"Platform '{platform_name}' is in available_platforms but has no A3 data source ({a3_path})"
             )
 
     def test_simnos_decorator_rejects_unknown_platform(self):

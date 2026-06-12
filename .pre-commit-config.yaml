@@ -28,15 +28,15 @@ repos:
         language: system
         entry: bandit
         args: ["-c", "pyproject.toml", "--recursive", "."]
-  # platform yaml conventions lint (#244, baseline ratchet)
+  # A3 platform data conventions lint (#264 / D8, D9)
   - repo: local
     hooks:
-      - id: lint-platform-yaml
-        name: lint-platform-yaml
+      - id: lint-platform-data
+        name: lint-platform-data
         language: system
-        entry: invoke lint-platform-yaml
-        # Fires on data changes AND on edits to the lint logic / its
+        entry: invoke lint-platform-data
+        # Fires on A3 data changes AND on edits to the lint logic / its
         # self-test, so touching the lint itself gets local feedback
         # instead of waiting for CI (code 2nd round 🦊#4).
-        files: ^(simnos/plugins/nos/platforms_yaml/.*\.ya?ml|platform_yaml_lint_baseline\.yaml|tasks\.py|tests/test_lint_platform_yaml\.py)$
+        files: ^(simnos/plugins/nos/platforms/.*|tasks\.py|tests/test_lint_platform_data\.py)$
         pass_filenames: false
