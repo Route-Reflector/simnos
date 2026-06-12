@@ -27,12 +27,12 @@ import sys
 
 import yaml
 
+from a3_paths import PLATFORMS_DIR as SIMNOS_A3_DIR
 from a3_paths import list_a3_platform_names, unique_command_stem
 from simnos.core.platform_loader import load_platform_dir
 
 NTC_REPO_URL = "https://github.com/networktocode/ntc-templates"
 NTC_LOCAL_DIR = "/tmp/ntc-templates"
-SIMNOS_A3_DIR = "simnos/plugins/nos/platforms"
 DEFAULT_OUTPUT_DIR = "/tmp/ntc-diff"
 
 
@@ -361,6 +361,13 @@ def main() -> None:
         new_commands = compute_diff(ntc_commands, simnos_cmds)
 
         if not new_commands:
+            # A platform whose candidates were all taken in (diff now 0) must not
+            # keep a stale candidate dir from a previous run — `write_diff_files`
+            # only clears dirs it writes to, so clear here (2nd round claude #1,
+            # replacing the old top-level unconditional output cleanup).
+            stale_dir = os.path.join(args.output, platform)
+            if os.path.isdir(stale_dir):
+                shutil.rmtree(stale_dir)
             continue
 
         if is_new_platform:

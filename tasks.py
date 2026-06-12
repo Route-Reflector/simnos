@@ -311,20 +311,16 @@ def platform_display_name(platform: str) -> str:
 def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "mkdocs.yml") -> None:
     """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
 
-    The caller passes the platform list the docs pages are generated from. For
-    the legacy yaml platforms every nav entry has a backing page. A3-migrated
-    platforms (#264) are also included to keep their existing page in the nav
-    until docs generation moves to the ResolvedCommand path (PR-3); an
-    "A3-born" platform with no pre-existing page would get a nav entry without a
-    backing page until then — a known PR-3 follow-up (2nd round claude #5b).
-    A yaml-less, A3-less py-only platform still gets no nav entry — the
-    registry-truth pin (`test_available_platforms_match_mkdocs_nav`) failing is
-    the designed loud signal to decide how to document such a platform.
-    Closes the M-1 failure mode (#239): a new platform used to need a manual
-    nav entry, and a forgotten one silently produced a docs page unreachable
-    from the site nav. The section is replaced as a text block (instead of a
-    yaml round-trip) so comments, ordering and the material python tags in
-    the rest of mkdocs.yml are preserved byte-for-byte.
+    The caller passes the A3 platform list `gen_docs_platform_commands` just
+    generated pages for, so every nav entry has a backing page. A py-only
+    platform with no A3 dir gets no page and no nav entry — the registry-truth
+    pin (`test_available_platforms_match_mkdocs_nav`) failing is the designed
+    loud signal to decide how to document such a platform. Closes the M-1
+    failure mode (#239): a new platform used to need a manual nav entry, and a
+    forgotten one silently produced a docs page unreachable from the site nav.
+    The section is replaced as a text block (instead of a yaml round-trip) so
+    comments, ordering and the material python tags in the rest of mkdocs.yml
+    are preserved byte-for-byte.
 
     Raises RuntimeError if the Platforms section cannot be located.
     """
@@ -349,13 +345,12 @@ def sweep_orphaned_platform_docs(
     valid_platforms: Iterable[str],
     preserve: frozenset[str] = _PRESERVED_PLATFORM_DOCS,
 ) -> list[str]:
-    """Remove ``docs/platforms/*.md`` entries whose backing yaml is gone.
+    """Remove ``docs/platforms/*.md`` entries with no backing A3 platform.
 
-    Keeps the docs idempotent with the yaml directory as the source of
-    truth: if a platform's yaml is deleted, the corresponding markdown
-    is also removed on the next regeneration. ``preserve`` lists hand-
-    authored markdown that has no yaml counterpart (index pages etc.)
-    and must never be swept.
+    Keeps the docs idempotent with the A3 platform directory as the source of
+    truth: if a platform is removed, its markdown is deleted on the next
+    regeneration. ``preserve`` lists hand-authored markdown that has no platform
+    counterpart (index pages etc.) and must never be swept.
 
     Returns the sorted list of removed filenames for caller-side logging.
     """

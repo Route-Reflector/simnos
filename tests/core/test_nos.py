@@ -629,21 +629,27 @@ def test_register_nos_plugin_incorrect_output():
         Nos(commands={"show clock": {"output": 42}})
 
 
-def test_registry_data_source_is_a3_dir_then_py_module():
-    """Every registry entry is an A3 platform dir, optionally + a co-named py module.
+def test_registry_data_source_is_a3_dir_and_or_py_module():
+    """Every registry entry is an A3 platform dir and/or a co-named py module.
 
     The legacy ``platforms_yaml/<p>.yaml`` data source was removed in v3 (#264);
-    static command data now lives only in the A3 ``platforms/<p>/`` directory. A
-    co-named py module (dynamic handlers / device class) is appended last so it
-    wins the per-command precedence (#264 / D6).
+    a platform's static command data lives in an A3 ``platforms/<p>/`` directory,
+    its dynamic behavior in a ``platforms_py/<p>.py`` module, and a platform may
+    have either or both (a py-only platform registers as ``[<p>.py]`` — the
+    registry's ``not in nos_plugins`` branch). When both are present the A3 dir
+    is registered first and the py module is appended last so it wins the
+    per-command precedence (#264 / D6).
     """
     # pylint: disable=duplicate-code
     for filenames in nos_plugins.values():
         for filename in filenames:
             assert isinstance(filename, str)
-        assert os.path.isdir(filenames[0])  # the A3 platform dir is always first
-        assert len(filenames) <= 2
+        assert 1 <= len(filenames) <= 2
+        # Each entry is an A3 platform dir or a .py module; a 2-entry list is
+        # always [A3 dir, py module] in that order.
+        assert all(os.path.isdir(f) or f.endswith(".py") for f in filenames)
         if len(filenames) == 2:
+            assert os.path.isdir(filenames[0])
             assert filenames[1].endswith(".py")
 
 

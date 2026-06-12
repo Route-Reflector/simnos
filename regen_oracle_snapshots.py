@@ -26,12 +26,10 @@ import json
 import os
 import sys
 
-from a3_paths import list_a3_platform_names
+from a3_paths import PLATFORMS_DIR as A3_ROOT
+from a3_paths import SNAPSHOT_DIR, list_a3_platform_names
 from simnos.core.platform_loader import load_platform_dir
 from tests.core.oracle_projection import project_resolved
-
-A3_ROOT = "simnos/plugins/nos/platforms"
-SNAPSHOT_DIR = "tests/assets/oracle"
 
 
 def regen(platform: str) -> None:

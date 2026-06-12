@@ -38,5 +38,5 @@ repos:
         # Fires on A3 data changes AND on edits to the lint logic / its
         # self-test, so touching the lint itself gets local feedback
         # instead of waiting for CI (code 2nd round 🦊#4).
-        files: ^(simnos/plugins/nos/platforms/.*|tasks\.py|tests/test_lint_platform_data\.py)$
+        files: ^(simnos/plugins/nos/platforms/.*|tasks\.py|a3_paths\.py|tests/test_lint_platform_data\.py)$
         pass_filenames: false

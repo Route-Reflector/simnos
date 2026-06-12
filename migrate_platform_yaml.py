@@ -38,14 +38,13 @@ import sys
 
 import yaml
 
-from a3_paths import unique_command_stem
+from a3_paths import PLATFORMS_DIR as A3_ROOT
+from a3_paths import SNAPSHOT_DIR, unique_command_stem
 from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import format_template_to_jinja
 
 LEGACY_DIR = "simnos/plugins/nos/platforms_yaml"
-A3_ROOT = "simnos/plugins/nos/platforms"
-SNAPSHOT_DIR = "tests/assets/oracle"
 
 # Legacy scalar prompt -> canonical mode name (#264 / M2).
 PROMPT_FIELD_TO_MODE = (("initial_prompt", "user"), ("enable_prompt", "enable"), ("config_prompt", "config"))

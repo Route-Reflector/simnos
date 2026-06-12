@@ -15,6 +15,10 @@ import re
 # Root holding the A3 platform dirs (each is one platform with a platform.yaml).
 PLATFORMS_DIR = "simnos/plugins/nos/platforms"
 
+# Where the migration-oracle (b) snapshots live (frozen by migrate, re-baselined
+# by regen, compared by the committed oracle test).
+SNAPSHOT_DIR = "tests/assets/oracle"
+
 
 def list_a3_platform_names(root: str = PLATFORMS_DIR) -> list[str]:
     """Names of A3 platforms (dirs holding a ``platform.yaml``), sorted."""

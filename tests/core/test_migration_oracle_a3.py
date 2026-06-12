@@ -32,10 +32,10 @@ import os
 
 import pytest
 
+from a3_paths import SNAPSHOT_DIR, list_a3_platform_names
 from simnos.core.platform_loader import load_platform_dir
 from tests.core.oracle_projection import project_resolved
 
-SNAPSHOT_DIR = "tests/assets/oracle"
 A3_ROOT = "simnos/plugins/nos/platforms"
 
 _snapshots = sorted(os.path.basename(p)[: -len(".json")] for p in glob.glob(os.path.join(SNAPSHOT_DIR, "*.json")))
@@ -56,6 +56,16 @@ def test_a3_loader_matches_frozen_snapshot(platform):
     assert not mismatches, f"{platform}: {len(mismatches)} command(s) diverge from snapshot: {sorted(mismatches)}"
 
 
-def test_at_least_one_snapshot_present():
-    """Guard: the parametrize source must not silently be empty (no gate)."""
+def test_snapshot_set_matches_a3_platforms():
+    """Every A3 platform has a snapshot and vice versa (no silent oracle gap).
+
+    The parametrize above is snapshot-glob driven, so a *new* A3 platform whose
+    snapshot was forgotten would silently run with no regression baseline. Pin
+    the two sets equal — regenerate a missing one with
+    ``python regen_oracle_snapshots.py <platform>`` (2nd round claude #2).
+    """
     assert _snapshots, "no oracle snapshots found — did the conversion run?"
+    assert set(_snapshots) == set(list_a3_platform_names(A3_ROOT)), (
+        "oracle snapshots and A3 platforms are out of sync — "
+        "run `python regen_oracle_snapshots.py` to add the missing snapshot(s)"
+    )
