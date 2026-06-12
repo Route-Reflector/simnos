@@ -1,9 +1,15 @@
 """
 Diff-based NTC Templates sync tool for simnos.
 
-Compares simnos platform YAML files against NTC Templates test data
-and outputs only NEW commands (commands in NTC but not in simnos) to
-separate diff files. simnos YAML files are never modified.
+Compares simnos A3 platforms (``platforms/<name>/``) against NTC Templates
+test data and outputs only NEW commands (commands in NTC but not in simnos)
+as **A3 take-in candidate files** — one ``commands/<stem>.yaml`` + adjacent
+``<stem>.txt`` per command, with ``type: ntc`` and a ``source`` block — so a
+maintainer can review and drop them straight into the platform dir (#264 / D9).
+simnos's own data is never modified.
+
+Output is verbatim: the A3 form stores raw NTC capture text (no ``str.format``
+brace escaping — the runtime renders literal output unchanged, #264 / D6, D8).
 
 Usage:
     python sync_ntc_commands.py                          # all platforms
@@ -14,16 +20,18 @@ Usage:
 from __future__ import annotations
 
 import argparse
-from datetime import UTC, datetime
 import os
+import re
 import subprocess
 import sys
 
-from ruamel.yaml import YAML
+import yaml
+
+from simnos.core.platform_loader import load_platform_dir
 
 NTC_REPO_URL = "https://github.com/networktocode/ntc-templates"
 NTC_LOCAL_DIR = "/tmp/ntc-templates"
-SIMNOS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
+SIMNOS_A3_DIR = "simnos/plugins/nos/platforms"
 DEFAULT_OUTPUT_DIR = "/tmp/ntc-diff"
 
 
@@ -112,21 +120,22 @@ def select_primary_raw(platform: str, folder: str, raw_files: list[str]) -> str:
     return raw_files[0]
 
 
-def escape_format_braces(text: str) -> str:
-    """Double every ``{`` / ``}`` so the text survives ``str.format()`` unchanged.
+def _sanitize_filename(command: str, used: set[str]) -> str:
+    """Map a command name to a lint-clean, collision-free A3 file stem (D1).
 
-    NTC fixtures may contain literal ``{xxx}`` patterns (e.g. Juniper's
-    ``{master}`` routing-engine indicator, ``{rpd}`` / ``{junos-bgpshard*}``
-    process-thread names). simnos's runtime calls
-    ``output.format(base_prompt=...)`` on every command output, which would
-    otherwise interpret these as named placeholders and raise ``KeyError``.
-    Doubling the braces makes them literal under ``str.format()``.
-
-    NTC fixtures never contain simnos-specific placeholders like
-    ``{base_prompt}``, so a blanket replace is safe — anything that comes
-    from NTC is content meant to be displayed verbatim.
+    ``[a-z0-9_.-]`` only; the ``command`` field is the SSoT (Decision 1), so the
+    stem is non-semantic and a collision just gets a deterministic suffix. Shared
+    convention with ``migrate_platform_yaml._sanitize_filename``.
     """
-    return text.replace("{", "{{").replace("}", "}}")
+    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
+    stem = re.sub(r"_+", "_", stem).strip("_") or "cmd"
+    candidate = stem
+    counter = 2
+    while candidate in used:
+        candidate = f"{stem}__{counter}"
+        counter += 1
+    used.add(candidate)
+    return candidate
 
 
 def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
@@ -161,7 +170,8 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
         primary = select_primary_raw(platform, folder, raw_files)
         primary_path = os.path.join(folder_path, primary)
         with open(primary_path, encoding="utf-8") as f:
-            output = escape_format_braces(f.read())
+            # Verbatim: the A3 form stores raw NTC text (no brace escaping).
+            output = f.read()
 
         variant_outputs: list[str] = []
         variant_paths: list[str] = []
@@ -170,7 +180,7 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
                 continue
             variant_path = os.path.join(folder_path, variant)
             with open(variant_path, encoding="utf-8") as f:
-                variant_outputs.append(escape_format_braces(f.read()))
+                variant_outputs.append(f.read())
             variant_paths.append(variant_path)
 
         command_name = folder.replace("_", " ")
@@ -184,52 +194,42 @@ def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     return commands
 
 
-def get_simnos_yaml_data(platform: str) -> dict | None:
-    """Load and return the full YAML data for a simnos platform."""
-    yaml_path = os.path.join(SIMNOS_YAML_DIR, f"{platform}.yaml")
-    if not os.path.isfile(yaml_path):
-        return None
+def get_simnos_commands(platform: str) -> set[str]:
+    """Return the command names a simnos A3 platform already defines.
 
-    yaml = YAML()
-    with open(yaml_path, encoding="utf-8") as f:
-        data = yaml.load(f)
-
-    if not data or "commands" not in data:
-        return None
-
-    return data
-
-
-def get_simnos_commands(platform_data: dict | None) -> set[str]:
-    """Get command names from simnos YAML data."""
-    if platform_data is None:
-        return set()
-    return set(platform_data["commands"].keys())
-
-
-def get_platform_prompts(platform_data: dict | None) -> list[str]:
-    """Get prompt patterns from simnos YAML data.
-
-    Returns a list of prompt strings suitable for the 'prompt' field
-    in diff YAML output, derived from the platform's initial_prompt
-    and enable_prompt.
+    Loads ``platforms/<platform>/`` through the runtime loader, so the keys are
+    the resolved ``command`` fields (the SSoT) — the same names NTC folders map
+    to. An unmigrated / absent platform yields an empty set (every NTC command
+    is then "new").
     """
-    if platform_data is None:
-        return ["{base_prompt}>", "{base_prompt}#"]
+    a3_dir = os.path.join(SIMNOS_A3_DIR, platform)
+    if not os.path.isfile(os.path.join(a3_dir, "platform.yaml")):
+        return set()
+    return set(load_platform_dir(a3_dir).commands.keys())
 
-    initial = platform_data.get("initial_prompt", "{base_prompt}>")
-    enable = platform_data.get("enable_prompt")
 
-    if enable and enable != initial:
-        return [initial, enable]
-    return [initial]
+def get_platform_modes(platform: str) -> list[str]:
+    """Return the canonical mode names of an A3 platform (for the diff `mode`).
+
+    NTC commands are show/exec output, valid wherever the platform exposes a
+    prompt; the candidate file lists the platform's modes so a reviewer can
+    trim them. An absent platform falls back to the canonical user/enable pair.
+    """
+    a3_dir = os.path.join(SIMNOS_A3_DIR, platform)
+    if not os.path.isfile(os.path.join(a3_dir, "platform.yaml")):
+        return ["user", "enable"]
+    return list(load_platform_dir(a3_dir).modes.keys())
 
 
 def get_simnos_platforms() -> set[str]:
-    """Get all platform names from simnos YAML directory."""
-    if not os.path.isdir(SIMNOS_YAML_DIR):
+    """Get all platform names from the simnos A3 directory."""
+    if not os.path.isdir(SIMNOS_A3_DIR):
         return set()
-    return {f.replace(".yaml", "") for f in os.listdir(SIMNOS_YAML_DIR) if f.endswith(".yaml")}
+    return {
+        entry
+        for entry in os.listdir(SIMNOS_A3_DIR)
+        if os.path.isfile(os.path.join(SIMNOS_A3_DIR, entry, "platform.yaml"))
+    }
 
 
 def compute_diff(
@@ -242,67 +242,85 @@ def compute_diff(
     }
 
 
-def write_diff_file(
+def _ensure_trailing_newline(text: str) -> str:
+    """LF + a single trailing newline; empty stays a 0-byte file (D7/D8).
+
+    Mirrors ``migrate_platform_yaml._ensure_trailing_newline`` so re-synced
+    output is byte-identical to a migrated literal.
+    """
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    if text and not text.endswith("\n"):
+        text += "\n"
+    return text
+
+
+def _ntc_source(raw_path: str, ntc_commit: str) -> dict:
+    """The A3 ``source`` block for an NTC-derived command (provenance)."""
+    rel = raw_path
+    marker = f"{os.sep}tests{os.sep}"
+    if marker in raw_path:
+        rel = "tests/" + raw_path.split(marker, 1)[1].replace(os.sep, "/")
+    return {"ntc_template": rel, "ntc_commit": ntc_commit}
+
+
+def write_diff_files(
     output_dir: str,
     platform: str,
     new_commands: dict[str, dict],
     ntc_commit: str,
-    is_new_platform: bool,
-    prompts: list[str],
+    modes: list[str],
 ) -> str:
-    """Write diff YAML file and return the file path."""
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(output_dir, f"{platform}.yaml")
+    """Write A3 take-in candidate files for a platform; return its commands dir.
 
-    yaml = YAML()
-    yaml.default_flow_style = False
+    Per command: ``commands/<stem>.yaml`` (``command`` / ``type: ntc`` /
+    ``source`` / ``help`` / ``mode`` / ``output`` or ``variants``) + adjacent
+    ``<stem>.txt`` capture file(s). The layout mirrors a real A3 platform dir so
+    the files can be reviewed and copied straight under
+    ``simnos/plugins/nos/platforms/<platform>/`` (#264 / D9).
+    """
+    commands_dir = os.path.join(output_dir, platform, "commands")
+    os.makedirs(commands_dir, exist_ok=True)
 
-    # Build commands dict for YAML output
-    prompt_value = prompts[0] if len(prompts) == 1 else prompts
-    commands_data = {}
-    has_any_variants = False
+    used_stems: set[str] = set()
     for cmd_name, cmd_data in new_commands.items():
-        entry: dict = {
-            "output": cmd_data["output"],
+        stem = _sanitize_filename(cmd_name, used_stems)
+        mapping: dict = {
+            "command": cmd_name,
+            "type": "ntc",
+            "source": _ntc_source(cmd_data["raw_path"], ntc_commit),
             "help": f'execute the command "{cmd_name}"',
-            "prompt": prompt_value,
         }
-        if cmd_data.get("output_variants"):
-            entry["output_variants"] = cmd_data["output_variants"]
-            has_any_variants = True
-        commands_data[cmd_name] = entry
+        if modes:
+            mapping["mode"] = modes
+        variants = cmd_data.get("output_variants") or []
+        if variants:
+            variant_entries = [{"name": "variant_1", "output": f"{stem}__variant_1.txt"}]
+            _write(os.path.join(commands_dir, f"{stem}__variant_1.txt"), _ensure_trailing_newline(cmd_data["output"]))
+            for i, variant_output in enumerate(variants):
+                vstem = f"{stem}__variant_{i + 2}"
+                _write(os.path.join(commands_dir, f"{vstem}.txt"), _ensure_trailing_newline(variant_output))
+                variant_entries.append({"name": f"variant_{i + 2}", "output": f"{vstem}.txt"})
+            mapping["variants"] = variant_entries
+        else:
+            mapping["output"] = f"{stem}.txt"
+            _write(os.path.join(commands_dir, f"{stem}.txt"), _ensure_trailing_newline(cmd_data["output"]))
+        _write(
+            os.path.join(commands_dir, f"{stem}.yaml"),
+            yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True, default_flow_style=False),
+        )
 
-    now = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
+    return commands_dir
 
-    # Write as YAML with header comments
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(f"# NTC Templates diff for {platform}\n")
-        f.write(f"# Generated: {now}\n")
-        f.write(f"# NTC commit: {ntc_commit}\n")
-        if is_new_platform:
-            f.write("# NOTE: New platform — not yet in simnos\n")
-        f.write(f"# New commands: {len(new_commands)}\n")
-        if has_any_variants:
-            f.write("#\n")
-            f.write("# NOTE: `output_variants` lists alternate fixtures from NTC and is\n")
-            f.write("# currently ignored by the simnos runtime (no schema support yet).\n")
-            f.write("# It is preserved for future scenario / random response features.\n")
-        f.write("#\n")
-        f.write("# Source .raw files (primary marked with *):\n")
-        for cmd_name, cmd_data in new_commands.items():
-            f.write(f"#   {cmd_name}:\n")
-            f.write(f"#     * {cmd_data['raw_path']}\n")
-            for variant_path in cmd_data.get("raw_path_variants", []):
-                f.write(f"#       {variant_path}\n")
-        f.write("\n")
-        yaml.dump({"commands": commands_data}, f)
 
-    return output_path
+def _write(path: str, content: str) -> None:
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Compare simnos YAML platforms against NTC Templates and output new commands.",
+        description="Compare simnos A3 platforms against NTC Templates and output new commands as A3 candidate files.",
     )
     parser.add_argument(
         "--platform",
@@ -333,16 +351,10 @@ def main() -> None:
     else:
         platforms_to_process = ntc_platforms
 
-    # Guard against accidental cleanup of simnos platform YAML
-    if os.path.realpath(args.output) == os.path.realpath(SIMNOS_YAML_DIR):
-        print(f"Error: --output must not point to simnos YAML directory ({SIMNOS_YAML_DIR})")
+    # Guard against accidental writes into the real simnos platform tree
+    if os.path.realpath(args.output) == os.path.realpath(SIMNOS_A3_DIR):
+        print(f"Error: --output must not point to the simnos platform directory ({SIMNOS_A3_DIR})")
         sys.exit(1)
-
-    # Clean stale diff YAML files from previous runs
-    if os.path.isdir(args.output):
-        for f in os.listdir(args.output):
-            if f.endswith(".yaml"):
-                os.remove(os.path.join(args.output, f))
 
     # Step 3: Process each platform
     total_new = 0
@@ -355,9 +367,8 @@ def main() -> None:
             continue
 
         is_new_platform = platform not in simnos_platforms
-        platform_data = get_simnos_yaml_data(platform) if not is_new_platform else None
-        simnos_cmds = get_simnos_commands(platform_data)
-        prompts = get_platform_prompts(platform_data)
+        simnos_cmds = get_simnos_commands(platform)
+        modes = get_platform_modes(platform)
 
         new_commands = compute_diff(ntc_commands, simnos_cmds)
 
@@ -367,13 +378,12 @@ def main() -> None:
         if is_new_platform:
             new_platforms.append(platform)
 
-        output_path = write_diff_file(
+        output_path = write_diff_files(
             args.output,
             platform,
             new_commands,
             ntc_commit,
-            is_new_platform,
-            prompts,
+            modes,
         )
 
         marker = " [NEW PLATFORM]" if is_new_platform else ""

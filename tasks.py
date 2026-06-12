@@ -9,6 +9,7 @@ local docs serving (`docs`), platform docs generation
 from collections.abc import Iterable
 import glob
 import os
+import re
 import time
 
 from invoke import Exit, task
@@ -75,8 +76,8 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
        loader's ``*.yaml`` glob silently ignores (1st round claude #8).
 
     Returns a list of human-readable violation strings (empty = clean). Filename
-    convention + ``type: ntc`` source-presence warnings are deferred (see the
-    PR-2 worklog Notes) — they are warning-tier polish, not gates.
+    convention + ``type: ntc`` source-presence checks are warning-tier and live
+    in `check_platform_data_warnings` (printed by the task, never gating).
     """
     violations: list[str] = []
     if not os.path.isdir(platforms_dir):
@@ -113,6 +114,56 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
             if ref not in output_files:
                 violations.append(f"{platform}/commands/{ref}: referenced by {sources} but the file is missing")
     return violations
+
+
+def _command_stem(command: str) -> str:
+    """The conventional A3 file stem for a command name (#264 / D1).
+
+    Same ``[a-z0-9_.-]`` sanitization the migrate / NTC-sync tools use; the
+    ``command`` field is the SSoT (filenames are non-semantic), so this drives a
+    warning-tier convention check, not a gate.
+    """
+    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
+    return re.sub(r"_+", "_", stem).strip("_") or "cmd"
+
+
+def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Warning-tier A3 conventions (#264 / D9) — informational, never a gate.
+
+    1. filename convention: a command yaml's stem should be the sanitized
+       ``command`` name (optionally with a ``__<n>`` collision suffix). A
+       mismatch is harmless (the loader keys on the ``command`` field) but hurts
+       discoverability.
+    2. ``type: ntc`` provenance: a command authored as ``type: ntc`` should
+       carry a ``source`` block (``ntc_template`` / ``ntc_commit``) so the
+       capture's origin is traceable; a missing one is flagged.
+
+    Returns a list of human-readable warnings (empty = clean).
+    """
+    warnings: list[str] = []
+    if not os.path.isdir(platforms_dir):
+        return warnings
+    for platform in sorted(os.listdir(platforms_dir)):
+        commands_dir = os.path.join(platforms_dir, platform, "commands")
+        if not os.path.isdir(commands_dir):
+            continue
+        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+            stem = os.path.basename(command_yaml).removesuffix(".yaml")
+            with open(command_yaml, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            command = data.get("command")
+            if isinstance(command, str):
+                base = _command_stem(command)
+                if stem != base and not stem.startswith(f"{base}__"):
+                    warnings.append(
+                        f"{platform}/commands/{stem}.yaml: filename does not match command {command!r} "
+                        f"(expected stem {base!r})"
+                    )
+            if data.get("type") == "ntc" and not data.get("source"):
+                warnings.append(
+                    f"{platform}/commands/{stem}.yaml: type: ntc but no `source` block (provenance missing)"
+                )
+    return warnings
 
 
 def _variant_output_refs(command_data: dict) -> list[str]:
@@ -169,9 +220,17 @@ def _check_output_encoding(path: str, rel: str) -> list[str]:
 def lint_platform_data(context):
     """Lint the A3 platform data directories (#264 / D8, D9).
 
-    Encoding (UTF-8 / LF / trailing newline), orphan output files, and shared
-    output references. See `check_platform_data` for the rules.
+    Gating: encoding (UTF-8 / LF / trailing newline), orphan output files,
+    shared output references, extension convention, stray ``.yml`` (see
+    `check_platform_data`). Warning-tier (printed, non-blocking): filename
+    convention + ``type: ntc`` provenance (see `check_platform_data_warnings`).
     """
+    warnings = check_platform_data_warnings()
+    for warning in warnings:
+        print(f"WARNING: {warning}")
+    if warnings:
+        print(f"({len(warnings)} warning(s) — informational, not blocking)")
+
     violations = check_platform_data()
     for violation in violations:
         print(violation)
