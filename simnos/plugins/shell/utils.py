@@ -175,9 +175,12 @@ def get_files_changed(directory: str) -> list[str]:
     """
     global _files_lasttime_changed_old, _watch_root
     files_under_directory = get_files_under_directory(directory)
-    # Re-seed (no diff) on first ever poll or when the watch root changes, so a
-    # stale prior-root snapshot does not surface every old path as a deletion.
-    if _watch_root != directory or not _files_lasttime_changed_old:
+    # Re-seed (no diff) on the first poll of a watch root, so a stale
+    # prior-root snapshot does not surface every old path as a deletion. The
+    # root is the only seed key: an empty snapshot is a legitimate baseline
+    # (a root with no watched files yet), and treating it as "unseeded" would
+    # swallow the first file ever added to it (1st code review codex #2).
+    if _watch_root != directory:
         _watch_root = directory
         _files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
         return []

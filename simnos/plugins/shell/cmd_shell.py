@@ -187,7 +187,7 @@ class CMDShell(Cmd):
     def emptyline(self):
         """This method to do nothing if empty line entered"""
 
-    # `Nos` state `from_file` mutates; snapshotted per reloaded file so a file
+    # `Nos` state `from_file` mutates; snapshotted per reload target so a target
     # that loads but fails to normalize can be rolled back (2nd round codex #1).
     _NOS_RELOAD_ATTRS = (
         "name",

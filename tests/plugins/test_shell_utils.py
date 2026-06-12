@@ -325,3 +325,19 @@ def test_get_files_changed_detects_deletion(tmp_path, _clean_watcher):
     assert get_files_changed(str(root)) == []  # seed
     (root / "platforms" / "cisco_ios" / "commands" / "show.yaml").unlink()
     assert get_files_changed(str(root)) == [platform_dir]
+
+
+def test_get_files_changed_empty_root_first_file_detected(tmp_path, _clean_watcher):
+    """A file added to an initially-empty root is detected, not swallowed by re-seed.
+
+    The seed condition keys on the watch root only: an empty snapshot is a
+    legitimate baseline (a root with no watched files yet). Keying on snapshot
+    emptiness would re-seed on the next poll and swallow the first file ever
+    added (1st code review codex #2, taken in at final-refactor).
+    """
+    root = tmp_path / "nos"
+    (root / "platforms_py").mkdir(parents=True)
+    assert get_files_changed(str(root)) == []  # seed: empty but valid baseline
+    newplugin = root / "platforms_py" / "newplugin.py"
+    newplugin.write_text("NAME = 'x'\n", encoding="utf-8")
+    assert get_files_changed(str(root)) == [str(newplugin)]
