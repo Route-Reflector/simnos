@@ -100,7 +100,7 @@ class CMDShell(Cmd):
     ):
         self.nos: Nos = nos
         # Platform name captured at build time for the hot-reload ownership filter
-        # (#264 #274 / D6). A later foreign py reload can overwrite live `nos.name`
+        # (#274 / D6). A later foreign py reload can overwrite live `nos.name`
         # (`_from_module` commit phase), so the filter must compare against this
         # frozen value, not `self.nos.name`, or a hijacked name would permanently
         # skip this session's own A3 platform reload.

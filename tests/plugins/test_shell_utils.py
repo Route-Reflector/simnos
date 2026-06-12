@@ -8,6 +8,8 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
+import pytest
+
 from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.utils import (
     get_files_changed,
@@ -164,19 +166,17 @@ class ShellUtilsTest(TestCase):
         self.assertFalse(targets)  # first call: seed only, no diff
         with patch("os.stat", side_effect=mock_os_stat):
             targets = get_files_changed("simnos/plugins/nos")
-        self.assertTrue(targets)
-        # The single changed RANDOM_FILE maps to exactly its rollup target.
-        expected = resolve_reload_targets([RANDOM_FILE], "simnos/plugins/nos")
-        self.assertTrue(set(expected).issubset(set(targets)))
+        # RANDOM_FILE is the only change, so the result is exactly its rollup target.
+        self.assertEqual(targets, resolve_reload_targets([RANDOM_FILE], "simnos/plugins/nos"))
 
     def test_get_files_changed_null(self):
         """
         Test to check if we don't get the files that have been changed
         """
-        files = get_files_changed("simnos/plugins/nos")
-        self.assertFalse(files)
-        files = get_files_changed("simnos/plugins/nos")
-        self.assertFalse(files)
+        targets = get_files_changed("simnos/plugins/nos")
+        self.assertFalse(targets)
+        targets = get_files_changed("simnos/plugins/nos")
+        self.assertFalse(targets)
 
 
 # --- resolve_reload_targets (#274 / D1) --------------------------------------
@@ -253,32 +253,44 @@ def test_resolve_targets_drops_non_plugin_and_stray(tmp_path):
 
 
 def test_resolve_targets_drops_deleted_platform_dir(tmp_path):
-    """An old-only path whose whole platform dir is gone is dropped (not reloaded)."""
+    """An old-only path whose whole platform dir is gone is dropped (not reloaded).
+
+    The `.j2` case pins that a deleted platform's A3 path never falls through to
+    the legacy `.j2`->py mapping (which would fabricate a bogus py target).
+    """
     root = _make_nos_tree(tmp_path)
-    ghost = str(root / "platforms" / "ghost" / "commands" / "show.yaml")
-    assert resolve_reload_targets([ghost], str(root)) == []
+    ghost_yaml = str(root / "platforms" / "ghost" / "commands" / "show.yaml")
+    ghost_j2 = str(root / "platforms" / "ghost" / "commands" / "show.j2")
+    assert resolve_reload_targets([ghost_yaml, ghost_j2], str(root)) == []
 
 
-def test_get_files_changed_root_change_reseeds(tmp_path):
-    """A changed watch root re-seeds instead of reporting all prior paths (#274 / D7)."""
+@pytest.fixture
+def _clean_watcher():
+    """Reset the module-global watcher snapshot around a test (#274 / D7).
+
+    Same contract as `ShellUtilsTest.setUp/tearDown` and the autouse fixture in
+    `test_cmd_shell_a3.TestA3HotReload` — without it, another test's snapshot
+    (possibly for a different root) leaks phantom changes into this one.
+    """
     shell_utils._files_lasttime_changed_old.clear()
     shell_utils._watch_root = None
+    yield
+    shell_utils._files_lasttime_changed_old.clear()
+    shell_utils._watch_root = None
+
+
+def test_get_files_changed_root_change_reseeds(tmp_path, _clean_watcher):
+    """A changed watch root re-seeds instead of reporting all prior paths (#274 / D7)."""
     root_a = _make_nos_tree(tmp_path / "a")
     root_b = _make_nos_tree(tmp_path / "b")
     assert get_files_changed(str(root_a)) == []  # seed A
     assert get_files_changed(str(root_b)) == []  # root change -> re-seed, no phantom diff
-    shell_utils._files_lasttime_changed_old.clear()
-    shell_utils._watch_root = None
 
 
-def test_get_files_changed_detects_deletion(tmp_path):
+def test_get_files_changed_detects_deletion(tmp_path, _clean_watcher):
     """Deleting a command file rolls up to the (healthy) platform dir (#274 / D7)."""
-    shell_utils._files_lasttime_changed_old.clear()
-    shell_utils._watch_root = None
     root = _make_nos_tree(tmp_path)
     platform_dir = str(root / "platforms" / "cisco_ios")
     assert get_files_changed(str(root)) == []  # seed
     (root / "platforms" / "cisco_ios" / "commands" / "show.yaml").unlink()
     assert get_files_changed(str(root)) == [platform_dir]
-    shell_utils._files_lasttime_changed_old.clear()
-    shell_utils._watch_root = None

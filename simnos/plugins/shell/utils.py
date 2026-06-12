@@ -120,8 +120,14 @@ def resolve_reload_targets(files: list[str], root: str) -> list[str]:
     for file in files:
         parts = os.path.normpath(file).split(os.sep)
         platform_dir = _a3_platform_dir(parts, root_parts)
-        if platform_dir is not None and os.path.isdir(platform_dir):
-            targets.add(platform_dir)
+        if platform_dir is not None:
+            # An A3 path is claimed here even when its platform dir is gone
+            # (whole-platform deletion): falling through to the legacy `.j2`
+            # branch would fabricate a bogus py path for an A3 `commands/*.j2`.
+            if os.path.isdir(platform_dir):
+                targets.add(platform_dir)
+            else:
+                log.debug("hot-reload: ignoring path of deleted platform %s", file)
         elif file.endswith(".j2"):
             targets.add(_legacy_jinja_to_py(file))
         elif file.endswith(".py"):
