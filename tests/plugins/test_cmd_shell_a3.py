@@ -225,6 +225,28 @@ class TestA3HotReload:
         shell.precmd("show clock")  # second poll: detects the edit, reloads the dir
         assert shell.commands["show version"].output.render("R1") == "Cisco IOS Software, Version 16.0\n"
 
+    def test_a3_new_command_file_appears_via_precmd(self, tmp_path, monkeypatch):
+        """E2E: a brand-new command yaml surfaces its command on the next poll.
+
+        Complements the edit test above: this drives the *new-file* detection
+        (`get_new_files`, key diff — no mtime involved) through rollup and
+        reload, a chain no other test exercises (1st code review claude #3).
+        """
+        watch_root = tmp_path / "nos"
+        platform_dir = _a3_platform(watch_root / "platforms")
+        shell = _shell_for(Nos(filename=str(platform_dir)))
+        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
+        monkeypatch.setattr(cmd_shell_module, "nos", SimpleNamespace(__path__=[str(watch_root)]))
+        shell.precmd("show clock")  # first poll: seed only
+        assert "show clock" not in shell.commands
+        _write(
+            platform_dir / "commands" / "show_clock.yaml",
+            "command: show clock\ntype: simnos\nmode: [user]\noutput: show_clock.txt\n",
+        )
+        _write(platform_dir / "commands" / "show_clock.txt", "12:00:00 UTC\n")
+        shell.precmd("show clock")  # second poll: new files detected, dir reloaded
+        assert shell.commands["show clock"].output.render("R1") == "12:00:00 UTC\n"
+
     def test_post_commit_rebuild_failure_rolls_back_resolved_platform(self, tmp_path, caplog):
         """A reload that loads but fails `_rebuild` restores `resolved_platform` (D3).
 

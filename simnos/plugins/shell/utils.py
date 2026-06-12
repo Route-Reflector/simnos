@@ -69,21 +69,29 @@ def get_files_recently_modified(files: list[str], files_lasttime_changed_old: di
     return files_recently_modified
 
 
-def _legacy_jinja_to_py(filepath: str) -> str:
-    """Map one legacy py-plugin `.j2` template to its corresponding `.py` module.
+def _legacy_jinja_to_py(filepath: str) -> str | None:
+    """Map a legacy py-plugin `.j2` template to its `.py` module, or None.
 
-    Preserves the pre-#274 conversion: a `configurations/<platform>.yaml.j2`
-    config template and a `templates/<platform>/<cmd>.j2` output template both
-    reload by re-importing the platform's `.py` module. Only reached for `.j2`
-    paths that are NOT under an A3 platform dir (those are rolled up to the dir
-    by `resolve_reload_targets` first — A3 priority).
+    Recognizes the two shipped legacy shapes only, by segment position:
+
+    - ``<base>/configurations/<platform>.yaml.j2`` -> ``<base>/<platform>.py``
+    - ``<base>/templates/<platform>/<cmd>.j2``     -> ``<base>/<platform>.py``
+
+    Any other `.j2` (e.g. a stray ``README.j2`` under the watch root) returns
+    None so the caller drops it — mapping it blindly would fabricate a bogus
+    py path that `from_file` can only fail on (1st round codex #1). Only
+    reached for `.j2` paths NOT under an A3 platform dir (those are rolled up
+    by `resolve_reload_targets` first — A3 priority). POSIX ``/`` separators
+    are a pre-existing assumption of the legacy py-plugin layout (unlike the
+    ``os.sep``-aware `_a3_platform_dir`).
     """
-    if "configurations" in filepath:
-        base_filepath = filepath.rsplit("/", 2)[0]
-        platform = os.path.basename(filepath).replace(".yaml.j2", "").replace(".yaml", "")
-        return f"{base_filepath}/{platform}.py"
-    split = filepath.rsplit("/", 3)
-    return f"{split[0]}/{split[2]}.py"
+    parts = filepath.split("/")
+    if len(parts) >= 3 and parts[-2] == "configurations":
+        platform = parts[-1].replace(".yaml.j2", "").replace(".yaml", "")
+        return "/".join([*parts[:-2], f"{platform}.py"])
+    if len(parts) >= 4 and parts[-3] == "templates":
+        return "/".join([*parts[:-3], f"{parts[-2]}.py"])
+    return None
 
 
 def _a3_platform_dir(parts: list[str], root_parts: list[str]) -> str | None:
@@ -108,12 +116,13 @@ def resolve_reload_targets(files: list[str], root: str) -> list[str]:
     `from_file` reloads a *platform dir*, not an individual command file, so any
     changed file under `platforms/<p>/` is rolled up to that dir. This branch is
     first (A3 priority) so an A3 `commands/*.j2` is not misrouted to a py path by
-    the legacy `.j2` mapping. py plugins (and their adjacent `.j2`
-    config/templates) map to their `.py` module. A path that is neither — a
-    non-plugin file, or a whole-platform deletion whose dir is gone — is dropped
-    (`from_file` would only raise on it) and logged for "why didn't my edit
-    reload?" troubleshooting. Targets are deduped and sorted (deterministic
-    order; the merge is order-invariant for commands, last-writer for scalars).
+    the legacy `.j2` mapping. py plugins (and their adjacent legacy-shape `.j2`
+    config/templates) map to their `.py` module. Everything else is dropped — a
+    non-plugin file, an unrecognized `.j2`, or a whole-platform deletion whose
+    dir is gone (`from_file` would only raise on it) — and logged for "why
+    didn't my edit reload?" troubleshooting. Targets are deduped and sorted
+    (deterministic order; the merge is order-invariant for commands,
+    last-writer for scalars).
     """
     root_parts = os.path.normpath(root).split(os.sep)
     targets: set[str] = set()
@@ -127,9 +136,9 @@ def resolve_reload_targets(files: list[str], root: str) -> list[str]:
             if os.path.isdir(platform_dir):
                 targets.add(platform_dir)
             else:
-                log.debug("hot-reload: ignoring path of deleted platform %s", file)
-        elif file.endswith(".j2"):
-            targets.add(_legacy_jinja_to_py(file))
+                log.debug("hot-reload: ignoring %s (platform dir %s is gone)", file, platform_dir)
+        elif file.endswith(".j2") and (py_target := _legacy_jinja_to_py(file)) is not None:
+            targets.add(py_target)
         elif file.endswith(".py"):
             targets.add(file)
         else:
@@ -156,6 +165,13 @@ def get_files_changed(directory: str) -> list[str]:
     `resolve_reload_targets`. Deletion matters for A3 (a removed `commands/*`
     file is a command removal); the platform dir is still healthy so the rollup
     reloads it and the removal propagates.
+
+    Known dev-mode limitation: the snapshot is consume-once and shared by every
+    shell in the process. The first session to poll consumes a change, and the
+    ownership filter (#274 / D6) may then discard it — on a multi-host reload
+    server another platform's edit can be consumed-and-dropped before any
+    session of that platform observes it. Per-shell snapshots are the future
+    fix (pre-existing single-host assumption, 1st code review claude #2).
     """
     global _files_lasttime_changed_old, _watch_root
     files_under_directory = get_files_under_directory(directory)
