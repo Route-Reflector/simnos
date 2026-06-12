@@ -54,6 +54,20 @@ def unique_command_stem(command: str, used: set[str]) -> str:
     return candidate
 
 
+def write_text_file(path: str, content: str) -> None:
+    """Write UTF-8 ``content`` to ``path``, creating parent dirs as needed.
+
+    The one file-write primitive the dev scripts (migrate / sync / regen) share,
+    so an A3 output / candidate / snapshot file is written the same way
+    everywhere (parents created, UTF-8, no implicit newline — callers pass
+    :func:`ensure_trailing_newline` output when the trailing-newline convention
+    applies).
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        fh.write(content)
+
+
 def ensure_trailing_newline(text: str) -> str:
     """LF + a single trailing newline for an A3 output file (D7 / D8).
 

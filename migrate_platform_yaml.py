@@ -39,7 +39,7 @@ import sys
 import yaml
 
 from a3_paths import PLATFORMS_DIR as A3_ROOT
-from a3_paths import SNAPSHOT_DIR, ensure_trailing_newline, unique_command_stem
+from a3_paths import SNAPSHOT_DIR, ensure_trailing_newline, unique_command_stem, write_text_file
 from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import format_template_to_jinja
@@ -78,12 +78,6 @@ def _prompt_to_modes(prompt, prompt_to_mode: dict[str, str], command: str) -> li
     return modes
 
 
-def _write(path: str, content: str) -> None:
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8") as fh:
-        fh.write(content)
-
-
 def _convert_output(value, stem: str, commands_dir: str) -> dict:
     """Turn a legacy ``output`` into A3 fields + write the adjacent file.
 
@@ -98,10 +92,10 @@ def _convert_output(value, stem: str, commands_dir: str) -> dict:
     jinja_source, has_field = format_template_to_jinja(value)
     if not has_field:
         # No render: `str.format` collapses `{{`->`{` — the literal wire text.
-        _write(os.path.join(commands_dir, f"{stem}.txt"), ensure_trailing_newline(value.format()))
+        write_text_file(os.path.join(commands_dir, f"{stem}.txt"), ensure_trailing_newline(value.format()))
         return {"output": f"{stem}.txt"}
     # `{base_prompt}` present -> a jinja template file.
-    _write(os.path.join(commands_dir, f"{stem}.j2"), ensure_trailing_newline(jinja_source))
+    write_text_file(os.path.join(commands_dir, f"{stem}.j2"), ensure_trailing_newline(jinja_source))
     return {"output_template": f"{stem}.j2"}
 
 
@@ -124,7 +118,7 @@ def _convert_command(name: str, entry: dict, stem: str, commands_dir: str, promp
         variant_files = []
         for i, variant in enumerate(variants):
             vstem = f"{stem}__variant_{i + 2}"
-            _write(os.path.join(commands_dir, f"{vstem}.txt"), ensure_trailing_newline(variant.format()))
+            write_text_file(os.path.join(commands_dir, f"{vstem}.txt"), ensure_trailing_newline(variant.format()))
             variant_files.append({"name": f"variant_{i + 2}", "output": f"{vstem}.txt"})
         primary = _convert_output(entry.get("output"), f"{stem}__variant_1", commands_dir)
         out["variants"] = [{"name": "variant_1", **primary}, *variant_files]
@@ -174,14 +168,14 @@ def convert(platform: str) -> None:
     commands_dir = os.path.join(platform_dir, "commands")
     os.makedirs(commands_dir, exist_ok=True)
 
-    _write(os.path.join(platform_dir, "platform.yaml"), _platform_meta_yaml(legacy))
+    write_text_file(os.path.join(platform_dir, "platform.yaml"), _platform_meta_yaml(legacy))
 
     used_stems: set[str] = set()
     for name, entry in legacy.get("commands", {}).items():
         stem = unique_command_stem(name, used_stems)
         mapping = _convert_command(name, entry, stem, commands_dir, prompt_to_mode)
         text = yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True, default_flow_style=False)
-        _write(os.path.join(commands_dir, f"{stem}.yaml"), text)
+        write_text_file(os.path.join(commands_dir, f"{stem}.yaml"), text)
 
     # Oracle (b): adapter projection of the legacy data == A3 loader projection.
     legacy_resolved = adapt_legacy_commands(
@@ -198,7 +192,7 @@ def convert(platform: str) -> None:
         raise SystemExit(f"{platform}: A3 projection diverges from legacy adapter for {diff}")
 
     snapshot_path = os.path.join(SNAPSHOT_DIR, f"{platform}.json")
-    _write(snapshot_path, json.dumps(legacy_proj, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
+    write_text_file(snapshot_path, json.dumps(legacy_proj, indent=2, sort_keys=True, ensure_ascii=False) + "\n")
     print(f"converted {platform}: {len(legacy.get('commands', {}))} commands -> {platform_dir}")
     print(f"oracle snapshot: {snapshot_path}")
 
