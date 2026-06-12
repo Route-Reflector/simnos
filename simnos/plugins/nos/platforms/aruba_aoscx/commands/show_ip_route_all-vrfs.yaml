@@ -1,0 +1,7 @@
+command: show ip route all-vrfs
+type: simnos
+help: execute the command "show ip route all-vrfs"
+mode:
+- user
+- enable
+output: show_ip_route_all-vrfs.txt

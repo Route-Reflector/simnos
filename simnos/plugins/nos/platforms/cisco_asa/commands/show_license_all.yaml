@@ -1,0 +1,7 @@
+command: show license all
+type: simnos
+help: execute the command "show license all"
+mode:
+- user
+- enable
+output: show_license_all.txt

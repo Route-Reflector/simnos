@@ -1,0 +1,6 @@
+command: show interface logical
+type: simnos
+help: execute the command "show interface logical"
+mode:
+- user
+output: show_interface_logical.txt

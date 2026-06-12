@@ -1,0 +1,7 @@
+command: show chassis hardware
+type: simnos
+help: execute the command "show chassis hardware"
+mode:
+- user
+- enable
+output: show_chassis_hardware.txt

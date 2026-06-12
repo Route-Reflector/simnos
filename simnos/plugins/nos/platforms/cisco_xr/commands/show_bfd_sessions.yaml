@@ -1,0 +1,7 @@
+command: show bfd sessions
+type: simnos
+help: execute the command "show bfd sessions"
+mode:
+- user
+- enable
+output: show_bfd_sessions.txt

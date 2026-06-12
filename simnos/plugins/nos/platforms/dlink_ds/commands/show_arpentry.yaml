@@ -1,0 +1,6 @@
+command: show arpentry
+type: simnos
+help: execute the command "show arpentry"
+mode:
+- user
+output: show_arpentry.txt

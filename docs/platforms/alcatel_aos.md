@@ -26,26 +26,6 @@
 - alcatel_aos>
 - alcatel_aos#
 
-### show vlan
-
-**Output:**
-```
-                              stree                 mble   src        
- vlan  type  admin   oper   1x1   flat   auth   ip   tag   lrn   name
------+-----+------+------+------+------+----+-----+-----+------+----------
-   1    std   on     on     on    on     off   off   off     on   VLAN 1                          
-  10    std   on    off     on    on     off   off   off     on   name with spaces                
- 100    std   on     on     on    on     off    on   off     on   name-with-dashes                  
-1000   gvrp   on     on     on    on     off    on   off     on   namewithoutnothing                  
-
-```
-
-**Help:** execute the command "show vlan"
-
-**Prompt:**
-- alcatel_aos>
-- alcatel_aos#
-
 ### show chassis
 
 **Output:**
@@ -72,8 +52,6 @@ Chassis 2
   Admin Status:                  POWER ON,
   Operational Status:            UP,
   MAC Address:                   00:00:00:00:00:00,
-
-
 ```
 
 **Help:** execute the command "show chassis"
@@ -93,7 +71,6 @@ Chassis 2
  1/1/1     enable     up      0          0          "This is an example"
  2/1/10    enable     down    0          0          "This_is_an_example"
  2/1/11    enable     down    0          0          "This"
-
 ```
 
 **Help:** execute the command "show interfaces alias"
@@ -150,7 +127,6 @@ Slot/Port  1/2 :
   UnderSize Frames:                    0, OverSize Frames:                    0,
   Lost Frames     :                    0, Collided Frames:                    0,
   Error Frames    :                    0
-
 ```
 
 **Help:** execute the command "show interfaces ethernet"
@@ -178,7 +154,6 @@ Port     Status   Status                 Time       Max        (sec)
   1/25   enable      up        none           300         10          0 ""
   1/26   enable      down      none           300         10          0 ""
   1/28   enable      down      none             0          0          0 ""
-
 ```
 
 **Help:** execute the command "show interfaces port"
@@ -224,7 +199,6 @@ Port           (Mbps)         Type   (Mbps)         Mode   LinkUpDown
 
 FF - ForcedFiber PF - PreferredFiber  F - Fiber
 FC - ForcedCopper PC - PreferredCopper C - Copper
-
 ```
 
 **Help:** execute the command "show interfaces status"
@@ -244,7 +218,6 @@ Number  Aggregate  Size  state        state      Ports      Name
    2     Dynamic      2    ENABLED    UP      2  2     LINK_LACP_CORE
   31     Dynamic      8    ENABLED    DOWN    0  0     Created by Auto-Fabric on Mon Oct 6 00:00:00 2000
   32     Dynamic      8    ENABLED    DOWN    0  0     Created by Auto-Fabric on Mon Oct 01 00:00:00 2000
-
 ```
 
 **Help:** execute the command "show linkagg alias"
@@ -264,7 +237,6 @@ Slot/Port Aggregate SNMP Id   Status   Agg  Oper Link Prim
    1/2    Dynamic     1001  ATTACHED     1  UP   UP   NO 
    1/3    Dynamic     1002  ATTACHED     2  UP   UP   YES
    1/4    Dynamic     1003  ATTACHED     2  UP   UP   NO 
-
 ```
 
 **Help:** execute the command "show linkagg port"
@@ -371,7 +343,6 @@ Copyright (C) 2000-2001 HUAWEI TECH Co., Ltd.,
       Protocol vlan Id            = 0 (Flags = 0),
       Remote port MAC/PHY AutoNeg = Supported Enabled Capability 0xa03e,
       Mau Type                    = 1000BaseTFD - Four-pair Category 5 UTP full duplex mode
-
 ```
 
 **Help:** execute the command "show lldp remote-system"
@@ -395,7 +366,6 @@ Legend: Mac Address: * = address not valid
  * 999    ee:ee:ee:ee:ee:ee      permanent           0      bridging      1/11
 
 Total number of Valid MAC addresses above = 4
-
 ```
 
 **Help:** execute the command "show mac-address-table"
@@ -441,7 +411,6 @@ Port:  1/12
  MAC Address        VLAN   TYPE
 -------------------+------+------------
  aa:aa:aa:aa:aa:bb    10   STATIC
-
 ```
 
 **Help:** execute the command "show port-security"
@@ -468,10 +437,28 @@ Flash Space:
     Primary CMM:
       Available (bytes):  39243776,
       Comments         :  None
-
 ```
 
 **Help:** execute the command "show system"
+
+**Prompt:**
+- alcatel_aos>
+- alcatel_aos#
+
+### show vlan
+
+**Output:**
+```
+                              stree                 mble   src        
+ vlan  type  admin   oper   1x1   flat   auth   ip   tag   lrn   name
+-----+-----+------+------+------+------+----+-----+-----+------+----------
+   1    std   on     on     on    on     off   off   off     on   VLAN 1                          
+  10    std   on    off     on    on     off   off   off     on   name with spaces                
+ 100    std   on     on     on    on     off    on   off     on   name-with-dashes                  
+1000   gvrp   on     on     on    on     off    on   off     on   namewithoutnothing                  
+```
+
+**Help:** execute the command "show vlan"
 
 **Prompt:**
 - alcatel_aos>
@@ -485,7 +472,6 @@ Flash Space:
 --------+------------+------------+--------------
   1         1/1/23       default    inactive
   1         1/1/25       qtagged    forwarding
-
 ```
 
 **Help:** execute the command "show vlan port"

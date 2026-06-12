@@ -1,0 +1,7 @@
+command: show router interface
+type: simnos
+help: execute the command "show router interface"
+mode:
+- user
+- enable
+output: show_router_interface.txt

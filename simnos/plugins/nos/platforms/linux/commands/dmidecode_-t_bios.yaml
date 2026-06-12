@@ -1,0 +1,7 @@
+command: dmidecode -t bios
+type: simnos
+help: execute the command "dmidecode -t bios"
+mode:
+- user
+- enable
+output: dmidecode_-t_bios.txt

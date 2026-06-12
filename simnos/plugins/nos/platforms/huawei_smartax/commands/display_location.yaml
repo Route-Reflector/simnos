@@ -1,0 +1,7 @@
+command: display location
+type: simnos
+help: execute the command "display location"
+mode:
+- user
+- enable
+output: display_location.txt

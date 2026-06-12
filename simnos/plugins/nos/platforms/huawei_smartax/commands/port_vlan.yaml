@@ -1,0 +1,7 @@
+command: port vlan
+type: simnos
+help: execute the command "port vlan"
+mode:
+- user
+- enable
+output: port_vlan.txt

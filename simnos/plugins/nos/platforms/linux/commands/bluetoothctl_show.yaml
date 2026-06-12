@@ -1,0 +1,11 @@
+command: bluetoothctl show
+type: simnos
+help: execute the command "bluetoothctl show"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: bluetoothctl_show__variant_1.txt
+- name: variant_2
+  output: bluetoothctl_show__variant_2.txt

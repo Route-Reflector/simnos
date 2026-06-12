@@ -1,0 +1,6 @@
+command: ex
+type: simnos
+help: exit the terminal
+mode:
+- user
+exit: true

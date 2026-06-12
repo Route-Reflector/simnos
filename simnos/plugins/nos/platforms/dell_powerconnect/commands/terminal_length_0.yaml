@@ -1,0 +1,6 @@
+command: terminal length 0
+type: simnos
+help: disable paging (Dell 7xxx)
+mode:
+- user
+- enable

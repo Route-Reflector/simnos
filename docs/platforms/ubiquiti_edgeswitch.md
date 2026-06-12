@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -45,7 +56,6 @@ Static Entry Count Configured / Active / Max .. 0 / 0 / 128
 172.16.216.2     E2:91:F5:CC:E8:19  4/1             Dynamic    0h  2m 16s
 172.16.216.4     78:8A:20:44:02:7F  4/1             Local         n/a
 172.16.216.33    00:00:00:00:00:00  4/1             Dynamic    0h  0m  5s
-
 ```
 
 **Help:** execute the command "show arp"
@@ -68,7 +78,6 @@ Machine Model.................................. ES-24-250W
  Serial Number.................................. 788A20BE0E00
 Burned In MAC Address.......................... 78:8A:20:BE:0E:00
 Software Version............................... 1.8.0.5106045
-
 ```
 
 **Help:** execute the command "show version"
@@ -88,7 +97,6 @@ VLAN ID VLAN Name                        VLAN Type
 102     internet                         Static
 216     hjemmenett                       Static
 217     server                           Static
-
 ```
 
 **Help:** execute the command "show vlan"
@@ -111,7 +119,7 @@ VLAN ID VLAN Name                        VLAN Type
 
 **Output:** None
 
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - ubiquiti_edgeswitch>

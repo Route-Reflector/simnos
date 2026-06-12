@@ -1,0 +1,7 @@
+command: set terminal length 0
+type: simnos
+help: set the terminal to max width
+mode:
+- user
+- enable
+output: set_terminal_length_0.txt

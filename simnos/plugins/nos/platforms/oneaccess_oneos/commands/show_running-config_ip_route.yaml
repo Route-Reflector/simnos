@@ -1,0 +1,7 @@
+command: show running-config ip route
+type: simnos
+help: execute the command "show running-config ip route"
+mode:
+- user
+- enable
+output: show_running-config_ip_route.txt

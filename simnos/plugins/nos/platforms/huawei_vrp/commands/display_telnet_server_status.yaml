@@ -1,0 +1,7 @@
+command: display telnet server status
+type: simnos
+help: execute the command "display telnet server status"
+mode:
+- user
+- enable
+output: display_telnet_server_status.txt

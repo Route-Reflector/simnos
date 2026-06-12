@@ -1,0 +1,7 @@
+command: pveversion
+type: simnos
+help: execute the command "pveversion"
+mode:
+- user
+- enable
+output: pveversion.txt

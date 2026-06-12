@@ -1,0 +1,7 @@
+command: show interfaces brief
+type: simnos
+help: execute the command "show interfaces brief"
+mode:
+- user
+- enable
+output: show_interfaces_brief.txt

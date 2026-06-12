@@ -1,0 +1,7 @@
+command: traffic-profiling standard-profile show
+type: simnos
+help: execute the command "traffic-profiling standard-profile show"
+mode:
+- user
+- enable
+output: traffic-profiling_standard-profile_show.txt

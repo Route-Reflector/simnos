@@ -1,0 +1,7 @@
+command: show ip ospf neighbor
+type: simnos
+help: execute the command "show ip ospf neighbor"
+mode:
+- user
+- enable
+output: show_ip_ospf_neighbor.txt

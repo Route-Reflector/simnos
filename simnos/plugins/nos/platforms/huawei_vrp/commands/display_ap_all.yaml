@@ -1,0 +1,7 @@
+command: display ap all
+type: simnos
+help: execute the command "display ap all"
+mode:
+- user
+- enable
+output: display_ap_all.txt

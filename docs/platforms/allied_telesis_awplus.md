@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -15,6 +26,332 @@
 
 **Prompt:**
 - allied_telesis_awplus>
+
+### show arp
+
+**Output:**
+```
+ IP Address      MAC Address     Interface    Port        Type
+192.168.254.251 0000.cd37.06aa  vlan954      sa1         dynamic
+192.168.254.250 0000.cd37.06bb  vlan954      sa1         dynamic
+```
+
+**Help:** execute the command "show arp"
+
+**Prompt:**
+- allied_telesis_awplus>
+- allied_telesis_awplus#
+
+### show etherchannel summary
+
+**Output:**
+```
+Aggregator po7 (IfIndex: 4607)
+ Admin Key: 0007 - Oper Key 0007
+  Link: port1.0.7 (IfIndex: 5007) synchronized
+  Link: port1.0.8 (IfIndex: 5008) synchronized
+ Aggregator po8 (IfIndex: 4607)
+ Admin Key: 0008 - Oper Key 0008
+  Link: port1.0.9 (IfIndex: 5009) synchronized
+  Link: port1.0.10 (IfIndex: 5010) synchronized
+```
+
+**Help:** execute the command "show etherchannel summary"
+
+**Prompt:**
+- allied_telesis_awplus>
+- allied_telesis_awplus#
+
+### show interface
+
+**Output:**
+```
+Interface port1.1.1
+  Scope: both
+  Link is UP, administrative state is UP
+  Thrash-limiting
+    Status Not Detected, Action learn-disable, Timeout 1(s)
+  Hardware is Ethernet, address is 0000.cd37.0fcf
+  Description: To XXXXXXXXXXXX
+  index 5101 metric 1 mru 1500
+  current duplex full, current speed 10000, current polarity mdi
+  configured duplex auto, configured speed auto, configured polarity auto
+  <UP,BROADCAST,RUNNING,MULTICAST>
+  SNMP link-status traps: Sending (suppressed after 20 traps in 60 sec)
+    Link-status trap delay: 0 sec
+    input packets 9455362865, bytes 11289114945786, dropped 0, multicast packets 3410881
+    output packets 17173058785, bytes 12752872494347, multicast packets 513043665, broadcast packets 830156481
+    input average rate : 30 seconds 1.05 Mbps, 5 minutes 590.97 Kbps
+    output average rate: 30 seconds 1.64 Mbps, 5 minutes 919.28 Kbps
+    input peak rate 806.73 Mbps at 2023/01/12 23:32:30
+    output peak rate 806.80 Mbps at 2023/01/12 23:32:30
+  Time since last state change: 0 days 01:14:20
+Interface vlan1
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is VLAN, address is 0000.cd37.0fcf
+  IPv4 address 192.168.1.1/24 broadcast 192.168.1.255
+  index 301 metric 1 mtu 1500
+  arp ageing timeout 300
+  <UP,BROADCAST,RUNNING,MULTICAST>
+  VRF Binding: Associated with VRF01
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+    input packets 30729674, bytes 2331109561, dropped 206, multicast packets 1014964
+    output packets 117039344, bytes 5218779216, multicast packets 0, broadcast packets 0
+  Time since last state change: 134 days 01:22:08
+Interface vlan2
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is VLAN, address is 0000.cd37.0fcf
+  index 302 metric 1 mtu 1500
+  arp ageing timeout 300
+  <UP,BROADCAST,RUNNING,MULTICAST>
+  VRF Binding: Not bound
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+    input packets 0, bytes 0, dropped 0, multicast packets 0
+    output packets 0, bytes 0, multicast packets 0, broadcast packets 0
+  Time since last state change: 134 days 01:22:08
+Interface vlan3
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is VLAN, address is 0000.cd37.0fcf
+  IPv4 address 192.168.3.1/24 broadcast 192.168.3.255
+  index 303 metric 1 mtu 1500
+  arp ageing timeout 300
+  <UP,BROADCAST,RUNNING,MULTICAST>
+  VRF Binding: Associated with VRF01
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+    input packets 35361512, bytes 2570082989, dropped 0, multicast packets 360213
+    output packets 24669070, bytes 1441930633, multicast packets 0, broadcast packets 0
+  Time since last state change: 134 days 01:22:08
+Interface lo
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is Loopback
+  index 1 metric 1
+  <UP,LOOPBACK,RUNNING>
+  VRF Binding: Not bound
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+  Time since last state change: 134 days 01:59:44
+Interface lo1
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is Loopback
+  index 5 metric 1
+  <UP,RUNNING,NOARP>
+  VRF Binding: Associated with VRF01
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+  Time since last state change: 134 days 01:59:44
+Interface lo2
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is Loopback
+  index 6 metric 1
+  <UP,RUNNING,NOARP>
+  VRF Binding: Associated with VRF02
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+  Time since last state change: 134 days 01:59:44
+Interface lo3
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is Loopback
+  index 7 metric 1
+  <UP,RUNNING,NOARP>
+  VRF Binding: Associated with VRF03
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+  Time since last state change: 134 days 01:59:44
+Interface lo4
+  Scope: both
+  Link is UP, administrative state is UP
+  Hardware is Loopback
+  index 8 metric 1
+  <UP,RUNNING,NOARP>
+  VRF Binding: Associated with VRF04
+  SNMP link-status traps: Disabled
+  Router Advertisement is disabled
+  Router Advertisement default routes are accepted
+  Router Advertisement prefix info is accepted
+  Time since last state change: 134 days 01:59:44
+```
+
+**Help:** execute the command "show interface"
+
+**Prompt:**
+- allied_telesis_awplus>
+- allied_telesis_awplus#
+
+### show interface switchport
+
+**Output:**
+```
+ Interface name         : port1.0.1
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   767  793  794  811  900  964  973
+                             989 1111 2222
+ Dynamic Vlans           :
+ Interface name         : port1.0.2
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   767  793  794  811  900  964  973
+                             989 1111 2222
+ Dynamic Vlans           :
+ Interface name         : port1.0.3
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   795
+ Dynamic Vlans           :
+ Interface name         : port1.0.4
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   793
+ Dynamic Vlans           :
+ Interface name         : port1.0.5
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   794
+ Dynamic Vlans           :
+ Interface name         : port1.0.6
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   989
+ Dynamic Vlans           :
+ Interface name         : port1.0.7
+ Switchport mode        : access
+ Ingress filter          : enable
+ Acceptable frame types  : all
+ Default Vlan            : 989
+ Configured Vlans        :   989
+ Dynamic Vlans           :
+ Interface name         : port1.0.8
+ Switchport mode        : access
+ Ingress filter          : enable
+ Acceptable frame types  : all
+ Default Vlan            : 989
+ Configured Vlans        :   989
+ Dynamic Vlans           :
+ Interface name         : port1.0.9
+ Switchport mode        : access
+ Ingress filter          : enable
+ Acceptable frame types  : all
+ Default Vlan            : 989
+ Configured Vlans        :   989
+ Dynamic Vlans           :
+ Interface name         : port1.0.10
+ Switchport mode        : access
+ Ingress filter          : enable
+ Acceptable frame types  : all
+ Default Vlan            : 900
+ Configured Vlans        :   900
+ Dynamic Vlans           :
+ Interface name         : port1.0.11
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   989
+ Dynamic Vlans           :
+ Interface name         : port1.0.12
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   795
+ Dynamic Vlans           :
+ Interface name         : port1.0.13
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   479  767  793  794  811  900  964
+                             973  989 1111 2222
+ Dynamic Vlans           :
+ Interface name         : port1.0.23
+ Switchport mode        : trunk
+ Ingress filter          : enable
+ Acceptable frame types  : vlan-tagged only
+ Default Vlan            : None
+ Configured Vlans        :   504  508  767  793  794  811  883
+                             900  909  910  914  915  929  931
+                             952  954  955  964  973  989
+ Dynamic Vlans           :
+```
+
+**Help:** execute the command "show interface switchport"
+
+**Prompt:**
+- allied_telesis_awplus>
+- allied_telesis_awplus#
+
+### show ip route
+
+**Output:**
+```
+Codes: C - connected, S - static, R - RIP, B - BGP
+       O - OSPF, D - DHCP, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2
+       * - candidate default
+
+Gateway of last resort is 192.168.254.251 to network 0.0.0.0
+
+S*      0.0.0.0/0 [1/0] via 192.168.254.251, vlan954
+C       10.255.255.0/24 is directly connected, vlan795
+C       192.168.254.0/24 is directly connected, vlan954
+O       10.0.0.0/8 [110/20] via 192.168.254.251, vlan954
+O E1    172.16.23.0/24 [110/30] via 192.168.254.251, vlan954
+
+[VRF: DMZ]
+Gateway of last resort is 20.0.0.254 to network 0.0.0.0
+
+S*      0.0.0.0/0 [1/0] via 20.0.0.254, vlan511
+C       20.0.0.0/24 is directly connected, vlan511
+ 
+[VRF: AAA]
+Gateway of last resort is 2.0.0.254 to network 0.0.0.0
+
+S*      0.0.0.0/0 [1/0] via 2.0.0.254, vlan51
+C       2.0.0.0/24 is directly connected, vlan51
+```
+
+**Help:** execute the command "show ip route"
+
+**Prompt:**
+- allied_telesis_awplus>
+- allied_telesis_awplus#
 
 ### show lldp neighbors detail
 
@@ -168,21 +505,6 @@ Local port1.0.24:
 - allied_telesis_awplus>
 - allied_telesis_awplus#
 
-### show arp
-
-**Output:**
-```
- IP Address      MAC Address     Interface    Port        Type
-192.168.254.251 0000.cd37.06aa  vlan954      sa1         dynamic
-192.168.254.250 0000.cd37.06bb  vlan954      sa1         dynamic
-```
-
-**Help:** execute the command "show arp"
-
-**Prompt:**
-- allied_telesis_awplus>
-- allied_telesis_awplus#
-
 ### show mac address-table
 
 **Output:**
@@ -200,116 +522,23 @@ VLAN port             mac            fwd
 - allied_telesis_awplus>
 - allied_telesis_awplus#
 
-### show interface switchport
+### show static-channel-group
 
 **Output:**
 ```
- Interface name         : port1.0.1
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   767  793  794  811  900  964  973
-                             989 1111 2222
- Dynamic Vlans           :
- Interface name         : port1.0.2
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   767  793  794  811  900  964  973
-                             989 1111 2222
- Dynamic Vlans           :
- Interface name         : port1.0.3
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   795
- Dynamic Vlans           :
- Interface name         : port1.0.4
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   793
- Dynamic Vlans           :
- Interface name         : port1.0.5
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   794
- Dynamic Vlans           :
- Interface name         : port1.0.6
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   989
- Dynamic Vlans           :
- Interface name         : port1.0.7
- Switchport mode        : access
- Ingress filter          : enable
- Acceptable frame types  : all
- Default Vlan            : 989
- Configured Vlans        :   989
- Dynamic Vlans           :
- Interface name         : port1.0.8
- Switchport mode        : access
- Ingress filter          : enable
- Acceptable frame types  : all
- Default Vlan            : 989
- Configured Vlans        :   989
- Dynamic Vlans           :
- Interface name         : port1.0.9
- Switchport mode        : access
- Ingress filter          : enable
- Acceptable frame types  : all
- Default Vlan            : 989
- Configured Vlans        :   989
- Dynamic Vlans           :
- Interface name         : port1.0.10
- Switchport mode        : access
- Ingress filter          : enable
- Acceptable frame types  : all
- Default Vlan            : 900
- Configured Vlans        :   900
- Dynamic Vlans           :
- Interface name         : port1.0.11
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   989
- Dynamic Vlans           :
- Interface name         : port1.0.12
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   795
- Dynamic Vlans           :
- Interface name         : port1.0.13
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   479  767  793  794  811  900  964
-                             973  989 1111 2222
- Dynamic Vlans           :
- Interface name         : port1.0.23
- Switchport mode        : trunk
- Ingress filter          : enable
- Acceptable frame types  : vlan-tagged only
- Default Vlan            : None
- Configured Vlans        :   504  508  767  793  794  811  883
-                             900  909  910  914  915  929  931
-                             952  954  955  964  973  989
- Dynamic Vlans           :
+% Static Aggregator: sa11
+% Member: sa1
+   port1.1.1
+   port1.1.2
+   port1.1.3
+   port1.1.4
+% Static Aggregator: sa12
+% Member: sa2
+   port1.1.5
+   port1.1.6
 ```
 
-**Help:** execute the command "show interface switchport"
+**Help:** execute the command "show static-channel-group"
 
 **Prompt:**
 - allied_telesis_awplus>
@@ -352,168 +581,6 @@ System Location
 - allied_telesis_awplus>
 - allied_telesis_awplus#
 
-### show static-channel-group
-
-**Output:**
-```
-% Static Aggregator: sa11
-% Member: sa1
-   port1.1.1
-   port1.1.2
-   port1.1.3
-   port1.1.4
-% Static Aggregator: sa12
-% Member: sa2
-   port1.1.5
-   port1.1.6
-
-```
-
-**Help:** execute the command "show static-channel-group"
-
-**Prompt:**
-- allied_telesis_awplus>
-- allied_telesis_awplus#
-
-### show interface
-
-**Output:**
-```
-Interface port1.1.1
-  Scope: both
-  Link is UP, administrative state is UP
-  Thrash-limiting
-    Status Not Detected, Action learn-disable, Timeout 1(s)
-  Hardware is Ethernet, address is 0000.cd37.0fcf
-  Description: To XXXXXXXXXXXX
-  index 5101 metric 1 mru 1500
-  current duplex full, current speed 10000, current polarity mdi
-  configured duplex auto, configured speed auto, configured polarity auto
-  <UP,BROADCAST,RUNNING,MULTICAST>
-  SNMP link-status traps: Sending (suppressed after 20 traps in 60 sec)
-    Link-status trap delay: 0 sec
-    input packets 9455362865, bytes 11289114945786, dropped 0, multicast packets 3410881
-    output packets 17173058785, bytes 12752872494347, multicast packets 513043665, broadcast packets 830156481
-    input average rate : 30 seconds 1.05 Mbps, 5 minutes 590.97 Kbps
-    output average rate: 30 seconds 1.64 Mbps, 5 minutes 919.28 Kbps
-    input peak rate 806.73 Mbps at 2023/01/12 23:32:30
-    output peak rate 806.80 Mbps at 2023/01/12 23:32:30
-  Time since last state change: 0 days 01:14:20
-Interface vlan1
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is VLAN, address is 0000.cd37.0fcf
-  IPv4 address 192.168.1.1/24 broadcast 192.168.1.255
-  index 301 metric 1 mtu 1500
-  arp ageing timeout 300
-  <UP,BROADCAST,RUNNING,MULTICAST>
-  VRF Binding: Associated with VRF01
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-    input packets 30729674, bytes 2331109561, dropped 206, multicast packets 1014964
-    output packets 117039344, bytes 5218779216, multicast packets 0, broadcast packets 0
-  Time since last state change: 134 days 01:22:08
-Interface vlan2
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is VLAN, address is 0000.cd37.0fcf
-  index 302 metric 1 mtu 1500
-  arp ageing timeout 300
-  <UP,BROADCAST,RUNNING,MULTICAST>
-  VRF Binding: Not bound
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-    input packets 0, bytes 0, dropped 0, multicast packets 0
-    output packets 0, bytes 0, multicast packets 0, broadcast packets 0
-  Time since last state change: 134 days 01:22:08
-Interface vlan3
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is VLAN, address is 0000.cd37.0fcf
-  IPv4 address 192.168.3.1/24 broadcast 192.168.3.255
-  index 303 metric 1 mtu 1500
-  arp ageing timeout 300
-  <UP,BROADCAST,RUNNING,MULTICAST>
-  VRF Binding: Associated with VRF01
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-    input packets 35361512, bytes 2570082989, dropped 0, multicast packets 360213
-    output packets 24669070, bytes 1441930633, multicast packets 0, broadcast packets 0
-  Time since last state change: 134 days 01:22:08
-Interface lo
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is Loopback
-  index 1 metric 1
-  <UP,LOOPBACK,RUNNING>
-  VRF Binding: Not bound
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-  Time since last state change: 134 days 01:59:44
-Interface lo1
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is Loopback
-  index 5 metric 1
-  <UP,RUNNING,NOARP>
-  VRF Binding: Associated with VRF01
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-  Time since last state change: 134 days 01:59:44
-Interface lo2
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is Loopback
-  index 6 metric 1
-  <UP,RUNNING,NOARP>
-  VRF Binding: Associated with VRF02
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-  Time since last state change: 134 days 01:59:44
-Interface lo3
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is Loopback
-  index 7 metric 1
-  <UP,RUNNING,NOARP>
-  VRF Binding: Associated with VRF03
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-  Time since last state change: 134 days 01:59:44
-Interface lo4
-  Scope: both
-  Link is UP, administrative state is UP
-  Hardware is Loopback
-  index 8 metric 1
-  <UP,RUNNING,NOARP>
-  VRF Binding: Associated with VRF04
-  SNMP link-status traps: Disabled
-  Router Advertisement is disabled
-  Router Advertisement default routes are accepted
-  Router Advertisement prefix info is accepted
-  Time since last state change: 134 days 01:59:44
-```
-
-**Help:** execute the command "show interface"
-
-**Prompt:**
-- allied_telesis_awplus>
-- allied_telesis_awplus#
-
 ### show vlan all
 
 **Output:**
@@ -545,68 +612,11 @@ VLAN ID  Name            Type    State   Member ports
 - allied_telesis_awplus>
 - allied_telesis_awplus#
 
-### show ip route
-
-**Output:**
-```
-Codes: C - connected, S - static, R - RIP, B - BGP
-       O - OSPF, D - DHCP, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2
-       * - candidate default
-
-Gateway of last resort is 192.168.254.251 to network 0.0.0.0
-
-S*      0.0.0.0/0 [1/0] via 192.168.254.251, vlan954
-C       10.255.255.0/24 is directly connected, vlan795
-C       192.168.254.0/24 is directly connected, vlan954
-O       10.0.0.0/8 [110/20] via 192.168.254.251, vlan954
-O E1    172.16.23.0/24 [110/30] via 192.168.254.251, vlan954
-
-[VRF: DMZ]
-Gateway of last resort is 20.0.0.254 to network 0.0.0.0
-
-S*      0.0.0.0/0 [1/0] via 20.0.0.254, vlan511
-C       20.0.0.0/24 is directly connected, vlan511
- 
-[VRF: AAA]
-Gateway of last resort is 2.0.0.254 to network 0.0.0.0
-
-S*      0.0.0.0/0 [1/0] via 2.0.0.254, vlan51
-C       2.0.0.0/24 is directly connected, vlan51
-```
-
-**Help:** execute the command "show ip route"
-
-**Prompt:**
-- allied_telesis_awplus>
-- allied_telesis_awplus#
-
-### show etherchannel summary
-
-**Output:**
-```
-Aggregator po7 (IfIndex: 4607)
- Admin Key: 0007 - Oper Key 0007
-  Link: port1.0.7 (IfIndex: 5007) synchronized
-  Link: port1.0.8 (IfIndex: 5008) synchronized
- Aggregator po8 (IfIndex: 4607)
- Admin Key: 0008 - Oper Key 0008
-  Link: port1.0.9 (IfIndex: 5009) synchronized
-  Link: port1.0.10 (IfIndex: 5010) synchronized
-```
-
-**Help:** execute the command "show etherchannel summary"
-
-**Prompt:**
-- allied_telesis_awplus>
-- allied_telesis_awplus#
-
 ### terminal length 0
 
 **Output:** None
 
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal length 0. This automatically generated.
 
 **Prompt:**
 - allied_telesis_awplus>

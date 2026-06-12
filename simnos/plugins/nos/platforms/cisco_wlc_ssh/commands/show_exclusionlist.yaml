@@ -1,0 +1,7 @@
+command: show exclusionlist
+type: simnos
+help: execute the command "show exclusionlist"
+mode:
+- user
+- enable
+output: show_exclusionlist.txt

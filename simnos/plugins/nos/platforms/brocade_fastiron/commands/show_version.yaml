@@ -1,0 +1,8 @@
+command: show version
+type: simnos
+help: execute the command "show version"
+mode:
+- user
+- enable
+- config
+output: show_version.txt

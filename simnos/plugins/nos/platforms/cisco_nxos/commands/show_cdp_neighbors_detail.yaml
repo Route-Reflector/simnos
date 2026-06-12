@@ -1,0 +1,7 @@
+command: show cdp neighbors detail
+type: simnos
+help: execute the command "show cdp neighbors detail"
+mode:
+- user
+- enable
+output: show_cdp_neighbors_detail.txt

@@ -1,0 +1,7 @@
+command: show interface detailed id
+type: simnos
+help: execute the command "show interface detailed id"
+mode:
+- user
+- enable
+output: show_interface_detailed_id.txt

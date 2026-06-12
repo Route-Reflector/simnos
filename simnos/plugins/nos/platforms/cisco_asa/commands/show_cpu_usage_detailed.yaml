@@ -1,0 +1,7 @@
+command: show cpu usage detailed
+type: simnos
+help: execute the command "show cpu usage detailed"
+mode:
+- user
+- enable
+output: show_cpu_usage_detailed.txt

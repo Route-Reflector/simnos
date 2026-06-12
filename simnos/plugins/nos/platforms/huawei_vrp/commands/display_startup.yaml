@@ -1,0 +1,7 @@
+command: display startup
+type: simnos
+help: execute the command "display startup"
+mode:
+- user
+- enable
+output: display_startup.txt

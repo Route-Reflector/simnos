@@ -1,0 +1,7 @@
+command: show ntp servers
+type: simnos
+help: execute the command "show ntp servers"
+mode:
+- user
+- enable
+output: show_ntp_servers.txt

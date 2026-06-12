@@ -1,0 +1,11 @@
+command: display bgp peer ipv4
+type: simnos
+help: execute the command "display bgp peer ipv4"
+mode:
+- user
+- config
+variants:
+- name: variant_1
+  output: display_bgp_peer_ipv4__variant_1.txt
+- name: variant_2
+  output: display_bgp_peer_ipv4__variant_2.txt

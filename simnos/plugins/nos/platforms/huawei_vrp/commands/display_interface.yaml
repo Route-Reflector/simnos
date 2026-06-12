@@ -1,0 +1,7 @@
+command: display interface
+type: simnos
+help: execute the command "display interface"
+mode:
+- user
+- enable
+output: display_interface.txt

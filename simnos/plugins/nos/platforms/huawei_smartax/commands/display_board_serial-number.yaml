@@ -1,0 +1,7 @@
+command: display board serial-number
+type: simnos
+help: execute the command "display board serial-number"
+mode:
+- user
+- enable
+output: display_board_serial-number.txt

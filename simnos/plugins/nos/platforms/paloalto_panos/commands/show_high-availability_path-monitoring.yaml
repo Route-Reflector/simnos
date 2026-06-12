@@ -1,0 +1,6 @@
+command: show high-availability path-monitoring
+type: simnos
+help: execute the command "show high-availability path-monitoring"
+mode:
+- user
+output: show_high-availability_path-monitoring.txt

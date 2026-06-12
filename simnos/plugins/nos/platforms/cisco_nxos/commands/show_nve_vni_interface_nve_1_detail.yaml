@@ -1,0 +1,7 @@
+command: show nve vni interface nve 1 detail
+type: simnos
+help: execute the command "show nve vni interface nve 1 detail"
+mode:
+- user
+- enable
+output: show_nve_vni_interface_nve_1_detail.txt

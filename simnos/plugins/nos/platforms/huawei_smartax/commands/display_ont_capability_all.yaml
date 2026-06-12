@@ -1,0 +1,7 @@
+command: display ont capability all
+type: simnos
+help: execute the command "display ont capability all"
+mode:
+- user
+- enable
+output: display_ont_capability_all.txt

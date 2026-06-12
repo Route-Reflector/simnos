@@ -1,0 +1,7 @@
+command: cfg static route get
+type: simnos
+help: execute the command "cfg static route get"
+mode:
+- user
+- enable
+output: cfg_static_route_get.txt

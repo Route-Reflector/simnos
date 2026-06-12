@@ -1,0 +1,6 @@
+command: get hardware nic nic-name
+type: simnos
+help: execute the command "get hardware nic nic-name"
+mode:
+- user
+output: get_hardware_nic_nic-name.txt

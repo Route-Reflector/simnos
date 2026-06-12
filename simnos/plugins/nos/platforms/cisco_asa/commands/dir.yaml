@@ -1,0 +1,7 @@
+command: dir
+type: simnos
+help: execute the command "dir"
+mode:
+- user
+- enable
+output: dir.txt

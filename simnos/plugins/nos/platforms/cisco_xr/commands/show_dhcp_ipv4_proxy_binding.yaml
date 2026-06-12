@@ -1,0 +1,7 @@
+command: show dhcp ipv4 proxy binding
+type: simnos
+help: execute the command "show dhcp ipv4 proxy binding"
+mode:
+- user
+- enable
+output: show_dhcp_ipv4_proxy_binding.txt

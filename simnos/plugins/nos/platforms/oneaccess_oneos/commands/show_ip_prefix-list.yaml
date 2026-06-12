@@ -1,0 +1,7 @@
+command: show ip prefix-list
+type: simnos
+help: execute the command "show ip prefix-list"
+mode:
+- user
+- enable
+output: show_ip_prefix-list.txt

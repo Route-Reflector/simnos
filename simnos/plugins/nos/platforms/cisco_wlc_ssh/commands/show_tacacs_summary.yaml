@@ -1,0 +1,7 @@
+command: show tacacs summary
+type: simnos
+help: execute the command "show tacacs summary"
+mode:
+- user
+- enable
+output: show_tacacs_summary.txt

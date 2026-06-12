@@ -1,0 +1,7 @@
+command: display sysman service state
+type: simnos
+help: execute the command "display sysman service state"
+mode:
+- user
+- enable
+output: display_sysman_service_state.txt

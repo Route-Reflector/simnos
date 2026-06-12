@@ -1,0 +1,7 @@
+command: display ont info summary ont
+type: simnos
+help: execute the command "display ont info summary ont"
+mode:
+- user
+- enable
+output: display_ont_info_summary_ont.txt

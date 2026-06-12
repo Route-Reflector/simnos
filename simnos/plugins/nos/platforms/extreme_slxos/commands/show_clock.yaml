@@ -1,0 +1,6 @@
+command: show clock
+type: simnos
+help: execute the command "show clock"
+mode:
+- user
+output: show_clock.txt

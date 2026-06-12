@@ -56,9 +56,10 @@ New platform contributions are welcome! A few things to keep in mind:
 
 - **Real device verification is your responsibility.** The maintainer often does not have access to the actual hardware. Please test your platform against real device output (or well-known reference data) before submitting.
 - **If the platform isn't in [NTC Templates](https://github.com/networktocode/ntc-templates) yet**, consider contributing a parser there as well. It benefits the entire network automation ecosystem, and SIMNOS uses NTC test data as a source for command outputs.
-- **Platform YAML structure**: Look at existing platforms in `simnos/plugins/nos/platforms_yaml/` for reference. Each platform needs at minimum:
-  - `initial_prompt` — the default CLI prompt
-  - `commands` — a mapping of command names to their output, help text, and prompt
+- **A3 platform structure**: Look at existing platforms in `simnos/plugins/nos/platforms/` for reference. Each platform is a directory with at minimum:
+  - `platform.yaml` — the modes (name → prompt template) and `initial_mode`
+  - `commands/<stem>.yaml` — one command per file (`command` field is the source of truth), each with its output, help text, and modes
+  - adjacent `commands/<stem>.txt` — the literal command output
 - See the [Creating New Platforms](https://route-reflector.github.io/simnos/development/creating_new_platforms/) guide for details.
 
 ## Development Setup

@@ -1,0 +1,7 @@
+command: show ip as-path-access-list
+type: simnos
+help: execute the command "show ip as-path-access-list"
+mode:
+- user
+- enable
+output: show_ip_as-path-access-list.txt

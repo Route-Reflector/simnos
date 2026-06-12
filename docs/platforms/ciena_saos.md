@@ -7,6 +7,29 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### chassis show temperature
+
+**Output:**
+```
++- TEMPERATURE THRESHOLD -+
+| Low        | High       |
++------------+------------+
+ | -40 C      | 65  C      |
++------------+------------+
+
++--- TEMPERATURE STATUS --+
+| Current | Low   | High  |
++---------+-------+-------+
+| 19  C   | 17  C | 20  C |
++---------+-------+-------+
+```
+
+**Help:** execute the command "chassis show temperature"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
 ### enable
 
 **Output:** None
@@ -16,11 +39,192 @@
 **Prompt:**
 - ciena_saos>
 
-### system shell session set more off
+### lldp show neighbors
 
-**Output:** None
+**Output:**
+```
++--------------------------------------------------------------------------------------------------------------+
+|                                                LLDP Neighbors                                                |
++--------------------------------------------------------------------------------------------------------------+
+| Remote Addr: 10.8.91.1                                                                                       |
+| Remote Addr: 10.8.128.39                                                                                     |
+| Remote Addr: fe80::9e7a:3ff:fed1:cd1                                                                         |
+| Remote Addr: fe80::9e7a:3ff:fed1:cdf                                                                         |
+| System Name: LAB_00009-SDS39-100                                                                             |
+| System Desc: Ciena 3916 Service Delivery Switch                                                              |
++-------------+------------------------------------------------------------------------------------------------+
+|Local        |                                              Remote                                            |
++-------------+--------------------------------+---------------------------------------------------------------+
+|Port         |Port                            |Info                                                           |
++-------------+--------------------------------+---------------------------------------------------------------+
+|5            |6                               |  Chassis Id: 9C7A03A10D60                                     |
+|             |                                |   Mgmt Addr: 10.8.91.2                                        |
+|             |                                |              10.8.128.40                                      |
+|             |                                |              fe80::9e7a:3ff:fed1:d61                          |
+|             |                                |              fe80::9e7a:3ff:fed1:d6f                          |
+|             |                                | System Name: LAB_SDS39-200                                    |
+|             |                                | System Desc: Ciena 3916 Service Delivery Switch               |
+|             |                                | SyncE Suppt: Not Supported                                    |
+|             |                                | SyncE Confg: Not Configured                                   |
++-------------+--------------------------------+---------------------------------------------------------------+
+|6            |3                               |  Chassis Id: 9C7A03B86040                                     |
+|             |                                |   Mgmt Addr: 10.8.90.250                                      |
+|             |                                |              10.8.130.1                                       |
+|             |                                |              fe80::9e7a:3ff:fec8:6040                         |
+|             |                                |              fe80::9e7a:3ff:fec8:6041                         |
+|             |                                | System Name: LAB_SAS51-100                                    |
+|             |                                | System Desc: Ciena 5142 Service Aggregation Switch            |
+|             |                                | SyncE Suppt: Input and Output                                 |
+|             |                                | SyncE Confg: Not Configured                                   |
++-------------+--------------------------------+---------------------------------------------------------------+
+```
 
-**Help:** It enters the machine-to-machine interface mode (mmi-mode)
+**Help:** execute the command "lldp show neighbors"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### port show
+
+**Output:**
+```
++--------------- PORT GLOBAL CONFIGURATION ----------------+
+|            Parameter             |       Value           |
++----------------------------------+-----------------------+
+ | Rx Low Power Detect Admin State  | Disabled              |
++----------------------------------+-----------------------+
+ +-------------------------------------------------------------------------------+
+ | Port Table        |           Operational Status            |  Admin Config   |
+|---------+---------+----+--------------+----+---+-------+----+----+-------+----|
+ | Port    | Port    |    |  Link State  |    |   |       |Auto|    |       |Auto|
+ | Name    | Type    |Link|   Duration   |XCVR|STP| Mode  |Neg |Link| Mode  |Neg |
+|---------+---------+----+--------------+----+---+-------+----+----+-------+----|
+ | 1.11    |100/G    | Up |  30d 2h24m21s|Ena |Dis|1000/FD| On |Ena |Auto/FD| On |
+| 2.1     |100G/Gig |Down|   0d 0h 0m 0s|UCTF|Dis|       |    |Ena |Auto/FD| On |
+| 3       |10/100/G | Up |  30d 1h55m12s|Ena |Dis|1000/FD| On |Ena |Auto/FD| On |
+| 4       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 5       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 6       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 7       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 8       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 9       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 10      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 11      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 12      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 13      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 14      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 15      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 16      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 17      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 18      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 19      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 20      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 21      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 22      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 23      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| 24      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
+| LAG1    | LAG     | Up |  30d 2h24m21s|    |FWD|       |    |Ena |       |    |
+| LAG2    | LAG     | Up |  30d 1h55m11s|    |FWD|       |    |Ena |       |    |
+| LATERAL | LAG     |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |       |    |
++---------+---------+----+--------------+----+---+-------+----+----+-------+----+
+```
+
+**Help:** execute the command "port show"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### port show ethernet-config
+
+**Output:**
+```
++------------------------ PORT ETHERNET CONFIGURATION -------------------------+
+|        |         |       |      |     |    |    |     |      |    Mirror     |
+| Port   | Port    | Admin |      |     |    | FC | Auto| MTU  |    Status     |
+| Name   | Type    | Status| Speed| Dplx| FC | Adv| Neg | Size |State| Eg | Ig |
++--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
+| 1      | 10/100/G| Dis   | Auto | ??  |off |off | On  | 9100 | Off | 0  | 0  |
+| 2      | 10/100/G| Ena   | Auto | ??  |off |off | On  | 9100 | Off | 0  | 0  |
+| 3      | 100/G   | Ena   | 100  | ??  |off |off | Off | 9100 | Off | 0  | 0  |
+| 4      | 100/G   | Ena   | 1000 | ??  |off |off | On  | 9100 | Off | 0  | 0  |
+| 5      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  | 0  |
+| 6      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  | 0  |
++--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
+```
+
+**Help:** execute the command "port show ethernet-config"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### port show network-config
+
+**Output:**
+```
++----------------------------- PORT NETWORK CONFIGURATION ------------------------------+
+|         |     | Accpt  |Untag  |VLAN   |VS     |Egress |VS     |Ingress| VPLS  |Eth VC|
+| Port    |     | Frame  |Ingress|Ingress|Ingress|Untag  |Egress |CoS    | Port  |Ether-|
+| Name    |PVID | Type   |Vid    |Filter |Filter |VLAN   |Filter |Policy | Type  |Type  |
++---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
+| 1       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
+| 2       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
+| 3       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
+| 4       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Subsc | 8100 |
+| 5       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Ntwrk | 8100 |
+| 6       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Ntwrk | 8100 |
++---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
+```
+
+**Help:** execute the command "port show network-config"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### port show status
+
+**Output:**
+```
++---------------------------- PORT OPERATIONAL STATUS ----------------------------+
+|    |                               |    |Link State|    |   |Speed/ |MTU  |Flow |
+| ## | Description                   |Link|Duration  |XCVR|STP|Duplex |Size |Ctrl |
++----+-------------------------------+----+----------+----+---+-------+-----+-----+
+|1   |ACL_3360610_71CHA              |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+|2   |UNI-Port2                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+|3   |UNI-Port3                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+|4   |NNI-Ringport                   |Down|  0h 0m 0s|    |Dis|       | 9100|     |
+|5   |NNI-Ringport                   | Up |268d 1h12m|Ena |FWD|1000/FD| 9216|off  |
+|6   |NNI-Ringport                   | Up |268d 1h14m|Ena |FWD|1000/FD| 9216|off  |
++----+-------------------------------+----+----------+----+---+-------+-----+-----+
+```
+
+**Help:** execute the command "port show status"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### port xcvr show
+
+**Output:**
+```
++----+-----+-----+---------Transceiver-Status------------+-----+----------------+----+
+|    |Admin| Oper|                                       |Ciena|Ether Medium &  |Diag|
+|Port|State|State|      Vendor Name & Part Number        | Rev |Connector Type  |Data|
++----+-----+-----+---------------------------------------+-----+----------------+----+
+|1   |Empty|     |                                       |     |                |    |
+|2   |Empty|     |                                       |     |                |    |
+|3   |Empty|     |                                       |     |                |    |
+|4   |Empty|     |                                       |     |                |    |
+|5   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes |
+|6   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes |
++----+-----+-----+---------------------------------------+-----+----------------+----+
+```
+
+**Help:** execute the command "port xcvr show"
 
 **Prompt:**
 - ciena_saos>
@@ -73,10 +277,77 @@
 |LAG2   |Up|Dis| DIS|FWD |FWD | 8|   20000|T| F| F|AUTO|T |  0| 0|0030D04:22:36|
  |LATERAL|--|Ena| DIS|DISC| DIS| 8| ------ |T| F| F|AUTO| F|  0| 0|0000D00:00:00|
 +-------+--+---+----+----+----+--+--------+-+--+--+----+--+---+--+-------------+
-
 ```
 
 **Help:** execute the command "rstp show"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### software show
+
+**Output:**
+```
++------------------------------------------------------------------------------+
+ | Installed Package   : saos-06-18-00-1848                                     |
+| Running Package     : saos-06-18-00-1848                                     |
+| Application Build   : 17704                                                  |
+| Package Build Info  : Thu Feb 21 04:19:00 2019 autouser onxvpnjk02           |
+| Running Kernel      : 3.10.54-grsec                                          |
+| Running MIB Version : 04-18-00-0028                                          |
+| Release Status      : GA                                                     |
++------------------------------------------------------------------------------+
+ | Running bank        : B                                                      |
+| Bank package version: saos-06-18-00-1848                                     |
+| Bootloader version  : 17704                                                  |
+| Bootloader status   : valid                                                  |
+| Bank status         : valid (validated    17hr  7min 15sec ago)              |
+| Standby bank        : A                                                      |
+| Bank package version: saos-06-15-00-0242                                     |
+| Bootloader version  : 12760                                                  |
+| Bootloader status   : valid                                                  |
+| Bank status         : valid (validated    17hr  6min 51sec ago)              |
++------------------------------------------------------------------------------+
+ | Last command file: unknown                                                   |
+| Last configuration file: unknown                                             |
++------------------------------------------------------------------------------+
+```
+
+**Help:** execute the command "software show"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### ssh server show key
+
+**Output:**
+```
++---------------------------- SSH SERVER KEY --------------------------------+
+ | Key Status              | Generated                                        |
+| Key Fingerprint [MD5]   | 1a:1d:1c:1e:da:11:1d:1d:11:aa:11:11:11:a1:11:1c  |
++-------------------------+--------------------------------------------------+
+ 
++------------------------ SSH PUBLIC KEY AUTHENTICATION USERS ------------------------+
+ | Username                         | Key Status                                       |
++----------------------------------+--------------------------------------------------+
+ | abc1                             | installed                                        |
+| abc2                             | installed                                        |
++----------------------------------+--------------------------------------------------+
+```
+
+**Help:** execute the command "ssh server show key"
+
+**Prompt:**
+- ciena_saos>
+- ciena_saos#
+
+### system shell session set more off
+
+**Output:** None
+
+**Help:** It enters the machine-to-machine interface mode (mmi-mode)
 
 **Prompt:**
 - ciena_saos>
@@ -137,285 +408,6 @@
 ```
 
 **Help:** execute the command "vlan show"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### chassis show temperature
-
-**Output:**
-```
-+- TEMPERATURE THRESHOLD -+
-| Low        | High       |
-+------------+------------+
- | -40 C      | 65  C      |
-+------------+------------+
-
-+--- TEMPERATURE STATUS --+
-| Current | Low   | High  |
-+---------+-------+-------+
-| 19  C   | 17  C | 20  C |
-+---------+-------+-------+
-```
-
-**Help:** execute the command "chassis show temperature"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### software show
-
-**Output:**
-```
-+------------------------------------------------------------------------------+
- | Installed Package   : saos-06-18-00-1848                                     |
-| Running Package     : saos-06-18-00-1848                                     |
-| Application Build   : 17704                                                  |
-| Package Build Info  : Thu Feb 21 04:19:00 2019 autouser onxvpnjk02           |
-| Running Kernel      : 3.10.54-grsec                                          |
-| Running MIB Version : 04-18-00-0028                                          |
-| Release Status      : GA                                                     |
-+------------------------------------------------------------------------------+
- | Running bank        : B                                                      |
-| Bank package version: saos-06-18-00-1848                                     |
-| Bootloader version  : 17704                                                  |
-| Bootloader status   : valid                                                  |
-| Bank status         : valid (validated    17hr  7min 15sec ago)              |
-| Standby bank        : A                                                      |
-| Bank package version: saos-06-15-00-0242                                     |
-| Bootloader version  : 12760                                                  |
-| Bootloader status   : valid                                                  |
-| Bank status         : valid (validated    17hr  6min 51sec ago)              |
-+------------------------------------------------------------------------------+
- | Last command file: unknown                                                   |
-| Last configuration file: unknown                                             |
-+------------------------------------------------------------------------------+
-
-```
-
-**Help:** execute the command "software show"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### port show
-
-**Output:**
-```
-+--------------- PORT GLOBAL CONFIGURATION ----------------+
-|            Parameter             |       Value           |
-+----------------------------------+-----------------------+
- | Rx Low Power Detect Admin State  | Disabled              |
-+----------------------------------+-----------------------+
- +-------------------------------------------------------------------------------+
- | Port Table        |           Operational Status            |  Admin Config   |
-|---------+---------+----+--------------+----+---+-------+----+----+-------+----|
- | Port    | Port    |    |  Link State  |    |   |       |Auto|    |       |Auto|
- | Name    | Type    |Link|   Duration   |XCVR|STP| Mode  |Neg |Link| Mode  |Neg |
-|---------+---------+----+--------------+----+---+-------+----+----+-------+----|
- | 1.11    |100/G    | Up |  30d 2h24m21s|Ena |Dis|1000/FD| On |Ena |Auto/FD| On |
-| 2.1     |100G/Gig |Down|   0d 0h 0m 0s|UCTF|Dis|       |    |Ena |Auto/FD| On |
-| 3       |10/100/G | Up |  30d 1h55m12s|Ena |Dis|1000/FD| On |Ena |Auto/FD| On |
-| 4       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 5       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 6       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 7       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 8       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 9       | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 10      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 11      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 12      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 13      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 14      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 15      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 16      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 17      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 18      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 19      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 20      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 21      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 22      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 23      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| 24      | G/10Gig |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |Auto/FD| On |
-| LAG1    | LAG     | Up |  30d 2h24m21s|    |FWD|       |    |Ena |       |    |
-| LAG2    | LAG     | Up |  30d 1h55m11s|    |FWD|       |    |Ena |       |    |
-| LATERAL | LAG     |Down|   0d 0h 0m 0s|    |Dis|       |    |Ena |       |    |
-+---------+---------+----+--------------+----+---+-------+----+----+-------+----+
-```
-
-**Help:** execute the command "port show"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### ssh server show key
-
-**Output:**
-```
-+---------------------------- SSH SERVER KEY --------------------------------+
- | Key Status              | Generated                                        |
-| Key Fingerprint [MD5]   | 1a:1d:1c:1e:da:11:1d:1d:11:aa:11:11:11:a1:11:1c  |
-+-------------------------+--------------------------------------------------+
- 
-+------------------------ SSH PUBLIC KEY AUTHENTICATION USERS ------------------------+
- | Username                         | Key Status                                       |
-+----------------------------------+--------------------------------------------------+
- | abc1                             | installed                                        |
-| abc2                             | installed                                        |
-+----------------------------------+--------------------------------------------------+
-
-```
-
-**Help:** execute the command "ssh server show key"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### lldp show neighbors
-
-**Output:**
-```
-+--------------------------------------------------------------------------------------------------------------+
-|                                                LLDP Neighbors                                                |
-+--------------------------------------------------------------------------------------------------------------+
-| Remote Addr: 10.8.91.1                                                                                       |
-| Remote Addr: 10.8.128.39                                                                                     |
-| Remote Addr: fe80::9e7a:3ff:fed1:cd1                                                                         |
-| Remote Addr: fe80::9e7a:3ff:fed1:cdf                                                                         |
-| System Name: LAB_00009-SDS39-100                                                                             |
-| System Desc: Ciena 3916 Service Delivery Switch                                                              |
-+-------------+------------------------------------------------------------------------------------------------+
-|Local        |                                              Remote                                            |
-+-------------+--------------------------------+---------------------------------------------------------------+
-|Port         |Port                            |Info                                                           |
-+-------------+--------------------------------+---------------------------------------------------------------+
-|5            |6                               |  Chassis Id: 9C7A03A10D60                                     |
-|             |                                |   Mgmt Addr: 10.8.91.2                                        |
-|             |                                |              10.8.128.40                                      |
-|             |                                |              fe80::9e7a:3ff:fed1:d61                          |
-|             |                                |              fe80::9e7a:3ff:fed1:d6f                          |
-|             |                                | System Name: LAB_SDS39-200                                    |
-|             |                                | System Desc: Ciena 3916 Service Delivery Switch               |
-|             |                                | SyncE Suppt: Not Supported                                    |
-|             |                                | SyncE Confg: Not Configured                                   |
-+-------------+--------------------------------+---------------------------------------------------------------+
-|6            |3                               |  Chassis Id: 9C7A03B86040                                     |
-|             |                                |   Mgmt Addr: 10.8.90.250                                      |
-|             |                                |              10.8.130.1                                       |
-|             |                                |              fe80::9e7a:3ff:fec8:6040                         |
-|             |                                |              fe80::9e7a:3ff:fec8:6041                         |
-|             |                                | System Name: LAB_SAS51-100                                    |
-|             |                                | System Desc: Ciena 5142 Service Aggregation Switch            |
-|             |                                | SyncE Suppt: Input and Output                                 |
-|             |                                | SyncE Confg: Not Configured                                   |
-+-------------+--------------------------------+---------------------------------------------------------------+
-
-```
-
-**Help:** execute the command "lldp show neighbors"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### port show ethernet-config
-
-**Output:**
-```
-+------------------------ PORT ETHERNET CONFIGURATION -------------------------+
-|        |         |       |      |     |    |    |     |      |    Mirror     |
-| Port   | Port    | Admin |      |     |    | FC | Auto| MTU  |    Status     |
-| Name   | Type    | Status| Speed| Dplx| FC | Adv| Neg | Size |State| Eg | Ig |
-+--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
-| 1      | 10/100/G| Dis   | Auto | ??  |off |off | On  | 9100 | Off | 0  | 0  |
-| 2      | 10/100/G| Ena   | Auto | ??  |off |off | On  | 9100 | Off | 0  | 0  |
-| 3      | 100/G   | Ena   | 100  | ??  |off |off | Off | 9100 | Off | 0  | 0  |
-| 4      | 100/G   | Ena   | 1000 | ??  |off |off | On  | 9100 | Off | 0  | 0  |
-| 5      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  | 0  |
-| 6      | Gig     | Ena   | 1000 | Full|off |off | Off | 9216 | Off | 0  | 0  |
-+--------+---------+-------+------+-----+----+----+-----+------+-----+----+----+
-
-```
-
-**Help:** execute the command "port show ethernet-config"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### port show network-config
-
-**Output:**
-```
-+----------------------------- PORT NETWORK CONFIGURATION ------------------------------+
-|         |     | Accpt  |Untag  |VLAN   |VS     |Egress |VS     |Ingress| VPLS  |Eth VC|
-| Port    |     | Frame  |Ingress|Ingress|Ingress|Untag  |Egress |CoS    | Port  |Ether-|
-| Name    |PVID | Type   |Vid    |Filter |Filter |VLAN   |Filter |Policy | Type  |Type  |
-+---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
-| 1       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
-| 2       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
-| 3       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Subsc | 8100 |
-| 4       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Subsc | 8100 |
-| 5       | 1   | All    | 0     | Ena   | Ena   | 1     | Dis   | leave | Ntwrk | 8100 |
-| 6       | 1   | All    | 0     | Ena   | Dis   | 1     | Dis   | leave | Ntwrk | 8100 |
-+---------+-----+--------+-------+-------+-------+-------+-------+-------+-------+------+
-
-```
-
-**Help:** execute the command "port show network-config"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### port show status
-
-**Output:**
-```
-+---------------------------- PORT OPERATIONAL STATUS ----------------------------+
-|    |                               |    |Link State|    |   |Speed/ |MTU  |Flow |
-| ## | Description                   |Link|Duration  |XCVR|STP|Duplex |Size |Ctrl |
-+----+-------------------------------+----+----------+----+---+-------+-----+-----+
-|1   |ACL_3360610_71CHA              |Down|  0h 0m 0s|    |Dis|       | 9100|     |
-|2   |UNI-Port2                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
-|3   |UNI-Port3                      |Down|  0h 0m 0s|    |Dis|       | 9100|     |
-|4   |NNI-Ringport                   |Down|  0h 0m 0s|    |Dis|       | 9100|     |
-|5   |NNI-Ringport                   | Up |268d 1h12m|Ena |FWD|1000/FD| 9216|off  |
-|6   |NNI-Ringport                   | Up |268d 1h14m|Ena |FWD|1000/FD| 9216|off  |
-+----+-------------------------------+----+----------+----+---+-------+-----+-----+
-
-```
-
-**Help:** execute the command "port show status"
-
-**Prompt:**
-- ciena_saos>
-- ciena_saos#
-
-### port xcvr show
-
-**Output:**
-```
-+----+-----+-----+---------Transceiver-Status------------+-----+----------------+----+
-|    |Admin| Oper|                                       |Ciena|Ether Medium &  |Diag|
-|Port|State|State|      Vendor Name & Part Number        | Rev |Connector Type  |Data|
-+----+-----+-----+---------------------------------------+-----+----------------+----+
-|1   |Empty|     |                                       |     |                |    |
-|2   |Empty|     |                                       |     |                |    |
-|3   |Empty|     |                                       |     |                |    |
-|4   |Empty|     |                                       |     |                |    |
-|5   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes |
-|6   |Ena  |Ena  |CIENA-LMT XCVR-A40Y31 Rev0003          |A    |1000BASE-LX/LC  |Yes |
-+----+-----+-----+---------------------------------------+-----+----------------+----+
-
-```
-
-**Help:** execute the command "port xcvr show"
 
 **Prompt:**
 - ciena_saos>

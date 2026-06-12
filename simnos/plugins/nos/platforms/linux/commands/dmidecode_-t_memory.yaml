@@ -1,0 +1,7 @@
+command: dmidecode -t memory
+type: simnos
+help: execute the command "dmidecode -t memory"
+mode:
+- user
+- enable
+output: dmidecode_-t_memory.txt

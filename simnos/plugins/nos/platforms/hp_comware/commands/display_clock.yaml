@@ -1,0 +1,7 @@
+command: display clock
+type: simnos
+help: execute the command "display clock"
+mode:
+- user
+- config
+output: display_clock.txt

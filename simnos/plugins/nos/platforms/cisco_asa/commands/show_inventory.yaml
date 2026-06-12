@@ -1,0 +1,7 @@
+command: show inventory
+type: simnos
+help: execute the command "show inventory"
+mode:
+- user
+- enable
+output: show_inventory.txt

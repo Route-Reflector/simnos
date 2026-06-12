@@ -1,0 +1,7 @@
+command: display sysuptime
+type: simnos
+help: execute the command "display sysuptime"
+mode:
+- user
+- enable
+output: display_sysuptime.txt

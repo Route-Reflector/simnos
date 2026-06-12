@@ -1,0 +1,7 @@
+command: show topo
+type: simnos
+help: execute the command "show topo"
+mode:
+- user
+- enable
+output: show_topo.txt

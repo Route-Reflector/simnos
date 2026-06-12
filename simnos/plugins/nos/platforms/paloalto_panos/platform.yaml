@@ -1,0 +1,6 @@
+modes:
+  user:
+    prompt: "{{ base_prompt }}>"
+initial_mode: user
+netmiko_device_type: paloalto_panos
+ntc_platform: paloalto_panos

@@ -1,0 +1,6 @@
+command: show jobs all
+type: simnos
+help: execute the command "show jobs all"
+mode:
+- user
+output: show_jobs_all.txt

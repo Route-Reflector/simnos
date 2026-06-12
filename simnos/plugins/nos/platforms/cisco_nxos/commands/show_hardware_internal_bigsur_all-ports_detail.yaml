@@ -1,0 +1,7 @@
+command: show hardware internal bigsur all-ports detail
+type: simnos
+help: execute the command "show hardware internal bigsur all-ports detail"
+mode:
+- user
+- enable
+output: show_hardware_internal_bigsur_all-ports_detail.txt

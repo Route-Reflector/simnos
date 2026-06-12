@@ -1,0 +1,7 @@
+command: admin show environment fan
+type: simnos
+help: execute the command "admin show environment fan"
+mode:
+- user
+- enable
+output: admin_show_environment_fan.txt

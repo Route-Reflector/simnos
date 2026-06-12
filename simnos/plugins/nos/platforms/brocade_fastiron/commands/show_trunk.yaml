@@ -1,0 +1,8 @@
+command: show trunk
+type: simnos
+help: execute the command "show trunk"
+mode:
+- user
+- enable
+- config
+output: show_trunk.txt

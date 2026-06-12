@@ -1,0 +1,11 @@
+command: show system configuration database usage
+type: simnos
+help: execute the command "show system configuration database usage"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: show_system_configuration_database_usage__variant_1.txt
+- name: variant_2
+  output: show_system_configuration_database_usage__variant_2.txt

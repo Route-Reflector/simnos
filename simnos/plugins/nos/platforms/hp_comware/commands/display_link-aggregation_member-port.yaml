@@ -1,0 +1,13 @@
+command: display link-aggregation member-port
+type: simnos
+help: execute the command "display link-aggregation member-port"
+mode:
+- user
+- config
+variants:
+- name: variant_1
+  output: display_link-aggregation_member-port__variant_1.txt
+- name: variant_2
+  output: display_link-aggregation_member-port__variant_2.txt
+- name: variant_3
+  output: display_link-aggregation_member-port__variant_3.txt

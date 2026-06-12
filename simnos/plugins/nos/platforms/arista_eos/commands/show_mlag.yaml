@@ -1,0 +1,7 @@
+command: show mlag
+type: simnos
+help: execute the command "show mlag"
+mode:
+- user
+- enable
+output: show_mlag.txt

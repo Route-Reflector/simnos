@@ -1,0 +1,7 @@
+command: show interface breakout
+type: simnos
+help: execute the command "show interface breakout"
+mode:
+- user
+- enable
+output: show_interface_breakout.txt

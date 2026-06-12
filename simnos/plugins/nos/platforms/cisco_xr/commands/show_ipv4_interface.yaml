@@ -1,0 +1,7 @@
+command: show ipv4 interface
+type: simnos
+help: execute the command "show ipv4 interface"
+mode:
+- user
+- enable
+output: show_ipv4_interface.txt

@@ -29,7 +29,7 @@ class BaseDevice:
         `TypeError: 'NoneType'` on item access (#241 / #232 defer). The
         order matters: `data or {}` would also coerce an empty list /
         empty str to {} and contradict the non-mapping guard below
-        (symmetric with `Nos._from_yaml`, #232).
+        (symmetric with `Nos.from_dict`'s non-mapping guard, #232).
         """
         if data is None:
             return {}

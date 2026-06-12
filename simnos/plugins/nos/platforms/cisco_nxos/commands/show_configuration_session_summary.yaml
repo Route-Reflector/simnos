@@ -1,0 +1,7 @@
+command: show configuration session summary
+type: simnos
+help: execute the command "show configuration session summary"
+mode:
+- user
+- enable
+output: show_configuration_session_summary.txt

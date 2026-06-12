@@ -1,0 +1,6 @@
+command: system routerboard print
+type: simnos
+help: execute the command "system routerboard print"
+mode:
+- user
+output: system_routerboard_print.txt

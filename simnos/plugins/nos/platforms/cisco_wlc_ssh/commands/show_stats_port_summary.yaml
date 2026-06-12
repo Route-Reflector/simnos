@@ -1,0 +1,7 @@
+command: show stats port summary
+type: simnos
+help: execute the command "show stats port summary"
+mode:
+- user
+- enable
+output: show_stats_port_summary.txt

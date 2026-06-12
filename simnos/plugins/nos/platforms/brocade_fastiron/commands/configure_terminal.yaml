@@ -1,0 +1,6 @@
+command: configure terminal
+type: simnos
+help: enter the config mode
+mode:
+- enable
+new_mode: config

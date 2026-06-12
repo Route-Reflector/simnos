@@ -1,0 +1,7 @@
+command: show resource usage
+type: simnos
+help: execute the command "show resource usage"
+mode:
+- user
+- enable
+output: show_resource_usage.txt

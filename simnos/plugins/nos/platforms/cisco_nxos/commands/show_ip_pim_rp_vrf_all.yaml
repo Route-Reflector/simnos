@@ -1,0 +1,7 @@
+command: show ip pim rp vrf all
+type: simnos
+help: execute the command "show ip pim rp vrf all"
+mode:
+- user
+- enable
+output: show_ip_pim_rp_vrf_all.txt

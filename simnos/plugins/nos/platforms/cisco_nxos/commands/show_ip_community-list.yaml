@@ -1,0 +1,7 @@
+command: show ip community-list
+type: simnos
+help: execute the command "show ip community-list"
+mode:
+- user
+- enable
+output: show_ip_community-list.txt

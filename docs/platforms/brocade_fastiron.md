@@ -7,25 +7,6 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- brocade_fastiron>
-
-### skip-page-display
-
-**Output:** None
-
-**Help:** disable paging
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-
 ### configure terminal
 
 **Output:** None
@@ -35,20 +16,40 @@
 **Prompt:**
 - brocade_fastiron#
 
-### show monitor
+### _default_
 
 **Output:**
 ```
-Monitored Port 10
-  Input mirrored by	:  18
-  Output mirrored by	:  18
-Monitored Port 16
-  Input mirrored by	:  18
-  Output mirrored by	:  18
-
+Invalid input ->
+Type ? for a list
 ```
 
-**Help:** execute the command "show monitor"
+**Help:** default output for unknown commands
+
+**Prompt:**
+
+### enable
+
+**Output:** None
+
+**Help:** enter enable mode
+
+**Prompt:**
+- brocade_fastiron>
+
+### show arp
+
+**Output:**
+```
+Protocol  Address          Age (min)  Hardware Addr   Type   Interface
+Internet  10.51.250.70           94   64f6.9d1e.a4bf  ARPA   Vlan10
+Internet  10.51.250.120           -   fc5b.394a.5a7f  ARPA   Vlan10
+Internet  10.51.250.1             0   0010.dbff.1002  ARPA   Vlan10
+Internet  10.51.250.7            81   046c.9d67.7746  ARPA   Vlan10
+Internet  10.51.250.8            67   9c57.ad1e.4b46  ARPA   Vlan10
+```
+
+**Help:** execute the command "show arp"
 
 **Prompt:**
 - brocade_fastiron>
@@ -659,10 +660,92 @@ GigabitEthernet24 is up, line protocol is up
   Transmitted 5954167784 broadcasts, 678793901 multicasts, 2515318087 unicasts
   0 output errors, 0 collisions                                   
   Relay Agent Information option: Disabled
-
 ```
 
 **Help:** execute the command "show interfaces"
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
+### show interfaces brief
+
+**Output:**
+```
+
+Port    Link    State   Dupl Speed Trunk Tag Pvid Pri MAC            Name      
+1       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2000  to MLX1-
+2       Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.2001  switch1b
+3       Disable None    None None  None  No  1    0   001b.ed6b.2002          
+4       Disable None    None None  None  No  2033 0   001b.ed6b.2003  Boyce&By
+5       Disable None    None None  None  No  1    0   001b.ed6b.2004          
+6       Disable None    None None  None  No  1    0   001b.ed6b.2005          
+7       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2006  ms1a (4B
+8       Disable None    None None  None  No  1    0   001b.ed6b.2007          
+9       Up      Forward Full 1G    None  No  450  0   001b.ed6b.2008  warehous
+10      Up      Forward Full 1G    None  No  152  0   001b.ed6b.2009  sbc1.voi
+11      Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.200a  OPTI1-MS
+12      Disable None    None None  None  No  1    0   001b.ed6b.200b          
+13      Disable None    None None  None  No  1    0   001b.ed6b.200c          
+14      Down    None    None None  None  No  154  0   001b.ed6b.200d  SocketVo
+15      Disable None    None None  None  No  1    0   001b.ed6b.200e          
+16      Up      Forward Full 1G    None  No  149  0   001b.ed6b.200f  sbc1.voi
+17      Up      Forward Full 100M  None  No  2277 0   001b.ed6b.2010  Memory B
+18      Up      Forward Full 1G    None  No  1    0   001b.ed6b.2011  voipmon1
+19      Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2012  vmail1.v
+20      Up      Forward Full 100M  None  No  152  0   001b.ed6b.2013  VoIP-ASA
+21      Up      Forward Full 100M  None  No  149  0   001b.ed6b.2014  VoIP-ASA
+22      Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2015  md1a (2B
+23      Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.2016  MPLSPPP1
+24      Up      Forward Full 100M  None  No  450  0   001b.ed6b.2017  Socket O
+```
+
+**Help:** execute the command "show interfaces brief"
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
+### show lag brief
+
+**Output:**
+```
+Total number of LAGs:          4
+Total number of deployed LAGs: 4
+ Total number of trunks created:4 (116 available)
+LACP System Priority / ID:     1 / cc4e.2415.015e
+LACP Long timeout:             90, default: 90
+LACP Short timeout:            3, default: 3
+
+LAG           Type   Deploy Trunk Primary  Port List
+10G-Lag2      dynamic  Y    5     2/3/1    e 2/3/1 to 2/3/2
+1G-Lag        dynamic  Y    3     1/1/24   e 1/1/24
+1G-Lag-2      dynamic  Y    4     2/1/1    e 2/1/1
+SW2.XR-SW1A.TEdynamic  Y    1     1/3/1    e 1/3/1 to 1/3/2
+```
+
+**Help:** execute the command "show lag brief"
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
+### show lldp neighbors
+
+**Output:**
+```
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+ Device ID           Local Intf     Hold-time  Capability      Port ID
+core-sw01           Gi1/3          120        B,R             Gi0/3
+Total entries displayed: 1
+```
+
+**Help:** execute the command "show lldp neighbors"
 
 **Prompt:**
 - brocade_fastiron>
@@ -780,8 +863,6 @@ Local port: 2/3/2
     + Maximum frame size: 10200 octets
     + Port VLAN ID: none
     + Management address (IPv4): 10.255.13.2
-
-
 ```
 
 **Help:** execute the command "show lldp neighbors detail"
@@ -791,19 +872,91 @@ Local port: 2/3/2
 - brocade_fastiron#
 - brocade_fastiron(config)#
 
-### show arp
+### show mac-address
 
 **Output:**
 ```
-Protocol  Address          Age (min)  Hardware Addr   Type   Interface
-Internet  10.51.250.70           94   64f6.9d1e.a4bf  ARPA   Vlan10
-Internet  10.51.250.120           -   fc5b.394a.5a7f  ARPA   Vlan10
-Internet  10.51.250.1             0   0010.dbff.1002  ARPA   Vlan10
-Internet  10.51.250.7            81   046c.9d67.7746  ARPA   Vlan10
-Internet  10.51.250.8            67   9c57.ad1e.4b46  ARPA   Vlan10
+Total active entries from all ports = 236
+MAC Address     Port      Age      VLAN    Type
+
+6cae.8b2d.c979   2/1        0      1000
+3440.b5be.e3ac   2/1        0      1000
+90e2.ba5a.ab8c   2/1        0      1000
 ```
 
-**Help:** execute the command "show arp"
+**Help:** execute the command "show mac-address"
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
+### show metro
+
+**Output:**
+```
+Metro Ring 10
+=============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+10         enabled    member     10         10         100        300
+
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ethernet 11     primary        forwarding       ethernet 11      regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
+
+RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
+0                    1432850207           7970                 154
+
+
+Metro Ring 14
+=============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+14         enabled    member     14         14         100        300
+
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ ethernet 1      primary        forwarding       ethernet 1       regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
+
+RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
+0                    1441064488           1728                 86
+
+
+Metro Ring 176 - CLMAMOFW-to-CLMAMO10G
+=============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+176        enabled    member     175        175        100        300
+
+Ring interfaces Interface role Forwarding state Active interface interface type 
+ ethernet 1      primary        forwarding       ethernet 1       regular        
+ethernet 2      secondary      forwarding       ethernet 2       regular        
+
+RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
+0                    355056325            689                  9
+```
+
+**Help:** execute the command "show metro"
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
+### show monitor
+
+**Output:**
+```
+Monitored Port 10
+  Input mirrored by	:  18
+  Output mirrored by	:  18
+Monitored Port 16
+  Input mirrored by	:  18
+  Output mirrored by	:  18
+```
+
+**Help:** execute the command "show monitor"
 
 **Prompt:**
 - brocade_fastiron>
@@ -878,110 +1031,98 @@ vlan 154 name SocketVoIP-Svr by port
 - brocade_fastiron#
 - brocade_fastiron(config)#
 
-### show lag brief
-
-**Output:**
-```
-Total number of LAGs:          4
-Total number of deployed LAGs: 4
- Total number of trunks created:4 (116 available)
-LACP System Priority / ID:     1 / cc4e.2415.015e
-LACP Long timeout:             90, default: 90
-LACP Short timeout:            3, default: 3
-
-LAG           Type   Deploy Trunk Primary  Port List
-10G-Lag2      dynamic  Y    5     2/3/1    e 2/3/1 to 2/3/2
-1G-Lag        dynamic  Y    3     1/1/24   e 1/1/24
-1G-Lag-2      dynamic  Y    4     2/1/1    e 2/1/1
-SW2.XR-SW1A.TEdynamic  Y    1     1/3/1    e 1/3/1 to 1/3/2
-
-```
-
-**Help:** execute the command "show lag brief"
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-- brocade_fastiron(config)#
-
-### show trunk
+### show span
 
 **Output:**
 ```
 
-Configured trunks:
+STP instance owned by VLAN 1
 
-Trunk ID: 5
-Hw Trunk ID: 1
-Ports_Configured: 2
-Primary Port Monitored: Jointly
+Global STP (IEEE 802.1D) Parameters:
+ 
+VLAN Root             Root Root   Prio Max He- Ho- Fwd Last    Chg Bridge      
+ ID   ID              Cost Port   rity Age llo ld  dly Chang   cnt Address     
+                                  Hex  sec sec sec sec sec                     
+   1 8000cc4e2415015e 0    Root   8000 20  2   1   15  265591169   cc4e2415015e
 
-Ports         5       23      
-Port Names    none    none    
-Port_Status   enable  enable  
-Monitor       off     off     
-Rx Mirr Port  N/A     N/A     
-Tx Mirr Port  N/A     N/A     
- Monitor Dir   N/A     N/A     
+Port STP Parameters:
 
-Operational trunks:
+Port   Prio Path  State       Fwd    Design  Designated       Designated       
+Num    rity Cost              Trans  Cost    Root             Bridge           
+       Hex                                                                     
+1/1/1  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+1/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/1/24 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+2/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
 
-Trunk ID: 5
-Hw Trunk ID: 1
-Duplex: Full
-Speed: 1G
-Tag: Yes
-Priority: level0                                                  
-Active Ports: 2
+Spanning-tree is not configured on port-vlan 385
 
-Ports         5       23      
-Link_Status   active  active  
-port_state    Forward Forward 
-LACP_Status   ready   ready   
+Spanning-tree is not configured on port-vlan 10
+                                                                  
+Spanning-tree is not configured on port-vlan 94
 
+Spanning-tree is not configured on port-vlan 144
+
+Spanning-tree is not configured on port-vlan 145
+
+Spanning-tree is not configured on port-vlan 146
+
+Spanning-tree is not configured on port-vlan 149
+
+Spanning-tree is not configured on port-vlan 151
+
+Spanning-tree is not configured on port-vlan 152
+
+Spanning-tree is not configured on port-vlan 154
 ```
 
-**Help:** execute the command "show trunk"
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-- brocade_fastiron(config)#
-
-### show interfaces brief
-
-**Output:**
-```
-
-Port    Link    State   Dupl Speed Trunk Tag Pvid Pri MAC            Name      
-1       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2000  to MLX1-
-2       Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.2001  switch1b
-3       Disable None    None None  None  No  1    0   001b.ed6b.2002          
-4       Disable None    None None  None  No  2033 0   001b.ed6b.2003  Boyce&By
-5       Disable None    None None  None  No  1    0   001b.ed6b.2004          
-6       Disable None    None None  None  No  1    0   001b.ed6b.2005          
-7       Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2006  ms1a (4B
-8       Disable None    None None  None  No  1    0   001b.ed6b.2007          
-9       Up      Forward Full 1G    None  No  450  0   001b.ed6b.2008  warehous
-10      Up      Forward Full 1G    None  No  152  0   001b.ed6b.2009  sbc1.voi
-11      Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.200a  OPTI1-MS
-12      Disable None    None None  None  No  1    0   001b.ed6b.200b          
-13      Disable None    None None  None  No  1    0   001b.ed6b.200c          
-14      Down    None    None None  None  No  154  0   001b.ed6b.200d  SocketVo
-15      Disable None    None None  None  No  1    0   001b.ed6b.200e          
-16      Up      Forward Full 1G    None  No  149  0   001b.ed6b.200f  sbc1.voi
-17      Up      Forward Full 100M  None  No  2277 0   001b.ed6b.2010  Memory B
-18      Up      Forward Full 1G    None  No  1    0   001b.ed6b.2011  voipmon1
-19      Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2012  vmail1.v
-20      Up      Forward Full 100M  None  No  152  0   001b.ed6b.2013  VoIP-ASA
-21      Up      Forward Full 100M  None  No  149  0   001b.ed6b.2014  VoIP-ASA
-22      Up      Forward Full 1G    None  Yes N/A  0   001b.ed6b.2015  md1a (2B
-23      Up      Forward Full 1G    None  Yes 1    0   001b.ed6b.2016  MPLSPPP1
-24      Up      Forward Full 100M  None  No  450  0   001b.ed6b.2017  Socket O
-
-```
-
-**Help:** execute the command "show interfaces brief"
+**Help:** execute the command "show span"
 
 **Prompt:**
 - brocade_fastiron>
@@ -1108,7 +1249,6 @@ Topology Group 215
  Per vlan free ports                                
  ethernet 1/3/2                  Vlan 215           
  ethernet 2/3/2                  Vlan 215     
-
 ```
 
 **Help:** execute the command "show topo"
@@ -1118,194 +1258,43 @@ Topology Group 215
 - brocade_fastiron#
 - brocade_fastiron(config)#
 
-### show span
+### show trunk
 
 **Output:**
 ```
 
-STP instance owned by VLAN 1
+Configured trunks:
 
-Global STP (IEEE 802.1D) Parameters:
- 
-VLAN Root             Root Root   Prio Max He- Ho- Fwd Last    Chg Bridge      
- ID   ID              Cost Port   rity Age llo ld  dly Chang   cnt Address     
-                                  Hex  sec sec sec sec sec                     
-   1 8000cc4e2415015e 0    Root   8000 20  2   1   15  265591169   cc4e2415015e
+Trunk ID: 5
+Hw Trunk ID: 1
+Ports_Configured: 2
+Primary Port Monitored: Jointly
 
-Port STP Parameters:
+Ports         5       23      
+Port Names    none    none    
+Port_Status   enable  enable  
+Monitor       off     off     
+Rx Mirr Port  N/A     N/A     
+Tx Mirr Port  N/A     N/A     
+ Monitor Dir   N/A     N/A     
 
-Port   Prio Path  State       Fwd    Design  Designated       Designated       
-Num    rity Cost              Trans  Cost    Root             Bridge           
-       Hex                                                                     
-1/1/1  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-1/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/9  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/10 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/11 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/12 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/13 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/14 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/15 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/16 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/17 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/18 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/19 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/20 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/21 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/22 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/23 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/1/24 80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/3  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/4  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/5  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/6  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/7  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
-2/3/8  80   0     DISABLED    0      0       0000000000000000 0000000000000000 
+Operational trunks:
 
-Spanning-tree is not configured on port-vlan 385
+Trunk ID: 5
+Hw Trunk ID: 1
+Duplex: Full
+Speed: 1G
+Tag: Yes
+Priority: level0                                                  
+Active Ports: 2
 
-Spanning-tree is not configured on port-vlan 10
-                                                                  
-Spanning-tree is not configured on port-vlan 94
-
-Spanning-tree is not configured on port-vlan 144
-
-Spanning-tree is not configured on port-vlan 145
-
-Spanning-tree is not configured on port-vlan 146
-
-Spanning-tree is not configured on port-vlan 149
-
-Spanning-tree is not configured on port-vlan 151
-
-Spanning-tree is not configured on port-vlan 152
-
-Spanning-tree is not configured on port-vlan 154
-
-
+Ports         5       23      
+Link_Status   active  active  
+port_state    Forward Forward 
+LACP_Status   ready   ready   
 ```
 
-**Help:** execute the command "show span"
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-- brocade_fastiron(config)#
-
-### show mac-address
-
-**Output:**
-```
-Total active entries from all ports = 236
-MAC Address     Port      Age      VLAN    Type
-
-6cae.8b2d.c979   2/1        0      1000
-3440.b5be.e3ac   2/1        0      1000
-90e2.ba5a.ab8c   2/1        0      1000
-```
-
-**Help:** execute the command "show mac-address"
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-- brocade_fastiron(config)#
-
-### show metro
-
-**Output:**
-```
-Metro Ring 10
-=============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-10         enabled    member     10         10         100        300
-
-Ring interfaces Interface role Forwarding state Active interface interface type 
-ethernet 11     primary        forwarding       ethernet 11      regular        
-ethernet 2      secondary      forwarding       ethernet 2       regular        
-
-RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
-0                    1432850207           7970                 154
-
-
-Metro Ring 14
-=============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-14         enabled    member     14         14         100        300
-
-Ring interfaces Interface role Forwarding state Active interface interface type 
- ethernet 1      primary        forwarding       ethernet 1       regular        
-ethernet 2      secondary      forwarding       ethernet 2       regular        
-
-RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
-0                    1441064488           1728                 86
-
-
-Metro Ring 176 - CLMAMOFW-to-CLMAMO10G
-=============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-176        enabled    member     175        175        100        300
-
-Ring interfaces Interface role Forwarding state Active interface interface type 
- ethernet 1      primary        forwarding       ethernet 1       regular        
-ethernet 2      secondary      forwarding       ethernet 2       regular        
-
-RHPs sent            RHPs rcvd            TC RBPDUs rcvd       State changes
-0                    355056325            689                  9
-
-
-```
-
-**Help:** execute the command "show metro"
-
-**Prompt:**
-- brocade_fastiron>
-- brocade_fastiron#
-- brocade_fastiron(config)#
-
-### show lldp neighbors
-
-**Output:**
-```
-Capability codes:
-    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
-    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
- Device ID           Local Intf     Hold-time  Capability      Port ID
-core-sw01           Gi1/3          120        B,R             Gi0/3
-Total entries displayed: 1
-
-```
-
-**Help:** execute the command "show lldp neighbors"
+**Help:** execute the command "show trunk"
 
 **Prompt:**
 - brocade_fastiron>
@@ -1403,7 +1392,6 @@ The system started at 15:56:16 Pacific Fri Jul 08 2016
 
  The system : started=cold start
  My stack unit ID = 1, bootup role = active
-
 ```
 
 **Help:** execute the command "show version"
@@ -1412,4 +1400,14 @@ The system started at 15:56:16 Pacific Fri Jul 08 2016
 - brocade_fastiron>
 - brocade_fastiron#
 - brocade_fastiron(config)#
+
+### skip-page-display
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
 

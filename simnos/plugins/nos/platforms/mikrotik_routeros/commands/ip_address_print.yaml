@@ -1,0 +1,6 @@
+command: ip address print
+type: simnos
+help: execute the command "ip address print"
+mode:
+- user
+output: ip_address_print.txt

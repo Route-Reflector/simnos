@@ -1,0 +1,10 @@
+command: show lacp aggregate-ethernet all
+type: simnos
+help: execute the command "show lacp aggregate-ethernet all"
+mode:
+- user
+variants:
+- name: variant_1
+  output: show_lacp_aggregate-ethernet_all__variant_1.txt
+- name: variant_2
+  output: show_lacp_aggregate-ethernet_all__variant_2.txt

@@ -1,0 +1,7 @@
+command: show service sap-using
+type: simnos
+help: execute the command "show service sap-using"
+mode:
+- user
+- enable
+output: show_service_sap-using.txt

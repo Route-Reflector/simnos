@@ -1,0 +1,7 @@
+command: display snmp-agent community read
+type: simnos
+help: execute the command "display snmp-agent community read"
+mode:
+- user
+- enable
+output: display_snmp-agent_community_read.txt

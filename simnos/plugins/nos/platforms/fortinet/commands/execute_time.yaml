@@ -1,0 +1,6 @@
+command: execute time
+type: simnos
+help: execute the command "execute time"
+mode:
+- user
+output: execute_time.txt

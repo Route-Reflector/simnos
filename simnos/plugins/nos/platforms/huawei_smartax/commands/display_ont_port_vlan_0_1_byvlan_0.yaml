@@ -1,0 +1,7 @@
+command: display ont port vlan 0 1 byvlan 0
+type: simnos
+help: execute the command "display ont port vlan 0 1 byvlan 0"
+mode:
+- user
+- enable
+output: display_ont_port_vlan_0_1_byvlan_0.txt

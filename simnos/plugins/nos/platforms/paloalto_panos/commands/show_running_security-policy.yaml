@@ -1,0 +1,6 @@
+command: show running security-policy
+type: simnos
+help: execute the command "show running security-policy"
+mode:
+- user
+output: show_running_security-policy.txt

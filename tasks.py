@@ -9,11 +9,16 @@ local docs serving (`docs`), platform docs generation
 from collections.abc import Iterable
 import glob
 import os
-import string
+import re
 import time
 
 from invoke import Exit, task
 import yaml
+
+# Stdlib-only shared helpers (no `simnos` import), so `invoke --list` and the
+# lint tasks stay free of the pydantic / paramiko load cost (#264 / D1).
+from a3_paths import PLATFORMS_DIR as PLATFORMS_A3_DIR
+from a3_paths import list_a3_platform_names, sanitize_command_stem
 
 
 def run_cmd(context, exec_cmd):
@@ -41,138 +46,7 @@ def bandit(context):
     run_cmd(context, "bandit -c pyproject.toml --recursive ./")
 
 
-# --- platform yaml conventions lint (#244) -----------------------------------
-
-# Real path — a shorthand here would make the glob empty and the lint a
-# silent pass, which defeats the ratchet entirely. The `*.yaml` glob below
-# mirrors the plugin discovery glob (simnos/plugins/nos/__init__.py), which
-# also only picks up `.yaml` — a stray `.yml` is invisible to both.
-PLATFORMS_YAML_DIR = "simnos/plugins/nos/platforms_yaml"
-PLATFORM_YAML_LINT_BASELINE = "platform_yaml_lint_baseline.yaml"
-HERITAGE_HELP_SENTENCE = "Feel free to change it!"
-
-
-def is_stub_help(help_text: str) -> bool:
-    """Return True for an auto-generated stub help (FakeNOS heritage).
-
-    Covers the lower/upper-case `execute the command ...` prefix and the
-    `This automatically generated` marker (#244 / P-13).
-
-    Deliberately prefix/marker-based, so a hand-edited help that keeps
-    the stub prefix still counts as a stub — improving a help means
-    dropping the prefix, not appending to it (conservative direction:
-    the false-positive side only freezes an entry in the baseline, it
-    never lets new drift through).
-    """
-    lowered = help_text.lower()
-    return lowered.startswith("execute the command") or "this automatically generated" in lowered
-
-
-def check_platform_yaml(
-    platforms_dir: str = PLATFORMS_YAML_DIR,
-    baseline_path: str = PLATFORM_YAML_LINT_BASELINE,
-) -> list[str]:
-    """Check platform yamls against the authoring conventions (#244).
-
-    Baseline-ratchet rules (the baseline freezes today's drift; new drift
-    fails CI, improvements must shrink the baseline in the same PR):
-
-    1. every platform defines a `_default_` command (baseline-exempt)
-    2. no command gains an auto-generated stub help (identity set per
-       file — a count would let "improve one, add one" slip through)
-    3. no help contains the heritage sentence "Feel free to change it!"
-       (checked on parsed help values: a raw-text grep is fooled by
-       folded scalars splitting the sentence across lines)
-    4. no baseline entry points at a file that no longer exists
-    5. no baseline entry remains for a violation that was fixed
-       (forgetting to shrink the baseline would let later regressions
-       grow back unnoticed)
-
-    Returns a list of human-readable violations (empty = clean).
-    """
-    with open(baseline_path, encoding="utf-8") as f:
-        baseline = yaml.safe_load(f) or {}
-    baseline_missing = set(baseline.get("missing_default") or [])
-    baseline_stub = {file: set(commands or []) for file, commands in (baseline.get("stub_help") or {}).items()}
-
-    violations: list[str] = []
-    paths = sorted(glob.glob(os.path.join(platforms_dir, "*.yaml")))
-    if not paths:
-        return [f"{platforms_dir}: no platform yamls found (wrong path?)"]
-    seen: set[str] = set()
-    for path in paths:
-        rel = path.replace(os.sep, "/")
-        seen.add(rel)
-        with open(path, encoding="utf-8") as f:
-            data = yaml.safe_load(f)
-        commands = (data or {}).get("commands") or {}
-        helps = {
-            name: details["help"]
-            for name, details in commands.items()
-            if isinstance(details, dict) and isinstance(details.get("help"), str)
-        }
-        # rule 1 / 5: _default_ presence vs baseline
-        if "_default_" not in commands and rel not in baseline_missing:
-            violations.append(f"{rel}: missing '_default_' command (new platforms must define one)")
-        if "_default_" in commands and rel in baseline_missing:
-            violations.append(
-                f"{rel}: defines '_default_' but is still listed under missing_default — shrink {baseline_path}"
-            )
-        # rule 2 / 5: stub-help identity set vs baseline
-        current_stubs = {name for name, help_text in helps.items() if is_stub_help(help_text)}
-        allowed_stubs = baseline_stub.get(rel, set())
-        violations.extend(
-            f"{rel}: command '{name}' adds an auto-generated stub help — write a real one"
-            for name in sorted(current_stubs - allowed_stubs)
-        )
-        violations.extend(
-            f"{rel}: command '{name}' no longer has a stub help but is still listed under stub_help "
-            f"— shrink {baseline_path}"
-            for name in sorted(allowed_stubs - current_stubs)
-        )
-        # rule 3: heritage sentence
-        violations.extend(
-            f"{rel}: command '{name}' help still contains {HERITAGE_HELP_SENTENCE!r}"
-            for name in sorted(name for name, help_text in helps.items() if HERITAGE_HELP_SENTENCE in help_text)
-        )
-    # rule 4: stale baseline entries
-    violations.extend(
-        f"{rel}: listed in {baseline_path} but the file does not exist — remove the stale entry"
-        for rel in sorted((baseline_missing | set(baseline_stub)) - seen)
-    )
-    return violations
-
-
-@task
-def lint_platform_yaml(context):
-    """Lint platform yamls against the authoring conventions (#244).
-
-    Baseline-ratchet lint: see `check_platform_yaml` for the rules. The
-    baseline lives in `platform_yaml_lint_baseline.yaml` (repo root) and
-    only ever shrinks — additions fail CI.
-    """
-    violations = check_platform_yaml()
-    for violation in violations:
-        print(violation)
-    if violations:
-        raise Exit(f"platform yaml lint failed with {len(violations)} violation(s)", code=1)
-    print("platform yaml lint OK")
-
-
 # --- A3 platform data lint (#264 / D8, D9) -----------------------------------
-
-PLATFORMS_A3_DIR = "simnos/plugins/nos/platforms"
-
-
-def _a3_platform_names(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
-    """Names of A3 platforms (dirs holding a ``platform.yaml``), sorted."""
-    if not os.path.isdir(platforms_dir):
-        return []
-    return sorted(
-        entry
-        for entry in os.listdir(platforms_dir)
-        if os.path.isfile(os.path.join(platforms_dir, entry, "platform.yaml"))
-    )
 
 
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
@@ -194,8 +68,8 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
        loader's ``*.yaml`` glob silently ignores (1st round claude #8).
 
     Returns a list of human-readable violation strings (empty = clean). Filename
-    convention + ``type: ntc`` source-presence warnings are deferred (see the
-    PR-2 worklog Notes) — they are warning-tier polish, not gates.
+    convention + ``type: ntc`` source-presence checks are warning-tier and live
+    in `check_platform_data_warnings` (printed by the task, never gating).
     """
     violations: list[str] = []
     if not os.path.isdir(platforms_dir):
@@ -232,6 +106,47 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
             if ref not in output_files:
                 violations.append(f"{platform}/commands/{ref}: referenced by {sources} but the file is missing")
     return violations
+
+
+def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Warning-tier A3 conventions (#264 / D9) — informational, never a gate.
+
+    1. filename convention: a command yaml's stem should be the sanitized
+       ``command`` name (optionally with a ``__<n>`` collision suffix). A
+       mismatch is harmless (the loader keys on the ``command`` field) but hurts
+       discoverability.
+    2. ``type: ntc`` provenance: a command authored as ``type: ntc`` should
+       carry a ``source`` block (``ntc_template`` / ``ntc_commit``) so the
+       capture's origin is traceable; a missing one is flagged.
+
+    Returns a list of human-readable warnings (empty = clean).
+    """
+    warnings: list[str] = []
+    if not os.path.isdir(platforms_dir):
+        return warnings
+    for platform in sorted(os.listdir(platforms_dir)):
+        commands_dir = os.path.join(platforms_dir, platform, "commands")
+        if not os.path.isdir(commands_dir):
+            continue
+        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+            stem = os.path.basename(command_yaml).removesuffix(".yaml")
+            with open(command_yaml, encoding="utf-8") as f:
+                data = yaml.safe_load(f) or {}
+            command = data.get("command")
+            if isinstance(command, str):
+                base = sanitize_command_stem(command)
+                # Accept the exact stem or the deterministic ``__<n>`` collision
+                # suffix the migrate / sync tools append (not an arbitrary ``__x``).
+                if stem != base and not re.fullmatch(rf"{re.escape(base)}__\d+", stem):
+                    warnings.append(
+                        f"{platform}/commands/{stem}.yaml: filename does not match command {command!r} "
+                        f"(expected stem {base!r})"
+                    )
+            if data.get("type") == "ntc" and not data.get("source"):
+                warnings.append(
+                    f"{platform}/commands/{stem}.yaml: type: ntc but no `source` block (provenance missing)"
+                )
+    return warnings
 
 
 def _variant_output_refs(command_data: dict) -> list[str]:
@@ -288,9 +203,24 @@ def _check_output_encoding(path: str, rel: str) -> list[str]:
 def lint_platform_data(context):
     """Lint the A3 platform data directories (#264 / D8, D9).
 
-    Encoding (UTF-8 / LF / trailing newline), orphan output files, and shared
-    output references. See `check_platform_data` for the rules.
+    Gating: encoding (UTF-8 / LF / trailing newline), orphan output files,
+    shared output references, extension convention, stray ``.yml`` (see
+    `check_platform_data`). Warning-tier (printed, non-blocking): filename
+    convention + ``type: ntc`` provenance (see `check_platform_data_warnings`).
     """
+    # Loud on an empty platforms dir: after the A3 migration completed, 0
+    # platforms means a wrong path / broken checkout, not a legitimate
+    # pre-migration state — fail standalone instead of silently printing OK
+    # (3rd round claude #7; the CI snapshot-set pin catches it too).
+    if not list_a3_platform_names():
+        raise Exit(f"platform data lint: no A3 platforms found under {PLATFORMS_A3_DIR} (wrong path?)", code=1)
+
+    warnings = check_platform_data_warnings()
+    for warning in warnings:
+        print(f"WARNING: {warning}")
+    if warnings:
+        print(f"({len(warnings)} warning(s) — informational, not blocking)")
+
     violations = check_platform_data()
     for violation in violations:
         print(violation)
@@ -331,54 +261,6 @@ WARNING_MESSAGE = """
     please refer to the source code or, even better,
     open an issue on the GitHub repository. Thanks! 🤗📖
 """
-
-
-def render_template(template: str, platform: str, command: str, field: str) -> str:
-    """Render a YAML string template for the docs generator (build time).
-
-    Uses `str.format(base_prompt=platform)` against the legacy
-    ``platforms_yaml`` data: substitutes `{base_prompt}` and unescapes
-    `{{` / `}}` literals from `sync_ntc_commands.escape_format_braces`.
-
-    Build time is strict: besides re-raising the `FORMAT_ERRORS` catch set,
-    this rejects unsupported constructs that `str.format()` would happily
-    render (e.g. `{base_prompt!r}` or `{base_prompt:>20}`) — only a plain
-    `{base_prompt}` field and `{{` / `}}` escapes are supported. Every
-    failure surfaces as `RuntimeError` carrying the platform / command /
-    field context, so CI failures pinpoint the offending YAML entry
-    instead of dumping a contextless stack trace.
-
-    The runtime shell no longer uses `str.format` (it renders the A3
-    `ResolvedCommand` representation, #264); this build-time path still reads
-    the legacy yaml and is replaced when the docs generator moves to the new
-    loader (#264 PR-3 / D9). `FORMAT_ERRORS` is the frozen `str.format`
-    failure set, kept here until then.
-    """
-    # str.format failure modes, formerly shared with the runtime shell's
-    # _safe_format (removed in #264). Local to this build-time renderer now.
-    FORMAT_ERRORS = (KeyError, IndexError, ValueError, AttributeError, TypeError)
-
-    try:
-        # Strict authoring check first: a malformed template raises ValueError
-        # out of parse() (caught below); a well-formed but unsupported
-        # construct (conversion / format spec / non-base_prompt field) would
-        # render silently, so it must be rejected explicitly.
-        for _, field_name, format_spec, conversion in string.Formatter().parse(template):
-            if field_name is None:
-                continue
-            if field_name != "base_prompt" or conversion is not None or format_spec:
-                raise RuntimeError(
-                    f"Failed to format {field} for {platform}/{command!r}: unsupported template "
-                    f"construct (field_name={field_name!r}, conversion={conversion!r}, "
-                    f"format_spec={format_spec!r}). Only '{{base_prompt}}' substitution and "
-                    f"'{{{{' / '}}}}' escapes are supported."
-                )
-        return template.format(base_prompt=platform)
-    except FORMAT_ERRORS as exc:
-        raise RuntimeError(
-            f"Failed to format {field} for {platform}/{command!r}: {exc!r}. "
-            f"Check that any literal '{{' / '}}' in YAML is escaped as '{{{{' / '}}}}'."
-        ) from exc
 
 
 _PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"})
@@ -436,20 +318,16 @@ def platform_display_name(platform: str) -> str:
 def rewrite_mkdocs_platforms_nav(platforms: Iterable[str], mkdocs_path: str = "mkdocs.yml") -> None:
     """Regenerate the Platforms nav section of mkdocs.yml from `platforms`.
 
-    The caller passes the platform list the docs pages are generated from. For
-    the legacy yaml platforms every nav entry has a backing page. A3-migrated
-    platforms (#264) are also included to keep their existing page in the nav
-    until docs generation moves to the ResolvedCommand path (PR-3); an
-    "A3-born" platform with no pre-existing page would get a nav entry without a
-    backing page until then — a known PR-3 follow-up (2nd round claude #5b).
-    A yaml-less, A3-less py-only platform still gets no nav entry — the
-    registry-truth pin (`test_available_platforms_match_mkdocs_nav`) failing is
-    the designed loud signal to decide how to document such a platform.
-    Closes the M-1 failure mode (#239): a new platform used to need a manual
-    nav entry, and a forgotten one silently produced a docs page unreachable
-    from the site nav. The section is replaced as a text block (instead of a
-    yaml round-trip) so comments, ordering and the material python tags in
-    the rest of mkdocs.yml are preserved byte-for-byte.
+    The caller passes the A3 platform list `gen_docs_platform_commands` just
+    generated pages for, so every nav entry has a backing page. A py-only
+    platform with no A3 dir gets no page and no nav entry — the registry-truth
+    pin (`test_available_platforms_match_mkdocs_nav`) failing is the designed
+    loud signal to decide how to document such a platform. Closes the M-1
+    failure mode (#239): a new platform used to need a manual nav entry, and a
+    forgotten one silently produced a docs page unreachable from the site nav.
+    The section is replaced as a text block (instead of a yaml round-trip) so
+    comments, ordering and the material python tags in the rest of mkdocs.yml
+    are preserved byte-for-byte.
 
     Raises RuntimeError if the Platforms section cannot be located.
     """
@@ -474,13 +352,12 @@ def sweep_orphaned_platform_docs(
     valid_platforms: Iterable[str],
     preserve: frozenset[str] = _PRESERVED_PLATFORM_DOCS,
 ) -> list[str]:
-    """Remove ``docs/platforms/*.md`` entries whose backing yaml is gone.
+    """Remove ``docs/platforms/*.md`` entries with no backing A3 platform.
 
-    Keeps the docs idempotent with the yaml directory as the source of
-    truth: if a platform's yaml is deleted, the corresponding markdown
-    is also removed on the next regeneration. ``preserve`` lists hand-
-    authored markdown that has no yaml counterpart (index pages etc.)
-    and must never be swept.
+    Keeps the docs idempotent with the A3 platform directory as the source of
+    truth: if a platform is removed, its markdown is deleted on the next
+    regeneration. ``preserve`` lists hand-authored markdown that has no platform
+    counterpart (index pages etc.) and must never be swept.
 
     Returns the sorted list of removed filenames for caller-side logging.
     """
@@ -498,55 +375,54 @@ def sweep_orphaned_platform_docs(
 
 @task
 def gen_docs_platform_commands(ctx):
-    """
-    Generate platform specific commands in the docs.
-    """
-    platforms_folder: str = PLATFORMS_YAML_DIR
-    docs_folder: str = "docs/platforms"
-    files: list[str] = os.listdir(platforms_folder)
-    platforms: list[str] = [platform.split(".yaml")[0] for platform in files]
+    """Generate platform-specific command docs from the A3 ``ResolvedCommand``.
 
-    # A3-migrated platforms have no legacy yaml to read here; their doc
-    # generation moves to the ResolvedCommand path in PR-3 (#264 / D9). Until
-    # then their existing docs must be preserved (not swept) and kept in the
-    # nav — otherwise running this task after the pilot's yaml deletion would
-    # delete docs/platforms/<a3>.md and drop it from mkdocs.yml (1st round claude #4).
-    a3_platforms: list[str] = _a3_platform_names()
+    Reads each A3 platform through the runtime loader (#264 / D9) instead of the
+    legacy ``platforms_yaml`` + ``str.format`` path: literal output is emitted
+    verbatim, template output is rendered with the platform name as the device
+    ``base_prompt`` (matching the old build-time substitution). Only the A3
+    static surface is documented — py-module dynamic handlers were never in the
+    docs (the old generator read yaml only), so the coverage is unchanged.
+    """
+    # Lazy import: keep `invoke --list` / lint-only tasks free of the pydantic /
+    # jinja2 load cost unless this task actually runs (same paradigm as
+    # `netmiko_check`).
+    from simnos.core.platform_loader import load_platform_dir
+
+    docs_folder: str = "docs/platforms"
+    platforms: list[str] = list_a3_platform_names()
 
     for platform in platforms:
         print(f"Generating Platform: {platform}")
-        with open(f"{platforms_folder}/{platform}.yaml", encoding="utf-8") as file:
-            data = yaml.safe_load(file)
+        resolved = load_platform_dir(os.path.join(PLATFORMS_A3_DIR, platform))
         with open(f"{docs_folder}/{platform}.md", "w", encoding="utf-8") as platforms_file:
             platforms_file.write(f"# {platform}\n\n")
             platforms_file.write(WARNING_MESSAGE)
             platforms_file.write("## Commands\n\n")
-            for command, details in data["commands"].items():
+            for command, rc in resolved.commands.items():
                 platforms_file.write(f"### {command}\n\n")
-                output = details.get("output")
-                if not output:
+                if rc.output.kind == "none":
                     platforms_file.write("**Output:** None\n\n")
                 else:
-                    rendered = render_template(output, platform, command, "output")
+                    # `base_prompt` = platform name (the old build-time choice);
+                    # strip the file-convention trailing newline for display.
+                    rendered = (rc.output.render(platform) or "").rstrip("\n")
                     platforms_file.write(f"**Output:**\n```\n{rendered}\n```\n\n")
-                platforms_file.write(f"**Help:** {details.get('help', '')}\n\n")
+                platforms_file.write(f"**Help:** {rc.help}\n\n")
                 platforms_file.write("**Prompt:**\n")
-                prompts = details.get("prompt", [])
-                if not isinstance(prompts, list):
-                    prompts = [prompts]
-                for prompt in prompts:
-                    rendered = render_template(prompt, platform, command, "prompt")
-                    platforms_file.write(f"- {rendered}\n")
+                # The modes the command is visible in, rendered in canonical
+                # order (user/enable/config). An all-modes command (empty `modes`,
+                # the legacy prompt-omission successor) lists none — same as the
+                # old generator emitting no prompt lines for an omitted prompt.
+                for mode_name, mode in resolved.modes.items():
+                    if mode_name in rc.modes:
+                        platforms_file.write(f"- {mode.render_prompt(platform)}\n")
                 platforms_file.write("\n")
 
-    # dedupe: during the PR-3 migration window both forms can briefly coexist
-    # (the converter does not delete the legacy yaml), which would otherwise put
-    # a platform in the nav twice (2nd round claude #5b).
-    all_platforms = sorted(set(platforms) | set(a3_platforms))
-    for orphan in sweep_orphaned_platform_docs(docs_folder, all_platforms):
+    for orphan in sweep_orphaned_platform_docs(docs_folder, platforms):
         print(f"Removed orphaned doc: {orphan}")
 
-    rewrite_mkdocs_platforms_nav(all_platforms)
+    rewrite_mkdocs_platforms_nav(platforms)
     print("Regenerated mkdocs.yml Platforms nav")
 
 

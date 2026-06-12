@@ -1,0 +1,7 @@
+command: show vpn-sessiondb detail l2l
+type: simnos
+help: execute the command "show vpn-sessiondb detail l2l"
+mode:
+- user
+- enable
+output: show_vpn-sessiondb_detail_l2l.txt

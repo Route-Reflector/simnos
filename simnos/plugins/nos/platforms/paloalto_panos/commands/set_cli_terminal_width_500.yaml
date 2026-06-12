@@ -1,0 +1,5 @@
+command: set cli terminal width 500
+type: simnos
+help: set terminal width to 500 columns
+mode:
+- user

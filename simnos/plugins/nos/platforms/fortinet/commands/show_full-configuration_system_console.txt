@@ -1,0 +1,3 @@
+config system console
+    set output standard
+end

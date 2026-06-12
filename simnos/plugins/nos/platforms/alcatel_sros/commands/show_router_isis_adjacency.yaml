@@ -1,0 +1,7 @@
+command: show router isis adjacency
+type: simnos
+help: execute the command "show router isis adjacency"
+mode:
+- user
+- enable
+output: show_router_isis_adjacency.txt

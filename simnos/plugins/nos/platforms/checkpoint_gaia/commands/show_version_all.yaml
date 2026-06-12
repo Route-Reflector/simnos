@@ -1,0 +1,7 @@
+command: show version all
+type: simnos
+help: execute the command "show version all"
+mode:
+- user
+- enable
+output: show_version_all.txt

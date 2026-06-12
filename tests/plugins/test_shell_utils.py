@@ -153,7 +153,7 @@ class ShellUtilsTest(TestCase):
         the stat used to propagate and crash the hot-reload caller.
         """
         files = get_files_under_directory("simnos/plugins/nos")
-        vanished = "simnos/plugins/nos/platforms_yaml/vanished_after_walk.yaml"
+        vanished = "simnos/plugins/nos/platforms/vanished_after_walk/platform.yaml"
         files_lasttime_changed = get_files_lasttime_changed([*files, vanished])
         self.assertNotIn(vanished, files_lasttime_changed)
         self.assertTrue(all(file in files_lasttime_changed for file in files))
@@ -166,7 +166,7 @@ class ShellUtilsTest(TestCase):
         ever reached.
         """
         files = get_files_under_directory("simnos/plugins/nos")
-        vanished = "simnos/plugins/nos/platforms_yaml/vanished_after_walk.yaml"
+        vanished = "simnos/plugins/nos/platforms/vanished_after_walk/platform.yaml"
         files_lasttime_changed = get_files_lasttime_changed(files)
         modified = get_files_recently_modified([*files, vanished], files_lasttime_changed)
         self.assertNotIn(vanished, modified)

@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -58,7 +69,6 @@ Address         Age      Address        Interface    VlanID VlanID Interface
 10.10.185.3    03:09:39 744a.a42b.d358 xxvgei-1/1/0 N/A    N/A    xxvgei-1/1/0/
                                         /24                        24
 192.168.1.11  H        744a.a42b.2011 mgmt_eth     N/A    N/A    N/A
-
 ```
 
 **Help:** execute the command "show arp"
@@ -203,7 +213,6 @@ loopback0 is up, ifindex: 8234
   IP MTU 1500 bytes
   IPv6 MTU 1500 bytes
   MPLS MTU 1550 bytes
-
 ```
 
 **Help:** execute the command "show interface"
@@ -253,7 +262,6 @@ xxvgei-1/1/0/29         optical    Duplex/full  25G   down  down  down
 xxvgei-1/1/0/30         optical    Duplex/full  25G   down  down  down                                                            
 xxvgei-1/1/0/31         optical    Duplex/full  25G   down  down  down                                                            
 xxvgei-1/1/0/32         optical    Duplex/full  25G   down  down  down  
-
 ```
 
 **Help:** execute the command "show interface brief"
@@ -275,7 +283,6 @@ Process ID: 1
 Interface         System id        State     Lev     Holds       SNPA(802.2)    Pri     MT   NSF       AF       
 xxvgei-1/1/0/2... RAW-KSBJB0072... UP        L2      30          PPP            -       M    Disable   IPv6      
 xxvgei-1/1/0/2... RR-KSMTP1445-01Z UP        L2      22          PPP            -       M    Disable   IPv6     
-
 ```
 
 **Help:** execute the command "show isis adjacency"
@@ -783,7 +790,6 @@ Name: R-PTABR-01-to-RAW-XXXXX0056-01Z
     Tunnel:
     Time Since Created: 2 days, 1 hours, 51 minutes, 13 seconds
     Current LSP: Uptime:2 days, 1 hours, 51 minutes, 13 seconds
-
 ```
 
 **Help:** execute the command "show mpls traffic-eng tunnels"
@@ -855,23 +861,9 @@ System Nvram    :  0 bytes
 System Memory   :  0 Mbytes
 System Flash    :  0 Mbytes
 Uptime is N/A
-
 ```
 
 **Help:** execute the command "show version"
-
-**Prompt:**
-- zte_zxros>
-- zte_zxros#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - zte_zxros>

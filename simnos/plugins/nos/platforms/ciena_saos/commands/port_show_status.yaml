@@ -1,0 +1,7 @@
+command: port show status
+type: simnos
+help: execute the command "port show status"
+mode:
+- user
+- enable
+output: port_show_status.txt

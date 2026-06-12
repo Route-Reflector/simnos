@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -51,23 +62,9 @@ apic1# fabric 203 show vlan extended
       Generators:source-tg-epg                                                   
  14   infra:default                    vxlan-16777209,  Eth1/1, Eth1/48          
                                        vlan-3914
-
 ```
 
 **Help:** execute the command "fabric show vlan extended"
-
-**Prompt:**
-- cisco_apic$
-- cisco_apic#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - cisco_apic$

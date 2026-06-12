@@ -1,0 +1,7 @@
+command: show router isis interface
+type: simnos
+help: execute the command "show router isis interface"
+mode:
+- user
+- enable
+output: show_router_isis_interface.txt

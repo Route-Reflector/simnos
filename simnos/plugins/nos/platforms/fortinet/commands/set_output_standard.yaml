@@ -1,0 +1,5 @@
+command: set output standard
+type: simnos
+help: set output to standard mode
+mode:
+- user

@@ -1,0 +1,6 @@
+command: get system interface
+type: simnos
+help: execute the command "get system interface"
+mode:
+- user
+output: get_system_interface.txt

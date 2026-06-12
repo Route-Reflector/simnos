@@ -1,0 +1,6 @@
+command: terminal more disable
+type: simnos
+help: Execute the command terminal more disable. This automatically generated.
+mode:
+- user
+- enable

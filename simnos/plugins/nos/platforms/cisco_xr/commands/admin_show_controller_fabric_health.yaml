@@ -1,0 +1,7 @@
+command: admin show controller fabric health
+type: simnos
+help: execute the command "admin show controller fabric health"
+mode:
+- user
+- enable
+output: admin_show_controller_fabric_health.txt

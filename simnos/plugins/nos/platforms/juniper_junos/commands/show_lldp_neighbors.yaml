@@ -1,0 +1,7 @@
+command: show lldp neighbors
+type: simnos
+help: execute the command "show lldp neighbors"
+mode:
+- user
+- enable
+output: show_lldp_neighbors.txt

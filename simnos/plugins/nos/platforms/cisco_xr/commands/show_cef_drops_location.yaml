@@ -1,0 +1,7 @@
+command: show cef drops location
+type: simnos
+help: execute the command "show cef drops location"
+mode:
+- user
+- enable
+output: show_cef_drops_location.txt

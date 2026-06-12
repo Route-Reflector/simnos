@@ -1,0 +1,5 @@
+command: set console page 0
+type: simnos
+help: set the terminal width to maximum
+mode:
+- user

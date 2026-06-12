@@ -9,4 +9,4 @@ invoke <task_name>
 
 -  `netmiko-check`: Netmiko はネットワーク自動化のコアライブラリです。SIMNOS はそのテストライブラリとしての役割を意図しており、利用可能なプラットフォームが Netmiko と互換性があることを確認することが重要です。このタスクは、プラットフォームと Netmiko の互換性をテストするために使用できるスクリプトを生成します。成功すると `Everything is OK! ✅` と表示されます。
 
--  `lint-platform-yaml`: platform YAML を authoring 規約 (#244) に照らして検査します: 新規 platform の `_default_` 必須、auto-generated stub help の新規追加禁止、heritage 文言の残存禁止。既存の drift は `platform_yaml_lint_baseline.yaml` (repo root) に凍結されており、baseline は縮小のみ — 違反を直したら同じ PR で baseline の entry も削除する必要があります。CI と pre-commit hook で実行されます。
+-  `lint-platform-data`: A3 platform データディレクトリを authoring 規約 (#264) に照らして検査します: 出力ファイル (`.txt` / `.j2`) は UTF-8・LF のみ・末尾改行必須、各出力ファイルはちょうど 1 つの command yaml から参照される (orphan / 共有 / 欠落参照を検出)、literal channel は `.txt`・`output_template` は `.j2`、`.yml` の混入を検出。加えて非ブロッキングの warning も出力します (ファイル名が sanitize 済コマンド名と不一致、`type: ntc` なのに `source` ブロック欠落)。CI と pre-commit hook で実行されます。

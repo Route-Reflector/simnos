@@ -1,0 +1,7 @@
+command: show access-lists
+type: simnos
+help: execute the command "show access-lists"
+mode:
+- user
+- enable
+output: show_access-lists.txt

@@ -1,0 +1,7 @@
+command: show router bgp summary family
+type: simnos
+help: execute the command "show router bgp summary family"
+mode:
+- user
+- enable
+output: show_router_bgp_summary_family.txt

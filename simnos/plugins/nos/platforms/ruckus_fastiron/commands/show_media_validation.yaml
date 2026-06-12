@@ -1,0 +1,7 @@
+command: show media validation
+type: simnos
+help: execute the command "show media validation"
+mode:
+- user
+- enable
+output: show_media_validation.txt

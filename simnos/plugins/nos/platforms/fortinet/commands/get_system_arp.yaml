@@ -1,0 +1,6 @@
+command: get system arp
+type: simnos
+help: execute the command "get system arp"
+mode:
+- user
+output: get_system_arp.txt

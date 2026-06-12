@@ -1,0 +1,7 @@
+command: show cts interface all
+type: simnos
+help: execute the command "show cts interface all"
+mode:
+- user
+- enable
+output: show_cts_interface_all.txt

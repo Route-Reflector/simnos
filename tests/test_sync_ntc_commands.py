@@ -1,9 +1,9 @@
 """Unit tests for sync_ntc_commands.py.
 
-Focuses on `select_primary_raw`, which encodes the NTC fixture-naming
-heuristics (canonical exact, separator normalization, prefix-less name,
-sibling-fixture filtering, alphabetical fallback). These were derived
-from concrete cases observed in real NTC Templates data:
+Covers `select_primary_raw` (the NTC fixture-naming heuristics) and the A3
+take-in candidate output (`write_diff_files`) the tool generates (#264 / D9).
+
+`select_primary_raw` cases are derived from concrete real NTC Templates data:
 
 - `cisco_ios/show_ip_bgp_neighbors_advertised-routes/`: folder uses `-`,
   the matching raw uses `_` and has no platform prefix.
@@ -15,8 +15,11 @@ from concrete cases observed in real NTC Templates data:
 """
 
 import importlib.util
+import os
 from pathlib import Path
 import sys
+
+import yaml
 
 # sync_ntc_commands.py is a top-level script (not under simnos/) so we load
 # it explicitly rather than via a package import.
@@ -28,45 +31,93 @@ sys.modules["sync_ntc_commands"] = sync_ntc_commands
 _spec.loader.exec_module(sync_ntc_commands)
 
 select_primary_raw = sync_ntc_commands.select_primary_raw
-escape_format_braces = sync_ntc_commands.escape_format_braces
+write_diff_files = sync_ntc_commands.write_diff_files
 
 
-class TestEscapeFormatBraces:
-    """`escape_format_braces` doubles ``{`` and ``}`` so NTC outputs survive
-    simnos's runtime ``output.format(base_prompt=...)`` call without
-    ``KeyError``. The motivating real-world cases are Juniper's ``{master}``
-    routing-engine indicator and ``rpd{junos-bgpshard0}`` process-thread
-    names from ``show system processes summary``.
+class TestWriteDiffFiles:
+    """`write_diff_files` emits A3 take-in candidate files (#264 / D9).
+
+    One ``commands/<stem>.yaml`` + adjacent ``.txt`` per command, with
+    ``type: ntc`` and a ``source`` provenance block — raw NTC text stored
+    verbatim (no brace escaping, the A3 runtime renders literals unchanged).
     """
 
-    def test_juniper_master_indicator(self):
-        """`{master}` becomes `{{master}}` — the most common Juniper case."""
-        assert escape_format_braces("...\n{master}\n") == "...\n{{master}}\n"
+    def _new_commands(self):
+        return {
+            "show version": {
+                "output": "Cisco IOS\nflags={origin_is_acl,}\n",
+                "output_variants": [],
+                "raw_path": "ntc-templates/tests/cisco_ios/show_version/cisco_ios_show_version.raw",
+                "raw_path_variants": [],
+            }
+        }
 
-    def test_juniper_process_thread_names(self):
-        """Nested-looking patterns like `rpd{junos-bgpshard0}` are escaped."""
-        assert (
-            escape_format_braces("rpd{junos-bgpshard0}\nchassisd{chassisd}")
-            == "rpd{{junos-bgpshard0}}\nchassisd{{chassisd}}"
-        )
+    def test_emits_a3_command_yaml_and_txt(self, tmp_path):
+        write_diff_files(str(tmp_path), "cisco_ios", self._new_commands(), "abc123", ["user", "enable"])
+        commands_dir = tmp_path / "cisco_ios" / "commands"
+        mapping = yaml.safe_load((commands_dir / "show_version.yaml").read_text(encoding="utf-8"))
+        assert mapping["command"] == "show version"
+        assert mapping["type"] == "ntc"
+        assert mapping["source"] == {
+            "ntc_template": "tests/cisco_ios/show_version/cisco_ios_show_version.raw",
+            "ntc_commit": "abc123",
+        }
+        assert mapping["mode"] == ["user", "enable"]
+        assert mapping["output"] == "show_version.txt"
 
-    def test_already_escaped_double_braces_get_quadrupled(self):
-        """Pre-escaped `{{x}}` becomes `{{{{x}}}}` — by design.
+    def test_output_text_is_verbatim_with_trailing_newline(self, tmp_path):
+        """Braces survive unescaped; a single trailing newline is ensured."""
+        write_diff_files(str(tmp_path), "cisco_ios", self._new_commands(), "abc123", [])
+        body = (tmp_path / "cisco_ios" / "commands" / "show_version.txt").read_text(encoding="utf-8")
+        assert body == "Cisco IOS\nflags={origin_is_acl,}\n"
 
-        Inputs to this function are raw NTC fixtures, which never carry
-        pre-escaped braces. We pin the literal behaviour here to make
-        the contract explicit: callers must pass untouched fixture text.
-        """
-        assert escape_format_braces("{{x}}") == "{{{{x}}}}"
+    def test_variants_become_variant_entries(self, tmp_path):
+        new_commands = {
+            "show foo": {
+                "output": "primary\n",
+                "output_variants": ["alt one\n", "alt two\n"],
+                "raw_path": "ntc-templates/tests/cisco_ios/show_foo/show_foo.raw",
+                "raw_path_variants": [],
+            }
+        }
+        write_diff_files(str(tmp_path), "cisco_ios", new_commands, "abc123", [])
+        commands_dir = tmp_path / "cisco_ios" / "commands"
+        mapping = yaml.safe_load((commands_dir / "show_foo.yaml").read_text(encoding="utf-8"))
+        assert [v["name"] for v in mapping["variants"]] == ["variant_1", "variant_2", "variant_3"]
+        assert "output" not in mapping
+        assert (commands_dir / "show_foo__variant_1.txt").read_text(encoding="utf-8") == "primary\n"
+        assert (commands_dir / "show_foo__variant_3.txt").read_text(encoding="utf-8") == "alt two\n"
 
-    def test_passthrough_when_no_braces(self):
-        """Strings without braces are returned unchanged."""
-        assert escape_format_braces("plain output text\n") == "plain output text\n"
+    def test_fs_hostile_command_name_is_sanitized(self, tmp_path):
+        new_commands = {
+            "get system status | grep Version": {
+                "output": "v1\n",
+                "output_variants": [],
+                "raw_path": "ntc-templates/tests/fortinet/x/x.raw",
+                "raw_path_variants": [],
+            }
+        }
+        write_diff_files(str(tmp_path), "fortinet", new_commands, "abc123", [])
+        files = os.listdir(tmp_path / "fortinet" / "commands")
+        # no path separators / pipes leaked into the filename
+        assert all("/" not in f and "|" not in f for f in files)
+        assert "get_system_status_grep_version.yaml" in files
 
-    def test_preserves_other_characters(self):
-        """Newlines, percent signs, backslashes are not affected."""
-        text = "line1\nline2\n100%\\path\n"
-        assert escape_format_braces(text) == text
+    def test_rerun_clears_stale_candidates(self, tmp_path):
+        """A re-run drops candidates from a command NTC no longer reports (#264)."""
+        write_diff_files(str(tmp_path), "cisco_ios", self._new_commands(), "abc123", [])
+        # second run for a different command set must not leave show_version.* behind
+        other = {
+            "show clock": {
+                "output": "12:00\n",
+                "output_variants": [],
+                "raw_path": "ntc-templates/tests/cisco_ios/show_clock/show_clock.raw",
+                "raw_path_variants": [],
+            }
+        }
+        write_diff_files(str(tmp_path), "cisco_ios", other, "abc123", [])
+        files = set(os.listdir(tmp_path / "cisco_ios" / "commands"))
+        assert files == {"show_clock.yaml", "show_clock.txt"}
 
 
 class TestSelectPrimaryRaw:

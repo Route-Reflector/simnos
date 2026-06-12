@@ -16,6 +16,36 @@
 **Prompt:**
 - ipinfusion_ocnos>
 
+### login
+
+**Output:** None
+
+**Help:** Execute the command login. This automatically generated.
+
+**Prompt:**
+- ipinfusion_ocnos>
+- ipinfusion_ocnos#
+
+### set cli screen-width 511
+
+**Output:** None
+
+**Help:** Execute the command set cli screen-width 511. This automatically generated.
+
+**Prompt:**
+- ipinfusion_ocnos>
+- ipinfusion_ocnos#
+
+### show curpriv
+
+**Output:** None
+
+**Help:** Execute the command show curpriv. This automatically generated.
+
+**Prompt:**
+- ipinfusion_ocnos>
+- ipinfusion_ocnos#
+
 ### show lldp table
 
 **Output:**
@@ -32,20 +62,9 @@ Ethernet20   leaf04           fortyGigE0/24   BR            Ethernet24
 eth0         mgmt-switch      swp14           BR            swp14
 --------------------------------------------------
 Total entries displayed:  7
-
 ```
 
 **Help:** execute the command "show lldp table"
-
-**Prompt:**
-- ipinfusion_ocnos>
-- ipinfusion_ocnos#
-
-### terminal width 511
-
-**Output:** None
-
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
 
 **Prompt:**
 - ipinfusion_ocnos>
@@ -71,31 +90,11 @@ Total entries displayed:  7
 - ipinfusion_ocnos>
 - ipinfusion_ocnos#
 
-### show curpriv
+### terminal width 511
 
 **Output:** None
 
-**Help:** Execute the command show curpriv. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ipinfusion_ocnos>
-- ipinfusion_ocnos#
-
-### login
-
-**Output:** None
-
-**Help:** Execute the command login. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- ipinfusion_ocnos>
-- ipinfusion_ocnos#
-
-### set cli screen-width 511
-
-**Output:** None
-
-**Help:** Execute the command set cli screen-width 511. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - ipinfusion_ocnos>

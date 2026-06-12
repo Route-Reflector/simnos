@@ -1,0 +1,11 @@
+command: display ont info by-sn ABC
+type: simnos
+help: execute the command "display ont info by-sn ABC"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: display_ont_info_by-sn_abc__variant_1.txt
+- name: variant_2
+  output: display_ont_info_by-sn_abc__variant_2.txt

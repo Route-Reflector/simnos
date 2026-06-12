@@ -1,0 +1,7 @@
+command: show asset all
+type: simnos
+help: execute the command "show asset all"
+mode:
+- user
+- enable
+output: show_asset_all.txt

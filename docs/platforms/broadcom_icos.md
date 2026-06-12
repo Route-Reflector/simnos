@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -37,7 +48,6 @@ dev3-ds-loc-sw000001     0/39      157       R          BCM-56340        0/1
 dev4-da-loc-sw000001     0/43      179       R          BCM-56340        0/1
 dev5-ab-loc-sw0001       0/49      154       R          AS5610-52X       0/1
 dev6-aa-loc-sw0002       0/50      158       R          AS5610-52X       0/1
-
 ```
 
 **Help:** execute the command "show isdp neighbors"
@@ -87,7 +97,6 @@ Interface  RemID   Chassis ID            Port ID             System Name
 0/48
 0/49       1       A8:00:B5:57:CC:8D     A8:00:B5:57:CC:8E   abc-ee-abc-sw0101
 0/50       2       A8:00:B5:57:CB:01     A8:00:B5:57:CB:02   abc-ff-abc-sw0102
-
 ```
 
 **Help:** execute the command "show lldp remote-device all"
@@ -122,7 +131,6 @@ VLAN ID  MAC Address         Interface              IfIndex  Status
 112      00:40:58:0E:A6:36   0/14                   14       Learned
 112      00:40:58:0E:A8:08   0/6                    6        Learned
 112      00:00:58:13:E4:67   0/13                   13       Learned
-
 ```
 
 **Help:** execute the command "show mac-addr-table"
@@ -158,9 +166,6 @@ Additional Packages............................ BGP-4
                                                 Data Center
                                                 OpEN API
                                                 Prototype Open API
-
-
-
 ```
 
 **Help:** execute the command "show version"
@@ -196,7 +201,6 @@ VLAN ID VLAN Name                        VLAN Type
 700     VLAN0700                         Static
 800     VLAN0800                         Static
 999     VLAN0999                         Static
-
 ```
 
 **Help:** execute the command "show vlan brief"
@@ -209,7 +213,7 @@ VLAN ID VLAN Name                        VLAN Type
 
 **Output:** None
 
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal length 0. This automatically generated.
 
 **Prompt:**
 - broadcom_icos>

@@ -1,0 +1,15 @@
+command: dir
+type: simnos
+help: execute the command "dir"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: dir__variant_1.txt
+- name: variant_2
+  output: dir__variant_2.txt
+- name: variant_3
+  output: dir__variant_3.txt
+- name: variant_4
+  output: dir__variant_4.txt

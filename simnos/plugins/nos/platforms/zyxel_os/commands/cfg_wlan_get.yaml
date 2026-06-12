@@ -1,0 +1,7 @@
+command: cfg wlan get
+type: simnos
+help: execute the command "cfg wlan get"
+mode:
+- user
+- enable
+output: cfg_wlan_get.txt

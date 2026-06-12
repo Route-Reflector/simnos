@@ -1,0 +1,7 @@
+command: chassis show temperature
+type: simnos
+help: execute the command "chassis show temperature"
+mode:
+- user
+- enable
+output: chassis_show_temperature.txt

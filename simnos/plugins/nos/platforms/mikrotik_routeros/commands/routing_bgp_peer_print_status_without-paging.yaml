@@ -1,0 +1,6 @@
+command: routing bgp peer print status without-paging
+type: simnos
+help: execute the command "routing bgp peer print status without-paging"
+mode:
+- user
+output: routing_bgp_peer_print_status_without-paging.txt

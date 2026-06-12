@@ -1,0 +1,7 @@
+command: show license usage
+type: simnos
+help: execute the command "show license usage"
+mode:
+- user
+- enable
+output: show_license_usage.txt

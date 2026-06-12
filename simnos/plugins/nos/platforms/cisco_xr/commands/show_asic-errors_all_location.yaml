@@ -1,0 +1,7 @@
+command: show asic-errors all location
+type: simnos
+help: execute the command "show asic-errors all location"
+mode:
+- user
+- enable
+output: show_asic-errors_all_location.txt

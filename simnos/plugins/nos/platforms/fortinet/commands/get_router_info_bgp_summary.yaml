@@ -1,0 +1,6 @@
+command: get router info bgp summary
+type: simnos
+help: execute the command "get router info bgp summary"
+mode:
+- user
+output: get_router_info_bgp_summary.txt

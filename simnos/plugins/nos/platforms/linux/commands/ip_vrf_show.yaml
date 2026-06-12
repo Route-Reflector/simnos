@@ -1,0 +1,7 @@
+command: ip vrf show
+type: simnos
+help: execute the command "ip vrf show"
+mode:
+- user
+- enable
+output: ip_vrf_show.txt

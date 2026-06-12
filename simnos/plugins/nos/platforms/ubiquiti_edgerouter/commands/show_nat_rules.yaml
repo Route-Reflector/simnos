@@ -1,0 +1,7 @@
+command: show nat rules
+type: simnos
+help: execute the command "show nat rules"
+mode:
+- user
+- enable
+output: show_nat_rules.txt

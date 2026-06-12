@@ -1,0 +1,6 @@
+command: show interface management
+type: simnos
+help: execute the command "show interface management"
+mode:
+- user
+output: show_interface_management.txt

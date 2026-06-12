@@ -1,0 +1,8 @@
+modes:
+  user:
+    prompt: "{{ base_prompt }}$"
+  enable:
+    prompt: "{{ base_prompt }}#"
+initial_mode: user
+netmiko_device_type: cisco_apic
+ntc_platform: cisco_apic

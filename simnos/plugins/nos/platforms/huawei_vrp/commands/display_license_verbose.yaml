@@ -1,0 +1,7 @@
+command: display license verbose
+type: simnos
+help: execute the command "display license verbose"
+mode:
+- user
+- enable
+output: display_license_verbose.txt

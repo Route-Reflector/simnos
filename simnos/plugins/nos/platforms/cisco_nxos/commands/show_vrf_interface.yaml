@@ -1,0 +1,7 @@
+command: show vrf interface
+type: simnos
+help: execute the command "show vrf interface"
+mode:
+- user
+- enable
+output: show_vrf_interface.txt

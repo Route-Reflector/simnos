@@ -1,0 +1,7 @@
+command: show static-channel-group
+type: simnos
+help: execute the command "show static-channel-group"
+mode:
+- user
+- enable
+output: show_static-channel-group.txt

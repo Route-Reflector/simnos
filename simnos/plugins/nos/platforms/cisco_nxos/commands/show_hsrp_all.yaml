@@ -1,0 +1,7 @@
+command: show hsrp all
+type: simnos
+help: execute the command "show hsrp all"
+mode:
+- user
+- enable
+output: show_hsrp_all.txt

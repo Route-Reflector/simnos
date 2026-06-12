@@ -1,0 +1,6 @@
+command: system identity print
+type: simnos
+help: execute the command "system identity print"
+mode:
+- user
+output: system_identity_print.txt

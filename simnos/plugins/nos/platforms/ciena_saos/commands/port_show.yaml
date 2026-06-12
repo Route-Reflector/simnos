@@ -1,0 +1,7 @@
+command: port show
+type: simnos
+help: execute the command "port show"
+mode:
+- user
+- enable
+output: port_show.txt

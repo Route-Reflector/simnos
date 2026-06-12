@@ -1,0 +1,7 @@
+command: display ont-srvprofile gpon all
+type: simnos
+help: execute the command "display ont-srvprofile gpon all"
+mode:
+- user
+- enable
+output: display_ont-srvprofile_gpon_all.txt

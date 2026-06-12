@@ -1,0 +1,6 @@
+command: user active print
+type: simnos
+help: execute the command "user active print"
+mode:
+- user
+output: user_active_print.txt

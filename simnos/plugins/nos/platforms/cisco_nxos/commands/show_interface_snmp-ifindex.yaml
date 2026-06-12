@@ -1,0 +1,7 @@
+command: show interface snmp-ifindex
+type: simnos
+help: execute the command "show interface snmp-ifindex"
+mode:
+- user
+- enable
+output: show_interface_snmp-ifindex.txt

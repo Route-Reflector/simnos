@@ -7,7 +7,7 @@
     "output": [
       "% Invalid input detected at '^' marker."
     ],
-    "variant_count": 0
+    "variants": []
   },
   "configure terminal": {
     "exit": false,
@@ -17,7 +17,7 @@
     ],
     "new_mode": "config",
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "dir": {
     "exit": false,
@@ -45,7 +45,7 @@
       "",
       "7835619328 bytes total (6612774912 bytes free)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "enable": {
     "exit": false,
@@ -55,7 +55,7 @@
     ],
     "new_mode": "enable",
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "end": {
     "exit": false,
@@ -65,7 +65,7 @@
     ],
     "new_mode": "enable",
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "exit": {
     "exit": false,
@@ -75,7 +75,7 @@
     ],
     "new_mode": "enable",
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "ping": {
     "exit": false,
@@ -91,7 +91,7 @@
       "U..U.",
       "Success rate is 0 percent (0/5)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show access-list": {
     "exit": false,
@@ -109,7 +109,7 @@
       "10 permit 0.0.0.0, wildcard bits 255.255.255.252 log (4556 matches)",
       "20 permit any (11665 matches)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show access-session": {
     "exit": false,
@@ -180,7 +180,7 @@
       "  X - Unknown Blocker",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show adjacency": {
     "exit": false,
@@ -197,7 +197,7 @@
       "IP       Vlan1                     10.255.1.250(8)",
       "IP       Vlan1                     227.0.0.0(3)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show alert counters": {
     "exit": false,
@@ -264,7 +264,7 @@
       "Global Errors :",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show aliases": {
     "exit": false,
@@ -289,7 +289,7 @@
       "ATM virtual circuit configuration mode aliases:",
       "  vbr                   vbr-nrt"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ap cdp neighbors": {
     "exit": false,
@@ -309,7 +309,7 @@
       "AP-OUTDOOR-01                    192.0.2.3                                 sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45     ",
       "AP-OUTDOOR-02                    2001:db8:abc:def::1234                    sw456.example.lan                          192.2.0.67        TenGigabitEthernet1/0/10.45     "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ap summary": {
     "exit": false,
@@ -326,7 +326,7 @@
       "-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------",
       "device-name                         2      9120AXI   0000.0000.000a  000a.000a.0000  default location                  US          1.1.1.1                            Registered"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show archive": {
     "exit": false,
@@ -339,7 +339,7 @@
     "output": [
       " Archive feature not enabled"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show arp": {
     "exit": false,
@@ -357,7 +357,7 @@
       "Internet  1.2.3.4                 0   c4ad.3425.b7be  ARPA   FastEthernet4",
       "Internet  1.2.3.5                 -   c4f7.d564.b71a  ARPA   FastEthernet4"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show authentication sessions": {
     "exit": false,
@@ -429,7 +429,7 @@
       "  X - Unknown Blocker",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show authentication sessions method details": {
     "exit": false,
@@ -474,7 +474,7 @@
       "        dot1x           Stopped",
       "          mab           Authc Success"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show bfd neighbors details": {
     "exit": false,
@@ -523,7 +523,7 @@
       "             Min tx interval: 1000000    - Min rx interval: 1000000",
       "             Min Echo interval: 50000"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show boot": {
     "exit": false,
@@ -550,7 +550,7 @@
       "Config Download",
       "via DHCP: disabled (next boot: disabled)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show capability feature routing": {
     "exit": false,
@@ -577,7 +577,7 @@
       " OSPFv3 Stub Router Advertisement: Enabled ",
       "OSPFv3 support of RFC3101: Enabled "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show cdp neighbors": {
     "exit": false,
@@ -599,7 +599,7 @@
       "SEP000DBC50FCD1   Gig 1/0/4     147          H P        IP Phone   Port 1",
       "SEP00124362C4D2   Gig 1/0/42    147          H P        IP Phone   Port 1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show cdp neighbors detail": {
     "exit": false,
@@ -684,7 +684,7 @@
       "Duplex: full",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show clock": {
     "exit": false,
@@ -697,7 +697,7 @@
     "output": [
       "*18:57:38.347 UTC Mon Oct 19 2015"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show controller t1": {
     "exit": false,
@@ -774,7 +774,7 @@
       "     0 Slip Secs, 0 Fr Loss Secs, 0 Line Err Secs, 0 Degraded Mins,",
       "     0 Errored Secs, 0 Bursty Err Secs, 0 Severely Err Secs, 58500 Unavail Secs"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show crypto ipsec sa detail": {
     "exit": false,
@@ -897,7 +897,7 @@
       "",
       "     outbound pcp sas:"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show crypto pki certificates": {
     "exit": false,
@@ -988,7 +988,7 @@
       "  Associated Trustpoints: ROOT-CA ",
       "  Storage: nvram:certfile.cer"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show crypto session detail": {
     "exit": false,
@@ -1052,7 +1052,7 @@
       "        Inbound:  #pkts dec'ed 0 drop 0 life (KB/Sec) 0/0",
       "        Outbound: #pkts enc'ed 0 drop 0 life (KB/Sec) 0/0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show cts credentials": {
     "exit": false,
@@ -1065,7 +1065,7 @@
     "output": [
       "No CTS credentials exist."
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show cts pacs": {
     "exit": false,
@@ -1087,7 +1087,7 @@
       "Refresh timer is set for 00:00:24",
       "Refresh delayed for 4286610 seconds waiting for server address information."
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show dhcp lease": {
     "exit": false,
@@ -1109,7 +1109,7 @@
       "                       306363302D566C31",
       "   Hostname: hostname-2"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show dmvpn": {
     "exit": false,
@@ -1138,7 +1138,7 @@
       "     1 10.202.0.170         10.253.0.2  NHRP    48w0d     S",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show dot1x all": {
     "exit": false,
@@ -1187,7 +1187,7 @@
       "TxPeriod                  = 30",
       "RateLimitPeriod           = 0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show endpoint-tracker": {
     "exit": false,
@@ -1202,7 +1202,7 @@
       "GigabitEthernet1             trk_umbrella           Up              2               1               10.44.22.1",
       "GigabitEthernet2             trk_goolge             Up              2               1               10.2.2.1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show endpoint-tracker tracker-group": {
     "exit": false,
@@ -1217,7 +1217,7 @@
       "trkgrp_grp1                      trk_google-web, trk_umbrella       UP(UP OR UP)                 16, 3            5, 6",
       "trkgrp_endpoint                  trk_google-web1, trk_umbrella1     UP(UP AND UP)                16, 3            5, 6"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show environment power all": {
     "exit": false,
@@ -1235,7 +1235,7 @@
       "2A  PWR-C1-1100WAC      DEF123456EF  OK              Good     Good     1100",
       "2B  PWR-C1-1100WAC      DEF123456GH  OK              Good     Good     1100"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show environment temperature": {
     "exit": false,
@@ -1267,7 +1267,7 @@
       "Yellow Threshold : 105 Degree Celsius",
       " Red Threshold    : 125 Degree Celsius"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show etherchannel summary": {
     "exit": false,
@@ -1302,7 +1302,7 @@
       "P/bndl -  Bundled",
       "S/susp  - Suspended"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show file systems": {
     "exit": false,
@@ -1333,7 +1333,7 @@
       "             -             -   network     rw   https:",
       "             -             -    opaque     ro   cns:"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show hosts summary": {
     "exit": false,
@@ -1349,7 +1349,7 @@
       "Local cache entries: 0",
       "Dynamic cache entries: 0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interface link": {
     "exit": false,
@@ -1383,7 +1383,7 @@
       "Tw1/0/48   WERFBZW5236KARA   00 secs",
       "Te6/1    ICN-DOFKYLW5823TV000 secs"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interface transceiver": {
     "exit": false,
@@ -1408,7 +1408,7 @@
       "Te1/51       21.5       3.29      -2.2      -2.1   ",
       "Te1/52       23.5       3.29      -2.4      -2.8  "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interfaces": {
     "exit": false,
@@ -1862,7 +1862,7 @@
       "     0 lost carrier, 0 no carrier",
       "     0 output buffer failures, 0 output buffers swapped out"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interfaces description": {
     "exit": false,
@@ -1890,7 +1890,7 @@
       "Gi0/10.20                      up             up       Carrier VLAN",
       "Gi0/10.30                      reset          down     Garbage"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interfaces status": {
     "exit": false,
@@ -1922,7 +1922,7 @@
       "Eth1/9        BBBBBBBB11-1       connected 4093      full    10G     Fabric Exte",
       "Eth1/10       BBBBBBBB11-1       connected 4093      full    10G     Fabric Exte"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interfaces status err-disabled": {
     "exit": false,
@@ -1938,7 +1938,7 @@
       "Eth2                         err-disabled  bpduguard",
       "Eth3                         err-disabled  loopback"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show interfaces switchport": {
     "exit": false,
@@ -2013,7 +2013,7 @@
       "Vepa Enabled: false",
       "Appliance trust: none"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show inventory": {
     "exit": false,
@@ -2037,7 +2037,7 @@
       "PID: NM-1FE-TX=        , VID: 1.0, SN: 7720321",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip access-lists": {
     "exit": false,
@@ -2136,7 +2136,7 @@
       "    660 permit pim host 10.10.37.18 host 224.0.0.1 time-range test2 (inactive)",
       "Extended IP access list test2"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip arp": {
     "exit": false,
@@ -2157,7 +2157,7 @@
       "Internet  10.0.0.0             -              aabb.cc03.8200    SRP-A",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip bgp": {
     "exit": false,
@@ -2186,7 +2186,7 @@
       " *>i  10.13.0.0/16     10.0.0.1                 0    100      0 i",
       " *>i  10.14.0.0/16     10.0.0.1                 0    100      0 i"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip bgp neighbors": {
     "exit": false,
@@ -3424,7 +3424,7 @@
       " fast lock acquisition failures: 0, slow path: 0",
       "TCP Semaphore      0x3DD685B8  FREE "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip bgp neighbors advertised-routes": {
     "exit": false,
@@ -3454,7 +3454,7 @@
       "",
       "Total number of prefixes 7"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip bgp summary": {
     "exit": false,
@@ -3492,7 +3492,7 @@
       "10.0.0.9        4        65008  222146 14368489 512185203    0    0 22w0d           0",
       "10.0.0.10       4        65009 26930508  942614 512185203    0    0 1y10w     Idle (Admin) "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip bgp vpnv4 all neighbors": {
     "exit": false,
@@ -4503,7 +4503,7 @@
       " fast lock acquisition failures: 0, slow path: 0",
       "TCP Semaphore      0x7F1747D2ADA0  FREE"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip cef": {
     "exit": false,
@@ -4528,7 +4528,7 @@
       "240.0.0.0/4          drop",
       "255.255.255.255/32   receive"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip cef detail": {
     "exit": false,
@@ -4623,7 +4623,7 @@
       "  Special source: receive",
       "  receive"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip device tracking all": {
     "exit": false,
@@ -4653,7 +4653,7 @@
       "  Gi1/0/18, Gi1/0/19, Gi1/0/20, Gi1/0/21, Gi1/0/22, Gi1/0/23, Gi1/0/24,",
       "  Gi1/0/25, Gi1/0/26, Gi1/0/27, Gi1/0/28"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip dhcp binding": {
     "exit": false,
@@ -4671,7 +4671,7 @@
       "10.100.88.26        01aa.aaaa.aaaa.aa       Infinite                Manual",
       "10.100.88.197       01dd.dddd.dddd.dd       Infinite                Manual"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip dhcp snooping binding": {
     "exit": false,
@@ -4713,7 +4713,7 @@
       "  10:85:9B:DA:04:09   172.16.92.219    1765        dhcp-snooping   1     GigabitEthernet0/26",
       "  Total number of bindings: 27"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip eigrp interfaces detail": {
     "exit": false,
@@ -4755,7 +4755,7 @@
       "  Topologies advertised on this interface:  base",
       "  Topologies not advertised on this interface:"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip eigrp neighbors": {
     "exit": false,
@@ -4773,7 +4773,7 @@
       "0   10.230.205.27           Vl942                    13 9w4d        1   100  0  35073",
       "1   10.230.205.23           Vl942                    13 15w2d       1   100  0  1051652"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip eigrp neighbors detail": {
     "exit": false,
@@ -4795,7 +4795,7 @@
       "   Topology-ids from peer - 0",
       "Max Nbrs: 0, Current Nbrs: 0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip eigrp topology": {
     "exit": false,
@@ -4851,7 +4851,7 @@
       "P 10.50.23.92/30, 1 successors, FD is 3840256, tag is 5507497",
       "        via Redistributed"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip flow toptalkers": {
     "exit": false,
@@ -4866,7 +4866,7 @@
       "Gi0/2/0.30    10.2.100.83     Null          224.0.0.2       11 07C1 07C1   414",
       "Gi0/2/0.40    10.2.100.99     Null          224.0.0.2       11 07C1 07C1   410"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip http server status": {
     "exit": false,
@@ -4913,7 +4913,7 @@
       "HTTP secure server ECDHE curve: secp256r1",
       "HTTP secure server active session modules: ALL"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip interface": {
     "exit": false,
@@ -5058,7 +5058,7 @@
       "  IP Clear Dont Fragment is disabled",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip interface brief": {
     "exit": false,
@@ -5077,7 +5077,7 @@
       "Ethernet0/3                unassigned      YES NVRAM  administratively down down",
       "Loopback0                  10.0.1.2        YES NVRAM  up                    up"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip mroute": {
     "exit": false,
@@ -5102,7 +5102,7 @@
       " Timers: Uptime/Expires",
       " Interface state: Interface, Next-Hop or VCD, State/Mode"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip nat translations": {
     "exit": false,
@@ -5122,7 +5122,7 @@
       "",
       "--- 10.9.0.0     10.1.0.2     ---        ---"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf database": {
     "exit": false,
@@ -5156,7 +5156,7 @@
       "192.168.1.128   0.0.0.3         565         0x80000001 0x007C05 0",
       "192.168.1.160   0.0.0.3         567         0x80000001 0x003B26 0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf database network": {
     "exit": false,
@@ -5207,7 +5207,7 @@
       "        Attached Router: 100.4.4.4",
       "        Attached Router: 100.3.3.3"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf database router": {
     "exit": false,
@@ -5349,7 +5349,7 @@
       "      Number of MTID metrics: 0",
       "       TOS 0 Metrics: 1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf interface brief": {
     "exit": false,
@@ -5374,7 +5374,7 @@
       "Se3/2:0 \t 1\t   0 \t 10.1.224.218/30 \t6\t  P2P\t1/1",
       "Se3/1:0 \t 1\t   0 \t 10.1.225.150/30 \t6\t  P2P\t1/1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf neighbor": {
     "exit": false,
@@ -5390,7 +5390,7 @@
       "10.0.0.2          0   FULL/  -        00:00:33    10.0.2.1        Port-channel2",
       "10.0.0.3          0   FULL/  -        00:00:39    10.0.3.1        Vlan1000"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip ospf neighbor detail": {
     "exit": false,
@@ -5426,7 +5426,7 @@
       "    Last retransmission scan length is 1, maximum is 1",
       "    Last retransmission scan time is 0 msec, maximum is 0 msec"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip prefix-list": {
     "exit": false,
@@ -5442,7 +5442,7 @@
       "   seq 10 permit 0.0.0.0/0 le 32",
       "   seq 15 deny 10.0.0.0/8 ge 10 le 20"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip route": {
     "exit": false,
@@ -5471,7 +5471,7 @@
       "C        192.168.1.0/24 is directly connected, vasileft1",
       "L        192.168.1.1/32 is directly connected, vasileft1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip route summary": {
     "exit": false,
@@ -5497,7 +5497,7 @@
       "internal        2                                               920",
       "Total           2           6           0           408         2000"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip source binding": {
     "exit": false,
@@ -5515,7 +5515,7 @@
       "9C:A0:B0:16:26:D2   192.168.1.104    591457      dhcp-snooping   1     GigabitEthernet1/0/9",
       " Total number of bindings: 3"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ip vrf interfaces": {
     "exit": false,
@@ -5534,7 +5534,7 @@
       "Vl520                  172.31.2.253    SP-INET                          up      ",
       "Vl1836                 10.255.0.18     SP-INET                          up"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ipv6 access-lists": {
     "exit": false,
@@ -5569,7 +5569,7 @@
       "    deny ipv6 any any sequence 50",
       "    permit tcp any any established sequence 9996"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ipv6 interface brief": {
     "exit": false,
@@ -5767,7 +5767,7 @@
       "Vlan2300               [administratively down/down]",
       "    unassigned"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ipv6 neighbors": {
     "exit": false,
@@ -5790,7 +5790,7 @@
       "FE80::208:E3FF:FEFF:FC28                    0 0008.e3ff.fc28  REACH Vl687",
       "FE80::9277:EEFF:FE9B:4E00                   - -               REACH Di0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show ipv6 route": {
     "exit": false,
@@ -5821,7 +5821,7 @@
       "     via 2A05:C100:2A::3:344, Vlan1",
       "     via Vlan1, directly connected"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show isdn status": {
     "exit": false,
@@ -5869,7 +5869,7 @@
       "    Number of L2 Discards = 0, L2 Session ID = 1",
       "    Total Allocated ISDN CCBs = 1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show isis neighbors": {
     "exit": false,
@@ -5888,7 +5888,7 @@
       "XRv3            L2   Gi2           10.1.2.3        UP    7        XRv3.03",
       "vEOS4           L2   Gi3           10.2.4.4        UP    23       0F"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show license": {
     "exit": false,
@@ -5960,7 +5960,7 @@
       "        License Priority: None",
       "Index 10 Feature: internal_service              "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show license status": {
     "exit": false,
@@ -6005,7 +6005,7 @@
       "  Features Authorized:",
       "    <none>"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show lldp neighbors": {
     "exit": false,
@@ -6029,7 +6029,7 @@
       "",
       "Total entries displayed: 5"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show lldp neighbors detail": {
     "exit": false,
@@ -6083,7 +6083,7 @@
       "    PD device, Power source: Unknown, Power Priority: Unknown, Wattage: 6.3",
       "    Location - not advertised"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show logging": {
     "exit": false,
@@ -6140,7 +6140,7 @@
       "",
       "*Sep 14 06:07:26.245: %LINEPROTO-5-UPDOWN: Line protocol on Interface Virtual-PPP2, changed state to down"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show mac-address-table": {
     "exit": false,
@@ -6167,7 +6167,7 @@
       "   669  30a3.30a3.5a22   dynamic  Yes        300   Te3/20",
       "  2000  30a3.30a3.5a22   dynamic  Yes        300   Te3/20"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show module": {
     "exit": false,
@@ -6183,7 +6183,7 @@
       " 1       28     C9200L-24T-4G-E       3YEEQEY2MND  dc8c.5322.19c6  V01           16.12.6  ",
       " 2       28     C9200L-24T-4G-E       CBC7DQFNB7F  dc8c.aaa0.1b77  V01           16.12.6  "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show mpls interfaces": {
     "exit": false,
@@ -6203,7 +6203,7 @@
       "TenGigabitEthernet1/15 Yes (ldp)     No       No  No     Yes     ",
       "Vlan101                Yes (ldp)     No       No  No     Yes     "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show mpls l2transport vc": {
     "exit": false,
@@ -6220,7 +6220,7 @@
       "AT4/0          ATM AAL5 0/100     10.0.0.1        100        UP",
       "AT4/0.300      ATM AAL5 0/300     10.0.0.1        300        UP"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show nve peers": {
     "exit": false,
@@ -6239,7 +6239,7 @@
       "nve1       1032 L3CP 192.168.111.48   cc7f.76a5.3c56 1032   UP   A/M 6d22h",
       "nve1       1036 L3CP 192.168.111.48   cc7f.76a5.3c56 1036   UP   A/M 6d22h"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show nve vni": {
     "exit": false,
@@ -6256,7 +6256,7 @@
       "nve1       10302   N/A             Up         L3CP  302  CLI GRN                                         ",
       "nve1       10301   N/A             Up         L3CP  301  CLI BLU  "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show object-group": {
     "exit": false,
@@ -6299,7 +6299,7 @@
       " Network object group XXXX",
       "Network object group YYYY"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show platform": {
     "exit": false,
@@ -6315,7 +6315,7 @@
       " 1       65     C9300-48P             J111111111a  f000.f000.f000  V03           16.12.4",
       " 2       65     C9300-48P             J222222222b  f000.f000.f001  V03           16.12.4"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show platform diag": {
     "exit": false,
@@ -6386,7 +6386,7 @@
       "   Physical insert detect time : 00:01:40 (4d22h ago)",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show policy-map": {
     "exit": false,
@@ -6431,7 +6431,7 @@
       "      bandwidth remaining ratio 60 account user-defined 3",
       "      queue-limit 50 ms"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show port-security interface interface": {
     "exit": false,
@@ -6455,7 +6455,7 @@
       "Last Source Address:Vlan   : 0000.0000.0000:0",
       "Security Violation Count   : 0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show power available": {
     "exit": false,
@@ -6476,7 +6476,7 @@
       "Total                     575         750",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show power inline": {
     "exit": false,
@@ -6508,7 +6508,7 @@
       "Totals:          11   on    330.0",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show power status": {
     "exit": false,
@@ -6531,7 +6531,7 @@
       " ",
       "*** Power Supplies of different type have been detected***"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show power supplies": {
     "exit": false,
@@ -6545,7 +6545,7 @@
       "Power supplies needed by system    : 1",
       "Power supplies currently available : 2"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show power used": {
     "exit": false,
@@ -6558,7 +6558,7 @@
     "output": [
       "system power used =      2255.76 Watts (43.38 Amps @ 52V)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show privilege": {
     "exit": false,
@@ -6571,7 +6571,7 @@
     "output": [
       "Current privilege level is 15"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show processes cpu": {
     "exit": false,
@@ -6901,7 +6901,7 @@
       " 317           0         1          0  0.00%  0.00%  0.00%   0 CEF RP IPC Backg",
       " 318           0         3          0  0.00%  0.00%  0.00%   0 Collection proce"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show processes memory sorted": {
     "exit": false,
@@ -6932,7 +6932,7 @@
       "",
       "342936032 Total"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show redundancy": {
     "exit": false,
@@ -6983,7 +6983,7 @@
       "                       BOOTLDR = ",
       "        Configuration register = 0x2102"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show rep topology": {
     "exit": false,
@@ -7000,7 +7000,7 @@
       "Switch01          Fa0/2      Pri  Alt",
       "Switch02          Fa1/0/23   Sec  Open"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show route-map": {
     "exit": false,
@@ -7025,7 +7025,7 @@
       "    ip next-hop 10.10.11.14",
       "  Policy routing matches: 144 packets, 15190 bytes"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show running-config interface": {
     "exit": false,
@@ -7119,7 +7119,7 @@
       " service-policy output VIPSIP_POLICY_800_OUT",
       "!"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show running-config partition access-list": {
     "exit": false,
@@ -7188,7 +7188,7 @@
       " 521 permit tcp any any match-any +ack +fin +syn +psh",
       " 530 permit tcp any 10.1.0.0 0.0.255.255 established psh"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show running-config partition route-map": {
     "exit": false,
@@ -7216,7 +7216,7 @@
       " match ip address prefix-list BGP_OUT",
       " set community 11167:5000"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show sdwan bfd sessions table": {
     "exit": false,
@@ -7243,7 +7243,7 @@
       "10.11.22.4   84.169.24.206    ipsec  12346  12386  172.47.255.6   65003  gold      gold      up     7           1000      17:00:15:23  6",
       "10.11.22.4   242.105.174.58   ipsec  12346  12386  172.47.255.6   65003  gold      silver    up     7           1000      17:00:15:23  2"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show sdwan bfd summary": {
     "exit": false,
@@ -7260,7 +7260,7 @@
       "sessions-flap          444",
       "poll-interval          123400"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show sdwan control connections": {
     "exit": false,
@@ -7280,7 +7280,7 @@
       "vbond   dtls 0.0.0.0         0          0      24.254.21.185                           12346 24.254.21.185                           12346 network-SDWAN           gold            -     up     110:18:34:340           ",
       "vmanage dtls 10.14.2.248     100        0      10.14.2.70                              12346 40.117.123.18                           12346 network-SDWAN           gold            No    up     110:18:39:240   "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show sdwan omp peers": {
     "exit": false,
@@ -7301,7 +7301,7 @@
       "0         10.94.2.240      vsmart  1         1         142       None      up       16:23:52:59      520/383/30",
       "0         10.94.3.240      vsmart  1         1         242       None      up       16:23:52:59      520/0/30"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show sdwan tunnel statistics table": {
     "exit": false,
@@ -7325,7 +7325,7 @@
       "ipsec     10.11.42.4   20.117.210.153   12346   12386  172.29.155.21  gold      silver    1438    50210316   27862783665   51447748    18414059862    1358    0             0               0             0               0                   0                     0                   0                                        ",
       "ipsec     10.11.42.36  10.21.42.36     12346   12346  10.21.55.1     private6  private6  1438    439400369  213633937560  1379033146  1252855204172  1358    0             0               0             0               0                   0                     0                   0                     "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show snmp community": {
     "exit": false,
@@ -7354,7 +7354,7 @@
       "storage-type: nonvolatile        active",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show snmp group": {
     "exit": false,
@@ -7407,7 +7407,7 @@
       "notifyview: <no notifyview specified>       ",
       "row status: active      access-list: snmp-acl-name"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show snmp user": {
     "exit": false,
@@ -7440,7 +7440,7 @@
       "Privacy Protocol: -",
       "Group-name: test-group"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show spanning-tree": {
     "exit": false,
@@ -7511,7 +7511,7 @@
       "Gi0/3               Root FWD 4         128.4    Shr",
       "Gi1/0               Altn BLK 4         128.5    Shr"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show spanning-tree root": {
     "exit": false,
@@ -7529,7 +7529,7 @@
       "VLAN0002         11185 5c6e.f0a7.a0b0         0    2   20  15                  ",
       "VLAN0003         11195 5c6e.f0a7.a0b0         0    2   20  15  Po34"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show stack-power": {
     "exit": false,
@@ -7546,7 +7546,7 @@
       "    Powerstack-1                     SP-PS   Stndaln  1430    0       340     1090      1    2   ",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show standby": {
     "exit": false,
@@ -7615,7 +7615,7 @@
       "    Track object 1 (unknown)",
       "  Group name is \"hsrp-Gi0/1.2951-1\" (default)"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show standby brief": {
     "exit": false,
@@ -7638,7 +7638,7 @@
       "Vl4010 ",
       "     1    120 P Active  local           10.1.254.3    10.1.254.1"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show switch detail": {
     "exit": false,
@@ -7666,7 +7666,7 @@
       "  2        Ok         Ok                1        3 ",
       "  3        Ok         Ok                2        1 "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show switch virtual": {
     "exit": false,
@@ -7697,7 +7697,7 @@
       "Peer switch number           : 1",
       "Peer switch operational role : Virtual Switch Active"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show tacacs": {
     "exit": false,
@@ -7735,7 +7735,7 @@
       "        Total Packets Sent:       2954",
       "        Total Packets Recv:       2953"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show users": {
     "exit": false,
@@ -7751,7 +7751,7 @@
       "",
       "  Interface    User               Mode         Idle     Peer Address"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show version": {
     "exit": false,
@@ -7806,7 +7806,7 @@
       "",
       "Configuration register is 0x0"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vlan": {
     "exit": false,
@@ -7848,7 +7848,7 @@
       "Primary Secondary Type              Ports",
       "------- --------- ----------------- ------------------------------------------"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vlan group": {
     "exit": false,
@@ -7865,7 +7865,7 @@
       "vlan group MULTI_VLAN_TEST_1 : 5, 66",
       "vlan group MULTI_VLAN_TEST_2 : 761-763, 197, 200, 208"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vlans": {
     "exit": false,
@@ -8041,7 +8041,7 @@
       "      Total 1003113541 packets, 74260171809 bytes output",
       "      Total 0 oversubscription packet drops"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vrf": {
     "exit": false,
@@ -8058,7 +8058,7 @@
       "                                                                     Gi0/1.21",
       "  vpn22                            65201:22              ipv4        "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vrf detail": {
     "exit": false,
@@ -8126,7 +8126,7 @@
       "Address family ipv6 multicast not active",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vrrp all": {
     "exit": false,
@@ -8218,7 +8218,7 @@
       "",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vrrp brief": {
     "exit": false,
@@ -8237,7 +8237,7 @@
       "  Gi0/0.2600           1 IPv4  90  3648  N   Y  BACKUP  172.26.0.3 172.26.0.1",
       ""
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show vtp status": {
     "exit": false,
@@ -8266,7 +8266,7 @@
       "MD5 digest                        : 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF ",
       "                                    0x89 0x07 0xE4 0x53 0xBA 0xB1 0x1C 0xC1 "
     ],
-    "variant_count": 0
+    "variants": []
   },
   "show wireless tag policy summary": {
     "exit": false,
@@ -8291,7 +8291,7 @@
       "PT_Hallway                        PT_Hallway",
       "default-policy-tag                default policy-tag"
     ],
-    "variant_count": 0
+    "variants": []
   },
   "terminal length 0": {
     "exit": false,
@@ -8302,7 +8302,7 @@
     ],
     "new_mode": null,
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "terminal width 511": {
     "exit": false,
@@ -8313,7 +8313,7 @@
     ],
     "new_mode": null,
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "terminal width 512": {
     "exit": false,
@@ -8324,7 +8324,7 @@
     ],
     "new_mode": null,
     "output": null,
-    "variant_count": 0
+    "variants": []
   },
   "traceroute": {
     "exit": false,
@@ -8360,6 +8360,6 @@
       "    108.170.238.117 14 msec",
       "  6 172.17.10.225 !H  *  !H"
     ],
-    "variant_count": 0
+    "variants": []
   }
 }

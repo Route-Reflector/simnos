@@ -1,0 +1,7 @@
+command: show crypto ipsec sa
+type: simnos
+help: execute the command "show crypto ipsec sa"
+mode:
+- user
+- enable
+output: show_crypto_ipsec_sa.txt

@@ -1,0 +1,7 @@
+command: show arp no-resolve
+type: simnos
+help: execute the command "show arp no-resolve"
+mode:
+- user
+- enable
+output: show_arp_no-resolve.txt

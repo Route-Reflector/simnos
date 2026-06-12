@@ -56,9 +56,10 @@ SIMNOS はネットワーク自動化ツールのための**軽量テストス�
 
 - **実機での動作検証はコントリビューターの責任です。** メンテナーは多くの場合、実機にアクセスできません。提出前に実デバイスの出力（または信頼できるリファレンスデータ）でテストしてください。
 - **[NTC Templates](https://github.com/networktocode/ntc-templates) にまだない場合**、パーサーの追加も検討してください。ネットワーク自動化エコシステム全体の利益になりますし、SIMNOS は NTC のテストデータをコマンド出力のソースとして利用しています。
-- **プラットフォーム YAML の構造**: `simnos/plugins/nos/platforms_yaml/` の既存プラットフォームを参考にしてください。最低限必要なもの:
-  - `initial_prompt` — デフォルトの CLI プロンプト
-  - `commands` — コマンド名と出力、ヘルプテキスト、プロンプトのマッピング
+- **A3 プラットフォームの構造**: `simnos/plugins/nos/platforms/` の既存プラットフォームを参考にしてください。各プラットフォームはディレクトリで、最低限必要なもの:
+  - `platform.yaml` — モード (名前 → プロンプトテンプレート) と `initial_mode`
+  - `commands/<stem>.yaml` — 1 コマンド 1 ファイル (`command` フィールドが SSoT)、出力・ヘルプ・モードを記述
+  - 隣接する `commands/<stem>.txt` — コマンドの literal 出力
 - 詳細は [新プラットフォームの作成](https://route-reflector.github.io/simnos/ja/development/creating_new_platforms/) ガイドを参照してください。
 
 ## 開発環境のセットアップ

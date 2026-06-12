@@ -7,14 +7,16 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### enable
+### _default_
 
-**Output:** None
+**Output:**
+```
+%% Invalid input detected at '^' marker.
+```
 
-**Help:** enter enable mode
+**Help:** default output for unknown commands
 
 **Prompt:**
-- extreme_exos>
 
 ### disable cli prompting
 
@@ -26,11 +28,91 @@
 - extreme_exos>
 - extreme_exos#
 
+### disable clipaging
+
+**Output:** None
+
+**Help:** Execute the command disable clipaging. This automatically generated.
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
+### enable
+
+**Output:** None
+
+**Help:** enter enable mode
+
+**Prompt:**
+- extreme_exos>
+
 ### ex
 
 **Output:** None
 
 **Help:** exit the terminal
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
+### show fdb
+
+**Output:**
+```
+MAC                                      VLAN Name( Tag)  Age  Flags          Port / Virtual Port List
+------------------------------------------------------------------------------------------------------
+00:0c:29:4b:34:cf                             v101(0101) 0041  d m D          1:2
+00:0c:29:4b:34:cf                             v100(0100) 0041  d m P          1:2
+00:0c:29:d2:2d:48                             v102(0102) 0045  d miM          1:3, 1:45
+00:0c:29:d2:2d:48                             v100(0100) 0045  d m P          1:3
+00:0c:29:f1:f2:f5                             v100(0100) 0045  d miM          1:51:1, 1:45
+00:0c:29:f1:f2:f5                             v102(0102) 0045  d m P          1:1
+00:0c:29:f1:f2:f5                             v101(0101) 0000  d m P          1:1
+
+Flags : d - Dynamic, s - Static, p - Permanent, n - NetLogin, m - MAC, i - IP,
+        x - IPX, l - lockdown MAC, L - lockdown-timeout MAC, M- Mirror, B - Egress Blackhole,
+        b - Ingress Blackhole, v - MAC-Based VLAN, P - Private VLAN, T - VLAN translation,
+        D - drop packet, h - Hardware Aging (Age=0), o - IEEE 802.1ah Backbone MAC,
+        S - Software Controlled Deletion, r - MSRP,
+        X - VXLAN, E - EVPN
+
+Total: 3 Static: 0  Perm: 0  Dyn: 3  Dropped: 1  Locked: 0  Locked with Timeout: 0
+FDB Aging time: 300
+```
+
+**Help:** execute the command "show fdb"
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
+### show iparp
+
+**Output:**
+```
+VR            Destination      Mac                Age  Static  VLAN          VID   Port
+VR-Default    10.128.32.4      00:d0:59:17:74:83   20      NO  bluered       4092  1:25
+VR-Default    10.128.32.8      00:01:30:ba:6a:a0    7      NO  Default       4095
+
+Dynamic Entries  :           4             Static Entries            :          0
+Pending Entries  :           0
+
+ARP address check:    Enabled              ARP refresh               :    Enabled
+Timeout          :          20 minutes     ARP Sender-Mac Learning   :   Disabled
+Locktime         :        1000 milliseconds
+Retransmit Time  :        1000 milliseconds
+Reachable Time   :      900000 milliseconds (Auto)
+Fast Convergence :         Off 
+
+ARP Global Settings
+Max Entries         :    12288 
+Max Pending Entries :      256 
+Max Proxy Entries   :      256
+```
+
+**Help:** execute the command "show iparp"
 
 **Prompt:**
 - extreme_exos>
@@ -73,7 +155,6 @@ Flags: (A) Address Mask Reply Enabled (B) BOOTP Enabled
        (t) Tentative address, (T) Time Stamp Reply Enabled
        (u) Send Unreachables Enabled, (U) Interface Up
        (v) VRRP Enabled, (X) Send Time Exceeded Enabled
-
 ```
 
 **Help:** execute the command "show ipconfig"
@@ -137,10 +218,90 @@ Port   Display String        Description String
 47                           BLADE-1-VC2 - VC1
 48                           BLADE-1-VC2 - VC8
 =====  ====================  ==================================================
-
 ```
 
 **Help:** execute the command "show ports description"
+
+**Prompt:**
+- extreme_exos>
+- extreme_exos#
+
+### show ports information
+
+**Output:**
+```
+Port      Flags               Link      ELSM Link Num Num  Num   Jumbo QOS     Load
+                              State     /OAM UPS  STP VLAN Proto Size  profile Master
+=====================================================================================
+1         Dmjla---e--fMB---x- ready     - / -  0    1 3288   1   9216  none    1 a
+2         Dmjla---e--fMB---x- ready     - / -  1    1 3288   1   9216  none    1 a
+3         Dmjla---e--fMB---x- ready     - / -  7    1 3288   1   9216  none    1 a
+4         Dmjla---e--fMB---x- ready     - / -  0    1 3288   1   9216  none    1 a
+5         Emj-----e--fMB---x- active    - / -  1    0    1   0   9216  none
+6         Emj-----e--fMB---x- active    - / -  2    0   74   0   9216  none
+7         Emj-----e--fMB---x- active    - / -  2    0   74   0   9216  none
+8         Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+9         Dmj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+10        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+11        Emj-----e--fMB---x- ready     - / -  0    0    1   1   9216  none
+12        Emj-----e--fMB---x- active    - / -  0    0   97   0   9216  none
+13        Emj-----e--fMB---x- active    - / -  1    1   55   1   9216  none
+14        Emj-----e--fMB---x- active    - / - 10    1  130   1   9216  none
+15        Emj-----e--fMB---x- active    - / -  0    1  191   1   9216  none
+16        Emj-----e--fMB---x- active    - / -  1    1  312   1   9216  none
+17        Emj-----e--fMB---x- ready     - / -  0    0 3289   0   9216  none
+18        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+19        Emj-----e--fMB---x- active    - / - 22    0  176   0   9216  none
+20        Emj-----e--fMB---x- ready     - / -  0    1    7   1   9216  none
+21        Dmj-----e--fMB---x- ready     - / -  4    0    1   1   9216  none
+22        Emj-----e--fMB---x- ready     - / -  0    1   11   1   9216  none
+23        Emj-----e--fMB---x- active    - / -  2    1 3324   1   9216  none
+24        Emj-----e--fMB---x- ready     - / -  2    0    1   0   9216  none
+25        Dmj-----e--fMB---x- ready     - / -  3    0    5   0   9216  none
+26        Emj-----e--fMB---x- ready     - / -  4    0    5   0   9216  none
+27        Emj-----e--fMB---x- ready     - / - 11    0    5   0   9216  none
+28        Emj-----e--fMB---x- ready     - / -  0    0    5   0   9216  none
+29        Emjla---e--fMB---x- ready     - / - 12    0   72   0   9216  none    29 a
+30        Dmj-----e--fMB---x- ready     - / -  2    1  532   1   9216  none
+31        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+32        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
+33        Emjla---e--fMB---x- active    - / -  2    0  856   0   9216  none    33 a
+34        Emjla---e--fMB---x- ready     - / -  7    0   72   0   9216  none    29 a
+35        Emjla---e--fMB---x- active    - / -  1    0  856   0   9216  none    33 a
+36        Emj-----e--fMB---x- active    - / - 10    0    0   0   9216  none
+37        Emj-----e--fMB---x- active    - / -  0    0    0   0   9216  none
+38        Emjla---e--fMB---x- ready     - / -  0    0   26   0   9216  none    38 a
+39        Emjla---e--fMB---x- ready     - / -  0    0   26   0   9216  none    38 a
+40        Emj-----e--fMB---x- ready     - / -  0    0    7   0   9216  none
+41        Emj-----e--fMB---x- ready     - / -  0    1  118   1   9216  none
+42        Emj-----e--fMB---x- ready     - / -  0    1  317   1   9216  none
+43        Emj-----e--fMB---x- ready     - / -  5    1    2   1   9216  none
+44        Emj-----e--fMB---x- active    - / -  2    0    1   1   9216  none
+45        Emj-----e--fMB----- active    - / -  1    0  388   0   9216  none
+46        Emj-----e--fMB----- active    - / - 17    0    6   0   9216  none
+47        Emj-----e--fMB----- active    - / -  0    0  261   0   9216  none
+48        Emj-----e--fMB----- active    - / -  0    0  265   0   9216  none
+=====================================================================================
+ > indicates Port Display Name truncated past 8 characters
+Flags : a - Load Sharing Algorithm address-based, D - Port Disabled,
+        e - Extreme Discovery Protocol Enabled, E - Port Enabled,
+        g - Egress TOS Enabled, i - Isolation, j - Jumbo Frame Enabled,
+        l - Load Sharing Enabled, m - MACLearning Enabled,
+        n - Ingress TOS Enabled, o - Dot1p Replacement Enabled,
+        P - Software redundant port(Primary),
+        R - Software redundant port(Redundant),
+        q - Background QOS Monitoring Enabled,
+        s - diffserv Replacement Enabled,
+        v - Vman Enabled, f - Unicast Flooding Enabled,
+        M - Multicast Flooding Enabled, B - Broadcast Flooding Enabled
+        L - Extreme Link Status Monitoring Enabled
+        O - Ethernet OAM Enabled
+        w - MACLearning Disabled with Forwarding
+        b - Rx and Tx Flow Control Enabled, x - Rx Flow Control Enabled
+        p - Priority Flow Control Enabled
+```
+
+**Help:** execute the command "show ports information"
 
 **Prompt:**
 - extreme_exos>
@@ -285,92 +446,9 @@ Port:	2
 	Synchronous Ethernet:		Unsupported
 	Dynamic VLAN Uplink:          	Disabled
 	VM Tracking Dynamic VLANs:    	Disabled
-
 ```
 
 **Help:** execute the command "show ports information detail"
-
-**Prompt:**
-- extreme_exos>
-- extreme_exos#
-
-### show ports information
-
-**Output:**
-```
-Port      Flags               Link      ELSM Link Num Num  Num   Jumbo QOS     Load
-                              State     /OAM UPS  STP VLAN Proto Size  profile Master
-=====================================================================================
-1         Dmjla---e--fMB---x- ready     - / -  0    1 3288   1   9216  none    1 a
-2         Dmjla---e--fMB---x- ready     - / -  1    1 3288   1   9216  none    1 a
-3         Dmjla---e--fMB---x- ready     - / -  7    1 3288   1   9216  none    1 a
-4         Dmjla---e--fMB---x- ready     - / -  0    1 3288   1   9216  none    1 a
-5         Emj-----e--fMB---x- active    - / -  1    0    1   0   9216  none
-6         Emj-----e--fMB---x- active    - / -  2    0   74   0   9216  none
-7         Emj-----e--fMB---x- active    - / -  2    0   74   0   9216  none
-8         Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-9         Dmj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-10        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-11        Emj-----e--fMB---x- ready     - / -  0    0    1   1   9216  none
-12        Emj-----e--fMB---x- active    - / -  0    0   97   0   9216  none
-13        Emj-----e--fMB---x- active    - / -  1    1   55   1   9216  none
-14        Emj-----e--fMB---x- active    - / - 10    1  130   1   9216  none
-15        Emj-----e--fMB---x- active    - / -  0    1  191   1   9216  none
-16        Emj-----e--fMB---x- active    - / -  1    1  312   1   9216  none
-17        Emj-----e--fMB---x- ready     - / -  0    0 3289   0   9216  none
-18        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-19        Emj-----e--fMB---x- active    - / - 22    0  176   0   9216  none
-20        Emj-----e--fMB---x- ready     - / -  0    1    7   1   9216  none
-21        Dmj-----e--fMB---x- ready     - / -  4    0    1   1   9216  none
-22        Emj-----e--fMB---x- ready     - / -  0    1   11   1   9216  none
-23        Emj-----e--fMB---x- active    - / -  2    1 3324   1   9216  none
-24        Emj-----e--fMB---x- ready     - / -  2    0    1   0   9216  none
-25        Dmj-----e--fMB---x- ready     - / -  3    0    5   0   9216  none
-26        Emj-----e--fMB---x- ready     - / -  4    0    5   0   9216  none
-27        Emj-----e--fMB---x- ready     - / - 11    0    5   0   9216  none
-28        Emj-----e--fMB---x- ready     - / -  0    0    5   0   9216  none
-29        Emjla---e--fMB---x- ready     - / - 12    0   72   0   9216  none    29 a
-30        Dmj-----e--fMB---x- ready     - / -  2    1  532   1   9216  none
-31        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-32        Emj-----e--fMB---x- ready     - / -  0    0    0   0   9216  none
-33        Emjla---e--fMB---x- active    - / -  2    0  856   0   9216  none    33 a
-34        Emjla---e--fMB---x- ready     - / -  7    0   72   0   9216  none    29 a
-35        Emjla---e--fMB---x- active    - / -  1    0  856   0   9216  none    33 a
-36        Emj-----e--fMB---x- active    - / - 10    0    0   0   9216  none
-37        Emj-----e--fMB---x- active    - / -  0    0    0   0   9216  none
-38        Emjla---e--fMB---x- ready     - / -  0    0   26   0   9216  none    38 a
-39        Emjla---e--fMB---x- ready     - / -  0    0   26   0   9216  none    38 a
-40        Emj-----e--fMB---x- ready     - / -  0    0    7   0   9216  none
-41        Emj-----e--fMB---x- ready     - / -  0    1  118   1   9216  none
-42        Emj-----e--fMB---x- ready     - / -  0    1  317   1   9216  none
-43        Emj-----e--fMB---x- ready     - / -  5    1    2   1   9216  none
-44        Emj-----e--fMB---x- active    - / -  2    0    1   1   9216  none
-45        Emj-----e--fMB----- active    - / -  1    0  388   0   9216  none
-46        Emj-----e--fMB----- active    - / - 17    0    6   0   9216  none
-47        Emj-----e--fMB----- active    - / -  0    0  261   0   9216  none
-48        Emj-----e--fMB----- active    - / -  0    0  265   0   9216  none
-=====================================================================================
- > indicates Port Display Name truncated past 8 characters
-Flags : a - Load Sharing Algorithm address-based, D - Port Disabled,
-        e - Extreme Discovery Protocol Enabled, E - Port Enabled,
-        g - Egress TOS Enabled, i - Isolation, j - Jumbo Frame Enabled,
-        l - Load Sharing Enabled, m - MACLearning Enabled,
-        n - Ingress TOS Enabled, o - Dot1p Replacement Enabled,
-        P - Software redundant port(Primary),
-        R - Software redundant port(Redundant),
-        q - Background QOS Monitoring Enabled,
-        s - diffserv Replacement Enabled,
-        v - Vman Enabled, f - Unicast Flooding Enabled,
-        M - Multicast Flooding Enabled, B - Broadcast Flooding Enabled
-        L - Extreme Link Status Monitoring Enabled
-        O - Ethernet OAM Enabled
-        w - MACLearning Disabled with Forwarding
-        b - Rx and Tx Flow Control Enabled, x - Rx Flow Control Enabled
-        p - Priority Flow Control Enabled
-
-```
-
-**Help:** execute the command "show ports information"
 
 **Prompt:**
 - extreme_exos>
@@ -401,7 +479,6 @@ Master    Master     Control   Algorithm   Group     Mbr   State   Transitions
                         (custom) User-selected address-based configuration
  Custom Algorithm Configuration: ipv4 L3-and-L4, xor
 Number of load sharing trunks: 4
-
 ```
 
 **Help:** execute the command "show sharing"
@@ -462,83 +539,9 @@ VLAN0248        248
 > Indicates description string truncated past 57 characters
 
 Total number of VLAN(s) : 3469
-
 ```
 
 **Help:** execute the command "show vlan description"
-
-**Prompt:**
-- extreme_exos>
-- extreme_exos#
-
-### disable clipaging
-
-**Output:** None
-
-**Help:** Execute the command disable clipaging. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- extreme_exos>
-- extreme_exos#
-
-### show fdb
-
-**Output:**
-```
-MAC                                      VLAN Name( Tag)  Age  Flags          Port / Virtual Port List
-------------------------------------------------------------------------------------------------------
-00:0c:29:4b:34:cf                             v101(0101) 0041  d m D          1:2
-00:0c:29:4b:34:cf                             v100(0100) 0041  d m P          1:2
-00:0c:29:d2:2d:48                             v102(0102) 0045  d miM          1:3, 1:45
-00:0c:29:d2:2d:48                             v100(0100) 0045  d m P          1:3
-00:0c:29:f1:f2:f5                             v100(0100) 0045  d miM          1:51:1, 1:45
-00:0c:29:f1:f2:f5                             v102(0102) 0045  d m P          1:1
-00:0c:29:f1:f2:f5                             v101(0101) 0000  d m P          1:1
-
-Flags : d - Dynamic, s - Static, p - Permanent, n - NetLogin, m - MAC, i - IP,
-        x - IPX, l - lockdown MAC, L - lockdown-timeout MAC, M- Mirror, B - Egress Blackhole,
-        b - Ingress Blackhole, v - MAC-Based VLAN, P - Private VLAN, T - VLAN translation,
-        D - drop packet, h - Hardware Aging (Age=0), o - IEEE 802.1ah Backbone MAC,
-        S - Software Controlled Deletion, r - MSRP,
-        X - VXLAN, E - EVPN
-
-Total: 3 Static: 0  Perm: 0  Dyn: 3  Dropped: 1  Locked: 0  Locked with Timeout: 0
-FDB Aging time: 300
-
-```
-
-**Help:** execute the command "show fdb"
-
-**Prompt:**
-- extreme_exos>
-- extreme_exos#
-
-### show iparp
-
-**Output:**
-```
-VR            Destination      Mac                Age  Static  VLAN          VID   Port
-VR-Default    10.128.32.4      00:d0:59:17:74:83   20      NO  bluered       4092  1:25
-VR-Default    10.128.32.8      00:01:30:ba:6a:a0    7      NO  Default       4095
-
-Dynamic Entries  :           4             Static Entries            :          0
-Pending Entries  :           0
-
-ARP address check:    Enabled              ARP refresh               :    Enabled
-Timeout          :          20 minutes     ARP Sender-Mac Learning   :   Disabled
-Locktime         :        1000 milliseconds
-Retransmit Time  :        1000 milliseconds
-Reachable Time   :      900000 milliseconds (Auto)
-Fast Convergence :         Off 
-
-ARP Global Settings
-Max Entries         :    12288 
-Max Pending Entries :      256 
-Max Proxy Entries   :      256
-
-```
-
-**Help:** execute the command "show iparp"
 
 **Prompt:**
 - extreme_exos>

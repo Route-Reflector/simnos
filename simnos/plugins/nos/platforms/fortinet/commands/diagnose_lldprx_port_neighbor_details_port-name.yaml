@@ -1,0 +1,6 @@
+command: diagnose lldprx port neighbor details port-name
+type: simnos
+help: execute the command "diagnose lldprx port neighbor details port-name"
+mode:
+- user
+output: diagnose_lldprx_port_neighbor_details_port-name.txt

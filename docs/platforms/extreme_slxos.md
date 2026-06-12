@@ -7,12 +7,22 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### show clock
 
 **Output:**
 ```
 2024-10-14 16:33:35 Europe/Zurich
-
 ```
 
 **Help:** execute the command "show clock"
@@ -50,22 +60,9 @@ Ve 546                 10.11.84.2           DEMO-VLT-LAB-02                     
 Ve 547                 10.11.85.2           DEMO-VLT-LAB-02                               up                        up
 Ve 548                 172.16.0.2           DEMO-VLT-LAB-01                               up                        up
 Ve 734                 10.224.8.137         ABC-PUBLIC-LEGACY                             administratively down     down
-
 ```
 
 **Help:** execute the command "show ip interface brief"
-
-**Prompt:**
-- extreme_slxos#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - extreme_slxos#

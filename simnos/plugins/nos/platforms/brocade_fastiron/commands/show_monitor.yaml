@@ -1,0 +1,8 @@
+command: show monitor
+type: simnos
+help: execute the command "show monitor"
+mode:
+- user
+- enable
+- config
+output: show_monitor.txt

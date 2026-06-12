@@ -1,0 +1,7 @@
+command: show system cpu
+type: simnos
+help: execute the command "show system cpu"
+mode:
+- user
+- enable
+output: show_system_cpu.txt

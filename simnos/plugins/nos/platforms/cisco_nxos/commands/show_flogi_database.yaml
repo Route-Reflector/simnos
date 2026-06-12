@@ -1,0 +1,7 @@
+command: show flogi database
+type: simnos
+help: execute the command "show flogi database"
+mode:
+- user
+- enable
+output: show_flogi_database.txt

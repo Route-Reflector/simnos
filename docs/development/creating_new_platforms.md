@@ -1,112 +1,120 @@
 # Adding new platforms
-SIMNOS is designed to be easily extensible. It is designed in such
-a way that adding new platforms is simple and can be done using different
-methods. At the moment, it is possible only using Python modules or YAML files.
+SIMNOS is designed to be easily extensible. A platform's static command data
+lives in an **A3 platform directory**; dynamic behavior is added with an
+optional Python module. The two compose: the A3 dir provides the static
+commands and modes, and a co-named Python module can add handlers / a device
+class on top (#264).
 
 !!! tip
-    There is implemented a hot-reloader that automatically reloads Python modules
-    and YAML files when they are modified inside `simnos/plugins/nos`. To run it
-    simply do `simnos --reload-commands`.
+    A hot-reloader reloads **Python modules** when they change inside
+    `simnos/plugins/nos` (`simnos --reload-commands`). Hot-reload of an A3
+    platform directory is a separate, deferred capability (#274); for now an A3
+    edit is picked up on the next server start.
 
-## YAML files
-This is preferred way in case that the platform you want to implement is not
-existing yet. The great advantage of this method is that it is fairly simple
-to add new platforms. However, it is not as flexible as the Python module method
-as it is not possible to implement dynamic behavior.
+## A3 platform directory
+This is the way to add a platform's static command data. Each platform is a
+directory under `simnos/plugins/nos/platforms/<name>/` containing:
 
-The YAML files are located in the `simnos/plugins/nos/platforms_yaml` directory.
+```
+platforms/<name>/
+  platform.yaml        # modes + metadata
+  commands/
+    <stem>.yaml        # one command per file (command field is the SSoT)
+    <stem>.txt         # literal output for that command
+    <stem>.j2          # jinja2 template output (when {{ base_prompt }} is needed)
+```
 
-### Templating rules
+The command-file *stem* is non-semantic — the `command:` field inside the yaml
+is the single source of truth. The lint warns if the stem does not match the
+sanitized command name (a discoverability convention, not a correctness rule).
 
-String fields in the YAML (`initial_prompt` and per-command `output` /
-`prompt` / `new_prompt`) are rendered with Python's `str.format()` at
-runtime. Top-level `enable_prompt` / `config_prompt` are not consumed by the
-runtime shell today (Python plugins use their own module constants), but they
-are written in the same template style and validated preventively by the CI
-sweep. Only two constructs are supported:
+### `platform.yaml`
 
-- `{base_prompt}` — replaced with the device's base prompt (hostname):
+Declares the platform's modes (name → prompt template) and metadata:
 
-    ```yaml
-    initial_prompt: "{base_prompt}>"
-    ```
+```yaml
+modes:
+  user:
+    prompt: "{{ base_prompt }}>"
+  enable:
+    prompt: "{{ base_prompt }}#"
+  config:
+    prompt: "{{ base_prompt }}(config)#"
+initial_mode: user
+auth: none                      # optional — e.g. dell_powerconnect disables SSH auth
+netmiko_device_type: cisco_ios  # optional metadata placeholders (consumed by #266)
+ntc_platform: cisco_ios
+```
 
-- `{{` / `}}` — escapes for a literal `{` / `}` in the output:
+Prompt templates are **jinja2** (`{{ base_prompt }}` is the device hostname);
+`StrictUndefined` makes an undefined variable a loud render error. `initial_mode`
+must be one of the declared modes. A flat-CLI platform (no privileged/config
+modes) simply declares a single mode. The mode names are conventionally
+`user` / `enable` / `config`, but any name works as long as commands reference
+the names that exist.
 
-    ```yaml
-    output: "{{master:0}}"   # renders as: {master:0}
-    ```
+### `commands/<stem>.yaml`
 
-Anything else from the format mini-language is **not supported** and is
-treated as an authoring error: attribute access (`{base_prompt.foo}`), index
-access (`{base_prompt[0]}`), format specs (`{base_prompt:d}`), positional
-placeholders (`{}` / `{0}`), and unknown names (`{hostname}`). This includes
-constructs that `str.format()` would render without raising — e.g.
-`{base_prompt!r}` or `{base_prompt:>20}` — the build-time check rejects them
-explicitly.
+One command per file. Fields (unknown fields are rejected — `extra="forbid"`):
 
-On a malformed template:
+```yaml
+command: show version          # SSoT; what the user types
+type: ntc                      # ntc | simnos | custom (provenance class)
+source:                        # optional; required-by-convention for type: ntc
+  ntc_template: tests/cisco_ios/show_version/cisco_ios_show_version.raw
+  ntc_commit: <sha>
+help: show system version
+mode: [user, enable]           # modes the command is valid in; omit = all modes
+output: show_version.txt       # a bare .txt filename, read verbatim (literal)
+```
 
-- **Runtime** is lenient — the error is logged and the session degrades
-  safely instead of crashing: a broken `output` is sent unformatted, a broken
-  `prompt` candidate never matches (the command becomes unreachable), a
-  broken `new_prompt` keeps the current prompt.
-- **Build time** is loud — `invoke gen_docs_platform_commands` and the CI
-  template sweep (`tests/test_gen_docs_platform_commands.py`) raise a
-  `RuntimeError` naming the platform / command / field.
-
-### Prompt keys
-
-The three top-level prompt keys describe the CLI's mode prompts:
-
-- `initial_prompt` — the prompt right after login. This is the only one the
-  runtime shell consumes directly (it becomes the session's first prompt).
-- `enable_prompt` — the privileged-mode prompt (Cisco `enable` style).
-- `config_prompt` — the configuration-mode prompt.
-
-`enable_prompt` / `config_prompt` are authoring metadata: mode transitions
-are driven entirely by per-command `prompt` / `new_prompt` values, so use
-these keys to document the platform's modes, not to drive behavior. The
-naming is Cisco-flavored; for platforms whose real CLI does not fit it,
-keep the **real device prompt** and accept the naming mismatch — e.g.
-`hp_comware` stores the Comware *system view* prompt (`[{base_prompt}]`)
-under `config_prompt`, which is accurate for the device even though Comware
-has no "config mode" of that name. Platforms with a flat CLI (no modes,
-e.g. D-Link xStack) should simply leave these keys out.
+- **`output`** references an adjacent `.txt` file read **verbatim** — no
+  `str.format`, no brace escaping. A literal `{master:0}` in the capture
+  reaches the wire unchanged.
+- **`output_template`** references an adjacent `.j2` file rendered with jinja2
+  (use it only when the output must interpolate `{{ base_prompt }}`). A command
+  may set `output` *or* `output_template`, never both.
+- **`new_mode`** names the mode to transition to after the command runs
+  (the successor of the legacy `new_prompt`).
+- **`variants`** is the multi-capture contract: a list of `{name, output}`
+  entries (`variant_1` mirrors the primary, `variant_2`.. are alternates), each
+  pointing at its own `.txt`.
+- **`alias`** makes the command a pure reference to another command — it carries
+  no other dispatch fields.
+- **`exit`** marks a session-closing command.
+- **`_default_`** is the mode-agnostic unknown-command fallback: author the
+  platform's real error wording (e.g. Cisco IOS `% Invalid input detected at
+  '^' marker.`; vendor wording differs, do not copy-paste). It takes no `mode`.
 
 ### Authoring conventions
 
-These are enforced by `invoke lint-platform-yaml` (CI + pre-commit) and the
-yamllint `quoted-strings` rule:
+The A3 data lint (`invoke lint-platform-data`, CI + pre-commit) gates:
 
-- **Quote style**: if you quote a scalar, use double quotes. Single quotes
-  are only kept where the real device output itself contains double quotes
-  (marked with an inline `# yamllint disable-line rule:quoted-strings`).
-- **`prompt` form**: both a bare string and a list are valid authoring
-  sugar — the loader normalizes either to a list before commit, so runtime
-  consumers always see lists.
-- **`_default_` command**: every *new* platform must define one, with the
-  platform's real unknown-command error (e.g. Cisco IOS answers
-  `% Invalid input detected at '^' marker.`, NX-OS says `% Invalid command
-  at '^' marker.` — vendor wording differs, do not copy-paste). Cite your
-  source as a `# source: <URL> (retrieved YYYY-MM-DD)` comment right above
-  the entry. Existing platforms without one are frozen in
-  `platform_yaml_lint_baseline.yaml`; that baseline only ever shrinks.
-- **`help` text**: write real help. Auto-generated stubs
-  (`execute the command "X"`) are frozen in the baseline and new ones fail
-  the lint.
-- **`output_variants`**: an optional data-only field holding alternate
-  captures of the same command's output. The runtime does not consume it;
-  it is preserved because re-capturing device output is not always
-  possible.
+- **encoding**: every `.txt` / `.j2` output file must be UTF-8, LF-only, and end
+  with a trailing newline (an empty output file stays 0 bytes).
+- **references**: each output file is referenced by exactly one command yaml
+  (1 yaml : 1 output); an unreferenced output file (orphan), a missing
+  referenced file, or a shared reference is flagged.
+- **extension convention**: literal channels (`output` / a variant's `output`)
+  use `.txt`; `output_template` uses `.j2`. A stray `.yml` command file (the
+  loader only globs `.yaml`) is flagged.
 
-Unknown fields are rejected at load time: a typo'd top-level key raises a
-`ValueError` and a typo'd command field fails the pydantic validation
-(`extra="forbid"`), so mistakes surface immediately instead of being
-dropped silently.
+It also prints **warnings** (non-blocking): a filename not matching the
+sanitized command name, and a `type: ntc` command missing its `source` block.
 
+The `quoted-strings` yamllint rule does not apply to the platform data
+directory (raw captures live in `.txt` files, not yaml scalars).
+
+### Generating candidates from NTC Templates
+
+`sync_ntc_commands.py` compares NTC Templates against the A3 platforms and emits
+A3 take-in candidate files (`commands/<stem>.yaml` + `.txt`, `type: ntc` with a
+`source` block) for commands not yet present — review them and copy them under
+`platforms/<name>/`. A brand-new platform's `platform.yaml` is authored by hand
+(modes/auth are not derivable from NTC fixtures).
 
 ## Python modules
-This method is more flexible than the YAML files method. It is possible to implement
-dynamic behavior and to use the full power of Python. However, it is a little more difficult to
-implement. The Python modules are located in the `simnos/plugins/nos/platforms_py` package.
+This method adds dynamic behavior on top of (or instead of) the static A3 data:
+handlers and a device class with the full power of Python. The Python modules
+are located in the `simnos/plugins/nos/platforms_py` package; a module co-named
+with an A3 platform is merged over it (its commands win per-command).

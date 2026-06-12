@@ -1,6 +1,6 @@
 """Unit tests for the A3 platform data lint (#264 / D8, D9, tasks.check_platform_data)."""
 
-from tasks import check_platform_data
+from tasks import check_platform_data, check_platform_data_warnings
 
 
 def _write(path, content, *, binary=False):
@@ -104,3 +104,48 @@ class TestConventions:
 def test_absent_dir_is_clean(tmp_path):
     # No platforms dir at all (the state before any A3 migration) is not an error.
     assert check_platform_data(str(tmp_path / "nonexistent")) == []
+
+
+class TestWarnings:
+    """Warning-tier conventions (#264 / D9): filename + type:ntc provenance.
+
+    These never gate (`check_platform_data` stays empty); they are surfaced by
+    `check_platform_data_warnings` for the maintainer.
+    """
+
+    def test_clean_data_has_no_warnings(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(commands / "show_version.yaml", "command: show version\ntype: simnos\noutput: show_version.txt\n")
+        _write(commands / "show_version.txt", "ok\n")
+        assert check_platform_data_warnings(str(tmp_path)) == []
+
+    def test_filename_mismatch_warned(self, tmp_path):
+        commands = _platform(tmp_path)
+        # stem `wrong` does not match the sanitized command `show version`.
+        _write(commands / "wrong.yaml", "command: show version\ntype: simnos\noutput: wrong.txt\n")
+        _write(commands / "wrong.txt", "ok\n")
+        warnings = check_platform_data_warnings(str(tmp_path))
+        assert any("filename does not match command" in w and "show_version" in w for w in warnings)
+
+    def test_collision_suffix_filename_is_not_warned(self, tmp_path):
+        commands = _platform(tmp_path)
+        # the deterministic `__2` collision suffix is an accepted stem shape.
+        _write(commands / "show_version__2.yaml", "command: show version\ntype: simnos\noutput: show_version__2.txt\n")
+        _write(commands / "show_version__2.txt", "ok\n")
+        assert check_platform_data_warnings(str(tmp_path)) == []
+
+    def test_ntc_without_source_warned(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(commands / "show_version.yaml", "command: show version\ntype: ntc\noutput: show_version.txt\n")
+        _write(commands / "show_version.txt", "ok\n")
+        warnings = check_platform_data_warnings(str(tmp_path))
+        assert any("type: ntc but no `source`" in w for w in warnings)
+
+    def test_ntc_with_source_not_warned(self, tmp_path):
+        commands = _platform(tmp_path)
+        _write(
+            commands / "show_version.yaml",
+            "command: show version\ntype: ntc\nsource:\n  ntc_template: t\n  ntc_commit: c\noutput: show_version.txt\n",
+        )
+        _write(commands / "show_version.txt", "ok\n")
+        assert check_platform_data_warnings(str(tmp_path)) == []

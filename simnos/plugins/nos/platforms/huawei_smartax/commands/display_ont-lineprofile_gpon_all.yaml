@@ -1,0 +1,7 @@
+command: display ont-lineprofile gpon all
+type: simnos
+help: execute the command "display ont-lineprofile gpon all"
+mode:
+- user
+- enable
+output: display_ont-lineprofile_gpon_all.txt

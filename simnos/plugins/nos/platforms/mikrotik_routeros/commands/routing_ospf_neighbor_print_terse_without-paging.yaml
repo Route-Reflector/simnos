@@ -1,0 +1,6 @@
+command: routing ospf neighbor print terse without-paging
+type: simnos
+help: execute the command "routing ospf neighbor print terse without-paging"
+mode:
+- user
+output: routing_ospf_neighbor_print_terse_without-paging.txt

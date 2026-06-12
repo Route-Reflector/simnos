@@ -1,0 +1,6 @@
+command: test security-policy-match
+type: simnos
+help: execute the command "test security-policy-match"
+mode:
+- user
+output: test_security-policy-match.txt

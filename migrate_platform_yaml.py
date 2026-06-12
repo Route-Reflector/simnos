@@ -21,6 +21,12 @@ Mechanical conversions (D3 / D7):
   not recorded in the legacy data; ``source`` is backfilled by NTC re-sync).
 
 Run from the repo root:  ``python migrate_platform_yaml.py cisco_ios``
+
+Spent after PR-3 (1st round gemini #6): the legacy ``platforms_yaml/`` it reads
+was deleted once every platform was migrated, so this is no longer runnable —
+kept as the executable record of how the one-shot conversion was done (#264 /
+D7). To re-baseline an oracle snapshot after an *intentional* A3 edit, use
+``regen_oracle_snapshots.py`` (projects the A3 loader), not this script.
 """
 
 from __future__ import annotations
@@ -28,47 +34,20 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 
 import yaml
 
+from a3_paths import PLATFORMS_DIR as A3_ROOT
+from a3_paths import SNAPSHOT_DIR, ensure_trailing_newline, unique_command_stem
 from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import format_template_to_jinja
 
 LEGACY_DIR = "simnos/plugins/nos/platforms_yaml"
-A3_ROOT = "simnos/plugins/nos/platforms"
-SNAPSHOT_DIR = "tests/assets/oracle"
 
 # Legacy scalar prompt -> canonical mode name (#264 / M2).
 PROMPT_FIELD_TO_MODE = (("initial_prompt", "user"), ("enable_prompt", "enable"), ("config_prompt", "config"))
-
-
-def _sanitize_filename(command: str, used: set[str]) -> str:
-    """Map a command name to a lint-clean, collision-free file stem (D1).
-
-    ``[a-z0-9_.-]`` only; spaces and other chars collapse to ``_``. The stem is
-    non-semantic (the ``command`` field is the SSoT, Decision 1), so a collision
-    just needs a deterministic suffix.
-    """
-    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
-    stem = re.sub(r"_+", "_", stem).strip("_") or "cmd"
-    candidate = stem
-    counter = 2
-    while candidate in used:
-        candidate = f"{stem}__{counter}"
-        counter += 1
-    used.add(candidate)
-    return candidate
-
-
-def _ensure_trailing_newline(text: str) -> str:
-    """LF + a single trailing newline (D7). Wire-equivalent under splitlines()."""
-    text = text.replace("\r\n", "\n").replace("\r", "\n")
-    if not text.endswith("\n"):
-        text += "\n"
-    return text
 
 
 def _build_prompt_to_mode(legacy: dict) -> dict[str, str]:
@@ -119,10 +98,10 @@ def _convert_output(value, stem: str, commands_dir: str) -> dict:
     jinja_source, has_field = format_template_to_jinja(value)
     if not has_field:
         # No render: `str.format` collapses `{{`->`{` — the literal wire text.
-        _write(os.path.join(commands_dir, f"{stem}.txt"), _ensure_trailing_newline(value.format()))
+        _write(os.path.join(commands_dir, f"{stem}.txt"), ensure_trailing_newline(value.format()))
         return {"output": f"{stem}.txt"}
     # `{base_prompt}` present -> a jinja template file.
-    _write(os.path.join(commands_dir, f"{stem}.j2"), _ensure_trailing_newline(jinja_source))
+    _write(os.path.join(commands_dir, f"{stem}.j2"), ensure_trailing_newline(jinja_source))
     return {"output_template": f"{stem}.j2"}
 
 
@@ -145,7 +124,7 @@ def _convert_command(name: str, entry: dict, stem: str, commands_dir: str, promp
         variant_files = []
         for i, variant in enumerate(variants):
             vstem = f"{stem}__variant_{i + 2}"
-            _write(os.path.join(commands_dir, f"{vstem}.txt"), _ensure_trailing_newline(variant.format()))
+            _write(os.path.join(commands_dir, f"{vstem}.txt"), ensure_trailing_newline(variant.format()))
             variant_files.append({"name": f"variant_{i + 2}", "output": f"{vstem}.txt"})
         primary = _convert_output(entry.get("output"), f"{stem}__variant_1", commands_dir)
         out["variants"] = [{"name": "variant_1", **primary}, *variant_files]
@@ -199,7 +178,7 @@ def convert(platform: str) -> None:
 
     used_stems: set[str] = set()
     for name, entry in legacy.get("commands", {}).items():
-        stem = _sanitize_filename(name, used_stems)
+        stem = unique_command_stem(name, used_stems)
         mapping = _convert_command(name, entry, stem, commands_dir, prompt_to_mode)
         text = yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True, default_flow_style=False)
         _write(os.path.join(commands_dir, f"{stem}.yaml"), text)

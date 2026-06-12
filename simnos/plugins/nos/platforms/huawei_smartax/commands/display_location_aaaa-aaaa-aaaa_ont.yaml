@@ -1,0 +1,7 @@
+command: display location aaaa-aaaa-aaaa ont
+type: simnos
+help: execute the command "display location aaaa-aaaa-aaaa ont"
+mode:
+- user
+- enable
+output: display_location_aaaa-aaaa-aaaa_ont.txt

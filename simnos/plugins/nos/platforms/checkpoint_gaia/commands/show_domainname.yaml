@@ -1,0 +1,7 @@
+command: show domainname
+type: simnos
+help: execute the command "show domainname"
+mode:
+- user
+- enable
+output: show_domainname.txt

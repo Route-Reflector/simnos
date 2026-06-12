@@ -1,0 +1,7 @@
+command: cat bsa bsaboot.inf
+type: simnos
+help: execute the command "cat bsa bsaboot.inf"
+mode:
+- user
+- enable
+output: cat_bsa_bsaboot.inf.txt

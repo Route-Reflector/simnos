@@ -1,0 +1,6 @@
+command: show mac all
+type: simnos
+help: execute the command "show mac all"
+mode:
+- user
+output: show_mac_all.txt

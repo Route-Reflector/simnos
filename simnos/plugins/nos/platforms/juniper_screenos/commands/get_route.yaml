@@ -1,0 +1,6 @@
+command: get route
+type: simnos
+help: execute the command "get route"
+mode:
+- user
+output: get_route.txt

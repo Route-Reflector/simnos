@@ -1,0 +1,7 @@
+command: zycli Ethctl media-type
+type: simnos
+help: execute the command "zycli Ethctl media-type"
+mode:
+- user
+- enable
+output: zycli_ethctl_media-type.txt

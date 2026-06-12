@@ -1,0 +1,7 @@
+command: show ipconfig
+type: simnos
+help: execute the command "show ipconfig"
+mode:
+- user
+- enable
+output: show_ipconfig.txt

@@ -1,0 +1,7 @@
+command: show ip bgp summary vrf
+type: simnos
+help: execute the command "show ip bgp summary vrf"
+mode:
+- user
+- enable
+output: show_ip_bgp_summary_vrf.txt

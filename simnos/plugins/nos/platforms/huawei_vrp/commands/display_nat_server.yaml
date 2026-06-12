@@ -1,0 +1,7 @@
+command: display nat server
+type: simnos
+help: execute the command "display nat server"
+mode:
+- user
+- enable
+output: display_nat_server.txt

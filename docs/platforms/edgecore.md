@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -32,7 +43,6 @@ Eth 1/ 7  Phone_Lollink_RNCB Up        222   0 Auto-100full  100TX        None
 Eth 1/ 8                     Up        222   0 Auto-100full  100TX        None
 Eth 1/ 9                     Up          1   0 Auto-1000full 1000T        None
 Eth 1/10  Uplink             Up          1   0 Auto-1000full 1000Base SFP None
-
 ```
 
 **Help:** execute the command "show interfaces brief"
@@ -348,7 +358,6 @@ Information of VLAN 150
 
 Information of VLAN 203
  MAC Address:             12-34-56-78-90-00
-
 ```
 
 **Help:** execute the command "show interfaces status"
@@ -595,7 +604,6 @@ Information of Eth 1/10
  802.1Q-tunnel Mode:            NORMAL
  802.1Q-tunnel TPID:            8100(Hex)
  Layer 2 Protocol Tunnel       : None
-
 ```
 
 **Help:** execute the command "show interfaces switchport"
@@ -610,7 +618,6 @@ Information of Eth 1/10
 ```
  IP Address and Netmask:  10.255.5.55 255.255.0.0 on VLAN 255,
  Address Mode:            User specified
-
 ```
 
 **Help:** execute the command "show ip interface"
@@ -648,7 +655,6 @@ DRAM Test .................... PASS
 I2C Bus Initialization ....... PASS
 
 Done All Pass.
-
 ```
 
 **Help:** execute the command "show system"
@@ -670,7 +676,6 @@ Done All Pass.
  Loader Version:          1.2.3.4
  Boot ROM Version:        1.2.3.5
  Operation Code Version:  1.2.3.6
-
 ```
 
 **Help:** execute the command "show version"
@@ -714,23 +719,9 @@ Type:                  Static
 Name:
 Status:                Active
 Ports/Port Channels:   Eth1/ 3(S) Eth1/ 5(S) Eth1/25(S)
-
 ```
 
 **Help:** execute the command "show vlan"
-
-**Prompt:**
-- edgecore$
-- edgecore#
-
-### _default_
-
-**Output:**
-```
-% Invalid input detected
-```
-
-**Help:** default output for unknown commands
 
 **Prompt:**
 - edgecore$

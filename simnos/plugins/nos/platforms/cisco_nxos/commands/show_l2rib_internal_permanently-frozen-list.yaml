@@ -1,0 +1,7 @@
+command: show l2rib internal permanently-frozen-list
+type: simnos
+help: execute the command "show l2rib internal permanently-frozen-list"
+mode:
+- user
+- enable
+output: show_l2rib_internal_permanently-frozen-list.txt

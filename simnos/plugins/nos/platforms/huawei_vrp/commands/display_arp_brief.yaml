@@ -1,0 +1,7 @@
+command: display arp brief
+type: simnos
+help: execute the command "display arp brief"
+mode:
+- user
+- enable
+output: display_arp_brief.txt

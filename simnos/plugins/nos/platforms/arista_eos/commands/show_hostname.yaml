@@ -1,0 +1,7 @@
+command: show hostname
+type: simnos
+help: execute the command "show hostname"
+mode:
+- user
+- enable
+output: show_hostname.txt

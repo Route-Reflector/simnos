@@ -1,0 +1,11 @@
+command: display ont info 0 1
+type: simnos
+help: execute the command "display ont info 0 1"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: display_ont_info_0_1__variant_1.txt
+- name: variant_2
+  output: display_ont_info_0_1__variant_2.txt

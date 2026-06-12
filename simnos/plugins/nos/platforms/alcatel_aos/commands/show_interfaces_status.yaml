@@ -1,0 +1,11 @@
+command: show interfaces status
+type: simnos
+help: execute the command "show interfaces status"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: show_interfaces_status__variant_1.txt
+- name: variant_2
+  output: show_interfaces_status__variant_2.txt

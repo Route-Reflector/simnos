@@ -1,0 +1,7 @@
+command: show span
+type: simnos
+help: execute the command "show span"
+mode:
+- user
+- enable
+output: show_span.txt

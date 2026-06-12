@@ -1,0 +1,7 @@
+command: show router ldp interface
+type: simnos
+help: execute the command "show router ldp interface"
+mode:
+- user
+- enable
+output: show_router_ldp_interface.txt

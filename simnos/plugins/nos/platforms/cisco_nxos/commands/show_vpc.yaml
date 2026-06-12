@@ -1,0 +1,7 @@
+command: show vpc
+type: simnos
+help: execute the command "show vpc"
+mode:
+- user
+- enable
+output: show_vpc.txt

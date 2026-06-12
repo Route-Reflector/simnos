@@ -1,0 +1,7 @@
+command: show ipv6 bgp summary
+type: simnos
+help: execute the command "show ipv6 bgp summary"
+mode:
+- user
+- enable
+output: show_ipv6_bgp_summary.txt

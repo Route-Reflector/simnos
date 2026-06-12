@@ -1,0 +1,7 @@
+command: show mac security mka counters
+type: simnos
+help: execute the command "show mac security mka counters"
+mode:
+- user
+- enable
+output: show_mac_security_mka_counters.txt

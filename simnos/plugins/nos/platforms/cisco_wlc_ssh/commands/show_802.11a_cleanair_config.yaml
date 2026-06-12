@@ -1,0 +1,7 @@
+command: show 802.11a cleanair config
+type: simnos
+help: execute the command "show 802.11a cleanair config"
+mode:
+- user
+- enable
+output: show_802.11a_cleanair_config.txt

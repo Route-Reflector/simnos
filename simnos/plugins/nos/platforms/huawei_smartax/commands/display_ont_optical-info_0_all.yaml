@@ -1,0 +1,7 @@
+command: display ont optical-info 0 all
+type: simnos
+help: execute the command "display ont optical-info 0 all"
+mode:
+- user
+- enable
+output: display_ont_optical-info_0_all.txt

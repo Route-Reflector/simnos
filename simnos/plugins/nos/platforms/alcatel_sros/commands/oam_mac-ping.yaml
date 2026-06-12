@@ -1,0 +1,7 @@
+command: oam mac-ping
+type: simnos
+help: execute the command "oam mac-ping"
+mode:
+- user
+- enable
+output: oam_mac-ping.txt

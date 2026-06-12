@@ -1,0 +1,7 @@
+Available commands:
+..                  ?                   cable_diag          clear
+config              create              delete              dir
+disable             download            drv                 enable
+login               logout              ping                reboot
+reconfig            reset               save                show
+telnet              upload

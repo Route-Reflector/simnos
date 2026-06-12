@@ -1,0 +1,6 @@
+command: logout
+type: simnos
+help: Execute the command logout. This automatically generated.
+mode:
+- user
+- enable

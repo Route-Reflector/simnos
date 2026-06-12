@@ -1,0 +1,7 @@
+command: show aaa authentication port-access interface all client-status
+type: simnos
+help: execute the command "show aaa authentication port-access interface all client-status"
+mode:
+- user
+- enable
+output: show_aaa_authentication_port-access_interface_all_client-status.txt

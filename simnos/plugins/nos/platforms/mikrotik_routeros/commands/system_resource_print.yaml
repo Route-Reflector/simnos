@@ -1,0 +1,14 @@
+command: system resource print
+type: simnos
+help: execute the command "system resource print"
+mode:
+- user
+variants:
+- name: variant_1
+  output: system_resource_print__variant_1.txt
+- name: variant_2
+  output: system_resource_print__variant_2.txt
+- name: variant_3
+  output: system_resource_print__variant_3.txt
+- name: variant_4
+  output: system_resource_print__variant_4.txt

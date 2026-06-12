@@ -1,0 +1,11 @@
+command: show bgp vrf all neighbors advertised-routes
+type: simnos
+help: execute the command "show bgp vrf all neighbors advertised-routes"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: show_bgp_vrf_all_neighbors_advertised-routes__variant_1.txt
+- name: variant_2
+  output: show_bgp_vrf_all_neighbors_advertised-routes__variant_2.txt

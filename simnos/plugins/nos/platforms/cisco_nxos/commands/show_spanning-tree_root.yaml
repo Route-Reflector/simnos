@@ -1,0 +1,7 @@
+command: show spanning-tree root
+type: simnos
+help: execute the command "show spanning-tree root"
+mode:
+- user
+- enable
+output: show_spanning-tree_root.txt

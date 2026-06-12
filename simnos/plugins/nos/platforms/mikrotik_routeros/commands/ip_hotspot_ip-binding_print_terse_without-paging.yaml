@@ -1,0 +1,6 @@
+command: ip hotspot ip-binding print terse without-paging
+type: simnos
+help: execute the command "ip hotspot ip-binding print terse without-paging"
+mode:
+- user
+output: ip_hotspot_ip-binding_print_terse_without-paging.txt

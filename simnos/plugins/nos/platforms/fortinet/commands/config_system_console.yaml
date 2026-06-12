@@ -1,0 +1,5 @@
+command: config system console
+type: simnos
+help: enter system console config
+mode:
+- user

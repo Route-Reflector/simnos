@@ -1,0 +1,7 @@
+command: show arp all-vrfs
+type: simnos
+help: execute the command "show arp all-vrfs"
+mode:
+- user
+- enable
+output: show_arp_all-vrfs.txt

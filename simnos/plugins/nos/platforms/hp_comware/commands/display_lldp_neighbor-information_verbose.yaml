@@ -1,0 +1,7 @@
+command: display lldp neighbor-information verbose
+type: simnos
+help: execute the command "display lldp neighbor-information verbose"
+mode:
+- user
+- config
+output: display_lldp_neighbor-information_verbose.txt

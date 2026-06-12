@@ -1,0 +1,7 @@
+command: show controllers HundredGigabitEthernet
+type: simnos
+help: execute the command "show controllers HundredGigabitEthernet"
+mode:
+- user
+- enable
+output: show_controllers_hundredgigabitethernet.txt

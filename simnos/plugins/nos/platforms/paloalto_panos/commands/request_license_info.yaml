@@ -1,0 +1,6 @@
+command: request license info
+type: simnos
+help: execute the command "request license info"
+mode:
+- user
+output: request_license_info.txt

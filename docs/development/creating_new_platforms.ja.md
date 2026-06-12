@@ -1,59 +1,81 @@
 # 新しいプラットフォームの追加
-SIMNOS は容易に拡張できるように設計されています。新しいプラットフォームの追加がシンプルで、さまざまな方法で行えるように設計されています。現時点では、Python モジュールまたは YAML ファイルを使用する方法のみが可能です。
+SIMNOS は容易に拡張できるように設計されています。プラットフォームの静的なコマンドデータは **A3 プラットフォームディレクトリ**に置き、動的な挙動は任意の Python モジュールで追加します。両者は合成され、A3 dir が静的コマンドとモードを提供し、同名の Python モジュールがその上にハンドラ / デバイスクラスを重ねます (#264)。
 
 !!! tip
-    `simnos/plugins/nos` 内の Python モジュールと YAML ファイルが変更された際に自動的にリロードするホットリローダーが実装されています。実行するには `simnos --reload-commands` を実行してください。
+    ホットリローダーは `simnos/plugins/nos` 内の **Python モジュール**が変更されたときにリロードします (`simnos --reload-commands`)。A3 プラットフォームディレクトリのホットリロードは別の、保留中の機能です (#274)。現状 A3 の編集は次回サーバー起動時に反映されます。
 
-## YAML ファイル
-実装したいプラットフォームがまだ存在しない場合に推奨される方法です。この方法の大きな利点は、新しいプラットフォームの追加が非常にシンプルであることです。ただし、動的な動作を実装できないため、Python モジュール方式ほど柔軟ではありません。
+## A3 プラットフォームディレクトリ
+プラットフォームの静的コマンドデータを追加する方法です。各プラットフォームは `simnos/plugins/nos/platforms/<name>/` 配下のディレクトリで、以下を含みます:
 
-YAML ファイルは `simnos/plugins/nos/platforms_yaml` ディレクトリに配置されています。
+```
+platforms/<name>/
+  platform.yaml        # モード + メタデータ
+  commands/
+    <stem>.yaml        # 1 コマンド 1 ファイル (command フィールドが SSoT)
+    <stem>.txt         # そのコマンドの literal 出力
+    <stem>.j2          # jinja2 テンプレート出力 ({{ base_prompt }} が必要な場合)
+```
 
-### テンプレート記法のルール
+コマンドファイルの *stem* は非意味的です — yaml 内の `command:` フィールドが唯一の真実 (SSoT)。lint は stem が sanitize 済コマンド名と一致しない場合に warning を出します (correctness ではなく discoverability の規約)。
 
-YAML 内の文字列フィールド (`initial_prompt` および各コマンドの `output` / `prompt` / `new_prompt`) は、ランタイムで Python の `str.format()` によりレンダリングされます。top-level の `enable_prompt` / `config_prompt` は現状ランタイム shell からは消費されません (Python plugin は自前の module 定数を使用) が、同じテンプレート記法で書かれるため CI sweep が予防的に検証します。サポートされる記法は次の 2 つだけです:
+### `platform.yaml`
 
-- `{base_prompt}` — デバイスのベースプロンプト (ホスト名) に置換されます:
+プラットフォームのモード (名前 → prompt テンプレート) とメタデータを宣言します:
 
-    ```yaml
-    initial_prompt: "{base_prompt}>"
-    ```
+```yaml
+modes:
+  user:
+    prompt: "{{ base_prompt }}>"
+  enable:
+    prompt: "{{ base_prompt }}#"
+  config:
+    prompt: "{{ base_prompt }}(config)#"
+initial_mode: user
+auth: none                      # 任意 — 例: dell_powerconnect は SSH auth を無効化
+netmiko_device_type: cisco_ios  # 任意のメタデータ placeholder (#266 で消費)
+ntc_platform: cisco_ios
+```
 
-- `{{` / `}}` — リテラルの `{` / `}` を出力するためのエスケープ:
+prompt テンプレートは **jinja2** (`{{ base_prompt }}` はデバイスのホスト名)。`StrictUndefined` により未定義変数は loud な render エラーになります。`initial_mode` は宣言済みモードのいずれかである必要があります。flat CLI (特権/設定モードなし) のプラットフォームは単一モードだけを宣言します。モード名は慣習的に `user` / `enable` / `config` ですが、コマンドが参照する名前が存在しさえすれば任意の名前が使えます。
 
-    ```yaml
-    output: "{{master:0}}"   # 出力: {master:0}
-    ```
+### `commands/<stem>.yaml`
 
-format ミニ言語のそれ以外の記法は**非サポート**であり、記述ミスとして扱われます: attribute access (`{base_prompt.foo}`)、index access (`{base_prompt[0]}`)、format spec (`{base_prompt:d}`)、positional placeholder (`{}` / `{0}`)、未知の名前 (`{hostname}`)。`str.format()` が例外を投げずにレンダリングしてしまう記法 — 例えば `{base_prompt!r}` や `{base_prompt:>20}` — も同様で、ビルド時チェックが明示的に reject します。
+1 コマンド 1 ファイル。フィールド (未知 field は reject — `extra="forbid"`):
 
-テンプレートが不正な場合の挙動:
+```yaml
+command: show version          # SSoT; ユーザーが入力するもの
+type: ntc                      # ntc | simnos | custom (provenance クラス)
+source:                        # 任意; type: ntc では規約上必須
+  ntc_template: tests/cisco_ios/show_version/cisco_ios_show_version.raw
+  ntc_commit: <sha>
+help: show system version
+mode: [user, enable]           # コマンドが有効なモード; 省略 = 全モード
+output: show_version.txt       # 裸の .txt ファイル名、verbatim 読込 (literal)
+```
 
-- **ランタイム**は lenient — エラーはログに記録され、セッションはクラッシュせず安全に縮退します: 不正な `output` は未整形のまま送信、不正な `prompt` 候補は match しない (コマンドが到達不能になる)、不正な `new_prompt` は現在のプロンプトを維持。
-- **ビルド時**は loud — `invoke gen_docs_platform_commands` と CI のテンプレート sweep (`tests/test_gen_docs_platform_commands.py`) が platform / command / field を明示した `RuntimeError` を raise します。
-
-### prompt key の意味
-
-top-level の 3 つの prompt key は CLI の mode prompt を記述します:
-
-- `initial_prompt` — login 直後の prompt。runtime shell が直接消費する唯一の key (セッションの初期 prompt になります)
-- `enable_prompt` — 特権 mode の prompt (Cisco `enable` 系)
-- `config_prompt` — 設定 mode の prompt
-
-`enable_prompt` / `config_prompt` は authoring メタデータです: mode 遷移は command 単位の `prompt` / `new_prompt` だけで駆動されるため、この 2 key は「platform の mode を文書化する」ために使い、挙動を駆動させるものではありません。命名は Cisco 寄りなので、実機 CLI が当てはまらない platform では**実機の prompt を優先**し、命名との乖離は許容してください — 例: `hp_comware` は Comware の *system view* prompt (`[{base_prompt}]`) を `config_prompt` に格納しています (Comware にその名の「config mode」は無いが、値は実機に忠実)。flat CLI (mode なし、例: D-Link xStack) の platform はこれらの key を単に省略してください。
+- **`output`** は隣接する `.txt` ファイルを **verbatim** で参照 — `str.format` なし、brace エスケープなし。capture 中の literal な `{master:0}` はそのまま wire に届きます。
+- **`output_template`** は隣接する `.j2` ファイルを jinja2 で render (出力が `{{ base_prompt }}` を補間する必要がある場合のみ使用)。1 コマンドは `output` か `output_template` のどちらか一方のみ。
+- **`new_mode`** はコマンド実行後に遷移するモード名 (旧 `new_prompt` の後継)。
+- **`variants`** は multi-capture 契約: `{name, output}` エントリのリスト (`variant_1` が primary を mirror、`variant_2`.. が alternate)、各々が自身の `.txt` を指す。
+- **`alias`** はコマンドを別コマンドへの純粋な参照にします — 他の dispatch field は持ちません。
+- **`exit`** はセッションを閉じるコマンドを表します。
+- **`_default_`** はモード非依存の unknown-command フォールバック: プラットフォームの実機エラー文言を記述 (例: Cisco IOS は `% Invalid input detected at '^' marker.`; vendor ごとに違うので copy-paste 禁止)。`mode` は取りません。
 
 ### authoring 規約
 
-以下は `invoke lint-platform-yaml` (CI + pre-commit) と yamllint の `quoted-strings` rule で機械担保されます:
+A3 データ lint (`invoke lint-platform-data`、CI + pre-commit) が gate するもの:
 
-- **quote style**: scalar を quote するなら double quote。実機出力自体が double quote を含む場合のみ single quote を維持 (inline `# yamllint disable-line rule:quoted-strings` でマーク)
-- **`prompt` の形式**: 裸の文字列と list はどちらも有効な authoring sugar — loader が commit 前に list へ正規化するため、runtime は常に list を見ます
-- **`_default_` command**: **新規** platform は必ず定義してください。文言はその platform の実機の unknown-command エラー (例: Cisco IOS は `% Invalid input detected at '^' marker.`、NX-OS は `% Invalid command at '^' marker.` — vendor ごとに違うので copy-paste 禁止)。出典は entry 直上に `# source: <URL> (retrieved YYYY-MM-DD)` コメントで記録します。既存の未定義 platform は `platform_yaml_lint_baseline.yaml` に凍結済みで、baseline は縮小のみ許可です
-- **`help` text**: 本物の help を書いてください。auto-generated stub (`execute the command "X"`) は baseline に凍結済みで、新規追加は lint で fail します
-- **`output_variants`**: 同一 command の別 capture を保持する data-only な optional field。runtime は消費しませんが、実機出力の再収集が常に可能とは限らないため保全されています
+- **encoding**: すべての `.txt` / `.j2` 出力ファイルは UTF-8・LF のみ・末尾改行必須 (空の出力ファイルは 0 バイトのまま)。
+- **参照**: 各出力ファイルはちょうど 1 つの command yaml から参照される (1 yaml : 1 output)。未参照の出力ファイル (orphan)、欠落した参照先、共有参照を検出。
+- **拡張子規約**: literal channel (`output` / variant の `output`) は `.txt`、`output_template` は `.j2`。`.yml` の command ファイル (loader は `.yaml` のみ glob) を検出。
 
-未知 field は load 時に reject されます: top-level key の typo は `ValueError`、command field の typo は pydantic validation (`extra="forbid"`) で fail し、silent drop は起きません。
+加えて **warning** (非ブロッキング) も出力: ファイル名が sanitize 済コマンド名と不一致、`type: ntc` なのに `source` ブロック欠落。
 
+yamllint の `quoted-strings` rule はプラットフォームデータディレクトリには適用されません (raw capture は yaml scalar ではなく `.txt` ファイルに置かれます)。
+
+### NTC Templates からの candidate 生成
+
+`sync_ntc_commands.py` は NTC Templates を A3 プラットフォームと比較し、まだ存在しないコマンドについて A3 take-in candidate ファイル (`commands/<stem>.yaml` + `.txt`、`source` ブロック付き `type: ntc`) を生成します — レビューして `platforms/<name>/` 配下にコピーしてください。新規プラットフォームの `platform.yaml` は手書きします (モード/auth は NTC fixture から導出できません)。
 
 ## Python モジュール
-この方法は YAML ファイル方式よりも柔軟です。動的な動作を実装でき、Python のフルパワーを活用できます。ただし、実装はやや難しくなります。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置されています。
+この方法は静的な A3 データの上に (または代わりに) 動的な挙動を追加します: Python のフルパワーによるハンドラとデバイスクラス。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置されます。A3 プラットフォームと同名のモジュールはその上に merge されます (コマンド単位でモジュール側が勝ちます)。

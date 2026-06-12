@@ -1,0 +1,7 @@
+command: top
+type: simnos
+help: execute the command "top"
+mode:
+- user
+- enable
+output: top.txt

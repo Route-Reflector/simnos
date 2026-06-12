@@ -1,0 +1,7 @@
+command: set cli screen-width 511
+type: simnos
+help: Sets the terminal width to maximum
+mode:
+- user
+- enable
+output: set_cli_screen-width_511.txt

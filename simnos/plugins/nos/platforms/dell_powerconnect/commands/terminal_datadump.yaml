@@ -1,0 +1,6 @@
+command: terminal datadump
+type: simnos
+help: disable paging (Dell 34xx)
+mode:
+- user
+- enable

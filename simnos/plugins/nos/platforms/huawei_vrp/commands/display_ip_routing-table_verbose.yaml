@@ -1,0 +1,7 @@
+command: display ip routing-table verbose
+type: simnos
+help: execute the command "display ip routing-table verbose"
+mode:
+- user
+- enable
+output: display_ip_routing-table_verbose.txt

@@ -1,0 +1,6 @@
+command: environment no more
+type: simnos
+help: Execute the command environment no more. This automatically generated.
+mode:
+- user
+- enable

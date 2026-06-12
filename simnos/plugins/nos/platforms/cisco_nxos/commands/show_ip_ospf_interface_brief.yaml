@@ -1,0 +1,7 @@
+command: show ip ospf interface brief
+type: simnos
+help: execute the command "show ip ospf interface brief"
+mode:
+- user
+- enable
+output: show_ip_ospf_interface_brief.txt

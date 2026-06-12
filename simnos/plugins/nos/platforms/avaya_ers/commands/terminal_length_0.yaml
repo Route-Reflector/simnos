@@ -1,0 +1,6 @@
+command: terminal length 0
+type: simnos
+help: make the terminal full screen
+mode:
+- user
+- enable

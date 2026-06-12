@@ -1,0 +1,7 @@
+command: display counters bound interface
+type: simnos
+help: execute the command "display counters bound interface"
+mode:
+- user
+- config
+output: display_counters_bound_interface.txt

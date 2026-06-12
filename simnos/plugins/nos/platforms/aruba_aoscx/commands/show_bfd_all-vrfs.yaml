@@ -1,0 +1,7 @@
+command: show bfd all-vrfs
+type: simnos
+help: execute the command "show bfd all-vrfs"
+mode:
+- user
+- enable
+output: show_bfd_all-vrfs.txt

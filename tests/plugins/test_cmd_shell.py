@@ -22,12 +22,26 @@ from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell
 from tests.utils import set_attr
 
 
+def _nos_from_yaml_asset(path: str = "tests/assets/yaml_nos.yaml") -> Nos:
+    """Build a Nos from a yaml *asset* via the surviving ``from_dict`` path.
+
+    The legacy ``from_file(.yaml)`` loader was removed in v3 (#264); this test
+    vehicle keeps the shared fixture data but loads it through ``from_dict`` (the
+    inventory/constructor inflow), which the legacy shell still consumes.
+    """
+    with open(path, encoding="utf-8") as fh:
+        data = yaml.safe_load(fh)
+    nos = Nos()
+    nos.from_dict(data)
+    return nos
+
+
 def make_cmd_shell_args() -> dict:
     """Build the CMDShell constructor kwargs shared across cmd_shell tests (SSoT)."""
     return {
         "stdin": None,
         "stdout": None,
-        "nos": Nos(filename="tests/assets/yaml_nos.yaml"),
+        "nos": _nos_from_yaml_asset(),
         "nos_inventory_config": {},
         "base_prompt": "test",
         "is_running": threading.Event(),
@@ -107,20 +121,20 @@ class TestCmdShell(TestCase):
         """Test the init method raises an error if nos_inventory_config is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"))  # ty: ignore[missing-argument]
+            CMDShell(nos=_nos_from_yaml_asset())  # ty: ignore[missing-argument]
 
     def test_init_error_if_base_prompt_not_provided(self):
         """Test the init method raises an error if base_prompt is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=Nos(filename="tests/assets/yaml_nos.yaml"), nos_inventory_config={})  # ty: ignore[missing-argument]
+            CMDShell(nos=_nos_from_yaml_asset(), nos_inventory_config={})  # ty: ignore[missing-argument]
 
     def test_init_error_if_is_running_not_provided(self):
         """Test the init method raises an error if is_running is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
             CMDShell(  # ty: ignore[missing-argument]
-                nos=Nos(filename="tests/assets/yaml_nos.yaml"),
+                nos=_nos_from_yaml_asset(),
                 nos_inventory_config={},
                 base_prompt="test",
             )
@@ -850,74 +864,20 @@ class HotReloadTest(TestCase):
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @pytest.mark.xdist_group("hot-reload-fs")
-    @simnos(platform="allied_telesis_awplus", return_instance=True)
-    def test_hot_reload_integration_yaml(self, net: SimNOS):
-        """
-        Test that the hot reload feature works correctly for a legacy yaml platform.
-
-        Uses `allied_telesis_awplus` (a still-legacy `platforms_yaml/*.yaml`
-        platform): cisco_ios moved to the A3 form in #264, which has no
-        monolithic yaml to hot-edit. The `_default_` wording is read from the
-        yaml so the pin survives vendor-wording changes.
-
-        Both hot-reload integration tests mutate the same real
-        `simnos/plugins/nos/` tree that every reload-enabled server in
-        the worker process watches, so they are serialized onto one
-        worker via `xdist_group` and keep their backup copies on a
-        non-watched `.bak` extension (#232: a sibling worker observed
-        a mid-`copyfile` empty `.yaml` and crashed its shell thread).
-        """
-        original_filename = "simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml"
-        copy_filename = "simnos/plugins/nos/platforms_yaml/allied_telesis_awplus.yaml.bak"
-        with open(original_filename, encoding="utf-8") as file:
-            default_output = yaml.safe_load(file)["commands"]["_default_"]["output"]
-        test_commands = {
-            "test": {
-                "output": "test output",
-                "help": "test help",
-                "prompt": ["{base_prompt}>"],
-            }
-        }
-
-        def change_file():
-            shutil.copyfile(original_filename, copy_filename)
-            with open(original_filename, encoding="utf-8") as file:
-                values = yaml.safe_load(file)
-            values["commands"].update(test_commands)
-            self._atomic_write(original_filename, yaml.dump(values), suffix=".yaml.bak")
-
-        def undo_change_file():
-            # Atomic restore: no window where the original is missing.
-            os.replace(copy_filename, original_filename)
-
-        device = list(net.hosts.values())
-        credentials = {
-            "host": "localhost",
-            "username": device[0].username,
-            "password": device[0].password,
-            "port": device[0].port,
-            "device_type": "allied_telesis_awplus",
-        }
-        with ConnectHandler(**credentials) as conn:
-            output = conn.send_command("test")
-            assert output == default_output
-            change_file()
-            try:
-                output = conn.send_command("test")
-                assert output == "test output"
-            finally:
-                undo_change_file()
-
-    @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
-    @pytest.mark.xdist_group("hot-reload-fs")
     @simnos(platform="cisco_ios", return_instance=True)
     def test_hot_reload_integration_py_jinja(self, net: SimNOS):
         """
-        Test that the hot reload feature works correctly
+        Test that the hot reload feature works correctly for a py-template edit.
 
-        See `test_hot_reload_integration_yaml` for why both hot-reload
-        integration tests share an `xdist_group` and use `.bak` backups
-        (#232 cross-worker file race).
+        Mutates the real `simnos/plugins/nos/` tree that every reload-enabled
+        server in the worker process watches, so it is serialized onto one
+        worker via `xdist_group` and keeps its backup on a non-watched `.bak`
+        extension (#232: a sibling worker observed a mid-`copyfile` empty file
+        and crashed its shell thread).
+
+        A3 platform-dir hot reload (editing `platforms/<p>/commands/*`) is a
+        separate, deferred capability (#274 / PR-4) — the legacy monolithic-yaml
+        hot-reload integration test was removed with that data form (#264).
         """
         original_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2"
         copy_filename = "simnos/plugins/nos/platforms_py/templates/cisco_ios/show_version.j2.bak"

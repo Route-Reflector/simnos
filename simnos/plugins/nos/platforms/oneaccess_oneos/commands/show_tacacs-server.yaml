@@ -1,0 +1,7 @@
+command: show tacacs-server
+type: simnos
+help: execute the command "show tacacs-server"
+mode:
+- user
+- enable
+output: show_tacacs-server.txt

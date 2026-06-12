@@ -1,0 +1,7 @@
+command: dir flash
+type: simnos
+help: execute the command "dir flash"
+mode:
+- user
+- enable
+output: dir_flash.txt

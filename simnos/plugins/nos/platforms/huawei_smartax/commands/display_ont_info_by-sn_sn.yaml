@@ -1,0 +1,7 @@
+command: display ont info by-sn sn
+type: simnos
+help: execute the command "display ont info by-sn sn"
+mode:
+- user
+- enable
+output: display_ont_info_by-sn_sn.txt

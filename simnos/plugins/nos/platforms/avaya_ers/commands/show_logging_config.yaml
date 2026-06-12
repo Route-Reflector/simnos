@@ -1,0 +1,7 @@
+command: show logging config
+type: simnos
+help: execute the command "show logging config"
+mode:
+- user
+- enable
+output: show_logging_config.txt

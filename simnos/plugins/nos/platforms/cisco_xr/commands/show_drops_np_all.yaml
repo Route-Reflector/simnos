@@ -1,0 +1,7 @@
+command: show drops np all
+type: simnos
+help: execute the command "show drops np all"
+mode:
+- user
+- enable
+output: show_drops_np_all.txt

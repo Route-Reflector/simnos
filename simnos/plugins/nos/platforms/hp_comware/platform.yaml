@@ -1,0 +1,8 @@
+modes:
+  user:
+    prompt: "<{{ base_prompt }}>"
+  config:
+    prompt: "[{{ base_prompt }}]"
+initial_mode: user
+netmiko_device_type: hp_comware
+ntc_platform: hp_comware

@@ -1,0 +1,6 @@
+command: get system interface physical
+type: simnos
+help: execute the command "get system interface physical"
+mode:
+- user
+output: get_system_interface_physical.txt

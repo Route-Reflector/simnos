@@ -1,0 +1,6 @@
+command: skip-page-display
+type: simnos
+help: disable paging
+mode:
+- user
+- enable

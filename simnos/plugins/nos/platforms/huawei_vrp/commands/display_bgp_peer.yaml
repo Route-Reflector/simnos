@@ -1,0 +1,11 @@
+command: display bgp peer
+type: simnos
+help: execute the command "display bgp peer"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: display_bgp_peer__variant_1.txt
+- name: variant_2
+  output: display_bgp_peer__variant_2.txt

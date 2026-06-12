@@ -1,0 +1,7 @@
+command: show service id base
+type: simnos
+help: execute the command "show service id base"
+mode:
+- user
+- enable
+output: show_service_id_base.txt

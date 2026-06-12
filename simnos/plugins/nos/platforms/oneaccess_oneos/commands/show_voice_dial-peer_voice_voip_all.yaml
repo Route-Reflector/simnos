@@ -1,0 +1,7 @@
+command: show voice dial-peer voice voip all
+type: simnos
+help: execute the command "show voice dial-peer voice voip all"
+mode:
+- user
+- enable
+output: show_voice_dial-peer_voice_voip_all.txt

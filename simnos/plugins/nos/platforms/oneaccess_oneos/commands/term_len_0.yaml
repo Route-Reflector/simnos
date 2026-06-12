@@ -1,0 +1,7 @@
+command: term len 0
+type: simnos
+help: disable paging
+mode:
+- user
+- enable
+output: term_len_0.txt

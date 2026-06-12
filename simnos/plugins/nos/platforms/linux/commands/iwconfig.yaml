@@ -1,0 +1,11 @@
+command: iwconfig
+type: simnos
+help: execute the command "iwconfig"
+mode:
+- user
+- enable
+variants:
+- name: variant_1
+  output: iwconfig__variant_1.txt
+- name: variant_2
+  output: iwconfig__variant_2.txt

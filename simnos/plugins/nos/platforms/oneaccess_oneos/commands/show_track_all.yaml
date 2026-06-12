@@ -1,0 +1,7 @@
+command: show track all
+type: simnos
+help: execute the command "show track all"
+mode:
+- user
+- enable
+output: show_track_all.txt

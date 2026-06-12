@@ -1,0 +1,7 @@
+command: arp -a
+type: simnos
+help: execute the command "arp -a"
+mode:
+- user
+- enable
+output: arp_-a.txt

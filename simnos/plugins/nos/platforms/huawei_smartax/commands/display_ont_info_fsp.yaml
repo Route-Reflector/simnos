@@ -1,0 +1,7 @@
+command: display ont info fsp
+type: simnos
+help: execute the command "display ont info fsp"
+mode:
+- user
+- enable
+output: display_ont_info_fsp.txt

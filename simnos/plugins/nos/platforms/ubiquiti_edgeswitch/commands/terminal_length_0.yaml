@@ -1,0 +1,6 @@
+command: terminal length 0
+type: simnos
+help: set the terminal width to the maximum
+mode:
+- user
+- enable

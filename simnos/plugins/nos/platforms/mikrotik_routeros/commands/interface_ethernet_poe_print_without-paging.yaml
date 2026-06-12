@@ -1,0 +1,6 @@
+command: interface ethernet poe print without-paging
+type: simnos
+help: execute the command "interface ethernet poe print without-paging"
+mode:
+- user
+output: interface_ethernet_poe_print_without-paging.txt

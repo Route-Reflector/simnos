@@ -1,0 +1,7 @@
+command: show interfaces ethernet physical
+type: simnos
+help: execute the command "show interfaces ethernet physical"
+mode:
+- user
+- enable
+output: show_interfaces_ethernet_physical.txt

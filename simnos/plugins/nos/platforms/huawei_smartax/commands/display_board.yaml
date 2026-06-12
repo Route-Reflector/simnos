@@ -1,0 +1,7 @@
+command: display board
+type: simnos
+help: execute the command "display board"
+mode:
+- user
+- enable
+output: display_board.txt

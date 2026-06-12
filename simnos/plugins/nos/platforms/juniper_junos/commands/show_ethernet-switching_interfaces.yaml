@@ -1,0 +1,7 @@
+command: show ethernet-switching interfaces
+type: simnos
+help: execute the command "show ethernet-switching interfaces"
+mode:
+- user
+- enable
+output: show_ethernet-switching_interfaces.txt

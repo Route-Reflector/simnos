@@ -1,0 +1,7 @@
+command: show l2vpn mac-learning mac all location
+type: simnos
+help: execute the command "show l2vpn mac-learning mac all location"
+mode:
+- user
+- enable
+output: show_l2vpn_mac-learning_mac_all_location.txt

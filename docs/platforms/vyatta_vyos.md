@@ -7,6 +7,17 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+Invalid command: [ ]
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -24,6 +35,25 @@ set terminal length 0
 ```
 
 **Help:** set the terminal to max width
+
+**Prompt:**
+- vyatta_vyos~$
+- vyatta_vyos#
+
+### show arp
+
+**Output:**
+```
+Address                  HWtype  HWaddress           Flags Mask            Iface
+10.123.254.20            ether   9c:8e:99:fa:15:0a   C                     eth1.1230
+123.12.120.44            ether   11:22:33:aa:02:90   C                     eth0.42
+123.12.120.218                   (incomplete)                              eth1.1234
+10.123.254.21            ether   00:0c:29:59:94:56   C                     eth1.1230
+123.12.120.219                   (incomplete)                              eth1.1234
+123.12.120.57            ether   11:22:33:aa:65:bb   C                     eth0.42
+```
+
+**Help:** execute the command "show arp"
 
 **Prompt:**
 - vyatta_vyos~$
@@ -51,31 +81,9 @@ lo               127.0.0.1/8                       u/u
 vtun0            192.168.80.2                      u/u  
 vtun1            192.168.80.4                      u/u   OpenVPN-TUNNEL1
 vtun2            192.168.80.6                      u/u  
-
-
 ```
 
 **Help:** execute the command "show interfaces"
-
-**Prompt:**
-- vyatta_vyos~$
-- vyatta_vyos#
-
-### show arp
-
-**Output:**
-```
-Address                  HWtype  HWaddress           Flags Mask            Iface
-10.123.254.20            ether   9c:8e:99:fa:15:0a   C                     eth1.1230
-123.12.120.44            ether   11:22:33:aa:02:90   C                     eth0.42
-123.12.120.218                   (incomplete)                              eth1.1234
-10.123.254.21            ether   00:0c:29:59:94:56   C                     eth1.1230
-123.12.120.219                   (incomplete)                              eth1.1234
-123.12.120.57            ether   11:22:33:aa:65:bb   C                     eth0.42
-
-```
-
-**Help:** execute the command "show arp"
 
 **Prompt:**
 - vyatta_vyos~$
@@ -98,7 +106,6 @@ Neighbor        V         AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down State/P
 193.189.82.105  4     12365        0       0        0    0    0    never       Active
 
 Total number of neighbors 3
-
 ```
 
 **Help:** execute the command "show ip bgp summary"

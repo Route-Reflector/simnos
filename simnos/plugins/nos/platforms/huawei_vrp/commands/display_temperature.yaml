@@ -1,0 +1,7 @@
+command: display temperature
+type: simnos
+help: execute the command "display temperature"
+mode:
+- user
+- enable
+output: display_temperature.txt

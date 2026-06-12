@@ -1,0 +1,7 @@
+command: show environment cooling
+type: simnos
+help: execute the command "show environment cooling"
+mode:
+- user
+- enable
+output: show_environment_cooling.txt

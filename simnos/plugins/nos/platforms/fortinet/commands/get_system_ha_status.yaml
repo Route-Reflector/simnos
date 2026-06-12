@@ -1,0 +1,6 @@
+command: get system ha status
+type: simnos
+help: execute the command "get system ha status"
+mode:
+- user
+output: get_system_ha_status.txt

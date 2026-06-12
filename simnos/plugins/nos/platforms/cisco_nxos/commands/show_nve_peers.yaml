@@ -1,0 +1,7 @@
+command: show nve peers
+type: simnos
+help: execute the command "show nve peers"
+mode:
+- user
+- enable
+output: show_nve_peers.txt

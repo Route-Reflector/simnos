@@ -1,0 +1,6 @@
+command: ip arp print without-paging
+type: simnos
+help: execute the command "ip arp print without-paging"
+mode:
+- user
+output: ip_arp_print_without-paging.txt

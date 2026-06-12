@@ -1,0 +1,6 @@
+command: set cli scripting-mode on
+type: simnos
+help: enable scripting mode
+mode:
+- user
+output_template: set_cli_scripting-mode_on.j2

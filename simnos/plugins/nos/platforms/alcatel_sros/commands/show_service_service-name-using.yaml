@@ -1,0 +1,7 @@
+command: show service service-name-using
+type: simnos
+help: execute the command "show service service-name-using"
+mode:
+- user
+- enable
+output: show_service_service-name-using.txt

@@ -1,0 +1,7 @@
+command: show system secure-crashlog
+type: simnos
+help: execute the command "show system secure-crashlog"
+mode:
+- user
+- enable
+output: show_system_secure-crashlog.txt

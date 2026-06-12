@@ -1,0 +1,7 @@
+command: show ip msdp summary vrf all
+type: simnos
+help: execute the command "show ip msdp summary vrf all"
+mode:
+- user
+- enable
+output: show_ip_msdp_summary_vrf_all.txt

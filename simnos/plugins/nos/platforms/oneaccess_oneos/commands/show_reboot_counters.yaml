@@ -1,0 +1,7 @@
+command: show reboot counters
+type: simnos
+help: execute the command "show reboot counters"
+mode:
+- user
+- enable
+output: show_reboot_counters.txt

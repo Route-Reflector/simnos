@@ -1,0 +1,7 @@
+command: cfg lan get
+type: simnos
+help: execute the command "cfg lan get"
+mode:
+- user
+- enable
+output: cfg_lan_get.txt

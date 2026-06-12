@@ -1,0 +1,7 @@
+command: sys atsh
+type: simnos
+help: execute the command "sys atsh"
+mode:
+- user
+- enable
+output: sys_atsh.txt

@@ -1,0 +1,7 @@
+command: show ip pim interface brief vrf all
+type: simnos
+help: execute the command "show ip pim interface brief vrf all"
+mode:
+- user
+- enable
+output: show_ip_pim_interface_brief_vrf_all.txt

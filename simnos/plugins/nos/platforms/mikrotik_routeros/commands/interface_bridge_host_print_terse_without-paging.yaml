@@ -1,0 +1,6 @@
+command: interface bridge host print terse without-paging
+type: simnos
+help: execute the command "interface bridge host print terse without-paging"
+mode:
+- user
+output: interface_bridge_host_print_terse_without-paging.txt

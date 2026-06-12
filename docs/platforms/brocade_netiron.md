@@ -7,6 +7,18 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+Invalid input ->
+Type ? for a list
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -198,6 +210,69 @@ Loopback6 is up, line protocol is up
 - brocade_netiron>
 - brocade_netiron#
 
+### show interfaces brief
+
+**Output:**
+```
+
+Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
+1/1    Up       Forward      Full 1G    None  Yes level0 0024.38a5.1c00 ATM1-G0-1      default-port      
+1/2    Disabled None         None None  None  No  level0 0024.38a5.1c01                default-port      
+1/3    Disabled None         None None  None  No  level0 0024.38a5.1c02                default-port      
+1/4    Up       Forward      Full 1G    5     Yes level0 0024.38a5.1c00 switch1a.clmamodefault-port      
+1/5    Up       LACP-BLOCKED Full 1G    1     Yes level0 0024.38a5.1c00 CLMA-JFCY LAG #default-port      
+1/16   Down     None         None None  None  No  level0 0024.38a5.1c00 InstallerDHCP  default-port
+      
+Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
+ve2    Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 Main Ethernet Vdefault-port      
+ve10   Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 Admin VLAN 10  default-port      
+ve144  Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 VOIPstate-Exterdefault-port      
+ve145  Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 VOIPstate-Interdefault-port    
+
+Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
+lb1    Up       N/A          N/A  N/A   None  N/A N/A    N/A            MPLS Loopback  default-port      
+lb6    Up       N/A          N/A  N/A   None  N/A N/A    N/A                           default-port      
+```
+
+**Help:** execute the command "show interfaces brief"
+
+**Prompt:**
+- brocade_netiron>
+- brocade_netiron#
+
+### show lag brief
+
+**Output:**
+```
+Total number of LAGs	: 12, 100/40g : 0
+Total number of deployed LAGs	 : 12, 100/40g : 0
+Total number of trunks created	: 12 (116 available), 100/40g : 0 (8 available)
+LACP System Priority / ID	:1 / 0024.38a5.5f00
+LACP Long timeout	:90, default: 90
+LACP Short timeout	:3, default: 3
+
+LAG                Type      Deploy Trunk Primary        Port List
+Akamai Uplink     dynamic      Y     11     1/13        e 1/13 e 2/13
+CLMAMOFW-FLTNHT   dynamic      Y     7      4/2         e 3/2 e 4/2
+LAG5              dynamic      Y     5      3/3         e 3/3 to 3/4
+LAG6              dynamic      Y     6      4/3         e 4/3 to 4/4
+MLX-1a            dynamic      Y     4      2/2         e 2/2
+MLX-CLMAMOXE      dynamic      Y     3      2/1         e 2/1
+Switch1e.clmamofw dynamic      Y     10     1/5         e 1/5 e 2/21
+fw1-inside        dynamic      Y     12     1/24        e 1/24 e 2/24
+fw1-outside       dynamic      Y     13     1/10        e 1/10 e 2/10
+speedtest         dynamic      Y     9      2/23        e 1/11 e 2/23
+switch1c-MLX-FW   dynamic      Y     2      1/1         e 1/1
+videouplink       static       Y     8      2/15        e 1/15 to 1/18 e 2/15 t
+                                                        o 2/18
+```
+
+**Help:** execute the command "show lag brief"
+
+**Prompt:**
+- brocade_netiron>
+- brocade_netiron#
+
 ### show lldp neighbors detail
 
 **Output:**
@@ -283,10 +358,261 @@ Local port: 1/13
                                100BaseTX-FD, 1000BaseT-FD
       Operational MAU type   : 1000BaseT-FD
     + 802.3 Power via MDI: PSE port, power not supported
-
 ```
 
 **Help:** execute the command "show lldp neighbors detail"
+
+**Prompt:**
+- brocade_netiron>
+- brocade_netiron#
+
+### show metro
+
+**Output:**
+```
+
+Metro Ring 10 - VLAN Type REGULAR
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+10         enabled    member     10         10         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 1/1    primary         forwarding      regular        
+ethernet 2/1    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+10              0               126        0          30
+
+Metro Ring 14 - VLAN Type REGULAR
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+14         enabled    member     14         14         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 1/1    primary         forwarding      regular        
+ethernet 2/2    secondary       forwarding      regular        
+                                                                  
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+0               0               0          0          0
+
+Metro Ring 215 - VLAN Type REGULAR - CLMAMOFW-Backbone
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+215        enabled    master     215        215        100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 4/3    primary         forwarding      regular        
+ethernet 3/3    secondary       blocking        regular        
+ 
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+18288470        18195932        0          259        148
+
+Metro Ring 13 - VLAN Type REGULAR - CLMAXA-FW-Telecom
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+13         enabled    member     513        13         100        300
+
+Ring interfaces Interface role  Interface state interface type    
+ethernet 3/3    primary         forwarding      regular        
+ethernet 4/3    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+4               0               16         0          33
+
+Metro Ring 171 - VLAN Type REGULAR - CLMA-KSCY-STLS-10G-C
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+171        enabled    member     170        170        100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 3/3    primary         forwarding      regular        
+ethernet 4/3    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+4               0               22         0          33
+
+Metro Ring 175 - VLAN Type REGULAR - CLMAMO10G-to-FW
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+175        enabled    member     175        175        100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 3/3    primary         forwarding      regular        
+ethernet 4/3    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+4               0               20         0          33
+
+Metro Ring 176 - VLAN Type REGULAR - FW-to-CLMAMO10G
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+176        enabled    member     175        175        100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 1/1    primary         forwarding      regular        
+ethernet 2/2    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+0               0               3          0          0
+
+Metro Ring 60 - VLAN Type REGULAR                                 
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+60         enabled    member     60         60         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 3/3    primary         forwarding      tunnel         
+ethernet 4/3    secondary       forwarding      tunnel         
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+0               0               9          0          33
+
+Metro Ring 61 - VLAN Type REGULAR
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+61         enabled    member     60         60         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 4/3    primary         forwarding      tunnel         
+ethernet 4/2    secondary       forwarding      regular        
+ 
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+0               0               42         0          12
+
+Metro Ring 63 - VLAN Type REGULAR
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+63         enabled    member     62         62         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 4/3    primary         forwarding      regular        
+ethernet 4/2    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+0               0               122        0          12
+
+Metro Ring 58 - VLAN Type REGULAR
+==============
+Ring       State      Ring       Master     Topo       Hello      Prefwing
+id                    role       vlan       group      time(ms)   time(ms)
+58         enabled    member     60         60         100        300
+
+Ring interfaces Interface role  Interface state interface type 
+ethernet 4/3    primary         forwarding      regular           
+ethernet 3/3    secondary       forwarding      regular        
+
+RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
+7               0               0          0          33
+```
+
+**Help:** execute the command "show metro"
+
+**Prompt:**
+- brocade_netiron>
+- brocade_netiron#
+
+### show monitor actual
+
+**Output:**
+```
+Monitored Port 1/10
+  Input traffic mirrored to:  1/13
+  Output traffic mirrored to:  1/13
+Monitored Port 1/11
+  Input traffic mirrored to:  1/13
+  Output traffic mirrored to:  1/13
+Monitored Port 2/10
+  Input traffic mirrored to:  1/13
+  Output traffic mirrored to:  1/13
+Monitored Port 2/11
+  Input traffic mirrored to:  1/13
+  Output traffic mirrored to:  1/13
+```
+
+**Help:** execute the command "show monitor actual"
+
+**Prompt:**
+- brocade_netiron>
+- brocade_netiron#
+
+### show running-config interface
+
+**Output:**
+```
+interface ve 2801
+ ip address 10.92.176.219/29
+ ip address 10.92.191.67/26
+ ip address 10.201.214.35/28
+ ip address 10.231.184.211/28
+ ip address 10.251.229.83/28
+ ip helper-address 10.0.113.10
+ ip helper-address 10.0.113.20
+ ipv6 address 2001:2aaf:14:8::3/120
+ ipv6 nd suppress-ra
+ disable
+ ip vrrp-extended auth-type simple-text-auth VLAN2801
+ ip vrrp-extended vrid 1
+  backup priority 90 track-priority 50
+  ip-address 10.92.176.217
+  advertise backup
+  dead-interval 12
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+ ip vrrp-extended vrid 2
+  backup priority 90 track-priority 50
+  ip-address 10.251.229.81
+  advertise backup
+  dead-interval 12
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+ ip vrrp-extended vrid 3
+  backup priority 90 track-priority 50
+  ip-address 10.231.184.209
+  advertise backup
+  dead-interval 12
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+ ip vrrp-extended vrid 4
+  backup priority 90 track-priority 50
+  ip-address 10.201.214.33
+  advertise backup
+  dead-interval 12
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+ ip vrrp-extended vrid 5
+  backup priority 90 track-priority 50
+  ip-address 10.92.191.65
+  advertise backup
+  dead-interval 12
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+ ipv6 vrrp-extended vrid 6
+  backup priority 90 track-priority 50
+  ipv6-address 2001:2aaf:14:8::1
+  advertise backup
+  hello-interval 4
+  track-port ethernet 1/1
+  activate
+!
+interface ve 2802
+```
+
+**Help:** execute the command "show running-config interface"
 
 **Prompt:**
 - brocade_netiron>
@@ -380,7 +706,6 @@ vlan 156 name VoIP-Signaling
 vlan 158 name VoIP-Bearer 
  untagged e 1/10 e 2/10 
  router-interface ve 158
-
 ```
 
 **Help:** execute the command "show running-config vlan"
@@ -389,65 +714,38 @@ vlan 158 name VoIP-Bearer
 - brocade_netiron>
 - brocade_netiron#
 
-### show lag brief
-
-**Output:**
-```
-Total number of LAGs	: 12, 100/40g : 0
-Total number of deployed LAGs	 : 12, 100/40g : 0
-Total number of trunks created	: 12 (116 available), 100/40g : 0 (8 available)
-LACP System Priority / ID	:1 / 0024.38a5.5f00
-LACP Long timeout	:90, default: 90
-LACP Short timeout	:3, default: 3
-
-LAG                Type      Deploy Trunk Primary        Port List
-Akamai Uplink     dynamic      Y     11     1/13        e 1/13 e 2/13
-CLMAMOFW-FLTNHT   dynamic      Y     7      4/2         e 3/2 e 4/2
-LAG5              dynamic      Y     5      3/3         e 3/3 to 3/4
-LAG6              dynamic      Y     6      4/3         e 4/3 to 4/4
-MLX-1a            dynamic      Y     4      2/2         e 2/2
-MLX-CLMAMOXE      dynamic      Y     3      2/1         e 2/1
-Switch1e.clmamofw dynamic      Y     10     1/5         e 1/5 e 2/21
-fw1-inside        dynamic      Y     12     1/24        e 1/24 e 2/24
-fw1-outside       dynamic      Y     13     1/10        e 1/10 e 2/10
-speedtest         dynamic      Y     9      2/23        e 1/11 e 2/23
-switch1c-MLX-FW   dynamic      Y     2      1/1         e 1/1
-videouplink       static       Y     8      2/15        e 1/15 to 1/18 e 2/15 t
-                                                        o 2/18
-
-```
-
-**Help:** execute the command "show lag brief"
-
-**Prompt:**
-- brocade_netiron>
-- brocade_netiron#
-
-### show interfaces brief
+### show span
 
 **Output:**
 ```
 
-Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
-1/1    Up       Forward      Full 1G    None  Yes level0 0024.38a5.1c00 ATM1-G0-1      default-port      
-1/2    Disabled None         None None  None  No  level0 0024.38a5.1c01                default-port      
-1/3    Disabled None         None None  None  No  level0 0024.38a5.1c02                default-port      
-1/4    Up       Forward      Full 1G    5     Yes level0 0024.38a5.1c00 switch1a.clmamodefault-port      
-1/5    Up       LACP-BLOCKED Full 1G    1     Yes level0 0024.38a5.1c00 CLMA-JFCY LAG #default-port      
-1/16   Down     None         None None  None  No  level0 0024.38a5.1c00 InstallerDHCP  default-port
-      
-Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
-ve2    Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 Main Ethernet Vdefault-port      
-ve10   Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 Admin VLAN 10  default-port      
-ve144  Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 VOIPstate-Exterdefault-port      
-ve145  Up       N/A          N/A  N/A   None  N/A N/A    0024.38a5.1c00 VOIPstate-Interdefault-port    
+VLAN 2 - STP instance 0
+--------------------------------------------------------------------
+ STP Bridge Parameters:
 
-Port   Link     Port-State   Dupl Speed Trunk Tag Priori MAC            Name           Type              
-lb1    Up       N/A          N/A  N/A   None  N/A N/A    N/A            MPLS Loopback  default-port      
-lb6    Up       N/A          N/A  N/A   None  N/A N/A    N/A                           default-port      
+Bridge           Bridge Bridge Bridge Hold  LastTopology Topology
+Identifier       MaxAge Hello  FwdDly Time  Change       Change
+hex              sec    sec    sec    sec   sec          cnt
+8000002438a51c00 20     2      15     1     2456092      8       
+
+RootBridge       RootPath  DesignatedBridge Root  Max Hel Fwd
+Identifier       Cost      Identifier       Port  Age lo  Dly
+hex                        hex                    sec sec sec
+8000002438a51c00 0         8000002438a51c00 Root  20  2   15  
+
+STP Port Parameters:
+
+Port  Prio Path      State      Designat- Designated       Designated
+Num   rity Cost                 ed Cost   Root             Bridge
+1/1   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
+1/6   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
+1/17  128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
+2/1   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
+2/6   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
+2/17  128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
 ```
 
-**Help:** execute the command "show interfaces brief"
+**Help:** execute the command "show span"
 
 **Prompt:**
 - brocade_netiron>
@@ -752,302 +1050,9 @@ Member VLAN   : 144 to 145 220 454 2040 2191 2422 2459
 Member Group  : None
 Control Ports : e 3/1 e 3/3 e 4/1 e 4/3 
 Free Ports :
-
 ```
 
 **Help:** execute the command "show topo"
-
-**Prompt:**
-- brocade_netiron>
-- brocade_netiron#
-
-### show monitor actual
-
-**Output:**
-```
-Monitored Port 1/10
-  Input traffic mirrored to:  1/13
-  Output traffic mirrored to:  1/13
-Monitored Port 1/11
-  Input traffic mirrored to:  1/13
-  Output traffic mirrored to:  1/13
-Monitored Port 2/10
-  Input traffic mirrored to:  1/13
-  Output traffic mirrored to:  1/13
-Monitored Port 2/11
-  Input traffic mirrored to:  1/13
-  Output traffic mirrored to:  1/13
-
-```
-
-**Help:** execute the command "show monitor actual"
-
-**Prompt:**
-- brocade_netiron>
-- brocade_netiron#
-
-### show span
-
-**Output:**
-```
-
-VLAN 2 - STP instance 0
---------------------------------------------------------------------
- STP Bridge Parameters:
-
-Bridge           Bridge Bridge Bridge Hold  LastTopology Topology
-Identifier       MaxAge Hello  FwdDly Time  Change       Change
-hex              sec    sec    sec    sec   sec          cnt
-8000002438a51c00 20     2      15     1     2456092      8       
-
-RootBridge       RootPath  DesignatedBridge Root  Max Hel Fwd
-Identifier       Cost      Identifier       Port  Age lo  Dly
-hex                        hex                    sec sec sec
-8000002438a51c00 0         8000002438a51c00 Root  20  2   15  
-
-STP Port Parameters:
-
-Port  Prio Path      State      Designat- Designated       Designated
-Num   rity Cost                 ed Cost   Root             Bridge
-1/1   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-1/6   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-1/17  128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-2/1   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-2/6   128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-2/17  128  4         FORWARDING 0         8000002438a51c00 8000002438a51c00 
-```
-
-**Help:** execute the command "show span"
-
-**Prompt:**
-- brocade_netiron>
-- brocade_netiron#
-
-### show metro
-
-**Output:**
-```
-
-Metro Ring 10 - VLAN Type REGULAR
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-10         enabled    member     10         10         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 1/1    primary         forwarding      regular        
-ethernet 2/1    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-10              0               126        0          30
-
-Metro Ring 14 - VLAN Type REGULAR
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-14         enabled    member     14         14         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 1/1    primary         forwarding      regular        
-ethernet 2/2    secondary       forwarding      regular        
-                                                                  
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-0               0               0          0          0
-
-Metro Ring 215 - VLAN Type REGULAR - CLMAMOFW-Backbone
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-215        enabled    master     215        215        100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 4/3    primary         forwarding      regular        
-ethernet 3/3    secondary       blocking        regular        
- 
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-18288470        18195932        0          259        148
-
-Metro Ring 13 - VLAN Type REGULAR - CLMAXA-FW-Telecom
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-13         enabled    member     513        13         100        300
-
-Ring interfaces Interface role  Interface state interface type    
-ethernet 3/3    primary         forwarding      regular        
-ethernet 4/3    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-4               0               16         0          33
-
-Metro Ring 171 - VLAN Type REGULAR - CLMA-KSCY-STLS-10G-C
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-171        enabled    member     170        170        100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 3/3    primary         forwarding      regular        
-ethernet 4/3    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-4               0               22         0          33
-
-Metro Ring 175 - VLAN Type REGULAR - CLMAMO10G-to-FW
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-175        enabled    member     175        175        100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 3/3    primary         forwarding      regular        
-ethernet 4/3    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-4               0               20         0          33
-
-Metro Ring 176 - VLAN Type REGULAR - FW-to-CLMAMO10G
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-176        enabled    member     175        175        100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 1/1    primary         forwarding      regular        
-ethernet 2/2    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-0               0               3          0          0
-
-Metro Ring 60 - VLAN Type REGULAR                                 
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-60         enabled    member     60         60         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 3/3    primary         forwarding      tunnel         
-ethernet 4/3    secondary       forwarding      tunnel         
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-0               0               9          0          33
-
-Metro Ring 61 - VLAN Type REGULAR
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-61         enabled    member     60         60         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 4/3    primary         forwarding      tunnel         
-ethernet 4/2    secondary       forwarding      regular        
- 
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-0               0               42         0          12
-
-Metro Ring 63 - VLAN Type REGULAR
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-63         enabled    member     62         62         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 4/3    primary         forwarding      regular        
-ethernet 4/2    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-0               0               122        0          12
-
-Metro Ring 58 - VLAN Type REGULAR
-==============
-Ring       State      Ring       Master     Topo       Hello      Prefwing
-id                    role       vlan       group      time(ms)   time(ms)
-58         enabled    member     60         60         100        300
-
-Ring interfaces Interface role  Interface state interface type 
-ethernet 4/3    primary         forwarding      regular           
-ethernet 3/3    secondary       forwarding      regular        
-
-RHPs sent       RHPs rcvd       TC rcvd    TC sent    State changes
-7               0               0          0          33
-
-```
-
-**Help:** execute the command "show metro"
-
-**Prompt:**
-- brocade_netiron>
-- brocade_netiron#
-
-### show running-config interface
-
-**Output:**
-```
-interface ve 2801
- ip address 10.92.176.219/29
- ip address 10.92.191.67/26
- ip address 10.201.214.35/28
- ip address 10.231.184.211/28
- ip address 10.251.229.83/28
- ip helper-address 10.0.113.10
- ip helper-address 10.0.113.20
- ipv6 address 2001:2aaf:14:8::3/120
- ipv6 nd suppress-ra
- disable
- ip vrrp-extended auth-type simple-text-auth VLAN2801
- ip vrrp-extended vrid 1
-  backup priority 90 track-priority 50
-  ip-address 10.92.176.217
-  advertise backup
-  dead-interval 12
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
- ip vrrp-extended vrid 2
-  backup priority 90 track-priority 50
-  ip-address 10.251.229.81
-  advertise backup
-  dead-interval 12
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
- ip vrrp-extended vrid 3
-  backup priority 90 track-priority 50
-  ip-address 10.231.184.209
-  advertise backup
-  dead-interval 12
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
- ip vrrp-extended vrid 4
-  backup priority 90 track-priority 50
-  ip-address 10.201.214.33
-  advertise backup
-  dead-interval 12
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
- ip vrrp-extended vrid 5
-  backup priority 90 track-priority 50
-  ip-address 10.92.191.65
-  advertise backup
-  dead-interval 12
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
- ipv6 vrrp-extended vrid 6
-  backup priority 90 track-priority 50
-  ipv6-address 2001:2aaf:14:8::1
-  advertise backup
-  hello-interval 4
-  track-port ethernet 1/1
-  activate
-!
-interface ve 2802
-
-```
-
-**Help:** execute the command "show running-config interface"
 
 **Prompt:**
 - brocade_netiron>
@@ -1057,7 +1062,7 @@ interface ve 2802
 
 **Output:** None
 
-**Help:** Execute the command skip-page-display. This automatically generated. Feel free to change it!
+**Help:** Execute the command skip-page-display. This automatically generated.
 
 **Prompt:**
 - brocade_netiron>

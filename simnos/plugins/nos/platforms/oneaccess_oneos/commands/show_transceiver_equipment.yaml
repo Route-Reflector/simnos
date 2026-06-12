@@ -1,0 +1,7 @@
+command: show transceiver equipment
+type: simnos
+help: execute the command "show transceiver equipment"
+mode:
+- user
+- enable
+output: show_transceiver_equipment.txt

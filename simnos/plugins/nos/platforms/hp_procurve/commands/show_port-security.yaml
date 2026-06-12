@@ -1,0 +1,7 @@
+command: show port-security
+type: simnos
+help: execute the command "show port-security"
+mode:
+- user
+- enable
+output: show_port-security.txt

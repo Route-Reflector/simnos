@@ -7,6 +7,42 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### _default_
+
+**Output:**
+```
+% Invalid command at '^' marker.
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
+### dir
+
+**Output:**
+```
+Input/output error
+       4096    Sep 22 15:27:34 2019  .rpmstore/
+       4096    Sep 22 15:27:53 2019  .swtam/
+       1982    Sep 22 15:29:22 2019  20190922_052903_poap_7826_init.log
+     189080    Sep 22 15:18:11 2019  CpuUsage.Log
+ 1410981963    Jul 13 10:05:48 2018  aci-n9000-dk9.13.1.2p.bin
+ 1157861451    Sep 22 15:15:57 2019  auto-s
+          0    Sep 22 15:16:00 2019  bios_bootup_scratch_not_cleared
+          0    Sep 22 15:27:47 2019  bootflash_sync_list
+         53    Sep 22 15:10:02 2019  disk_log.txt
+         18    Dec 12 22:32:13 2022  gold_file
+        462    Sep 22 15:18:02 2019  libmon.logs
+       4096    Sep 22 15:02:17 2019  lost+found/
+```
+
+**Help:** execute the command "dir"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
 ### enable
 
 **Output:** None
@@ -15,16 +51,6 @@
 
 **Prompt:**
 - cisco_nxos>
-
-### terminal length 0
-
-**Output:** None
-
-**Help:** set the terminal width to maximum
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
 
 ### ex
 
@@ -36,331 +62,323 @@
 - cisco_nxos>
 - cisco_nxos#
 
-### show l2rib internal permanently-frozen-list
+### show access-lists
 
 **Output:**
 ```
-
-Topology    Mac Address    Frozen time
------------ -------------- ---------------------------
-190         0050.5699.7898 Sat Jan 27 08:46:01.447 UTC
-190         0050.5699.8ec0 Sat Jan 27 08:47:39.818 UTC
-190         0050.5699.d709 Sat Jan 27 08:47:49.970 UTC
-190         0050.56b5.1419 Sat Jan 27 08:40:15.482 UTC
-190         0050.56b5.1bca Sat Jan 27 08:48:00.545 UTC
-192         000c.29d4.ee30 Sat Jan 27 08:42:26.149 UTC
-192         0012.3fff.e687 Sat Jan 27 08:57:48.481 UTC
-192         0050.5699.1684 Sat Jan 27 08:53:13.686 UTC
-192         0050.5699.1b56 Sat Jan 27 08:37:59.468 UTC
-192         0050.5699.2199 Sat Jan 27 08:53:08.098 UTC
-192         0050.5699.249d Sat Jan 27 08:52:44.355 UTC
-192         0050.5699.25bf Sat Jan 27 08:45:45.772 UTC
-192         0050.5699.27b2 Sat Jan 27 08:49:48.131 UTC
-192         0050.5699.3c5a Sat Jan 27 08:49:48.310 UTC
-192         0050.5699.410a Sat Jan 27 08:51:56.147 UTC
-192         0050.5699.4241 Sat Jan 27 08:52:28.534 UTC
-192         0050.5699.449f Sat Jan 27 08:52:50.603 UTC
-192         0050.5699.4826 Sat Jan 27 08:55:45.974 UTC
-192         0050.5699.4a94 Sat Jan 27 08:56:50.314 UTC
-192         0050.5699.4dd2 Sat Jan 27 08:48:56.964 UTC
-192         0050.5699.5044 Sat Jan 27 08:55:23.553 UTC
-192         0050.5699.50ab Sat Jan 27 08:52:46.601 UTC
-192         0050.5699.5705 Sat Jan 27 08:58:09.431 UTC
-192         0050.5699.57ec Sat Jan 27 08:51:55.528 UTC
-192         0050.5699.6083 Sat Jan 27 08:52:46.851 UTC
-
+IP access list TEST-ACL
+        statistics per-entry
+        10 remark established connections
+        20 permit tcp any 10.10.10.0/24 established [match=66]
+        30 remark Test
+        40 permit tcp 1.1.1.1/32 any eq 80 [match=0]
+        50 permit tcp 2.2.2.2/32 any eq 443 [match=0]
+        60 remark Allow NAT IP
+        70 permit tcp 3.3.3.3/32 any eq 80 [match=0]
+        80 remark TestRemark
+        90 permit tcp 4.4.4.4/32 any eq 443 [match=0]
+        100 remark Test Remark
+        110 permit tcp 5.5.5.5/32 any eq 80 [match=0]
+        120 remark AnotherOne
+        130 permit tcp 6.6.6.6/32 any eq 443 [match=0]
+        140 remark addTest: contains list should not become name
+        150 remark addTest: dont "miss" 'me'
 ```
 
-**Help:** execute the command "show l2rib internal permanently-frozen-list"
+**Help:** execute the command "show access-lists"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show vrf interface
+### show bfd neighbors
 
 **Output:**
 ```
-Interface                 VRF-Name                        VRF-ID  Site-of-Origin
-Vlan6001                  ADMIN                                6  --
-Vlan6700                  ADMIN                                6  --
-Vlan5302                  AXNET                                7  --
-Vlan7202                  AXNET                                7  --
-Vlan6302                  AXNET                                7  --
-Vlan5301                  MARKING                              4  --
-Vlan7201                  MARKING                              4  --
-Vlan6301                  MARKING                              4  --
-Ethernet1/10              Keepalive                            3  --
-Vlan1                     default                              1  --
-Vlan100                   default                              1  --
-loopback0                 default                              1  --
-loopback1                 default                              1  --
-Ethernet1/25              default                              1  --
-Ethernet1/30              default                              1  --
-Ethernet1/17              default                              1  --
-Ethernet1/42              default                              1  --
-mgmt0                     management                           2  --
-
+OurAddr         NeighAddr       LD/RD                 RH/RS           Holdown(mult)     State       Int                   Vrf                              Type
+172.23.0.18     172.23.0.19     1090540255/1090566886 Up              862(3)            Up          Eth1/10               default                          SH
+172.23.0.22     172.23.0.23     1090540256/1090561429 Up              647(3)            Up          Eth1/12               default                          SH
+172.23.0.20     172.23.0.21     1090540257/1090566968 Up              729(3)            Up          Eth1/11               default                          SH
 ```
 
-**Help:** execute the command "show vrf interface"
+**Help:** execute the command "show bfd neighbors"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show ip bgp
+### show bgp vrf all ipv4 unicast detail
 
 **Output:**
 ```
+BGP routing table information for VRF TEST_1, address family IPv4 Unicast
+ BGP routing table entry for 10.1.1.0/24, version 3446
+Paths: (1 available, best #0)
+Flags: (0x8000002) (high32 00000000) on xmit-list, is not in urib, is not in HW
+
+  Path type: local, path is invalid(not in urib), no labeled nexthop
+  AS-Path: NONE, path locally originated
+    0.0.0.0 (metric 0) from 0.0.0.0 (10.0.1.1)
+      Origin IGP, MED not set, localpref 100, weight 32768
+ 
+
+BGP routing table information for VRF default, address family IPv4 Unicast
+ BGP routing table entry for 0.0.0.0/0, version 461888
+Paths: (2 available, best #1)
+Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+
+  Advertised path-id 1
+  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65111.1233 65111.4566 65111.7899 12345 , path sourced external to AS
+    10.2.2.252 (metric 0) from 10.2.2.252 (10.12.2.100)
+      Origin IGP, MED not set, localpref 5000, weight 0
+      Community: 12345:1111 3000:4444 44444:1111 
+
+  Path type: external, path is valid, not best reason: Local Preference, no labeled nexthop
+  AS-Path: 65111.1233 65111.4566 65111.7899 22222 , path sourced external to AS
+    10.1.1.226 (metric 0) from 10.1.1.226 (10.9.1.100)
+      Origin IGP, MED not set, localpref 4000, weight 0
+      Community: 12345:1111 3000:4444 44444:2222
+
+  Path-id 1 advertised to peers:
+    172.16.251.13  
+BGP routing table entry for 2.22.22.0/27, version 98
+Paths: (1 available, best #1)
+Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+
+  Advertised path-id 1
+  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65222.1111 653333 , path sourced external to AS
+    10.3.3.252 (metric 0) from 10.3.3.252 (10.9.1.200)
+      Origin IGP, MED 100, localpref 5000, weight 0
+      Community: 10104:10030 20311:0 41000:11501 
+
+  Path-id 1 advertised to peers:
+    10.3.10.123        10.3.9.234        172.16.10.123  
+BGP routing table entry for 10.10.10.0/24, version 336212
+Paths: (3 available, best #1)
+Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+
+  Advertised path-id 1
+  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65444.3444 65444.100 65444.200 , path sourced external to AS
+    10.9.9.252 (metric 0) from 10.9.10.252 (10.16.100.100)
+      Origin IGP, MED not set, localpref 5000, weight 0
+      Aggregated by 172.16.100.100, aggregator AS 65444.3444
+      Community: 100:200 300:400 500:600
+      Extcommunity: RT:33333:2222
+
+  Path type: external, path is valid, not best reason: Local Preference, no labeled nexthop
+  AS-Path: 65444.3444 65444.100 65444.300 , path sourced external to AS
+    10.15.5.214 (metric 0) from 10.15.5.214 (172.16.5.100)
+      Origin IGP, MED not set, localpref 4000, weight 0
+      Aggregated by 172.16.5.100, aggregator AS 65444.500
+      Community: 100:200 300:400 500:700
+      Extcommunity: RT:33333:2222
+
+  Path type: external, path is valid, received only, no labeled nexthop
+  AS-Path: 65108.50007 65108.51000 65108.53002 , path sourced external to AS
+    10.19.9.214 (metric 0) from 10.19.9.214 (172.26.156.121)
+      Origin IGP, MED 100, localpref 100, weight 0
+      Aggregated by 172.26.156.121, aggregator AS 65108.50007
+      Community: 100:200 300:400 500:800
+      Extcommunity: RT:33333:2222
+
+  Path-id 1 advertised to peers:
+    172.16.251.13  
+BGP routing table entry for 10.13.13.0/22, version 450373
+Paths: (2 available, best #1)
+Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+
+  Advertised path-id 1
+  Path type: external, path is valid, is best path, no labeled nexthop, in rib
+  AS-Path: 65100.30037 65100.30032 2222 2222 , path sourced external to AS
+    10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
+      Origin IGP, MED not set, localpref 5000, weight 0
+      Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
+      Community: 10308:10030 30006:0 41000:11501 
+
+  Path type: external, path is valid, received only, no labeled nexthop
+  AS-Path: 65100.30037 65100.30032 2222 2222 2222 , path sourced external to AS
+    10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
+      Origin IGP, MED not set, localpref 100, weight 0
+      Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
+      Community: 10308:10030 30006:0 41000:11501 
+
+  Path-id 1 advertised to peers:
+    10.19.10.253 
+```
+
+**Help:** execute the command "show bgp vrf all ipv4 unicast detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show bgp vrf all ipv4 unicast neighbors routes
+
+**Output:**
+```
+Can't find neighbor 10.1.1.1 in VRF TEST_1
+
+Peer 10.1.1.1 routes for address family IPv4 Unicast:
+BGP table version is 401423, Local Router ID is 10.10.10.10
 Status: s-suppressed, x-deleted, S-stale, d-dampened, h-history, *-valid, >-best
 Path type: i-internal, e-external, c-confed, l-local, a-aggregate, r-redist, I-injected
-Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup
+Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup, 2 - best2
 
    Network            Next Hop            Metric     LocPrf     Weight Path
-*>l10.10.0.1/32       0.0.0.0                           100      32768 i
-x e10.10.0.2/32       10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 64002 i
-*>e10.10.0.101/32     10.10.1.1                                      0 64101 i
-*>e10.10.0.102/32     10.10.2.1                                      0 64102 i
-*>e10.10.0.201/32     10.10.2.1                                      0 64102 64201 i
-* e                   10.10.1.1                                      0 64101 64201 i
-*>e10.10.0.202/32     10.10.2.1                                      0 64102 64202 i
-*>l10.10.1.0/30       0.0.0.0                           100      32768 i
-* e                   10.10.1.1                                      0 64101 i
-x e10.10.1.4/30       10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 i
-*>l10.10.2.0/30       0.0.0.0                           100      32768 i
-* e                   10.10.2.1                                      0 64102 i
-*>e10.10.2.4/30       10.10.2.1                                      0 64102 i
-* e                   10.10.1.1                                      0 64101 64002 i
-* e10.10.101.0/30     10.10.2.1                                      0 64102 64201 i
-*>e                   10.10.1.1                                      0 64101 i
-*>e10.10.101.4/30     10.10.2.1                                      0 64102 i
-* e                   10.10.1.1                                      0 64101 64201 i
-* e10.10.102.0/30     10.10.2.1                                      0 64102 64202 i
-*>e                   10.10.1.1                                      0 64101 i
-*>e10.10.102.4/30     10.10.2.1                                      0 64102 i
-*>l10.10.150.0/24     0.0.0.0                           100      32768 i
-*>l10.10.151.0/24     0.0.0.0                           100      32768 i
-*>l10.10.152.0/24     0.0.0.0                           100      32768 i
-x e10.10.160.0/24     10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 64002 i
-x e10.10.161.0/24     10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 64002 i
-x e10.10.162.0/24     10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 64002 i
-*>e10.10.201.0/30     10.10.2.1                                      0 64102 64201 i
-* e                   10.10.1.1                                      0 64101 64201 i
+*>e10.20.20.0/27      10.1.1.1                         5000          0 100 200 i
 *>e10.10.202.0/30     10.10.2.1                                      0 64102 64202 i
 *>l100.100.100.100/30 0.0.0.0                           100      32768 i
 x e100.100.100.104/30 10.10.2.1                                      0 64102 64002 i
 *>e                   10.10.1.1                                      0 64101 64002 i
 *>e100.100.100.108/30 10.10.2.1                                      0 64102 {64201 64202} i
 *>e100.100.100.112/30 10.10.2.1                                      0 64102 {64201 64202} 64203 i
-  l                   0.0.0.0                           100      32768 i
-
+ *>e100.100.100.114/30 10.10.2.1                                      0 64102 {64201 64202} 64203 64500.2345 i
+*>e100.100.100.116/30 10.10.2.1                                      0 {64102 64201 64202} 64203 64500.2345 i
+*>e100.100.100.118/30 10.10.2.1                                      0 64102.444 {64201 64202} 64203 64500.2345 i
+*>e100.100.100.120/30 10.10.2.1                                      0 {64102.333 64201 64202} 64203 64500.2345 i
 ```
 
-**Help:** execute the command "show ip bgp"
+**Help:** execute the command "show bgp vrf all ipv4 unicast neighbors routes"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show interface description
+### show cdp neighbors
 
 **Output:**
 ```
+Capability Codes: R - Router, T - Trans-Bridge, B - Source-Route-Bridge
+                 S - Switch, H - Host, I - IGMP, r - Repeater,
+                 V - VoIP-Phone, D - Remotely-Managed-Device,
+                 s - Supports-STP-Dispute
 
--------------------------------------------------------------------------------
-Interface                Description                                            
--------------------------------------------------------------------------------
-mgmt0                    --
 
--------------------------------------------------------------------------------
-Port          Type   Speed   Description
--------------------------------------------------------------------------------
-Eth4/1        eth    10G     --
-Eth4/2        eth    1000    --
-Eth4/3        eth    10G     This is a test description
-Eth4/4        eth    10G     This is a test description
-Eth4/5        eth    10G     This is a test description
-Eth4/6        eth    1000    This is a test description
-Eth4/7        eth    10G     This is a test description
-Eth4/8        eth    1000    This is a test description
-Eth4/9        eth    10G     This is a test description
-Eth4/10       eth    10G     This is a test description
-Eth4/11       eth    10G     This is a test description
-Eth4/12       eth    10G     This is a test description
-Eth4/13       eth    1000    This is a test description
-Eth4/14       eth    10G     --
-Eth4/15       eth    10G     This is a test description
-Eth4/16       eth    10G     This is a test description
-Eth4/17       eth    1000    This is a test description
-Eth4/18       eth    10G     This is a test description
-Eth4/19       eth    1000    This is a test description
-Eth4/20       eth    10G     This is a test description
-Eth4/21       eth    10G     This is a test description
-Eth4/22       eth    10G     This is a test description
-Eth4/23       eth    10G     This is a test description
-Eth4/24       eth    10G     This is a test description
-Eth6/1        eth    10G     This is a description on line card 6
-Eth6/2        eth    10G     This is a description on line card 6
-Eth6/3        eth    1000    This is a description on line card 6
-Eth6/4        eth    1000    This is a description on line card 6
-Eth6/5        eth    10G     This is a description on line card 6
-Eth6/6        eth    1000    This is a description on line card 6
-Eth6/7        eth    10G     This is a description on line card 6
-Eth6/8        eth    10G     This is a description on line card 6
-Eth6/9        eth    10G     This is a description on line card 6
-Eth6/10       eth    10G     This is a description on line card 6
-Eth6/11       eth    10G     This is a description on line card 6
-Eth6/12       eth    10G     This is a description on line card 6
-Eth6/13       eth    10G     This is a description on line card 6
-Eth6/14       eth    10G     This is a description on line card 6
-Eth6/15       eth    10G     This is a description on line card 6
-Eth6/16       eth    1000    This is a description on line card 6
-Eth6/17       eth    10G     This is a description on line card 6
-Eth6/18       eth    1000    This is a description on line card 6
-Eth6/19       eth    10G     This is a description on line card 6
-Eth6/20       eth    10G     This is a description on line card 6
-Eth6/21       eth    10G     This is a description on line card 6
-Eth6/22       eth    10G     This is a description on line card 6
-Eth6/23       eth    10G     This is a description on line card 6
-Eth6/24       eth    10G     This is a description on line card 6
-Eth6/25       eth    1000    This is a description on line card 6
-Eth6/26       eth    1000    This is a description on line card 6
-Eth6/27       eth    10G     This is a description on line card 6
-Eth6/28       eth    1000    This is a description on line card 6
-Eth6/29       eth    10G     This is a description on line card 6
-Eth6/30       eth    10G     This is a description on line card 6
-Eth6/31       eth    10G     This is a description on line card 6
-Eth6/32       eth    10G     This is a description on line card 6
-Eth6/33       eth    10G     This is a description on line card 6
-Eth6/34       eth    1000    This is a description on line card 6
-Eth6/35       eth    10G     This is a description on line card 6
-Eth6/36       eth    1000    This is a description on line card 6
-Eth6/37       eth    10G     This is a description on line card 6
-Eth6/38       eth    10G     This is a description on line card 6
-Eth6/39       eth    1000    This is a description on line card 6
-Eth6/40       eth    10G     This is a description on line card 6
-Eth6/41       eth    10G     This is a description on line card 6
-Eth6/42       eth    10G     This is a description on line card 6
-Eth6/43       eth    10G     This is a description on line card 6
-Eth6/44       eth    10G     This is a description on line card 6
-Eth6/45       eth    10G     This is a description on line card 6
-Eth6/46       eth    10G     This is a description on line card 6
-Eth6/47       eth    10G     This is a description on line card 6
-Eth6/48       eth    10G     This is a description on line card 6
-
--------------------------------------------------------------------------------
-Interface                Description                                            
--------------------------------------------------------------------------------
-Po10                     This is a portchannel
-Po20                     This is a portchannel
-Po25                     This is a portchannel
-Po300                    This is a portchannel
-
--------------------------------------------------------------------------------
-Interface                Description                                            
--------------------------------------------------------------------------------
-Lo0                      This is a loopback
-Lo1                      This is a loopback
-Lo2                      This is a loopback
-Lo20                     --
-Lo30                     --
-Vlan1                    --
-Vlan9                    Nice little VLAN interface here
-Vlan10                   Nice little VLAN interface here
-Vlan20                   Nice little VLAN interface here
-Vlan30                   Nice little VLAN interface here
-
--------------------------------------------------------------------------------
-Port          Type   Speed   Description
--------------------------------------------------------------------------------
-Eth100/1/1    eth    1000    This is another description
-Eth100/1/2    eth    1000    This is another description
-Eth100/1/3    eth    1000    This is another description
-Eth100/1/4    eth    1000    This is another description
-Eth100/1/5    eth    1000    This is another description
-Eth100/1/6    eth    1000    This is another description
-Eth100/1/7    eth    1000    This is another description
-Eth100/1/8    eth    1000    This is another description
-Eth100/1/9    eth    1000    This is another description
-Eth100/1/10   eth    1000    This is another description
-Eth100/1/11   eth    1000    This is another description
-Eth100/1/12   eth    1000    This is another description
-Eth100/1/13   eth    1000    This is another description
-Eth100/1/14   eth    1000    This is another description
-Eth100/1/15   eth    1000    This is another description
-Eth100/1/16   eth    1000    This is another description
-Eth100/1/17   eth    1000    This is another description
-Eth100/1/18   eth    1000    This is another description
-Eth100/1/19   eth    1000    This is another description
-Eth100/1/20   eth    1000    This is another description
-Eth100/1/21   eth    1000    This is another description
-Eth100/1/22   eth    1000    This is another description
-Eth100/1/23   eth    1000    This is another description
-Eth100/1/24   eth    1000    This is another description
-
+Device-ID             Local Intrfce Hldtme Capability  Platform         Port ID
+my-dc1-mgt-sw1(FOC213230KP)
+                   mgmt0          138    R S I s   N3K-C3172PQ-XL     Eth1/48       
+lx-dc1-server01.mynetwork.com
+                   Eth1/1/1       109    H         Linux              eth9          
+lx-dc1-server02.mynetwork.com
+                   Eth1/1/2       106    H         Linux              eth9          
+lx-dc1-server03.mynetwork.com
+                   Eth1/1/3       91     H         Linux              eth9          
+lx-dc1-server04.mynetwork.com
+                   Eth1/1/4       112    H         Linux              eth9          
+lx-dc1-server05.mynetwork.com
+                   Eth1/2/1       100    H         Linux              eth9
 ```
 
-**Help:** execute the command "show interface description"
+**Help:** execute the command "show cdp neighbors"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show module
+### show cdp neighbors detail
 
 **Output:**
 ```
-Mod  Ports  Module-Type                      Model              Status
----  -----  -------------------------------- ------------------ ------------
-1    48     1000 Mbps Optical Ethernet Modul N7K-M148GS-11      ok
-3    0      Supervisor Module-2                                 powered-up
-4    0      Supervisor Module-2              N7K-SUP1           powered-dn
-5    0      Supervisor Module-2              N7K-SUP1           active *
-6    0      Supervisor Module-2              N7K-SUP1           ha-standby
+----------------------------------------
+Device ID:MKT1
 
+Interface address(es): 0
+Platform: MikroTik, Capabilities: Router
+Interface: Ethernet1/1, Port ID (outgoing port): ether1
+Holdtime: 61 sec
 
-Mod  Power-Status  Reason 
----  ------------  ---------------------------
-4    powered-dn     Configured Power down
-
-Mod  Sw              Hw
----  --------------  ------
-3    4.1(3)          0.202   
-4    4.1(3)          0.805   
-
-Mod  MAC-Address(es)                         Serial-Num
----  --------------------------------------  ----------
-3    00-1b-54-c2-ed-d0 to 00-1b-54-c2-ee-04  JAF1219AGFE
-4    00-1b-54-c0-ff-10 to 00-1b-54-c0-ff-18  JAB114000BV
-
-Mod  Online Diag Status
----  ------------------
-3    Pass
-4    Pass
-
-Xbar Ports  Module-Type                      Model              Status
----  -----  -------------------------------- ------------------ ------------
-1    0      Fabric Module 1                  N7K-C7018-FAB-1    ok
-
-Xbar Sw              Hw
----  --------------  ------
-1    NA              0.101   
-
-Xbar MAC-Address(es)                         Serial-Num
----  --------------------------------------  ----------
-1    NA                                      JAF1225AGHJ
-
-* this terminal session 
-
+Version:
+6.47.10 (long-term)
+ 
+Advertisement Version: 1
+Local Interface MAC: b1:81:d1:d1:a1:11
+Remote Interface MAC: 00:00:00:00:00:00
 ```
 
-**Help:** execute the command "show module"
+**Help:** execute the command "show cdp neighbors detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show clock
+
+**Output:**
+```
+18:57:38.347 UTC Mon Oct 19 2015
+```
+
+**Help:** execute the command "show clock"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show configuration session summary
+
+**Output:**
+```
+Session Manager Database:
+--------------------------------------------------------------------
+Name                    Session Owner           Creation Time
+--------------------------------------------------------------------
+ACL-SESSION1            ntc                     02:37:14 UTC Oct 28 2017
+ACL-SESS22              ntc                     02:37:55 UTC Oct 28 2017
+
+Number of active configuration sessions = 2
+```
+
+**Help:** execute the command "show configuration session summary"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show cts interface all
+
+**Output:**
+```
+CTS Information for Interface Ethernet1/2:
+    CTS is enabled, mode:   CTS_MODE_MANUAL
+    IFC state:              Unknown
+    Authentication Status:  CTS_AUTHC_INIT
+      Peer Identity:        MyDevice2
+      Peer is:              Unknown in manual mode
+      802.1X role:          CTS_ROLE_UNKNOWN
+      Last Re-Authentication: 
+    Authorization Status:   CTS_AUTHZ_INIT
+      PEER SGT:             0
+      Peer SGT assignment:  Not Trusted
+    SAP Status:             CTS_SAP_INIT
+      Configured pairwise ciphers: 
+      Replay protection: 
+      Replay protection mode: 
+      Selected cipher: 
+    Propagate SGT: Enabled
+
+CTS Information for Interface Ethernet1/3:
+    CTS is enabled, mode:   CTS_MODE_MANUAL
+    IFC state:              Unknown
+    Authentication Status:  CTS_AUTHC_INIT
+      Peer Identity:        
+      Peer is:              Unknown in manual mode
+      802.1X role:          CTS_ROLE_UNKNOWN
+      Last Re-Authentication: 
+    Authorization Status:   CTS_AUTHZ_SKIPPED_CONFIG
+      PEER SGT:             2
+      Peer SGT assignment:  Not Trusted
+    SAP Status:             CTS_SAP_INIT
+      Configured pairwise ciphers: 
+      Replay protection: 
+      Replay protection mode: 
+      Selected cipher: 
+    Propagate SGT: Enabled
+```
+
+**Help:** execute the command "show cts interface all"
 
 **Prompt:**
 - cisco_nxos>
@@ -375,197 +393,9 @@ CTS Information for Interfaces:
 Interface CTS Mode IFC State    SGT Assignment   Propagate SGT 
 --------- -------- ---------- ------------------ -------------
 Eth4/1    MANUAL   OPEN           0, Not Trusted Disabled 
-
 ```
 
 **Help:** execute the command "show cts interface brief"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show switching-mode
-
-**Output:**
-```
-Configured switching mode: Store and Forward
-
-Module Number     Operational Mode 
-     1            Store and Forward
-     2            Cut-Through 
-```
-
-**Help:** execute the command "show switching-mode"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show vrf detail
-
-**Output:**
-```
-VRF-Name: HUB, VRF-ID: 9, State: Up
-    VPNID: 123:456
-    RD: 172.21.111.112:197
-    Max Routes: 0  Mid-Threshold: 0
-    Table-ID: 0x80000009, AF: IPv6, Fwd-ID: 0x80000009, State: Up
-    Table-ID: 0x00000009, AF: IPv4, Fwd-ID: 0x00000009, State: Up
-
-VRF-Name: INSTRUMENTS, VRF-ID: 10, State: Up
-    VPNID: 3211:65
-    RD: 172.21.111.112:108
-    Max Routes: 0  Mid-Threshold: 0
-    Table-ID: 0x8000000a, AF: IPv6, Fwd-ID: 0x8000000a, State: Up
-    Table-ID: 0x0000000a, AF: IPv4, Fwd-ID: 0x0000000a, State: Up
-
-VRF-Name: LAB, VRF-ID: 11, State: Up
-    VPNID: 890:765
-    RD: 172.21.123.111:107
-    Max Routes: 0  Mid-Threshold: 0
-    Table-ID: 0x8000000b, AF: IPv6, Fwd-ID: 0x8000000b, State: Up
-    Table-ID: 0x0000000b, AF: IPv4, Fwd-ID: 0x0000000b, State: Up
-
-```
-
-**Help:** execute the command "show vrf detail"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip dhcp snooping statistics
-
-**Output:**
-```
----------------------------------------------------------------------- 
-Message Type             Rx              Tx           Drops  
----------------------------------------------------------------------- 
-Discover                 10              10              10
-Offer                    20              20              20
-Request                  30              30              30
-Ack                      40              40              40
-Release                  50              50              50
-Decline                  60              60              60
-Inform                   70              70              70
-Nack                     80              80              80
----------------------------------------------------------------------- 
-Total                  5000            5000            5000
----------------------------------------------------------------------- 
-DHCP L2 Forwarding:
-Total Packets Forwarded                          :       100
-Total Packets Received                           :       200
-Total Packets Dropped                            :       300
-Non DHCP:
-Total Packets Received                           :       400
-Total Packets Forwarded                          :       500
-Total Packets Dropped                            :       600
-DROP:
-Received on untrusted port                       :       700
-Unknown Failure                                  :       800
-Source mac validation failed                     :       900
-Binding entry validation Failed                  :      1000
-Invalid DHCP message type                        :      1100
-Interface error                                  :      1200
-Tx over trusted port failed                      :      1300
-Trust port not configured                        :      1400
- Vlan validation failure                          :      1500
-Insertion of option 82 failed                    :      1600
-Packet Malformed                                 :      1700
-```
-
-**Help:** execute the command "show ip dhcp snooping statistics"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip pim group-range vrf all
-
-**Output:**
-```
-PIM Group-Range Configuration for VRF "default"
-Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
-224.0.0.0/8        Accept SSM   -               -                 Local
-
-PIM Group-Range Configuration for VRF "red"
-Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
-224.0.0.0/8        Accept SSM   -               -                 Local
-
-
-```
-
-**Help:** execute the command "show ip pim group-range vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show nve peers
-
-**Output:**
-```
-Interface Peer-IP                                 State LearnType Uptime   Router-Mac      
---------- --------------------------------------  ----- --------- -------- -----------------
-nve1      192.168.111.41                          Up    CP        2y11w    0200.c0a8.5422   
-nve1      192.168.111.47                          Up    CP        2y11w    2416.9dd1.4117  
-nve1      192.168.111.48                          Up    CP        2y11w    cc7f.76a5.3a77  
-nve1      192.168.111.52                          Up    CP        2y11w    2416.9dd1.8137  
-nve1      192.168.111.81                          Up    CP        2y11w    0200.c0a8.545b  
-
-```
-
-**Help:** execute the command "show nve peers"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show port-channel summary
-
-**Output:**
-```
-Flags:  D - Down        P - Up in port-channel (members)
-        I - Individual  H - Hot-standby (LACP only)
-        s - Suspended   r - Module-removed
-        S - Switched    R - Routed
-        U - Up (port-channel)
-        M - Not in use. Min-links not met
---------------------------------------------------------------------------------
- Group Port-       Type     Protocol  Member Ports
-      Channel
---------------------------------------------------------------------------------
-1     Po1(RU)     Eth      LACP      Eth1/1(P)    Eth2/1(P)
-2     Po2(RU)     Eth      LACP      Eth1/2(P)    Eth2/2(P)
-3     Po3(RU)     Eth      LACP      Eth1/3(P)    Eth2/3(P)
-4     Po4(RU)     Eth      LACP      Eth1/4(P)    Eth2/4(P)
-12    Po12(RU)    Eth      LACP      Eth1/5(P)    Eth2/5(P)
-13    Po13(RU)    Eth      LACP      Eth1/6(P)    Eth2/6(P)
-14    Po14(RU)    Eth      LACP      Eth1/7(P)    Eth2/7(P)
-801   Po801(RU)   Eth      LACP      Eth5/6(P)    Eth6/6(P)
-802   Po802(RU)   Eth      LACP      Eth5/7(P)    Eth6/7(P)
-803   Po803(RU)   Eth      LACP      Eth15/17(P)  Eth16/17(P)
-804   Po804(RU)   Eth      LACP      Eth15/24(P)  Eth16/24(P)
-811   Po811(RU)   Eth      LACP      Eth15/8(P)   Eth15/28(P)  Eth16/8(P)
-                                     Eth16/28(P)
-812   Po812(RU)   Eth      LACP      Eth15/36(P)  Eth16/36(P)  Eth17/8(P)
-                                     Eth18/8(P)
-813   Po813(RU)   Eth      LACP      Eth15/15(P)  Eth16/15(P)
-814   Po814(RU)   Eth      LACP      Eth15/22(P)  Eth16/22(P)
-821   Po821(RU)   Eth      LACP      Eth15/30(P)  Eth16/30(P)  Eth17/29(P)
-                                     Eth18/29(P)
-822   Po822(RU)   Eth      LACP      Eth15/38(P)  Eth16/38(P)  Eth17/30(P)
-                                     Eth18/30(P)
-823   Po823(RU)   Eth      LACP      Eth3/9(P)    Eth4/9(P)
-824   Po824(RU)   Eth      LACP      Eth3/10(P)   Eth4/10(P)
-825   Po825(RU)   Eth      LACP      Eth3/3(P)
-826   Po826(RU)   Eth      LACP      Eth4/3(P)
-827   Po827(RU)   Eth      LACP      Eth5/3(P)
-828   Po828(RU)   Eth      LACP      Eth6/3(P)
-
-```
-
-**Help:** execute the command "show port-channel summary"
 
 **Prompt:**
 - cisco_nxos>
@@ -655,10 +485,406 @@ Module   Sensor        MajorThresh   MinorThres   CurTemp     Status
 4        MAC0Sn1(s3)     115             105         36         Ok         
     
 4        MAC0-Buf0(s4)   115             105         46         Ok         
-
 ```
 
 **Help:** execute the command "show environment"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show environment temperature
+
+**Output:**
+```
+
+
+Temperature
+-------------------------------------------------------------------------
+Module  Sensor             MajorThresh   MinorThres   CurTemp     Status
+                            (Celsius)     (Celsius)   (Celsius)         
+-------------------------------------------------------------------------
+1       ASIC                101           95           52          ok          
+1       Front-Middle(D1)    62            56           38          ok          
+1       Front-Left  (D2)    52            44           33          ok          
+1       Back        (D3)    48            42           28          ok
+```
+
+**Help:** execute the command "show environment temperature"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show fabricpath route
+
+**Output:**
+```
+FabricPath Unicast Route Table
+'a/b/c' denotes ftag/switch-id/subswitch-id
+'[x/y]' denotes [admin distance/metric]
+ftag 0 is local ftag
+subswitch-id 0 is default subswitch-id
+FabricPath Unicast Route Table for Topology-Default
+0/10/0, number of next-hops: 0
+  via ----, [60/0], 5 day/s 11:35:56, local
+1/20/0, number of next-hops: 1
+  via Po2, [115/40], 5 day/s 11:35:23, isis_l2mp-default
+  via Eth7/2, [115/40], 5 day/s 11:35:28, isis_l2mp-default
+1/35/0, number of next-hops: 0
+  via ----, [60/0], 5 day/s 11:35:26, local
+```
+
+**Help:** execute the command "show fabricpath route"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show feature
+
+**Output:**
+```
+Feature Name          Instance  State
+--------------------  --------  --------
+bash-shell             1          enabled
+bfd                    1          disabled
+bgp                    1          disabled
+dhcp                   1          disabled
+eigrp                  1          disabled
+eigrp                  2          disabled
+eigrp                  3          disabled
+eigrp                  4          disabled
+eigrp                  5          disabled
+eigrp                  6          disabled
+eigrp                  7          disabled
+eigrp                  8          disabled
+eigrp                  9          disabled
+eigrp                  10         disabled
+eigrp                  11         disabled
+eigrp                  12         disabled
+eigrp                  13         disabled
+eigrp                  14         disabled
+eigrp                  15         disabled
+eigrp                  16         disabled
+evmed                  1          disabled
+fabric_mcast           1          disabled
+hmm                    1          disabled
+hsrp_engine            1          enabled
+interface-vlan         1          enabled
+isis                   1          disabled
+isis                   2          disabled
+isis                   3          disabled
+isis                   4          disabled
+isis                   5          disabled
+isis                   6          disabled
+isis                   7          disabled
+isis                   8          disabled
+isis                   9          disabled
+isis                   10         disabled
+isis                   11         disabled
+isis                   12         disabled
+isis                   13         disabled
+isis                   14         disabled
+isis                   15         disabled
+isis                   16         disabled
+itd                    1          disabled
+lacp                   1          enabled
+ldap                   1          disabled
+ldp                    1          disabled
+lldp                   1          enabled
+mpls_static            1          disabled
+msdp                   1          disabled
+nat                    1          disabled
+ospf                   1          enabled (not-running)
+ospf                   2          enabled
+ospf                   3          enabled
+ospf                   4          enabled (not-running)
+ospf                   5          enabled (not-running)
+ospf                   6          enabled (not-running)
+ospf                   7          enabled (not-running)
+ospf                   8          enabled (not-running)
+ospf                   9          enabled (not-running)
+ospf                   10         enabled (not-running)
+ospf                   11         enabled (not-running)
+ospf                   12         enabled (not-running)
+ospf                   13         enabled (not-running)
+```
+
+**Help:** execute the command "show feature"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show fex
+
+**Output:**
+```
+
+  FEX         FEX           FEX              FEX              Fex
+Number    Description      State            Model            Serial
+------------------------------------------------------------------------
+102      ATL1-AS3P                Online   N2K-C2248TP-E-1GE   SSI16340AR0
+103      ATL1-AS5P                Online   N2K-C2248TP-E-1GE   SSI16350CPC
+104      ATL1-AS7P                Online   N2K-C2248TP-E-1GE   SSI16340AKE
+105      ATL1-AS9P                Online   N2K-C2248TP-E-1GE   SSI16350BJ9
+121    ATL1-AS1PR2                Online   N2K-C2248TP-E-1GE   SSI165102M7
+122    ATL1-AS3PR2 test           Online   N2K-C2248TP-E-1GE   SSI16460ARS
+123    ATL1-AS3PR2 test test      Online   N2K-C2248TP-E-1GE   SSI16460AR1
+124    ATL1-AS3PR2  Test          Online   N2K-C2248TP-E-1GE   SSI16460AR2
+125    ATL1-AS3PR2 Test  test     Online   N2K-C2248TP-E-1GE   SSI16460AR3
+```
+
+**Help:** execute the command "show fex"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show fex id
+
+**Output:**
+```
+FEX: 102 Description: ATL1-AS3P   state: Online
+  FEX version: 7.2(1)N1(1) [Switch version: 7.2(1)N1(1)]
+  Extender Serial: SSI16340AR0
+  Extender Model: N2K-C2248TP-E-1GE,  Part No: 73-13671-01
+  Pinning-mode: static    Max-links: 1
+  Fabric port for control traffic: Eth1/31
+  FCoE Admin: false
+  FCoE Oper: true
+  FCoE FEX AA Configured: false
+  Fabric interface state:
+    Po102 - Interface Up. State: Active
+    Eth1/31 - Interface Up. State: Active
+    Eth2/15 - Interface Up. State: Active
+```
+
+**Help:** execute the command "show fex id"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show flogi database
+
+**Output:**
+```
+SWITCH1# sh flogi database
+--------------------------------------------------------------------------------
+INTERFACE        VSAN    FCID           PORT NAME               NODE NAME
+--------------------------------------------------------------------------------
+fc1/33           10    0x000000  aa:bb:cc:dd:ee:ff:00:11 aa:bb:cc:dd:ee:ff:00:00
+                           [SAN_PORT_1]
+fc1/34           10    0x000000  aa:bb:cc:dd:ee:ff:00:12 aa:bb:cc:dd:ee:ff:00:00
+                           [SAN_PORT_2]
+fc1/35           10    0x000000  aa:bb:cc:dd:ee:ff:00:13 aa:bb:cc:dd:ee:ff:00:00
+                           [SAN_PORT_3]
+fc1/36           10    0x000000  aa:bb:cc:dd:ee:ff:00:14 aa:bb:cc:dd:ee:ff:00:00
+                           [SAN_PORT_4]
+fc1/37           10    0x000000  aa:bb:cc:dd:ee:ff:00:15 bb:bb:cc:dd:ee:ff:00:00
+                           [TAPE_1]
+fc1/38           10    0x000000  aa:bb:cc:dd:ee:ff:00:16 a0:bb:cc:dd:ee:ff:00:00
+                           [TAPE_2]
+fc1/41           10    0x000000  aa:bb:cc:dd:ee:ff:00:17 d1:bb:cc:dd:ee:ff:00:00
+                           [SERVER_A_PORT_1]
+fc1/42           10    0x000000  aa:bb:cc:dd:ee:ff:00:18 d1:bb:cc:dd:ee:ff:00:00
+                           [SERVER_A_PORT_2]
+fc1/43           10    0x000000  aa:bb:cc:dd:ee:ff:00:19 3a:bb:cc:dd:ee:ff:00:00
+                           [SERVER_B_PORT_1]
+fc1/44           10    0x000000  aa:bb:cc:dd:ee:ff:00:10 3a:bb:cc:dd:ee:ff:00:00
+                           [SERVER_B_PORT_2]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:10 da:bb:cc:dd:ee:ff:00:00
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:11 da:bb:cc:dd:ee:ff:00:01
+                           [SERVER_C_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:12 da:bb:cc:dd:ee:ff:00:a0
+                           [SERVER_D_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:13 da:bb:cc:dd:ee:ff:00:f3
+                           [SERVER_E_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:14 da:bb:cc:dd:ee:ff:00:d7
+                           [SERVER_F_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:15 da:bb:cc:dd:ee:ff:00:a8
+                           [SERVER_G_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:16 da:bb:cc:dd:ee:ff:00:c3
+                           [SERVER_H_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:17 da:bb:cc:dd:ee:ff:00:c8
+                           [SERVER_I_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:18 da:bb:cc:dd:ee:ff:00:e9
+                           [SERVER_J_PORT_1]
+fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:19 da:bb:cc:dd:ee:ff:00:e1
+                           [SERVER_K_PORT_1]
+fc1/46           10    0x000000  aa:bb:cc:dd:ee:ff:02:00 c6:bb:cc:dd:ee:ff:00:11
+                           [DEV_SERVER_PORT_1]
+
+ Total number of flogi = 21.
+```
+
+**Help:** execute the command "show flogi database"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show forwarding adjacency
+
+**Output:**
+```
+IPv4 adjacency information
+
+next-hop         rewrite info    interface    Origin AS  Peer AS  Neighbor
+-------------- --------------- ------------- ---------- --------- --------------
+10.111.1.3      cc16.7c1f.9852 Vlan10
+10.111.1.4      cc16.7c1f.6900 Vlan10
+10.111.1.5      84b8.025a.f786 Vlan10
+10.111.1.6      a89d.2121.bc7b Vlan10
+10.5.111.213    0050.528c.5b4c Vlan182
+10.5.111.221    002a.6312.6ac1 Vlan182
+10.111.254.6    002a.6312.6ac1 Vlan254
+10.6.140.234    000e.b6b2.ff01 Ethernet1/16
+10.6.140.238    54a2.72da.b651 Ethernet1/16
+```
+
+**Help:** execute the command "show forwarding adjacency"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show forwarding ipv4 route
+
+**Output:**
+```
+IPv4 routes for table default/base
+
+------------------+------------------+----------------------+-----------------
+Prefix            | Next-hop         | Interface            | Labels
+------------------+------------------+----------------------+-----------------
+0.0.0.0/32           Drop               Null0
+127.0.0.0/8          Drop               Null0
+255.255.255.255/32   Receive            sup-eth1
+0.0.0.0/0            10.100.100.178     Ethernet1/8
+                     10.100.100.186     Ethernet1/9
+10.0.0.0/16          10.100.100.230     Ethernet1/14
+10.0.120.0/24        10.100.100.230     Ethernet1/14
+10.0.210.0/24        10.100.100.230     Ethernet1/14
+10.0.251.0/24        10.100.100.230     Ethernet1/14
+10.1.0.0/16          10.100.100.230     Ethernet1/14
+10.2.0.0/16          10.100.100.230     Ethernet1/14
+10.5.0.0/16          10.100.100.230     Ethernet1/14
+10.6.0.0/16          10.100.100.230     Ethernet1/14
+10.7.0.0/16          10.100.100.230     Ethernet1/14
+10.8.0.0/16          10.100.100.230     Ethernet1/14
+10.12.0.0/16         10.100.100.230     Ethernet1/14
+10.13.0.0/16         10.100.100.230     Ethernet1/14
+10.14.0.0/16         10.100.100.230     Ethernet1/14
+10.27.0.0/16         10.100.100.230     Ethernet1/14
+10.29.0.0/16         10.100.100.230     Ethernet1/14
+10.30.0.0/16         10.100.100.230     Ethernet1/14
+10.31.0.0/16         10.100.100.230     Ethernet1/14
+10.32.0.0/16         10.100.100.230     Ethernet1/14
+10.33.0.0/16         10.100.100.230     Ethernet1/14
+10.34.0.0/16         10.100.100.230     Ethernet1/14
+10.36.0.0/16         10.100.100.230     Ethernet1/14
+10.38.0.0/16         10.100.100.230     Ethernet1/14
+10.39.0.0/16         10.100.100.230     Ethernet1/14
+10.40.0.0/16         10.100.100.230     Ethernet1/14
+10.42.0.0/16         10.100.100.230     Ethernet1/14
+10.43.0.0/16         10.100.100.230     Ethernet1/14
+10.44.0.0/16         10.100.100.230     Ethernet1/14
+10.46.0.0/16         10.100.100.230     Ethernet1/14
+10.48.0.0/16         10.100.100.230     Ethernet1/14
+10.49.0.0/16         10.100.100.230     Ethernet1/14
+10.50.0.0/16         10.100.100.230     Ethernet1/14
+10.51.0.0/16         10.100.100.230     Ethernet1/14
+10.52.0.0/16         10.100.100.230     Ethernet1/14
+10.53.0.0/16         10.100.100.230     Ethernet1/14
+10.54.0.0/16         10.100.100.230     Ethernet1/14
+10.55.0.0/16         10.100.100.230     Ethernet1/14
+10.57.0.0/16         10.100.100.230     Ethernet1/14
+10.62.0.0/16         10.100.100.230     Ethernet1/14
+10.63.0.0/16         10.100.100.230     Ethernet1/14
+10.64.0.0/16         10.100.100.230     Ethernet1/14
+10.66.0.0/16         10.100.100.230     Ethernet1/14
+10.67.0.0/16         10.100.100.230     Ethernet1/14
+10.69.192.0/19       10.100.100.230     Ethernet1/14
+10.69.224.0/19       10.100.100.230     Ethernet1/14
+10.70.0.0/16         10.100.100.230     Ethernet1/14
+10.70.0.0/24         10.100.100.230     Ethernet1/14
+10.70.7.0/24         10.100.100.230     Ethernet1/14
+10.70.8.0/24         10.100.100.230     Ethernet1/14
+10.70.12.0/24        10.100.100.230     Ethernet1/14
+10.70.14.0/24        10.100.100.230     Ethernet1/14
+10.70.27.0/24        10.100.100.230     Ethernet1/14
+10.70.29.0/24        10.100.100.230     Ethernet1/14
+10.70.30.0/24        10.100.100.230     Ethernet1/14
+10.70.32.0/24        10.100.100.230     Ethernet1/14
+10.70.34.0/24        10.100.100.230     Ethernet1/14
+10.70.38.0/24        10.100.100.230     Ethernet1/14
+10.70.40.0/24        10.100.100.230     Ethernet1/14
+10.70.42.0/24        10.100.100.230     Ethernet1/14
+10.70.43.0/24        10.100.100.230     Ethernet1/14
+10.70.44.0/24        10.100.100.230     Ethernet1/14
+10.70.46.0/24        10.100.100.230     Ethernet1/14
+10.70.48.0/24        10.100.100.230     Ethernet1/14
+10.70.49.0/24        10.100.100.230     Ethernet1/14
+10.70.50.0/24        10.100.100.230     Ethernet1/14
+10.70.51.0/24        10.100.100.230     Ethernet1/14
+10.70.52.0/24        10.100.100.230     Ethernet1/14
+10.70.64.0/24        10.100.100.230     Ethernet1/14
+10.70.66.0/24        10.100.100.230     Ethernet1/14
+10.70.67.0/24        10.100.100.230     Ethernet1/14
+10.70.112.0/24       10.100.100.230     Ethernet1/14
+10.71.0.0/16         10.100.100.230     Ethernet1/14
+10.72.150.0/24       10.100.100.230     Ethernet1/14
+10.72.151.0/24       10.100.100.230     Ethernet1/14
+10.73.0.0/16         10.100.100.230     Ethernet1/14
+10.74.0.0/16         10.100.100.230     Ethernet1/14
+10.75.0.0/16         10.100.100.230     Ethernet1/14
+10.76.0.0/16         10.100.100.230     Ethernet1/14
+10.77.0.0/16         10.100.100.230     Ethernet1/14
+10.78.0.0/16         10.100.100.230     Ethernet1/14
+10.79.0.0/16         10.100.100.230     Ethernet1/14
+10.80.0.0/16         10.100.100.230     Ethernet1/14
+10.82.20.0/24        10.100.100.142     Vlan1800
+10.82.21.0/24        10.100.100.142     Vlan1800
+10.82.22.0/24        10.100.100.142     Vlan1800
+10.82.22.0/26        10.100.100.142     Vlan1800
+10.82.22.64/26       10.100.100.142     Vlan1800
+10.82.22.80/32       10.100.100.142     Vlan1800
+10.82.22.192/26      10.100.100.142     Vlan1800
+10.82.22.231/32      10.100.100.142     Vlan1800
+10.82.22.240/32      10.100.100.142     Vlan1800
+10.82.22.242/32      10.100.100.142     Vlan1800
+10.82.22.243/32      10.100.100.142     Vlan1800
+10.82.22.244/32      10.100.100.142     Vlan1800
+10.82.22.245/32      10.100.100.142     Vlan1800
+10.82.23.0/24        10.100.100.142     Vlan1800
+10.91.9.0/24         10.100.100.230     Ethernet1/14
+10.92.0.0/19         10.100.100.230     Ethernet1/14
+10.92.254.0/24       10.100.100.230     Ethernet1/14
+10.100.32.0/21       10.100.100.230     Ethernet1/14
+10.100.40.0/21       10.100.100.230     Ethernet1/14
+10.100.112.0/21      10.100.100.230     Ethernet1/14
+10.100.120.0/21      10.100.100.230     Ethernet1/14
+10.101.174.0/23      10.100.100.230     Ethernet1/14
+10.102.174.0/23      10.100.100.230     Ethernet1/14
+10.112.0.0/16        10.100.100.230     Ethernet1/14
+10.122.0.0/16        10.100.100.230     Ethernet1/14
+10.123.0.0/16        10.100.100.230     Ethernet1/14
+*10.128.0.0/17       10.100.100.114     Ethernet1/47
+10.130.0.0/16        10.100.100.186     Ethernet1/9
+*10.131.0.0/16       10.100.100.114     Ethernet1/47
+*10.132.0.0/18       10.100.100.114     Ethernet1/47
+*10.132.101.0/24     10.100.100.114     Ethernet1/47
+*10.132.102.0/24     10.100.100.114     Ethernet1/47
+*10.132.103.0/24     10.100.100.114     Ethernet1/47
+*10.132.104.0/24     10.100.100.114     Ethernet1/47
+*10.132.150.0/24     10.100.100.114     Ethernet1/47
+*10.132.170.0/24     10.100.100.114     Ethernet1/47
+```
+
+**Help:** execute the command "show forwarding ipv4 route"
 
 **Prompt:**
 - cisco_nxos>
@@ -1398,685 +1624,9 @@ Counters:
     Link debounced with link up: 0x0 (0)
     Link debounced with link up since  last enable: 0x0 (0)
 Done.
-
 ```
 
 **Help:** execute the command "show hardware internal bigsur all-ports detail"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show lldp neighbors detail
-
-**Output:**
-```
-Capability codes:
-  (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
-  (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
- Device ID            Local Intf      Hold-time  Capability  Port ID  
-
-Chassis id: 0014.1c57.a48b
-Port id: Fa1/0/9
-Local Port id: mgmt0
-Port Description: FastEthernet1/0/9
-System Name: Switch.cisco.com
-System Description: Cisco IOS Software, C3750 Software (C3750-IPBASEK9-M), Version 12.2(44)SE2, RELEASE SOFTWARE (fc2)
-Copyright (c) 1986-2008 by Cisco Systems, Inc.
-Compiled Thu 01-May-08 15:42 by antonino
-Time remaining: 91 seconds
-System Capabilities: B, R
-Enabled Capabilities: B, R
-Management Address: 10.30.140.1
-Vlan ID: 100
-
-
-Chassis id: 5087.89a1.d8d6
-Port id: Ethernet1/1
-Local Port id: Eth1/1
- Port Description: Ethernet1/1
-System Name: n9k2.company.com
-System Description: Cisco Nexus Operating System (NX-OS) Software 7.0(3)I4(1)
-TAC support: http://www.cisco.com/tac
- Copyright (c) 2002-2016, Cisco Systems, Inc. All rights reserved.
-Time remaining: 93 seconds
-System Capabilities: B, R
-Enabled Capabilities: B, R
-Management Address: 10.30.140.21
-Vlan ID: 1
-
-
-Chassis id: 5087.89a1.d8d7
-Port id: Ethernet1/2
-Local Port id: Eth1/2
-Port Description: Ethernet1/2
-System Name: n9k2.company.com
-System Description: Cisco Nexus Operating System (NX-OS) Software 7.0(3)I4(1)
-TAC support: http://www.cisco.com/tac
-Copyright (c) 2002-2016, Cisco Systems, Inc. All rights reserved.
-Time remaining: 93 seconds
-System Capabilities: B, R
-Enabled Capabilities: B, R
-Management Address: 10.30.140.21
- Vlan ID: 1
-
-
-Chassis id: 547f.eeaf.7818
-Port id: Ethernet1/49
-Local Port id: Eth2/2
-Port Description: Ethernet1/49
-System Name: N3K.cisconxapi.com
- System Description: Cisco Nexus Operating System (NX-OS) Software 6.0(2)U4(1)
- TAC support: http://www.cisco.com/tac
-Copyright (c) 2002-2014, Cisco Systems, Inc. All rights reserved.
-Time remaining: 93 seconds
-System Capabilities: B, R
-Enabled Capabilities: B, R
-Management Address: 10.30.140.30
-Vlan ID: 1
-
-Total entries displayed: 4
-
-```
-
-**Help:** execute the command "show lldp neighbors detail"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface snmp-ifindex
-
-**Output:**
-```
-
---------------------------------------------------------------------------------
-Port             IFMIB Ifindex (hex)
---------------------------------------------------------------------------------
-mgmt0           83886080   (0x5000000 )
-Eth9/1          440401920  (0x1a400000)
-Eth9/2          440406016  (0x1a401000)
-Eth9/3          440410112  (0x1a402000)
-Eth9/4          440414208  (0x1a403000)
-Eth9/4.10       440414218  (0x1a40300a)
-Eth9/5/1        960659456  (0x39428000)
-Eth9/5/2        960663552  (0x39429000)
-Eth9/5/3        960667648  (0x3942a000)
-Eth9/5/4        960671744  (0x3942b000)
-Eth9/6/1        960700416  (0x39432000)
-Eth9/6/2        960704512  (0x39433000)
-Eth9/6/3        960708608  (0x39434000)
-Eth9/6/4        960712704  (0x39435000)
-Eth9/7          440426496  (0x1a406000)
-Eth9/8          440430592  (0x1a407000)
-Eth9/9          440434688  (0x1a408000)
-Eth9/10         440438784  (0x1a409000)
-Eth9/11         440442880  (0x1a40a000)
-Eth9/12         440446976  (0x1a40b000)
-Po1             369098752  (0x16000000)
-Lo0             335544320  (0x14000000)
-Vlan1           151126017  (0x9020001)
-```
-
-**Help:** execute the command "show interface snmp-ifindex"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show license usage
-
-**Output:**
-```
-
-Feature                      Ins  Lic   Status Expiry Date Comments
-                                 Count
---------------------------------------------------------------------------------
-MPLS_PKG                      No    -   Unused             Grace 10D 1H
-STORAGE-ENT                   No    -   Unused             Grace 20D 6H
-VDC_LICENSES                  No    0   Unused             -
-ENTERPRISE_PKG                No    -   Unused             -
-FCOE-N7K-F132XP               No    0   Unused             -
-FCOE-N7K-F248XP               No    0   Unused             -
-ENHANCED_LAYER2_PKG           No    -   Unused             Grace 20D 6H
-SCALABLE_SERVICES_PKG         No    -   Unused             -
-TRANSPORT_SERVICES_PKG        Yes   -   Unused Never       -
-LAN_ADVANCED_SERVICES_PKG     Yes   -   Unused Never       -
-LAN_ENTERPRISE_SERVICES_PKG   Yes   -   In use Never       -
---------------------------------------------------------------------------------
-
-```
-
-**Help:** execute the command "show license usage"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip adjacency
-
-**Output:**
-```
-
-Flags: # - Adjacencies Throttled for Glean
-       G - Adjacencies of vPC peer with G/W bit
-
-IP Adjacency Table for VRF default
-Total number of entries: 8
-Address         MAC Address     Pref Source     Interface
-10.110.100.142  002a.6a11.62c1  50   arp        Vlan1800         G
-10.110.100.178  78bc.1af1.ca61  50   arp        Vlan1801
-10.110.100.179  002a.6a11.62c1  50   arp        Vlan1801         G
-10.100.1.22     002a.6a11.62c1  50   arp        Vlan10           G
-10.100.1.24     0040.9d99.f6f6  50   arp        Vlan10
-10.100.150.3    0050.5694.bb20  50   arp        Vlan150
-10.100.150.5    002a.6a11.62c1  50   arp        Vlan150          G
-10.100.150.6    0050.568c.2110  50   arp        Vlan150
-```
-
-**Help:** execute the command "show ip adjacency"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show spanning-tree root
-
-**Output:**
-```
-                                        Root  Hello Max Fwd
-Vlan                   Root ID          Cost  Time  Age Dly  Root Port
----------------- -------------------- ------- ----- --- ---  ----------------
-VLAN0001             1 1211.a111.1111       0    2   20  10  This bridge is root
-VLAN0002            10 1211.a111.1112       3    2   20  10    port-channel10
-VLAN0003          1111 1211.a111.1113       1    2   20  10     port-channel1
-VLAN0004            11 1211.a111.1114       0    2   20  10  This bridge is root
-```
-
-**Help:** execute the command "show spanning-tree root"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show bgp vrf all ipv4 unicast neighbors routes
-
-**Output:**
-```
-Can't find neighbor 10.1.1.1 in VRF TEST_1
-
-Peer 10.1.1.1 routes for address family IPv4 Unicast:
-BGP table version is 401423, Local Router ID is 10.10.10.10
-Status: s-suppressed, x-deleted, S-stale, d-dampened, h-history, *-valid, >-best
-Path type: i-internal, e-external, c-confed, l-local, a-aggregate, r-redist, I-injected
-Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup, 2 - best2
-
-   Network            Next Hop            Metric     LocPrf     Weight Path
-*>e10.20.20.0/27      10.1.1.1                         5000          0 100 200 i
-*>e10.10.202.0/30     10.10.2.1                                      0 64102 64202 i
-*>l100.100.100.100/30 0.0.0.0                           100      32768 i
-x e100.100.100.104/30 10.10.2.1                                      0 64102 64002 i
-*>e                   10.10.1.1                                      0 64101 64002 i
-*>e100.100.100.108/30 10.10.2.1                                      0 64102 {64201 64202} i
-*>e100.100.100.112/30 10.10.2.1                                      0 64102 {64201 64202} 64203 i
- *>e100.100.100.114/30 10.10.2.1                                      0 64102 {64201 64202} 64203 64500.2345 i
-*>e100.100.100.116/30 10.10.2.1                                      0 {64102 64201 64202} 64203 64500.2345 i
-*>e100.100.100.118/30 10.10.2.1                                      0 64102.444 {64201 64202} 64203 64500.2345 i
-*>e100.100.100.120/30 10.10.2.1                                      0 {64102.333 64201 64202} 64203 64500.2345 i
-
-```
-
-**Help:** execute the command "show bgp vrf all ipv4 unicast neighbors routes"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show vpc
-
-**Output:**
-```
-Legend:
-                (*) - local vPC is down, forwarding via vPC peer-link
-
-vPC domain id                     : 100
-Peer status                       : peer link is down
-vPC keep-alive status             : Suspended (Destination IP not reachable)
-Configuration consistency status  : failed
- Per-vlan consistency status       : success
-Configuration inconsistency reason: Consistency Check Not Performed
-Type-2 inconsistency reason       : Consistency Check Not Performed
-vPC role                          : none established
- Number of vPCs configured         : 0
-Peer Gateway                      : Disabled
- Dual-active excluded VLANs        : -
-Graceful Consistency Check        : Disabled (due to peer configuration)
-Auto-recovery status              : Disabled
- Delay-restore status              : Timer is off.(timeout = 30s)
-Delay-restore SVI status          : Timer is off.(timeout = 10s)
-
-vPC Peer-link status
----------------------------------------------------------------------
-id   Port   Status Active vlans
---   ----   ------ --------------------------------------------------
-1    Po12   down   -
-2    Po13   up     10
-
-```
-
-**Help:** execute the command "show vpc"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show access-lists
-
-**Output:**
-```
-IP access list TEST-ACL
-        statistics per-entry
-        10 remark established connections
-        20 permit tcp any 10.10.10.0/24 established [match=66]
-        30 remark Test
-        40 permit tcp 1.1.1.1/32 any eq 80 [match=0]
-        50 permit tcp 2.2.2.2/32 any eq 443 [match=0]
-        60 remark Allow NAT IP
-        70 permit tcp 3.3.3.3/32 any eq 80 [match=0]
-        80 remark TestRemark
-        90 permit tcp 4.4.4.4/32 any eq 443 [match=0]
-        100 remark Test Remark
-        110 permit tcp 5.5.5.5/32 any eq 80 [match=0]
-        120 remark AnotherOne
-        130 permit tcp 6.6.6.6/32 any eq 443 [match=0]
-        140 remark addTest: contains list should not become name
-        150 remark addTest: dont "miss" 'me'
-
-```
-
-**Help:** execute the command "show access-lists"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show mac address-table
-
-**Output:**
-```
-Legend:
-        * - primary entry, G - Gateway MAC, (R) - Routed MAC, O - Overlay MAC
-        age - seconds since last seen,+ - primary entry using vPC Peer-Link,
-        (T) - True, (F) - False
-     VLAN       MAC Address       Type     age    Secure  NTFY     Ports
-------------+-----------------+----------+-------+------+------+------------------
-G    100      5087.89a1.de75     static     -        F      F    sup-eth1(R)
-*    145        000a.000a.000a   static     -        F      F    Drop
-*    145        000e.000e.000e   static     -        F      F    Po10
-
-
-```
-
-**Help:** execute the command "show mac address-table"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show fex id
-
-**Output:**
-```
-FEX: 102 Description: ATL1-AS3P   state: Online
-  FEX version: 7.2(1)N1(1) [Switch version: 7.2(1)N1(1)]
-  Extender Serial: SSI16340AR0
-  Extender Model: N2K-C2248TP-E-1GE,  Part No: 73-13671-01
-  Pinning-mode: static    Max-links: 1
-  Fabric port for control traffic: Eth1/31
-  FCoE Admin: false
-  FCoE Oper: true
-  FCoE FEX AA Configured: false
-  Fabric interface state:
-    Po102 - Interface Up. State: Active
-    Eth1/31 - Interface Up. State: Active
-    Eth2/15 - Interface Up. State: Active
-
-```
-
-**Help:** execute the command "show fex id"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip pim rp vrf all
-
-**Output:**
-```
-PIM RP Status Information for VRF "default"
-BSR disabled
-Auto-RP disabled
-BSR RP Candidate policy: None
-BSR RP policy: None
-Auto-RP Announce policy: None
-Auto-RP Discovery policy: None
-
-
-PIM RP Status Information for VRF "red"
-BSR disabled
-Auto-RP disabled
-BSR RP Candidate policy: None
- BSR RP policy: None
-Auto-RP Announce policy: None
-Auto-RP Discovery policy: None
-
-
-
-```
-
-**Help:** execute the command "show ip pim rp vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show vdc
-
-**Output:**
-```
-
-Switchwide mode is m1 f1 m1xl f2 m2xl f2e f3
-
-vdc_id  vdc_name                          state               mac                 type        lc
-------  --------                          -----               ----------          ---------   ------
-1       not1.barr1                        active              e4:c7:22:0c:67:c1   Admin       None
-2       foo1.bar1.bazz1                   active              e4:c7:22:0c:67:c2   Ethernet    f2e
-3       foo2.bar2.bazz2                   active              e4:c7:22:0c:67:c3   Ethernet    f2e
-
-```
-
-**Help:** execute the command "show vdc"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show forwarding adjacency
-
-**Output:**
-```
-IPv4 adjacency information
-
-next-hop         rewrite info    interface    Origin AS  Peer AS  Neighbor
--------------- --------------- ------------- ---------- --------- --------------
-10.111.1.3      cc16.7c1f.9852 Vlan10
-10.111.1.4      cc16.7c1f.6900 Vlan10
-10.111.1.5      84b8.025a.f786 Vlan10
-10.111.1.6      a89d.2121.bc7b Vlan10
-10.5.111.213    0050.528c.5b4c Vlan182
-10.5.111.221    002a.6312.6ac1 Vlan182
-10.111.254.6    002a.6312.6ac1 Vlan254
-10.6.140.234    000e.b6b2.ff01 Ethernet1/16
-10.6.140.238    54a2.72da.b651 Ethernet1/16
-```
-
-**Help:** execute the command "show forwarding adjacency"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip ospf neighbor
-
-**Output:**
-```
-router1# sh ip ospf neighbors vrf all 
- OSPF Process ID 1111 VRF CUSTVRF1
- Total number of neighbors: 3
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.1          1 FULL/ -          8w6d     11.11.11.11     Vlan999 
- 10.0.0.2          1 FULL/ -          5w6d     22.22.22.22     Po1 
- 10.0.0.3          1 FULL/ -          5w6d     44.44.44.44     Po2 
- OSPF Process ID 2222 VRF CUSTVRF2
- Total number of neighbors: 1
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.4          1 FULL/ -          8w6d     55.55.55.55     Vlan1000 
- OSPF Process ID 3333 VRF CUSTVRF2
- Total number of neighbors: 2
- Neighbor ID     Pri State            Up Time  Address         Interface
- 10.0.0.5          1 FULL/ -          7w2d     66.66.66.66     Po3 
- 10.0.0.6          1 INIT/DROTHER     -        77.77.77.77     Po4 
-
-```
-
-**Help:** execute the command "show ip ospf neighbor"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip bgp summary vrf
-
-**Output:**
-```
-BGP summary information for VRF AMB, address family IPv4 Unicast
- 
- BGP summary information for VRF AMB, address family IPv6 Unicast
- 
-BGP summary information for VRF BLU, address family IPv4 Unicast
-BGP router identifier 172.16.101.101, local AS number 65161
-BGP table version is 2301549, IPv4 Unicast config peers 1, capable peers 1
-827 network entries and 1406 paths using 105308 bytes of memory
-BGP attribute entries [107/18404], BGP AS path entries [26/272]
- BGP community entries [0/0], BGP clusterlist entries [6/24]
- 
-Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.25.113.1     4 65001 21968368 22451737  2301549    0    0    24w2d 0        
- 
-BGP summary information for VRF BLU, address family IPv6 Unicast
- 
-BGP summary information for VRF GRN, address family IPv4 Unicast
- 
-BGP summary information for VRF GRN, address family IPv6 Unicast
- 
-BGP summary information for VRF GRY, address family IPv4 Unicast
- 
-BGP summary information for VRF GRY, address family IPv6 Unicast
- 
-BGP summary information for VRF NPE, address family IPv4 Unicast
- 
-BGP summary information for VRF NPE, address family IPv6 Unicast
- 
-BGP summary information for VRF RED, address family IPv4 Unicast
- 
-BGP summary information for VRF RED, address family IPv6 Unicast
- 
-BGP summary information for VRF TRI, address family IPv4 Unicast
-BGP router identifier 172.16.101.123, local AS number 65161
-BGP table version is 8526, IPv4 Unicast config peers 1, capable peers 1
-55 network entries and 102 paths using 9940 bytes of memory
- BGP attribute entries [11/1892], BGP AS path entries [8/80]
-BGP community entries [0/0], BGP clusterlist entries [6/24]
- 
-Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-10.23.1.74      4 65171 3078819 3074406     8526    0    0     2w5d 24    
- 
-BGP summary information for VRF TRI, address family IPv6 Unicast
- 
-BGP summary information for VRF default, address family IPv4 Unicast
-BGP router identifier 172.16.101.37, local AS number 65161
-BGP table version is 14450, IPv4 Unicast config peers 5, capable peers 5
-36 network entries and 56 paths using 11184 bytes of memory
-BGP attribute entries [24/4128], BGP AS path entries [13/102]
-BGP community entries [0/0], BGP clusterlist entries [6/24]
- 
-Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-172.16.14.2     4 65164 8429603 8531693    14450    0    0    1d08h 2        
-172.16.31.1     4 65191 8081582 8260415    14450    0    0     1w0d 2        
-172.16.31.17    4 65193 8167842 8348036    14450    0    0     1w0d 2        
-172.16.102.2    4 65161 1166456 1165743    14450    0    0     2y0w 28       
-172.16.151.2    4 65162 1074723 1073151    14450    0    0     1w1d 18       
- 
-BGP summary information for VRF default, address family IPv6 Unicast
- 
-BGP summary information for VRF default, address family VPNv4 Unicast
- 
-BGP summary information for VRF default, address family VPNv6 Unicast
- 
-BGP summary information for VRF default, address family IPv4 MVPN
- 
-BGP summary information for VRF default, address family IPv6 MVPN
- 
-BGP summary information for VRF default, address family L2VPN EVPN
-BGP router identifier 172.16.101.37, local AS number 65161
-BGP table version is 63025110, L2VPN EVPN config peers 7, capable peers 7
-4630 network entries and 8017 paths using 1210960 bytes of memory
-BGP attribute entries [796/136912], BGP AS path entries [31/334]
-BGP community entries [0/0], BGP clusterlist entries [6/24]
- 
-Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
-172.23.129.240  4 65191 8081498 8246843 63025110    0    0     1w0d 6        
-172.23.133.240  4 65193 8167863 8334538 63025110    0    0     1w0d 6        
-172.16.101.33   4 65161 40997672 23273121 63025110    0    0    2y11w 1782     
-172.16.101.34   4 65161 40992491 23273008 63025110    0    0    2y11w 1782     
-172.16.201.37   4 65162 23261970 26520909 63025110    0    0     1w1d 698      
-172.16.201.38   4 65162 23309853 26564632 63025110    0    0     2y2w 698      
-172.16.255.42   4 65164 20901792 21346308 63025110    0    0    1d08h 14       
- 
-Neighbor        T    AS PfxRcd     Type-2     Type-3     Type-4     Type-5   
-172.23.129.240  I 65191 6          0          0          0          6        
-172.23.133.240  I 65193 6          0          0          0          6        
-172.16.101.33   I 65161 1782       1434       14         0          334      
-172.16.101.34   I 65161 1782       1434       14         0          334      
-172.16.201.37   E 65162 698        481        7          0          210      
-172.16.201.38   E 65162 698        481        7          0          210      
-172.16.255.42   I 65164 14         0          0          0          14
-
-
-Value Filldown VRF (\S+)
- Value Filldown ADDRESS_FAMILY (\S+\s\S+)
-Value Filldown ROUTER_ID (\d+?\ .\d+?\.\d+?\.\d+?)
-Value Filldown LOCAL_AS (\d+)
-Value Required BGP_NEIGH (\d+?\.\d+?\.\d+?\.\d+?)
-Value BGP_VER (\d)
-Value Required NEIGH_AS (\S+)
-Value MSG_RCVD (\d+)
-Value MSG_SENT (\d+)
-Value TBLVER (\d+)
- Value IN_QUEUE (\d+)
-Value OUT_QUEUE (\d+)
-Value UP_DOWN (\S+)
-Value STATE_PFXRCD (\S+?\s+\S+?|\S+?)
-
-```
-
-**Help:** execute the command "show ip bgp summary vrf"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show fex
-
-**Output:**
-```
-
-  FEX         FEX           FEX              FEX              Fex
-Number    Description      State            Model            Serial
-------------------------------------------------------------------------
-102      ATL1-AS3P                Online   N2K-C2248TP-E-1GE   SSI16340AR0
-103      ATL1-AS5P                Online   N2K-C2248TP-E-1GE   SSI16350CPC
-104      ATL1-AS7P                Online   N2K-C2248TP-E-1GE   SSI16340AKE
-105      ATL1-AS9P                Online   N2K-C2248TP-E-1GE   SSI16350BJ9
-121    ATL1-AS1PR2                Online   N2K-C2248TP-E-1GE   SSI165102M7
-122    ATL1-AS3PR2 test           Online   N2K-C2248TP-E-1GE   SSI16460ARS
-123    ATL1-AS3PR2 test test      Online   N2K-C2248TP-E-1GE   SSI16460AR1
-124    ATL1-AS3PR2  Test          Online   N2K-C2248TP-E-1GE   SSI16460AR2
-125    ATL1-AS3PR2 Test  test     Online   N2K-C2248TP-E-1GE   SSI16460AR3
-
-
-```
-
-**Help:** execute the command "show fex"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show environment temperature
-
-**Output:**
-```
-
-
-Temperature
--------------------------------------------------------------------------
-Module  Sensor             MajorThresh   MinorThres   CurTemp     Status
-                            (Celsius)     (Celsius)   (Celsius)         
--------------------------------------------------------------------------
-1       ASIC                101           95           52          ok          
-1       Front-Middle(D1)    62            56           38          ok          
-1       Front-Left  (D2)    52            44           33          ok          
-1       Back        (D3)    48            42           28          ok
-
-```
-
-**Help:** execute the command "show environment temperature"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show vlan
-
-**Output:**
-```
-
-VLAN Name                             Status    Ports
----- -------------------------------- --------- -------------------------------
-1    default                          active    Po1, Eth1/53, Eth1/54
-
-VLAN Type         Vlan-mode
----- -----        ----------
-1    enet         CE
-
-Remote SPAN VLANs
--------------------------------------------------------------------------------
-
-Primary  Secondary  Type             Ports
--------  ---------  ---------------  -------------------------------------------
-
-
-
-
-```
-
-**Help:** execute the command "show vlan"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip dhcp relay address
-
-**Output:**
-```
- Interface        Relay Address     VRF Name
- -------------    -------------     --------
-
- Vlan100           10.40.15.152      my_vrf
- Vlan100           10.40.10.162
- Vlan200           10.40.15.152
- Vlan200           10.40.10.162
- Ethernet1         10.40.15.152
- Ethernet1         10.40.10.162      my_vrf2
- Ethernet1/1       10.40.15.152
- Ethernet1/1       10.40.10.162
- Ethernet1/1.1     10.40.15.152
- Ethernet1/1.1     10.40.10.162
-```
-
-**Help:** execute the command "show ip dhcp relay address"
 
 **Prompt:**
 - cisco_nxos>
@@ -2087,459 +1637,9 @@ Primary  Secondary  Type             Ports
 **Output:**
 ```
 n9k1 
-
 ```
 
 **Help:** execute the command "show hostname"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip interface brief
-
-**Output:**
-```
-IP Interface Status for VRF "default"(1)
-Interface            IP Address      Interface Status
-
-IP Interface Status for VRF "management"(2)
-Interface            IP Address      Interface Status
-mgmt0                10.205.143.20   protocol-up/link-up/admin-up       
-
-```
-
-**Help:** execute the command "show ip interface brief"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show vrf
-
-**Output:**
-```
-VRF-Name                           VRF-ID State   Reason
-VPC_KEEPALIVE                           3 Up      --
-default                                 1 Up      --
-VRF1                                    4 Up      --
-VRF2                                    7 Up      --
-VRF-NAME-3                              8 Up      --
-VRF_NAME_4                              5 Up      --
-VRFNAME5                                6 Up      --
-management                              2 Up      --
-```
-
-**Help:** execute the command "show vrf"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip ospf database
-
-**Output:**
-```
-OSPF Router with ID (50.50.50.50) (Process ID p1)
- 
-Router Link States (Area 0)
- 
-Link ID ADV Router Age Seq# Checksum Link Count
-40.40.40.40 40.40.40.40 930 0x80000004 0x2ea1 3
-50.50.50.50 50.50.50.50 935 0x80000002 0x8b52 1
-60.60.60.60 60.60.60.60 943 0x800003c5 0x9854 2
- 
-Network Link States (Area 0)
- 
-Link ID ADV Router Age Seq# Checksum
-209.165.201.3 60.60.60.60 944 0x80000001 0x7179
- 192.0.2.1 50.50.50.50 935 0x80000001 0x516a
- 
-Summary Network Link States (Area 0)
- 
-Link ID ADV Router Age Seq# Checksum
-209.165.201.1 40.40.40.40 929 0x80000001 0x2498
-209.165.201.1 50.50.50.50 928 0x80000001 0x5b2f
-209.165.201.1 60.60.60.60 1265 0x800003c3 0xf49b
-192.0.2.0 40.40.40.40 943 0x80000001 0x53f3
- 192.0.2.0 50.50.50.50 935 0x80000001 0x26f8
-192.0.2.0 60.60.60.60 930 0x80000001 0x7b51
-```
-
-**Help:** execute the command "show ip ospf database"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show route-map
-
-**Output:**
-```
-route-map RM-TEST-OUT, permit, sequence 10 
-  Match clauses:
-    as-path (as-path filter): AS-TEST 
-  Set clauses:
-route-map RM-BGP-TO-OSPF, deny, sequence 10 
-  Match clauses:
-    tag: 12345
-  Set clauses:
-route-map RM-BGP-TO-OSPF, permit, sequence 20 
-  Match clauses:
-  Set clauses:
-route-map RM-ISP1-IN, permit, sequence 1000 
-  Match clauses:
-  Set clauses:
-    local-preference 300
-route-map RM-ISP1-OUT, permit, sequence 1000 
-  Match clauses:
-    as-path (as-path filter): AS-ISP2 
-  Set clauses:
-route-map RM-ISP1-MAITENANCE, permit, sequence 10 
-  Match clauses:
-  Set clauses:
-    local-preference 50
-route-map RM-FW-LP, permit, sequence 10 
-  Match clauses:
-  Set clauses:
-    local-preference 25
-route-map RM-FW-MAITENANCE, permit, sequence 10 
-  Match clauses:
-  Set clauses:
-route-map RM-FW-OUTBOUND, permit, sequence 10 
-  Match clauses:
-    as-path (as-path filter): TEST-AS-FW 
-  Set clauses:
-
-route-map RM-X-SIDE-INTERNAL, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PF-PATH-X-INTERNAL 
-  Set clauses:
-route-map RM-Z-SIDE-INTERNAL, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PF-PATH-Z-INTERNAL 
-  Set clauses:
- route-map RM-FILTER-IN, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PL-PERMIT-IN 
-  Set clauses:
-route-map TEST_THIS, permit, sequence 10 
-  Match clauses:
-    ip address (access-lists): AL_TEST_TEST 
-  Set clauses:
-    ip next-hop 2.2.2.2 
-route-map RM-N3K1-TO-N3K2, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PF-N3K1-TO-N3K2 
-  Set clauses:
-    extcommunity RT:100:1
-route-map RM-N3K2-TO-N3K1, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PF-N3K2-TO-N3K1 
-  Set clauses:
-    extcommunity RT:200:1
-route-map RM-PATH-A-DEFAULT-ROUTE, permit, sequence 10 
-  Match clauses:
-    ip address prefix-lists: PF-A-DEFAULT-ROUTE 
-  Set clauses:
-
-```
-
-**Help:** execute the command "show route-map"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface brief
-
-**Output:**
-```
---------------------------------------------------------------------------------
-Ethernet      VLAN   Type Mode   Status  Reason                   Speed     Port
-Interface                                                                   Ch #
---------------------------------------------------------------------------------
-Eth1/1        150     eth  access down    Link not connected         auto(D) --
-Eth1/2        150     eth  access down    Link not connected         auto(D) --
-Eth1/3        150     eth  access down    Link not connected         auto(D) --
-Eth1/4        150     eth  access down    Link not connected         auto(D) --
-Eth1/5        150     eth  access down    Link not connected         auto(D) --
-Eth1/6        150     eth  access down    Link not connected         auto(D) --
-Eth1/7        150     eth  access down    Link not connected         auto(D) --
-Eth1/8        150     eth  access down    Link not connected         auto(D) --
-Eth1/9        150     eth  access down    Link not connected         auto(D) --
-Eth1/10       150     eth  access down    Link not connected         auto(D) --
-Eth1/11       150     eth  access down    Link not connected         auto(D) --
-Eth1/12       150     eth  access down    Link not connected         auto(D) --
-Eth1/13       150     eth  access down    Link not connected         auto(D) --
-Eth1/14       150     eth  access down    Link not connected         auto(D) --
-Eth1/15       150     eth  access down    Link not connected         auto(D) --
-Eth1/16       150     eth  access down    Link not connected         auto(D) --
-Eth1/17       150     eth  access down    Link not connected         auto(D) --
-Eth1/18       150     eth  access down    Link not connected         auto(D) --
-Eth1/19       150     eth  access down    Link not connected         auto(D) --
-Eth1/20       150     eth  access down    Link not connected         auto(D) --
-Eth1/21       150     eth  access down    Link not connected         auto(D) --
-Eth1/22       150     eth  access down    Link not connected         auto(D) --
-Eth1/23       150     eth  access down    Link not connected         auto(D) --
-Eth1/24       150     eth  access down    Link not connected         auto(D) --
-Eth1/25       150     eth  access down    Link not connected         auto(D) --
-Eth1/26       150     eth  access down    Link not connected         auto(D) --
-Eth1/27       150     eth  access down    Link not connected         auto(D) --
-Eth1/28       150     eth  access down    Link not connected         auto(D) --
-Eth1/29       150     eth  access down    Link not connected         auto(D) --
-Eth1/30       150     eth  access down    Link not connected         auto(D) --
-Eth1/31       140     eth  access down    Link not connected         auto(D) --
-Eth1/32       140     eth  access down    Link not connected         auto(D) --
-Eth1/33       140     eth  access down    Link not connected         auto(D) --
-Eth1/34       140     eth  access down    Link not connected         auto(D) --
-Eth1/35       140     eth  access down    Link not connected         auto(D) --
-Eth1/36       140     eth  access down    Link not connected         auto(D) --
-Eth1/37       140     eth  access down    Link not connected         auto(D) --
-Eth1/38       140     eth  access down    Link not connected         auto(D) --
-Eth1/39       140     eth  access down    Link not connected         auto(D) --
-Eth1/40       140     eth  access down    Link not connected         auto(D) --
-Eth1/41       140     eth  access down    Link not connected         auto(D) --
-Eth1/42       140     eth  access down    Link not connected         auto(D) --
-Eth1/43       140     eth  access down    Link not connected         auto(D) --
-Eth1/44       140     eth  access down    Link not connected         auto(D) --
-Eth1/45       140     eth  access down    Link not connected         auto(D) --
-Eth1/46       140     eth  access down    Link not connected         auto(D) --
-Eth1/47       140     eth  access down    Link not connected         auto(D) --
-Eth1/48       140     eth  access down    Link not connected         auto(D) --
-Eth1/49       1       eth  trunk  up      none                        10G(D) 1
-Eth1/50       1       eth  trunk  down    SFP not inserted            10G(D) 1
-Eth1/51       1       eth  access down    SFP not inserted            10G(D) --
-Eth1/52       1       eth  access down    SFP not inserted            10G(D) --
-
---------------------------------------------------------------------------------
- Port-channel VLAN    Type Mode   Status  Reason                    Speed   Protocol
-Interface
---------------------------------------------------------------------------------
-Po1          1       eth  trunk  up      none                       a-10G(D)  lacp
-
---------------------------------------------------------------------------------
-Port   VRF          Status IP Address                              Speed    MTU
---------------------------------------------------------------------------------
-mgmt0  --           down   --                                      --       1500
-
--------------------------------------------------------------------------------
- Interface Secondary VLAN(Type)                    Status Reason
--------------------------------------------------------------------------------
-Vlan1     --                                      down   Administratively down
-Vlan142   --                                      up     --
-```
-
-**Help:** execute the command "show interface brief"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface status
-
-**Output:**
-```
---------------------------------------------------------------------------------
-Port          Name               Status    Vlan      Duplex  Speed   Type
---------------------------------------------------------------------------------
-mgmt0         --                 notconnec routed    auto    auto    --         
-
---------------------------------------------------------------------------------
-Port          Name               Status    Vlan      Duplex  Speed   Type
---------------------------------------------------------------------------------
-Eth1/1        --                 connected trunk     full    1000    1000base-T 
-Eth1/2        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/3        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/4        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/5        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/6        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/7        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/8        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/9        --                 xcvrAbsen 1         auto    auto    --         
-Eth1/10       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/11       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/12       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/13       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/14       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/15       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/16       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/17       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/18       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/19       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/20       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/21       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/22       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/23       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/24       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/25       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/26       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/27       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/28       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/29       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/30       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/31       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/32       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/33       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/34       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/35       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/36       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/37       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/38       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/39       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/40       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/41       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/42       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/43       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/44       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/45       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/46       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/47       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/48       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/49       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/50       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/51       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/52       --                 xcvrAbsen 1         auto    auto    --         
-Eth1/53       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
-Eth1/54       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
-
-```
-
-**Help:** execute the command "show interface status"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip mroutes vrf all
-
-**Output:**
-```
-IP Multicast Routing Table for VRF "default"
-
-(*, 225.1.0.1/32), uptime: 2w3d, igmp ip pim
-  Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
-  Outgoing interface list: (count: 1)
-    Ethernet1/3, uptime: 2w3d, igmp
- 
-
-(10.1.13.10/32, 225.1.0.1/32), uptime: 06:33:34, ip mrib pim
-  Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
-  Outgoing interface list: (count: 1)
-    Ethernet1/3, uptime: 06:33:34, mrib
-
-
-(*, 232.0.0.0/8), uptime: 2w3d, pim ip
-  Incoming interface: Null, RPF nbr: 0.0.0.0
-  Outgoing interface list: (count: 0)
-
-```
-
-**Help:** execute the command "show ip mroutes vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show cdp neighbors detail
-
-**Output:**
-```
-----------------------------------------
-Device ID:MKT1
-
-Interface address(es): 0
-Platform: MikroTik, Capabilities: Router
-Interface: Ethernet1/1, Port ID (outgoing port): ether1
-Holdtime: 61 sec
-
-Version:
-6.47.10 (long-term)
- 
-Advertisement Version: 1
-Local Interface MAC: b1:81:d1:d1:a1:11
-Remote Interface MAC: 00:00:00:00:00:00
-
-```
-
-**Help:** execute the command "show cdp neighbors detail"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show feature
-
-**Output:**
-```
-Feature Name          Instance  State
---------------------  --------  --------
-bash-shell             1          enabled
-bfd                    1          disabled
-bgp                    1          disabled
-dhcp                   1          disabled
-eigrp                  1          disabled
-eigrp                  2          disabled
-eigrp                  3          disabled
-eigrp                  4          disabled
-eigrp                  5          disabled
-eigrp                  6          disabled
-eigrp                  7          disabled
-eigrp                  8          disabled
-eigrp                  9          disabled
-eigrp                  10         disabled
-eigrp                  11         disabled
-eigrp                  12         disabled
-eigrp                  13         disabled
-eigrp                  14         disabled
-eigrp                  15         disabled
-eigrp                  16         disabled
-evmed                  1          disabled
-fabric_mcast           1          disabled
-hmm                    1          disabled
-hsrp_engine            1          enabled
-interface-vlan         1          enabled
-isis                   1          disabled
-isis                   2          disabled
-isis                   3          disabled
-isis                   4          disabled
-isis                   5          disabled
-isis                   6          disabled
-isis                   7          disabled
-isis                   8          disabled
-isis                   9          disabled
-isis                   10         disabled
-isis                   11         disabled
-isis                   12         disabled
-isis                   13         disabled
-isis                   14         disabled
-isis                   15         disabled
-isis                   16         disabled
-itd                    1          disabled
-lacp                   1          enabled
-ldap                   1          disabled
-ldp                    1          disabled
-lldp                   1          enabled
-mpls_static            1          disabled
-msdp                   1          disabled
-nat                    1          disabled
-ospf                   1          enabled (not-running)
-ospf                   2          enabled
-ospf                   3          enabled
-ospf                   4          enabled (not-running)
-ospf                   5          enabled (not-running)
-ospf                   6          enabled (not-running)
-ospf                   7          enabled (not-running)
-ospf                   8          enabled (not-running)
-ospf                   9          enabled (not-running)
-ospf                   10         enabled (not-running)
-ospf                   11         enabled (not-running)
-ospf                   12         enabled (not-running)
-ospf                   13         enabled (not-running)
-
-```
-
-**Help:** execute the command "show feature"
 
 **Prompt:**
 - cisco_nxos>
@@ -2733,223 +1833,9 @@ Vlan420 - Group 420 (HSRP-V2) (IPv4)
   Virtual mac address is 0000.0c9f.ff50 (Default MAC)
   103 state changes, last state change 21w5d
   IP redundancy name is hsrp-Vlan420-420 (default)
-
 ```
 
 **Help:** execute the command "show hsrp all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show inventory
-
-**Output:**
-```
-NAME: "Chassis",  DESCR: "Nexus9000 C9396PX Chassis"
-PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
-
-NAME: "Slot 1",  DESCR: "1/10G SFP+ Ethernet Module"
-PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
- 
-NAME: "Slot 2",  DESCR: "40G Ethernet Expansion Module"
-PID: N9K-M12PQ           ,  VID: V01 ,  SN: SAL1815QCJE
-
-NAME: "Power Supply 1",  DESCR: "Nexus9000 C9396PX Chassis Power Supply"
-PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07E
-
-NAME: "Power Supply 2",  DESCR: "Nexus9000 C9396PX Chassis Power Supply"
-PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07H
- 
-NAME: "Fan 1",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
-PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
-
-NAME: "Fan 2",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
-PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
-
-NAME: "Fan 3",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
-PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
-
-NAME: "Slot 33", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
-PID: N7K-AC-6.0KW, VID: V01, SN: DTM141600XT
- 
-NAME: "Slot 34", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
-PID: N7K-AC-6.0KW, VID: V01, SN: DTM1414007T
- 
-NAME: "Slot 35", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Fan Module"
-PID: N7K-C7009-FAN, VID: V00, SN: JAF1433DDEJ
-
-NAME: Ethernet1/46,  DESCR: CISCO-AVAGO
-PID: 10Gbase-SR          ,  VID: SFBR-709SMZ-CS1,  SN: AVD42309ABD
-
-NAME: Ethernet1/47,  DESCR: CISCO
-PID: 1000base-LH         ,  VID: RTXM191-404-C88,  SN: ACW315000AD
- 
-NAME: Ethernet1/48,  DESCR: CISCO-AVAGO
-PID: 10Gbase-LR          ,  VID: SFCT-739SMZ,  SN: AVD2219K9AO
-
-```
-
-**Help:** execute the command "show inventory"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface transceiver details
-
-**Output:**
-```
-Ethernet3/1
-    transceiver is present
-    type is 10Gbase-SR
-    name is CISCO-FINISAR   
-    part number is FTLX8571D3BCL-C2
-    revision is A   
-    serial number is FNS18510TXL     
-    nominal bitrate is 10300 MBit/sec
-    Link length supported for 50/125um OM2 fiber is 82 m
-    Link length supported for 62.5/125um fiber is 26 m
-    Link length supported for 50/125um OM3 fiber is 300 m
-    cisco id is --
-    cisco extended id number is 4
-    cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR          
-    cisco vendor id is V03 
-    number of lanes 1
-
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Temperature   35.66 C        75.00 C     -5.00 C     70.00 C        0.00 C
-  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
-  Current           N/A        11.80 mA     4.00 mA    10.80 mA       5.00 mA
-  Tx Power     -14.05 dBm --    1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
-  Rx Power     -30.45 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
-  Transmit Fault Count = 0
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
-Ethernet3/2
-    transceiver is present
-    type is 10Gbase-SR
-    name is CISCO-FINISAR   
-    part number is FTLX8571D3BCL-C2
-    revision is A   
-    serial number is FNS18510TXV     
-    nominal bitrate is 10300 MBit/sec
-    Link length supported for 50/125um OM2 fiber is 82 m
-    Link length supported for 62.5/125um fiber is 26 m
-    Link length supported for 50/125um OM3 fiber is 300 m
-    cisco id is --
-    cisco extended id number is 4
-    cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR          
-    cisco vendor id is V03 
-    number of lanes 1
-
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Temperature   38.28 C        75.00 C     -5.00 C     70.00 C        0.00 C
-  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
-  Current        0.43 mA  --   11.80 mA     4.00 mA    10.80 mA       5.00 mA
-  Tx Power     -16.19 dBm --    1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
-  Rx Power     -33.97 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
-  Transmit Fault Count = 0
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
-Ethernet3/3
-    transceiver is present
-    type is 10Gbase-SR
-    name is CISCO-FINISAR   
-    part number is FTLX8571D3BCL-C2
-    revision is A   
-    serial number is FNS18510TYD     
-    nominal bitrate is 10300 MBit/sec
-    Link length supported for 50/125um OM2 fiber is 82 m
-    Link length supported for 62.5/125um fiber is 26 m
-    Link length supported for 50/125um OM3 fiber is 300 m
-    cisco id is --
-    cisco extended id number is 4
-    cisco part number is 10-2415-03
-    cisco product id is SFP-10G-SR          
-    cisco vendor id is V03 
-    number of lanes 1
-
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Temperature   37.07 C        75.00 C     -5.00 C     70.00 C        0.00 C
-  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
-  Current        0.21 mA  --   11.80 mA     4.00 mA    10.80 mA       5.00 mA
-  Tx Power          N/A         1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
-  Rx Power     -33.97 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
-  Transmit Fault Count = 0
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
-Ethernet4/1
-    transceiver is present
-    type is CFP-100G-LR4
-    name is CISCO           
-    part number is SCF1001L4CNC101 
-    revision is 11
-    serial number is ECL190200BA     
-    nominal bitrate is 129 MBit/sec per channel
-    Link length supported for 9/125um fiber is 10 km
-    cisco id is --
-    cisco extended id number is 85
-    cisco part number is 10-2549-02
-    cisco product id is CFP-100G-LR4    
-    cisco vendor id is V02 
-    number of lanes 3
-
-Lane Number:1 Common Diagnostic Information
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Temperature   40.44 C        74.00 C     -4.00 C     70.00 C        0.00 C
-  Voltage        3.28 V         3.66 V      2.93 V      3.46 V        3.13 V
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
- Lane Number:2 Network Lane
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Tx Power       0.76 dBm       7.49 dBm   -8.30 dBm    4.49 dBm     -4.30 dBm
-  Rx Power      -1.77 dBm       7.49 dBm  -14.60 dBm    4.49 dBm    -10.59 dBm
-  Transmit Fault Count = 0
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
- Lane Number:3 Network Lane
-           SFP Detail Diagnostics Information (internal calibration)
-  ----------------------------------------------------------------------------
-                Current              Alarms                  Warnings
-                Measurement     High        Low         High          Low
-  ----------------------------------------------------------------------------
-  Tx Power       0.44 dBm       7.49 dBm   -8.30 dBm    4.49 dBm     -4.30 dBm
-  Rx Power      -1.57 dBm       7.49 dBm  -14.60 dBm    4.49 dBm    -10.59 dBm
-  Transmit Fault Count = 0
-  ----------------------------------------------------------------------------
-  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
-
-```
-
-**Help:** execute the command "show interface transceiver details"
 
 **Prompt:**
 - cisco_nxos>
@@ -3017,7 +1903,6 @@ Ethernet106/1/1 is down (Link not connected)
     0 output error  0 collision  0 deferred  0 late collision
     0 lost carrier  0 no carrier  0 babble 0 output discard
     0 Tx pause
-
 ```
 
 **Help:** execute the command "show interface"
@@ -3026,176 +1911,524 @@ Ethernet106/1/1 is down (Link not connected)
 - cisco_nxos>
 - cisco_nxos#
 
-### show ip interface
+### show interface breakout
 
 **Output:**
 ```
-IP Interface Status for VRF "default"
-Vlan156, Interface status: protocol-down/link-down/admin-up, iod: 2,
-  IP address: 155.155.155.1, IP subnet: 155.155.155.0/30 route-preference: 0, tag: 0 
-  IP broadcast address: 255.255.255.255
-  IP multicast groups locally joined: none
-  IP MTU: 1500 bytes (using link MTU)
-  IP primary address route-preference: 0, tag: 0
-  IP proxy ARP : disabled
-  IP Local Proxy ARP : disabled
-  IP multicast routing: disabled
-  IP icmp redirects: enabled
-  IP directed-broadcast: disabled 
-  IP Forwarding: disabled 
-  IP icmp unreachables (except port): disabled
-  IP icmp port-unreachable: enabled
-  IP unicast reverse path forwarding: none
-  IP load sharing: none 
-  IP interface statistics last reset: never
-  IP interface software stats: (sent/received/forwarded/originated/consumed)
-    Unicast packets    : 0/0/0/0/0
-    Unicast bytes      : 0/0/0/0/0
-    Multicast packets  : 0/0/0/0/0
-    Multicast bytes    : 0/0/0/0/0
-    Broadcast packets  : 0/0/0/0/0
-    Broadcast bytes    : 0/0/0/0/0
-    Labeled packets    : 0/0/0/0/0
-    Labeled bytes      : 0/0/0/0/0
-Ethernet1/5, Interface status: protocol-down/link-down/admin-up, iod: 15,
-  IP address: 10.1.0.1, IP subnet: 10.1.0.0/30 route-preference: 0, tag: 0 
-  IP broadcast address: 255.255.255.255
-  IP multicast groups locally joined: none
-  IP MTU: 1500 bytes (using link MTU)
-  IP primary address route-preference: 0, tag: 0
-  IP proxy ARP : disabled
-  IP Local Proxy ARP : disabled
-  IP multicast routing: disabled
-  IP icmp redirects: enabled
-  IP directed-broadcast: disabled 
-  IP Forwarding: disabled 
-  IP icmp unreachables (except port): disabled
-  IP icmp port-unreachable: enabled
-  IP unicast reverse path forwarding: none
-  IP load sharing: none 
-  IP interface statistics last reset: never
-  IP interface software stats: (sent/received/forwarded/originated/consumed)
-    Unicast packets    : 0/0/0/0/0
-    Unicast bytes      : 0/0/0/0/0
-    Multicast packets  : 0/0/0/0/0
-    Multicast bytes    : 0/0/0/0/0
-    Broadcast packets  : 0/0/0/0/0
-    Broadcast bytes    : 0/0/0/0/0
-    Labeled packets    : 0/0/0/0/0
-    Labeled bytes      : 0/0/0/0/0
 
+--------------------------------------------------------------------------------
+Parent                     Breakout Map    Breakout Ports
+--------------------------------------------------------------------------------
+Eth1/2                     10g-4x          Eth1/2/1-4
+Eth1/3                     10g-4x          Eth1/3/1-4
+Eth1/4                     10g-4x          Eth1/4/1-4
+Eth1/5                     10g-4x          Eth1/5/1-4
+Eth1/6                     10g-4x          Eth1/6/1-4
+Eth1/11                    10g-4x          Eth1/11/1-4
+Eth1/13                    10g-4x          Eth1/13/1-4
+Eth1/14                    10g-4x          Eth1/14/1-4
+Eth1/16                    10g-4x          Eth1/16/1-4
+Eth1/19                    10g-4x          Eth1/19/1-4
+Eth1/22                    10g-4x          Eth1/22/1-4
 ```
 
-**Help:** execute the command "show ip interface"
+**Help:** execute the command "show interface breakout"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show bgp vrf all ipv4 unicast detail
+### show interface brief
 
 **Output:**
 ```
-BGP routing table information for VRF TEST_1, address family IPv4 Unicast
- BGP routing table entry for 10.1.1.0/24, version 3446
-Paths: (1 available, best #0)
-Flags: (0x8000002) (high32 00000000) on xmit-list, is not in urib, is not in HW
+--------------------------------------------------------------------------------
+Ethernet      VLAN   Type Mode   Status  Reason                   Speed     Port
+Interface                                                                   Ch #
+--------------------------------------------------------------------------------
+Eth1/1        150     eth  access down    Link not connected         auto(D) --
+Eth1/2        150     eth  access down    Link not connected         auto(D) --
+Eth1/3        150     eth  access down    Link not connected         auto(D) --
+Eth1/4        150     eth  access down    Link not connected         auto(D) --
+Eth1/5        150     eth  access down    Link not connected         auto(D) --
+Eth1/6        150     eth  access down    Link not connected         auto(D) --
+Eth1/7        150     eth  access down    Link not connected         auto(D) --
+Eth1/8        150     eth  access down    Link not connected         auto(D) --
+Eth1/9        150     eth  access down    Link not connected         auto(D) --
+Eth1/10       150     eth  access down    Link not connected         auto(D) --
+Eth1/11       150     eth  access down    Link not connected         auto(D) --
+Eth1/12       150     eth  access down    Link not connected         auto(D) --
+Eth1/13       150     eth  access down    Link not connected         auto(D) --
+Eth1/14       150     eth  access down    Link not connected         auto(D) --
+Eth1/15       150     eth  access down    Link not connected         auto(D) --
+Eth1/16       150     eth  access down    Link not connected         auto(D) --
+Eth1/17       150     eth  access down    Link not connected         auto(D) --
+Eth1/18       150     eth  access down    Link not connected         auto(D) --
+Eth1/19       150     eth  access down    Link not connected         auto(D) --
+Eth1/20       150     eth  access down    Link not connected         auto(D) --
+Eth1/21       150     eth  access down    Link not connected         auto(D) --
+Eth1/22       150     eth  access down    Link not connected         auto(D) --
+Eth1/23       150     eth  access down    Link not connected         auto(D) --
+Eth1/24       150     eth  access down    Link not connected         auto(D) --
+Eth1/25       150     eth  access down    Link not connected         auto(D) --
+Eth1/26       150     eth  access down    Link not connected         auto(D) --
+Eth1/27       150     eth  access down    Link not connected         auto(D) --
+Eth1/28       150     eth  access down    Link not connected         auto(D) --
+Eth1/29       150     eth  access down    Link not connected         auto(D) --
+Eth1/30       150     eth  access down    Link not connected         auto(D) --
+Eth1/31       140     eth  access down    Link not connected         auto(D) --
+Eth1/32       140     eth  access down    Link not connected         auto(D) --
+Eth1/33       140     eth  access down    Link not connected         auto(D) --
+Eth1/34       140     eth  access down    Link not connected         auto(D) --
+Eth1/35       140     eth  access down    Link not connected         auto(D) --
+Eth1/36       140     eth  access down    Link not connected         auto(D) --
+Eth1/37       140     eth  access down    Link not connected         auto(D) --
+Eth1/38       140     eth  access down    Link not connected         auto(D) --
+Eth1/39       140     eth  access down    Link not connected         auto(D) --
+Eth1/40       140     eth  access down    Link not connected         auto(D) --
+Eth1/41       140     eth  access down    Link not connected         auto(D) --
+Eth1/42       140     eth  access down    Link not connected         auto(D) --
+Eth1/43       140     eth  access down    Link not connected         auto(D) --
+Eth1/44       140     eth  access down    Link not connected         auto(D) --
+Eth1/45       140     eth  access down    Link not connected         auto(D) --
+Eth1/46       140     eth  access down    Link not connected         auto(D) --
+Eth1/47       140     eth  access down    Link not connected         auto(D) --
+Eth1/48       140     eth  access down    Link not connected         auto(D) --
+Eth1/49       1       eth  trunk  up      none                        10G(D) 1
+Eth1/50       1       eth  trunk  down    SFP not inserted            10G(D) 1
+Eth1/51       1       eth  access down    SFP not inserted            10G(D) --
+Eth1/52       1       eth  access down    SFP not inserted            10G(D) --
 
-  Path type: local, path is invalid(not in urib), no labeled nexthop
-  AS-Path: NONE, path locally originated
-    0.0.0.0 (metric 0) from 0.0.0.0 (10.0.1.1)
-      Origin IGP, MED not set, localpref 100, weight 32768
- 
+--------------------------------------------------------------------------------
+ Port-channel VLAN    Type Mode   Status  Reason                    Speed   Protocol
+Interface
+--------------------------------------------------------------------------------
+Po1          1       eth  trunk  up      none                       a-10G(D)  lacp
 
-BGP routing table information for VRF default, address family IPv4 Unicast
- BGP routing table entry for 0.0.0.0/0, version 461888
-Paths: (2 available, best #1)
-Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
+--------------------------------------------------------------------------------
+Port   VRF          Status IP Address                              Speed    MTU
+--------------------------------------------------------------------------------
+mgmt0  --           down   --                                      --       1500
 
-  Advertised path-id 1
-  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
-  AS-Path: 65111.1233 65111.4566 65111.7899 12345 , path sourced external to AS
-    10.2.2.252 (metric 0) from 10.2.2.252 (10.12.2.100)
-      Origin IGP, MED not set, localpref 5000, weight 0
-      Community: 12345:1111 3000:4444 44444:1111 
-
-  Path type: external, path is valid, not best reason: Local Preference, no labeled nexthop
-  AS-Path: 65111.1233 65111.4566 65111.7899 22222 , path sourced external to AS
-    10.1.1.226 (metric 0) from 10.1.1.226 (10.9.1.100)
-      Origin IGP, MED not set, localpref 4000, weight 0
-      Community: 12345:1111 3000:4444 44444:2222
-
-  Path-id 1 advertised to peers:
-    172.16.251.13  
-BGP routing table entry for 2.22.22.0/27, version 98
-Paths: (1 available, best #1)
-Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
-
-  Advertised path-id 1
-  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
-  AS-Path: 65222.1111 653333 , path sourced external to AS
-    10.3.3.252 (metric 0) from 10.3.3.252 (10.9.1.200)
-      Origin IGP, MED 100, localpref 5000, weight 0
-      Community: 10104:10030 20311:0 41000:11501 
-
-  Path-id 1 advertised to peers:
-    10.3.10.123        10.3.9.234        172.16.10.123  
-BGP routing table entry for 10.10.10.0/24, version 336212
-Paths: (3 available, best #1)
-Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
-
-  Advertised path-id 1
-  Path type: internal, path is valid, is best path, no labeled nexthop, in rib
-  AS-Path: 65444.3444 65444.100 65444.200 , path sourced external to AS
-    10.9.9.252 (metric 0) from 10.9.10.252 (10.16.100.100)
-      Origin IGP, MED not set, localpref 5000, weight 0
-      Aggregated by 172.16.100.100, aggregator AS 65444.3444
-      Community: 100:200 300:400 500:600
-      Extcommunity: RT:33333:2222
-
-  Path type: external, path is valid, not best reason: Local Preference, no labeled nexthop
-  AS-Path: 65444.3444 65444.100 65444.300 , path sourced external to AS
-    10.15.5.214 (metric 0) from 10.15.5.214 (172.16.5.100)
-      Origin IGP, MED not set, localpref 4000, weight 0
-      Aggregated by 172.16.5.100, aggregator AS 65444.500
-      Community: 100:200 300:400 500:700
-      Extcommunity: RT:33333:2222
-
-  Path type: external, path is valid, received only, no labeled nexthop
-  AS-Path: 65108.50007 65108.51000 65108.53002 , path sourced external to AS
-    10.19.9.214 (metric 0) from 10.19.9.214 (172.26.156.121)
-      Origin IGP, MED 100, localpref 100, weight 0
-      Aggregated by 172.26.156.121, aggregator AS 65108.50007
-      Community: 100:200 300:400 500:800
-      Extcommunity: RT:33333:2222
-
-  Path-id 1 advertised to peers:
-    172.16.251.13  
-BGP routing table entry for 10.13.13.0/22, version 450373
-Paths: (2 available, best #1)
-Flags: (0x8008001a) (high32 00000000) on xmit-list, is in urib, is best urib route, is in HW
-
-  Advertised path-id 1
-  Path type: external, path is valid, is best path, no labeled nexthop, in rib
-  AS-Path: 65100.30037 65100.30032 2222 2222 , path sourced external to AS
-    10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
-      Origin IGP, MED not set, localpref 5000, weight 0
-      Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
-      Community: 10308:10030 30006:0 41000:11501 
-
-  Path type: external, path is valid, received only, no labeled nexthop
-  AS-Path: 65100.30037 65100.30032 2222 2222 2222 , path sourced external to AS
-    10.19.19.19 (metric 0) from 10.19.19.19 (172.16.2.2)
-      Origin IGP, MED not set, localpref 100, weight 0
-      Aggregated by 10.9.1.90, aggregator AS 64675, atomic-aggregate set
-      Community: 10308:10030 30006:0 41000:11501 
-
-  Path-id 1 advertised to peers:
-    10.19.10.253 
-
+-------------------------------------------------------------------------------
+ Interface Secondary VLAN(Type)                    Status Reason
+-------------------------------------------------------------------------------
+Vlan1     --                                      down   Administratively down
+Vlan142   --                                      up     --
 ```
 
-**Help:** execute the command "show bgp vrf all ipv4 unicast detail"
+**Help:** execute the command "show interface brief"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface capabilities
+
+**Output:**
+```
+Ethernet1/1
+  Model:                 N5600-48Q-12Q-FIX
+  Type (SFP capable):    QSFP-40G-SR-BD
+  Speed:                 40000
+  Duplex:                full
+  Trunk encap. type:     802.1Q
+  Channel:               yes
+  Broadcast suppression: no
+  Flowcontrol:           rx-(off/on),tx-(off/on)
+  Rate mode:             none
+  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
+  CoS rewrite:           no
+  ToS rewrite:           no
+  SPAN:                  yes
+  UDLD:                  yes
+  MDIX:                  no
+  Link Debounce:         yes
+  Link Debounce Time:    yes
+  dot1Q-tunnel mode:     yes
+  Pvlan Trunk capable:   yes
+  TDR capable:           no
+  FabricPath capable:    yes
+  Port mode:             Switched
+  FEX Fabric:            yes
+
+Ethernet101/1/23
+  Model:                 N2K-C2348TQ-10G-E
+  Type (Non SFP):        1G/10G
+  Speed:                 100,1000,10000,auto
+  Duplex:                full
+  Trunk encap. type:     802.1Q
+  Channel:               yes
+  Broadcast suppression: no
+  Flowcontrol:           rx-(off/on),tx-(off/on)
+  Rate mode:             none
+  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
+  CoS rewrite:           no
+  ToS rewrite:           no
+  SPAN:                  yes
+  UDLD:                  no
+  MDIX:                  no
+  Link Debounce:         yes
+  Link Debounce Time:    yes
+  dot1Q-tunnel mode:     yes
+  Pvlan Trunk capable:   yes
+  TDR capable:           no
+  FabricPath capable:    no
+  Port mode:             Switched
+  FEX Fabric:            no
+```
+
+**Help:** execute the command "show interface capabilities"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface description
+
+**Output:**
+```
+
+-------------------------------------------------------------------------------
+Interface                Description                                            
+-------------------------------------------------------------------------------
+mgmt0                    --
+
+-------------------------------------------------------------------------------
+Port          Type   Speed   Description
+-------------------------------------------------------------------------------
+Eth4/1        eth    10G     --
+Eth4/2        eth    1000    --
+Eth4/3        eth    10G     This is a test description
+Eth4/4        eth    10G     This is a test description
+Eth4/5        eth    10G     This is a test description
+Eth4/6        eth    1000    This is a test description
+Eth4/7        eth    10G     This is a test description
+Eth4/8        eth    1000    This is a test description
+Eth4/9        eth    10G     This is a test description
+Eth4/10       eth    10G     This is a test description
+Eth4/11       eth    10G     This is a test description
+Eth4/12       eth    10G     This is a test description
+Eth4/13       eth    1000    This is a test description
+Eth4/14       eth    10G     --
+Eth4/15       eth    10G     This is a test description
+Eth4/16       eth    10G     This is a test description
+Eth4/17       eth    1000    This is a test description
+Eth4/18       eth    10G     This is a test description
+Eth4/19       eth    1000    This is a test description
+Eth4/20       eth    10G     This is a test description
+Eth4/21       eth    10G     This is a test description
+Eth4/22       eth    10G     This is a test description
+Eth4/23       eth    10G     This is a test description
+Eth4/24       eth    10G     This is a test description
+Eth6/1        eth    10G     This is a description on line card 6
+Eth6/2        eth    10G     This is a description on line card 6
+Eth6/3        eth    1000    This is a description on line card 6
+Eth6/4        eth    1000    This is a description on line card 6
+Eth6/5        eth    10G     This is a description on line card 6
+Eth6/6        eth    1000    This is a description on line card 6
+Eth6/7        eth    10G     This is a description on line card 6
+Eth6/8        eth    10G     This is a description on line card 6
+Eth6/9        eth    10G     This is a description on line card 6
+Eth6/10       eth    10G     This is a description on line card 6
+Eth6/11       eth    10G     This is a description on line card 6
+Eth6/12       eth    10G     This is a description on line card 6
+Eth6/13       eth    10G     This is a description on line card 6
+Eth6/14       eth    10G     This is a description on line card 6
+Eth6/15       eth    10G     This is a description on line card 6
+Eth6/16       eth    1000    This is a description on line card 6
+Eth6/17       eth    10G     This is a description on line card 6
+Eth6/18       eth    1000    This is a description on line card 6
+Eth6/19       eth    10G     This is a description on line card 6
+Eth6/20       eth    10G     This is a description on line card 6
+Eth6/21       eth    10G     This is a description on line card 6
+Eth6/22       eth    10G     This is a description on line card 6
+Eth6/23       eth    10G     This is a description on line card 6
+Eth6/24       eth    10G     This is a description on line card 6
+Eth6/25       eth    1000    This is a description on line card 6
+Eth6/26       eth    1000    This is a description on line card 6
+Eth6/27       eth    10G     This is a description on line card 6
+Eth6/28       eth    1000    This is a description on line card 6
+Eth6/29       eth    10G     This is a description on line card 6
+Eth6/30       eth    10G     This is a description on line card 6
+Eth6/31       eth    10G     This is a description on line card 6
+Eth6/32       eth    10G     This is a description on line card 6
+Eth6/33       eth    10G     This is a description on line card 6
+Eth6/34       eth    1000    This is a description on line card 6
+Eth6/35       eth    10G     This is a description on line card 6
+Eth6/36       eth    1000    This is a description on line card 6
+Eth6/37       eth    10G     This is a description on line card 6
+Eth6/38       eth    10G     This is a description on line card 6
+Eth6/39       eth    1000    This is a description on line card 6
+Eth6/40       eth    10G     This is a description on line card 6
+Eth6/41       eth    10G     This is a description on line card 6
+Eth6/42       eth    10G     This is a description on line card 6
+Eth6/43       eth    10G     This is a description on line card 6
+Eth6/44       eth    10G     This is a description on line card 6
+Eth6/45       eth    10G     This is a description on line card 6
+Eth6/46       eth    10G     This is a description on line card 6
+Eth6/47       eth    10G     This is a description on line card 6
+Eth6/48       eth    10G     This is a description on line card 6
+
+-------------------------------------------------------------------------------
+Interface                Description                                            
+-------------------------------------------------------------------------------
+Po10                     This is a portchannel
+Po20                     This is a portchannel
+Po25                     This is a portchannel
+Po300                    This is a portchannel
+
+-------------------------------------------------------------------------------
+Interface                Description                                            
+-------------------------------------------------------------------------------
+Lo0                      This is a loopback
+Lo1                      This is a loopback
+Lo2                      This is a loopback
+Lo20                     --
+Lo30                     --
+Vlan1                    --
+Vlan9                    Nice little VLAN interface here
+Vlan10                   Nice little VLAN interface here
+Vlan20                   Nice little VLAN interface here
+Vlan30                   Nice little VLAN interface here
+
+-------------------------------------------------------------------------------
+Port          Type   Speed   Description
+-------------------------------------------------------------------------------
+Eth100/1/1    eth    1000    This is another description
+Eth100/1/2    eth    1000    This is another description
+Eth100/1/3    eth    1000    This is another description
+Eth100/1/4    eth    1000    This is another description
+Eth100/1/5    eth    1000    This is another description
+Eth100/1/6    eth    1000    This is another description
+Eth100/1/7    eth    1000    This is another description
+Eth100/1/8    eth    1000    This is another description
+Eth100/1/9    eth    1000    This is another description
+Eth100/1/10   eth    1000    This is another description
+Eth100/1/11   eth    1000    This is another description
+Eth100/1/12   eth    1000    This is another description
+Eth100/1/13   eth    1000    This is another description
+Eth100/1/14   eth    1000    This is another description
+Eth100/1/15   eth    1000    This is another description
+Eth100/1/16   eth    1000    This is another description
+Eth100/1/17   eth    1000    This is another description
+Eth100/1/18   eth    1000    This is another description
+Eth100/1/19   eth    1000    This is another description
+Eth100/1/20   eth    1000    This is another description
+Eth100/1/21   eth    1000    This is another description
+Eth100/1/22   eth    1000    This is another description
+Eth100/1/23   eth    1000    This is another description
+Eth100/1/24   eth    1000    This is another description
+```
+
+**Help:** execute the command "show interface description"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface snmp-ifindex
+
+**Output:**
+```
+
+--------------------------------------------------------------------------------
+Port             IFMIB Ifindex (hex)
+--------------------------------------------------------------------------------
+mgmt0           83886080   (0x5000000 )
+Eth9/1          440401920  (0x1a400000)
+Eth9/2          440406016  (0x1a401000)
+Eth9/3          440410112  (0x1a402000)
+Eth9/4          440414208  (0x1a403000)
+Eth9/4.10       440414218  (0x1a40300a)
+Eth9/5/1        960659456  (0x39428000)
+Eth9/5/2        960663552  (0x39429000)
+Eth9/5/3        960667648  (0x3942a000)
+Eth9/5/4        960671744  (0x3942b000)
+Eth9/6/1        960700416  (0x39432000)
+Eth9/6/2        960704512  (0x39433000)
+Eth9/6/3        960708608  (0x39434000)
+Eth9/6/4        960712704  (0x39435000)
+Eth9/7          440426496  (0x1a406000)
+Eth9/8          440430592  (0x1a407000)
+Eth9/9          440434688  (0x1a408000)
+Eth9/10         440438784  (0x1a409000)
+Eth9/11         440442880  (0x1a40a000)
+Eth9/12         440446976  (0x1a40b000)
+Po1             369098752  (0x16000000)
+Lo0             335544320  (0x14000000)
+Vlan1           151126017  (0x9020001)
+```
+
+**Help:** execute the command "show interface snmp-ifindex"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface status
+
+**Output:**
+```
+--------------------------------------------------------------------------------
+Port          Name               Status    Vlan      Duplex  Speed   Type
+--------------------------------------------------------------------------------
+mgmt0         --                 notconnec routed    auto    auto    --         
+
+--------------------------------------------------------------------------------
+Port          Name               Status    Vlan      Duplex  Speed   Type
+--------------------------------------------------------------------------------
+Eth1/1        --                 connected trunk     full    1000    1000base-T 
+Eth1/2        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/3        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/4        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/5        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/6        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/7        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/8        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/9        --                 xcvrAbsen 1         auto    auto    --         
+Eth1/10       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/11       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/12       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/13       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/14       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/15       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/16       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/17       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/18       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/19       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/20       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/21       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/22       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/23       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/24       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/25       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/26       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/27       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/28       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/29       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/30       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/31       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/32       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/33       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/34       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/35       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/36       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/37       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/38       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/39       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/40       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/41       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/42       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/43       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/44       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/45       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/46       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/47       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/48       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/49       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/50       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/51       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/52       --                 xcvrAbsen 1         auto    auto    --         
+Eth1/53       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
+Eth1/54       VPC-peer-link !kob xcvrAbsen trunk     auto    auto    --         
+```
+
+**Help:** execute the command "show interface status"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface status err-disabled
+
+**Output:**
+```
+--------------------------------------------------------------------------------
+Port         Name               Status             Reason
+--------------------------------------------------------------------------------
+Eth1         tenGigE 0/0/2/0 as linkFlapErr        linkFlapErrDisabled
+Eth2         --                 linkFlapErr        linkFlapErrDisabled
+Eth3         --                 err-disabled       Error disabled
+Eth4         SD 180848 OFFER EM linkFlapErr        linkFlapErrDisabled
+```
+
+**Help:** execute the command "show interface status err-disabled"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface switchport
+
+**Output:**
+```
+Name: Ethernet1/1
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: access
+  Access Mode VLAN: 3 (Vlan not created)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/2
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 5 (Vlan not created)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/3
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+```
+
+**Help:** execute the command "show interface switchport"
 
 **Prompt:**
 - cisco_nxos>
@@ -3906,6 +3139,505 @@ Ethernet1/60
 ```
 
 **Help:** execute the command "show interface transceiver"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interface transceiver details
+
+**Output:**
+```
+Ethernet3/1
+    transceiver is present
+    type is 10Gbase-SR
+    name is CISCO-FINISAR   
+    part number is FTLX8571D3BCL-C2
+    revision is A   
+    serial number is FNS18510TXL     
+    nominal bitrate is 10300 MBit/sec
+    Link length supported for 50/125um OM2 fiber is 82 m
+    Link length supported for 62.5/125um fiber is 26 m
+    Link length supported for 50/125um OM3 fiber is 300 m
+    cisco id is --
+    cisco extended id number is 4
+    cisco part number is 10-2415-03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
+    number of lanes 1
+
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Temperature   35.66 C        75.00 C     -5.00 C     70.00 C        0.00 C
+  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
+  Current           N/A        11.80 mA     4.00 mA    10.80 mA       5.00 mA
+  Tx Power     -14.05 dBm --    1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
+  Rx Power     -30.45 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
+  Transmit Fault Count = 0
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+
+Ethernet3/2
+    transceiver is present
+    type is 10Gbase-SR
+    name is CISCO-FINISAR   
+    part number is FTLX8571D3BCL-C2
+    revision is A   
+    serial number is FNS18510TXV     
+    nominal bitrate is 10300 MBit/sec
+    Link length supported for 50/125um OM2 fiber is 82 m
+    Link length supported for 62.5/125um fiber is 26 m
+    Link length supported for 50/125um OM3 fiber is 300 m
+    cisco id is --
+    cisco extended id number is 4
+    cisco part number is 10-2415-03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
+    number of lanes 1
+
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Temperature   38.28 C        75.00 C     -5.00 C     70.00 C        0.00 C
+  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
+  Current        0.43 mA  --   11.80 mA     4.00 mA    10.80 mA       5.00 mA
+  Tx Power     -16.19 dBm --    1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
+  Rx Power     -33.97 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
+  Transmit Fault Count = 0
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+
+Ethernet3/3
+    transceiver is present
+    type is 10Gbase-SR
+    name is CISCO-FINISAR   
+    part number is FTLX8571D3BCL-C2
+    revision is A   
+    serial number is FNS18510TYD     
+    nominal bitrate is 10300 MBit/sec
+    Link length supported for 50/125um OM2 fiber is 82 m
+    Link length supported for 62.5/125um fiber is 26 m
+    Link length supported for 50/125um OM3 fiber is 300 m
+    cisco id is --
+    cisco extended id number is 4
+    cisco part number is 10-2415-03
+    cisco product id is SFP-10G-SR          
+    cisco vendor id is V03 
+    number of lanes 1
+
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Temperature   37.07 C        75.00 C     -5.00 C     70.00 C        0.00 C
+  Voltage        3.29 V         3.63 V      2.97 V      3.46 V        3.13 V
+  Current        0.21 mA  --   11.80 mA     4.00 mA    10.80 mA       5.00 mA
+  Tx Power          N/A         1.69 dBm  -11.30 dBm   -1.30 dBm     -7.30 dBm
+  Rx Power     -33.97 dBm --    2.00 dBm  -13.90 dBm   -1.00 dBm     -9.90 dBm
+  Transmit Fault Count = 0
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+
+Ethernet4/1
+    transceiver is present
+    type is CFP-100G-LR4
+    name is CISCO           
+    part number is SCF1001L4CNC101 
+    revision is 11
+    serial number is ECL190200BA     
+    nominal bitrate is 129 MBit/sec per channel
+    Link length supported for 9/125um fiber is 10 km
+    cisco id is --
+    cisco extended id number is 85
+    cisco part number is 10-2549-02
+    cisco product id is CFP-100G-LR4    
+    cisco vendor id is V02 
+    number of lanes 3
+
+Lane Number:1 Common Diagnostic Information
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Temperature   40.44 C        74.00 C     -4.00 C     70.00 C        0.00 C
+  Voltage        3.28 V         3.66 V      2.93 V      3.46 V        3.13 V
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+
+ Lane Number:2 Network Lane
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Tx Power       0.76 dBm       7.49 dBm   -8.30 dBm    4.49 dBm     -4.30 dBm
+  Rx Power      -1.77 dBm       7.49 dBm  -14.60 dBm    4.49 dBm    -10.59 dBm
+  Transmit Fault Count = 0
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+
+ Lane Number:3 Network Lane
+           SFP Detail Diagnostics Information (internal calibration)
+  ----------------------------------------------------------------------------
+                Current              Alarms                  Warnings
+                Measurement     High        Low         High          Low
+  ----------------------------------------------------------------------------
+  Tx Power       0.44 dBm       7.49 dBm   -8.30 dBm    4.49 dBm     -4.30 dBm
+  Rx Power      -1.57 dBm       7.49 dBm  -14.60 dBm    4.49 dBm    -10.59 dBm
+  Transmit Fault Count = 0
+  ----------------------------------------------------------------------------
+  Note: ++  high-alarm; +  high-warning; --  low-alarm; -  low-warning
+```
+
+**Help:** execute the command "show interface transceiver details"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show interfaces switchport
+
+**Output:**
+```
+Name: Ethernet1/1
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: access
+  Access Mode VLAN: 3 (Vlan not created)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/2
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 5 (Vlan not created)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+Name: Ethernet1/3
+  Switchport: Enabled
+  Switchport Monitor: Not enabled
+  Switchport Isolated : Not enabled
+  Switchport Block Multicast: Not enabled
+  Switchport Block Unicast: Not enabled
+  Operational Mode: trunk
+  Access Mode VLAN: 1 (default)
+  Trunking Native Mode VLAN: 1 (default)
+  Trunking VLANs Allowed: 1-4094
+  Voice VLAN: none
+  Extended Trust State : not trusted [COS = 0]
+  Administrative private-vlan primary host-association: none
+  Administrative private-vlan secondary host-association: none
+  Administrative private-vlan primary mapping: none
+  Administrative private-vlan secondary mapping: none
+  Administrative private-vlan trunk native VLAN: none
+  Administrative private-vlan trunk encapsulation: dot1q
+  Administrative private-vlan trunk normal VLANs: none
+  Administrative private-vlan trunk private VLANs: none
+  Operational private-vlan: none
+```
+
+**Help:** execute the command "show interfaces switchport"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show inventory
+
+**Output:**
+```
+NAME: "Chassis",  DESCR: "Nexus9000 C9396PX Chassis"
+PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
+
+NAME: "Slot 1",  DESCR: "1/10G SFP+ Ethernet Module"
+PID: N9K-C9396PX         ,  VID: V02 ,  SN: SAL1819S6LU
+ 
+NAME: "Slot 2",  DESCR: "40G Ethernet Expansion Module"
+PID: N9K-M12PQ           ,  VID: V01 ,  SN: SAL1815QCJE
+
+NAME: "Power Supply 1",  DESCR: "Nexus9000 C9396PX Chassis Power Supply"
+PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07E
+
+NAME: "Power Supply 2",  DESCR: "Nexus9000 C9396PX Chassis Power Supply"
+PID: N9K-PAC-650W        ,  VID: V01 ,  SN: DCB1809X07H
+ 
+NAME: "Fan 1",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
+PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
+
+NAME: "Fan 2",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
+PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
+
+NAME: "Fan 3",  DESCR: "Nexus9000 C9396PX Chassis Fan Module"
+PID: N9K-C9300-FAN2      ,  VID: V01 ,  SN: N/A
+
+NAME: "Slot 33", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
+PID: N7K-AC-6.0KW, VID: V01, SN: DTM141600XT
+ 
+NAME: "Slot 34", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Power Supply"
+PID: N7K-AC-6.0KW, VID: V01, SN: DTM1414007T
+ 
+NAME: "Slot 35", DESCR: "Nexus7000 C7009 (9 Slot) Chassis Fan Module"
+PID: N7K-C7009-FAN, VID: V00, SN: JAF1433DDEJ
+
+NAME: Ethernet1/46,  DESCR: CISCO-AVAGO
+PID: 10Gbase-SR          ,  VID: SFBR-709SMZ-CS1,  SN: AVD42309ABD
+
+NAME: Ethernet1/47,  DESCR: CISCO
+PID: 1000base-LH         ,  VID: RTXM191-404-C88,  SN: ACW315000AD
+ 
+NAME: Ethernet1/48,  DESCR: CISCO-AVAGO
+PID: 10Gbase-LR          ,  VID: SFCT-739SMZ,  SN: AVD2219K9AO
+```
+
+**Help:** execute the command "show inventory"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip adjacency
+
+**Output:**
+```
+
+Flags: # - Adjacencies Throttled for Glean
+       G - Adjacencies of vPC peer with G/W bit
+
+IP Adjacency Table for VRF default
+Total number of entries: 8
+Address         MAC Address     Pref Source     Interface
+10.110.100.142  002a.6a11.62c1  50   arp        Vlan1800         G
+10.110.100.178  78bc.1af1.ca61  50   arp        Vlan1801
+10.110.100.179  002a.6a11.62c1  50   arp        Vlan1801         G
+10.100.1.22     002a.6a11.62c1  50   arp        Vlan10           G
+10.100.1.24     0040.9d99.f6f6  50   arp        Vlan10
+10.100.150.3    0050.5694.bb20  50   arp        Vlan150
+10.100.150.5    002a.6a11.62c1  50   arp        Vlan150          G
+10.100.150.6    0050.568c.2110  50   arp        Vlan150
+```
+
+**Help:** execute the command "show ip adjacency"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip arp
+
+**Output:**
+```
+
+Flags: * - Adjacencies learnt on non-active FHRP router
+       + - Adjacencies synced via CFSoE
+       # - Adjacencies Throttled for Glean
+       D - Static Adjacencies attached to down interface
+
+IP ARP Table for all contexts
+Total number of entries: 22
+Address         Age       MAC Address     Interface
+1.1.1.2         00:00:57  3c60.f40e.f9c3  Ethernet1/41
+1.0.11.2        00:01:02  3c60.f40e.f9c4  Ethernet1/47
+10.3.1.101      00:06:06  d46d.5031.88b0  mgmt0
+10.3.1.102      00:18:18  e0ac.b16b.e940  mgmt0
+10.3.1.104      00:17:17  e5ac.b16c.aac8  mgmt0
+10.3.1.105      00:13:08  d46d.503c.beb0  mgmt0
+10.3.0.20       00:15:11  487b.6bad.7b36  mgmt0
+10.3.0.250      00:14:56  0000.0c9f.fa14  mgmt0
+10.3.0.251      00:07:08  03c5.a4e8.c342  mgmt0
+10.3.0.252      00:14:14  02c5.a4ea.56c2  mgmt0
+192.168.10.12   00:00:57  8c60.0012.0012  Vlan10
+10.45.69.110    00:09:49  70e4.225a.5e6a  Ethernet1/1.2151
+10.45.69.106    00:00:05  d46d.501e.2a92  Ethernet1/2.2151
+10.225.19.113   00:00:57  8c60.f40e.f9c3  Vlan2051
+10.254.254.113  00:00:57  8b60.f40e.f9c3  Vlan2003
+10.225.19.110   00:09:51  7ee4.225a.5e6a  Ethernet1/1.2051
+10.225.19.106   00:00:05  a16d.501e.2a92  Ethernet1/2.2051
+10.254.254.106  00:00:05  a16d.501e.2a92  Ethernet1/2.2003
+10.254.254.110  00:09:50  1ee4.125a.5e6a  Ethernet1/1.2003
+10.15.154.110   00:09:50  1ee4.125a.5e6a  Ethernet1/1.2103
+10.15.154.106   00:00:06  d46d.301e.2a92  Ethernet1/2.2103
+10.215.51.250      -      0000.0c9f.f9d3  Vlan2515
+10.5.6.10       00:00:16  INCOMPLETE      Vlan1425
+```
+
+**Help:** execute the command "show ip arp"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip arp detail
+
+**Output:**
+```
+Flags: * - Adjacencies learnt on non-active FHRP router
+       + - Adjacencies synced via CFSoE
+       # - Adjacencies Throttled for Glean
+
+IP ARP Table for context default
+Total number of entries: 1
+Address         Age       MAC Address     Interface        Physical Interface
+192.168.56.2    00:17:02  5087.89a1.d8d5  Ethernet1/2      Ethernet1/2
+90.10.10.2      00:02:55  000d.ece7.df7c  Vlan900          Ethernet1/12
+90.10.10.4      -         000d.ece7.df7d  -                -
+```
+
+**Help:** execute the command "show ip arp detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip arp detail vrf all
+
+**Output:**
+```
+Flags: * - Adjacencies learnt on non-active FHRP router
+       + - Adjacencies synced via CFSoE
+       # - Adjacencies Throttled for Glean
+       CP - Added via L2RIB, Control plane Adjacencies
+       PS - Added via L2RIB, Peer Sync
+       RO - Re-Originated Peer Sync Entry
+
+IP ARP Table for all contexts
+Total number of entries: 350
+Address         Age       MAC Address     Interface        Physical Interface  Flags    VRF Name
+10.255.0.2      00:09:24  14a2.a070.52a7  Vlan666          port-channel1000             default
+10.255.0.1      00:17:20  14a2.a070.52a0  mgmt0            mgmt0                        management
+172.23.5.8      00:06:48  b8a3.771c.255b  Ethernet1/49     Ethernet1/49                 default
+172.23.5.10     00:06:50  d477.98e9.c6bf  Ethernet1/50     Ethernet1/50                 default
+10.233.6.3      00:14:55  14a2.a070.52a7  Vlan3            port-channel1000             PRIMARY
+10.233.6.5      00:11:24  c8e7.f0fb.d6a7  Vlan3            Ethernet1/8                  PRIMARY
+10.233.6.6      00:14:04  d0d0.fd61.ecc1  Vlan3            Ethernet1/9         +        PRIMARY
+10.233.6.7      00:12:05  44aa.502f.c150  Vlan3            Ethernet1/13                 PRIMARY
+10.233.6.8      00:07:12  8418.88ac.9741  Vlan3            port-channel12               PRIMARY
+10.233.6.9      00:13:41  8418.88aa.c641  Vlan3            port-channel13               PRIMARY
+10.233.6.10     00:05:29  0881.f4ae.4841  Vlan3            port-channel14               PRIMARY
+10.233.6.11     00:10:51  b0a8.6e03.ce81  Vlan3            port-channel11               PRIMARY
+10.233.6.12     00:04:35  2c21.7299.8ac1  Vlan3            Ethernet1/6                  PRIMARY
+10.233.6.13     00:13:25  78fe.3d35.7b41  Vlan3            Ethernet1/21                 PRIMARY
+10.233.6.14     00:09:43  8071.1fe7.f041  Vlan3            Ethernet1/29                 PRIMARY
+10.233.6.15     00:06:38  8071.1fe7.ef41  Vlan3            Ethernet1/28                 PRIMARY
+10.233.6.16     00:17:54  3c61.04f9.6bc1  Vlan3            Ethernet1/12                 PRIMARY
+10.233.6.18     00:13:17  2c21.7298.8b41  Vlan3            Ethernet1/10                 PRIMARY
+10.233.6.19     00:11:53  2c21.7299.8e81  Vlan3            Ethernet1/11                 PRIMARY
+10.233.6.20     00:00:01  28c0.da35.dc01  Vlan3            Ethernet1/16                 PRIMARY
+10.233.6.21     00:01:08  c8e7.f0fb.c487  Vlan3            port-channel10               PRIMARY
+10.233.6.30     00:09:24  7819.f79a.82c1  Vlan3            Ethernet1/2                  PRIMARY
+10.233.6.31     00:01:54  2c21.728a.0581  Vlan3            Ethernet1/22                 PRIMARY
+10.233.6.32     00:02:05  78fe.3d35.a101  Vlan3            Ethernet1/1         +        PRIMARY
+10.233.6.33     00:05:25  2c21.7296.b501  Vlan3            Ethernet1/3                  PRIMARY
+10.233.6.34     00:16:36  2c21.7296.8c81  Vlan3            Ethernet1/23                 PRIMARY
+10.233.6.35     00:08:06  2c21.7293.a401  Vlan3            Ethernet1/24                 PRIMARY
+10.233.6.36     00:14:56  2c21.7296.9081  Vlan3            Ethernet1/4                  PRIMARY
+10.233.6.37     00:12:56  7819.f79b.8801  Vlan3            Ethernet1/25                 PRIMARY
+10.233.6.38     00:14:49  2c21.7296.a401  Vlan3            Ethernet1/26                 PRIMARY
+10.233.6.39     00:17:42  2c21.3111.0701  Vlan3            port-channel18               PRIMARY
+10.233.6.48     00:08:50  7c25.8629.ab83  Vlan3            Ethernet1/15                 PRIMARY
+10.233.6.50     00:13:21  f8c0.01c9.e501  Vlan3            port-channel15               PRIMARY
+10.233.6.60     00:05:02  8418.88ac.9ec1  Vlan3            port-channel16      +        PRIMARY
+10.233.6.70     00:12:04  8418.88ac.a0c1  Vlan3            port-channel17               PRIMARY
+10.233.6.193    00:03:29  2829.862b.0dfc  Vlan3            port-channel13               PRIMARY
+10.233.6.194    00:02:38  2829.863f.5708  Vlan3            Ethernet1/2                  PRIMARY
+10.233.6.196    00:02:15  2829.8615.4bd3  Vlan3            Ethernet1/4                  PRIMARY
+10.233.6.197    00:08:54  2829.8617.5b14  Vlan3            Ethernet1/21                 PRIMARY
+10.233.6.1         -      0000.5e00.0101  Vlan9            -
+```
+
+**Help:** execute the command "show ip arp detail vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip bgp
+
+**Output:**
+```
+Status: s-suppressed, x-deleted, S-stale, d-dampened, h-history, *-valid, >-best
+Path type: i-internal, e-external, c-confed, l-local, a-aggregate, r-redist, I-injected
+Origin codes: i - IGP, e - EGP, ? - incomplete, | - multipath, & - backup
+
+   Network            Next Hop            Metric     LocPrf     Weight Path
+*>l10.10.0.1/32       0.0.0.0                           100      32768 i
+x e10.10.0.2/32       10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 64002 i
+*>e10.10.0.101/32     10.10.1.1                                      0 64101 i
+*>e10.10.0.102/32     10.10.2.1                                      0 64102 i
+*>e10.10.0.201/32     10.10.2.1                                      0 64102 64201 i
+* e                   10.10.1.1                                      0 64101 64201 i
+*>e10.10.0.202/32     10.10.2.1                                      0 64102 64202 i
+*>l10.10.1.0/30       0.0.0.0                           100      32768 i
+* e                   10.10.1.1                                      0 64101 i
+x e10.10.1.4/30       10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 i
+*>l10.10.2.0/30       0.0.0.0                           100      32768 i
+* e                   10.10.2.1                                      0 64102 i
+*>e10.10.2.4/30       10.10.2.1                                      0 64102 i
+* e                   10.10.1.1                                      0 64101 64002 i
+* e10.10.101.0/30     10.10.2.1                                      0 64102 64201 i
+*>e                   10.10.1.1                                      0 64101 i
+*>e10.10.101.4/30     10.10.2.1                                      0 64102 i
+* e                   10.10.1.1                                      0 64101 64201 i
+* e10.10.102.0/30     10.10.2.1                                      0 64102 64202 i
+*>e                   10.10.1.1                                      0 64101 i
+*>e10.10.102.4/30     10.10.2.1                                      0 64102 i
+*>l10.10.150.0/24     0.0.0.0                           100      32768 i
+*>l10.10.151.0/24     0.0.0.0                           100      32768 i
+*>l10.10.152.0/24     0.0.0.0                           100      32768 i
+x e10.10.160.0/24     10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 64002 i
+x e10.10.161.0/24     10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 64002 i
+x e10.10.162.0/24     10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 64002 i
+*>e10.10.201.0/30     10.10.2.1                                      0 64102 64201 i
+* e                   10.10.1.1                                      0 64101 64201 i
+*>e10.10.202.0/30     10.10.2.1                                      0 64102 64202 i
+*>l100.100.100.100/30 0.0.0.0                           100      32768 i
+x e100.100.100.104/30 10.10.2.1                                      0 64102 64002 i
+*>e                   10.10.1.1                                      0 64101 64002 i
+*>e100.100.100.108/30 10.10.2.1                                      0 64102 {64201 64202} i
+*>e100.100.100.112/30 10.10.2.1                                      0 64102 {64201 64202} 64203 i
+  l                   0.0.0.0                           100      32768 i
+```
+
+**Help:** execute the command "show ip bgp"
 
 **Prompt:**
 - cisco_nxos>
@@ -7386,7 +7118,6 @@ BGP neighbor is 19.13.1.12,  remote AS 65273.3334, local AS 2202, ebgp link,  Pe
   Local host: 23.55.61.2, Local port: 42267
   Foreign host: 86.11.82.26, Foreign port: 179
   fd = 91
-
 ```
 
 **Help:** execute the command "show ip bgp neighbors"
@@ -7420,7 +7151,6 @@ Neighbor V AS MsgRcvd MsgSent TblVer InQ OutQ Up/Down State/PfxRcd
 10.0.0.10       4        65009 26930508  942614 512185203    0    0 1y10w     Idle (Admin)
 10.0.0.11       4        65010
                                2655204 14931352 512185206   0    0 1w5d      4452
-
 ```
 
 **Help:** execute the command "show ip bgp summary"
@@ -7429,83 +7159,121 @@ Neighbor V AS MsgRcvd MsgSent TblVer InQ OutQ Up/Down State/PfxRcd
 - cisco_nxos>
 - cisco_nxos#
 
-### show configuration session summary
+### show ip bgp summary vrf
 
 **Output:**
 ```
-Session Manager Database:
---------------------------------------------------------------------
-Name                    Session Owner           Creation Time
---------------------------------------------------------------------
-ACL-SESSION1            ntc                     02:37:14 UTC Oct 28 2017
-ACL-SESS22              ntc                     02:37:55 UTC Oct 28 2017
+BGP summary information for VRF AMB, address family IPv4 Unicast
+ 
+ BGP summary information for VRF AMB, address family IPv6 Unicast
+ 
+BGP summary information for VRF BLU, address family IPv4 Unicast
+BGP router identifier 172.16.101.101, local AS number 65161
+BGP table version is 2301549, IPv4 Unicast config peers 1, capable peers 1
+827 network entries and 1406 paths using 105308 bytes of memory
+BGP attribute entries [107/18404], BGP AS path entries [26/272]
+ BGP community entries [0/0], BGP clusterlist entries [6/24]
+ 
+Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.25.113.1     4 65001 21968368 22451737  2301549    0    0    24w2d 0        
+ 
+BGP summary information for VRF BLU, address family IPv6 Unicast
+ 
+BGP summary information for VRF GRN, address family IPv4 Unicast
+ 
+BGP summary information for VRF GRN, address family IPv6 Unicast
+ 
+BGP summary information for VRF GRY, address family IPv4 Unicast
+ 
+BGP summary information for VRF GRY, address family IPv6 Unicast
+ 
+BGP summary information for VRF NPE, address family IPv4 Unicast
+ 
+BGP summary information for VRF NPE, address family IPv6 Unicast
+ 
+BGP summary information for VRF RED, address family IPv4 Unicast
+ 
+BGP summary information for VRF RED, address family IPv6 Unicast
+ 
+BGP summary information for VRF TRI, address family IPv4 Unicast
+BGP router identifier 172.16.101.123, local AS number 65161
+BGP table version is 8526, IPv4 Unicast config peers 1, capable peers 1
+55 network entries and 102 paths using 9940 bytes of memory
+ BGP attribute entries [11/1892], BGP AS path entries [8/80]
+BGP community entries [0/0], BGP clusterlist entries [6/24]
+ 
+Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+10.23.1.74      4 65171 3078819 3074406     8526    0    0     2w5d 24    
+ 
+BGP summary information for VRF TRI, address family IPv6 Unicast
+ 
+BGP summary information for VRF default, address family IPv4 Unicast
+BGP router identifier 172.16.101.37, local AS number 65161
+BGP table version is 14450, IPv4 Unicast config peers 5, capable peers 5
+36 network entries and 56 paths using 11184 bytes of memory
+BGP attribute entries [24/4128], BGP AS path entries [13/102]
+BGP community entries [0/0], BGP clusterlist entries [6/24]
+ 
+Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+172.16.14.2     4 65164 8429603 8531693    14450    0    0    1d08h 2        
+172.16.31.1     4 65191 8081582 8260415    14450    0    0     1w0d 2        
+172.16.31.17    4 65193 8167842 8348036    14450    0    0     1w0d 2        
+172.16.102.2    4 65161 1166456 1165743    14450    0    0     2y0w 28       
+172.16.151.2    4 65162 1074723 1073151    14450    0    0     1w1d 18       
+ 
+BGP summary information for VRF default, address family IPv6 Unicast
+ 
+BGP summary information for VRF default, address family VPNv4 Unicast
+ 
+BGP summary information for VRF default, address family VPNv6 Unicast
+ 
+BGP summary information for VRF default, address family IPv4 MVPN
+ 
+BGP summary information for VRF default, address family IPv6 MVPN
+ 
+BGP summary information for VRF default, address family L2VPN EVPN
+BGP router identifier 172.16.101.37, local AS number 65161
+BGP table version is 63025110, L2VPN EVPN config peers 7, capable peers 7
+4630 network entries and 8017 paths using 1210960 bytes of memory
+BGP attribute entries [796/136912], BGP AS path entries [31/334]
+BGP community entries [0/0], BGP clusterlist entries [6/24]
+ 
+Neighbor        V    AS MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/PfxRcd
+172.23.129.240  4 65191 8081498 8246843 63025110    0    0     1w0d 6        
+172.23.133.240  4 65193 8167863 8334538 63025110    0    0     1w0d 6        
+172.16.101.33   4 65161 40997672 23273121 63025110    0    0    2y11w 1782     
+172.16.101.34   4 65161 40992491 23273008 63025110    0    0    2y11w 1782     
+172.16.201.37   4 65162 23261970 26520909 63025110    0    0     1w1d 698      
+172.16.201.38   4 65162 23309853 26564632 63025110    0    0     2y2w 698      
+172.16.255.42   4 65164 20901792 21346308 63025110    0    0    1d08h 14       
+ 
+Neighbor        T    AS PfxRcd     Type-2     Type-3     Type-4     Type-5   
+172.23.129.240  I 65191 6          0          0          0          6        
+172.23.133.240  I 65193 6          0          0          0          6        
+172.16.101.33   I 65161 1782       1434       14         0          334      
+172.16.101.34   I 65161 1782       1434       14         0          334      
+172.16.201.37   E 65162 698        481        7          0          210      
+172.16.201.38   E 65162 698        481        7          0          210      
+172.16.255.42   I 65164 14         0          0          0          14
 
-Number of active configuration sessions = 2
 
-
+Value Filldown VRF (\S+)
+ Value Filldown ADDRESS_FAMILY (\S+\s\S+)
+Value Filldown ROUTER_ID (\d+?\ .\d+?\.\d+?\.\d+?)
+Value Filldown LOCAL_AS (\d+)
+Value Required BGP_NEIGH (\d+?\.\d+?\.\d+?\.\d+?)
+Value BGP_VER (\d)
+Value Required NEIGH_AS (\S+)
+Value MSG_RCVD (\d+)
+Value MSG_SENT (\d+)
+Value TBLVER (\d+)
+ Value IN_QUEUE (\d+)
+Value OUT_QUEUE (\d+)
+Value UP_DOWN (\S+)
+Value STATE_PFXRCD (\S+?\s+\S+?|\S+?)
 ```
 
-**Help:** execute the command "show configuration session summary"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show flogi database
-
-**Output:**
-```
-SWITCH1# sh flogi database
---------------------------------------------------------------------------------
-INTERFACE        VSAN    FCID           PORT NAME               NODE NAME
---------------------------------------------------------------------------------
-fc1/33           10    0x000000  aa:bb:cc:dd:ee:ff:00:11 aa:bb:cc:dd:ee:ff:00:00
-                           [SAN_PORT_1]
-fc1/34           10    0x000000  aa:bb:cc:dd:ee:ff:00:12 aa:bb:cc:dd:ee:ff:00:00
-                           [SAN_PORT_2]
-fc1/35           10    0x000000  aa:bb:cc:dd:ee:ff:00:13 aa:bb:cc:dd:ee:ff:00:00
-                           [SAN_PORT_3]
-fc1/36           10    0x000000  aa:bb:cc:dd:ee:ff:00:14 aa:bb:cc:dd:ee:ff:00:00
-                           [SAN_PORT_4]
-fc1/37           10    0x000000  aa:bb:cc:dd:ee:ff:00:15 bb:bb:cc:dd:ee:ff:00:00
-                           [TAPE_1]
-fc1/38           10    0x000000  aa:bb:cc:dd:ee:ff:00:16 a0:bb:cc:dd:ee:ff:00:00
-                           [TAPE_2]
-fc1/41           10    0x000000  aa:bb:cc:dd:ee:ff:00:17 d1:bb:cc:dd:ee:ff:00:00
-                           [SERVER_A_PORT_1]
-fc1/42           10    0x000000  aa:bb:cc:dd:ee:ff:00:18 d1:bb:cc:dd:ee:ff:00:00
-                           [SERVER_A_PORT_2]
-fc1/43           10    0x000000  aa:bb:cc:dd:ee:ff:00:19 3a:bb:cc:dd:ee:ff:00:00
-                           [SERVER_B_PORT_1]
-fc1/44           10    0x000000  aa:bb:cc:dd:ee:ff:00:10 3a:bb:cc:dd:ee:ff:00:00
-                           [SERVER_B_PORT_2]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:10 da:bb:cc:dd:ee:ff:00:00
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:11 da:bb:cc:dd:ee:ff:00:01
-                           [SERVER_C_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:12 da:bb:cc:dd:ee:ff:00:a0
-                           [SERVER_D_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:13 da:bb:cc:dd:ee:ff:00:f3
-                           [SERVER_E_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:14 da:bb:cc:dd:ee:ff:00:d7
-                           [SERVER_F_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:15 da:bb:cc:dd:ee:ff:00:a8
-                           [SERVER_G_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:16 da:bb:cc:dd:ee:ff:00:c3
-                           [SERVER_H_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:17 da:bb:cc:dd:ee:ff:00:c8
-                           [SERVER_I_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:18 da:bb:cc:dd:ee:ff:00:e9
-                           [SERVER_J_PORT_1]
-fc1/45           10    0x000000  aa:bb:cc:dd:ee:ff:01:19 da:bb:cc:dd:ee:ff:00:e1
-                           [SERVER_K_PORT_1]
-fc1/46           10    0x000000  aa:bb:cc:dd:ee:ff:02:00 c6:bb:cc:dd:ee:ff:00:11
-                           [DEV_SERVER_PORT_1]
-
- Total number of flogi = 21.
-
-```
-
-**Help:** execute the command "show flogi database"
+**Help:** execute the command "show ip bgp summary vrf"
 
 **Prompt:**
 - cisco_nxos>
@@ -7523,7 +7291,6 @@ Standard Community List ROUTES_CL2
     3 permit 33333:10000
     4 permit 44444:10000 55555:10005 no-export
     5 deny internet
-
 ```
 
 **Help:** execute the command "show ip community-list"
@@ -7532,78 +7299,178 @@ Standard Community List ROUTES_CL2
 - cisco_nxos>
 - cisco_nxos#
 
-### show nve vni
+### show ip dhcp relay address
 
 **Output:**
 ```
-Codes: CP - Control Plane        DP - Data Plane         
-       UC - Unconfigured         SA - Suppress ARP       
-       SU - Suppress Unknown Unicast
-       Xconn - Crossconnect     
-       MS-IR - Multisite Ingress Replication
-Interface VNI      Multicast-group   State Mode Type [BD/VRF]      Flags
---------- -------- ----------------- ----- ---- ------------------ -----
-nve1      1006    UnicastBGP          Up    CP   L2 [6]             SA   
-nve1      1105    UnicastBGP          Up    CP   L2 [1105]          SA  
-nve1      2111    UnicastBGP          Up    CP   L2 [111]           SA  
-nve1      3098    UnicastBGP          Up    CP   L2 [98]            SA  
-nve1      10301 n/a                   Up    CP   L3 [BLU]               
-nve1      10302 n/a                   Up    CP   L3 [GRN]               
-nve1      10303 n/a                   Up    CP   L3 [AMB]                              
-nve1      10306 n/a                   Up    CP   L3 [GRY]               
+ Interface        Relay Address     VRF Name
+ -------------    -------------     --------
 
+ Vlan100           10.40.15.152      my_vrf
+ Vlan100           10.40.10.162
+ Vlan200           10.40.15.152
+ Vlan200           10.40.10.162
+ Ethernet1         10.40.15.152
+ Ethernet1         10.40.10.162      my_vrf2
+ Ethernet1/1       10.40.15.152
+ Ethernet1/1       10.40.10.162
+ Ethernet1/1.1     10.40.15.152
+ Ethernet1/1.1     10.40.10.162
 ```
 
-**Help:** execute the command "show nve vni"
+**Help:** execute the command "show ip dhcp relay address"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show ip arp detail
+### show ip dhcp snooping statistics
 
 **Output:**
 ```
-Flags: * - Adjacencies learnt on non-active FHRP router
-       + - Adjacencies synced via CFSoE
-       # - Adjacencies Throttled for Glean
-
-IP ARP Table for context default
-Total number of entries: 1
-Address         Age       MAC Address     Interface        Physical Interface
-192.168.56.2    00:17:02  5087.89a1.d8d5  Ethernet1/2      Ethernet1/2
-90.10.10.2      00:02:55  000d.ece7.df7c  Vlan900          Ethernet1/12
-90.10.10.4      -         000d.ece7.df7d  -                -
-
-
+---------------------------------------------------------------------- 
+Message Type             Rx              Tx           Drops  
+---------------------------------------------------------------------- 
+Discover                 10              10              10
+Offer                    20              20              20
+Request                  30              30              30
+Ack                      40              40              40
+Release                  50              50              50
+Decline                  60              60              60
+Inform                   70              70              70
+Nack                     80              80              80
+---------------------------------------------------------------------- 
+Total                  5000            5000            5000
+---------------------------------------------------------------------- 
+DHCP L2 Forwarding:
+Total Packets Forwarded                          :       100
+Total Packets Received                           :       200
+Total Packets Dropped                            :       300
+Non DHCP:
+Total Packets Received                           :       400
+Total Packets Forwarded                          :       500
+Total Packets Dropped                            :       600
+DROP:
+Received on untrusted port                       :       700
+Unknown Failure                                  :       800
+Source mac validation failed                     :       900
+Binding entry validation Failed                  :      1000
+Invalid DHCP message type                        :      1100
+Interface error                                  :      1200
+Tx over trusted port failed                      :      1300
+Trust port not configured                        :      1400
+ Vlan validation failure                          :      1500
+Insertion of option 82 failed                    :      1600
+Packet Malformed                                 :      1700
 ```
 
-**Help:** execute the command "show ip arp detail"
+**Help:** execute the command "show ip dhcp snooping statistics"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### dir
+### show ip eigrp neighbors
 
 **Output:**
 ```
-Input/output error
-       4096    Sep 22 15:27:34 2019  .rpmstore/
-       4096    Sep 22 15:27:53 2019  .swtam/
-       1982    Sep 22 15:29:22 2019  20190922_052903_poap_7826_init.log
-     189080    Sep 22 15:18:11 2019  CpuUsage.Log
- 1410981963    Jul 13 10:05:48 2018  aci-n9000-dk9.13.1.2p.bin
- 1157861451    Sep 22 15:15:57 2019  auto-s
-          0    Sep 22 15:16:00 2019  bios_bootup_scratch_not_cleared
-          0    Sep 22 15:27:47 2019  bootflash_sync_list
-         53    Sep 22 15:10:02 2019  disk_log.txt
-         18    Dec 12 22:32:13 2022  gold_file
-        462    Sep 22 15:18:02 2019  libmon.logs
-       4096    Sep 22 15:02:17 2019  lost+found/
+IP-EIGRP neighbors for process 65535 VRF default
+H Address Interface Hold Uptime SRTT RTO Q Seq
+(sec) (ms) Cnt Num
+7 10.20.150.2 Po2001 12 03:44:02 20 200 0 10331
+6 10.20.200.2 Po2000 14 03:44:02 13 200 0 158157
+5 10.40.1.1 Eth1/26 13 03:44:14 16 200 0 158164
+4 10.50.2.1 Eth2/5 12 03:44:14 16 200 0 158166
+3 10.50.1.1 Eth2/6 13 03:44:15 16 200 0 158165
+2 10.50.3.1 Eth2/7 11 03:44:15 13 200 0 158167
+1 10.20.5.2 Eth3/11 14 03:44:16 18 200 0 158158
+0 10.20.6.2 Eth3/12 11 03:44:17 14 200 0 158163
 ```
 
-**Help:** execute the command "dir"
+**Help:** execute the command "show ip eigrp neighbors"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip interface
+
+**Output:**
+```
+IP Interface Status for VRF "default"
+Vlan156, Interface status: protocol-down/link-down/admin-up, iod: 2,
+  IP address: 155.155.155.1, IP subnet: 155.155.155.0/30 route-preference: 0, tag: 0 
+  IP broadcast address: 255.255.255.255
+  IP multicast groups locally joined: none
+  IP MTU: 1500 bytes (using link MTU)
+  IP primary address route-preference: 0, tag: 0
+  IP proxy ARP : disabled
+  IP Local Proxy ARP : disabled
+  IP multicast routing: disabled
+  IP icmp redirects: enabled
+  IP directed-broadcast: disabled 
+  IP Forwarding: disabled 
+  IP icmp unreachables (except port): disabled
+  IP icmp port-unreachable: enabled
+  IP unicast reverse path forwarding: none
+  IP load sharing: none 
+  IP interface statistics last reset: never
+  IP interface software stats: (sent/received/forwarded/originated/consumed)
+    Unicast packets    : 0/0/0/0/0
+    Unicast bytes      : 0/0/0/0/0
+    Multicast packets  : 0/0/0/0/0
+    Multicast bytes    : 0/0/0/0/0
+    Broadcast packets  : 0/0/0/0/0
+    Broadcast bytes    : 0/0/0/0/0
+    Labeled packets    : 0/0/0/0/0
+    Labeled bytes      : 0/0/0/0/0
+Ethernet1/5, Interface status: protocol-down/link-down/admin-up, iod: 15,
+  IP address: 10.1.0.1, IP subnet: 10.1.0.0/30 route-preference: 0, tag: 0 
+  IP broadcast address: 255.255.255.255
+  IP multicast groups locally joined: none
+  IP MTU: 1500 bytes (using link MTU)
+  IP primary address route-preference: 0, tag: 0
+  IP proxy ARP : disabled
+  IP Local Proxy ARP : disabled
+  IP multicast routing: disabled
+  IP icmp redirects: enabled
+  IP directed-broadcast: disabled 
+  IP Forwarding: disabled 
+  IP icmp unreachables (except port): disabled
+  IP icmp port-unreachable: enabled
+  IP unicast reverse path forwarding: none
+  IP load sharing: none 
+  IP interface statistics last reset: never
+  IP interface software stats: (sent/received/forwarded/originated/consumed)
+    Unicast packets    : 0/0/0/0/0
+    Unicast bytes      : 0/0/0/0/0
+    Multicast packets  : 0/0/0/0/0
+    Multicast bytes    : 0/0/0/0/0
+    Broadcast packets  : 0/0/0/0/0
+    Broadcast bytes    : 0/0/0/0/0
+    Labeled packets    : 0/0/0/0/0
+    Labeled bytes      : 0/0/0/0/0
+```
+
+**Help:** execute the command "show ip interface"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip interface brief
+
+**Output:**
+```
+IP Interface Status for VRF "default"(1)
+Interface            IP Address      Interface Status
+
+IP Interface Status for VRF "management"(2)
+Interface            IP Address      Interface Status
+mgmt0                10.205.143.20   protocol-up/link-up/admin-up       
+```
+
+**Help:** execute the command "show ip interface brief"
 
 **Prompt:**
 - cisco_nxos>
@@ -7709,7 +7576,6 @@ mti3, Interface status: protocol-up/link-up/admin-up, iod: 62,
   WCCP Redirect outbound: disabled
   WCCP Redirect inbound: disabled
   WCCP Redirect exclude: disabled
-
 ```
 
 **Help:** execute the command "show ip interface vrf all"
@@ -7718,33 +7584,227 @@ mti3, Interface status: protocol-up/link-up/admin-up, iod: 62,
 - cisco_nxos>
 - cisco_nxos#
 
-### show cdp neighbors
+### show ip mroutes vrf all
 
 **Output:**
 ```
-Capability Codes: R - Router, T - Trans-Bridge, B - Source-Route-Bridge
-                 S - Switch, H - Host, I - IGMP, r - Repeater,
-                 V - VoIP-Phone, D - Remotely-Managed-Device,
-                 s - Supports-STP-Dispute
+IP Multicast Routing Table for VRF "default"
+
+(*, 225.1.0.1/32), uptime: 2w3d, igmp ip pim
+  Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
+  Outgoing interface list: (count: 1)
+    Ethernet1/3, uptime: 2w3d, igmp
+ 
+
+(10.1.13.10/32, 225.1.0.1/32), uptime: 06:33:34, ip mrib pim
+  Incoming interface: Ethernet1/1, RPF nbr: 10.1.1.1
+  Outgoing interface list: (count: 1)
+    Ethernet1/3, uptime: 06:33:34, mrib
 
 
-Device-ID             Local Intrfce Hldtme Capability  Platform         Port ID
-my-dc1-mgt-sw1(FOC213230KP)
-                   mgmt0          138    R S I s   N3K-C3172PQ-XL     Eth1/48       
-lx-dc1-server01.mynetwork.com
-                   Eth1/1/1       109    H         Linux              eth9          
-lx-dc1-server02.mynetwork.com
-                   Eth1/1/2       106    H         Linux              eth9          
-lx-dc1-server03.mynetwork.com
-                   Eth1/1/3       91     H         Linux              eth9          
-lx-dc1-server04.mynetwork.com
-                   Eth1/1/4       112    H         Linux              eth9          
-lx-dc1-server05.mynetwork.com
-                   Eth1/2/1       100    H         Linux              eth9
-
+(*, 232.0.0.0/8), uptime: 2w3d, pim ip
+  Incoming interface: Null, RPF nbr: 0.0.0.0
+  Outgoing interface list: (count: 0)
 ```
 
-**Help:** execute the command "show cdp neighbors"
+**Help:** execute the command "show ip mroutes vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip msdp summary vrf all
+
+**Output:**
+```
+MSDP Peer Status Summary for VRF "default"
+Local ASN: 64520, originator-id: 10.10.100.10
+
+Number of configured peers:  3
+Number of established peers: 3
+Number of shutdown peers:    0
+
+Peer            Peer        Connection      Uptime/   Last msg  (S,G)s
+Address         ASN         State           Downtime  Received  Received
+10.1.2.3        64513       Established     1w4d      0.487184  4195
+10.1.2.4        64513       Established     1w4d      0.485689  3763
+10.1.2.5        64517       Established     1w4d      0.487786  0
+```
+
+**Help:** execute the command "show ip msdp summary vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip ospf database
+
+**Output:**
+```
+OSPF Router with ID (50.50.50.50) (Process ID p1)
+ 
+Router Link States (Area 0)
+ 
+Link ID ADV Router Age Seq# Checksum Link Count
+40.40.40.40 40.40.40.40 930 0x80000004 0x2ea1 3
+50.50.50.50 50.50.50.50 935 0x80000002 0x8b52 1
+60.60.60.60 60.60.60.60 943 0x800003c5 0x9854 2
+ 
+Network Link States (Area 0)
+ 
+Link ID ADV Router Age Seq# Checksum
+209.165.201.3 60.60.60.60 944 0x80000001 0x7179
+ 192.0.2.1 50.50.50.50 935 0x80000001 0x516a
+ 
+Summary Network Link States (Area 0)
+ 
+Link ID ADV Router Age Seq# Checksum
+209.165.201.1 40.40.40.40 929 0x80000001 0x2498
+209.165.201.1 50.50.50.50 928 0x80000001 0x5b2f
+209.165.201.1 60.60.60.60 1265 0x800003c3 0xf49b
+192.0.2.0 40.40.40.40 943 0x80000001 0x53f3
+ 192.0.2.0 50.50.50.50 935 0x80000001 0x26f8
+192.0.2.0 60.60.60.60 930 0x80000001 0x7b51
+```
+
+**Help:** execute the command "show ip ospf database"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip ospf interface brief
+
+**Output:**
+```
+ OSPF Process ID BLU1 VRF BLU
+ Total number of interface: 1
+ Interface               ID     Area            Cost   State    Neighbors Status
+ Vlan10                  1      0.0.0.10        10     DR       2         up 
+ 
+ OSPF Process ID DC_UNDERLAY VRF default
+ Total number of interface: 6
+ Interface               ID     Area            Cost   State    Neighbors Status
+ Vlan2                   3      0.0.0.0         100    P2P      1         up 
+ Lo1                     1      0.0.0.0         1      LOOPBACK 0         up 
+ Lo2                     2      0.0.0.0         1      LOOPBACK 0         up 
+ Lo3                     4      0.0.0.0         1      LOOPBACK 0         up 
+ Eth1/1                  6      0.0.0.0         1      P2P      1         up 
+ Eth1/2                  5      0.0.0.0         1      P2P      1         up 
+```
+
+**Help:** execute the command "show ip ospf interface brief"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip ospf neighbor
+
+**Output:**
+```
+router1# sh ip ospf neighbors vrf all 
+ OSPF Process ID 1111 VRF CUSTVRF1
+ Total number of neighbors: 3
+ Neighbor ID     Pri State            Up Time  Address         Interface
+ 10.0.0.1          1 FULL/ -          8w6d     11.11.11.11     Vlan999 
+ 10.0.0.2          1 FULL/ -          5w6d     22.22.22.22     Po1 
+ 10.0.0.3          1 FULL/ -          5w6d     44.44.44.44     Po2 
+ OSPF Process ID 2222 VRF CUSTVRF2
+ Total number of neighbors: 1
+ Neighbor ID     Pri State            Up Time  Address         Interface
+ 10.0.0.4          1 FULL/ -          8w6d     55.55.55.55     Vlan1000 
+ OSPF Process ID 3333 VRF CUSTVRF2
+ Total number of neighbors: 2
+ Neighbor ID     Pri State            Up Time  Address         Interface
+ 10.0.0.5          1 FULL/ -          7w2d     66.66.66.66     Po3 
+ 10.0.0.6          1 INIT/DROTHER     -        77.77.77.77     Po4 
+```
+
+**Help:** execute the command "show ip ospf neighbor"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip pim group-range vrf all
+
+**Output:**
+```
+PIM Group-Range Configuration for VRF "default"
+Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
+224.0.0.0/8        Accept SSM   -               -                 Local
+
+PIM Group-Range Configuration for VRF "red"
+Group-range        Action Mode  RP-address      Shrd-tree-range   Origin
+224.0.0.0/8        Accept SSM   -               -                 Local
+```
+
+**Help:** execute the command "show ip pim group-range vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip pim interface brief vrf all
+
+**Output:**
+```
+PIM Interface Status for VRF "default"
+Interface            IP Address      PIM DR Address  Neighbor  Border
+                                                     Count     Interface
+Vlan100              192.0.2.1       192.0.2.2       0         no
+Ethernet1/1.10       192.0.2.3       192.0.2.4       1         no
+
+PIM Interface Status for VRF "red"
+Interface            IP Address      PIM DR Address  Neighbor  Border
+                                                     Count     Interface
+Ethernet1/1.20       192.0.2.5       192.0.2.6       1         no
+```
+
+**Help:** execute the command "show ip pim interface brief vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip pim neighbor vrf all
+
+**Output:**
+```
+                                    ^
+% Invalid command at '^' marker.
+```
+
+**Help:** execute the command "show ip pim neighbor vrf all"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show ip pim rp vrf all
+
+**Output:**
+```
+PIM RP Status Information for VRF "default"
+BSR disabled
+Auto-RP disabled
+BSR RP Candidate policy: None
+BSR RP policy: None
+Auto-RP Announce policy: None
+Auto-RP Discovery policy: None
+
+
+PIM RP Status Information for VRF "red"
+BSR disabled
+Auto-RP disabled
+BSR RP Candidate policy: None
+ BSR RP policy: None
+Auto-RP Announce policy: None
+Auto-RP Discovery policy: None
+```
+
+**Help:** execute the command "show ip pim rp vrf all"
 
 **Prompt:**
 - cisco_nxos>
@@ -7775,408 +7835,9 @@ IP Route Table for VRF "management"
  
 0.0.0.0/0, ubest/mbest: 1/0 time
     *via 172.16.170.193, [1/0], 1y16w, static
-
 ```
 
 **Help:** execute the command "show ip route"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip ospf interface brief
-
-**Output:**
-```
- OSPF Process ID BLU1 VRF BLU
- Total number of interface: 1
- Interface               ID     Area            Cost   State    Neighbors Status
- Vlan10                  1      0.0.0.10        10     DR       2         up 
- 
- OSPF Process ID DC_UNDERLAY VRF default
- Total number of interface: 6
- Interface               ID     Area            Cost   State    Neighbors Status
- Vlan2                   3      0.0.0.0         100    P2P      1         up 
- Lo1                     1      0.0.0.0         1      LOOPBACK 0         up 
- Lo2                     2      0.0.0.0         1      LOOPBACK 0         up 
- Lo3                     4      0.0.0.0         1      LOOPBACK 0         up 
- Eth1/1                  6      0.0.0.0         1      P2P      1         up 
- Eth1/2                  5      0.0.0.0         1      P2P      1         up 
-
-```
-
-**Help:** execute the command "show ip ospf interface brief"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip msdp summary vrf all
-
-**Output:**
-```
-MSDP Peer Status Summary for VRF "default"
-Local ASN: 64520, originator-id: 10.10.100.10
-
-Number of configured peers:  3
-Number of established peers: 3
-Number of shutdown peers:    0
-
-Peer            Peer        Connection      Uptime/   Last msg  (S,G)s
-Address         ASN         State           Downtime  Received  Received
-10.1.2.3        64513       Established     1w4d      0.487184  4195
-10.1.2.4        64513       Established     1w4d      0.485689  3763
-10.1.2.5        64517       Established     1w4d      0.487786  0
-
-```
-
-**Help:** execute the command "show ip msdp summary vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip pim neighbor vrf all
-
-**Output:**
-```
-                                    ^
-% Invalid command at '^' marker.
-
-```
-
-**Help:** execute the command "show ip pim neighbor vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show processes cpu
-
-**Output:**
-```
-CPU utilization for five seconds: 15%/1%; one minute: 12%; five minutes: 10%
-PID    Runtime(ms)  Invoked   uSecs  5Sec    1Min    5Min    TTY  Process
------  -----------  --------  -----  ------  ------  ------  ---  -----------
-    1         6170      1011      6   0.00%   0.00%  0.00%   -    init
- 2828           20         6      3   0.00%   0.00%  0.00%   -    portmap
- 2866           20         8      2   0.00%   0.00%  0.00%   -    rpc.statd
- 2876         3490     12448      0   0.92%   0.34%  0.10%   -    sysmgr
- 3383           80         6     13   0.00%   0.00%  0.00%   -    xinetd
- 3384           40         5      8   0.00%   0.00%  0.00%   -    tftpd
- 3385         1650      6566      0   0.00%   0.01%  0.01%   -    syslogd
- 3386          450        51      8   0.00%   0.00%  0.00%   -    sdwrapd
- 3387          650        92      7   0.00%   0.00%  0.00%   -    pfm_dummy
- 3388         2920      4747      0   0.00%   0.03%  0.03%   -    platform
- 3400          150       731      0   0.00%   0.00%  0.00%   -    klogd
- 3403          560       863      0   0.00%   0.00%  0.00%   -    vshd
- 3404          670      1698      0   0.00%   0.00%  0.00%   -    vpc_config_sync
- 3405          270      2214      0   0.00%   0.00%  0.00%   -    smm
- 3406          620      1399      0   0.00%   0.00%  0.00%   -    session-mgr
- 3407          730      4464      0   0.00%   0.00%  0.00%   -    psshelper
- 3408          820      1531      0   0.00%   0.00%  0.00%   -    pixm
- 3410          580     19429      0   0.00%   0.03%  0.03%   -    pdsd
-```
-
-**Help:** execute the command "show processes cpu"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show forwarding ipv4 route
-
-**Output:**
-```
-IPv4 routes for table default/base
-
-------------------+------------------+----------------------+-----------------
-Prefix            | Next-hop         | Interface            | Labels
-------------------+------------------+----------------------+-----------------
-0.0.0.0/32           Drop               Null0
-127.0.0.0/8          Drop               Null0
-255.255.255.255/32   Receive            sup-eth1
-0.0.0.0/0            10.100.100.178     Ethernet1/8
-                     10.100.100.186     Ethernet1/9
-10.0.0.0/16          10.100.100.230     Ethernet1/14
-10.0.120.0/24        10.100.100.230     Ethernet1/14
-10.0.210.0/24        10.100.100.230     Ethernet1/14
-10.0.251.0/24        10.100.100.230     Ethernet1/14
-10.1.0.0/16          10.100.100.230     Ethernet1/14
-10.2.0.0/16          10.100.100.230     Ethernet1/14
-10.5.0.0/16          10.100.100.230     Ethernet1/14
-10.6.0.0/16          10.100.100.230     Ethernet1/14
-10.7.0.0/16          10.100.100.230     Ethernet1/14
-10.8.0.0/16          10.100.100.230     Ethernet1/14
-10.12.0.0/16         10.100.100.230     Ethernet1/14
-10.13.0.0/16         10.100.100.230     Ethernet1/14
-10.14.0.0/16         10.100.100.230     Ethernet1/14
-10.27.0.0/16         10.100.100.230     Ethernet1/14
-10.29.0.0/16         10.100.100.230     Ethernet1/14
-10.30.0.0/16         10.100.100.230     Ethernet1/14
-10.31.0.0/16         10.100.100.230     Ethernet1/14
-10.32.0.0/16         10.100.100.230     Ethernet1/14
-10.33.0.0/16         10.100.100.230     Ethernet1/14
-10.34.0.0/16         10.100.100.230     Ethernet1/14
-10.36.0.0/16         10.100.100.230     Ethernet1/14
-10.38.0.0/16         10.100.100.230     Ethernet1/14
-10.39.0.0/16         10.100.100.230     Ethernet1/14
-10.40.0.0/16         10.100.100.230     Ethernet1/14
-10.42.0.0/16         10.100.100.230     Ethernet1/14
-10.43.0.0/16         10.100.100.230     Ethernet1/14
-10.44.0.0/16         10.100.100.230     Ethernet1/14
-10.46.0.0/16         10.100.100.230     Ethernet1/14
-10.48.0.0/16         10.100.100.230     Ethernet1/14
-10.49.0.0/16         10.100.100.230     Ethernet1/14
-10.50.0.0/16         10.100.100.230     Ethernet1/14
-10.51.0.0/16         10.100.100.230     Ethernet1/14
-10.52.0.0/16         10.100.100.230     Ethernet1/14
-10.53.0.0/16         10.100.100.230     Ethernet1/14
-10.54.0.0/16         10.100.100.230     Ethernet1/14
-10.55.0.0/16         10.100.100.230     Ethernet1/14
-10.57.0.0/16         10.100.100.230     Ethernet1/14
-10.62.0.0/16         10.100.100.230     Ethernet1/14
-10.63.0.0/16         10.100.100.230     Ethernet1/14
-10.64.0.0/16         10.100.100.230     Ethernet1/14
-10.66.0.0/16         10.100.100.230     Ethernet1/14
-10.67.0.0/16         10.100.100.230     Ethernet1/14
-10.69.192.0/19       10.100.100.230     Ethernet1/14
-10.69.224.0/19       10.100.100.230     Ethernet1/14
-10.70.0.0/16         10.100.100.230     Ethernet1/14
-10.70.0.0/24         10.100.100.230     Ethernet1/14
-10.70.7.0/24         10.100.100.230     Ethernet1/14
-10.70.8.0/24         10.100.100.230     Ethernet1/14
-10.70.12.0/24        10.100.100.230     Ethernet1/14
-10.70.14.0/24        10.100.100.230     Ethernet1/14
-10.70.27.0/24        10.100.100.230     Ethernet1/14
-10.70.29.0/24        10.100.100.230     Ethernet1/14
-10.70.30.0/24        10.100.100.230     Ethernet1/14
-10.70.32.0/24        10.100.100.230     Ethernet1/14
-10.70.34.0/24        10.100.100.230     Ethernet1/14
-10.70.38.0/24        10.100.100.230     Ethernet1/14
-10.70.40.0/24        10.100.100.230     Ethernet1/14
-10.70.42.0/24        10.100.100.230     Ethernet1/14
-10.70.43.0/24        10.100.100.230     Ethernet1/14
-10.70.44.0/24        10.100.100.230     Ethernet1/14
-10.70.46.0/24        10.100.100.230     Ethernet1/14
-10.70.48.0/24        10.100.100.230     Ethernet1/14
-10.70.49.0/24        10.100.100.230     Ethernet1/14
-10.70.50.0/24        10.100.100.230     Ethernet1/14
-10.70.51.0/24        10.100.100.230     Ethernet1/14
-10.70.52.0/24        10.100.100.230     Ethernet1/14
-10.70.64.0/24        10.100.100.230     Ethernet1/14
-10.70.66.0/24        10.100.100.230     Ethernet1/14
-10.70.67.0/24        10.100.100.230     Ethernet1/14
-10.70.112.0/24       10.100.100.230     Ethernet1/14
-10.71.0.0/16         10.100.100.230     Ethernet1/14
-10.72.150.0/24       10.100.100.230     Ethernet1/14
-10.72.151.0/24       10.100.100.230     Ethernet1/14
-10.73.0.0/16         10.100.100.230     Ethernet1/14
-10.74.0.0/16         10.100.100.230     Ethernet1/14
-10.75.0.0/16         10.100.100.230     Ethernet1/14
-10.76.0.0/16         10.100.100.230     Ethernet1/14
-10.77.0.0/16         10.100.100.230     Ethernet1/14
-10.78.0.0/16         10.100.100.230     Ethernet1/14
-10.79.0.0/16         10.100.100.230     Ethernet1/14
-10.80.0.0/16         10.100.100.230     Ethernet1/14
-10.82.20.0/24        10.100.100.142     Vlan1800
-10.82.21.0/24        10.100.100.142     Vlan1800
-10.82.22.0/24        10.100.100.142     Vlan1800
-10.82.22.0/26        10.100.100.142     Vlan1800
-10.82.22.64/26       10.100.100.142     Vlan1800
-10.82.22.80/32       10.100.100.142     Vlan1800
-10.82.22.192/26      10.100.100.142     Vlan1800
-10.82.22.231/32      10.100.100.142     Vlan1800
-10.82.22.240/32      10.100.100.142     Vlan1800
-10.82.22.242/32      10.100.100.142     Vlan1800
-10.82.22.243/32      10.100.100.142     Vlan1800
-10.82.22.244/32      10.100.100.142     Vlan1800
-10.82.22.245/32      10.100.100.142     Vlan1800
-10.82.23.0/24        10.100.100.142     Vlan1800
-10.91.9.0/24         10.100.100.230     Ethernet1/14
-10.92.0.0/19         10.100.100.230     Ethernet1/14
-10.92.254.0/24       10.100.100.230     Ethernet1/14
-10.100.32.0/21       10.100.100.230     Ethernet1/14
-10.100.40.0/21       10.100.100.230     Ethernet1/14
-10.100.112.0/21      10.100.100.230     Ethernet1/14
-10.100.120.0/21      10.100.100.230     Ethernet1/14
-10.101.174.0/23      10.100.100.230     Ethernet1/14
-10.102.174.0/23      10.100.100.230     Ethernet1/14
-10.112.0.0/16        10.100.100.230     Ethernet1/14
-10.122.0.0/16        10.100.100.230     Ethernet1/14
-10.123.0.0/16        10.100.100.230     Ethernet1/14
-*10.128.0.0/17       10.100.100.114     Ethernet1/47
-10.130.0.0/16        10.100.100.186     Ethernet1/9
-*10.131.0.0/16       10.100.100.114     Ethernet1/47
-*10.132.0.0/18       10.100.100.114     Ethernet1/47
-*10.132.101.0/24     10.100.100.114     Ethernet1/47
-*10.132.102.0/24     10.100.100.114     Ethernet1/47
-*10.132.103.0/24     10.100.100.114     Ethernet1/47
-*10.132.104.0/24     10.100.100.114     Ethernet1/47
-*10.132.150.0/24     10.100.100.114     Ethernet1/47
-*10.132.170.0/24     10.100.100.114     Ethernet1/47
-
-```
-
-**Help:** execute the command "show forwarding ipv4 route"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip arp
-
-**Output:**
-```
-
-Flags: * - Adjacencies learnt on non-active FHRP router
-       + - Adjacencies synced via CFSoE
-       # - Adjacencies Throttled for Glean
-       D - Static Adjacencies attached to down interface
-
-IP ARP Table for all contexts
-Total number of entries: 22
-Address         Age       MAC Address     Interface
-1.1.1.2         00:00:57  3c60.f40e.f9c3  Ethernet1/41
-1.0.11.2        00:01:02  3c60.f40e.f9c4  Ethernet1/47
-10.3.1.101      00:06:06  d46d.5031.88b0  mgmt0
-10.3.1.102      00:18:18  e0ac.b16b.e940  mgmt0
-10.3.1.104      00:17:17  e5ac.b16c.aac8  mgmt0
-10.3.1.105      00:13:08  d46d.503c.beb0  mgmt0
-10.3.0.20       00:15:11  487b.6bad.7b36  mgmt0
-10.3.0.250      00:14:56  0000.0c9f.fa14  mgmt0
-10.3.0.251      00:07:08  03c5.a4e8.c342  mgmt0
-10.3.0.252      00:14:14  02c5.a4ea.56c2  mgmt0
-192.168.10.12   00:00:57  8c60.0012.0012  Vlan10
-10.45.69.110    00:09:49  70e4.225a.5e6a  Ethernet1/1.2151
-10.45.69.106    00:00:05  d46d.501e.2a92  Ethernet1/2.2151
-10.225.19.113   00:00:57  8c60.f40e.f9c3  Vlan2051
-10.254.254.113  00:00:57  8b60.f40e.f9c3  Vlan2003
-10.225.19.110   00:09:51  7ee4.225a.5e6a  Ethernet1/1.2051
-10.225.19.106   00:00:05  a16d.501e.2a92  Ethernet1/2.2051
-10.254.254.106  00:00:05  a16d.501e.2a92  Ethernet1/2.2003
-10.254.254.110  00:09:50  1ee4.125a.5e6a  Ethernet1/1.2003
-10.15.154.110   00:09:50  1ee4.125a.5e6a  Ethernet1/1.2103
-10.15.154.106   00:00:06  d46d.301e.2a92  Ethernet1/2.2103
-10.215.51.250      -      0000.0c9f.f9d3  Vlan2515
-10.5.6.10       00:00:16  INCOMPLETE      Vlan1425
-```
-
-**Help:** execute the command "show ip arp"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip pim interface brief vrf all
-
-**Output:**
-```
-PIM Interface Status for VRF "default"
-Interface            IP Address      PIM DR Address  Neighbor  Border
-                                                     Count     Interface
-Vlan100              192.0.2.1       192.0.2.2       0         no
-Ethernet1/1.10       192.0.2.3       192.0.2.4       1         no
-
-PIM Interface Status for VRF "red"
-Interface            IP Address      PIM DR Address  Neighbor  Border
-                                                     Count     Interface
-Ethernet1/1.20       192.0.2.5       192.0.2.6       1         no
-
-
-```
-
-**Help:** execute the command "show ip pim interface brief vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interfaces switchport
-
-**Output:**
-```
-Name: Ethernet1/1
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: access
-  Access Mode VLAN: 3 (Vlan not created)
-  Trunking Native Mode VLAN: 1 (default)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-Name: Ethernet1/2
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: trunk
-  Access Mode VLAN: 1 (default)
-  Trunking Native Mode VLAN: 5 (Vlan not created)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-Name: Ethernet1/3
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: trunk
-  Access Mode VLAN: 1 (default)
-  Trunking Native Mode VLAN: 1 (default)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-
-```
-
-**Help:** execute the command "show interfaces switchport"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show clock
-
-**Output:**
-```
-18:57:38.347 UTC Mon Oct 19 2015
-
-```
-
-**Help:** execute the command "show clock"
 
 **Prompt:**
 - cisco_nxos>
@@ -8203,7 +7864,6 @@ Vlan49           2a01:3333:1:79::2                         up/up/up
                  fe80::333:4444:5555:8888
 Vlan50           2a01:3333:1:80::2                         up/up/up
                  fe80::333:4444:5555:8888
-
 ```
 
 **Help:** execute the command "show ipv6 interface brief"
@@ -8212,50 +7872,69 @@ Vlan50           2a01:3333:1:80::2                         up/up/up
 - cisco_nxos>
 - cisco_nxos#
 
-### show cts interface all
+### show l2rib internal permanently-frozen-list
 
 **Output:**
 ```
-CTS Information for Interface Ethernet1/2:
-    CTS is enabled, mode:   CTS_MODE_MANUAL
-    IFC state:              Unknown
-    Authentication Status:  CTS_AUTHC_INIT
-      Peer Identity:        MyDevice2
-      Peer is:              Unknown in manual mode
-      802.1X role:          CTS_ROLE_UNKNOWN
-      Last Re-Authentication: 
-    Authorization Status:   CTS_AUTHZ_INIT
-      PEER SGT:             0
-      Peer SGT assignment:  Not Trusted
-    SAP Status:             CTS_SAP_INIT
-      Configured pairwise ciphers: 
-      Replay protection: 
-      Replay protection mode: 
-      Selected cipher: 
-    Propagate SGT: Enabled
 
-CTS Information for Interface Ethernet1/3:
-    CTS is enabled, mode:   CTS_MODE_MANUAL
-    IFC state:              Unknown
-    Authentication Status:  CTS_AUTHC_INIT
-      Peer Identity:        
-      Peer is:              Unknown in manual mode
-      802.1X role:          CTS_ROLE_UNKNOWN
-      Last Re-Authentication: 
-    Authorization Status:   CTS_AUTHZ_SKIPPED_CONFIG
-      PEER SGT:             2
-      Peer SGT assignment:  Not Trusted
-    SAP Status:             CTS_SAP_INIT
-      Configured pairwise ciphers: 
-      Replay protection: 
-      Replay protection mode: 
-      Selected cipher: 
-    Propagate SGT: Enabled
-
-
+Topology    Mac Address    Frozen time
+----------- -------------- ---------------------------
+190         0050.5699.7898 Sat Jan 27 08:46:01.447 UTC
+190         0050.5699.8ec0 Sat Jan 27 08:47:39.818 UTC
+190         0050.5699.d709 Sat Jan 27 08:47:49.970 UTC
+190         0050.56b5.1419 Sat Jan 27 08:40:15.482 UTC
+190         0050.56b5.1bca Sat Jan 27 08:48:00.545 UTC
+192         000c.29d4.ee30 Sat Jan 27 08:42:26.149 UTC
+192         0012.3fff.e687 Sat Jan 27 08:57:48.481 UTC
+192         0050.5699.1684 Sat Jan 27 08:53:13.686 UTC
+192         0050.5699.1b56 Sat Jan 27 08:37:59.468 UTC
+192         0050.5699.2199 Sat Jan 27 08:53:08.098 UTC
+192         0050.5699.249d Sat Jan 27 08:52:44.355 UTC
+192         0050.5699.25bf Sat Jan 27 08:45:45.772 UTC
+192         0050.5699.27b2 Sat Jan 27 08:49:48.131 UTC
+192         0050.5699.3c5a Sat Jan 27 08:49:48.310 UTC
+192         0050.5699.410a Sat Jan 27 08:51:56.147 UTC
+192         0050.5699.4241 Sat Jan 27 08:52:28.534 UTC
+192         0050.5699.449f Sat Jan 27 08:52:50.603 UTC
+192         0050.5699.4826 Sat Jan 27 08:55:45.974 UTC
+192         0050.5699.4a94 Sat Jan 27 08:56:50.314 UTC
+192         0050.5699.4dd2 Sat Jan 27 08:48:56.964 UTC
+192         0050.5699.5044 Sat Jan 27 08:55:23.553 UTC
+192         0050.5699.50ab Sat Jan 27 08:52:46.601 UTC
+192         0050.5699.5705 Sat Jan 27 08:58:09.431 UTC
+192         0050.5699.57ec Sat Jan 27 08:51:55.528 UTC
+192         0050.5699.6083 Sat Jan 27 08:52:46.851 UTC
 ```
 
-**Help:** execute the command "show cts interface all"
+**Help:** execute the command "show l2rib internal permanently-frozen-list"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show license usage
+
+**Output:**
+```
+
+Feature                      Ins  Lic   Status Expiry Date Comments
+                                 Count
+--------------------------------------------------------------------------------
+MPLS_PKG                      No    -   Unused             Grace 10D 1H
+STORAGE-ENT                   No    -   Unused             Grace 20D 6H
+VDC_LICENSES                  No    0   Unused             -
+ENTERPRISE_PKG                No    -   Unused             -
+FCOE-N7K-F132XP               No    0   Unused             -
+FCOE-N7K-F248XP               No    0   Unused             -
+ENHANCED_LAYER2_PKG           No    -   Unused             Grace 20D 6H
+SCALABLE_SERVICES_PKG         No    -   Unused             -
+TRANSPORT_SERVICES_PKG        Yes   -   Unused Never       -
+LAN_ADVANCED_SERVICES_PKG     Yes   -   Unused Never       -
+LAN_ENTERPRISE_SERVICES_PKG   Yes   -   In use Never       -
+--------------------------------------------------------------------------------
+```
+
+**Help:** execute the command "show license usage"
 
 **Prompt:**
 - cisco_nxos>
@@ -8275,7 +7954,6 @@ nx-osv9000-4-extremely-long-name
                      Eth1/2          120        BR          Ethernet1/1   
 nx-osv9000-2         Eth1/3          120        BR          Ethernet1/3   
 Total entries displayed: 3
-
 ```
 
 **Help:** execute the command "show lldp neighbors"
@@ -8284,388 +7962,198 @@ Total entries displayed: 3
 - cisco_nxos>
 - cisco_nxos#
 
-### show version
+### show lldp neighbors detail
 
 **Output:**
 ```
-Documents: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html
+Capability codes:
+  (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+  (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+ Device ID            Local Intf      Hold-time  Capability  Port ID  
+
+Chassis id: 0014.1c57.a48b
+Port id: Fa1/0/9
+Local Port id: mgmt0
+Port Description: FastEthernet1/0/9
+System Name: Switch.cisco.com
+System Description: Cisco IOS Software, C3750 Software (C3750-IPBASEK9-M), Version 12.2(44)SE2, RELEASE SOFTWARE (fc2)
+Copyright (c) 1986-2008 by Cisco Systems, Inc.
+Compiled Thu 01-May-08 15:42 by antonino
+Time remaining: 91 seconds
+System Capabilities: B, R
+Enabled Capabilities: B, R
+Management Address: 10.30.140.1
+Vlan ID: 100
+
+
+Chassis id: 5087.89a1.d8d6
+Port id: Ethernet1/1
+Local Port id: Eth1/1
+ Port Description: Ethernet1/1
+System Name: n9k2.company.com
+System Description: Cisco Nexus Operating System (NX-OS) Software 7.0(3)I4(1)
+TAC support: http://www.cisco.com/tac
  Copyright (c) 2002-2016, Cisco Systems, Inc. All rights reserved.
-The copyrights to certain works contained herein are owned by
-other third parties and are used and distributed under license.
-Some parts of this software are covered under the GNU Public
-License. A copy of the license is available at
-http://www.gnu.org/licenses/gpl.html.
-
-Software
-  BIOS:      version 3.6.0
-  Power Sequencer Firmware: 
-             Module 1: v7.0
-             Module 1: v1.0
-             Module 2: v1.0
-             Module 3: v1.0
-  Microcontroller Firmware:        version v1.0.0.2
-  QSFP Microcontroller Firmware:   
-             Module not detected
-  CXP Microcontroller Firmware:   
-             Module not detected
-  kickstart: version 7.1(4)N1(1)
-  system:    version 7.1(4)N1(1)
-  BIOS compile time:       05/09/2012
-  kickstart image file is: bootflash:///n5000-uk9-kickstart.7.1.4.N1.1.bin
-  kickstart compile time:  9/2/2016 10:00:00 [09/02/2016 19:37:35]
-  system image file is:    bootflash:///n5000-uk9.7.1.4.N1.1.bin
-  system compile time:     9/2/2016 10:00:00 [09/02/2016 21:16:21]
+Time remaining: 93 seconds
+System Capabilities: B, R
+Enabled Capabilities: B, R
+Management Address: 10.30.140.21
+Vlan ID: 1
 
 
-Hardware
-  cisco Nexus 5596 Chassis ("O2 48X10GE/Modular Supervisor")
-  Intel(R) Xeon(R) CPU         with 8253848 kB of memory.
-  Processor Board ID FOC17153X08
+Chassis id: 5087.89a1.d8d7
+Port id: Ethernet1/2
+Local Port id: Eth1/2
+Port Description: Ethernet1/2
+System Name: n9k2.company.com
+System Description: Cisco Nexus Operating System (NX-OS) Software 7.0(3)I4(1)
+TAC support: http://www.cisco.com/tac
+Copyright (c) 2002-2016, Cisco Systems, Inc. All rights reserved.
+Time remaining: 93 seconds
+System Capabilities: B, R
+Enabled Capabilities: B, R
+Management Address: 10.30.140.21
+ Vlan ID: 1
 
-  Device name: IEDP02-N5K-SW01
-  bootflash:    2007040 kB
 
-Kernel uptime is 749 day(s), 15 hour(s), 17 minute(s), 48 second(s)
+Chassis id: 547f.eeaf.7818
+Port id: Ethernet1/49
+Local Port id: Eth2/2
+Port Description: Ethernet1/49
+System Name: N3K.cisconxapi.com
+ System Description: Cisco Nexus Operating System (NX-OS) Software 6.0(2)U4(1)
+ TAC support: http://www.cisco.com/tac
+Copyright (c) 2002-2014, Cisco Systems, Inc. All rights reserved.
+Time remaining: 93 seconds
+System Capabilities: B, R
+Enabled Capabilities: B, R
+Management Address: 10.30.140.30
+Vlan ID: 1
 
-Last reset at 958444 usecs after  Wed Nov  1 21:20:35 2017
-
-  Reason: Disruptive upgrade
-  System version: 7.0(7)N1(1)
-  Service: 
-
-plugin
-  Core Plugin, Ethernet Plugin, Fc Plugin
-
+Total entries displayed: 4
 ```
 
-**Help:** execute the command "show version"
+**Help:** execute the command "show lldp neighbors detail"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### terminal width 511
-
-**Output:** None
-
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show bfd neighbors
+### show mac address-table
 
 **Output:**
 ```
-OurAddr         NeighAddr       LD/RD                 RH/RS           Holdown(mult)     State       Int                   Vrf                              Type
-172.23.0.18     172.23.0.19     1090540255/1090566886 Up              862(3)            Up          Eth1/10               default                          SH
-172.23.0.22     172.23.0.23     1090540256/1090561429 Up              647(3)            Up          Eth1/12               default                          SH
-172.23.0.20     172.23.0.21     1090540257/1090566968 Up              729(3)            Up          Eth1/11               default                          SH
-
+Legend:
+        * - primary entry, G - Gateway MAC, (R) - Routed MAC, O - Overlay MAC
+        age - seconds since last seen,+ - primary entry using vPC Peer-Link,
+        (T) - True, (F) - False
+     VLAN       MAC Address       Type     age    Secure  NTFY     Ports
+------------+-----------------+----------+-------+------+------+------------------
+G    100      5087.89a1.de75     static     -        F      F    sup-eth1(R)
+*    145        000a.000a.000a   static     -        F      F    Drop
+*    145        000e.000e.000e   static     -        F      F    Po10
 ```
 
-**Help:** execute the command "show bfd neighbors"
+**Help:** execute the command "show mac address-table"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show fabricpath route
+### show module
 
 **Output:**
 ```
-FabricPath Unicast Route Table
-'a/b/c' denotes ftag/switch-id/subswitch-id
-'[x/y]' denotes [admin distance/metric]
-ftag 0 is local ftag
-subswitch-id 0 is default subswitch-id
-FabricPath Unicast Route Table for Topology-Default
-0/10/0, number of next-hops: 0
-  via ----, [60/0], 5 day/s 11:35:56, local
-1/20/0, number of next-hops: 1
-  via Po2, [115/40], 5 day/s 11:35:23, isis_l2mp-default
-  via Eth7/2, [115/40], 5 day/s 11:35:28, isis_l2mp-default
-1/35/0, number of next-hops: 0
-  via ----, [60/0], 5 day/s 11:35:26, local
+Mod  Ports  Module-Type                      Model              Status
+---  -----  -------------------------------- ------------------ ------------
+1    48     1000 Mbps Optical Ethernet Modul N7K-M148GS-11      ok
+3    0      Supervisor Module-2                                 powered-up
+4    0      Supervisor Module-2              N7K-SUP1           powered-dn
+5    0      Supervisor Module-2              N7K-SUP1           active *
+6    0      Supervisor Module-2              N7K-SUP1           ha-standby
 
+
+Mod  Power-Status  Reason 
+---  ------------  ---------------------------
+4    powered-dn     Configured Power down
+
+Mod  Sw              Hw
+---  --------------  ------
+3    4.1(3)          0.202   
+4    4.1(3)          0.805   
+
+Mod  MAC-Address(es)                         Serial-Num
+---  --------------------------------------  ----------
+3    00-1b-54-c2-ed-d0 to 00-1b-54-c2-ee-04  JAF1219AGFE
+4    00-1b-54-c0-ff-10 to 00-1b-54-c0-ff-18  JAB114000BV
+
+Mod  Online Diag Status
+---  ------------------
+3    Pass
+4    Pass
+
+Xbar Ports  Module-Type                      Model              Status
+---  -----  -------------------------------- ------------------ ------------
+1    0      Fabric Module 1                  N7K-C7018-FAB-1    ok
+
+Xbar Sw              Hw
+---  --------------  ------
+1    NA              0.101   
+
+Xbar MAC-Address(es)                         Serial-Num
+---  --------------------------------------  ----------
+1    NA                                      JAF1225AGHJ
+
+* this terminal session 
 ```
 
-**Help:** execute the command "show fabricpath route"
+**Help:** execute the command "show module"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show interface breakout
+### show nve peers
 
 **Output:**
 ```
-
---------------------------------------------------------------------------------
-Parent                     Breakout Map    Breakout Ports
---------------------------------------------------------------------------------
-Eth1/2                     10g-4x          Eth1/2/1-4
-Eth1/3                     10g-4x          Eth1/3/1-4
-Eth1/4                     10g-4x          Eth1/4/1-4
-Eth1/5                     10g-4x          Eth1/5/1-4
-Eth1/6                     10g-4x          Eth1/6/1-4
-Eth1/11                    10g-4x          Eth1/11/1-4
-Eth1/13                    10g-4x          Eth1/13/1-4
-Eth1/14                    10g-4x          Eth1/14/1-4
-Eth1/16                    10g-4x          Eth1/16/1-4
-Eth1/19                    10g-4x          Eth1/19/1-4
-Eth1/22                    10g-4x          Eth1/22/1-4
-
+Interface Peer-IP                                 State LearnType Uptime   Router-Mac      
+--------- --------------------------------------  ----- --------- -------- -----------------
+nve1      192.168.111.41                          Up    CP        2y11w    0200.c0a8.5422   
+nve1      192.168.111.47                          Up    CP        2y11w    2416.9dd1.4117  
+nve1      192.168.111.48                          Up    CP        2y11w    cc7f.76a5.3a77  
+nve1      192.168.111.52                          Up    CP        2y11w    2416.9dd1.8137  
+nve1      192.168.111.81                          Up    CP        2y11w    0200.c0a8.545b  
 ```
 
-**Help:** execute the command "show interface breakout"
+**Help:** execute the command "show nve peers"
 
 **Prompt:**
 - cisco_nxos>
 - cisco_nxos#
 
-### show interface capabilities
+### show nve vni
 
 **Output:**
 ```
-Ethernet1/1
-  Model:                 N5600-48Q-12Q-FIX
-  Type (SFP capable):    QSFP-40G-SR-BD
-  Speed:                 40000
-  Duplex:                full
-  Trunk encap. type:     802.1Q
-  Channel:               yes
-  Broadcast suppression: no
-  Flowcontrol:           rx-(off/on),tx-(off/on)
-  Rate mode:             none
-  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
-  CoS rewrite:           no
-  ToS rewrite:           no
-  SPAN:                  yes
-  UDLD:                  yes
-  MDIX:                  no
-  Link Debounce:         yes
-  Link Debounce Time:    yes
-  dot1Q-tunnel mode:     yes
-  Pvlan Trunk capable:   yes
-  TDR capable:           no
-  FabricPath capable:    yes
-  Port mode:             Switched
-  FEX Fabric:            yes
-
-Ethernet101/1/23
-  Model:                 N2K-C2348TQ-10G-E
-  Type (Non SFP):        1G/10G
-  Speed:                 100,1000,10000,auto
-  Duplex:                full
-  Trunk encap. type:     802.1Q
-  Channel:               yes
-  Broadcast suppression: no
-  Flowcontrol:           rx-(off/on),tx-(off/on)
-  Rate mode:             none
-  QOS scheduling:        rx-(6q1t),tx-(1p6q0t)
-  CoS rewrite:           no
-  ToS rewrite:           no
-  SPAN:                  yes
-  UDLD:                  no
-  MDIX:                  no
-  Link Debounce:         yes
-  Link Debounce Time:    yes
-  dot1Q-tunnel mode:     yes
-  Pvlan Trunk capable:   yes
-  TDR capable:           no
-  FabricPath capable:    no
-  Port mode:             Switched
-  FEX Fabric:            no
-
-
+Codes: CP - Control Plane        DP - Data Plane         
+       UC - Unconfigured         SA - Suppress ARP       
+       SU - Suppress Unknown Unicast
+       Xconn - Crossconnect     
+       MS-IR - Multisite Ingress Replication
+Interface VNI      Multicast-group   State Mode Type [BD/VRF]      Flags
+--------- -------- ----------------- ----- ---- ------------------ -----
+nve1      1006    UnicastBGP          Up    CP   L2 [6]             SA   
+nve1      1105    UnicastBGP          Up    CP   L2 [1105]          SA  
+nve1      2111    UnicastBGP          Up    CP   L2 [111]           SA  
+nve1      3098    UnicastBGP          Up    CP   L2 [98]            SA  
+nve1      10301 n/a                   Up    CP   L3 [BLU]               
+nve1      10302 n/a                   Up    CP   L3 [GRN]               
+nve1      10303 n/a                   Up    CP   L3 [AMB]                              
+nve1      10306 n/a                   Up    CP   L3 [GRY]               
 ```
 
-**Help:** execute the command "show interface capabilities"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface status err-disabled
-
-**Output:**
-```
---------------------------------------------------------------------------------
-Port         Name               Status             Reason
---------------------------------------------------------------------------------
-Eth1         tenGigE 0/0/2/0 as linkFlapErr        linkFlapErrDisabled
-Eth2         --                 linkFlapErr        linkFlapErrDisabled
-Eth3         --                 err-disabled       Error disabled
-Eth4         SD 180848 OFFER EM linkFlapErr        linkFlapErrDisabled
-
-```
-
-**Help:** execute the command "show interface status err-disabled"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show interface switchport
-
-**Output:**
-```
-Name: Ethernet1/1
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: access
-  Access Mode VLAN: 3 (Vlan not created)
-  Trunking Native Mode VLAN: 1 (default)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-Name: Ethernet1/2
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: trunk
-  Access Mode VLAN: 1 (default)
-  Trunking Native Mode VLAN: 5 (Vlan not created)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-Name: Ethernet1/3
-  Switchport: Enabled
-  Switchport Monitor: Not enabled
-  Switchport Isolated : Not enabled
-  Switchport Block Multicast: Not enabled
-  Switchport Block Unicast: Not enabled
-  Operational Mode: trunk
-  Access Mode VLAN: 1 (default)
-  Trunking Native Mode VLAN: 1 (default)
-  Trunking VLANs Allowed: 1-4094
-  Voice VLAN: none
-  Extended Trust State : not trusted [COS = 0]
-  Administrative private-vlan primary host-association: none
-  Administrative private-vlan secondary host-association: none
-  Administrative private-vlan primary mapping: none
-  Administrative private-vlan secondary mapping: none
-  Administrative private-vlan trunk native VLAN: none
-  Administrative private-vlan trunk encapsulation: dot1q
-  Administrative private-vlan trunk normal VLANs: none
-  Administrative private-vlan trunk private VLANs: none
-  Operational private-vlan: none
-
-```
-
-**Help:** execute the command "show interface switchport"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip arp detail vrf all
-
-**Output:**
-```
-Flags: * - Adjacencies learnt on non-active FHRP router
-       + - Adjacencies synced via CFSoE
-       # - Adjacencies Throttled for Glean
-       CP - Added via L2RIB, Control plane Adjacencies
-       PS - Added via L2RIB, Peer Sync
-       RO - Re-Originated Peer Sync Entry
-
-IP ARP Table for all contexts
-Total number of entries: 350
-Address         Age       MAC Address     Interface        Physical Interface  Flags    VRF Name
-10.255.0.2      00:09:24  14a2.a070.52a7  Vlan666          port-channel1000             default
-10.255.0.1      00:17:20  14a2.a070.52a0  mgmt0            mgmt0                        management
-172.23.5.8      00:06:48  b8a3.771c.255b  Ethernet1/49     Ethernet1/49                 default
-172.23.5.10     00:06:50  d477.98e9.c6bf  Ethernet1/50     Ethernet1/50                 default
-10.233.6.3      00:14:55  14a2.a070.52a7  Vlan3            port-channel1000             PRIMARY
-10.233.6.5      00:11:24  c8e7.f0fb.d6a7  Vlan3            Ethernet1/8                  PRIMARY
-10.233.6.6      00:14:04  d0d0.fd61.ecc1  Vlan3            Ethernet1/9         +        PRIMARY
-10.233.6.7      00:12:05  44aa.502f.c150  Vlan3            Ethernet1/13                 PRIMARY
-10.233.6.8      00:07:12  8418.88ac.9741  Vlan3            port-channel12               PRIMARY
-10.233.6.9      00:13:41  8418.88aa.c641  Vlan3            port-channel13               PRIMARY
-10.233.6.10     00:05:29  0881.f4ae.4841  Vlan3            port-channel14               PRIMARY
-10.233.6.11     00:10:51  b0a8.6e03.ce81  Vlan3            port-channel11               PRIMARY
-10.233.6.12     00:04:35  2c21.7299.8ac1  Vlan3            Ethernet1/6                  PRIMARY
-10.233.6.13     00:13:25  78fe.3d35.7b41  Vlan3            Ethernet1/21                 PRIMARY
-10.233.6.14     00:09:43  8071.1fe7.f041  Vlan3            Ethernet1/29                 PRIMARY
-10.233.6.15     00:06:38  8071.1fe7.ef41  Vlan3            Ethernet1/28                 PRIMARY
-10.233.6.16     00:17:54  3c61.04f9.6bc1  Vlan3            Ethernet1/12                 PRIMARY
-10.233.6.18     00:13:17  2c21.7298.8b41  Vlan3            Ethernet1/10                 PRIMARY
-10.233.6.19     00:11:53  2c21.7299.8e81  Vlan3            Ethernet1/11                 PRIMARY
-10.233.6.20     00:00:01  28c0.da35.dc01  Vlan3            Ethernet1/16                 PRIMARY
-10.233.6.21     00:01:08  c8e7.f0fb.c487  Vlan3            port-channel10               PRIMARY
-10.233.6.30     00:09:24  7819.f79a.82c1  Vlan3            Ethernet1/2                  PRIMARY
-10.233.6.31     00:01:54  2c21.728a.0581  Vlan3            Ethernet1/22                 PRIMARY
-10.233.6.32     00:02:05  78fe.3d35.a101  Vlan3            Ethernet1/1         +        PRIMARY
-10.233.6.33     00:05:25  2c21.7296.b501  Vlan3            Ethernet1/3                  PRIMARY
-10.233.6.34     00:16:36  2c21.7296.8c81  Vlan3            Ethernet1/23                 PRIMARY
-10.233.6.35     00:08:06  2c21.7293.a401  Vlan3            Ethernet1/24                 PRIMARY
-10.233.6.36     00:14:56  2c21.7296.9081  Vlan3            Ethernet1/4                  PRIMARY
-10.233.6.37     00:12:56  7819.f79b.8801  Vlan3            Ethernet1/25                 PRIMARY
-10.233.6.38     00:14:49  2c21.7296.a401  Vlan3            Ethernet1/26                 PRIMARY
-10.233.6.39     00:17:42  2c21.3111.0701  Vlan3            port-channel18               PRIMARY
-10.233.6.48     00:08:50  7c25.8629.ab83  Vlan3            Ethernet1/15                 PRIMARY
-10.233.6.50     00:13:21  f8c0.01c9.e501  Vlan3            port-channel15               PRIMARY
-10.233.6.60     00:05:02  8418.88ac.9ec1  Vlan3            port-channel16      +        PRIMARY
-10.233.6.70     00:12:04  8418.88ac.a0c1  Vlan3            port-channel17               PRIMARY
-10.233.6.193    00:03:29  2829.862b.0dfc  Vlan3            port-channel13               PRIMARY
-10.233.6.194    00:02:38  2829.863f.5708  Vlan3            Ethernet1/2                  PRIMARY
-10.233.6.196    00:02:15  2829.8615.4bd3  Vlan3            Ethernet1/4                  PRIMARY
-10.233.6.197    00:08:54  2829.8617.5b14  Vlan3            Ethernet1/21                 PRIMARY
-10.233.6.1         -      0000.5e00.0101  Vlan9            -
-
-```
-
-**Help:** execute the command "show ip arp detail vrf all"
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
-### show ip eigrp neighbors
-
-**Output:**
-```
-IP-EIGRP neighbors for process 65535 VRF default
-H Address Interface Hold Uptime SRTT RTO Q Seq
-(sec) (ms) Cnt Num
-7 10.20.150.2 Po2001 12 03:44:02 20 200 0 10331
-6 10.20.200.2 Po2000 14 03:44:02 13 200 0 158157
-5 10.40.1.1 Eth1/26 13 03:44:14 16 200 0 158164
-4 10.50.2.1 Eth2/5 12 03:44:14 16 200 0 158166
-3 10.50.1.1 Eth2/6 13 03:44:15 16 200 0 158165
-2 10.50.3.1 Eth2/7 11 03:44:15 13 200 0 158167
-1 10.20.5.2 Eth3/11 14 03:44:16 18 200 0 158158
-0 10.20.6.2 Eth3/12 11 03:44:17 14 200 0 158163
-
-```
-
-**Help:** execute the command "show ip eigrp neighbors"
+**Help:** execute the command "show nve vni"
 
 **Prompt:**
 - cisco_nxos>
@@ -8848,11 +8336,451 @@ VNI: 603006
   Provision State     : vni-add-complete
   Vlan-BD             : 3006
   SVI State           : DOWN [vrf-id: 0] [L3VNI: 0]
-
-
 ```
 
 **Help:** execute the command "show nve vni interface nve 1 detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show port-channel summary
+
+**Output:**
+```
+Flags:  D - Down        P - Up in port-channel (members)
+        I - Individual  H - Hot-standby (LACP only)
+        s - Suspended   r - Module-removed
+        S - Switched    R - Routed
+        U - Up (port-channel)
+        M - Not in use. Min-links not met
+--------------------------------------------------------------------------------
+ Group Port-       Type     Protocol  Member Ports
+      Channel
+--------------------------------------------------------------------------------
+1     Po1(RU)     Eth      LACP      Eth1/1(P)    Eth2/1(P)
+2     Po2(RU)     Eth      LACP      Eth1/2(P)    Eth2/2(P)
+3     Po3(RU)     Eth      LACP      Eth1/3(P)    Eth2/3(P)
+4     Po4(RU)     Eth      LACP      Eth1/4(P)    Eth2/4(P)
+12    Po12(RU)    Eth      LACP      Eth1/5(P)    Eth2/5(P)
+13    Po13(RU)    Eth      LACP      Eth1/6(P)    Eth2/6(P)
+14    Po14(RU)    Eth      LACP      Eth1/7(P)    Eth2/7(P)
+801   Po801(RU)   Eth      LACP      Eth5/6(P)    Eth6/6(P)
+802   Po802(RU)   Eth      LACP      Eth5/7(P)    Eth6/7(P)
+803   Po803(RU)   Eth      LACP      Eth15/17(P)  Eth16/17(P)
+804   Po804(RU)   Eth      LACP      Eth15/24(P)  Eth16/24(P)
+811   Po811(RU)   Eth      LACP      Eth15/8(P)   Eth15/28(P)  Eth16/8(P)
+                                     Eth16/28(P)
+812   Po812(RU)   Eth      LACP      Eth15/36(P)  Eth16/36(P)  Eth17/8(P)
+                                     Eth18/8(P)
+813   Po813(RU)   Eth      LACP      Eth15/15(P)  Eth16/15(P)
+814   Po814(RU)   Eth      LACP      Eth15/22(P)  Eth16/22(P)
+821   Po821(RU)   Eth      LACP      Eth15/30(P)  Eth16/30(P)  Eth17/29(P)
+                                     Eth18/29(P)
+822   Po822(RU)   Eth      LACP      Eth15/38(P)  Eth16/38(P)  Eth17/30(P)
+                                     Eth18/30(P)
+823   Po823(RU)   Eth      LACP      Eth3/9(P)    Eth4/9(P)
+824   Po824(RU)   Eth      LACP      Eth3/10(P)   Eth4/10(P)
+825   Po825(RU)   Eth      LACP      Eth3/3(P)
+826   Po826(RU)   Eth      LACP      Eth4/3(P)
+827   Po827(RU)   Eth      LACP      Eth5/3(P)
+828   Po828(RU)   Eth      LACP      Eth6/3(P)
+```
+
+**Help:** execute the command "show port-channel summary"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show processes cpu
+
+**Output:**
+```
+CPU utilization for five seconds: 15%/1%; one minute: 12%; five minutes: 10%
+PID    Runtime(ms)  Invoked   uSecs  5Sec    1Min    5Min    TTY  Process
+-----  -----------  --------  -----  ------  ------  ------  ---  -----------
+    1         6170      1011      6   0.00%   0.00%  0.00%   -    init
+ 2828           20         6      3   0.00%   0.00%  0.00%   -    portmap
+ 2866           20         8      2   0.00%   0.00%  0.00%   -    rpc.statd
+ 2876         3490     12448      0   0.92%   0.34%  0.10%   -    sysmgr
+ 3383           80         6     13   0.00%   0.00%  0.00%   -    xinetd
+ 3384           40         5      8   0.00%   0.00%  0.00%   -    tftpd
+ 3385         1650      6566      0   0.00%   0.01%  0.01%   -    syslogd
+ 3386          450        51      8   0.00%   0.00%  0.00%   -    sdwrapd
+ 3387          650        92      7   0.00%   0.00%  0.00%   -    pfm_dummy
+ 3388         2920      4747      0   0.00%   0.03%  0.03%   -    platform
+ 3400          150       731      0   0.00%   0.00%  0.00%   -    klogd
+ 3403          560       863      0   0.00%   0.00%  0.00%   -    vshd
+ 3404          670      1698      0   0.00%   0.00%  0.00%   -    vpc_config_sync
+ 3405          270      2214      0   0.00%   0.00%  0.00%   -    smm
+ 3406          620      1399      0   0.00%   0.00%  0.00%   -    session-mgr
+ 3407          730      4464      0   0.00%   0.00%  0.00%   -    psshelper
+ 3408          820      1531      0   0.00%   0.00%  0.00%   -    pixm
+ 3410          580     19429      0   0.00%   0.03%  0.03%   -    pdsd
+```
+
+**Help:** execute the command "show processes cpu"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show route-map
+
+**Output:**
+```
+route-map RM-TEST-OUT, permit, sequence 10 
+  Match clauses:
+    as-path (as-path filter): AS-TEST 
+  Set clauses:
+route-map RM-BGP-TO-OSPF, deny, sequence 10 
+  Match clauses:
+    tag: 12345
+  Set clauses:
+route-map RM-BGP-TO-OSPF, permit, sequence 20 
+  Match clauses:
+  Set clauses:
+route-map RM-ISP1-IN, permit, sequence 1000 
+  Match clauses:
+  Set clauses:
+    local-preference 300
+route-map RM-ISP1-OUT, permit, sequence 1000 
+  Match clauses:
+    as-path (as-path filter): AS-ISP2 
+  Set clauses:
+route-map RM-ISP1-MAITENANCE, permit, sequence 10 
+  Match clauses:
+  Set clauses:
+    local-preference 50
+route-map RM-FW-LP, permit, sequence 10 
+  Match clauses:
+  Set clauses:
+    local-preference 25
+route-map RM-FW-MAITENANCE, permit, sequence 10 
+  Match clauses:
+  Set clauses:
+route-map RM-FW-OUTBOUND, permit, sequence 10 
+  Match clauses:
+    as-path (as-path filter): TEST-AS-FW 
+  Set clauses:
+
+route-map RM-X-SIDE-INTERNAL, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PF-PATH-X-INTERNAL 
+  Set clauses:
+route-map RM-Z-SIDE-INTERNAL, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PF-PATH-Z-INTERNAL 
+  Set clauses:
+ route-map RM-FILTER-IN, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PL-PERMIT-IN 
+  Set clauses:
+route-map TEST_THIS, permit, sequence 10 
+  Match clauses:
+    ip address (access-lists): AL_TEST_TEST 
+  Set clauses:
+    ip next-hop 2.2.2.2 
+route-map RM-N3K1-TO-N3K2, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PF-N3K1-TO-N3K2 
+  Set clauses:
+    extcommunity RT:100:1
+route-map RM-N3K2-TO-N3K1, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PF-N3K2-TO-N3K1 
+  Set clauses:
+    extcommunity RT:200:1
+route-map RM-PATH-A-DEFAULT-ROUTE, permit, sequence 10 
+  Match clauses:
+    ip address prefix-lists: PF-A-DEFAULT-ROUTE 
+  Set clauses:
+```
+
+**Help:** execute the command "show route-map"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show spanning-tree root
+
+**Output:**
+```
+                                        Root  Hello Max Fwd
+Vlan                   Root ID          Cost  Time  Age Dly  Root Port
+---------------- -------------------- ------- ----- --- ---  ----------------
+VLAN0001             1 1211.a111.1111       0    2   20  10  This bridge is root
+VLAN0002            10 1211.a111.1112       3    2   20  10    port-channel10
+VLAN0003          1111 1211.a111.1113       1    2   20  10     port-channel1
+VLAN0004            11 1211.a111.1114       0    2   20  10  This bridge is root
+```
+
+**Help:** execute the command "show spanning-tree root"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show switching-mode
+
+**Output:**
+```
+Configured switching mode: Store and Forward
+
+Module Number     Operational Mode 
+     1            Store and Forward
+     2            Cut-Through 
+```
+
+**Help:** execute the command "show switching-mode"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vdc
+
+**Output:**
+```
+
+Switchwide mode is m1 f1 m1xl f2 m2xl f2e f3
+
+vdc_id  vdc_name                          state               mac                 type        lc
+------  --------                          -----               ----------          ---------   ------
+1       not1.barr1                        active              e4:c7:22:0c:67:c1   Admin       None
+2       foo1.bar1.bazz1                   active              e4:c7:22:0c:67:c2   Ethernet    f2e
+3       foo2.bar2.bazz2                   active              e4:c7:22:0c:67:c3   Ethernet    f2e
+```
+
+**Help:** execute the command "show vdc"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show version
+
+**Output:**
+```
+Documents: http://www.cisco.com/en/US/products/ps9372/tsd_products_support_series_home.html
+ Copyright (c) 2002-2016, Cisco Systems, Inc. All rights reserved.
+The copyrights to certain works contained herein are owned by
+other third parties and are used and distributed under license.
+Some parts of this software are covered under the GNU Public
+License. A copy of the license is available at
+http://www.gnu.org/licenses/gpl.html.
+
+Software
+  BIOS:      version 3.6.0
+  Power Sequencer Firmware: 
+             Module 1: v7.0
+             Module 1: v1.0
+             Module 2: v1.0
+             Module 3: v1.0
+  Microcontroller Firmware:        version v1.0.0.2
+  QSFP Microcontroller Firmware:   
+             Module not detected
+  CXP Microcontroller Firmware:   
+             Module not detected
+  kickstart: version 7.1(4)N1(1)
+  system:    version 7.1(4)N1(1)
+  BIOS compile time:       05/09/2012
+  kickstart image file is: bootflash:///n5000-uk9-kickstart.7.1.4.N1.1.bin
+  kickstart compile time:  9/2/2016 10:00:00 [09/02/2016 19:37:35]
+  system image file is:    bootflash:///n5000-uk9.7.1.4.N1.1.bin
+  system compile time:     9/2/2016 10:00:00 [09/02/2016 21:16:21]
+
+
+Hardware
+  cisco Nexus 5596 Chassis ("O2 48X10GE/Modular Supervisor")
+  Intel(R) Xeon(R) CPU         with 8253848 kB of memory.
+  Processor Board ID FOC17153X08
+
+  Device name: IEDP02-N5K-SW01
+  bootflash:    2007040 kB
+
+Kernel uptime is 749 day(s), 15 hour(s), 17 minute(s), 48 second(s)
+
+Last reset at 958444 usecs after  Wed Nov  1 21:20:35 2017
+
+  Reason: Disruptive upgrade
+  System version: 7.0(7)N1(1)
+  Service: 
+
+plugin
+  Core Plugin, Ethernet Plugin, Fc Plugin
+```
+
+**Help:** execute the command "show version"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vlan
+
+**Output:**
+```
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Po1, Eth1/53, Eth1/54
+
+VLAN Type         Vlan-mode
+---- -----        ----------
+1    enet         CE
+
+Remote SPAN VLANs
+-------------------------------------------------------------------------------
+
+Primary  Secondary  Type             Ports
+-------  ---------  ---------------  -------------------------------------------
+```
+
+**Help:** execute the command "show vlan"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vpc
+
+**Output:**
+```
+Legend:
+                (*) - local vPC is down, forwarding via vPC peer-link
+
+vPC domain id                     : 100
+Peer status                       : peer link is down
+vPC keep-alive status             : Suspended (Destination IP not reachable)
+Configuration consistency status  : failed
+ Per-vlan consistency status       : success
+Configuration inconsistency reason: Consistency Check Not Performed
+Type-2 inconsistency reason       : Consistency Check Not Performed
+vPC role                          : none established
+ Number of vPCs configured         : 0
+Peer Gateway                      : Disabled
+ Dual-active excluded VLANs        : -
+Graceful Consistency Check        : Disabled (due to peer configuration)
+Auto-recovery status              : Disabled
+ Delay-restore status              : Timer is off.(timeout = 30s)
+Delay-restore SVI status          : Timer is off.(timeout = 10s)
+
+vPC Peer-link status
+---------------------------------------------------------------------
+id   Port   Status Active vlans
+--   ----   ------ --------------------------------------------------
+1    Po12   down   -
+2    Po13   up     10
+```
+
+**Help:** execute the command "show vpc"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vrf
+
+**Output:**
+```
+VRF-Name                           VRF-ID State   Reason
+VPC_KEEPALIVE                           3 Up      --
+default                                 1 Up      --
+VRF1                                    4 Up      --
+VRF2                                    7 Up      --
+VRF-NAME-3                              8 Up      --
+VRF_NAME_4                              5 Up      --
+VRFNAME5                                6 Up      --
+management                              2 Up      --
+```
+
+**Help:** execute the command "show vrf"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vrf detail
+
+**Output:**
+```
+VRF-Name: HUB, VRF-ID: 9, State: Up
+    VPNID: 123:456
+    RD: 172.21.111.112:197
+    Max Routes: 0  Mid-Threshold: 0
+    Table-ID: 0x80000009, AF: IPv6, Fwd-ID: 0x80000009, State: Up
+    Table-ID: 0x00000009, AF: IPv4, Fwd-ID: 0x00000009, State: Up
+
+VRF-Name: INSTRUMENTS, VRF-ID: 10, State: Up
+    VPNID: 3211:65
+    RD: 172.21.111.112:108
+    Max Routes: 0  Mid-Threshold: 0
+    Table-ID: 0x8000000a, AF: IPv6, Fwd-ID: 0x8000000a, State: Up
+    Table-ID: 0x0000000a, AF: IPv4, Fwd-ID: 0x0000000a, State: Up
+
+VRF-Name: LAB, VRF-ID: 11, State: Up
+    VPNID: 890:765
+    RD: 172.21.123.111:107
+    Max Routes: 0  Mid-Threshold: 0
+    Table-ID: 0x8000000b, AF: IPv6, Fwd-ID: 0x8000000b, State: Up
+    Table-ID: 0x0000000b, AF: IPv4, Fwd-ID: 0x0000000b, State: Up
+```
+
+**Help:** execute the command "show vrf detail"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### show vrf interface
+
+**Output:**
+```
+Interface                 VRF-Name                        VRF-ID  Site-of-Origin
+Vlan6001                  ADMIN                                6  --
+Vlan6700                  ADMIN                                6  --
+Vlan5302                  AXNET                                7  --
+Vlan7202                  AXNET                                7  --
+Vlan6302                  AXNET                                7  --
+Vlan5301                  MARKING                              4  --
+Vlan7201                  MARKING                              4  --
+Vlan6301                  MARKING                              4  --
+Ethernet1/10              Keepalive                            3  --
+Vlan1                     default                              1  --
+Vlan100                   default                              1  --
+loopback0                 default                              1  --
+loopback1                 default                              1  --
+Ethernet1/25              default                              1  --
+Ethernet1/30              default                              1  --
+Ethernet1/17              default                              1  --
+Ethernet1/42              default                              1  --
+mgmt0                     management                           2  --
+```
+
+**Help:** execute the command "show vrf interface"
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### terminal length 0
+
+**Output:** None
+
+**Help:** set the terminal width to maximum
+
+**Prompt:**
+- cisco_nxos>
+- cisco_nxos#
+
+### terminal width 511
+
+**Output:** None
+
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - cisco_nxos>

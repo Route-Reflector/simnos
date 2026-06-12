@@ -1,0 +1,7 @@
+command: show ntp associations
+type: simnos
+help: execute the command "show ntp associations"
+mode:
+- user
+- enable
+output: show_ntp_associations.txt

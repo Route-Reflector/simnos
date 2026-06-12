@@ -1,0 +1,7 @@
+command: nmcli connection show
+type: simnos
+help: execute the command "nmcli connection show"
+mode:
+- user
+- enable
+output: nmcli_connection_show.txt

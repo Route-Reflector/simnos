@@ -1,0 +1,7 @@
+command: display device manuinfo
+type: simnos
+help: execute the command "display device manuinfo"
+mode:
+- user
+- config
+output: display_device_manuinfo.txt

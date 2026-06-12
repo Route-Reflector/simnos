@@ -1,0 +1,6 @@
+command: disable cli prompting
+type: simnos
+help: Execute the command disable cli prompting. This automatically generated.
+mode:
+- user
+- enable

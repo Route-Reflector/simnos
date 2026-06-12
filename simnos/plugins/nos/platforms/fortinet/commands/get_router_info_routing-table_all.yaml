@@ -1,0 +1,6 @@
+command: get router info routing-table all
+type: simnos
+help: execute the command "get router info routing-table all"
+mode:
+- user
+output: get_router_info_routing-table_all.txt

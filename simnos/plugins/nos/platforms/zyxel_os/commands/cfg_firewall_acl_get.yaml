@@ -1,0 +1,7 @@
+command: cfg firewall acl get
+type: simnos
+help: execute the command "cfg firewall acl get"
+mode:
+- user
+- enable
+output: cfg_firewall_acl_get.txt

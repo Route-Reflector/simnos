@@ -1,0 +1,7 @@
+command: show asp table vpn-context detail
+type: simnos
+help: execute the command "show asp table vpn-context detail"
+mode:
+- user
+- enable
+output: show_asp_table_vpn-context_detail.txt

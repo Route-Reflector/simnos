@@ -1,0 +1,7 @@
+command: show ethernet-switching table
+type: simnos
+help: execute the command "show ethernet-switching table"
+mode:
+- user
+- enable
+output: show_ethernet-switching_table.txt

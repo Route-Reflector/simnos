@@ -1,0 +1,7 @@
+command: show ap database long
+type: simnos
+help: execute the command "show ap database long"
+mode:
+- user
+- enable
+output: show_ap_database_long.txt

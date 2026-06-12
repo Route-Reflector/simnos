@@ -1,0 +1,6 @@
+command: show arp
+type: simnos
+help: execute the command "show arp"
+mode:
+- user
+output: show_arp.txt

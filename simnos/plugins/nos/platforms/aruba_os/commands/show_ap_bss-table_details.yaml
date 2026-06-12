@@ -1,0 +1,7 @@
+command: show ap bss-table details
+type: simnos
+help: execute the command "show ap bss-table details"
+mode:
+- user
+- enable
+output: show_ap_bss-table_details.txt

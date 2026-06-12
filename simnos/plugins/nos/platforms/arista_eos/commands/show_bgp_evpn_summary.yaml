@@ -1,0 +1,7 @@
+command: show bgp evpn summary
+type: simnos
+help: execute the command "show bgp evpn summary"
+mode:
+- user
+- enable
+output: show_bgp_evpn_summary.txt

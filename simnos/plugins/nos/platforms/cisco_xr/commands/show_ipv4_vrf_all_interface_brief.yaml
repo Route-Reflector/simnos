@@ -1,0 +1,7 @@
+command: show ipv4 vrf all interface brief
+type: simnos
+help: execute the command "show ipv4 vrf all interface brief"
+mode:
+- user
+- enable
+output: show_ipv4_vrf_all_interface_brief.txt

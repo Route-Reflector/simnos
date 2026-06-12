@@ -1,0 +1,6 @@
+command: interface ethernet print
+type: simnos
+help: execute the command "interface ethernet print"
+mode:
+- user
+output: interface_ethernet_print.txt

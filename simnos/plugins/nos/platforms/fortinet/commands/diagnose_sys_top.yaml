@@ -1,0 +1,6 @@
+command: diagnose sys top
+type: simnos
+help: execute the command "diagnose sys top"
+mode:
+- user
+output: diagnose_sys_top.txt

@@ -1,0 +1,7 @@
+command: show rsvp neighbors
+type: simnos
+help: execute the command "show rsvp neighbors"
+mode:
+- user
+- enable
+output: show_rsvp_neighbors.txt

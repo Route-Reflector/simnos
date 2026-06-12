@@ -1,0 +1,7 @@
+command: show router mpls interface
+type: simnos
+help: execute the command "show router mpls interface"
+mode:
+- user
+- enable
+output: show_router_mpls_interface.txt

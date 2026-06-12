@@ -1,0 +1,7 @@
+command: show helpers
+type: simnos
+help: execute the command "show helpers"
+mode:
+- user
+- enable
+output: show_helpers.txt

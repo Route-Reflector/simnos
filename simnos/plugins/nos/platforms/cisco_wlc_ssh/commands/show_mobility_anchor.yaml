@@ -1,0 +1,7 @@
+command: show mobility anchor
+type: simnos
+help: execute the command "show mobility anchor"
+mode:
+- user
+- enable
+output: show_mobility_anchor.txt

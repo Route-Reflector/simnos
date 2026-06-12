@@ -1,0 +1,7 @@
+command: display ont port state 0 1 eth-port
+type: simnos
+help: execute the command "display ont port state 0 1 eth-port"
+mode:
+- user
+- enable
+output: display_ont_port_state_0_1_eth-port.txt

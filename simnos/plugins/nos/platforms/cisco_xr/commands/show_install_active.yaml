@@ -1,0 +1,7 @@
+command: show install active
+type: simnos
+help: execute the command "show install active"
+mode:
+- user
+- enable
+output: show_install_active.txt

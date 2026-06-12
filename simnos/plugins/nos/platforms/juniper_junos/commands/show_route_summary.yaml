@@ -1,0 +1,7 @@
+command: show route summary
+type: simnos
+help: execute the command "show route summary"
+mode:
+- user
+- enable
+output: show_route_summary.txt

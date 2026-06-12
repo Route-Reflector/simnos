@@ -1,0 +1,7 @@
+command: show route-map
+type: simnos
+help: execute the command "show route-map"
+mode:
+- user
+- enable
+output: show_route-map.txt

@@ -1,0 +1,7 @@
+command: show cellular-radio equipment
+type: simnos
+help: execute the command "show cellular-radio equipment"
+mode:
+- user
+- enable
+output: show_cellular-radio_equipment.txt

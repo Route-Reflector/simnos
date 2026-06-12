@@ -1,0 +1,7 @@
+command: show interface status
+type: simnos
+help: execute the command "show interface status"
+mode:
+- user
+- enable
+output: show_interface_status.txt

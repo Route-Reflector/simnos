@@ -1,0 +1,6 @@
+command: ip dns cache print terse without-paging
+type: simnos
+help: execute the command "ip dns cache print terse without-paging"
+mode:
+- user
+output: ip_dns_cache_print_terse_without-paging.txt

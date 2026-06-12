@@ -1,0 +1,7 @@
+command: show interface transceiver details
+type: simnos
+help: execute the command "show interface transceiver details"
+mode:
+- user
+- enable
+output: show_interface_transceiver_details.txt

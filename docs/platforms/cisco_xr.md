@@ -7,34 +7,223 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- cisco_xr>
-
-### show interfaces summary
+### admin show controller fabric health
 
 **Output:**
 ```
-Interface Type          Total    UP       Down     Admin Down
---------------          -----    --       ----     ----------
-ALL TYPES               81       51       0        30
---------------
-IFT_ETHERBUNDLE         11       11       0        0
-IFT_HUNDREDGE           26       2        0        24
-IFT_LOOPBACK            1        1        0        0
-IFT_ETHERNET            2        0        0        2
-IFT_NULL                1        1        0        0
-IFT_TENGETHERNET        40       36       0        4
+Sat Feb 24 18:07:38.753 UTC
 
+Fabric System Health
+---------------------
+ Flags: T - Total,      U - Up,         A - Admin Down 
+       L - LCC,        M - Mcast Down, Y - Yes        
+       F - FCC,        D - Down,       N - No or Not Ok
+       V - Valid,     
 
+Collaborator Process State:
+------------------------------
+    FSDB Aggregator: OK
+    +-----------+--+
+    |Rack id    | 0|
+    +-----------+--+
+    |FSDB status|Ok|
+    +-----------+--+
+
+    +------------+-----+-----+-----+-----+-----+-----+
+    |FC Location |0/FC0|0/FC1|0/FC2|0/FC3|0/FC4|0/FC5|
+    +------------+-----+-----+-----+-----+-----+-----+
+    |SFE status  |  Ok |  Ok |  Ok |  Ok |  Ok |  Ok |
+    +------------+-----+-----+-----+-----+-----+-----+
+ 
+Router Health:
+-----------------
+
+    Rack    Planes  SFE Asics      Fia Asics     
+    T/L/F   U/M/D/A T/U/D          T/U/D         
+    ------------------------------------------------------
+    1/1/0   5/0/1/0 36/30/6        36/36/0        
+
+    Plane Admin Plane    Racks    Data      
+    id    state state    in issue drop/error
+    -----------------------------------------------------------
+    0     UP    UP       0        No        
+    1     UP    UP       0        No        
+    2     UP    DN       1        No        
+    3     UP    UP       0        No        
+    4     UP    UP       0        No        
+    5     UP    UP       0        No        
+    -----------------------------------------------------------
+ 
+Rack Health:
+-------------
+    Rack:  0, Type: LCC
+
+    SFE Asics  FIA Asics   Planes   Valid  
+    T/U/D      T/U/D       U/M/D    fab ids
+    ------------------------------------------------
+    36/30/6    36/36/0     5/0/1      72
+
+    Plane Plane    SFE Asics    Fab ids  
+    id    state    T/U/D        Reachable
+    --------------------------------------
+    0     UP       6/6/0        72    
+    1     UP       6/6/0        72    
+    2     DN       6/0/6        0     
+    3     UP       6/6/0        72    
+    4     UP       6/6/0        72    
+    5     UP       6/6/0        72    
+    --------------------------------------
 ```
 
-**Help:** execute the command "show interfaces summary"
+**Help:** execute the command "admin show controller fabric health"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### admin show environment fan
+
+**Output:**
+```
+Sat Mar 10 14:03:31.155 UTC
+===============================================================================
+                        Fan speed (rpm)
+Location   FRU Type           FAN_0   FAN_1   FAN_2   FAN_3   FAN_4   FAN_5   
+                                  FAN_6   FAN_7   FAN_8   FAN_9  FAN_10  FAN_11
+-------------------------------------------------------------------------------
+0/FT0      NC55-5516-FAN       6192    3870    6214    3859    6257    3857   
+                                   6420    4029    6390    3938    6467    4066   
+0/FT1      NC55-5516-FAN       6360    3970    6143    3824    6033    3750   
+                                   6279    3859    6060    3721    6375    3964   
+0/FT2      NC55-5516-FAN       6545    4014    6474    3994    6000    3752   
+                                   6375    4002    5921    3698    6308    3915   
+
+0/PM0      NC55-PWR-3KW-AC     8021    8537   
+
+0/PM1      NC55-PWR-3KW-AC     8064    8387   
+
+0/PM2      NC55-PWR-3KW-AC     8064    8473   
+
+0/PM3      NC55-PWR-3KW-AC     7978    8537   
+
+0/PM4      NC55-PWR-3KW-AC     8064    8473   
+
+0/PM5      NC55-PWR-3KW-AC     8086    8451   
+
+0/PM6      NC55-PWR-3KW-AC     8086    8537   
+
+0/PM7      NC55-PWR-3KW-AC     7978    8473   
+
+0/PM8      NC55-PWR-3KW-AC     8000    8516   
+
+0/PM9      NC55-PWR-3KW-AC     8021    8516 
+  
+```
+
+**Help:** execute the command "admin show environment fan"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### admin show environment power
+
+**Output:**
+```
+Fri Jan 17 14:45:54.414 EST
+================================================================================
+ CHASSIS LEVEL POWER INFO: 0
+================================================================================
+   Total output power capacity (Group 0 + Group 1) :    6000W +    6000W
+   Total output power required                     :    2493W
+   Total power input                               :    1334W
+   Total power output                              :    1246W
+
+Power Group 0: 
+================================================================================
+   Power       Supply      --------Input-------   ----Output----    Status
+   Module      Type        Volts A/B   Amps A/B   Volts     Amps    
+================================================================================
+   0/PM0       3kW-DC      54.0/54.0   3.3/ 3.5    12.1     27.0    Failed 
+   0/PM1       3kW-DC      54.0/54.0   3.0/ 2.9    12.1     25.8    OK 
+
+ Total of Power Group 0:       686W/  ( 6.3/ 6.4)A     639W/ 52.8A
+
+Power Group 1: 
+================================================================================
+   Power       Supply      --------Input-------   ----Output----    Status
+   Module      Type        Volts A/B   Amps A/B   Volts     Amps    
+================================================================================
+   0/PM2       3kW-DC      54.0/54.0   2.7/ 2.9    12.1     23.8    OK 
+   0/PM3       3kW-DC      54.0/54.0   3.1/ 3.3    12.1     26.4    OK 
+
+ Total of Power Group 1:       648W/  ( 5.8/ 6.2)A     607W/ 50.2A
+
+================================================================================
+   Location     Card Type            Power       Power       Status
+                                     Allocated   Used
+                                     Watts       Watts
+================================================================================
+   0/0          NC55-36X100G           902         504       ON 
+   0/1                 -                25           -       RESERVED 
+   0/2                 -                25           -       RESERVED 
+   0/3                 -                25           -       RESERVED 
+   0/RP0        NC55-RP                 90          37       ON 
+   0/RP1        NC55-RP                 90          28       ON 
+   0/FC0        NC55-5504-FC           124          89       ON 
+   0/FC1        NC55-5504-FC           124          90       ON 
+   0/FC2        NC55-5504-FC           124          88       ON 
+   0/FC3        NC55-5504-FC           124          88       ON 
+   0/FC4        NC55-5504-FC           124          87       ON 
+   0/FC5        NC55-5504-FC           124          88       ON 
+   0/FT0        NC55-5504-FAN          174          20       ON 
+   0/FT1        NC55-5504-FAN          174          19       ON 
+   0/FT2        NC55-5504-FAN          174          21       ON 
+   0/SC0        NC55-SC                 35          17       ON 
+   0/SC1        NC55-SC                 35          15       ON 
+```
+
+**Help:** execute the command "admin show environment power"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### admin show inventory
+
+**Output:**
+```
+Name: Rack 0 Descr: ASR-9010 Chassis
+PID: ASR-9010 VID: V01 SN: FOX0000X0XX
+ 
+Name: 0/0 Descr: 24X10G/1G Service Edge Optimized LC
+PID: A9K-24X10GE-1G-SE VID: V05 SN: FOC0000XXXX
+
+Name: 0/7 Descr: ASR 9000 8-port 100GE FLEXE SE linecard
+PID: A9K-8HG-FLEX-SE VID: V02 SN: FOC0000XXXX
+```
+
+**Help:** execute the command "admin show inventory"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### admin show platform
+
+**Output:**
+```
+Tue Mar  7 14:29:29.338 EST
+Node            Type                      State            Config State
+-----------------------------------------------------------------------------
+0/RSP0/CPU0     A9K-RSP440-TR(Active)     IOS XR RUN       PWR,NSHUT,MON
+0/RSP1/CPU0     A9K-RSP440-TR(Standby)    IOS XR RUN       PWR,NSHUT,MON
+0/FT0/SP        ASR-9010-FAN-V2           READY            
+0/FT1/SP        ASR-9010-FAN-V2           READY            
+0/0/0           A9K-MPA-2X40GE            OK               PWR,NSHUT,MON
+```
+
+**Help:** execute the command "admin show platform"
 
 **Prompt:**
 - cisco_xr>
@@ -129,324 +318,247 @@ sysadmin          running       192.0.120.1      NA/NA
 - cisco_xr>
 - cisco_xr#
 
-### show interfaces
+### dir
 
 **Output:**
 ```
-Mon Mar 20 17:31:48.208 EDT
-Loopback5 is up, line protocol is up
-  Interface state transitions: 1
-  Hardware is Loopback interface(s)
-  Description: $DCI ~Loopback for OSPF/LDP/BGP/TE
-  Internet address is 192.168.169.21/32
-  MTU 1500 bytes, BW 0 Kbit
-     reliability Unknown, txload Unknown, rxload Unknown
-  Encapsulation Loopback,  loopback not set,
-  Last link flapped 6w1d
-  Last input Unknown, output Unknown
-  Last clearing of "show interface" counters Unknown
-  Input/output data rate is disabled.
+Tue Jan 16 17:08:43.028 AEST
 
-Null0 is up, line protocol is up
-  Interface state transitions: 1
-  Hardware is Null interface
-  Internet address is Unknown
-  MTU 1500 bytes, BW 0 Kbit
-     reliability 255/255, txload Unknown, rxload Unknown
-  Encapsulation Null,  loopback not set,
-  Last link flapped 6w1d
-  Last input never, output never
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-     0 packets output, 0 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
+Directory of /var/xr/scratch
+74 drwxrwxrwx. 2  4096 Dec  6 19:39 resmon_debug
+22 -rw-rw-rw-. 1  2464 Jan  7 19:34 status_file
+ 11 drwx------. 2 16384 Nov 15 14:44 lost+found
+13 drwxr-xr-x. 3  4096 Jan  7 19:32 shutdown
+23 drwxrwxrwx. 3  4096 Nov 15 14:59 syslog-hm
+68 drwxrwxrwx. 3  4096 Dec  5 22:00 asic-err-logs-backup
+41 drwxr-xr-x. 3  4096 Nov 15 15:01 pam
+15 lrwxrwxrwx. 1    12 Nov 15 14:58 config -> /misc/config
+14 -rw-r--r--. 1   936 Jan  7 19:32 envoke_log
+28 drwxrwxrwx. 2  4096 Jan  7 19:33 crypto
+ 12 drwxr-xr-x. 3  4096 Dec 11 00:53 core
+17 drwxrwxrwx. 2  4096 Nov 15 14:58 npu_drvr_cfg
+55 drwxr-xr-x. 2  4096 Dec  5 22:46 nvgen_traces
+38 -rw-------. 1   444 Nov 15 15:23 .bash_history
+25 drwxrwxrwx. 9  4096 Jan  7 19:34 ztp
+ 19 drwx---r-x. 2  4096 Nov 15 14:58 clihistory
 
-tunnel-te300 is up, line protocol is up
-  Interface state transitions: 7
-  Hardware is Tunnel-TE
-  Description: $DCI TE Tunnel For REPLICATION to P-YB19-C95
-  Internet address is 192.168.169.21/32
-  MTU 1500 bytes, BW 0 Kbit
-     reliability 255/255, txload Unknown, rxload Unknown
-  Encapsulation TUNNEL,  loopback not set,
-  Last link flapped 3w2d
-  Last input never, output 00:00:00
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 2000 bits/sec, 1 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-     1960425 packets output, 674297494 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
-
-MgmtEth0/RSP0/CPU0/1 is administratively down, line protocol is administratively down
-  Interface state transitions: 0
-  Hardware is Management Ethernet, address is 5087.8966.5329 (bia 5087.8966.5329)
-  Description: $DCI
-  Internet address is Unknown
-  MTU 1514 bytes, BW 0 Kbit
-     reliability 255/255, txload Unknown, rxload Unknown
-  Encapsulation ARPA,
-  Duplex unknown, 0Kb/s, THD, link type is autonegotiation
-  output flow control is off, input flow control is off
-  loopback not set,
-  Last input never, output never
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     0 packets output, 0 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     0 carrier transitions
-
-MgmtEth0/RSP1/CPU0/0 is up, line protocol is up
-  Interface state transitions: 1
-  Hardware is Management Ethernet, address is f09e.6340.1420 (bia f09e.6340.1420)
-  Description: Management Interface
-  Internet address is 10.253.3.18/25
-  MTU 1514 bytes, BW 1000000 Kbit (Max: 1000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 0/255
-  Encapsulation ARPA,
-  Full-duplex, 1000Mb/s, THD, link type is autonegotiation
-  output flow control is off, input flow control is off
-  loopback not set,
-  Last link flapped 6w1d
-  ARP type ARPA, ARP timeout 04:00:00
-  Last input 00:00:11, output 00:00:41
-  Last clearing of "show interface" counters never
-  5 minute input rate 22000 bits/sec, 10 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     43738403 packets input, 12696681984 bytes, 0 total input drops
-     2022343 drops for unrecognized upper-level protocol
-     Received 194184 broadcast packets, 5015358 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     121976 packets output, 18613909 bytes, 0 total output drops
-     Output 2 broadcast packets, 62985 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     1 carrier transitions
-
-FortyGigE0/0/0/0 is up, line protocol is up
-  Interface state transitions: 1
-  Dampening enabled: penalty 0, not suppressed
-    half-life:        1        reuse:             750
-    suppress:         2000     max-suppress-time: 4
-    restart-penalty:  0
-  Hardware is FortyGigE, address is 5087.895f.81a0 (bia 5087.895f.81a0)
-  Layer 1 Transport Mode is LAN
-  Description: $DCI ~QTS Richmond DCI @CRDC %P-CRDC-C98 +Fort0/0/0/0 !CRIT
-  Internet address is 192.168.166.9/30
-  MTU 9216 bytes, BW 40000000 Kbit (Max: 40000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 0/255
-  Encapsulation ARPA,
-  Full-duplex, 40000Mb/s, link type is force-up
-  output flow control is off, input flow control is off
-  Carrier delay (up) is 9000 msec, Carrier delay (down) is 50 msec
-  loopback not set,
-  Last link flapped 6w1d
-  ARP type ARPA, ARP timeout 04:00:00
-  Last input 00:00:00, output 00:00:00
-  Last clearing of "show interface" counters never
-  30 second input rate 62000 bits/sec, 128 packets/sec
-  30 second output rate 62000 bits/sec, 128 packets/sec
-     478575583 packets input, 29095652278 bytes, 392 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 1 broadcast packets, 1675582 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     478514791 packets output, 29002406808 bytes, 0 total output drops
-     Output 2 broadcast packets, 1677091 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     1 carrier transitions
-
-TenGigE0/3/0/0 is up, line protocol is up
-  Interface state transitions: 1
-  Hardware is TenGigE, address is 5087.8964.53b0 (bia 5087.8964.53b0)
-  Layer 1 Transport Mode is LAN
-  Description: $DCI ~QTS Richmond Prod @CRDC %Z-CRDC-Dcc001 +Te5/1 !CRIT
-  Internet address is 192.168.166.65/30
-  MTU 9216 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 3/255
-  Encapsulation ARPA,
-  Full-duplex, 10000Mb/s, link type is force-up
-  output flow control is off, input flow control is off
-  Carrier delay (up) is 10 msec
-  loopback not set,
-  Last link flapped 6w1d
-  ARP type ARPA, ARP timeout 04:00:00
-  Last input 00:00:00, output 00:00:00
-  Last clearing of "show interface" counters never
-  30 second input rate 134379000 bits/sec, 26671 packets/sec
-  30 second output rate 285000 bits/sec, 257 packets/sec
-     74732197285 packets input, 48622921819223 bytes, 5 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 2 broadcast packets, 70041 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     2222908838 packets output, 856734632077 bytes, 0 total output drops
-     Output 1 broadcast packets, 63014 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     1 carrier transitions
-
-TenGigE0/3/0/4 is administratively down, line protocol is administratively down
-  Interface state transitions: 0
-  Hardware is TenGigE, address is 5087.8964.53b4 (bia 5087.8964.53b4)
-  Layer 1 Transport Mode is LAN
-  Internet address is Unknown
-  MTU 1514 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 0/255
-  Encapsulation ARPA,
-  Full-duplex, 10000Mb/s, link type is force-up
-  output flow control is off, input flow control is off
-  Carrier delay (up) is 10 msec
-  loopback not set,
-  Last input never, output never
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     0 packets output, 0 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     0 carrier transitions
-
-Bundle-Ether123456 is up, line protocol is up
-  Interface state transitions: 1
-  Hardware is Aggregated Ethernet interface(s), address is aaaa.bbbb.cccc
-  Description: Bundle_example
-  Internet address is Unknown
-  MTU 1514 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 0/255
-  Encapsulation ARPA,
-  Full-duplex, 10000Mb/s
-  loopback not set,
-  Last link flapped 3w1d
-    No. of members in this bundle: 1
-      TenGigE0/3/0/4             Full-duplex  10000Mb/s    Active
-  Last input 00:00:00, output 00:00:00
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-              0 runts, 0 giants, 0 throttles, 0 parity
-     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
-     0 packets output, 0 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
-     0 output errors, 0 underruns, 0 applique, 0 resets
-     0 output buffer failures, 0 output buffers swapped out
-     0 carrier transitions
-
-GigabitEthernet0/0/0/12.456 is administratively down, line protocol is administratively down
-  Interface state transitions: 0
-  Hardware is VLAN sub-interface(s), address is 5000.0002.000d
-  Description: qsqsd svsdvxcvsdv
-  Internet address is 192.168.5.1/24
-  MTU 1518 bytes, BW 1000000 Kbit (Max: 1000000 Kbit)
-     reliability 255/255, txload 0/255, rxload 0/255
-  Encapsulation 802.1Q Virtual LAN, VLAN Id 456,  loopback not set,
-  Last input never, output never
-  Last clearing of "show interface" counters never
-  5 minute input rate 0 bits/sec, 0 packets/sec
-  5 minute output rate 0 bits/sec, 0 packets/sec
-     0 packets input, 0 bytes, 0 total input drops
-     0 drops for unrecognized upper-level protocol
-     Received 0 broadcast packets, 0 multicast packets
-     0 packets output, 0 bytes, 0 total output drops
-     Output 0 broadcast packets, 0 multicast packets
-
+3365348 kbytes total (3163632 kbytes free)
 ```
 
-**Help:** execute the command "show interfaces"
+**Help:** execute the command "dir"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show pim ipv4 interface
+### enable
+
+**Output:** None
+
+**Help:** enter enable mode
+
+**Prompt:**
+- cisco_xr>
+
+### ping
 
 **Output:**
 ```
-
-Wed Jul 27 17:18:38.018 CST
-
-PIM interfaces in VRF default
-Address               Interface                     PIM  Nbr   Hello  DR    DR
-                                                         Count Intvl  Prior
-
-192.0.2.1             BVI10                         on   11    30     1     192.0.2.2
-192.0.2.1             Bundle-Ether10                on   2     30     1     192.0.2.2
-192.0.2.1             Bundle-Ether10.10             on   2     30     1     192.0.2.2
-192.0.2.1             Bundle-Ether10.20             on   2     30     1     192.0.2.2
-192.0.2.1             Bundle-Ether10.30             on   2     30     1     192.0.2.2
+Fri Dec 22 17:30:39.512 BRA
+Type escape sequence to abort.
+Sending 5, 100-byte ICMP Echos to 10.191.129.114, timeout is 2 seconds:
+!!!!!
+Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
 ```
 
-**Help:** execute the command "show pim ipv4 interface"
+**Help:** execute the command "ping"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### admin show environment fan
+### show arp
 
 **Output:**
 ```
-Sat Mar 10 14:03:31.155 UTC
-===============================================================================
-                        Fan speed (rpm)
-Location   FRU Type           FAN_0   FAN_1   FAN_2   FAN_3   FAN_4   FAN_5   
-                                  FAN_6   FAN_7   FAN_8   FAN_9  FAN_10  FAN_11
+
+Mon Oct 17 02:44:29.814 UTC
+
 -------------------------------------------------------------------------------
-0/FT0      NC55-5516-FAN       6192    3870    6214    3859    6257    3857   
-                                   6420    4029    6390    3938    6467    4066   
-0/FT1      NC55-5516-FAN       6360    3970    6143    3824    6033    3750   
-                                   6279    3859    6060    3721    6375    3964   
-0/FT2      NC55-5516-FAN       6545    4014    6474    3994    6000    3752   
-                                   6375    4002    5921    3698    6308    3915   
+0/0/CPU0
+-------------------------------------------------------------------------------
+Address         Age        Hardware Addr   State      Type  Interface
+192.0.2.1       01:31:14   ca01.1d8b.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
+192.0.2.2       01:46:18   ca02.1d99.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
+192.0.2.3       01:46:16   ca03.1da7.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
+192.0.2.4       01:46:15   ca04.1db5.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
+192.0.2.5       01:46:13   ca05.1dc3.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
+192.0.2.10      -          0c99.6869.0003  Interface  ARPA  GigabitEthernet0/0/0/0
+192.0.2.11      01:43:41   0ca1.f3ee.0ba0  Dynamic    ARPA  GigabitEthernet0/0/0/0
 
-0/PM0      NC55-PWR-3KW-AC     8021    8537   
-
-0/PM1      NC55-PWR-3KW-AC     8064    8387   
-
-0/PM2      NC55-PWR-3KW-AC     8064    8473   
-
-0/PM3      NC55-PWR-3KW-AC     7978    8537   
-
-0/PM4      NC55-PWR-3KW-AC     8064    8473   
-
-0/PM5      NC55-PWR-3KW-AC     8086    8451   
-
-0/PM6      NC55-PWR-3KW-AC     8086    8537   
-
-0/PM7      NC55-PWR-3KW-AC     7978    8473   
-
-0/PM8      NC55-PWR-3KW-AC     8000    8516   
-
-0/PM9      NC55-PWR-3KW-AC     8021    8516 
-  
+-------------------------------------------------------------------------------
+0/RP0/CPU0
+-------------------------------------------------------------------------------
+Address         Age        Hardware Addr   State      Type  Interface
+192.168.57.1    00:00:02   5254.004e.1156  Dynamic    ARPA  MgmtEth0/RP0/CPU0/0
+192.168.57.10   -          0c99.6869.0000  Interface  ARPA  MgmtEth0/RP0/CPU0/0
 ```
 
-**Help:** execute the command "admin show environment fan"
+**Help:** execute the command "show arp"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show asic-errors all location
+
+**Output:**
+```
+************************************************************
+*                  Fia ASIC Error Summary                  *
+************************************************************
+Instance            : 0
+Number of nodes     : 22
+SBE error count     : 33
+ MBE error count     : 44
+Parity error count  : 55
+CRC error count     : 99999
+ Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 1
+Number of nodes     : 0
+SBE error count     : 23
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 2
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 3
+ Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+ Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+ Reset error count   : 0
+--------------------
+
+************************************************************
+*                Prm_np ASIC Error Summary                 *
+************************************************************
+Instance            : 0
+Number of nodes     : 0
+SBE error count     : 0
+ MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+ Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 1
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 2
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 3
+ Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+ Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+ Reset error count   : 0
+--------------------
+Instance            : 4
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 5
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 6
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+Instance            : 7
+Number of nodes     : 0
+SBE error count     : 0
+MBE error count     : 0
+Parity error count  : 0
+CRC error count     : 0
+Generic error count : 0
+Reset error count   : 0
+--------------------
+```
+
+**Help:** execute the command "show asic-errors all location"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show bfd sessions
+
+**Output:**
+```
+Interface           Dest Addr           Local det time(int*mult)      State     
+                                    Echo             Async   H/W   NPU     
+------------------- --------------- ---------------- ---------------- ----------
+Fo0/0/1/0           10.100.100.141  45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+Fo0/0/0/0           10.100.100.19   45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+Fo0/0/0/1           10.100.100.125  45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+Fo0/1/0/0           10.100.100.113  45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+Fo0/1/1/0           10.100.100.145  45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+Fo0/2/1/1           10.100.100.129  45ms(15ms*3)     6s(2s*3)         UP        
+                                                             No    n/a            
+```
+
+**Help:** execute the command "show bfd sessions"
 
 **Prompt:**
 - cisco_xr>
@@ -495,7 +607,6 @@ Origin codes: i - IGP, e - EGP, ? - incomplete
 *>                    5.5.5.5                  5             5 1000 1000 1000 i
 *>                    6.6.6.6                  5          5  5 i
 *>                    7.7.7.7                                5 i
-
 ```
 
 **Help:** execute the command "show bgp"
@@ -504,822 +615,47 @@ Origin codes: i - IGP, e - EGP, ? - incomplete
 - cisco_xr>
 - cisco_xr#
 
-### show dhcp ipv4 proxy binding
+### show bgp instance all summary
 
 **Output:**
 ```
 
-                                           Lease
- MAC Address      IP Address      State    Remaining       Interface          VRF      Sublabel
---------------  --------------  ---------  ---------  -------------------  ---------  ----------
-2cb0.5d00.000a  10.248.159.182  BOUND      8691       BE1.201              default    0x11664
-20d5.bf00.000b  10.48.93.39     BOUND      10315      BE1.1530             cust-a 0x1853b
-a4b1.e900.000c  10.200.185.166 BOUND      10617      BE1.1502             default    0x1cf76
-3091.8f00.000d  10.200.185.165 DELETING   N/A        BE1.1526             default    0x10606
-0006.1900.000e  10.184.88.53    OFFER_SENT 27         BE1.1534             cust-b 0xa98d
-0026.f200.000f  10.200.185.170 BOUND      10794      BE1.1546             default    0x1bb34
-0006.1900.0010  10.184.88.24    OFFER_SENT 54         BE1.1535             cust-b 0x44d0
-0002.9b00.0011  10.48.90.0      BOUND      10796      BE1.1543             cust-a 0x1c5cc
-
-```
-
-**Help:** execute the command "show dhcp ipv4 proxy binding"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show configuration commit list
-
-**Output:**
-```
-SNo. Label/ID    User      Line                Client      Time Stamp
- ~~~~ ~~~~~~~~    ~~~~      ~~~~                ~~~~~~      ~~~~~~~~~~
-1    1000000093  fred      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:42:19 2016
-2    1000000092  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:40:05 2016
-3    1000000091  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:33:52 2016
-4    1000000090  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:33:05 2016
-5    1000000089  fred      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:31:39 2016
-6    1000000088  patrick   vty1:node0_RSP0_CP  Rollback    Tue Jun  7 14:29:12 2016
-7    1000000087  john      vty1:node0_RSP0_CP  CLI         Fri Jun  3 14:33:27 2016
-8    1000000086  admin     vty0:node0_RSP0_CP  CLI         Wed May 25 13:43:18 2016
-9    1000000085  admin     vty0:node0_RSP0_CP  CLI         Fri May 20 10:06:01 2016
-10   1000000084  admin     vty0:node0_RSP0_CP  CLI         Wed May 11 13:32:10 2016
-11   1000000083  patrick   vty0:node0_RSP0_CP  CLI         Tue May 10 14:18:59 2016
-
-```
-
-**Help:** execute the command "show configuration commit list"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show lldp neighbors detail
-
-**Output:**
-```
-Tue Jan 16 13:49:50.315 AEST
-Capability codes:
-        (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
-        (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
-
-------------------------------------------------
- Local Interface: FourHundredGigE0/0/0/0
-Chassis id: 6c03.b5aa.bbcc
-Port id: Fou1/0/22
-Port Description: uplink:router1:FH0/0/0/0
-System Name: router-400.router.com
- 
-System Description:
-Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_IOSXE), Version 17.9.3, RELEASE SOFTWARE (fc6)
-Technical Support: http://www.cisco.com/techsupport
- Copyright (c) 1986-2023 by Cisco Systems, Inc.
-Compiled Tue 14-Mar-23 18:26 by mcpre
-
-Time remaining: 90 seconds
-Hold Time: 120 seconds
-Age: 732802 seconds
-System Capabilities: B,R
-Enabled Capabilities: B,R
-Management Addresses:
-  IPv4 address: 172.1.1.79
-  IPv6 address: 2407:abcd:0:aaaa::0000
-
-Peer MAC Address: 6c:03:b5:aa:bb:cc
-
-
-------------------------------------------------
- Local Interface: FourHundredGigE0/0/0/28
-Chassis id: d0dc.2cdd.aabc
-Port id: FourHundredGigE0/0/0/28
-Port Description: uplink:router1::FH0/0/0/28
-System Name: router2.com
-
-System Description:
-7.9.2, 8000
-
-Time remaining: 98 seconds
-Hold Time: 120 seconds
-Age: 729378 seconds
-System Capabilities: R
- Enabled Capabilities: R
-Management Addresses:
-  IPv4 address: 172.1.1.64
-  IPv6 address: 2407:abcd::aaab::0000
-
-Peer MAC Address: d0:dc:2c:aa:bb:cc
- 
-
-------------------------------------------------
-Local Interface: FourHundredGigE0/0/0/29
- Chassis id: d0dc.abcd.dcba
-Port id: FourHundredGigE0/0/0/29
-Port Description: uplink:router1:FH0/0/0/29
-System Name: router66.router.com
-
-System Description:
- 7.9.2, 8000
-
-Time remaining: 100 seconds
-Hold Time: 120 seconds
-Age: 729313 seconds
-System Capabilities: R
-Enabled Capabilities: R
-Management Addresses:
-  IPv4 address: 172.1.1.66
-  IPv6 address: 2407:abcd:0:aaac::0000
-
-Peer MAC Address: d0:dc:2c:aa:bb:cd
-
-
-------------------------------------------------
- Local Interface: HundredGigE0/0/0/30
-Chassis id: 247e.32bb.0000
-Port id: Eth1/4
- Port Description: router1:Hun1/0/30
-System Name: otter-buffy
-
-System Description:
- Cisco NX-OS(tm) n7700, Software (n7700-s2-dk9), Version 8.4(3), RELEASE SOFTWARE Copyright (c) 2002-2020 by Cisco Systems, Inc. Compiled 9/4/2020 23:00:00
-
- Time remaining: 117 seconds
-Hold Time: 120 seconds
-Age: 732508 seconds
-System Capabilities: B,R
-Enabled Capabilities: B,R
-Management Addresses:
-  IPv4 address: 172.1.1.158
-
-Peer MAC Address: 24:7e:12:aa:bb:cc
-
-
-------------------------------------------------
- Local Interface: HundredGigE0/0/0/31
-Chassis id: 2cab.ebe1.ffff
-Port id: Eth2/4
- Port Description: uplink:router1:Hun1/0/31
-System Name: onyx.mgmt.com
-
-System Description:
-Cisco NX-OS(tm) n7700, Software (n7700-s2-dk9), Version 8.4(3), RELEASE SOFTWARE Copyright (c) 2002-2020 by Cisco Systems, Inc. Compiled 9/4/2020 23:00:00
-
-Time remaining: 104 seconds
-Hold Time: 120 seconds
-Age: 732462 seconds
-System Capabilities: B,R
-Enabled Capabilities: B,R
-Management Addresses:
-  IPv4 address: 172.1.1.158
-
-Peer MAC Address: 2c:ab:eb:aa:bb:cc
-
-
-Total entries displayed: 5
-```
-
-**Help:** execute the command "show lldp neighbors detail"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show rsvp neighbors
-
-**Output:**
-```
-Global Neighbor: 10.100.100.120
-  Interface Neighbor   Interface   
-  -------------------- ------------
-  10.100.100.141       FortyGigE0/0/1/0
-  10.100.100.145       FortyGigE0/1/1/0
-
-```
-
-**Help:** execute the command "show rsvp neighbors"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show arp
-
-**Output:**
-```
-
-Mon Oct 17 02:44:29.814 UTC
-
--------------------------------------------------------------------------------
-0/0/CPU0
--------------------------------------------------------------------------------
-Address         Age        Hardware Addr   State      Type  Interface
-192.0.2.1       01:31:14   ca01.1d8b.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
-192.0.2.2       01:46:18   ca02.1d99.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
-192.0.2.3       01:46:16   ca03.1da7.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
-192.0.2.4       01:46:15   ca04.1db5.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
-192.0.2.5       01:46:13   ca05.1dc3.0008  Dynamic    ARPA  GigabitEthernet0/0/0/0
-192.0.2.10      -          0c99.6869.0003  Interface  ARPA  GigabitEthernet0/0/0/0
-192.0.2.11      01:43:41   0ca1.f3ee.0ba0  Dynamic    ARPA  GigabitEthernet0/0/0/0
-
--------------------------------------------------------------------------------
-0/RP0/CPU0
--------------------------------------------------------------------------------
-Address         Age        Hardware Addr   State      Type  Interface
-192.168.57.1    00:00:02   5254.004e.1156  Dynamic    ARPA  MgmtEth0/RP0/CPU0/0
-192.168.57.10   -          0c99.6869.0000  Interface  ARPA  MgmtEth0/RP0/CPU0/0
-```
-
-**Help:** execute the command "show arp"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show controllers HundredGigabitEthernet
-
-**Output:**
-```
-Thu Dec 21 06:15:50.979 UTC
-Operational data for interface HundredGigE0/0/0/0:
-
-State:
-    Administrative state: enabled
-    Operational state: Up
-    LED state: Green On
-
-Phy:
-    Media type: Active optical cable
-    Optics:
-        Vendor: AOI             
-        Part number: AQPA9N09ADLN0778
-        Serial number: 04517A10025     
-        Wavelength: 850 nm
-    Digital Optical Monitoring:
-        Transceiver Temp: 17.070 C
-        Transceiver Voltage: 3.447 V
-
-        Alarms key: (H) Alarm high, (h) Warning high
-                    (L) Alarm low, (l) Warning low
-           Wavelength    Tx Power          Rx Power      Laser Bias
-        00     n/a     0.1   1.0205     -1.8   0.6627     5.450 
-        00     n/a     -0.1   0.9775     -1.1   0.7788     5.240 
-        00     n/a     0.3   1.0617     -1.2   0.7626     5.240 
-        00     n/a     -0.3   0.9281     -2.1   0.6213     5.240 
-        DOM alarms:
-            No alarms
-
-        Alarm                     Alarm    Warning   Warning    Alarm
-        Thresholds                High      High       Low       Low
-                                 -------   -------   -------   -------
-        Transceiver Temp (C):     80.000     0.000     0.000    -5.000
-        Transceiver Voltage (V):   3.600     0.000     0.000     3.000
-        Laser Bias (mA):             n/a       n/a       n/a       n/a
-        Transmit Power (mW):       2.754     0.000     0.000     0.091
-        Transmit Power (dBm):      4.400      -inf      -inf   -10.410
-        Receive Power (mW):        2.754     0.000     0.000     0.058
-        Receive Power (dBm):       4.400      -inf      -inf   -12.366
-    Statistics:
-        FEC:
-            Corrected Codeword Count: 0
-            Uncorrected Codeword Count: 0
-
-MAC address information:
-    Operational address: 008a.9658.f904
-    Burnt-in address: 008a.9658.f000
-
-Autonegotiation disabled.
-
-Operational values:
-    Speed: 100Gbps
-    Duplex: Full Duplex
-    Flowcontrol: None
-    Loopback: None (or external)
-    MTU: 9114
-    MRU: 9114
-    Forward error correction: Disabled
-          
-          
-Operational data for interface HundredGigE0/0/0/1:
-          
-State:    
-    Administrative state: enabled
-    Operational state: Up
-    LED state: Green On
-          
-Phy:      
-    Media type: Active optical cable
-    Optics:
-        Vendor: Ligent Photonics
-        Part number: DQF8503-4C13    
-        Serial number: S516CBD0371     
-        Wavelength: 850 nm
-    Digital Optical Monitoring:
-        Transceiver Temp: 18.000 C
-        Transceiver Voltage: 3.338 V
-          
-        Alarms key: (H) Alarm high, (h) Warning high
-                    (L) Alarm low, (l) Warning low
-           Wavelength    Tx Power          Rx Power      Laser Bias
-        Lane  (nm)    (dBm)    (mW)     (dBm)     (mW)      (mA)
-        --   -----   ------   ------    ------   ------    ------
-        00     n/a     -40.0   0.0001     -0.6   0.8658     5.930 
-        00     n/a     -40.0   0.0001     -0.6   0.8796     5.940 
-        00     n/a     -40.0   0.0001     -0.6   0.8742     5.932 
-        00     n/a     -40.0   0.0001     -0.7   0.8572     5.940 
-          
-        DOM alarms:
-            No alarms
-
-        Alarm                     Alarm    Warning   Warning    Alarm
-        Thresholds                High      High       Low       Low
-                                 -------   -------   -------   -------
-        Transceiver Temp (C):     80.000     0.000     0.000    -10.000
-        Transceiver Voltage (V):   3.600     0.000     0.000     3.000
-        Laser Bias (mA):             n/a       n/a       n/a       n/a
-        Transmit Power (mW):       1.949     0.000     0.000     0.087
-        Transmit Power (dBm):      2.898      -inf      -inf   -10.605
-        Receive Power (mW):        2.754     0.000     0.000     0.051
-        Receive Power (dBm):       4.400      -inf      -inf   -12.924
-    Statistics:
-        FEC:
-            Corrected Codeword Count: 0
-            Uncorrected Codeword Count: 0
-
-MAC address information:
-    Operational address: 008a.9661.d904
-    Burnt-in address: 008a.9661.d004
-
-Autonegotiation disabled.
-
-Operational values:
-    Speed: 100Gbps
-    Duplex: Full Duplex
-    Flowcontrol: None
-    Loopback: None (or external)
-    MTU: 9114
-    MRU: 9114
-    Forward error correction: Disabled
-```
-
-**Help:** execute the command "show controllers HundredGigabitEthernet"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show controllers fabric fia errors ingress location
-
-**Output:**
-```
-********** FIA-0 **********
-Category: in_error-0
-                             To Xbar Uc Crc-0                       11
-                             To Xbar Uc Crc-1                       22
-                             To Xbar Uc Crc-2                       33
-                             To Xbar Uc Crc-3                       44
-                             To Xbar Mc Crc-0                       55
-                             To Xbar Mc Crc-1                       66
-                             To Xbar Mc Crc-2                       77
-                             To Xbar Mc Crc-3                        0
-                          nb pa read data err                    12334
-                                pa header err                        0
-                                 pa crc16 err                        0
-                                 pa crc32 err                        0
-                                 pa to tf err                    99999
-                         ab overflow req lost                        0
-                                 ni bad crc32                        0
-                             ni crc32 corrupt                        0
-
- ********** FIA-1 **********
-Category: in_error-1
-                             To Xbar Uc Crc-0                        0
-                             To Xbar Uc Crc-1                        0
-                             To Xbar Uc Crc-2                        0
-                             To Xbar Uc Crc-3                        0
-                             To Xbar Mc Crc-0                        0
-                             To Xbar Mc Crc-1                        0
-                             To Xbar Mc Crc-2                        0
-                             To Xbar Mc Crc-3                        0
-                          nb pa read data err                        0
-                                pa header err                        0
-                                 pa crc16 err                        0
-                                 pa crc32 err                        0
-                                 pa to tf err                        0
-                         ab overflow req lost                        0
-                                 ni bad crc32                        0
-                             ni crc32 corrupt                 11111111
-
- ********** FIA-2 **********
-Category: in_error-2
-                             To Xbar Uc Crc-0                        0
-                             To Xbar Uc Crc-1                        0
-                             To Xbar Uc Crc-2                        0
-                             To Xbar Uc Crc-3                        0
-                             To Xbar Mc Crc-0                        0
-                             To Xbar Mc Crc-1                        0
-                             To Xbar Mc Crc-2                        0
-                             To Xbar Mc Crc-3                        0
-                          nb pa read data err                        0
-                                pa header err                        0
-                                 pa crc16 err                        0
-                                 pa crc32 err                        0
-                                 pa to tf err                        0
-                         ab overflow req lost                        0
-                                 ni bad crc32                        0
-                             ni crc32 corrupt                        0
-
- ********** FIA-3 **********
-Category: in_error-3
-                             To Xbar Uc Crc-0                        0
-                             To Xbar Uc Crc-1                        0
-                             To Xbar Uc Crc-2                        0
-                             To Xbar Uc Crc-3                        0
-                             To Xbar Mc Crc-0                        0
-                             To Xbar Mc Crc-1                        0
-                             To Xbar Mc Crc-2                        0
-                             To Xbar Mc Crc-3                        0
-                          nb pa read data err                        0
-                                pa header err                        0
-                                 pa crc16 err                        0
-                                 pa crc32 err                        0
-                                 pa to tf err                        0
-                         ab overflow req lost                        0
-                                 ni bad crc32                        0
-                             ni crc32 corrupt                        0
-
-```
-
-**Help:** execute the command "show controllers fabric fia errors ingress location"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show mpls ldp neighbor brief
-
-**Output:**
-```
-Tue Mar  7 14:35:15.185 EST
-
-Peer               GR  NSR  Up Time     Discovery   Addresses     Labels    
-                                        ipv4  ipv6  ipv4  ipv6  ipv4   ipv6 
------------------  --  ---  ----------  ----------  ----------  ------------
-10.100.100.120:0   Y   Y    4w2d        3     0     10    0     56     0    
-10.100.100.119:0   Y   Y    4w2d        3     0     10    0     56     0    
-10.100.100.121:0   Y   N/A  4w2d        3     0     8     0     57     0    
-
-
-```
-
-**Help:** execute the command "show mpls ldp neighbor brief"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show controllers fabric fia drops egress location
-
-**Output:**
-```
-********** FIA-0 **********
-Category: eg_drop-0
-                           From Xbar Uc Crc-0                       11
-                           From Xbar Uc Crc-1                       22
-                           From Xbar Uc Crc-2                       33
-                           From Xbar Uc Crc-3                       44
-                           From Xbar Uc Drp-0                       55
-                           From Xbar Uc Drp-1                       66
-                           From Xbar Uc Drp-2                       77
-                           From Xbar Uc Drp-3                       88
-                           From Xbar Mc Crc-0                        0
-                           From Xbar Mc Crc-1                        1
-                           From Xbar Mc Crc-2                        2
-                           From Xbar Mc Crc-3                        3
-                           From Xbar Mc Drp-0                        4
-                           From Xbar Mc Drp-1                        5
-                           From Xbar Mc Drp-2                        6
-                           From Xbar Mc Drp-3                        7
-       Uc dq pkt-len-crc/RO-seq/len error drp                        8
-                 Uc eq pkt-len-crc/lookup-drp                   999999
-                                Mc rf crc drp                        0
-                  Mc vl0 src0 buffer full drp                        0
-                  Mc vl1 src0 buffer full drp                        0
-                  Mc vl2 src0 buffer full drp                        0
-                  Mc vl3 src0 buffer full drp                        0
-                  Mc vl0 src1 buffer full drp                        0
-                  Mc vl1 src1 buffer full drp                        0
-                  Mc vl2 src1 buffer full drp                        0
-                  Mc vl3 src1 buffer full drp                        0
-
- ********** FIA-1 **********
-Category: eg_drop-1
-                           From Xbar Uc Crc-0                        0
-                           From Xbar Uc Crc-1                        0
-                           From Xbar Uc Crc-2                        0
-                           From Xbar Uc Crc-3                        0
-                           From Xbar Uc Drp-0                        0
-                           From Xbar Uc Drp-1                        0
-                           From Xbar Uc Drp-2                        0
-                           From Xbar Uc Drp-3                        0
-                           From Xbar Mc Crc-0                        0
-                           From Xbar Mc Crc-1                        0
-                           From Xbar Mc Crc-2                        0
-                           From Xbar Mc Crc-3                        0
-                           From Xbar Mc Drp-0                        0
-                           From Xbar Mc Drp-1                        0
-                           From Xbar Mc Drp-2                        0
-                           From Xbar Mc Drp-3                        0
-       Uc dq pkt-len-crc/RO-seq/len error drp                        0
-                 Uc eq pkt-len-crc/lookup-drp                        0
-                                Mc rf crc drp                        0
-                  Mc vl0 src0 buffer full drp                        0
-                  Mc vl1 src0 buffer full drp                        0
-                  Mc vl2 src0 buffer full drp                        0
-                  Mc vl3 src0 buffer full drp                        0
-                  Mc vl0 src1 buffer full drp                        0
-                  Mc vl1 src1 buffer full drp                        0
-                  Mc vl2 src1 buffer full drp                        0
-                  Mc vl3 src1 buffer full drp                        0
-
- ********** FIA-2 **********
-Category: eg_drop-2
-                           From Xbar Uc Crc-0                        0
-                           From Xbar Uc Crc-1                        0
-                           From Xbar Uc Crc-2                        0
-                           From Xbar Uc Crc-3                        0
-                           From Xbar Uc Drp-0                        0
-                           From Xbar Uc Drp-1                        0
-                           From Xbar Uc Drp-2                        0
-                           From Xbar Uc Drp-3                        0
-                           From Xbar Mc Crc-0                        0
-                           From Xbar Mc Crc-1                        0
-                           From Xbar Mc Crc-2                        0
-                           From Xbar Mc Crc-3                        0
-                           From Xbar Mc Drp-0                        0
-                           From Xbar Mc Drp-1                        0
-                           From Xbar Mc Drp-2                        0
-                           From Xbar Mc Drp-3                        0
-       Uc dq pkt-len-crc/RO-seq/len error drp                        0
-                 Uc eq pkt-len-crc/lookup-drp                        0
-                                Mc rf crc drp                        0
-                  Mc vl0 src0 buffer full drp                        0
-                  Mc vl1 src0 buffer full drp                        0
-                  Mc vl2 src0 buffer full drp                        0
-                  Mc vl3 src0 buffer full drp                        0
-                  Mc vl0 src1 buffer full drp                        0
-                  Mc vl1 src1 buffer full drp                        0
-                  Mc vl2 src1 buffer full drp                        0
-                  Mc vl3 src1 buffer full drp                        0
-
- ********** FIA-3 **********
-Category: eg_drop-3
-                           From Xbar Uc Crc-0                        0
-                           From Xbar Uc Crc-1                        0
-                           From Xbar Uc Crc-2                        0
-                           From Xbar Uc Crc-3                        0
-                           From Xbar Uc Drp-0                        0
-                           From Xbar Uc Drp-1                        0
-                           From Xbar Uc Drp-2                        0
-                           From Xbar Uc Drp-3                        0
-                           From Xbar Mc Crc-0                        0
-                           From Xbar Mc Crc-1                        0
-                           From Xbar Mc Crc-2                        0
-                           From Xbar Mc Crc-3                        0
-                           From Xbar Mc Drp-0                        0
-                           From Xbar Mc Drp-1                        0
-                           From Xbar Mc Drp-2                        0
-                           From Xbar Mc Drp-3                        0
-       Uc dq pkt-len-crc/RO-seq/len error drp                        0
-                 Uc eq pkt-len-crc/lookup-drp                        0
-                                Mc rf crc drp                        0
-                  Mc vl0 src0 buffer full drp                        0
-                  Mc vl1 src0 buffer full drp                        0
-                  Mc vl2 src0 buffer full drp                        0
-                  Mc vl3 src0 buffer full drp                        0
-                  Mc vl0 src1 buffer full drp                        0
-                  Mc vl1 src1 buffer full drp                        0
-                  Mc vl2 src1 buffer full drp                        0
-                  Mc vl3 src1 buffer full drp                        0
-
-```
-
-**Help:** execute the command "show controllers fabric fia drops egress location"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show cef drops location
-
-**Output:**
-```
-CEF Drop Statistics
-Node: 0/RSP0/CPU0
-  Unresolved drops     packets :              11
-  Unsupported drops    packets :              22
-  Null0 drops          packets :              33
-  No route drops       packets :              44
-  No Adjacency drops   packets :              55
-  Checksum error drops packets :              66
-  RPF drops            packets :              77
-  RPF suppressed drops packets :               0
-  RP destined drops    packets :               0
-  Discard drops        packets :               0
-  GRE lookup drops     packets :               0
-  GRE processing drops packets :               0
-  LISP punt drops      packets :          999999
-  LISP encap err drops packets :               0
-  LISP decap err drops packets :               0
-Node: 0/RSP1/CPU0
-  Unresolved drops     packets :               0
-  Unsupported drops    packets :               0
-  Null0 drops          packets :               0
-  No route drops       packets :              79
-  No Adjacency drops   packets :               0
-  Checksum error drops packets :               0
-  RPF drops            packets :               0
-  RPF suppressed drops packets :               0
-  RP destined drops    packets :               0
-  Discard drops        packets :               0
-  GRE lookup drops     packets :               0
-  GRE processing drops packets :               0
-  LISP punt drops      packets :               0
-  LISP encap err drops packets :               0
-  LISP decap err drops packets :               0
-Node: 0/0/CPU0
-  Unresolved drops     packets :               0
-  Unsupported drops    packets :               0
-  Null0 drops          packets :               0
-  No route drops       packets :               0
-  No Adjacency drops   packets :               0
-  Checksum error drops packets :               0
-  RPF drops            packets :               0
-  RPF suppressed drops packets :               0
-  RP destined drops    packets :               0
-  Discard drops        packets :              97
-  GRE lookup drops     packets :               0
-  GRE processing drops packets :               0
-  LISP punt drops      packets :               0
-  LISP encap err drops packets :               0
-  LISP decap err drops packets :               0
-Node: 0/7/CPU0
-  Unresolved drops     packets :               0
-  Unsupported drops    packets :               0
-  Null0 drops          packets :               0
-  No route drops       packets :               9
-  No Adjacency drops   packets :               0
-  Checksum error drops packets :               0
-  RPF drops            packets :               0
-  RPF suppressed drops packets :               0
-  RP destined drops    packets :               0
-  Discard drops        packets :             106
-  GRE lookup drops     packets :               0
-  GRE processing drops packets :               0
-  LISP punt drops      packets :               0
-  LISP encap err drops packets :               0
-  LISP decap err drops packets :               0
-
-```
-
-**Help:** execute the command "show cef drops location"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show bgp vrf all ipv4 unicast summary
-
-**Output:**
-```
-Tue Mar 21 09:08:19.039 EDT
-
-VRF: DR
--------
-BGP VRF DR, state: Active
- BGP Route Distinguisher: 10.1.1.1:5
-VRF ID: 0x60000002
-BGP router identifier 10.1.1.1, local AS number 15005
+Wed Jul 27 17:18:35.642 CST
+
+BGP instance 0: 'default'
+=========================
+ BGP router identifier 192.0.2.1, local AS number 65533
+BGP generic scan interval 60 secs
 Non-stop routing is enabled
 BGP table state: Active
-Table ID: 0xe0000011   RD version: 184934
-BGP main routing table version 31259922
-BGP NSR Initial initsync version 17 (Reached)
-BGP NSR/ISSU Sync-Group versions 31259922/0
+Table ID: 0xe0000000   RD version: 2308648196
+BGP main routing table version 2308648196
+BGP NSR Initial initsync version 2063371958 (Reached)
+BGP NSR/ISSU Sync-Group versions 2308648196/0
+BGP scan interval 60 secs
 
 BGP is operating in STANDALONE mode.
 
 
 Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+Speaker       2308648196  2308648196  2308648196  2308648196  2308648196  2308648196
  
-
-VRF: PROD
----------
-BGP VRF PROD, state: Active
-BGP Route Distinguisher: 10.1.1.1:3
-VRF ID: 0x60000003
-BGP router identifier 10.1.1.1, local AS number 15005
-Non-stop routing is enabled
-BGP table state: Active
-Table ID: 0xe0000012   RD version: 31259922
-BGP main routing table version 31259922
-BGP NSR Initial initsync version 17 (Reached)
-BGP NSR/ISSU Sync-Group versions 31259922/0
- 
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+Some configured eBGP neighbors (under default or non-default vrfs)
+do not have both inbound and outbound policies configured for IPv4 Unicast
+address family. These neighbors will default to sending and/or
+receiving no routes and are marked with '!' in the output below.
+Use the 'show bgp neighbor <nbr_address>' command for details.
 
 Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
-10.10.10.10       0 65370   83403   96226 31259922    0    0     6w2d      34543
-
-VRF: REPL
- ---------
-BGP VRF REPL, state: Active
-BGP Route Distinguisher: 10.1.1.1:1
- VRF ID: 0x60000004
-BGP router identifier 10.1.1.1, local AS number 15005
- Non-stop routing is enabled
-BGP table state: Active
-Table ID: 0xe0000013   RD version: 31259922
-BGP main routing table version 31259922
-BGP NSR Initial initsync version 17 (Reached)
-BGP NSR/ISSU Sync-Group versions 31259922/0
- 
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker        31259922   31259922   31259922   31259922    31259922    31259922
-
-Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
-172.16.16.10   0 65320   63970   64069 31259922    0    0     6w2d          1
-
-
-VRF: EXTRANET
- -------------
-BGP VRF EXTRANET, state: Active
-BGP Route Distinguisher: 10.1.1.1:7
- VRF ID: 0x60000005
-BGP router identifier 10.1.1.1, local AS number 15005
- Non-stop routing is enabled
-BGP table state: Active
-Table ID: 0xe0000014   RD version: 31162685
-BGP main routing table version 31259922
-BGP NSR Initial initsync version 17 (Reached)
-BGP NSR/ISSU Sync-Group versions 31259922/0
- 
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker        31259922   31259922   31259922   31259922    31259922    31259922
-
-
-VRF: EXTRANET2
---------------
- BGP VRF EXTRANET2, state: Active
-BGP Route Distinguisher: 10.1.1.1:8
-VRF ID: 0x60000007
-BGP router identifier 10.1.1.1, local AS number 15005
-Non-stop routing is enabled
-BGP table state: Active
-Table ID: 0xe0000016   RD version: 31259922
-BGP main routing table version 31259922
-BGP NSR Initial initsync version 17 (Reached)
-BGP NSR/ISSU Sync-Group versions 31259922/0
-
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker        31259922   31259922   31259922   31259922    31259922    31259922
-
-
-VRF: vrf-test
--------------
-BGP VRF vrf-test, state: Active
-BGP Route Distinguisher: 65000:42
-VRF ID: 0x60000003
- BGP router identifier 0.0.0.0, local AS number 65000
-Non-stop routing is enabled
- BGP table state: Active
-Table ID: 0xe0000012   RD version: 0
-BGP main routing table version 1
-BGP NSR Initial initsync version 0 (Not Reached)
-BGP NSR/ISSU Sync-Group versions 0/0
-
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker               1          1          0          0           1           0
-
+192.0.2.1         0 65533 3687720 44027503 2308648193    0    0     6w0d          4
+192.0.2.1         0 65533 2998156       0        0    0    0    1y11w Active
+192.0.2.1         0 65533  740185  712198 2308648196    0    0    6d12h          0
+192.0.2.1         0 65533   19179   11983 2308648196    0    0 01:57:59         10
+192.0.2.1         0 65533 3372692  355977 2308648196    0    0     1w6d          0!
+192.0.2.1         0 65533 5765678       0        0    0    0    45w1d Idle!
 ```
 
-**Help:** execute the command "show bgp vrf all ipv4 unicast summary"
+**Help:** execute the command "show bgp instance all summary"
 
 **Prompt:**
 - cisco_xr>
@@ -1855,7 +1191,6 @@ BGP neighbor is 1:1:34::242
   Foreign host: 1:1:34::242, Foreign port: 44455
   Last reset 2w3d, due to Peer closing down the session
   Peer reset reason: Remote closed the session (No error)
-
 ```
 
 **Help:** execute the command "show bgp neighbors"
@@ -1864,22 +1199,1639 @@ BGP neighbor is 1:1:34::242
 - cisco_xr>
 - cisco_xr#
 
-### admin show inventory
+### show bgp vrf all ipv4 unicast summary
 
 **Output:**
 ```
-Name: Rack 0 Descr: ASR-9010 Chassis
-PID: ASR-9010 VID: V01 SN: FOX0000X0XX
+Tue Mar 21 09:08:19.039 EDT
+
+VRF: DR
+-------
+BGP VRF DR, state: Active
+ BGP Route Distinguisher: 10.1.1.1:5
+VRF ID: 0x60000002
+BGP router identifier 10.1.1.1, local AS number 15005
+Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000011   RD version: 184934
+BGP main routing table version 31259922
+BGP NSR Initial initsync version 17 (Reached)
+BGP NSR/ISSU Sync-Group versions 31259922/0
+
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker        31259922   31259922   31259922   31259922    31259922    31259922
  
-Name: 0/0 Descr: 24X10G/1G Service Edge Optimized LC
-PID: A9K-24X10GE-1G-SE VID: V05 SN: FOC0000XXXX
 
-Name: 0/7 Descr: ASR 9000 8-port 100GE FLEXE SE linecard
-PID: A9K-8HG-FLEX-SE VID: V02 SN: FOC0000XXXX
+VRF: PROD
+---------
+BGP VRF PROD, state: Active
+BGP Route Distinguisher: 10.1.1.1:3
+VRF ID: 0x60000003
+BGP router identifier 10.1.1.1, local AS number 15005
+Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000012   RD version: 31259922
+BGP main routing table version 31259922
+BGP NSR Initial initsync version 17 (Reached)
+BGP NSR/ISSU Sync-Group versions 31259922/0
+ 
+BGP is operating in STANDALONE mode.
 
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+
+Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
+10.10.10.10       0 65370   83403   96226 31259922    0    0     6w2d      34543
+
+VRF: REPL
+ ---------
+BGP VRF REPL, state: Active
+BGP Route Distinguisher: 10.1.1.1:1
+ VRF ID: 0x60000004
+BGP router identifier 10.1.1.1, local AS number 15005
+ Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000013   RD version: 31259922
+BGP main routing table version 31259922
+BGP NSR Initial initsync version 17 (Reached)
+BGP NSR/ISSU Sync-Group versions 31259922/0
+ 
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+
+Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
+172.16.16.10   0 65320   63970   64069 31259922    0    0     6w2d          1
+
+
+VRF: EXTRANET
+ -------------
+BGP VRF EXTRANET, state: Active
+BGP Route Distinguisher: 10.1.1.1:7
+ VRF ID: 0x60000005
+BGP router identifier 10.1.1.1, local AS number 15005
+ Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000014   RD version: 31162685
+BGP main routing table version 31259922
+BGP NSR Initial initsync version 17 (Reached)
+BGP NSR/ISSU Sync-Group versions 31259922/0
+ 
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+
+
+VRF: EXTRANET2
+--------------
+ BGP VRF EXTRANET2, state: Active
+BGP Route Distinguisher: 10.1.1.1:8
+VRF ID: 0x60000007
+BGP router identifier 10.1.1.1, local AS number 15005
+Non-stop routing is enabled
+BGP table state: Active
+Table ID: 0xe0000016   RD version: 31259922
+BGP main routing table version 31259922
+BGP NSR Initial initsync version 17 (Reached)
+BGP NSR/ISSU Sync-Group versions 31259922/0
+
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker        31259922   31259922   31259922   31259922    31259922    31259922
+
+
+VRF: vrf-test
+-------------
+BGP VRF vrf-test, state: Active
+BGP Route Distinguisher: 65000:42
+VRF ID: 0x60000003
+ BGP router identifier 0.0.0.0, local AS number 65000
+Non-stop routing is enabled
+ BGP table state: Active
+Table ID: 0xe0000012   RD version: 0
+BGP main routing table version 1
+BGP NSR Initial initsync version 0 (Not Reached)
+BGP NSR/ISSU Sync-Group versions 0/0
+
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker               1          1          0          0           1           0
 ```
 
-**Help:** execute the command "admin show inventory"
+**Help:** execute the command "show bgp vrf all ipv4 unicast summary"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show bgp vrf all neighbors advertised-routes
+
+**Output:**
+```
+Sun Nov 17 19:47:39.864 BRA
+Network            Next Hop        From            AS Path
+Route Distinguisher: 3222:9196 (default for vrf VRF_NAME:9196)
+0.0.0.0/0          10.164.199.181  10.244.28.102  3222 65401i
+10.0.0.16/29       10.164.199.181  10.244.28.102  3222 65401?
+10.0.2.0/24        10.164.199.181  10.244.28.102  3222 65401?
+10.0.3.0/24        10.164.199.181  10.244.28.102  3222 65401?
+10.0.4.0/24        10.164.199.181  10.244.28.102  3222 65401?
+10.0.5.0/24        10.164.199.181  10.164.200.10   3222 65401?
+10.11.217.0/24     10.164.199.181  10.244.28.102  3222 65500i
+10.11.247.0/27     10.164.199.181  10.244.28.102  3222 65500i
+10.11.247.128/27   10.164.199.181  10.244.28.102  3222 65500i
+10.19.247.128/27   10.164.199.181  10.244.28.104  3222 65502 65502 65502 65502 65502i
+10.200.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
+10.235.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
+10.236.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
+10.238.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
+10.164.6.88/30     10.164.199.181  10.244.28.102  3222?
+10.164.192.248/30  10.164.199.181  10.244.28.102  3222 65401?
+10.164.192.252/30  10.164.199.181  10.244.28.102  3222?
+10.164.193.0/30    10.164.199.181  10.244.28.102  3222?
+10.164.193.4/30    10.164.199.181  Local           3222?
+10.164.193.180/30  10.164.199.181  Local           3222?
+10.164.194.196/30  10.164.199.181  10.244.28.102  3222?
+10.164.194.224/30  10.164.199.181  10.244.28.102  3222?
+10.164.195.24/30   10.164.199.181  Local           3222?
+10.164.195.28/30   10.164.199.181  10.244.28.102  3222?
+10.164.195.36/30   10.164.199.181  10.244.28.102  3222?
+10.164.195.40/30   10.164.199.181  Local           3222?
+10.164.195.44/30   10.164.199.181  10.244.28.102  3222?
+10.164.195.68/30   10.164.199.181  10.244.28.102  3222?
+10.164.195.72/30   10.164.199.181  Local           3222?
+10.164.195.76/30   10.164.199.181  10.244.28.102  3222?
+10.164.195.100/30  10.164.199.181  10.244.28.102  3222?
+10.164.195.104/30  10.164.199.181  Local           3222?
+10.164.195.108/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.124/30  10.164.199.181  Local           3222?
+10.164.200.128/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.132/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.164/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.168/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.172/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.176/30  10.164.199.181  Local           3222?
+10.164.200.180/30  10.164.199.181  10.244.28.102  3222?
+10.164.200.184/30  10.164.199.181  10.244.28.102  3222?
+10.164.201.28/30   10.164.199.181  Local           3222?
+10.164.201.32/30   10.164.199.181  10.244.28.102  3222?
+10.164.206.144/30  10.164.199.181  Local           3222?
+10.164.207.72/30   10.164.199.181  10.244.28.102  3222?
+10.164.207.80/30   10.164.199.181  Local           3222?
+169.247.1.236/32   10.164.199.181  10.244.28.102  3222 65000 65022i
+169.254.29.216/31  10.164.199.181  10.244.28.102  3222?
+172.21.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
+172.197.1.0/24     10.164.199.181  10.244.28.102  3222 27652?
+172.197.2.104/32   10.164.199.181  10.244.28.102  3222 27652 65510i
+10.172.210.0/24   10.164.199.181  10.244.28.102  3222 65500 65500?
+10.172.211.0/26   10.164.199.181  10.244.28.102  3222 65500 65500?
+10.209.18.184/30  10.164.199.181  10.244.28.102  3222?
+10.214.86.80/30   10.164.199.181  10.244.28.102  3222?
+10.255.225.60/32  10.164.199.181  10.244.28.102  3222 65500 65500?
+
+Processed 57 prefixes, 57 paths
+```
+
+**Help:** execute the command "show bgp vrf all neighbors advertised-routes"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show cdp neighbors detail
+
+**Output:**
+```
+-------------------------
+Device ID: nyc-dc-dcm005.ntc.com
+SysName :
+Entry address(es):
+  IPv4 address: 10.100.1.54
+Platform: cisco WS-C4948E,  Capabilities: Router Switch IGMP
+Interface: MgmtEth0/RSP0/CPU0/0
+Port ID (outgoing port): GigabitEthernet1/9
+Holdtime : 134 sec
+
+Version :
+Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 15.0(2)SG10, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+ Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Tue 07-Apr-15 10:40 by prod_rel_team
+
+advertisement version: 2
+Native VLAN: 103
+Duplex: full
+ 
+-------------------------
+Device ID: nyc-dc-dcm006.ntc.com
+SysName :
+Entry address(es):
+  IPv4 address: 10.100.1.55
+Platform: cisco WS-C4948E,  Capabilities: Router Switch IGMP
+Interface: MgmtEth0/RSP1/CPU0/0
+Port ID (outgoing port): GigabitEthernet1/9
+Holdtime : 160 sec
+
+Version :
+Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 15.0(2)SG10, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Tue 07-Apr-15 10:40 by prod_rel_team
+ 
+advertisement version: 2
+Native VLAN: 103
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-c90.ntc.com
+SysName : nyc-dc-c90.ntc.com
+Entry address(es):
+  IPv4 address: 10.100.100.141
+Platform: cisco CRS,  Capabilities: Router Switch IGMP
+Interface: FortyGigE0/0/1/0
+Port ID (outgoing port): FortyGigE0/0/0/2
+ Holdtime : 155 sec
+
+Version :
+Cisco IOS XR Software, Version 5.1.2[Default]
+ Copyright (c) 2015 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-d02.ntc.com(FXS182XXXXX)
+ SysName : nyc-dc-d02
+Entry address(es):
+  IPv4 address: 10.100.100.162
+Platform: N77-C7706,  Capabilities: Router Switch
+Interface: FortyGigE0/0/1/1
+Port ID (outgoing port): Ethernet6/1
+Holdtime : 126 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-c97
+SysName : nyc-dc-c97
+ Entry address(es):
+  IPv4 address: 10.100.100.19
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: FortyGigE0/0/0/0
+Port ID (outgoing port): FortyGigE0/0/0/0
+Holdtime : 170 sec
+
+Version :
+Cisco IOS XR Software, Version 5.3.4[Default]
+Copyright (c) 2016 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-c91.ntc.com
+ SysName : nyc-dc-c91.ntc.com
+Entry address(es):
+  IPv4 address: 10.100.100.125
+ Platform: cisco CRS,  Capabilities: Router
+Interface: FortyGigE0/0/0/1
+Port ID (outgoing port): FortyGigE0/0/0/2
+Holdtime : 122 sec
+
+Version :
+Cisco IOS XR Software, Version 5.1.2[Default]
+Copyright (c) 2015 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-c97
+SysName : nyc-dc-c97
+Entry address(es):
+  IPv4 address: 10.100.100.113
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: FortyGigE0/1/0/0
+Port ID (outgoing port): FortyGigE0/1/0/0
+Holdtime : 132 sec
+
+Version :
+Cisco IOS XR Software, Version 5.3.4[Default]
+Copyright (c) 2016 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-d03.ntc.com(FXS182XXXXX)
+SysName : nyc-dc-d03
+Entry address(es):
+  IPv4 address: 10.100.100.190
+Platform: N77-C7706,  Capabilities: Router Switch
+Interface: FortyGigE0/1/0/1
+Port ID (outgoing port): Ethernet6/1
+ Holdtime : 144 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-c90.ntc.com
+SysName : nyc-dc-c90.ntc.com
+Entry address(es):
+  IPv4 address: 10.100.100.145
+Platform: cisco CRS,  Capabilities: Router
+ Interface: FortyGigE0/1/1/0
+Port ID (outgoing port): FortyGigE0/4/0/2
+Holdtime : 174 sec
+
+Version :
+Cisco IOS XR Software, Version 5.1.2[Default]
+Copyright (c) 2015 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+ -------------------------
+Device ID: nyc-dc-z50a.ntc.com(JAF18XXXXX)
+SysName : nyc-dc-z50a
+Entry address(es):
+  IPv4 address: 10.100.100.116
+Platform: N77-C7710,  Capabilities: Router Switch
+Interface: FortyGigE0/1/1/1
+Port ID (outgoing port): Ethernet4/3
+Holdtime : 153 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-d04.ntc.com(FXS18XXXXXX)
+ SysName : nyc-dc-d04
+Entry address(es):
+  IPv4 address: 10.100.100.194
+Platform: N77-C7706,  Capabilities: Router Switch
+Interface: FortyGigE0/2/1/0
+Port ID (outgoing port): Ethernet6/1
+Holdtime : 155 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-c91.ntc.com
+SysName : nyc-dc-c91.ntc.com
+Entry address(es):
+  IPv4 address: 10.100.100.129
+Platform: cisco CRS,  Capabilities: Router
+Interface: FortyGigE0/2/1/1
+Port ID (outgoing port): FortyGigE0/4/0/2
+Holdtime : 130 sec
+
+Version :
+Cisco IOS XR Software, Version 5.1.2[Default]
+Copyright (c) 2015 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-d01.ntc.com(FXS182XXXXX)
+ SysName : nyc-dc-d01
+Entry address(es):
+  IPv4 address: 10.100.100.158
+Platform: N77-C7706,  Capabilities: Router Switch
+Interface: FortyGigE0/2/0/0
+Port ID (outgoing port): Ethernet6/1
+Holdtime : 128 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-z50b.ntc.com(JAF181XXXXX)
+ SysName : nyc-dc-z50b
+Entry address(es):
+  IPv4 address: 10.100.100.111
+ Platform: N77-C7710,  Capabilities: Router Switch
+Interface: FortyGigE0/2/0/1
+ Port ID (outgoing port): Ethernet4/3
+Holdtime : 158 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-dcc001.ntc.com
+ SysName :
+Entry address(es):
+  IPv4 address: 10.100.100.174
+Platform: cisco WS-C4510R+E,  Capabilities: Router Switch IGMP
+Interface: TenGigE0/3/0/0
+ Port ID (outgoing port): TenGigabitEthernet6/1
+Holdtime : 142 sec
+
+Version :
+Cisco IOS Software, Catalyst 4500 L3 Switch  Software (cat4500e-UNIVERSALK9-M), Version 15.2(2)E3, RELEASE SOFTWARE (fc3)
+Technical Support: http://www.cisco.com/techsupport
+ Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Wed 26-Aug-15 06:05 by prod_rel_team
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-d57
+SysName : nyc-dc-d57
+Entry address(es):
+  IPv4 address: 10.100.100.115
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: TenGigE0/3/0/1
+Port ID (outgoing port): TenGigE0/2/0/0
+Holdtime : 150 sec
+ 
+Version :
+Cisco IOS XR Software, Version 4.3.2[Default]
+Copyright (c) 2013 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-d40b.ntc.com(JAF182XXXXX)
+SysName : nyc-dc-d40b
+Entry address(es):
+  IPv4 address: 10.100.100.114
+Platform: N77-C7710,  Capabilities: Router Switch
+Interface: TenGigE0/3/0/2
+Port ID (outgoing port): Ethernet4/1
+Holdtime : 171 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-d80.ntc.com(FOC184XXXXX)
+SysName : nyc-dc-d80
+Entry address(es):
+  IPv4 address: 10.100.100.117
+Platform: N5K-C56128P,  Capabilities: Router Switch IGMP
+Interface: TenGigE0/3/0/3
+Port ID (outgoing port): Ethernet2/1
+ Holdtime : 140 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 7.0(7)N1(1)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-dcc002.ntc.com
+SysName :
+Entry address(es):
+  IPv4 address: 10.100.100.178
+Platform: cisco WS-C4510R+E,  Capabilities: Router Switch IGMP
+ Interface: TenGigE0/4/0/0
+Port ID (outgoing port): TenGigabitEthernet6/1
+ Holdtime : 147 sec
+
+Version :
+Cisco IOS Software, Catalyst 4500 L3 Switch  Software (cat4500e-UNIVERSALK9-M), Version 15.2(2)E3, RELEASE SOFTWARE (fc3)
+ Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2015 by Cisco Systems, Inc.
+Compiled Wed 26-Aug-15 06:05 by prod_rel_team
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-d57
+ SysName : nyc-dc-d57
+Entry address(es):
+  IPv4 address: 10.100.100.115
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: TenGigE0/4/0/1
+Port ID (outgoing port): TenGigE1/2/0/0
+Holdtime : 120 sec
+
+Version :
+Cisco IOS XR Software, Version 4.3.2[Default]
+Copyright (c) 2013 by Cisco Systems, Inc.
+ 
+advertisement version: 2
+Duplex: full
+
+-------------------------
+Device ID: nyc-dc-d40a.ntc.com(JAF182XXXXX)
+SysName : nyc-dc-d40a
+Entry address(es):
+  IPv4 address: 10.100.100.113
+Platform: N77-C7710,  Capabilities: Router Switch
+Interface: TenGigE0/4/0/2
+Port ID (outgoing port): Ethernet4/1
+Holdtime : 171 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-d81.ntc.com(FOC182XXXXX)
+SysName : nyc-dc-d81
+Entry address(es):
+  IPv4 address: 10.100.100.118
+Platform: N5K-C56128P,  Capabilities: Router Switch IGMP
+Interface: TenGigE0/4/0/3
+Port ID (outgoing port): Ethernet1/1
+ Holdtime : 141 sec
+
+Version :
+Cisco Nexus Operating System (NX-OS) Software, Version 7.0(7)N1(1)
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-c97
+SysName : nyc-dc-c97
+Entry address(es):
+  IPv4 address: 192.168.169.21
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: FortyGigE0/6/0/0
+Port ID (outgoing port): FortyGigE0/6/0/0
+Holdtime : 163 sec
+
+Version :
+Cisco IOS XR Software, Version 5.3.4[Default]
+Copyright (c) 2016 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+
+-------------------------
+ Device ID: nyc-dc-c97
+SysName : nyc-dc-c97
+Entry address(es):
+  IPv4 address: 192.168.169.21
+Platform: cisco ASR9K Series,  Capabilities: Router
+Interface: FortyGigE0/6/0/0
+Port ID (outgoing port): FortyGigE0/7/0/0
+Holdtime : 140 sec
+
+Version :
+Cisco IOS XR Software, Version 5.3.4[Default]
+Copyright (c) 2016 by Cisco Systems, Inc.
+
+advertisement version: 2
+Duplex: full
+```
+
+**Help:** execute the command "show cdp neighbors detail"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show cef drops location
+
+**Output:**
+```
+CEF Drop Statistics
+Node: 0/RSP0/CPU0
+  Unresolved drops     packets :              11
+  Unsupported drops    packets :              22
+  Null0 drops          packets :              33
+  No route drops       packets :              44
+  No Adjacency drops   packets :              55
+  Checksum error drops packets :              66
+  RPF drops            packets :              77
+  RPF suppressed drops packets :               0
+  RP destined drops    packets :               0
+  Discard drops        packets :               0
+  GRE lookup drops     packets :               0
+  GRE processing drops packets :               0
+  LISP punt drops      packets :          999999
+  LISP encap err drops packets :               0
+  LISP decap err drops packets :               0
+Node: 0/RSP1/CPU0
+  Unresolved drops     packets :               0
+  Unsupported drops    packets :               0
+  Null0 drops          packets :               0
+  No route drops       packets :              79
+  No Adjacency drops   packets :               0
+  Checksum error drops packets :               0
+  RPF drops            packets :               0
+  RPF suppressed drops packets :               0
+  RP destined drops    packets :               0
+  Discard drops        packets :               0
+  GRE lookup drops     packets :               0
+  GRE processing drops packets :               0
+  LISP punt drops      packets :               0
+  LISP encap err drops packets :               0
+  LISP decap err drops packets :               0
+Node: 0/0/CPU0
+  Unresolved drops     packets :               0
+  Unsupported drops    packets :               0
+  Null0 drops          packets :               0
+  No route drops       packets :               0
+  No Adjacency drops   packets :               0
+  Checksum error drops packets :               0
+  RPF drops            packets :               0
+  RPF suppressed drops packets :               0
+  RP destined drops    packets :               0
+  Discard drops        packets :              97
+  GRE lookup drops     packets :               0
+  GRE processing drops packets :               0
+  LISP punt drops      packets :               0
+  LISP encap err drops packets :               0
+  LISP decap err drops packets :               0
+Node: 0/7/CPU0
+  Unresolved drops     packets :               0
+  Unsupported drops    packets :               0
+  Null0 drops          packets :               0
+  No route drops       packets :               9
+  No Adjacency drops   packets :               0
+  Checksum error drops packets :               0
+  RPF drops            packets :               0
+  RPF suppressed drops packets :               0
+  RP destined drops    packets :               0
+  Discard drops        packets :             106
+  GRE lookup drops     packets :               0
+  GRE processing drops packets :               0
+  LISP punt drops      packets :               0
+  LISP encap err drops packets :               0
+  LISP decap err drops packets :               0
+```
+
+**Help:** execute the command "show cef drops location"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show configuration commit list
+
+**Output:**
+```
+SNo. Label/ID    User      Line                Client      Time Stamp
+ ~~~~ ~~~~~~~~    ~~~~      ~~~~                ~~~~~~      ~~~~~~~~~~
+1    1000000093  fred      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:42:19 2016
+2    1000000092  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:40:05 2016
+3    1000000091  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:33:52 2016
+4    1000000090  john      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:33:05 2016
+5    1000000089  fred      vty0:node0_RSP0_CP  CLI         Tue Jun  7 14:31:39 2016
+6    1000000088  patrick   vty1:node0_RSP0_CP  Rollback    Tue Jun  7 14:29:12 2016
+7    1000000087  john      vty1:node0_RSP0_CP  CLI         Fri Jun  3 14:33:27 2016
+8    1000000086  admin     vty0:node0_RSP0_CP  CLI         Wed May 25 13:43:18 2016
+9    1000000085  admin     vty0:node0_RSP0_CP  CLI         Fri May 20 10:06:01 2016
+10   1000000084  admin     vty0:node0_RSP0_CP  CLI         Wed May 11 13:32:10 2016
+11   1000000083  patrick   vty0:node0_RSP0_CP  CLI         Tue May 10 14:18:59 2016
+```
+
+**Help:** execute the command "show configuration commit list"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show controller fabric plane all
+
+**Output:**
+```
+Sun Feb  25 06:32:34.404 UTC
+
+Plane Admin Plane    up->dn  up->mcast
+Id    State State    counter   counter
+--------------------------------------
+0     UP    UP             0         0
+1     UP    UP             0         0
+2     UP    DN             0         0
+3     UP    UP             0         0
+4     UP    UP             0         0
+5     UP    UP             0         0
+```
+
+**Help:** execute the command "show controller fabric plane all"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show controllers all phy
+
+**Output:**
+```
+PHY data for interface: TenGigE0/0/0/0
+
+SFP EEPROM  port: 0
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KXG
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+ 
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 58 47 20
+ 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e4
+0x0060: 00 00 02 12 74 eb 9c 1e : 89 59 e6 a8 3c 20 cb 2a
+0x0070: b0 0d ca 00 00 00 00 00 : 00 00 00 00 f5 ca 74 5e
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 28.461
+        Voltage: 3.244 Volt
+        Tx Bias: 0.116 mAmps
+        Tx Power:  0.02730 mW (-15.63837 dBm)
+        Rx Power:  0.000 mW (<-40.00 dBm)
+        Oper. Status/Control: Tx Disabled, LOS,
+EEPROM Memory (A2 lower)
+ 0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 1c 76 7e b9 00 3a 01 11 : 00 00 00 00 00 00 82 00
+0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants:
+        Product Id: SFP-10G-SR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
+ 0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/1
+
+SFP EEPROM  port: 1
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-LR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 9u fiber (Km): 10000 meter
+        Link Reach 9u fiber (100m): 10000 meter
+        Vendor Name: CISCO-SUMITOMO
+        Vendor OUI: 00.00.5f
+        Vendor Part Number: SPP5200LR-C6     (rev.: B   )
+        Laser wavelength: 1310 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: SPC1719093J
+        Date Code (yy/mm/dd): 13/05/11  lot code: 1C
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 20 00 00 00 00 : 00 00 00 06 67 00 0a 64
+0x0010: 00 00 00 00 43 49 53 43 : 4f 2d 53 55 4d 49 54 4f
+0x0020: 4d 4f 20 20 00 00 00 5f : 53 50 50 35 32 30 30 4c
+0x0030: 52 2d 43 36 20 20 20 20 : 42 20 20 20 05 1e 00 06
+0x0040: 00 1a 00 00 53 50 43 31 : 37 31 39 30 39 33 4a 20
+0x0050: 20 20 20 20 31 33 30 35 : 31 31 31 43 68 f0 03 52
+0x0060: 00 00 0b 1c ba 98 43 64 : 6a 97 d8 6c ea 86 b2 df
+0x0070: cc 46 fd 00 00 00 00 00 : 00 00 00 00 3e ac 79 a3
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         90.000 mAmps          84.000 mAmps          24.000 mAmps          20.000 mAmps
+           Transmit Power:  2.23870 mW (3.49996 dBm)   1.12200 mW (0.49993 dBm)   0.15140 mW (-8.19874 dBm)   0.06030 mW (-12.19683 dBm)
+            Receive Power:  2.23870 mW (3.49996 dBm)   1.12200 mW (0.49993 dBm)   0.03630 mW (-14.40093 dBm)   0.01450 mW (-18.38632 dBm)
+        Temperature: 25.629
+        Voltage: 3.318 Volt
+        Tx Bias: 0.000 mAmps
+        Tx Power:  0.000 mW (<-40.00 dBm)
+        Rx Power:  0.000 mW (<-40.00 dBm)
+        Oper. Status/Control: Tx Disabled, LOS,
+EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: af c8 27 10 a4 10 2e e0 : 57 73 02 5b 2b d4 05 ea
+0x0120: 57 73 00 91 2b d4 01 6b : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 3c
+0x0160: 19 a1 81 98 00 00 00 00 : 00 00 00 00 00 00 82 00
+ 0x0170: 00 40 00 00 00 40 00 00 : 00 00 00 00 00 00 00 01
+
+        CLEI Code: COUIA75CAA
+        Part Number: 10-2457-02 (ver.: V02 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
+        Product Id: SFP-10G-LR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 37 35 43 : 41 41 31 30 2d 32 34 35
+0x0190: 37 2d 30 32 56 30 32 20 : 01 00 46 00 00 00 00 b0
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 8c dd 94 00 ac a5
+0x01b0: d6 cd 00 00 1e 00 59 2d : 12 88 0f 3e 00 00 aa aa
+0x01c0: 53 46 50 2d 31 30 47 2d : 4c 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 2e
+0x01e0: 20 26 2b 30 33 36 2b 36 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 6b 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/2
+
+SFP EEPROM  port: 2
+        Xcvr Type: SFP
+        Xcvr Code: DWDM-SFP10G-58.98
+        Encoding: 64B66B
+        Bit Rate: 11100 Mbps
+        Link Reach 9u fiber (Km): 80000 meter
+        Vendor Name: CISCO-FUJITSU
+        Vendor OUI: 00.00.0e
+        Vendor Part Number: FIM35060/201W23  (rev.: 0002)
+        Laser wavelength: 1558 nm (fraction: 0.098 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FLJ1736K039
+        Date Code (yy/mm/dd): 13/09/03  lot code: 01
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 00 00 00 00 00 : 00 00 00 06 6f 00 50 00
+0x0010: 00 00 00 00 43 49 53 43 : 4f 2d 46 55 4a 49 54 53
+0x0020: 55 20 20 20 00 00 00 0e : 46 49 4d 33 35 30 36 30
+0x0030: 2f 32 30 31 57 32 33 20 : 30 30 30 32 06 16 62 c1
+0x0040: 05 1a 00 00 46 4c 4a 31 : 37 33 36 4b 30 33 39 20
+0x0050: 20 20 20 20 31 33 30 39 : 30 33 30 31 68 f0 04 40
+0x0060: a3 00 15 3b 48 6e 9c da : f4 7b 3c 89 41 c2 1e d5
+ 0x0070: aa f3 88 00 00 00 00 00 : 00 00 00 00 49 75 e7 e7
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:        105.000 mAmps          98.000 mAmps          42.000 mAmps          35.000 mAmps
+           Transmit Power:  3.98100 mW (5.99992 dBm)   1.99520 mW (2.99986 dBm)   0.79430 mW (-1.00015 dBm)   0.31620 mW (-5.00038 dBm)
+            Receive Power:  0.50120 mW (-2.99989 dBm)   0.19950 mW (-7.00057 dBm)   0.00200 mW (-26.98970 dBm)   0.00080 mW (-30.96910 dBm)
+        Temperature: 36.656
+        Voltage: 3.250 Volt
+        Tx Bias: 79.936 mAmps
+        Tx Power:  1.38250 mW (1.40665 dBm)
+        Rx Power:  0.01520 mW (-18.18156 dBm)
+        Oper. Status/Control:
+ EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: cd 14 44 5c bf 68 52 08 : 9b 82 0c 5a 4d f0 1f 07
+0x0120: 13 94 00 08 07 cb 00 14 : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 00 00 00 01 : 00 00 00 00 00 01 00 00
+0x0150: 00 01 00 00 00 01 00 00 : 00 01 00 00 00 00 00 b0
+0x0160: 24 a8 7e f8 9c 20 36 01 : 00 98 00 00 00 00 00 00
+0x0170: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 02
+
+        CLEI Code: IPU3AZ6CAA
+        Part Number: 10-2750-01 (ver.: V01 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
+        Product Id: DWDM-SFP10G-58.98
+EEPROM Memory (A2 upper)
+ 0x0180: 49 50 55 33 41 5a 36 43 : 41 41 31 30 2d 32 37 35
+0x0190: 30 2d 30 31 56 30 31 20 : 01 00 46 00 00 00 00 bf
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 63 aa 64 00 64 ca
+0x01b0: 66 43 00 00 1c 02 9d 51 : 37 07 0f a1 00 00 aa aa
+0x01c0: 44 57 44 4d 2d 53 46 50 : 31 30 47 2d 35 38 2e 39
+0x01d0: 38 20 20 20 33 32 00 00 : 00 00 00 00 00 00 00 e8
+0x01e0: 0b 0d 1a 21 27 34 1a 34 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 fc 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/3
+
+SFP EEPROM  port: 3
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-JDSU
+        Vendor OUI: 00.01.9c
+        Vendor Part Number: PLRXPL-SC-S43-CS (rev.: 1   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: JUR1833GV1F
+        Date Code (yy/mm/dd): 14/08/16  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 4a 44 53 55 20 20
+0x0020: 20 20 20 20 00 00 01 9c : 50 4c 52 58 50 4c 2d 53
+0x0030: 43 2d 53 34 33 2d 43 53 : 31 20 20 20 03 52 00 19
+0x0040: 00 1a 00 00 4a 55 52 31 : 38 33 33 47 56 31 46 20
+0x0050: 20 20 20 20 31 34 30 38 : 31 36 20 20 68 f0 03 5d
+0x0060: 00 00 08 93 24 b6 53 74 : 94 4c 09 f7 05 38 f0 78
+0x0070: 12 90 2a 00 00 00 00 00 : 00 00 00 00 8a 25 00 f8
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         10.000 mAmps           8.500 mAmps           3.000 mAmps           2.600 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 32.988
+        Voltage: 3.291 Volt
+        Tx Bias: 7.250 mAmps
+        Tx Power:  0.56550 mW (-2.47567 dBm)
+        Rx Power:  0.42270 mW (-3.73968 dBm)
+        Oper. Status/Control:
+ EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 13 88 05 14 10 9a 05 dc : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 5b
+0x0160: 20 fd 80 8e 0e 29 16 17 : 10 83 00 00 00 00 00 00
+0x0170: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
+        Product Id: SFP-10G-SR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 61 06 64 00 6d d7
+0x01b0: 7c 2b 00 00 16 00 0c 6c : 16 45 0f ae 00 00 aa aa
+ 0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 34 31 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 00 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/4
+
+SFP EEPROM  port: 4
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KZU
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+ 
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 55 20
+ 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 f4
+0x0060: 00 00 02 61 e7 86 6e be : 16 35 ef 18 50 08 c7 78
+0x0070: 28 bc 3c 00 00 00 00 00 : 00 00 00 00 e5 04 00 95
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 32.152
+        Voltage: 3.264 Volt
+        Tx Bias: 7.904 mAmps
+        Tx Power:  0.59180 mW (-2.27825 dBm)
+        Rx Power:  0.45310 mW (-3.43806 dBm)
+        Oper. Status/Control:
+EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 20 27 7f 83 0f 70 17 1e : 11 b3 00 00 00 00 00 00
+0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants:
+        Product Id: SFP-10G-SR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+ 0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
+0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/5
+
+SFP EEPROM  port: 5
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KZ7
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+ 0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 37 20
+0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 d6
+0x0060: 00 00 02 6d 9a 90 34 05 : 5a 2b de b4 22 a8 95 6b
+0x0070: 4c b4 d5 00 00 00 00 00 : 00 00 00 00 b6 4c a5 80
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 30.563
+        Voltage: 3.258 Volt
+        Tx Bias: 7.876 mAmps
+        Tx Power:  0.64740 mW (-1.88827 dBm)
+        Rx Power:  0.56550 mW (-2.47567 dBm)
+        Oper. Status/Control:
+ EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 1e 90 7f 45 0f 62 19 4a : 16 17 00 00 00 00 00 00
+0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants:
+        Product Id: SFP-10G-SR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
+0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+ 0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/6
+
+SFP EEPROM  port: 6
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KYN
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+ 
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 59 4e 20
+ 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 ec
+0x0060: 00 00 02 b1 f4 73 e5 c3 : 5c aa e2 5c 9c fe 1c 95
+0x0070: 91 98 47 00 00 00 00 00 : 00 00 00 00 ab 24 53 3c
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 34.293
+        Voltage: 3.240 Volt
+        Tx Bias: 7.846 mAmps
+        Tx Power:  0.61560 mW (-2.10701 dBm)
+        Rx Power:  0.62050 mW (-2.07258 dBm)
+        Oper. Status/Control:
+EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 22 4b 7e 8e 0f 53 18 0c : 18 3d 00 00 00 00 00 00
+0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants:
+        Product Id: SFP-10G-SR
+EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+ 0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
+0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/7
+
+SFP EEPROM  port: 7
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KYF
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+ 0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 59 46 20
+0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e4
+0x0060: 00 00 02 92 fe 63 74 2e : 97 52 42 36 a9 62 00 68
+0x0070: 2e 2a 5f 00 00 00 00 00 : 00 00 00 00 8b 7d 0c 6e
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 34.387
+        Voltage: 3.278 Volt
+        Tx Bias: 0.152 mAmps
+        Tx Power:  0.05760 mW (-12.39578 dBm)
+        Rx Power:  0.000 mW (<-40.00 dBm)
+        Oper. Status/Control: Tx Disabled, LOS,
+EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 22 63 80 09 00 4c 02 40 : 00 00 00 00 00 00 82 00
+ 0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
+
+        CLEI Code: COUIA8NCAA
+        Part Number: 10-2415-03 (ver.: V03 )
+        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
+        Minimum Temperature: 0
+        Maximum Temperature: 70
+        Calibration Constants:
+        Product Id: SFP-10G-SR
+ EEPROM Memory (A2 upper)
+0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
+0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
+0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
+0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
+0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
+0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
+0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+
+
+
+PHY data for interface: TenGigE0/0/0/8
+ 
+SFP EEPROM  port: 8
+        Xcvr Type: SFP
+        Xcvr Code: SFP-10G-SR
+        Encoding: 64B66B
+        Bit Rate: 10300 Mbps
+        Link Reach 50u fiber: 80 meter
+        Link Reach 62.5u fiber: 20 meter
+        Vendor Name: CISCO-FINISAR
+        Vendor OUI: 00.90.65
+        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
+        Laser wavelength: 850 nm (fraction: 0.00 nm)
+        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
+        Vendor Serial Number: FNS17231KZG
+        Date Code (yy/mm/dd): 13/06/06  lot code:
+        Diagnostic Monitoring: DOM, Int. Cal.,
+        Enhanced Options: Alarm/Warning Flags
+
+MSA Data
+0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
+ 0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
+0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
+0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
+0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 47 20
+0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e6
+0x0060: 00 00 02 3e c6 30 bb 72 : 52 c4 39 8f 04 21 07 b0
+0x0070: cc 72 75 00 00 00 00 00 : 00 00 00 00 60 af 93 d2
+
+        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
+              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
+                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
+                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
+           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
+            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
+        Temperature: 33.723
+        Voltage: 3.277 Volt
+        Tx Bias: 0.000 mAmps
+        Tx Power:  0.00530 mW (-22.75724 dBm)
+        Rx Power:  0.000 mW (<-40.00 dBm)
+        Oper. Status/Control: Tx Disabled, LOS,
+ EEPROM Memory (A2 lower)
+0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
+0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
+0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
+0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
+0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
+0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
+0x0160: 21 b9 80 02 00 00 00 35 : 00 00 00 00 00 00 82 00
+0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
+```
+
+**Help:** execute the command "show controllers all phy"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show controllers fabric fia drops egress location
+
+**Output:**
+```
+********** FIA-0 **********
+Category: eg_drop-0
+                           From Xbar Uc Crc-0                       11
+                           From Xbar Uc Crc-1                       22
+                           From Xbar Uc Crc-2                       33
+                           From Xbar Uc Crc-3                       44
+                           From Xbar Uc Drp-0                       55
+                           From Xbar Uc Drp-1                       66
+                           From Xbar Uc Drp-2                       77
+                           From Xbar Uc Drp-3                       88
+                           From Xbar Mc Crc-0                        0
+                           From Xbar Mc Crc-1                        1
+                           From Xbar Mc Crc-2                        2
+                           From Xbar Mc Crc-3                        3
+                           From Xbar Mc Drp-0                        4
+                           From Xbar Mc Drp-1                        5
+                           From Xbar Mc Drp-2                        6
+                           From Xbar Mc Drp-3                        7
+       Uc dq pkt-len-crc/RO-seq/len error drp                        8
+                 Uc eq pkt-len-crc/lookup-drp                   999999
+                                Mc rf crc drp                        0
+                  Mc vl0 src0 buffer full drp                        0
+                  Mc vl1 src0 buffer full drp                        0
+                  Mc vl2 src0 buffer full drp                        0
+                  Mc vl3 src0 buffer full drp                        0
+                  Mc vl0 src1 buffer full drp                        0
+                  Mc vl1 src1 buffer full drp                        0
+                  Mc vl2 src1 buffer full drp                        0
+                  Mc vl3 src1 buffer full drp                        0
+
+ ********** FIA-1 **********
+Category: eg_drop-1
+                           From Xbar Uc Crc-0                        0
+                           From Xbar Uc Crc-1                        0
+                           From Xbar Uc Crc-2                        0
+                           From Xbar Uc Crc-3                        0
+                           From Xbar Uc Drp-0                        0
+                           From Xbar Uc Drp-1                        0
+                           From Xbar Uc Drp-2                        0
+                           From Xbar Uc Drp-3                        0
+                           From Xbar Mc Crc-0                        0
+                           From Xbar Mc Crc-1                        0
+                           From Xbar Mc Crc-2                        0
+                           From Xbar Mc Crc-3                        0
+                           From Xbar Mc Drp-0                        0
+                           From Xbar Mc Drp-1                        0
+                           From Xbar Mc Drp-2                        0
+                           From Xbar Mc Drp-3                        0
+       Uc dq pkt-len-crc/RO-seq/len error drp                        0
+                 Uc eq pkt-len-crc/lookup-drp                        0
+                                Mc rf crc drp                        0
+                  Mc vl0 src0 buffer full drp                        0
+                  Mc vl1 src0 buffer full drp                        0
+                  Mc vl2 src0 buffer full drp                        0
+                  Mc vl3 src0 buffer full drp                        0
+                  Mc vl0 src1 buffer full drp                        0
+                  Mc vl1 src1 buffer full drp                        0
+                  Mc vl2 src1 buffer full drp                        0
+                  Mc vl3 src1 buffer full drp                        0
+
+ ********** FIA-2 **********
+Category: eg_drop-2
+                           From Xbar Uc Crc-0                        0
+                           From Xbar Uc Crc-1                        0
+                           From Xbar Uc Crc-2                        0
+                           From Xbar Uc Crc-3                        0
+                           From Xbar Uc Drp-0                        0
+                           From Xbar Uc Drp-1                        0
+                           From Xbar Uc Drp-2                        0
+                           From Xbar Uc Drp-3                        0
+                           From Xbar Mc Crc-0                        0
+                           From Xbar Mc Crc-1                        0
+                           From Xbar Mc Crc-2                        0
+                           From Xbar Mc Crc-3                        0
+                           From Xbar Mc Drp-0                        0
+                           From Xbar Mc Drp-1                        0
+                           From Xbar Mc Drp-2                        0
+                           From Xbar Mc Drp-3                        0
+       Uc dq pkt-len-crc/RO-seq/len error drp                        0
+                 Uc eq pkt-len-crc/lookup-drp                        0
+                                Mc rf crc drp                        0
+                  Mc vl0 src0 buffer full drp                        0
+                  Mc vl1 src0 buffer full drp                        0
+                  Mc vl2 src0 buffer full drp                        0
+                  Mc vl3 src0 buffer full drp                        0
+                  Mc vl0 src1 buffer full drp                        0
+                  Mc vl1 src1 buffer full drp                        0
+                  Mc vl2 src1 buffer full drp                        0
+                  Mc vl3 src1 buffer full drp                        0
+
+ ********** FIA-3 **********
+Category: eg_drop-3
+                           From Xbar Uc Crc-0                        0
+                           From Xbar Uc Crc-1                        0
+                           From Xbar Uc Crc-2                        0
+                           From Xbar Uc Crc-3                        0
+                           From Xbar Uc Drp-0                        0
+                           From Xbar Uc Drp-1                        0
+                           From Xbar Uc Drp-2                        0
+                           From Xbar Uc Drp-3                        0
+                           From Xbar Mc Crc-0                        0
+                           From Xbar Mc Crc-1                        0
+                           From Xbar Mc Crc-2                        0
+                           From Xbar Mc Crc-3                        0
+                           From Xbar Mc Drp-0                        0
+                           From Xbar Mc Drp-1                        0
+                           From Xbar Mc Drp-2                        0
+                           From Xbar Mc Drp-3                        0
+       Uc dq pkt-len-crc/RO-seq/len error drp                        0
+                 Uc eq pkt-len-crc/lookup-drp                        0
+                                Mc rf crc drp                        0
+                  Mc vl0 src0 buffer full drp                        0
+                  Mc vl1 src0 buffer full drp                        0
+                  Mc vl2 src0 buffer full drp                        0
+                  Mc vl3 src0 buffer full drp                        0
+                  Mc vl0 src1 buffer full drp                        0
+                  Mc vl1 src1 buffer full drp                        0
+                  Mc vl2 src1 buffer full drp                        0
+                  Mc vl3 src1 buffer full drp                        0
+```
+
+**Help:** execute the command "show controllers fabric fia drops egress location"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show controllers fabric fia drops ingress location
+
+**Output:**
+```
+********** FIA-0 **********
+Category: in_drop-0
+                            From Spaui Drop-0                       11
+                                  accpt tbl-0                       22
+                                    ctl len-0                       33
+                                  short pkt-0                       44
+                                max pkt len-0                       55
+                                min pkt len-0                       66
+                            From Spaui Drop-1                       77
+                                  accpt tbl-1                       88
+                                    ctl len-1                       99
+                                  short pkt-1                        0
+                                max pkt len-1                       12
+                                min pkt len-1                       13
+                                     Tail drp                        4
+                                      Vqi drp                        1
+                           Header parsing drp                        2
+                                 pw to ni drp                        3
+                               ni from pw drp                        4
+                                  sp0 crc err                       12
+                                sp0 bad align                        5
+                                 sp0 bad code                        1
+                               sp0 align fail                        3
+                                 sp0 prot err                        1
+                                  sp1 crc err                        1
+                                sp1 bad align                        0
+                                 sp1 bad code                        0
+                               sp1 align fail                        3
+                                 sp1 prot err                        0
+
+ ********** FIA-1 **********
+Category: in_drop-1
+                            From Spaui Drop-0                        0
+                                  accpt tbl-0                        0
+                                    ctl len-0                        0
+                                  short pkt-0                        0
+                                max pkt len-0                        0
+                                min pkt len-0                        0
+                            From Spaui Drop-1                        0
+                                  accpt tbl-1                        0
+                                    ctl len-1                        0
+                                  short pkt-1                        0
+                                max pkt len-1                        0
+                                min pkt len-1                        0
+                                     Tail drp                        0
+                                      Vqi drp                        0
+                           Header parsing drp                        0
+                                 pw to ni drp                        0
+                               ni from pw drp                        0
+                                  sp0 crc err                        8
+                                sp0 bad align                        0
+                                 sp0 bad code                        5
+                               sp0 align fail                        3
+                                 sp0 prot err                        1
+                                  sp1 crc err                       12
+                                sp1 bad align                        0
+                                 sp1 bad code                        8
+                               sp1 align fail                        3
+                                 sp1 prot err                        0
+
+ ********** FIA-2 **********
+ Category: in_drop-2
+                            From Spaui Drop-0                        0
+                                  accpt tbl-0                        0
+                                    ctl len-0                        0
+                                  short pkt-0                        0
+                                max pkt len-0                        0
+                                min pkt len-0                        0
+                            From Spaui Drop-1                        0
+                                  accpt tbl-1                        0
+                                    ctl len-1                        0
+                                  short pkt-1                        0
+                                max pkt len-1                        0
+                                min pkt len-1                        0
+                                     Tail drp                        0
+                                      Vqi drp                        0
+                           Header parsing drp                        0
+                                 pw to ni drp                        0
+                               ni from pw drp                        0
+                                  sp0 crc err                       12
+                                sp0 bad align                        0
+                                 sp0 bad code                        6
+                               sp0 align fail                        3
+                                 sp0 prot err                        1
+                                  sp1 crc err                        1
+                                sp1 bad align                        0
+                                 sp1 bad code                        0
+                               sp1 align fail                        3
+                                 sp1 prot err                        0
+
+ ********** FIA-3 **********
+Category: in_drop-3
+                            From Spaui Drop-0                        0
+                                  accpt tbl-0                        0
+                                    ctl len-0                        0
+                                  short pkt-0                        0
+                                max pkt len-0                        0
+                                min pkt len-0                        0
+                            From Spaui Drop-1                        0
+                                  accpt tbl-1                        0
+                                    ctl len-1                        0
+                                  short pkt-1                        0
+                                max pkt len-1                        0
+                                min pkt len-1                        0
+                                     Tail drp                        0
+                                      Vqi drp                        0
+                           Header parsing drp                        0
+                                 pw to ni drp                        0
+                               ni from pw drp                        0
+                                  sp0 crc err                        2
+                                sp0 bad align                        0
+                                 sp0 bad code                        0
+                               sp0 align fail                        3
+                                 sp0 prot err                        0
+                                  sp1 crc err                        3
+                                sp1 bad align                        0
+                                 sp1 bad code                        0
+                               sp1 align fail                        3
+                                 sp1 prot err                        0
+```
+
+**Help:** execute the command "show controllers fabric fia drops ingress location"
 
 **Prompt:**
 - cisco_xr>
@@ -1912,7 +2864,6 @@ Category: eg_error-3
                              To Spaui Error-0                        0
                              To Spaui Error-1                        0
                        RL over/under flow cnt                        0
-
 ```
 
 **Help:** execute the command "show controllers fabric fia errors egress location"
@@ -1921,207 +2872,220 @@ Category: eg_error-3
 - cisco_xr>
 - cisco_xr#
 
-### show drops np all
+### show controllers fabric fia errors ingress location
 
 **Output:**
 ```
-Node: 0/0/CPU0:
-----------------------------------------------------------------
- 
-NP 0 Drops:
-----------------------------------------------------------------
-RSV_DROP_ING_BFD                                             3               
-RSV_DROP_MPLS_TXADJ_NO_MATCH                                 148             
-RSV_DROP_MPLS_LEAF_NO_MATCH                                  34              
-MODIFY_PUNT_REASON_MISS_DROP                                 2               
-PARSE_EGR_INJ_PKT_TYP_UNKNOWN                                4329            
-PARSE_DROP_IN_UIDB_TCAM_MISS                                 388             
-PARSE_DROP_IN_UIDB_DOWN                                      14              
-PARSE_DROP_IPV4_DISABLED                                     106             
-----------------------------------------------------------------
- 
-NP 1 Drops:
-----------------------------------------------------------------
-RSV_DROP_IPV4_NRLDI_NOT_LOCAL                                3472            
-MODIFY_PUNT_REASON_MISS_DROP                                 2               
-PARSE_DROP_IN_UIDB_TCAM_MISS                                 384             
-----------------------------------------------------------------
- 
-NP 2 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 2               
-----------------------------------------------------------------
+********** FIA-0 **********
+Category: in_error-0
+                             To Xbar Uc Crc-0                       11
+                             To Xbar Uc Crc-1                       22
+                             To Xbar Uc Crc-2                       33
+                             To Xbar Uc Crc-3                       44
+                             To Xbar Mc Crc-0                       55
+                             To Xbar Mc Crc-1                       66
+                             To Xbar Mc Crc-2                       77
+                             To Xbar Mc Crc-3                        0
+                          nb pa read data err                    12334
+                                pa header err                        0
+                                 pa crc16 err                        0
+                                 pa crc32 err                        0
+                                 pa to tf err                    99999
+                         ab overflow req lost                        0
+                                 ni bad crc32                        0
+                             ni crc32 corrupt                        0
 
-NP 3 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
+ ********** FIA-1 **********
+Category: in_error-1
+                             To Xbar Uc Crc-0                        0
+                             To Xbar Uc Crc-1                        0
+                             To Xbar Uc Crc-2                        0
+                             To Xbar Uc Crc-3                        0
+                             To Xbar Mc Crc-0                        0
+                             To Xbar Mc Crc-1                        0
+                             To Xbar Mc Crc-2                        0
+                             To Xbar Mc Crc-3                        0
+                          nb pa read data err                        0
+                                pa header err                        0
+                                 pa crc16 err                        0
+                                 pa crc32 err                        0
+                                 pa to tf err                        0
+                         ab overflow req lost                        0
+                                 ni bad crc32                        0
+                             ni crc32 corrupt                 11111111
 
-NP 4 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 4               
-----------------------------------------------------------------
+ ********** FIA-2 **********
+Category: in_error-2
+                             To Xbar Uc Crc-0                        0
+                             To Xbar Uc Crc-1                        0
+                             To Xbar Uc Crc-2                        0
+                             To Xbar Uc Crc-3                        0
+                             To Xbar Mc Crc-0                        0
+                             To Xbar Mc Crc-1                        0
+                             To Xbar Mc Crc-2                        0
+                             To Xbar Mc Crc-3                        0
+                          nb pa read data err                        0
+                                pa header err                        0
+                                 pa crc16 err                        0
+                                 pa crc32 err                        0
+                                 pa to tf err                        0
+                         ab overflow req lost                        0
+                                 ni bad crc32                        0
+                             ni crc32 corrupt                        0
 
-NP 5 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-NP 6 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-NP 7 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-		 Node: 0/7/CPU0:
-----------------------------------------------------------------
- 
-NP 0 Drops:
-----------------------------------------------------------------
-RSV_DROP_ING_BFD                                             256             
-RSV_DROP_EGR_UIDB_DOWN                                       1               
-RSV_DROP_MPLS_TXADJ_NO_MATCH                                 36              
-RSV_DROP_MPLS_LEAF_NO_MATCH                                  124             
-RSV_DROP_NHINDEX                                             1               
-MDF_RPF_FAIL_DROP                                            146019781       
-MDF_PUNT_POLICE_DROP                                         362             
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-PUNT_NO_MATCH_EXCD                                           362             
-DROP_FRM_FRM_ERR_XAUI6                                       1               
-PARSE_DROP_IN_UIDB_DOWN                                      27              
-PARSE_DROP_IPV4_DISABLED                                     163             
-----------------------------------------------------------------
- 
-NP 1 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 4               
-----------------------------------------------------------------
-
-NP 2 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-NP 3 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 4               
-----------------------------------------------------------------
-
-NP 4 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-NP 5 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 3               
-----------------------------------------------------------------
-
-NP 6 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 4               
-----------------------------------------------------------------
-
-NP 7 Drops:
-----------------------------------------------------------------
-MODIFY_PUNT_REASON_MISS_DROP                                 4               
-----------------------------------------------------------------
-
+ ********** FIA-3 **********
+Category: in_error-3
+                             To Xbar Uc Crc-0                        0
+                             To Xbar Uc Crc-1                        0
+                             To Xbar Uc Crc-2                        0
+                             To Xbar Uc Crc-3                        0
+                             To Xbar Mc Crc-0                        0
+                             To Xbar Mc Crc-1                        0
+                             To Xbar Mc Crc-2                        0
+                             To Xbar Mc Crc-3                        0
+                          nb pa read data err                        0
+                                pa header err                        0
+                                 pa crc16 err                        0
+                                 pa crc32 err                        0
+                                 pa to tf err                        0
+                         ab overflow req lost                        0
+                                 ni bad crc32                        0
+                             ni crc32 corrupt                        0
 ```
 
-**Help:** execute the command "show drops np all"
+**Help:** execute the command "show controllers fabric fia errors ingress location"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show ospf vrf all neighbor
+### show controllers HundredGigabitEthernet
 
 **Output:**
 ```
+Thu Dec 21 06:15:50.979 UTC
+Operational data for interface HundredGigE0/0/0/0:
 
-Wed Jul 27 17:18:33.921 CST
+State:
+    Administrative state: enabled
+    Operational state: Up
+    LED state: Green On
 
-* Indicates MADJ interface
-# Indicates Neighbor awaiting BFD session up
+Phy:
+    Media type: Active optical cable
+    Optics:
+        Vendor: AOI             
+        Part number: AQPA9N09ADLN0778
+        Serial number: 04517A10025     
+        Wavelength: 850 nm
+    Digital Optical Monitoring:
+        Transceiver Temp: 17.070 C
+        Transceiver Voltage: 3.447 V
 
-Neighbors for OSPF 1, VRF red
+        Alarms key: (H) Alarm high, (h) Warning high
+                    (L) Alarm low, (l) Warning low
+           Wavelength    Tx Power          Rx Power      Laser Bias
+        00     n/a     0.1   1.0205     -1.8   0.6627     5.450 
+        00     n/a     -0.1   0.9775     -1.1   0.7788     5.240 
+        00     n/a     0.3   1.0617     -1.2   0.7626     5.240 
+        00     n/a     -0.3   0.9281     -2.1   0.6213     5.240 
+        DOM alarms:
+            No alarms
 
-Neighbor ID     Pri   State           Dead Time   Address         Interface
-192.0.2.1       0     FULL/  -        00:00:39    192.0.2.2       Bundle-Ether10.10
-    Neighbor is up for 5w0d
-192.0.2.3       1     FULL/DR         00:00:39    192.0.2.4       TenGigE0/0/0/10.10
-    Neighbor is up for 35w1d
+        Alarm                     Alarm    Warning   Warning    Alarm
+        Thresholds                High      High       Low       Low
+                                 -------   -------   -------   -------
+        Transceiver Temp (C):     80.000     0.000     0.000    -5.000
+        Transceiver Voltage (V):   3.600     0.000     0.000     3.000
+        Laser Bias (mA):             n/a       n/a       n/a       n/a
+        Transmit Power (mW):       2.754     0.000     0.000     0.091
+        Transmit Power (dBm):      4.400      -inf      -inf   -10.410
+        Receive Power (mW):        2.754     0.000     0.000     0.058
+        Receive Power (dBm):       4.400      -inf      -inf   -12.366
+    Statistics:
+        FEC:
+            Corrected Codeword Count: 0
+            Uncorrected Codeword Count: 0
 
-Total neighbor count: 2
+MAC address information:
+    Operational address: 008a.9658.f904
+    Burnt-in address: 008a.9658.f000
 
+Autonegotiation disabled.
 
-* Indicates MADJ interface
-# Indicates Neighbor awaiting BFD session up
+Operational values:
+    Speed: 100Gbps
+    Duplex: Full Duplex
+    Flowcontrol: None
+    Loopback: None (or external)
+    MTU: 9114
+    MRU: 9114
+    Forward error correction: Disabled
+          
+          
+Operational data for interface HundredGigE0/0/0/1:
+          
+State:    
+    Administrative state: enabled
+    Operational state: Up
+    LED state: Green On
+          
+Phy:      
+    Media type: Active optical cable
+    Optics:
+        Vendor: Ligent Photonics
+        Part number: DQF8503-4C13    
+        Serial number: S516CBD0371     
+        Wavelength: 850 nm
+    Digital Optical Monitoring:
+        Transceiver Temp: 18.000 C
+        Transceiver Voltage: 3.338 V
+          
+        Alarms key: (H) Alarm high, (h) Warning high
+                    (L) Alarm low, (l) Warning low
+           Wavelength    Tx Power          Rx Power      Laser Bias
+        Lane  (nm)    (dBm)    (mW)     (dBm)     (mW)      (mA)
+        --   -----   ------   ------    ------   ------    ------
+        00     n/a     -40.0   0.0001     -0.6   0.8658     5.930 
+        00     n/a     -40.0   0.0001     -0.6   0.8796     5.940 
+        00     n/a     -40.0   0.0001     -0.6   0.8742     5.932 
+        00     n/a     -40.0   0.0001     -0.7   0.8572     5.940 
+          
+        DOM alarms:
+            No alarms
 
-Neighbors for OSPF 1, VRF green
+        Alarm                     Alarm    Warning   Warning    Alarm
+        Thresholds                High      High       Low       Low
+                                 -------   -------   -------   -------
+        Transceiver Temp (C):     80.000     0.000     0.000    -10.000
+        Transceiver Voltage (V):   3.600     0.000     0.000     3.000
+        Laser Bias (mA):             n/a       n/a       n/a       n/a
+        Transmit Power (mW):       1.949     0.000     0.000     0.087
+        Transmit Power (dBm):      2.898      -inf      -inf   -10.605
+        Receive Power (mW):        2.754     0.000     0.000     0.051
+        Receive Power (dBm):       4.400      -inf      -inf   -12.924
+    Statistics:
+        FEC:
+            Corrected Codeword Count: 0
+            Uncorrected Codeword Count: 0
 
-Neighbor ID     Pri   State           Dead Time   Address         Interface
-192.0.2.5       0     FULL/  -        00:00:34    192.0.2.6       Bundle-Ether10.20
-    Neighbor is up for 6d16h
-192.0.2.7       1     FULL/DR         00:00:38    192.0.2.8       TenGigE0/0/0/10.20
-    Neighbor is up for 35w1d
+MAC address information:
+    Operational address: 008a.9661.d904
+    Burnt-in address: 008a.9661.d004
 
-Total neighbor count: 2
+Autonegotiation disabled.
 
-
-* Indicates MADJ interface
-# Indicates Neighbor awaiting BFD session up
-
-Neighbors for OSPF 1, VRF blue
-
-Neighbor ID     Pri   State           Dead Time   Address         Interface
-192.0.2.9       1     FULL/BDR        00:00:39    192.0.2.10      Bundle-Ether10.30
-    Neighbor is up for 35w1d
-192.0.2.11      1     FULL/BDR        00:00:39    192.0.2.12      GigabitEthernet100/0/0/0
-    Neighbor is up for 35w1d
-
-Total neighbor count: 2
-
+Operational values:
+    Speed: 100Gbps
+    Duplex: Full Duplex
+    Flowcontrol: None
+    Loopback: None (or external)
+    MTU: 9114
+    MRU: 9114
+    Forward error correction: Disabled
 ```
 
-**Help:** execute the command "show ospf vrf all neighbor"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show hsrp
-
-**Output:**
-```
-Fri May 17 20:29:32.108 UTC
-
-IPv4 Groups:
-
-                       P indicates configured to preempt.
-
-                       |
-
-Interface     Grp Pri P State   Active addr     Standby addr   Group addr
-
-Gi0/0/0/1         1 110 P Active local           10.1.1.3       10.1.1.1
-
-IPv6 Groups:
-
-                       P indicates configured to preempt.
-
-                       |
-
-Interface     Grp Pri P State   Active addr     Standby addr   Group addr
-
-```
-
-**Help:** execute the command "show hsrp"
+**Help:** execute the command "show controllers HundredGigabitEthernet"
 
 **Prompt:**
 - cisco_xr>
@@ -6890,7 +7854,6 @@ HOST LANE VR 1 Registers:
 (Reg 0xa448=0x0007) (Reg 0xa449=0x0007) (Reg 0xa44a=0x0000) (Reg 0xa44b=0x0000) 
 (Reg 0xa44c=0x0000) (Reg 0xa44d=0x0000) (Reg 0xa44e=0x0000) (Reg 0xa44f=0x0000) 
 (Reg 0xa450=0x0000) 
-
 ```
 
 **Help:** execute the command "show controllers hundredgige all"
@@ -6899,150 +7862,305 @@ HOST LANE VR 1 Registers:
 - cisco_xr>
 - cisco_xr#
 
-### show bgp instance all summary
+### show dhcp ipv4 proxy binding
 
 **Output:**
 ```
 
-Wed Jul 27 17:18:35.642 CST
+                                           Lease
+ MAC Address      IP Address      State    Remaining       Interface          VRF      Sublabel
+--------------  --------------  ---------  ---------  -------------------  ---------  ----------
+2cb0.5d00.000a  10.248.159.182  BOUND      8691       BE1.201              default    0x11664
+20d5.bf00.000b  10.48.93.39     BOUND      10315      BE1.1530             cust-a 0x1853b
+a4b1.e900.000c  10.200.185.166 BOUND      10617      BE1.1502             default    0x1cf76
+3091.8f00.000d  10.200.185.165 DELETING   N/A        BE1.1526             default    0x10606
+0006.1900.000e  10.184.88.53    OFFER_SENT 27         BE1.1534             cust-b 0xa98d
+0026.f200.000f  10.200.185.170 BOUND      10794      BE1.1546             default    0x1bb34
+0006.1900.0010  10.184.88.24    OFFER_SENT 54         BE1.1535             cust-b 0x44d0
+0002.9b00.0011  10.48.90.0      BOUND      10796      BE1.1543             cust-a 0x1c5cc
+```
 
-BGP instance 0: 'default'
-=========================
- BGP router identifier 192.0.2.1, local AS number 65533
-BGP generic scan interval 60 secs
-Non-stop routing is enabled
-BGP table state: Active
-Table ID: 0xe0000000   RD version: 2308648196
-BGP main routing table version 2308648196
-BGP NSR Initial initsync version 2063371958 (Reached)
-BGP NSR/ISSU Sync-Group versions 2308648196/0
-BGP scan interval 60 secs
+**Help:** execute the command "show dhcp ipv4 proxy binding"
 
-BGP is operating in STANDALONE mode.
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
 
+### show drops np all
 
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker       2308648196  2308648196  2308648196  2308648196  2308648196  2308648196
+**Output:**
+```
+Node: 0/0/CPU0:
+----------------------------------------------------------------
  
-Some configured eBGP neighbors (under default or non-default vrfs)
-do not have both inbound and outbound policies configured for IPv4 Unicast
-address family. These neighbors will default to sending and/or
-receiving no routes and are marked with '!' in the output below.
-Use the 'show bgp neighbor <nbr_address>' command for details.
+NP 0 Drops:
+----------------------------------------------------------------
+RSV_DROP_ING_BFD                                             3               
+RSV_DROP_MPLS_TXADJ_NO_MATCH                                 148             
+RSV_DROP_MPLS_LEAF_NO_MATCH                                  34              
+MODIFY_PUNT_REASON_MISS_DROP                                 2               
+PARSE_EGR_INJ_PKT_TYP_UNKNOWN                                4329            
+PARSE_DROP_IN_UIDB_TCAM_MISS                                 388             
+PARSE_DROP_IN_UIDB_DOWN                                      14              
+PARSE_DROP_IPV4_DISABLED                                     106             
+----------------------------------------------------------------
+ 
+NP 1 Drops:
+----------------------------------------------------------------
+RSV_DROP_IPV4_NRLDI_NOT_LOCAL                                3472            
+MODIFY_PUNT_REASON_MISS_DROP                                 2               
+PARSE_DROP_IN_UIDB_TCAM_MISS                                 384             
+----------------------------------------------------------------
+ 
+NP 2 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 2               
+----------------------------------------------------------------
 
-Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
-192.0.2.1         0 65533 3687720 44027503 2308648193    0    0     6w0d          4
-192.0.2.1         0 65533 2998156       0        0    0    0    1y11w Active
-192.0.2.1         0 65533  740185  712198 2308648196    0    0    6d12h          0
-192.0.2.1         0 65533   19179   11983 2308648196    0    0 01:57:59         10
-192.0.2.1         0 65533 3372692  355977 2308648196    0    0     1w6d          0!
-192.0.2.1         0 65533 5765678       0        0    0    0    45w1d Idle!
+NP 3 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
 
+NP 4 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 4               
+----------------------------------------------------------------
+
+NP 5 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+NP 6 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+NP 7 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+		 Node: 0/7/CPU0:
+----------------------------------------------------------------
+ 
+NP 0 Drops:
+----------------------------------------------------------------
+RSV_DROP_ING_BFD                                             256             
+RSV_DROP_EGR_UIDB_DOWN                                       1               
+RSV_DROP_MPLS_TXADJ_NO_MATCH                                 36              
+RSV_DROP_MPLS_LEAF_NO_MATCH                                  124             
+RSV_DROP_NHINDEX                                             1               
+MDF_RPF_FAIL_DROP                                            146019781       
+MDF_PUNT_POLICE_DROP                                         362             
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+PUNT_NO_MATCH_EXCD                                           362             
+DROP_FRM_FRM_ERR_XAUI6                                       1               
+PARSE_DROP_IN_UIDB_DOWN                                      27              
+PARSE_DROP_IPV4_DISABLED                                     163             
+----------------------------------------------------------------
+ 
+NP 1 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 4               
+----------------------------------------------------------------
+
+NP 2 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+NP 3 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 4               
+----------------------------------------------------------------
+
+NP 4 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+NP 5 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 3               
+----------------------------------------------------------------
+
+NP 6 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 4               
+----------------------------------------------------------------
+
+NP 7 Drops:
+----------------------------------------------------------------
+MODIFY_PUNT_REASON_MISS_DROP                                 4               
+----------------------------------------------------------------
 ```
 
-**Help:** execute the command "show bgp instance all summary"
+**Help:** execute the command "show drops np all"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show ipv4 interface
+### show eigrp neighbors
 
 **Output:**
 ```
-Mon Feb 13 17:30:47.464 UTC
-MgmtEth0/0/CPU0/0 is Up, ipv4 protocol is Up
-  Vrf is default (vrfid 0x60000000)
-  Internet address is 172.25.82.44/24
-  MTU is 1514 (1500 is available to IP)
-  Helper address is not set
-  Multicast reserved groups joined: 224.0.0.2 224.0.0.1
-  Directed broadcast forwarding is disabled
-  Outgoing access list is not set
-  Inbound  common access list is not set, access list is not set
-  Proxy ARP is disabled
-  ICMP redirects are never sent
-  ICMP unreachables are always sent
-  ICMP mask replies are never sent
-  Table Id is 0xe0000000
-GigabitEthernet0/0/0/0 is Shutdown, ipv4 protocol is Down
-  Vrf is default (vrfid 0x60000000)
-  Internet protocol processing disabled
+Fri Jan 30 12:21:50.237 CST
 
+IPv4-EIGRP VR(EIGRP_1) Neighbors for AS(1) VRF default
+
+H   Address                 Interface       Hold Uptime   SRTT   RTO  Q  Seq
+                                            (sec)         (ms)       Cnt Num
+7   10.224.17.185           Te0/0/0/0         14     2w0d    1   200  0  1726
+6   10.224.17.191           Te0/0/0/1         11     2w0d    1   200  0  1894
+11  10.16.28.3              Fo0/0/1/0         13     7w6d    1   200  0  5276
+10  10.224.17.93            BV600             12    10w5d    1   200  0  54242
+9   10.224.17.89            BV600            152    10w5d    1   200  0  2451
+8   10.224.17.67            BV700             11    10w5d    2   200  0  54244
+5   10.224.16.241           Gi0/0/0/0         14    10w5d    6   200  0  4545276
+4   10.224.16.16            BE10              14    10w5d    1   200  0  17874171
+3   10.224.17.37            BE2               14    10w5d    1   200  0  178099
+2   10.224.16.1             BE1.1000           7    10w5d    1   200  0  54245
+1   10.224.17.39            BE4               14    10w5d    1   200  0  145002
+0   10.224.16.247           Te0/0/0/2.4000    12    10w5d    5   200  0  3283787
 ```
 
-**Help:** execute the command "show ipv4 interface"
+**Help:** execute the command "show eigrp neighbors"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show ip interface brief
+### show hsrp
 
 **Output:**
 ```
-Interface                      IP-Address      Status          Protocol Vrf-Name
-GigabitEthernet0/0/1/18        unassigned      Shutdown        Down     default
-GigabitEthernet0/0/1/19        unassigned      Up              Up       default
-GigabitEthernet0/0/1/19.2003   10.79.255.0     Up              Up       WAG:OOB
-TenGigE0/0/2/0                 unassigned      Up              Up       default
-TenGigE0/0/2/0.2396            10.79.255.96    Up              Up       WAG:123
-TenGigE0/0/2/0.2397            10.79.255.80    Up              Up       WAG:ABC
+Fri May 17 20:29:32.108 UTC
 
+IPv4 Groups:
+
+                       P indicates configured to preempt.
+
+                       |
+
+Interface     Grp Pri P State   Active addr     Standby addr   Group addr
+
+Gi0/0/0/1         1 110 P Active local           10.1.1.3       10.1.1.1
+
+IPv6 Groups:
+
+                       P indicates configured to preempt.
+
+                       |
+
+Interface     Grp Pri P State   Active addr     Standby addr   Group addr
 ```
 
-**Help:** execute the command "show ip interface brief"
+**Help:** execute the command "show hsrp"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show isis neighbors
+### show install active
 
 **Output:**
 ```
-Tue Jan  3 14:57:35.234 UTC
+Mon Feb 28 23:36:31.563 CET
+Label : 7.3.2
 
-IS-IS 1 neighbors:
-System Id      Interface        SNPA           State Holdtime Type IETF-NSF
-CSR2           Gi0/0/0/1        5000.0002.0001 Up    23       L1L2 Capable
-vMX1           Gi0/0/0/1        0005.8671.9202 Up    18       L1L2 Capable
-vMX1           Gi0/0/0/3        *PtoP*         Up    25       L1L2 Capable
-vEOS4          Gi0/0/0/2        5000.0003.3766 Up    8        L2   Unable
+Node 0/RP0/CPU0 [RP]
+  Boot Partition: xr_lv38
+  Active Packages: 18
+        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
+        ncs5500-mcast-3.0.0.0-r732
+        ncs5500-dpa-3.0.0.1-r732.CSCwa07903
+        ncs5500-mpls-2.1.0.0-r732
+        ncs5500-os-6.0.0.1-r732.CSCvq20498
+        ncs5500-k9sec-3.2.0.0-r732
+        ncs5500-os-support-4.0.0.2-r732.CSCvz72160
+        ncs5500-eigrp-1.0.0.0-r732
+        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
+        ncs5500-li-1.0.0.0-r732
+        ncs5500-parser-3.0.0.1-r732.CSCwa44780
+        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
+        ncs5500-mgbl-3.0.0.0-r732
+        ncs5500-isis-2.1.0.0-r732
+        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
+        ncs5500-mpls-te-rsvp-3.1.0.0-r732
+        ncs5500-infra-5.0.0.5-r732.CSCvu13993
+        ncs5500-ospf-3.0.0.0-r732
 
-Total neighbor count: 4
+Node 0/RP1/CPU0 [RP]
+  Boot Partition: xr_lv38
+  Active Packages: 18
+        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
+        ncs5500-mcast-3.0.0.0-r732
+        ncs5500-dpa-3.0.0.3-r732.CSCvz54050
+        ncs5500-mpls-2.1.0.0-r732
+        ncs5500-os-6.0.0.1-r732.CSCvq20498
+        ncs5500-k9sec-3.2.0.0-r732
+        ncs5500-eigrp-1.0.0.0-r732
+        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
+        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
+        ncs5500-li-1.0.0.0-r732
+        ncs5500-parser-3.0.0.1-r732.CSCwa44780
+        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
+        ncs5500-mgbl-3.0.0.0-r732
+        ncs5500-isis-2.1.0.0-r732
+        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
+        ncs5500-mpls-te-rsvp-3.1.0.0-r732
+        ncs5500-infra-5.0.0.5-r732.CSCvu13993
+        ncs5500-ospf-3.0.0.0-r732
 
+Node 0/0/CPU0 [LC]
+  Boot Partition: xr_lv0
+  Active Packages: 18
+        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
+        ncs5500-eigrp-1.0.0.0-r732
+        ncs5500-k9sec-3.2.0.0-r732
+        ncs5500-mpls-2.1.0.0-r732
+        ncs5500-li-1.0.0.0-r732
+        ncs5500-mgbl-3.0.0.0-r732
+        ncs5500-mpls-te-rsvp-3.1.0.0-r732
+        ncs5500-isis-2.1.0.0-r732
+        ncs5500-ospf-3.0.0.0-r732
+        ncs5500-mcast-3.0.0.0-r732
+        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
+        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
+        ncs5500-os-6.0.0.1-r732.CSCvq20498
+        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
+        ncs5500-dpa-3.0.0.5-r732.CSCwa05129
+        ncs5500-parser-3.0.0.1-r732.CSCwa44780
+        ncs5500-infra-5.0.0.5-r732.CSCvu13993
+        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
+
+Node 0/1/CPU0 [LC]
+  Boot Partition: xr_lv38
+  Active Packages: 18
+        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
+        ncs5500-dpa-3.0.0.5-r732.CSCwa05129
+        ncs5500-mcast-3.0.0.0-r732
+        ncs5500-mpls-2.1.0.0-r732
+        ncs5500-os-6.0.0.1-r732.CSCvq20498
+        ncs5500-k9sec-3.2.0.0-r732
+        ncs5500-eigrp-1.0.0.0-r732
+        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
+        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
+        ncs5500-dpa-fwding-4.1.0.1-r732.CSCwa03269
+        ncs5500-li-1.0.0.0-r732
+        ncs5500-parser-3.0.0.1-r732.CSCwa44780
+        ncs5500-mgbl-3.0.0.0-r732
+        ncs5500-isis-2.1.0.0-r732
+        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
+        ncs5500-mpls-te-rsvp-3.1.0.0-r732
+        ncs5500-infra-5.0.0.5-r732.CSCvu13993
+        ncs5500-ospf-3.0.0.0-r732
 ```
 
-**Help:** execute the command "show isis neighbors"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show bfd sessions
-
-**Output:**
-```
-Interface           Dest Addr           Local det time(int*mult)      State     
-                                    Echo             Async   H/W   NPU     
-------------------- --------------- ---------------- ---------------- ----------
-Fo0/0/1/0           10.100.100.141  45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-Fo0/0/0/0           10.100.100.19   45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-Fo0/0/0/1           10.100.100.125  45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-Fo0/1/0/0           10.100.100.113  45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-Fo0/1/1/0           10.100.100.145  45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-Fo0/2/1/1           10.100.100.129  45ms(15ms*3)     6s(2s*3)         UP        
-                                                             No    n/a            
-
-```
-
-**Help:** execute the command "show bfd sessions"
+**Help:** execute the command "show install active"
 
 **Prompt:**
 - cisco_xr>
@@ -7166,724 +8284,311 @@ Fo0/2/1/1           10.100.100.129  45ms(15ms*3)     6s(2s*3)         UP
 - cisco_xr>
 - cisco_xr#
 
-### show ipv6 neighbors
+### show interfaces
 
 **Output:**
 ```
-Fri Oct 11 02:35:25.149 UTC
-IPv6 Address                              Age Link-layer Addr State Interface            Location
-2001:db8:ffff::12:2                      110  0c07.a11a.b801 REACH Gi0/0/0/0            0/0/CPU0       
-fe80::e07:a1ff:fe1a:b801                 99   0c07.a11a.b801 REACH Gi0/0/0/0            0/0/CPU0       
-[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/0            0/0/CPU0       
-[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/1            0/0/CPU0       
-[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/2            0/0/CPU0       
-2001:db8:1000:beef::1                    105  ca01.0ff1.0008 REACH Gi0/0/0/3            0/0/CPU0       
-2001:db8:1000:beef::2                    108  ca02.0fff.0008 REACH Gi0/0/0/3            0/0/CPU0       
-2001:db8:1000:beef::3                    105  ca03.100d.0008 REACH Gi0/0/0/3            0/0/CPU0       
-fe80::c801:fff:fef1:8                    89   ca01.0ff1.0008 REACH Gi0/0/0/3            0/0/CPU0       
-fe80::c802:fff:feff:8                    105  ca02.0fff.0008 REACH Gi0/0/0/3            0/0/CPU0       
-fe80::c803:10ff:fe0d:8                   91   ca03.100d.0008 REACH Gi0/0/0/3            0/0/CPU0       
-[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/3            0/0/CPU0       
+Mon Mar 20 17:31:48.208 EDT
+Loopback5 is up, line protocol is up
+  Interface state transitions: 1
+  Hardware is Loopback interface(s)
+  Description: $DCI ~Loopback for OSPF/LDP/BGP/TE
+  Internet address is 192.168.169.21/32
+  MTU 1500 bytes, BW 0 Kbit
+     reliability Unknown, txload Unknown, rxload Unknown
+  Encapsulation Loopback,  loopback not set,
+  Last link flapped 6w1d
+  Last input Unknown, output Unknown
+  Last clearing of "show interface" counters Unknown
+  Input/output data rate is disabled.
 
+Null0 is up, line protocol is up
+  Interface state transitions: 1
+  Hardware is Null interface
+  Internet address is Unknown
+  MTU 1500 bytes, BW 0 Kbit
+     reliability 255/255, txload Unknown, rxload Unknown
+  Encapsulation Null,  loopback not set,
+  Last link flapped 6w1d
+  Last input never, output never
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+     0 packets output, 0 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
+
+tunnel-te300 is up, line protocol is up
+  Interface state transitions: 7
+  Hardware is Tunnel-TE
+  Description: $DCI TE Tunnel For REPLICATION to P-YB19-C95
+  Internet address is 192.168.169.21/32
+  MTU 1500 bytes, BW 0 Kbit
+     reliability 255/255, txload Unknown, rxload Unknown
+  Encapsulation TUNNEL,  loopback not set,
+  Last link flapped 3w2d
+  Last input never, output 00:00:00
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 2000 bits/sec, 1 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+     1960425 packets output, 674297494 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
+
+MgmtEth0/RSP0/CPU0/1 is administratively down, line protocol is administratively down
+  Interface state transitions: 0
+  Hardware is Management Ethernet, address is 5087.8966.5329 (bia 5087.8966.5329)
+  Description: $DCI
+  Internet address is Unknown
+  MTU 1514 bytes, BW 0 Kbit
+     reliability 255/255, txload Unknown, rxload Unknown
+  Encapsulation ARPA,
+  Duplex unknown, 0Kb/s, THD, link type is autonegotiation
+  output flow control is off, input flow control is off
+  loopback not set,
+  Last input never, output never
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     0 packets output, 0 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     0 carrier transitions
+
+MgmtEth0/RSP1/CPU0/0 is up, line protocol is up
+  Interface state transitions: 1
+  Hardware is Management Ethernet, address is f09e.6340.1420 (bia f09e.6340.1420)
+  Description: Management Interface
+  Internet address is 10.253.3.18/25
+  MTU 1514 bytes, BW 1000000 Kbit (Max: 1000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation ARPA,
+  Full-duplex, 1000Mb/s, THD, link type is autonegotiation
+  output flow control is off, input flow control is off
+  loopback not set,
+  Last link flapped 6w1d
+  ARP type ARPA, ARP timeout 04:00:00
+  Last input 00:00:11, output 00:00:41
+  Last clearing of "show interface" counters never
+  5 minute input rate 22000 bits/sec, 10 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     43738403 packets input, 12696681984 bytes, 0 total input drops
+     2022343 drops for unrecognized upper-level protocol
+     Received 194184 broadcast packets, 5015358 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     121976 packets output, 18613909 bytes, 0 total output drops
+     Output 2 broadcast packets, 62985 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     1 carrier transitions
+
+FortyGigE0/0/0/0 is up, line protocol is up
+  Interface state transitions: 1
+  Dampening enabled: penalty 0, not suppressed
+    half-life:        1        reuse:             750
+    suppress:         2000     max-suppress-time: 4
+    restart-penalty:  0
+  Hardware is FortyGigE, address is 5087.895f.81a0 (bia 5087.895f.81a0)
+  Layer 1 Transport Mode is LAN
+  Description: $DCI ~QTS Richmond DCI @CRDC %P-CRDC-C98 +Fort0/0/0/0 !CRIT
+  Internet address is 192.168.166.9/30
+  MTU 9216 bytes, BW 40000000 Kbit (Max: 40000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation ARPA,
+  Full-duplex, 40000Mb/s, link type is force-up
+  output flow control is off, input flow control is off
+  Carrier delay (up) is 9000 msec, Carrier delay (down) is 50 msec
+  loopback not set,
+  Last link flapped 6w1d
+  ARP type ARPA, ARP timeout 04:00:00
+  Last input 00:00:00, output 00:00:00
+  Last clearing of "show interface" counters never
+  30 second input rate 62000 bits/sec, 128 packets/sec
+  30 second output rate 62000 bits/sec, 128 packets/sec
+     478575583 packets input, 29095652278 bytes, 392 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 1 broadcast packets, 1675582 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     478514791 packets output, 29002406808 bytes, 0 total output drops
+     Output 2 broadcast packets, 1677091 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     1 carrier transitions
+
+TenGigE0/3/0/0 is up, line protocol is up
+  Interface state transitions: 1
+  Hardware is TenGigE, address is 5087.8964.53b0 (bia 5087.8964.53b0)
+  Layer 1 Transport Mode is LAN
+  Description: $DCI ~QTS Richmond Prod @CRDC %Z-CRDC-Dcc001 +Te5/1 !CRIT
+  Internet address is 192.168.166.65/30
+  MTU 9216 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 3/255
+  Encapsulation ARPA,
+  Full-duplex, 10000Mb/s, link type is force-up
+  output flow control is off, input flow control is off
+  Carrier delay (up) is 10 msec
+  loopback not set,
+  Last link flapped 6w1d
+  ARP type ARPA, ARP timeout 04:00:00
+  Last input 00:00:00, output 00:00:00
+  Last clearing of "show interface" counters never
+  30 second input rate 134379000 bits/sec, 26671 packets/sec
+  30 second output rate 285000 bits/sec, 257 packets/sec
+     74732197285 packets input, 48622921819223 bytes, 5 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 2 broadcast packets, 70041 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     2222908838 packets output, 856734632077 bytes, 0 total output drops
+     Output 1 broadcast packets, 63014 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     1 carrier transitions
+
+TenGigE0/3/0/4 is administratively down, line protocol is administratively down
+  Interface state transitions: 0
+  Hardware is TenGigE, address is 5087.8964.53b4 (bia 5087.8964.53b4)
+  Layer 1 Transport Mode is LAN
+  Internet address is Unknown
+  MTU 1514 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation ARPA,
+  Full-duplex, 10000Mb/s, link type is force-up
+  output flow control is off, input flow control is off
+  Carrier delay (up) is 10 msec
+  loopback not set,
+  Last input never, output never
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     0 packets output, 0 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     0 carrier transitions
+
+Bundle-Ether123456 is up, line protocol is up
+  Interface state transitions: 1
+  Hardware is Aggregated Ethernet interface(s), address is aaaa.bbbb.cccc
+  Description: Bundle_example
+  Internet address is Unknown
+  MTU 1514 bytes, BW 10000000 Kbit (Max: 10000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation ARPA,
+  Full-duplex, 10000Mb/s
+  loopback not set,
+  Last link flapped 3w1d
+    No. of members in this bundle: 1
+      TenGigE0/3/0/4             Full-duplex  10000Mb/s    Active
+  Last input 00:00:00, output 00:00:00
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+              0 runts, 0 giants, 0 throttles, 0 parity
+     0 input errors, 0 CRC, 0 frame, 0 overrun, 0 ignored, 0 abort
+     0 packets output, 0 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
+     0 output errors, 0 underruns, 0 applique, 0 resets
+     0 output buffer failures, 0 output buffers swapped out
+     0 carrier transitions
+
+GigabitEthernet0/0/0/12.456 is administratively down, line protocol is administratively down
+  Interface state transitions: 0
+  Hardware is VLAN sub-interface(s), address is 5000.0002.000d
+  Description: qsqsd svsdvxcvsdv
+  Internet address is 192.168.5.1/24
+  MTU 1518 bytes, BW 1000000 Kbit (Max: 1000000 Kbit)
+     reliability 255/255, txload 0/255, rxload 0/255
+  Encapsulation 802.1Q Virtual LAN, VLAN Id 456,  loopback not set,
+  Last input never, output never
+  Last clearing of "show interface" counters never
+  5 minute input rate 0 bits/sec, 0 packets/sec
+  5 minute output rate 0 bits/sec, 0 packets/sec
+     0 packets input, 0 bytes, 0 total input drops
+     0 drops for unrecognized upper-level protocol
+     Received 0 broadcast packets, 0 multicast packets
+     0 packets output, 0 bytes, 0 total output drops
+     Output 0 broadcast packets, 0 multicast packets
 ```
 
-**Help:** execute the command "show ipv6 neighbors"
+**Help:** execute the command "show interfaces"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show install active
+### show interfaces description
 
 **Output:**
 ```
-Mon Feb 28 23:36:31.563 CET
-Label : 7.3.2
+Tue Sep 24 10:49:25.293 BRA
 
-Node 0/RP0/CPU0 [RP]
-  Boot Partition: xr_lv38
-  Active Packages: 18
-        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
-        ncs5500-mcast-3.0.0.0-r732
-        ncs5500-dpa-3.0.0.1-r732.CSCwa07903
-        ncs5500-mpls-2.1.0.0-r732
-        ncs5500-os-6.0.0.1-r732.CSCvq20498
-        ncs5500-k9sec-3.2.0.0-r732
-        ncs5500-os-support-4.0.0.2-r732.CSCvz72160
-        ncs5500-eigrp-1.0.0.0-r732
-        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
-        ncs5500-li-1.0.0.0-r732
-        ncs5500-parser-3.0.0.1-r732.CSCwa44780
-        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
-        ncs5500-mgbl-3.0.0.0-r732
-        ncs5500-isis-2.1.0.0-r732
-        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
-        ncs5500-mpls-te-rsvp-3.1.0.0-r732
-        ncs5500-infra-5.0.0.5-r732.CSCvu13993
-        ncs5500-ospf-3.0.0.0-r732
-
-Node 0/RP1/CPU0 [RP]
-  Boot Partition: xr_lv38
-  Active Packages: 18
-        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
-        ncs5500-mcast-3.0.0.0-r732
-        ncs5500-dpa-3.0.0.3-r732.CSCvz54050
-        ncs5500-mpls-2.1.0.0-r732
-        ncs5500-os-6.0.0.1-r732.CSCvq20498
-        ncs5500-k9sec-3.2.0.0-r732
-        ncs5500-eigrp-1.0.0.0-r732
-        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
-        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
-        ncs5500-li-1.0.0.0-r732
-        ncs5500-parser-3.0.0.1-r732.CSCwa44780
-        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
-        ncs5500-mgbl-3.0.0.0-r732
-        ncs5500-isis-2.1.0.0-r732
-        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
-        ncs5500-mpls-te-rsvp-3.1.0.0-r732
-        ncs5500-infra-5.0.0.5-r732.CSCvu13993
-        ncs5500-ospf-3.0.0.0-r732
-
-Node 0/0/CPU0 [LC]
-  Boot Partition: xr_lv0
-  Active Packages: 18
-        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
-        ncs5500-eigrp-1.0.0.0-r732
-        ncs5500-k9sec-3.2.0.0-r732
-        ncs5500-mpls-2.1.0.0-r732
-        ncs5500-li-1.0.0.0-r732
-        ncs5500-mgbl-3.0.0.0-r732
-        ncs5500-mpls-te-rsvp-3.1.0.0-r732
-        ncs5500-isis-2.1.0.0-r732
-        ncs5500-ospf-3.0.0.0-r732
-        ncs5500-mcast-3.0.0.0-r732
-        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
-        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
-        ncs5500-os-6.0.0.1-r732.CSCvq20498
-        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
-        ncs5500-dpa-3.0.0.5-r732.CSCwa05129
-        ncs5500-parser-3.0.0.1-r732.CSCwa44780
-        ncs5500-infra-5.0.0.5-r732.CSCvu13993
-        ncs5500-dpa-fwding-4.1.0.3-r732.CSCwa01375
-
-Node 0/1/CPU0 [LC]
-  Boot Partition: xr_lv38
-  Active Packages: 18
-        ncs5500-xr-7.3.2 version=7.3.2 [Boot image]
-        ncs5500-dpa-3.0.0.5-r732.CSCwa05129
-        ncs5500-mcast-3.0.0.0-r732
-        ncs5500-mpls-2.1.0.0-r732
-        ncs5500-os-6.0.0.1-r732.CSCvq20498
-        ncs5500-k9sec-3.2.0.0-r732
-        ncs5500-eigrp-1.0.0.0-r732
-        ncs5500-os-support-4.0.0.5-r732.CSCwa01498
-        ncs5500-iosxr-fwding-4.1.0.1-r732.CSCwa34439
-        ncs5500-dpa-fwding-4.1.0.1-r732.CSCwa03269
-        ncs5500-li-1.0.0.0-r732
-        ncs5500-parser-3.0.0.1-r732.CSCwa44780
-        ncs5500-mgbl-3.0.0.0-r732
-        ncs5500-isis-2.1.0.0-r732
-        ncs5500-bgp-2.0.0.1-r732.CSCvz94897
-        ncs5500-mpls-te-rsvp-3.1.0.0-r732
-        ncs5500-infra-5.0.0.5-r732.CSCvu13993
-        ncs5500-ospf-3.0.0.0-r732
-
+Interface          Status      Protocol    Description
+--------------------------------------------------------------------------------
+BE100              up          up          Ligacao -SAT01 | 10G | (satellite100)
+Lo0                up          up          Endereco de Acesso ao Roteador
+Lo10               up          up          SPB | BGP | ASN 123456
+Lo20               up          up          *** Management Loopback ***
+Nu0                up          up
+Gi100/0/0/0        up          up          LINK ETHERNET
+Gi100/0/0/0.10     up          up          MULTIPLANNING
+Gi100/0/0/0.150012 admin-down  admin-down  ADMIN DOWN
+Gi100/0/0/2        admin-down  admin-down
+Gi100/0/0/9        deleted     deleted     DELETED
+nG100/0/0/42       deleted     deleted
+nG100/0/0/43       down        down
+nT100/0/0/47       up          up
+PT0/RSP0/CPU0/0    admin-down  admin-down
+Mg0/RSP1/CPU0/0    admin-down  admin-down
+Mg0/RSP1/CPU0/1    admin-down  admin-down
+Te0/3/0/0          up          up          Ligacao | 10G | 10G/061 | (ten0/4/0/1/0)
+Te0/4/0/0          up          up          Ligacao | 10G | 10G/062 | (ten0/3/0/1/7)
+Te0/5/0/3          up          up          Ligacao -SAT04 | 10G | (satellite400)
 ```
 
-**Help:** execute the command "show install active"
+**Help:** execute the command "show interfaces description"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show redundancy summary
+### show interfaces summary
 
 **Output:**
 ```
-Tue Mar  7 14:33:54.330 EST
-  Active/Primary   Standby/Backup
-  --------------   --------------
-  0/RSP0/CPU0(A)   0/RSP1/CPU0(S) (Node Ready, NSR: Ready)
-  0/RSP0/CPU0(P)   0/RSP1/CPU0(B) (Proc Group Ready, NSR: Ready)
-
+Interface Type          Total    UP       Down     Admin Down
+--------------          -----    --       ----     ----------
+ALL TYPES               81       51       0        30
+--------------
+IFT_ETHERBUNDLE         11       11       0        0
+IFT_HUNDREDGE           26       2        0        24
+IFT_LOOPBACK            1        1        0        0
+IFT_ETHERNET            2        0        0        2
+IFT_NULL                1        1        0        0
+IFT_TENGETHERNET        40       36       0        4
 ```
 
-**Help:** execute the command "show redundancy summary"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show pim ipv4 group-map
-
-**Output:**
-```
-
-Wed Jul 27 17:18:36.472 CST
-
-IP PIM Group Mapping Table
-(* indicates group mappings being used)
-(+ indicates BSR group mappings active in MRIB)
- 
-Group Range         Proto Client   Groups RP address      Info
-
-224.0.1.1/32*       DM    perm     0      0.0.0.0
-224.0.1.2/32*       DM    perm     1      0.0.0.0
-224.0.0.0/24*       NO    perm     0      0.0.0.0
-232.0.0.0/8*        SSM   config   40     0.0.0.0
-224.0.0.0/4*        SM    static   7      0.0.0.0         RPF: Null,0.0.0.0
-```
-
-**Help:** execute the command "show pim ipv4 group-map"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show cdp neighbors detail
-
-**Output:**
-```
--------------------------
-Device ID: nyc-dc-dcm005.ntc.com
-SysName :
-Entry address(es):
-  IPv4 address: 10.100.1.54
-Platform: cisco WS-C4948E,  Capabilities: Router Switch IGMP
-Interface: MgmtEth0/RSP0/CPU0/0
-Port ID (outgoing port): GigabitEthernet1/9
-Holdtime : 134 sec
-
-Version :
-Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 15.0(2)SG10, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
- Copyright (c) 1986-2015 by Cisco Systems, Inc.
-Compiled Tue 07-Apr-15 10:40 by prod_rel_team
-
-advertisement version: 2
-Native VLAN: 103
-Duplex: full
- 
--------------------------
-Device ID: nyc-dc-dcm006.ntc.com
-SysName :
-Entry address(es):
-  IPv4 address: 10.100.1.55
-Platform: cisco WS-C4948E,  Capabilities: Router Switch IGMP
-Interface: MgmtEth0/RSP1/CPU0/0
-Port ID (outgoing port): GigabitEthernet1/9
-Holdtime : 160 sec
-
-Version :
-Cisco IOS Software, Catalyst 4500 L3 Switch Software (cat4500e-ENTSERVICESK9-M), Version 15.0(2)SG10, RELEASE SOFTWARE (fc1)
-Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2015 by Cisco Systems, Inc.
-Compiled Tue 07-Apr-15 10:40 by prod_rel_team
- 
-advertisement version: 2
-Native VLAN: 103
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-c90.ntc.com
-SysName : nyc-dc-c90.ntc.com
-Entry address(es):
-  IPv4 address: 10.100.100.141
-Platform: cisco CRS,  Capabilities: Router Switch IGMP
-Interface: FortyGigE0/0/1/0
-Port ID (outgoing port): FortyGigE0/0/0/2
- Holdtime : 155 sec
-
-Version :
-Cisco IOS XR Software, Version 5.1.2[Default]
- Copyright (c) 2015 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-d02.ntc.com(FXS182XXXXX)
- SysName : nyc-dc-d02
-Entry address(es):
-  IPv4 address: 10.100.100.162
-Platform: N77-C7706,  Capabilities: Router Switch
-Interface: FortyGigE0/0/1/1
-Port ID (outgoing port): Ethernet6/1
-Holdtime : 126 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-c97
-SysName : nyc-dc-c97
- Entry address(es):
-  IPv4 address: 10.100.100.19
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: FortyGigE0/0/0/0
-Port ID (outgoing port): FortyGigE0/0/0/0
-Holdtime : 170 sec
-
-Version :
-Cisco IOS XR Software, Version 5.3.4[Default]
-Copyright (c) 2016 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-c91.ntc.com
- SysName : nyc-dc-c91.ntc.com
-Entry address(es):
-  IPv4 address: 10.100.100.125
- Platform: cisco CRS,  Capabilities: Router
-Interface: FortyGigE0/0/0/1
-Port ID (outgoing port): FortyGigE0/0/0/2
-Holdtime : 122 sec
-
-Version :
-Cisco IOS XR Software, Version 5.1.2[Default]
-Copyright (c) 2015 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-c97
-SysName : nyc-dc-c97
-Entry address(es):
-  IPv4 address: 10.100.100.113
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: FortyGigE0/1/0/0
-Port ID (outgoing port): FortyGigE0/1/0/0
-Holdtime : 132 sec
-
-Version :
-Cisco IOS XR Software, Version 5.3.4[Default]
-Copyright (c) 2016 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-d03.ntc.com(FXS182XXXXX)
-SysName : nyc-dc-d03
-Entry address(es):
-  IPv4 address: 10.100.100.190
-Platform: N77-C7706,  Capabilities: Router Switch
-Interface: FortyGigE0/1/0/1
-Port ID (outgoing port): Ethernet6/1
- Holdtime : 144 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-c90.ntc.com
-SysName : nyc-dc-c90.ntc.com
-Entry address(es):
-  IPv4 address: 10.100.100.145
-Platform: cisco CRS,  Capabilities: Router
- Interface: FortyGigE0/1/1/0
-Port ID (outgoing port): FortyGigE0/4/0/2
-Holdtime : 174 sec
-
-Version :
-Cisco IOS XR Software, Version 5.1.2[Default]
-Copyright (c) 2015 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
- -------------------------
-Device ID: nyc-dc-z50a.ntc.com(JAF18XXXXX)
-SysName : nyc-dc-z50a
-Entry address(es):
-  IPv4 address: 10.100.100.116
-Platform: N77-C7710,  Capabilities: Router Switch
-Interface: FortyGigE0/1/1/1
-Port ID (outgoing port): Ethernet4/3
-Holdtime : 153 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-d04.ntc.com(FXS18XXXXXX)
- SysName : nyc-dc-d04
-Entry address(es):
-  IPv4 address: 10.100.100.194
-Platform: N77-C7706,  Capabilities: Router Switch
-Interface: FortyGigE0/2/1/0
-Port ID (outgoing port): Ethernet6/1
-Holdtime : 155 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-c91.ntc.com
-SysName : nyc-dc-c91.ntc.com
-Entry address(es):
-  IPv4 address: 10.100.100.129
-Platform: cisco CRS,  Capabilities: Router
-Interface: FortyGigE0/2/1/1
-Port ID (outgoing port): FortyGigE0/4/0/2
-Holdtime : 130 sec
-
-Version :
-Cisco IOS XR Software, Version 5.1.2[Default]
-Copyright (c) 2015 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-d01.ntc.com(FXS182XXXXX)
- SysName : nyc-dc-d01
-Entry address(es):
-  IPv4 address: 10.100.100.158
-Platform: N77-C7706,  Capabilities: Router Switch
-Interface: FortyGigE0/2/0/0
-Port ID (outgoing port): Ethernet6/1
-Holdtime : 128 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-z50b.ntc.com(JAF181XXXXX)
- SysName : nyc-dc-z50b
-Entry address(es):
-  IPv4 address: 10.100.100.111
- Platform: N77-C7710,  Capabilities: Router Switch
-Interface: FortyGigE0/2/0/1
- Port ID (outgoing port): Ethernet4/3
-Holdtime : 158 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-dcc001.ntc.com
- SysName :
-Entry address(es):
-  IPv4 address: 10.100.100.174
-Platform: cisco WS-C4510R+E,  Capabilities: Router Switch IGMP
-Interface: TenGigE0/3/0/0
- Port ID (outgoing port): TenGigabitEthernet6/1
-Holdtime : 142 sec
-
-Version :
-Cisco IOS Software, Catalyst 4500 L3 Switch  Software (cat4500e-UNIVERSALK9-M), Version 15.2(2)E3, RELEASE SOFTWARE (fc3)
-Technical Support: http://www.cisco.com/techsupport
- Copyright (c) 1986-2015 by Cisco Systems, Inc.
-Compiled Wed 26-Aug-15 06:05 by prod_rel_team
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-d57
-SysName : nyc-dc-d57
-Entry address(es):
-  IPv4 address: 10.100.100.115
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: TenGigE0/3/0/1
-Port ID (outgoing port): TenGigE0/2/0/0
-Holdtime : 150 sec
- 
-Version :
-Cisco IOS XR Software, Version 4.3.2[Default]
-Copyright (c) 2013 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-d40b.ntc.com(JAF182XXXXX)
-SysName : nyc-dc-d40b
-Entry address(es):
-  IPv4 address: 10.100.100.114
-Platform: N77-C7710,  Capabilities: Router Switch
-Interface: TenGigE0/3/0/2
-Port ID (outgoing port): Ethernet4/1
-Holdtime : 171 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-d80.ntc.com(FOC184XXXXX)
-SysName : nyc-dc-d80
-Entry address(es):
-  IPv4 address: 10.100.100.117
-Platform: N5K-C56128P,  Capabilities: Router Switch IGMP
-Interface: TenGigE0/3/0/3
-Port ID (outgoing port): Ethernet2/1
- Holdtime : 140 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 7.0(7)N1(1)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-dcc002.ntc.com
-SysName :
-Entry address(es):
-  IPv4 address: 10.100.100.178
-Platform: cisco WS-C4510R+E,  Capabilities: Router Switch IGMP
- Interface: TenGigE0/4/0/0
-Port ID (outgoing port): TenGigabitEthernet6/1
- Holdtime : 147 sec
-
-Version :
-Cisco IOS Software, Catalyst 4500 L3 Switch  Software (cat4500e-UNIVERSALK9-M), Version 15.2(2)E3, RELEASE SOFTWARE (fc3)
- Technical Support: http://www.cisco.com/techsupport
-Copyright (c) 1986-2015 by Cisco Systems, Inc.
-Compiled Wed 26-Aug-15 06:05 by prod_rel_team
-
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-d57
- SysName : nyc-dc-d57
-Entry address(es):
-  IPv4 address: 10.100.100.115
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: TenGigE0/4/0/1
-Port ID (outgoing port): TenGigE1/2/0/0
-Holdtime : 120 sec
-
-Version :
-Cisco IOS XR Software, Version 4.3.2[Default]
-Copyright (c) 2013 by Cisco Systems, Inc.
- 
-advertisement version: 2
-Duplex: full
-
--------------------------
-Device ID: nyc-dc-d40a.ntc.com(JAF182XXXXX)
-SysName : nyc-dc-d40a
-Entry address(es):
-  IPv4 address: 10.100.100.113
-Platform: N77-C7710,  Capabilities: Router Switch
-Interface: TenGigE0/4/0/2
-Port ID (outgoing port): Ethernet4/1
-Holdtime : 171 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 6.2(12)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-d81.ntc.com(FOC182XXXXX)
-SysName : nyc-dc-d81
-Entry address(es):
-  IPv4 address: 10.100.100.118
-Platform: N5K-C56128P,  Capabilities: Router Switch IGMP
-Interface: TenGigE0/4/0/3
-Port ID (outgoing port): Ethernet1/1
- Holdtime : 141 sec
-
-Version :
-Cisco Nexus Operating System (NX-OS) Software, Version 7.0(7)N1(1)
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-c97
-SysName : nyc-dc-c97
-Entry address(es):
-  IPv4 address: 192.168.169.21
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: FortyGigE0/6/0/0
-Port ID (outgoing port): FortyGigE0/6/0/0
-Holdtime : 163 sec
-
-Version :
-Cisco IOS XR Software, Version 5.3.4[Default]
-Copyright (c) 2016 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
--------------------------
- Device ID: nyc-dc-c97
-SysName : nyc-dc-c97
-Entry address(es):
-  IPv4 address: 192.168.169.21
-Platform: cisco ASR9K Series,  Capabilities: Router
-Interface: FortyGigE0/6/0/0
-Port ID (outgoing port): FortyGigE0/7/0/0
-Holdtime : 140 sec
-
-Version :
-Cisco IOS XR Software, Version 5.3.4[Default]
-Copyright (c) 2016 by Cisco Systems, Inc.
-
-advertisement version: 2
-Duplex: full
-
-
-```
-
-**Help:** execute the command "show cdp neighbors detail"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show asic-errors all location
-
-**Output:**
-```
-************************************************************
-*                  Fia ASIC Error Summary                  *
-************************************************************
-Instance            : 0
-Number of nodes     : 22
-SBE error count     : 33
- MBE error count     : 44
-Parity error count  : 55
-CRC error count     : 99999
- Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 1
-Number of nodes     : 0
-SBE error count     : 23
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 2
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 3
- Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
- Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
- Reset error count   : 0
---------------------
-
-************************************************************
-*                Prm_np ASIC Error Summary                 *
-************************************************************
-Instance            : 0
-Number of nodes     : 0
-SBE error count     : 0
- MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
- Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 1
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 2
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 3
- Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
- Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
- Reset error count   : 0
---------------------
-Instance            : 4
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 5
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 6
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-Instance            : 7
-Number of nodes     : 0
-SBE error count     : 0
-MBE error count     : 0
-Parity error count  : 0
-CRC error count     : 0
-Generic error count : 0
-Reset error count   : 0
---------------------
-
-```
-
-**Help:** execute the command "show asic-errors all location"
+**Help:** execute the command "show interfaces summary"
 
 **Prompt:**
 - cisco_xr>
@@ -7936,7 +8641,6 @@ PID: PSU2KW-ACPI       , VID: V01 , SN: POG27DBCDEF
 
 NAME: "0/PM1", DESCR: "2000W AC Power Module with Port-side Air Intake"
 PID: PSU2KW-ACPI       , VID: V01 , SN: POG27ABCDEF
-
 ```
 
 **Help:** execute the command "show inventory"
@@ -7945,1093 +8649,449 @@ PID: PSU2KW-ACPI       , VID: V01 , SN: POG27ABCDEF
 - cisco_xr>
 - cisco_xr#
 
-### show controller fabric plane all
+### show ip bgp summary
 
 **Output:**
 ```
-Sun Feb  25 06:32:34.404 UTC
+Mon Dec 18 11:13:26.959 UTC
+BGP router identifier 30.67.35.78, local AS number 64200
+BGP generic scan interval 60 secs
+Non-stop routing is enabled
+ BGP table state: Active
+Table ID: 0xe0000000   RD version: 94623
+BGP main routing table version 94623
+BGP NSR Initial initsync version 2 (Reached)
+ BGP NSR/ISSU Sync-Group versions 0/0
+BGP scan interval 60 secs
 
-Plane Admin Plane    up->dn  up->mcast
-Id    State State    counter   counter
---------------------------------------
-0     UP    UP             0         0
-1     UP    UP             0         0
-2     UP    DN             0         0
-3     UP    UP             0         0
-4     UP    UP             0         0
-5     UP    UP             0         0
+BGP is operating in STANDALONE mode.
+
+
+Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
+Speaker           94623      94623      94623      94623       94623           0
+
+Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
+10.10.17.161      0 64924   36190   64731        0    0    0 00:00:00 Idle
+10.10.128.240     0 64727   68750   70941        0    0    0    2d14h Active
+10.10.132.240     0 64727   74112   76220    94623    0    0     7w2d         82
+10.10.140.240     0 64727   72363   74575    94623    0    0    4d10h         82
 ```
 
-**Help:** execute the command "show controller fabric plane all"
+**Help:** execute the command "show ip bgp summary"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show vrf all detail
+### show ip interface brief
 
 **Output:**
 ```
-
-Wed Jul 27 17:18:32.001 CST
-
-VRF red; RD not set; VPN ID not set
- VRF mode: Regular
-Description not set
-Address family IPV4 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
-VRF blue; RD not set; VPN ID not set
-VRF mode: Regular
-Description not set
-Interfaces:
-  BVI10
- Address family IPV4 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
-VRF green; RD not set; VPN ID not set
-VRF mode: Regular
-Description not set
-Interfaces:
-  GigabitEthernet200/0/0/1
-  GigabitEthernet200/0/0/2
-  GigabitEthernet300/0/0/1
-  GigabitEthernet300/0/0/2
-  TenGigE0/0/0/10.10
-  Bundle-Ether10.10
-  Bundle-Ether10.20
-  Bundle-Ether20.10
-  Bundle-Ether20.20
-  Bundle-Ether30.10
-  Bundle-Ether40.10
-  Bundle-Ether50.10
-  Loopback0
- Address family IPV4 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
-VRF purple; RD not set; VPN ID not set
-VRF mode: Regular
- Description not set
-Interfaces:
-  Loopback1
-  Bundle-Ether10.10
-  Bundle-Ether10.20
-  Bundle-Ether10.30
-  GigabitEthernet100/0/0/10.10
-  GigabitEthernet100/0/0/10.20
-  GigabitEthernet200/0/0/20.10
-  GigabitEthernet200/0/0/20.20
-  GigabitEthernet300/0/0/30.10
-  GigabitEthernet300/0/0/30.20
-  TenGigE0/0/0/10.10
-  TenGigE0/2/0/20.10
-  TenGigE0/2/0/20.20
-Address family IPV4 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
-VRF brown; RD not set; VPN ID not set
-VRF mode: Regular
-Description not set
-Interfaces:
-  GigabitEthernet100/0/0/10
-  GigabitEthernet300/0/0/20
-  Bundle-Ether10.10
-  Bundle-Ether10.20
-Address family IPV4 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
-VRF vrf-test; RD not set; VPN ID not set
-VRF mode: Regular
-Description this is a description
- Address family IPV4 Unicast
-  Import VPN route-target communities:
-    RT:65000:42
-  Export VPN route-target communities:
-    RT:65000:43
-  No import route policy
-  No export route policy
-Address family IPV6 Unicast
-  No import VPN route-target communities
-  No export VPN route-target communities
-  No import route policy
-  No export route policy
-
+Interface                      IP-Address      Status          Protocol Vrf-Name
+GigabitEthernet0/0/1/18        unassigned      Shutdown        Down     default
+GigabitEthernet0/0/1/19        unassigned      Up              Up       default
+GigabitEthernet0/0/1/19.2003   10.79.255.0     Up              Up       WAG:OOB
+TenGigE0/0/2/0                 unassigned      Up              Up       default
+TenGigE0/0/2/0.2396            10.79.255.96    Up              Up       WAG:123
+TenGigE0/0/2/0.2397            10.79.255.80    Up              Up       WAG:ABC
 ```
 
-**Help:** execute the command "show vrf all detail"
+**Help:** execute the command "show ip interface brief"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### admin show platform
+### show ip route
 
 **Output:**
 ```
-Tue Mar  7 14:29:29.338 EST
-Node            Type                      State            Config State
------------------------------------------------------------------------------
-0/RSP0/CPU0     A9K-RSP440-TR(Active)     IOS XR RUN       PWR,NSHUT,MON
-0/RSP1/CPU0     A9K-RSP440-TR(Standby)    IOS XR RUN       PWR,NSHUT,MON
-0/FT0/SP        ASR-9010-FAN-V2           READY            
-0/FT1/SP        ASR-9010-FAN-V2           READY            
-0/0/0           A9K-MPA-2X40GE            OK               PWR,NSHUT,MON
-
-```
-
-**Help:** execute the command "admin show platform"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show platform summary location all
-
-**Output:**
-```
-
-Wed Jul 27 17:18:08.328 CST
--------------------------------------------------------------------------------
-     Platform Node : 0/RP0/CPU0 (slot 0)
-               PID : ASR-9900-RP-SE
-         Card Type : ASR 9900 Route Processor for Service Edge
-            VID/SN : V02 / XXXXXXXXXXX
-        Oper State : IOS XR RUN
-        Last Reset : User Initiated reload                                                  Process: reload
-                   : Wed Jul 31 07:07:56 2019
-     Configuration : Power is enabled
-		     Bootup enabled.
-		     Monitoring enabled
-        Rommon Ver : Version 5.15
-        IOS SW Ver : 5.3.2
-        Main Power : Power state Enabled. Estimate power 380 Watts of power required.
-            Faults : N/A
--------------------------------------------------------------------------------
-     Platform Node : 0/RP1/CPU0 (slot 1)
-               PID : ASR-9900-RP-SE
-         Card Type : ASR 9900 Route Processor for Service Edge
-            VID/SN : V02 / XXXXXXXXXXX
-        Oper State : IOS XR RUN
-        Last Reset : dSC node reload is required by install operation                       Process: instdir
-                   : Wed Jan 27 20:49:21 2016
-     Configuration : Power is enabled
-		     Bootup enabled.
-		     Monitoring enabled
-        Rommon Ver : Version 5.15
-        IOS SW Ver : 5.3.2
-        Main Power : Power state Enabled. Estimate power 380 Watts of power required.
-            Faults : N/A
--------------------------------------------------------------------------------
-     Platform Node : 0/0/CPU0 (slot 2)
-               PID : A9K-24X10GE-TR
-         Card Type : 24-port 10GE, Packet Transport Optimized LC
-            VID/SN : V10 / XXXXXXXXXXX
-        Oper State : IOS XR RUN
-        Last Reset : N/A
-                   : N/A
-     Configuration : Power is enabled
-		     Bootup enabled.
-		     Monitoring enabled
-        Rommon Ver : Version 3.2(20150713:063058)
-        IOS SW Ver : 5.3.2
-        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
-            Faults : N/A
--------------------------------------------------------------------------------
-     Platform Node : 0/1/CPU0 (slot 3)
-               PID : A9K-24X10GE-TR
-         Card Type : 24-port 10GE, Packet Transport Optimized LC
-            VID/SN : V07 / XXXXXXXXXXX
-        Oper State : IOS XR RUN
-        Last Reset : N/A
-                   : N/A
-     Configuration : Power is enabled
-		     Bootup enabled.
-		     Monitoring enabled
-        Rommon Ver : Version 3.3(20150930:043930)
-        IOS SW Ver : 5.3.2
-        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
-            Faults : N/A
--------------------------------------------------------------------------------
-     Platform Node : 0/2/CPU0 (slot 4)
-               PID : A9K-24X10GE-TR
-         Card Type : 24-port 10GE, Packet Transport Optimized LC
-            VID/SN : V07 / XXXXXXXXXXX
-        Oper State : IOS XR RUN
-        Last Reset : N/A
-                   : N/A
-     Configuration : Power is enabled
-		     Bootup enabled.
-		     Monitoring enabled
-        Rommon Ver : Version 3.3(20150930:043930)
-        IOS SW Ver : 5.3.2
-        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
-            Faults : N/A
--------------------------------------------------------------------------------
-```
-
-**Help:** execute the command "show platform summary location all"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### admin show environment power
-
-**Output:**
-```
-Fri Jan 17 14:45:54.414 EST
-================================================================================
- CHASSIS LEVEL POWER INFO: 0
-================================================================================
-   Total output power capacity (Group 0 + Group 1) :    6000W +    6000W
-   Total output power required                     :    2493W
-   Total power input                               :    1334W
-   Total power output                              :    1246W
-
-Power Group 0: 
-================================================================================
-   Power       Supply      --------Input-------   ----Output----    Status
-   Module      Type        Volts A/B   Amps A/B   Volts     Amps    
-================================================================================
-   0/PM0       3kW-DC      54.0/54.0   3.3/ 3.5    12.1     27.0    Failed 
-   0/PM1       3kW-DC      54.0/54.0   3.0/ 2.9    12.1     25.8    OK 
-
- Total of Power Group 0:       686W/  ( 6.3/ 6.4)A     639W/ 52.8A
-
-Power Group 1: 
-================================================================================
-   Power       Supply      --------Input-------   ----Output----    Status
-   Module      Type        Volts A/B   Amps A/B   Volts     Amps    
-================================================================================
-   0/PM2       3kW-DC      54.0/54.0   2.7/ 2.9    12.1     23.8    OK 
-   0/PM3       3kW-DC      54.0/54.0   3.1/ 3.3    12.1     26.4    OK 
-
- Total of Power Group 1:       648W/  ( 5.8/ 6.2)A     607W/ 50.2A
-
-================================================================================
-   Location     Card Type            Power       Power       Status
-                                     Allocated   Used
-                                     Watts       Watts
-================================================================================
-   0/0          NC55-36X100G           902         504       ON 
-   0/1                 -                25           -       RESERVED 
-   0/2                 -                25           -       RESERVED 
-   0/3                 -                25           -       RESERVED 
-   0/RP0        NC55-RP                 90          37       ON 
-   0/RP1        NC55-RP                 90          28       ON 
-   0/FC0        NC55-5504-FC           124          89       ON 
-   0/FC1        NC55-5504-FC           124          90       ON 
-   0/FC2        NC55-5504-FC           124          88       ON 
-   0/FC3        NC55-5504-FC           124          88       ON 
-   0/FC4        NC55-5504-FC           124          87       ON 
-   0/FC5        NC55-5504-FC           124          88       ON 
-   0/FT0        NC55-5504-FAN          174          20       ON 
-   0/FT1        NC55-5504-FAN          174          19       ON 
-   0/FT2        NC55-5504-FAN          174          21       ON 
-   0/SC0        NC55-SC                 35          17       ON 
-   0/SC1        NC55-SC                 35          15       ON 
-
-```
-
-**Help:** execute the command "admin show environment power"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show pim neighbor
-
-**Output:**
-```
-Tue Mar  7 14:37:03.743 EST
-
-PIM neighbors in VRF default
-Flag: B - Bidir capable, P - Proxy capable, DR - Designated Router,
-      E - ECMP Redirect capable
-      * indicates the neighbor created for this router
-
- Neighbor Address             Interface              Uptime    Expires  DR pri   Flags
-
-10.100.100.129               FortyGigE0/2/1/1       4w2d      00:01:41 1      B P
-10.100.100.130*              FortyGigE0/2/1/1       4w2d      00:01:25 1 (DR) B E
-10.100.100.125               FortyGigE0/0/0/1       4w2d      00:01:27 1      B P
+Mon Jan 29 19:00:32.892 UTC
+VRF: example555
 
 
-```
+Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
+       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
+       A - access/subscriber, a - Application route
+       M - mobile route, r - RPL, (!) - FRR Backup path
 
-**Help:** execute the command "show pim neighbor"
+Gateway of last resort is 172.16.1.1 to network 0.0.0.0
 
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
+S*   0.0.0.0/0 [1/0] via 172.16.1.1, 04:43:54
+O    1.1.1.1/32 [110/0] via 10.1.1.9, 04:43:27, GigabitEthernet0/0/0/0 (!)
+                [110/9164] via 10.1.1.34, 04:43:27, GigabitEthernet0/0/0/3
+O    1.1.1.3/32 [110/0] via 10.1.1.9, 04:43:21, GigabitEthernet0/0/0/0 (!)
+                [110/6564] via 10.1.1.34, 04:43:21, GigabitEthernet0/0/0/3
+O    1.1.2.1/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                [110/9163] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+O    1.1.2.3/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                [110/6563] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+O    1.1.2.5/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                [110/639] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+L    1.1.2.6/32 is directly connected, 04:43:54, Loopback0
+O    10.1.0.0/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                 [110/9163] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+O    10.1.0.8/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                 [110/6563] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+O    10.1.1.0/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                 [110/11762] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+C    10.1.1.4/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/1
+L    10.1.1.6/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/1
+C    10.1.1.8/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/0
+L    10.1.1.10/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/0
+O    10.1.1.12/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                  [110/9162] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+O    10.1.1.20/30 [110/0] via 10.1.1.9, 04:43:41, GigabitEthernet0/0/0/0 (!)
+                  [110/6562] via 10.1.1.34, 04:43:41, GigabitEthernet0/0/0/3
+O    10.1.1.24/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
+                  [110/709] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
+C    10.1.1.28/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/2
+L    10.1.1.30/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/2
+C    10.1.1.32/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/3
+L    10.1.1.33/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/3
+C    172.16.1.0/24 is directly connected, 04:43:54, MgmtEth0/0/CPU0/0
+L    172.16.1.120/32 is directly connected, 04:43:54, MgmtEth0/0/CPU0/0
 
-### show controllers all phy
+VRF: VRF10
 
-**Output:**
-```
-PHY data for interface: TenGigE0/0/0/0
 
-SFP EEPROM  port: 0
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KXG
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
+Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
+       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
+       A - access/subscriber, a - Application route
+       M - mobile route, r - RPL, (!) - FRR Backup path
+
+Gateway of last resort is not set
+
+L    10.1.0.10/32 is directly connected, 1w1d, Loopback44
+B    10.1.0.15/32 [200/0] via 10.1.0.15 (nexthop in vrf default), 3w1d
+B    10.1.0.20/32 [200/0] via 10.1.0.20 (nexthop in vrf default), 3w1d
+
+VRF: ThirdExample
+
+
+Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
+       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
+       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
+       A - access/subscriber, a - Application route
+       M - mobile route, r - RPL, (!) - FRR Backup path
  
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
-0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 58 47 20
- 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e4
-0x0060: 00 00 02 12 74 eb 9c 1e : 89 59 e6 a8 3c 20 cb 2a
-0x0070: b0 0d ca 00 00 00 00 00 : 00 00 00 00 f5 ca 74 5e
+Gateway of last resort is not set
 
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 28.461
-        Voltage: 3.244 Volt
-        Tx Bias: 0.116 mAmps
-        Tx Power:  0.02730 mW (-15.63837 dBm)
-        Rx Power:  0.000 mW (<-40.00 dBm)
-        Oper. Status/Control: Tx Disabled, LOS,
-EEPROM Memory (A2 lower)
- 0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 1c 76 7e b9 00 3a 01 11 : 00 00 00 00 00 00 82 00
-0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants:
-        Product Id: SFP-10G-SR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
- 0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
+O    10.7.1.0/29 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
+                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
+O    10.2.0.0/24 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
+                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
+O    10.2.1.0/29 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
+                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
+C    10.2.2.0/29 is directly connected, 1w5d, GigabitEthernet0/0/0/0
+L    10.2.2.1/32 is directly connected, 1w5d, GigabitEthernet0/0/0/0
+O E1 10.2.10.2/32 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
+                  [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
+B    10.3.0.0/24 [200/110] via 10.1.0.25 (nexthop in vrf default), 1w5d
+B    10.3.1.0/29 [200/0] via 10.1.0.25 (nexthop in vrf default), 1w5d
 
 
-
-PHY data for interface: TenGigE0/0/0/1
-
-SFP EEPROM  port: 1
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-LR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 9u fiber (Km): 10000 meter
-        Link Reach 9u fiber (100m): 10000 meter
-        Vendor Name: CISCO-SUMITOMO
-        Vendor OUI: 00.00.5f
-        Vendor Part Number: SPP5200LR-C6     (rev.: B   )
-        Laser wavelength: 1310 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: SPC1719093J
-        Date Code (yy/mm/dd): 13/05/11  lot code: 1C
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 20 00 00 00 00 : 00 00 00 06 67 00 0a 64
-0x0010: 00 00 00 00 43 49 53 43 : 4f 2d 53 55 4d 49 54 4f
-0x0020: 4d 4f 20 20 00 00 00 5f : 53 50 50 35 32 30 30 4c
-0x0030: 52 2d 43 36 20 20 20 20 : 42 20 20 20 05 1e 00 06
-0x0040: 00 1a 00 00 53 50 43 31 : 37 31 39 30 39 33 4a 20
-0x0050: 20 20 20 20 31 33 30 35 : 31 31 31 43 68 f0 03 52
-0x0060: 00 00 0b 1c ba 98 43 64 : 6a 97 d8 6c ea 86 b2 df
-0x0070: cc 46 fd 00 00 00 00 00 : 00 00 00 00 3e ac 79 a3
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         90.000 mAmps          84.000 mAmps          24.000 mAmps          20.000 mAmps
-           Transmit Power:  2.23870 mW (3.49996 dBm)   1.12200 mW (0.49993 dBm)   0.15140 mW (-8.19874 dBm)   0.06030 mW (-12.19683 dBm)
-            Receive Power:  2.23870 mW (3.49996 dBm)   1.12200 mW (0.49993 dBm)   0.03630 mW (-14.40093 dBm)   0.01450 mW (-18.38632 dBm)
-        Temperature: 25.629
-        Voltage: 3.318 Volt
-        Tx Bias: 0.000 mAmps
-        Tx Power:  0.000 mW (<-40.00 dBm)
-        Rx Power:  0.000 mW (<-40.00 dBm)
-        Oper. Status/Control: Tx Disabled, LOS,
-EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: af c8 27 10 a4 10 2e e0 : 57 73 02 5b 2b d4 05 ea
-0x0120: 57 73 00 91 2b d4 01 6b : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 3c
-0x0160: 19 a1 81 98 00 00 00 00 : 00 00 00 00 00 00 82 00
- 0x0170: 00 40 00 00 00 40 00 00 : 00 00 00 00 00 00 00 01
-
-        CLEI Code: COUIA75CAA
-        Part Number: 10-2457-02 (ver.: V02 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
-        Product Id: SFP-10G-LR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 37 35 43 : 41 41 31 30 2d 32 34 35
-0x0190: 37 2d 30 32 56 30 32 20 : 01 00 46 00 00 00 00 b0
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 8c dd 94 00 ac a5
-0x01b0: d6 cd 00 00 1e 00 59 2d : 12 88 0f 3e 00 00 aa aa
-0x01c0: 53 46 50 2d 31 30 47 2d : 4c 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 2e
-0x01e0: 20 26 2b 30 33 36 2b 36 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 6b 00 00 : ff ff ff ff 00 00 00 00
+VRF: customerA
 
 
-
-PHY data for interface: TenGigE0/0/0/2
-
-SFP EEPROM  port: 2
-        Xcvr Type: SFP
-        Xcvr Code: DWDM-SFP10G-58.98
-        Encoding: 64B66B
-        Bit Rate: 11100 Mbps
-        Link Reach 9u fiber (Km): 80000 meter
-        Vendor Name: CISCO-FUJITSU
-        Vendor OUI: 00.00.0e
-        Vendor Part Number: FIM35060/201W23  (rev.: 0002)
-        Laser wavelength: 1558 nm (fraction: 0.098 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FLJ1736K039
-        Date Code (yy/mm/dd): 13/09/03  lot code: 01
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 00 00 00 00 00 : 00 00 00 06 6f 00 50 00
-0x0010: 00 00 00 00 43 49 53 43 : 4f 2d 46 55 4a 49 54 53
-0x0020: 55 20 20 20 00 00 00 0e : 46 49 4d 33 35 30 36 30
-0x0030: 2f 32 30 31 57 32 33 20 : 30 30 30 32 06 16 62 c1
-0x0040: 05 1a 00 00 46 4c 4a 31 : 37 33 36 4b 30 33 39 20
-0x0050: 20 20 20 20 31 33 30 39 : 30 33 30 31 68 f0 04 40
-0x0060: a3 00 15 3b 48 6e 9c da : f4 7b 3c 89 41 c2 1e d5
- 0x0070: aa f3 88 00 00 00 00 00 : 00 00 00 00 49 75 e7 e7
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:        105.000 mAmps          98.000 mAmps          42.000 mAmps          35.000 mAmps
-           Transmit Power:  3.98100 mW (5.99992 dBm)   1.99520 mW (2.99986 dBm)   0.79430 mW (-1.00015 dBm)   0.31620 mW (-5.00038 dBm)
-            Receive Power:  0.50120 mW (-2.99989 dBm)   0.19950 mW (-7.00057 dBm)   0.00200 mW (-26.98970 dBm)   0.00080 mW (-30.96910 dBm)
-        Temperature: 36.656
-        Voltage: 3.250 Volt
-        Tx Bias: 79.936 mAmps
-        Tx Power:  1.38250 mW (1.40665 dBm)
-        Rx Power:  0.01520 mW (-18.18156 dBm)
-        Oper. Status/Control:
- EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: cd 14 44 5c bf 68 52 08 : 9b 82 0c 5a 4d f0 1f 07
-0x0120: 13 94 00 08 07 cb 00 14 : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 00 00 00 01 : 00 00 00 00 00 01 00 00
-0x0150: 00 01 00 00 00 01 00 00 : 00 01 00 00 00 00 00 b0
-0x0160: 24 a8 7e f8 9c 20 36 01 : 00 98 00 00 00 00 00 00
-0x0170: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 02
-
-        CLEI Code: IPU3AZ6CAA
-        Part Number: 10-2750-01 (ver.: V01 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
-        Product Id: DWDM-SFP10G-58.98
-EEPROM Memory (A2 upper)
- 0x0180: 49 50 55 33 41 5a 36 43 : 41 41 31 30 2d 32 37 35
-0x0190: 30 2d 30 31 56 30 31 20 : 01 00 46 00 00 00 00 bf
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 63 aa 64 00 64 ca
-0x01b0: 66 43 00 00 1c 02 9d 51 : 37 07 0f a1 00 00 aa aa
-0x01c0: 44 57 44 4d 2d 53 46 50 : 31 30 47 2d 35 38 2e 39
-0x01d0: 38 20 20 20 33 32 00 00 : 00 00 00 00 00 00 00 e8
-0x01e0: 0b 0d 1a 21 27 34 1a 34 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 fc 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/3
-
-SFP EEPROM  port: 3
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-JDSU
-        Vendor OUI: 00.01.9c
-        Vendor Part Number: PLRXPL-SC-S43-CS (rev.: 1   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: JUR1833GV1F
-        Date Code (yy/mm/dd): 14/08/16  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: SW RX LOS Mon., SW TX Fault Mon, SW TX Disable, Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 4a 44 53 55 20 20
-0x0020: 20 20 20 20 00 00 01 9c : 50 4c 52 58 50 4c 2d 53
-0x0030: 43 2d 53 34 33 2d 43 53 : 31 20 20 20 03 52 00 19
-0x0040: 00 1a 00 00 4a 55 52 31 : 38 33 33 47 56 31 46 20
-0x0050: 20 20 20 20 31 34 30 38 : 31 36 20 20 68 f0 03 5d
-0x0060: 00 00 08 93 24 b6 53 74 : 94 4c 09 f7 05 38 f0 78
-0x0070: 12 90 2a 00 00 00 00 00 : 00 00 00 00 8a 25 00 f8
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         10.000 mAmps           8.500 mAmps           3.000 mAmps           2.600 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 32.988
-        Voltage: 3.291 Volt
-        Tx Bias: 7.250 mAmps
-        Tx Power:  0.56550 mW (-2.47567 dBm)
-        Rx Power:  0.42270 mW (-3.73968 dBm)
-        Oper. Status/Control:
- EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 13 88 05 14 10 9a 05 dc : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 5b
-0x0160: 20 fd 80 8e 0e 29 16 17 : 10 83 00 00 00 00 00 00
-0x0170: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants: LBC Scale, Temperature, Laser bias current, Output power,
-        Product Id: SFP-10G-SR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 61 06 64 00 6d d7
-0x01b0: 7c 2b 00 00 16 00 0c 6c : 16 45 0f ae 00 00 aa aa
- 0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 34 31 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 00 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/4
-
-SFP EEPROM  port: 4
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KZU
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
- 
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
-0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 55 20
- 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 f4
-0x0060: 00 00 02 61 e7 86 6e be : 16 35 ef 18 50 08 c7 78
-0x0070: 28 bc 3c 00 00 00 00 00 : 00 00 00 00 e5 04 00 95
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 32.152
-        Voltage: 3.264 Volt
-        Tx Bias: 7.904 mAmps
-        Tx Power:  0.59180 mW (-2.27825 dBm)
-        Rx Power:  0.45310 mW (-3.43806 dBm)
-        Oper. Status/Control:
-EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 20 27 7f 83 0f 70 17 1e : 11 b3 00 00 00 00 00 00
-0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants:
-        Product Id: SFP-10G-SR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
- 0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
-0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/5
-
-SFP EEPROM  port: 5
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KZ7
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
- 0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 37 20
-0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 d6
-0x0060: 00 00 02 6d 9a 90 34 05 : 5a 2b de b4 22 a8 95 6b
-0x0070: 4c b4 d5 00 00 00 00 00 : 00 00 00 00 b6 4c a5 80
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 30.563
-        Voltage: 3.258 Volt
-        Tx Bias: 7.876 mAmps
-        Tx Power:  0.64740 mW (-1.88827 dBm)
-        Rx Power:  0.56550 mW (-2.47567 dBm)
-        Oper. Status/Control:
- EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 1e 90 7f 45 0f 62 19 4a : 16 17 00 00 00 00 00 00
-0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants:
-        Product Id: SFP-10G-SR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
-0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
- 0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/6
-
-SFP EEPROM  port: 6
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KYN
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
- 
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
-0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 59 4e 20
- 0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 ec
-0x0060: 00 00 02 b1 f4 73 e5 c3 : 5c aa e2 5c 9c fe 1c 95
-0x0070: 91 98 47 00 00 00 00 00 : 00 00 00 00 ab 24 53 3c
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 34.293
-        Voltage: 3.240 Volt
-        Tx Bias: 7.846 mAmps
-        Tx Power:  0.61560 mW (-2.10701 dBm)
-        Rx Power:  0.62050 mW (-2.07258 dBm)
-        Oper. Status/Control:
-EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 22 4b 7e 8e 0f 53 18 0c : 18 3d 00 00 00 00 00 00
-0x0170: 00 00 00 00 00 00 00 00 : ff ff ff ff ff ff ff 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants:
-        Product Id: SFP-10G-SR
-EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
- 0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
-0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/7
-
-SFP EEPROM  port: 7
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KYF
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
-0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
- 0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 59 46 20
-0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e4
-0x0060: 00 00 02 92 fe 63 74 2e : 97 52 42 36 a9 62 00 68
-0x0070: 2e 2a 5f 00 00 00 00 00 : 00 00 00 00 8b 7d 0c 6e
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 34.387
-        Voltage: 3.278 Volt
-        Tx Bias: 0.152 mAmps
-        Tx Power:  0.05760 mW (-12.39578 dBm)
-        Rx Power:  0.000 mW (<-40.00 dBm)
-        Oper. Status/Control: Tx Disabled, LOS,
-EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 22 63 80 09 00 4c 02 40 : 00 00 00 00 00 00 82 00
- 0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
-
-        CLEI Code: COUIA8NCAA
-        Part Number: 10-2415-03 (ver.: V03 )
-        Temp/Alarm/Power Flags: COM, commercial 0C to 70C
-        Minimum Temperature: 0
-        Maximum Temperature: 70
-        Calibration Constants:
-        Product Id: SFP-10G-SR
- EEPROM Memory (A2 upper)
-0x0180: 43 4f 55 49 41 38 4e 43 : 41 41 31 30 2d 32 34 31
-0x0190: 35 2d 30 33 56 30 33 20 : 01 00 46 00 00 00 00 c6
-0x01a0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x01b0: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 aa aa
-0x01c0: 53 46 50 2d 31 30 47 2d : 53 52 20 20 20 20 20 20
-0x01d0: 20 20 20 20 32 33 00 00 : 00 00 00 00 00 00 00 35
-0x01e0: 15 1a 20 24 2a 30 20 30 : 00 00 00 00 00 00 00 00
-0x01f0: 00 00 00 00 00 1d 00 00 : ff ff ff ff 00 00 00 00
-
-
-
-PHY data for interface: TenGigE0/0/0/8
- 
-SFP EEPROM  port: 8
-        Xcvr Type: SFP
-        Xcvr Code: SFP-10G-SR
-        Encoding: 64B66B
-        Bit Rate: 10300 Mbps
-        Link Reach 50u fiber: 80 meter
-        Link Reach 62.5u fiber: 20 meter
-        Vendor Name: CISCO-FINISAR
-        Vendor OUI: 00.90.65
-        Vendor Part Number: FTLX8571D3BCL-C2 (rev.: A   )
-        Laser wavelength: 850 nm (fraction: 0.00 nm)
-        Optional SFP Signal: Tx_Disable, Tx_Fault, LOS
-        Vendor Serial Number: FNS17231KZG
-        Date Code (yy/mm/dd): 13/06/06  lot code:
-        Diagnostic Monitoring: DOM, Int. Cal.,
-        Enhanced Options: Alarm/Warning Flags
-
-MSA Data
-0x0000: 03 04 07 10 00 00 00 00 : 00 00 00 06 67 00 00 00
- 0x0010: 08 02 00 1e 43 49 53 43 : 4f 2d 46 49 4e 49 53 41
-0x0020: 52 20 20 20 00 00 90 65 : 46 54 4c 58 38 35 37 31
-0x0030: 44 33 42 43 4c 2d 43 32 : 41 20 20 20 03 52 00 a5
-0x0040: 00 1a 00 00 46 4e 53 31 : 37 32 33 31 4b 5a 47 20
-0x0050: 20 20 20 20 31 33 30 36 : 30 36 20 20 68 80 03 e6
-0x0060: 00 00 02 3e c6 30 bb 72 : 52 c4 39 8f 04 21 07 b0
-0x0070: cc 72 75 00 00 00 00 00 : 00 00 00 00 60 af 93 d2
-
-        Thresholds:                    Alarm High         Warning High          Warning Low            Alarm Low
-              Temperature:            +75.000 C             +70.000 C              +0.000 C              -5.000 C
-                  Voltage:           3.630 Volt            3.465 Volt            3.135 Volt            2.970 Volt
-                     Bias:         11.800 mAmps          10.800 mAmps           5.000 mAmps           4.000 mAmps
-           Transmit Power:  1.47910 mW (1.69998 dBm)   0.74130 mW (-1.30006 dBm)   0.18620 mW (-7.30020 dBm)   0.07410 mW (-11.30182 dBm)
-            Receive Power:  1.58490 mW (2.00002 dBm)   0.79430 mW (-1.00015 dBm)   0.10230 mW (-9.90124 dBm)   0.04070 mW (-13.90406 dBm)
-        Temperature: 33.723
-        Voltage: 3.277 Volt
-        Tx Bias: 0.000 mAmps
-        Tx Power:  0.00530 mW (-22.75724 dBm)
-        Rx Power:  0.000 mW (<-40.00 dBm)
-        Oper. Status/Control: Tx Disabled, LOS,
- EEPROM Memory (A2 lower)
-0x0100: 4b 00 fb 00 46 00 00 00 : 8d cc 74 04 87 5a 7a 76
-0x0110: 17 0c 07 d0 15 18 09 c4 : 39 c7 02 e5 1c f5 07 46
-0x0120: 3d e9 01 97 1f 07 03 ff : 00 00 00 00 00 00 00 00
-0x0130: 00 00 00 00 00 00 00 00 : 00 00 00 00 00 00 00 00
-0x0140: 00 00 00 00 3f 80 00 00 : 00 00 00 00 01 00 00 00
-0x0150: 01 00 00 00 01 00 00 00 : 01 00 00 00 00 00 00 10
-0x0160: 21 b9 80 02 00 00 00 35 : 00 00 00 00 00 00 82 00
-0x0170: 05 40 00 00 05 40 00 00 : ff ff ff ff ff ff ff 01
-
+% No matching routes found
 ```
 
-**Help:** execute the command "show controllers all phy"
+**Help:** execute the command "show ip route"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show ospf vrf all interface brief
+### show ipv4 interface
 
 **Output:**
 ```
-
-Wed Jul 27 17:18:34.807 CST
-
-* Indicates MADJ interface, (P) Indicates fast detect hold down state
-
-Interfaces for OSPF 1, VRF red
-
-Interface          PID   Area            IP Address/Mask    Cost  State Nbrs F/C
-BE1.10             1     0               192.0.2.1/30       1     DR    1/1
-Te0/0/0/10.10      1     0               192.0.2.1/30       1     BDR   1/1
-
-
-Interfaces for OSPF 1, VRF green
-
-BE1.20             1     0               192.0.2.1/30       1000  P2P   0/0
-Gi300/0/0/0.10     1     0               192.0.2.1/30       1     DR    0/0
-
-
-Interfaces for OSPF 1, VRF blue
-
-BE1.30             1     0               192.0.2.1/30       1     DR    1/1
-Gi300/0/0/0        1     0               192.0.2.1/30       1     DR    0/0
-
+Mon Feb 13 17:30:47.464 UTC
+MgmtEth0/0/CPU0/0 is Up, ipv4 protocol is Up
+  Vrf is default (vrfid 0x60000000)
+  Internet address is 172.25.82.44/24
+  MTU is 1514 (1500 is available to IP)
+  Helper address is not set
+  Multicast reserved groups joined: 224.0.0.2 224.0.0.1
+  Directed broadcast forwarding is disabled
+  Outgoing access list is not set
+  Inbound  common access list is not set, access list is not set
+  Proxy ARP is disabled
+  ICMP redirects are never sent
+  ICMP unreachables are always sent
+  ICMP mask replies are never sent
+  Table Id is 0xe0000000
+GigabitEthernet0/0/0/0 is Shutdown, ipv4 protocol is Down
+  Vrf is default (vrfid 0x60000000)
+  Internet protocol processing disabled
 ```
 
-**Help:** execute the command "show ospf vrf all interface brief"
+**Help:** execute the command "show ipv4 interface"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### admin show controller fabric health
+### show ipv4 vrf all interface brief
 
 **Output:**
 ```
-Sat Feb 24 18:07:38.753 UTC
 
-Fabric System Health
----------------------
- Flags: T - Total,      U - Up,         A - Admin Down 
-       L - LCC,        M - Mcast Down, Y - Yes        
-       F - FCC,        D - Down,       N - No or Not Ok
-       V - Valid,     
+Wed Jul 27 17:18:32.918 CST
 
-Collaborator Process State:
-------------------------------
-    FSDB Aggregator: OK
-    +-----------+--+
-    |Rack id    | 0|
-    +-----------+--+
-    |FSDB status|Ok|
-    +-----------+--+
-
-    +------------+-----+-----+-----+-----+-----+-----+
-    |FC Location |0/FC0|0/FC1|0/FC2|0/FC3|0/FC4|0/FC5|
-    +------------+-----+-----+-----+-----+-----+-----+
-    |SFE status  |  Ok |  Ok |  Ok |  Ok |  Ok |  Ok |
-    +------------+-----+-----+-----+-----+-----+-----+
- 
-Router Health:
------------------
-
-    Rack    Planes  SFE Asics      Fia Asics     
-    T/L/F   U/M/D/A T/U/D          T/U/D         
-    ------------------------------------------------------
-    1/1/0   5/0/1/0 36/30/6        36/36/0        
-
-    Plane Admin Plane    Racks    Data      
-    id    state state    in issue drop/error
-    -----------------------------------------------------------
-    0     UP    UP       0        No        
-    1     UP    UP       0        No        
-    2     UP    DN       1        No        
-    3     UP    UP       0        No        
-    4     UP    UP       0        No        
-    5     UP    UP       0        No        
-    -----------------------------------------------------------
- 
-Rack Health:
--------------
-    Rack:  0, Type: LCC
-
-    SFE Asics  FIA Asics   Planes   Valid  
-    T/U/D      T/U/D       U/M/D    fab ids
-    ------------------------------------------------
-    36/30/6    36/36/0     5/0/1      72
-
-    Plane Plane    SFE Asics    Fab ids  
-    id    state    T/U/D        Reachable
-    --------------------------------------
-    0     UP       6/6/0        72    
-    1     UP       6/6/0        72    
-    2     DN       6/0/6        0     
-    3     UP       6/6/0        72    
-    4     UP       6/6/0        72    
-    5     UP       6/6/0        72    
-    --------------------------------------
-
+Interface                      IP-Address      Status          Protocol Vrf-Name
+BVI10                          192.0.2.1       Up              Up       red
+BVI20                          192.0.2.1       Shutdown        Down     red
+BVI30                          192.0.2.1       Down            Down     red
+Bundle-Ether1                  192.0.2.1       Up              Up       **brown
+Bundle-Ether1.10               192.0.2.1       Up              Up       green
+Bundle-Ether1.20               192.0.2.1       Up              Up       blue
+Bundle-Ether1.30               192.0.2.1       Up              Up       blue
+Bundle-Ether2                  192.0.2.1       Up              Up       **brown
+Bundle-Ether3                  192.0.2.1       Up              Up       **brown
+Loopback0                      192.0.2.1       Up              Up       purple
+Loopback1                      192.0.2.1       Up              Up       green
+GigabitEthernet100/0/0/0       192.0.2.1       Up              Up       blue
+GigabitEthernet200/0/0/0.10    192.0.2.1       Up              Up       purple
+GigabitEthernet200/0/0/0.20    192.0.2.1       Up              Up       purple
+GigabitEthernet200/0/0/0.30    192.0.2.1       Down            Down     purple
+TenGigE0/1/0/0                 192.0.2.1       Up              Up       green
+TenGigE0/2/0/0.10              192.0.2.1       Up              Up       green
 ```
 
-**Help:** execute the command "admin show controller fabric health"
+**Help:** execute the command "show ipv4 vrf all interface brief"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show ipv6 neighbors
+
+**Output:**
+```
+Fri Oct 11 02:35:25.149 UTC
+IPv6 Address                              Age Link-layer Addr State Interface            Location
+2001:db8:ffff::12:2                      110  0c07.a11a.b801 REACH Gi0/0/0/0            0/0/CPU0       
+fe80::e07:a1ff:fe1a:b801                 99   0c07.a11a.b801 REACH Gi0/0/0/0            0/0/CPU0       
+[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/0            0/0/CPU0       
+[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/1            0/0/CPU0       
+[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/2            0/0/CPU0       
+2001:db8:1000:beef::1                    105  ca01.0ff1.0008 REACH Gi0/0/0/3            0/0/CPU0       
+2001:db8:1000:beef::2                    108  ca02.0fff.0008 REACH Gi0/0/0/3            0/0/CPU0       
+2001:db8:1000:beef::3                    105  ca03.100d.0008 REACH Gi0/0/0/3            0/0/CPU0       
+fe80::c801:fff:fef1:8                    89   ca01.0ff1.0008 REACH Gi0/0/0/3            0/0/CPU0       
+fe80::c802:fff:feff:8                    105  ca02.0fff.0008 REACH Gi0/0/0/3            0/0/CPU0       
+fe80::c803:10ff:fe0d:8                   91   ca03.100d.0008 REACH Gi0/0/0/3            0/0/CPU0       
+[Mcast adjacency]                           - 0000.0000.0000 REACH Gi0/0/0/3            0/0/CPU0       
+```
+
+**Help:** execute the command "show ipv6 neighbors"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show isis neighbors
+
+**Output:**
+```
+Tue Jan  3 14:57:35.234 UTC
+
+IS-IS 1 neighbors:
+System Id      Interface        SNPA           State Holdtime Type IETF-NSF
+CSR2           Gi0/0/0/1        5000.0002.0001 Up    23       L1L2 Capable
+vMX1           Gi0/0/0/1        0005.8671.9202 Up    18       L1L2 Capable
+vMX1           Gi0/0/0/3        *PtoP*         Up    25       L1L2 Capable
+vEOS4          Gi0/0/0/2        5000.0003.3766 Up    8        L2   Unable
+
+Total neighbor count: 4
+```
+
+**Help:** execute the command "show isis neighbors"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show l2vpn mac-learning mac all location
+
+**Output:**
+```
+Tue Mar 14 10:56:45.557 CET
+Topo ID   Producer       Next Hop(s)       Mac Address       IP Address
+-------   --------       -----------       --------------    ----------
+0         0/0/CPU0       Te0/0/0/24.2448   00c1.6402.7074
+0         0/0/CPU0       Te0/0/0/22.2448   5845.4cf3.094c
+4         0/0/CPU0       Te0/0/0/28.25     249e.aba4.31b3
+```
+
+**Help:** execute the command "show l2vpn mac-learning mac all location"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show lldp neighbors
+
+**Output:**
+```
+Mon Jan 29 19:06:33.768 UTC
+Capability codes:
+        (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+        (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+
+Device ID       Local Intf          Hold-time  Capability     Port ID
+ASR-OCC-P1      Gi0/0/0/0           120        R               Gi0/0/0/2
+ASR-LON-P1      Gi0/0/0/3           120        R               Gi0/0/0/2
+
+Total entries displayed: 2
+```
+
+**Help:** execute the command "show lldp neighbors"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show lldp neighbors detail
+
+**Output:**
+```
+Tue Jan 16 13:49:50.315 AEST
+Capability codes:
+        (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+        (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+
+------------------------------------------------
+ Local Interface: FourHundredGigE0/0/0/0
+Chassis id: 6c03.b5aa.bbcc
+Port id: Fou1/0/22
+Port Description: uplink:router1:FH0/0/0/0
+System Name: router-400.router.com
+ 
+System Description:
+Cisco IOS Software [Cupertino], Catalyst L3 Switch Software (CAT9K_IOSXE), Version 17.9.3, RELEASE SOFTWARE (fc6)
+Technical Support: http://www.cisco.com/techsupport
+ Copyright (c) 1986-2023 by Cisco Systems, Inc.
+Compiled Tue 14-Mar-23 18:26 by mcpre
+
+Time remaining: 90 seconds
+Hold Time: 120 seconds
+Age: 732802 seconds
+System Capabilities: B,R
+Enabled Capabilities: B,R
+Management Addresses:
+  IPv4 address: 172.1.1.79
+  IPv6 address: 2407:abcd:0:aaaa::0000
+
+Peer MAC Address: 6c:03:b5:aa:bb:cc
+
+
+------------------------------------------------
+ Local Interface: FourHundredGigE0/0/0/28
+Chassis id: d0dc.2cdd.aabc
+Port id: FourHundredGigE0/0/0/28
+Port Description: uplink:router1::FH0/0/0/28
+System Name: router2.com
+
+System Description:
+7.9.2, 8000
+
+Time remaining: 98 seconds
+Hold Time: 120 seconds
+Age: 729378 seconds
+System Capabilities: R
+ Enabled Capabilities: R
+Management Addresses:
+  IPv4 address: 172.1.1.64
+  IPv6 address: 2407:abcd::aaab::0000
+
+Peer MAC Address: d0:dc:2c:aa:bb:cc
+ 
+
+------------------------------------------------
+Local Interface: FourHundredGigE0/0/0/29
+ Chassis id: d0dc.abcd.dcba
+Port id: FourHundredGigE0/0/0/29
+Port Description: uplink:router1:FH0/0/0/29
+System Name: router66.router.com
+
+System Description:
+ 7.9.2, 8000
+
+Time remaining: 100 seconds
+Hold Time: 120 seconds
+Age: 729313 seconds
+System Capabilities: R
+Enabled Capabilities: R
+Management Addresses:
+  IPv4 address: 172.1.1.66
+  IPv6 address: 2407:abcd:0:aaac::0000
+
+Peer MAC Address: d0:dc:2c:aa:bb:cd
+
+
+------------------------------------------------
+ Local Interface: HundredGigE0/0/0/30
+Chassis id: 247e.32bb.0000
+Port id: Eth1/4
+ Port Description: router1:Hun1/0/30
+System Name: otter-buffy
+
+System Description:
+ Cisco NX-OS(tm) n7700, Software (n7700-s2-dk9), Version 8.4(3), RELEASE SOFTWARE Copyright (c) 2002-2020 by Cisco Systems, Inc. Compiled 9/4/2020 23:00:00
+
+ Time remaining: 117 seconds
+Hold Time: 120 seconds
+Age: 732508 seconds
+System Capabilities: B,R
+Enabled Capabilities: B,R
+Management Addresses:
+  IPv4 address: 172.1.1.158
+
+Peer MAC Address: 24:7e:12:aa:bb:cc
+
+
+------------------------------------------------
+ Local Interface: HundredGigE0/0/0/31
+Chassis id: 2cab.ebe1.ffff
+Port id: Eth2/4
+ Port Description: uplink:router1:Hun1/0/31
+System Name: onyx.mgmt.com
+
+System Description:
+Cisco NX-OS(tm) n7700, Software (n7700-s2-dk9), Version 8.4(3), RELEASE SOFTWARE Copyright (c) 2002-2020 by Cisco Systems, Inc. Compiled 9/4/2020 23:00:00
+
+Time remaining: 104 seconds
+Hold Time: 120 seconds
+Age: 732462 seconds
+System Capabilities: B,R
+Enabled Capabilities: B,R
+Management Addresses:
+  IPv4 address: 172.1.1.158
+
+Peer MAC Address: 2c:ab:eb:aa:bb:cc
+
+
+Total entries displayed: 5
+```
+
+**Help:** execute the command "show lldp neighbors detail"
 
 **Prompt:**
 - cisco_xr>
@@ -9146,7 +9206,6 @@ statistics:
 Packets dropped by deleted entries: 0
 Run out of statistics counter errors: 0
 Statistics last cleared: Sat Aug 25 18:56:24 2700
-
 ```
 
 **Help:** execute the command "show lpts pifib hardware police location"
@@ -9155,35 +9214,21 @@ Statistics last cleared: Sat Aug 25 18:56:24 2700
 - cisco_xr>
 - cisco_xr#
 
-### show ip bgp summary
+### show mpls ldp neighbor brief
 
 **Output:**
 ```
-Mon Dec 18 11:13:26.959 UTC
-BGP router identifier 30.67.35.78, local AS number 64200
-BGP generic scan interval 60 secs
-Non-stop routing is enabled
- BGP table state: Active
-Table ID: 0xe0000000   RD version: 94623
-BGP main routing table version 94623
-BGP NSR Initial initsync version 2 (Reached)
- BGP NSR/ISSU Sync-Group versions 0/0
-BGP scan interval 60 secs
+Tue Mar  7 14:35:15.185 EST
 
-BGP is operating in STANDALONE mode.
-
-
-Process       RcvTblVer   bRIB/RIB   LabelVer  ImportVer  SendTblVer  StandbyVer
-Speaker           94623      94623      94623      94623       94623           0
-
-Neighbor        Spk    AS MsgRcvd MsgSent   TblVer  InQ OutQ  Up/Down  St/PfxRcd
-10.10.17.161      0 64924   36190   64731        0    0    0 00:00:00 Idle
-10.10.128.240     0 64727   68750   70941        0    0    0    2d14h Active
-10.10.132.240     0 64727   74112   76220    94623    0    0     7w2d         82
-10.10.140.240     0 64727   72363   74575    94623    0    0    4d10h         82
+Peer               GR  NSR  Up Time     Discovery   Addresses     Labels    
+                                        ipv4  ipv6  ipv4  ipv6  ipv4   ipv6 
+-----------------  --  ---  ----------  ----------  ----------  ------------
+10.100.100.120:0   Y   Y    4w2d        3     0     10    0     56     0    
+10.100.100.119:0   Y   Y    4w2d        3     0     10    0     56     0    
+10.100.100.121:0   Y   N/A  4w2d        3     0     8     0     57     0    
 ```
 
-**Help:** execute the command "show ip bgp summary"
+**Help:** execute the command "show mpls ldp neighbor brief"
 
 **Prompt:**
 - cisco_xr>
@@ -9211,7 +9256,6 @@ Neighbor ID     Pri   State           Dead Time   Address         Interface
     Neighbor is up for 1w2d
 
  Total neighbor count: 4
-
 ```
 
 **Help:** execute the command "show ospf neighbor"
@@ -9220,317 +9264,140 @@ Neighbor ID     Pri   State           Dead Time   Address         Interface
 - cisco_xr>
 - cisco_xr#
 
-### show controllers fabric fia drops ingress location
+### show ospf vrf all interface brief
 
 **Output:**
 ```
-********** FIA-0 **********
-Category: in_drop-0
-                            From Spaui Drop-0                       11
-                                  accpt tbl-0                       22
-                                    ctl len-0                       33
-                                  short pkt-0                       44
-                                max pkt len-0                       55
-                                min pkt len-0                       66
-                            From Spaui Drop-1                       77
-                                  accpt tbl-1                       88
-                                    ctl len-1                       99
-                                  short pkt-1                        0
-                                max pkt len-1                       12
-                                min pkt len-1                       13
-                                     Tail drp                        4
-                                      Vqi drp                        1
-                           Header parsing drp                        2
-                                 pw to ni drp                        3
-                               ni from pw drp                        4
-                                  sp0 crc err                       12
-                                sp0 bad align                        5
-                                 sp0 bad code                        1
-                               sp0 align fail                        3
-                                 sp0 prot err                        1
-                                  sp1 crc err                        1
-                                sp1 bad align                        0
-                                 sp1 bad code                        0
-                               sp1 align fail                        3
-                                 sp1 prot err                        0
 
- ********** FIA-1 **********
-Category: in_drop-1
-                            From Spaui Drop-0                        0
-                                  accpt tbl-0                        0
-                                    ctl len-0                        0
-                                  short pkt-0                        0
-                                max pkt len-0                        0
-                                min pkt len-0                        0
-                            From Spaui Drop-1                        0
-                                  accpt tbl-1                        0
-                                    ctl len-1                        0
-                                  short pkt-1                        0
-                                max pkt len-1                        0
-                                min pkt len-1                        0
-                                     Tail drp                        0
-                                      Vqi drp                        0
-                           Header parsing drp                        0
-                                 pw to ni drp                        0
-                               ni from pw drp                        0
-                                  sp0 crc err                        8
-                                sp0 bad align                        0
-                                 sp0 bad code                        5
-                               sp0 align fail                        3
-                                 sp0 prot err                        1
-                                  sp1 crc err                       12
-                                sp1 bad align                        0
-                                 sp1 bad code                        8
-                               sp1 align fail                        3
-                                 sp1 prot err                        0
+Wed Jul 27 17:18:34.807 CST
 
- ********** FIA-2 **********
- Category: in_drop-2
-                            From Spaui Drop-0                        0
-                                  accpt tbl-0                        0
-                                    ctl len-0                        0
-                                  short pkt-0                        0
-                                max pkt len-0                        0
-                                min pkt len-0                        0
-                            From Spaui Drop-1                        0
-                                  accpt tbl-1                        0
-                                    ctl len-1                        0
-                                  short pkt-1                        0
-                                max pkt len-1                        0
-                                min pkt len-1                        0
-                                     Tail drp                        0
-                                      Vqi drp                        0
-                           Header parsing drp                        0
-                                 pw to ni drp                        0
-                               ni from pw drp                        0
-                                  sp0 crc err                       12
-                                sp0 bad align                        0
-                                 sp0 bad code                        6
-                               sp0 align fail                        3
-                                 sp0 prot err                        1
-                                  sp1 crc err                        1
-                                sp1 bad align                        0
-                                 sp1 bad code                        0
-                               sp1 align fail                        3
-                                 sp1 prot err                        0
+* Indicates MADJ interface, (P) Indicates fast detect hold down state
 
- ********** FIA-3 **********
-Category: in_drop-3
-                            From Spaui Drop-0                        0
-                                  accpt tbl-0                        0
-                                    ctl len-0                        0
-                                  short pkt-0                        0
-                                max pkt len-0                        0
-                                min pkt len-0                        0
-                            From Spaui Drop-1                        0
-                                  accpt tbl-1                        0
-                                    ctl len-1                        0
-                                  short pkt-1                        0
-                                max pkt len-1                        0
-                                min pkt len-1                        0
-                                     Tail drp                        0
-                                      Vqi drp                        0
-                           Header parsing drp                        0
-                                 pw to ni drp                        0
-                               ni from pw drp                        0
-                                  sp0 crc err                        2
-                                sp0 bad align                        0
-                                 sp0 bad code                        0
-                               sp0 align fail                        3
-                                 sp0 prot err                        0
-                                  sp1 crc err                        3
-                                sp1 bad align                        0
-                                 sp1 bad code                        0
-                               sp1 align fail                        3
-                                 sp1 prot err                        0
+Interfaces for OSPF 1, VRF red
 
+Interface          PID   Area            IP Address/Mask    Cost  State Nbrs F/C
+BE1.10             1     0               192.0.2.1/30       1     DR    1/1
+Te0/0/0/10.10      1     0               192.0.2.1/30       1     BDR   1/1
+
+
+Interfaces for OSPF 1, VRF green
+
+BE1.20             1     0               192.0.2.1/30       1000  P2P   0/0
+Gi300/0/0/0.10     1     0               192.0.2.1/30       1     DR    0/0
+
+
+Interfaces for OSPF 1, VRF blue
+
+BE1.30             1     0               192.0.2.1/30       1     DR    1/1
+Gi300/0/0/0        1     0               192.0.2.1/30       1     DR    0/0
 ```
 
-**Help:** execute the command "show controllers fabric fia drops ingress location"
+**Help:** execute the command "show ospf vrf all interface brief"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### dir
+### show ospf vrf all neighbor
 
 **Output:**
 ```
-Tue Jan 16 17:08:43.028 AEST
 
-Directory of /var/xr/scratch
-74 drwxrwxrwx. 2  4096 Dec  6 19:39 resmon_debug
-22 -rw-rw-rw-. 1  2464 Jan  7 19:34 status_file
- 11 drwx------. 2 16384 Nov 15 14:44 lost+found
-13 drwxr-xr-x. 3  4096 Jan  7 19:32 shutdown
-23 drwxrwxrwx. 3  4096 Nov 15 14:59 syslog-hm
-68 drwxrwxrwx. 3  4096 Dec  5 22:00 asic-err-logs-backup
-41 drwxr-xr-x. 3  4096 Nov 15 15:01 pam
-15 lrwxrwxrwx. 1    12 Nov 15 14:58 config -> /misc/config
-14 -rw-r--r--. 1   936 Jan  7 19:32 envoke_log
-28 drwxrwxrwx. 2  4096 Jan  7 19:33 crypto
- 12 drwxr-xr-x. 3  4096 Dec 11 00:53 core
-17 drwxrwxrwx. 2  4096 Nov 15 14:58 npu_drvr_cfg
-55 drwxr-xr-x. 2  4096 Dec  5 22:46 nvgen_traces
-38 -rw-------. 1   444 Nov 15 15:23 .bash_history
-25 drwxrwxrwx. 9  4096 Jan  7 19:34 ztp
- 19 drwx---r-x. 2  4096 Nov 15 14:58 clihistory
+Wed Jul 27 17:18:33.921 CST
 
-3365348 kbytes total (3163632 kbytes free)
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 1, VRF red
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.1       0     FULL/  -        00:00:39    192.0.2.2       Bundle-Ether10.10
+    Neighbor is up for 5w0d
+192.0.2.3       1     FULL/DR         00:00:39    192.0.2.4       TenGigE0/0/0/10.10
+    Neighbor is up for 35w1d
+
+Total neighbor count: 2
+
+
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 1, VRF green
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.5       0     FULL/  -        00:00:34    192.0.2.6       Bundle-Ether10.20
+    Neighbor is up for 6d16h
+192.0.2.7       1     FULL/DR         00:00:38    192.0.2.8       TenGigE0/0/0/10.20
+    Neighbor is up for 35w1d
+
+Total neighbor count: 2
+
+
+* Indicates MADJ interface
+# Indicates Neighbor awaiting BFD session up
+
+Neighbors for OSPF 1, VRF blue
+
+Neighbor ID     Pri   State           Dead Time   Address         Interface
+192.0.2.9       1     FULL/BDR        00:00:39    192.0.2.10      Bundle-Ether10.30
+    Neighbor is up for 35w1d
+192.0.2.11      1     FULL/BDR        00:00:39    192.0.2.12      GigabitEthernet100/0/0/0
+    Neighbor is up for 35w1d
+
+Total neighbor count: 2
 ```
 
-**Help:** execute the command "dir"
+**Help:** execute the command "show ospf vrf all neighbor"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show ipv4 vrf all interface brief
+### show pim ipv4 group-map
 
 **Output:**
 ```
 
-Wed Jul 27 17:18:32.918 CST
+Wed Jul 27 17:18:36.472 CST
 
-Interface                      IP-Address      Status          Protocol Vrf-Name
-BVI10                          192.0.2.1       Up              Up       red
-BVI20                          192.0.2.1       Shutdown        Down     red
-BVI30                          192.0.2.1       Down            Down     red
-Bundle-Ether1                  192.0.2.1       Up              Up       **brown
-Bundle-Ether1.10               192.0.2.1       Up              Up       green
-Bundle-Ether1.20               192.0.2.1       Up              Up       blue
-Bundle-Ether1.30               192.0.2.1       Up              Up       blue
-Bundle-Ether2                  192.0.2.1       Up              Up       **brown
-Bundle-Ether3                  192.0.2.1       Up              Up       **brown
-Loopback0                      192.0.2.1       Up              Up       purple
-Loopback1                      192.0.2.1       Up              Up       green
-GigabitEthernet100/0/0/0       192.0.2.1       Up              Up       blue
-GigabitEthernet200/0/0/0.10    192.0.2.1       Up              Up       purple
-GigabitEthernet200/0/0/0.20    192.0.2.1       Up              Up       purple
-GigabitEthernet200/0/0/0.30    192.0.2.1       Down            Down     purple
-TenGigE0/1/0/0                 192.0.2.1       Up              Up       green
-TenGigE0/2/0/0.10              192.0.2.1       Up              Up       green
-
-```
-
-**Help:** execute the command "show ipv4 vrf all interface brief"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show ip route
-
-**Output:**
-```
-Mon Jan 29 19:00:32.892 UTC
-VRF: example555
-
-
-Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
-       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
-       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
-       A - access/subscriber, a - Application route
-       M - mobile route, r - RPL, (!) - FRR Backup path
-
-Gateway of last resort is 172.16.1.1 to network 0.0.0.0
-
-S*   0.0.0.0/0 [1/0] via 172.16.1.1, 04:43:54
-O    1.1.1.1/32 [110/0] via 10.1.1.9, 04:43:27, GigabitEthernet0/0/0/0 (!)
-                [110/9164] via 10.1.1.34, 04:43:27, GigabitEthernet0/0/0/3
-O    1.1.1.3/32 [110/0] via 10.1.1.9, 04:43:21, GigabitEthernet0/0/0/0 (!)
-                [110/6564] via 10.1.1.34, 04:43:21, GigabitEthernet0/0/0/3
-O    1.1.2.1/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                [110/9163] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-O    1.1.2.3/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                [110/6563] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-O    1.1.2.5/32 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                [110/639] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-L    1.1.2.6/32 is directly connected, 04:43:54, Loopback0
-O    10.1.0.0/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                 [110/9163] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-O    10.1.0.8/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                 [110/6563] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-O    10.1.1.0/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                 [110/11762] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-C    10.1.1.4/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/1
-L    10.1.1.6/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/1
-C    10.1.1.8/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/0
-L    10.1.1.10/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/0
-O    10.1.1.12/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                  [110/9162] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-O    10.1.1.20/30 [110/0] via 10.1.1.9, 04:43:41, GigabitEthernet0/0/0/0 (!)
-                  [110/6562] via 10.1.1.34, 04:43:41, GigabitEthernet0/0/0/3
-O    10.1.1.24/30 [110/0] via 10.1.1.9, 04:43:40, GigabitEthernet0/0/0/0 (!)
-                  [110/709] via 10.1.1.34, 04:43:40, GigabitEthernet0/0/0/3
-C    10.1.1.28/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/2
-L    10.1.1.30/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/2
-C    10.1.1.32/30 is directly connected, 04:43:54, GigabitEthernet0/0/0/3
-L    10.1.1.33/32 is directly connected, 04:43:54, GigabitEthernet0/0/0/3
-C    172.16.1.0/24 is directly connected, 04:43:54, MgmtEth0/0/CPU0/0
-L    172.16.1.120/32 is directly connected, 04:43:54, MgmtEth0/0/CPU0/0
-
-VRF: VRF10
-
-
-Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
-       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
-       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
-       A - access/subscriber, a - Application route
-       M - mobile route, r - RPL, (!) - FRR Backup path
-
-Gateway of last resort is not set
-
-L    10.1.0.10/32 is directly connected, 1w1d, Loopback44
-B    10.1.0.15/32 [200/0] via 10.1.0.15 (nexthop in vrf default), 3w1d
-B    10.1.0.20/32 [200/0] via 10.1.0.20 (nexthop in vrf default), 3w1d
-
-VRF: ThirdExample
-
-
-Codes: C - connected, S - static, R - RIP, B - BGP, (>) - Diversion path
-       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
-       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
-       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
-       i - ISIS, L1 - IS-IS level-1, L2 - IS-IS level-2
-       ia - IS-IS inter area, su - IS-IS summary null, * - candidate default
-       U - per-user static route, o - ODR, L - local, G  - DAGR, l - LISP
-       A - access/subscriber, a - Application route
-       M - mobile route, r - RPL, (!) - FRR Backup path
+IP PIM Group Mapping Table
+(* indicates group mappings being used)
+(+ indicates BSR group mappings active in MRIB)
  
-Gateway of last resort is not set
+Group Range         Proto Client   Groups RP address      Info
 
-O    10.7.1.0/29 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
-                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
-O    10.2.0.0/24 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
-                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
-O    10.2.1.0/29 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
-                 [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
-C    10.2.2.0/29 is directly connected, 1w5d, GigabitEthernet0/0/0/0
-L    10.2.2.1/32 is directly connected, 1w5d, GigabitEthernet0/0/0/0
-O E1 10.2.10.2/32 [110/110] via 10.2.2.3, 1w5d, GigabitEthernet0/0/0/0
-                  [110/110] via 10.2.2.4, 1w5d, GigabitEthernet0/0/0/0
-B    10.3.0.0/24 [200/110] via 10.1.0.25 (nexthop in vrf default), 1w5d
-B    10.3.1.0/29 [200/0] via 10.1.0.25 (nexthop in vrf default), 1w5d
-
-
-VRF: customerA
-
-
-% No matching routes found
-
-
+224.0.1.1/32*       DM    perm     0      0.0.0.0
+224.0.1.2/32*       DM    perm     1      0.0.0.0
+224.0.0.0/24*       NO    perm     0      0.0.0.0
+232.0.0.0/8*        SSM   config   40     0.0.0.0
+224.0.0.0/4*        SM    static   7      0.0.0.0         RPF: Null,0.0.0.0
 ```
 
-**Help:** execute the command "show ip route"
+**Help:** execute the command "show pim ipv4 group-map"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show pim ipv4 interface
+
+**Output:**
+```
+
+Wed Jul 27 17:18:38.018 CST
+
+PIM interfaces in VRF default
+Address               Interface                     PIM  Nbr   Hello  DR    DR
+                                                         Count Intvl  Prior
+
+192.0.2.1             BVI10                         on   11    30     1     192.0.2.2
+192.0.2.1             Bundle-Ether10                on   2     30     1     192.0.2.2
+192.0.2.1             Bundle-Ether10.10             on   2     30     1     192.0.2.2
+192.0.2.1             Bundle-Ether10.20             on   2     30     1     192.0.2.2
+192.0.2.1             Bundle-Ether10.30             on   2     30     1     192.0.2.2
+```
+
+**Help:** execute the command "show pim ipv4 interface"
 
 **Prompt:**
 - cisco_xr>
@@ -9564,19 +9431,135 @@ Flag: B - Bidir capable, P - Proxy capable, DR - Designated Router,
 - cisco_xr>
 - cisco_xr#
 
-### ping
+### show pim neighbor
 
 **Output:**
 ```
-Fri Dec 22 17:30:39.512 BRA
-Type escape sequence to abort.
-Sending 5, 100-byte ICMP Echos to 10.191.129.114, timeout is 2 seconds:
-!!!!!
-Success rate is 100 percent (5/5), round-trip min/avg/max = 1/1/1 ms
+Tue Mar  7 14:37:03.743 EST
 
+PIM neighbors in VRF default
+Flag: B - Bidir capable, P - Proxy capable, DR - Designated Router,
+      E - ECMP Redirect capable
+      * indicates the neighbor created for this router
+
+ Neighbor Address             Interface              Uptime    Expires  DR pri   Flags
+
+10.100.100.129               FortyGigE0/2/1/1       4w2d      00:01:41 1      B P
+10.100.100.130*              FortyGigE0/2/1/1       4w2d      00:01:25 1 (DR) B E
+10.100.100.125               FortyGigE0/0/0/1       4w2d      00:01:27 1      B P
 ```
 
-**Help:** execute the command "ping"
+**Help:** execute the command "show pim neighbor"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show platform
+
+**Output:**
+```
+Tue Mar  7 14:29:29.338 EST
+Node            Type                      State            Config State
+-----------------------------------------------------------------------------
+0/RSP0/CPU0     A9K-RSP440-TR(Active)     IOS XR RUN       PWR,NSHUT,MON
+0/RSP1/CPU0     A9K-RSP440-TR(Standby)    IOS XR RUN       PWR,NSHUT,MON
+0/FT0/SP        ASR-9010-FAN-V2           READY            
+0/FT1/SP        ASR-9010-FAN-V2           READY            
+0/0/0           A9K-MPA-2X40GE            OK               PWR,NSHUT,MON
+```
+
+**Help:** execute the command "show platform"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show platform summary location all
+
+**Output:**
+```
+
+Wed Jul 27 17:18:08.328 CST
+-------------------------------------------------------------------------------
+     Platform Node : 0/RP0/CPU0 (slot 0)
+               PID : ASR-9900-RP-SE
+         Card Type : ASR 9900 Route Processor for Service Edge
+            VID/SN : V02 / XXXXXXXXXXX
+        Oper State : IOS XR RUN
+        Last Reset : User Initiated reload                                                  Process: reload
+                   : Wed Jul 31 07:07:56 2019
+     Configuration : Power is enabled
+		     Bootup enabled.
+		     Monitoring enabled
+        Rommon Ver : Version 5.15
+        IOS SW Ver : 5.3.2
+        Main Power : Power state Enabled. Estimate power 380 Watts of power required.
+            Faults : N/A
+-------------------------------------------------------------------------------
+     Platform Node : 0/RP1/CPU0 (slot 1)
+               PID : ASR-9900-RP-SE
+         Card Type : ASR 9900 Route Processor for Service Edge
+            VID/SN : V02 / XXXXXXXXXXX
+        Oper State : IOS XR RUN
+        Last Reset : dSC node reload is required by install operation                       Process: instdir
+                   : Wed Jan 27 20:49:21 2016
+     Configuration : Power is enabled
+		     Bootup enabled.
+		     Monitoring enabled
+        Rommon Ver : Version 5.15
+        IOS SW Ver : 5.3.2
+        Main Power : Power state Enabled. Estimate power 380 Watts of power required.
+            Faults : N/A
+-------------------------------------------------------------------------------
+     Platform Node : 0/0/CPU0 (slot 2)
+               PID : A9K-24X10GE-TR
+         Card Type : 24-port 10GE, Packet Transport Optimized LC
+            VID/SN : V10 / XXXXXXXXXXX
+        Oper State : IOS XR RUN
+        Last Reset : N/A
+                   : N/A
+     Configuration : Power is enabled
+		     Bootup enabled.
+		     Monitoring enabled
+        Rommon Ver : Version 3.2(20150713:063058)
+        IOS SW Ver : 5.3.2
+        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
+            Faults : N/A
+-------------------------------------------------------------------------------
+     Platform Node : 0/1/CPU0 (slot 3)
+               PID : A9K-24X10GE-TR
+         Card Type : 24-port 10GE, Packet Transport Optimized LC
+            VID/SN : V07 / XXXXXXXXXXX
+        Oper State : IOS XR RUN
+        Last Reset : N/A
+                   : N/A
+     Configuration : Power is enabled
+		     Bootup enabled.
+		     Monitoring enabled
+        Rommon Ver : Version 3.3(20150930:043930)
+        IOS SW Ver : 5.3.2
+        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
+            Faults : N/A
+-------------------------------------------------------------------------------
+     Platform Node : 0/2/CPU0 (slot 4)
+               PID : A9K-24X10GE-TR
+         Card Type : 24-port 10GE, Packet Transport Optimized LC
+            VID/SN : V07 / XXXXXXXXXXX
+        Oper State : IOS XR RUN
+        Last Reset : N/A
+                   : N/A
+     Configuration : Power is enabled
+		     Bootup enabled.
+		     Monitoring enabled
+        Rommon Ver : Version 3.3(20150930:043930)
+        IOS SW Ver : 5.3.2
+        Main Power : Power state Enabled. Estimate power 850 Watts of power required.
+            Faults : N/A
+-------------------------------------------------------------------------------
+```
+
+**Help:** execute the command "show platform summary location all"
 
 **Prompt:**
 - cisco_xr>
@@ -9982,60 +9965,49 @@ PID    1Min    5Min    15Min Process
 - cisco_xr>
 - cisco_xr#
 
-### show version brief
+### show redundancy summary
 
 **Output:**
 ```
-
-Wed Jul 27 17:17:42.915 CST
-
-Cisco IOS XR Software, Version 5.3.2[Default]
- Copyright (c) 2015 by Cisco Systems, Inc.
-
-ROM: System Bootstrap, Version 5.15(c) 1994-2012 by Cisco Systems,  Inc.
-
-rtr-01 uptime is 2 years, 51 weeks, 5 days, 11 hours, 1 minute
-System image file is "disk0:asr9k-os-mbi-5.3.2.sp1-1.0.0/0x100305/mbiasr9k-rsp3.vm"
-
-cisco ASR9K Series (Intel 686 F6M14S4) processor with 12582912K bytes of memory.
-Intel 686 F6M14S4 processor at 2130MHz, Revision 2.174
-ASR 9912 10 Line Card Slot Chassis with V2 AC PEM
-
-4 Management Ethernet
-132 GigabitEthernet/IEEE 802.3 interface(s)
-72 TenGigE
-72 DWDM controller(s)
-72 WANPHY controller(s)
- 503k bytes of non-volatile configuration memory.
-6111M bytes of hard disk.
- 12510192k bytes of disk0: (Sector size 512 bytes).
-12510192k bytes of disk1: (Sector size 512 bytes).
+Tue Mar  7 14:33:54.330 EST
+  Active/Primary   Standby/Backup
+  --------------   --------------
+  0/RSP0/CPU0(A)   0/RSP1/CPU0(S) (Node Ready, NSR: Ready)
+  0/RSP0/CPU0(P)   0/RSP1/CPU0(B) (Proc Group Ready, NSR: Ready)
 ```
 
-**Help:** execute the command "show version brief"
+**Help:** execute the command "show redundancy summary"
 
 **Prompt:**
 - cisco_xr>
 - cisco_xr#
 
-### show lldp neighbors
+### show rsvp neighbors
 
 **Output:**
 ```
-Mon Jan 29 19:06:33.768 UTC
-Capability codes:
-        (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
-        (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
-
-Device ID       Local Intf          Hold-time  Capability     Port ID
-ASR-OCC-P1      Gi0/0/0/0           120        R               Gi0/0/0/2
-ASR-LON-P1      Gi0/0/0/3           120        R               Gi0/0/0/2
-
-Total entries displayed: 2
-
+Global Neighbor: 10.100.100.120
+  Interface Neighbor   Interface   
+  -------------------- ------------
+  10.100.100.141       FortyGigE0/0/1/0
+  10.100.100.145       FortyGigE0/1/1/0
 ```
 
-**Help:** execute the command "show lldp neighbors"
+**Help:** execute the command "show rsvp neighbors"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show running-config hostname
+
+**Output:**
+```
+Thu Aug 29 16:30:30.674 CDT
+hostname rtr-01
+```
+
+**Help:** execute the command "show running-config hostname"
 
 **Prompt:**
 - cisco_xr>
@@ -10082,7 +10054,6 @@ hfr-doc, V 4.1.0[Default], Cisco Systems, at disk0:hfr-doc-4.1.0
 iosxr-infra, V 4.1.0[Default], Cisco Systems, at disk0:iosxr-infra-4.1.0
     Built on Thu May  6 15:09:12 DST 2010
     By sjc-lds-364 in /auto/ioxbuild6/production/4.1.0.DT_IMAGE/hfr/workspace for pie
-
 ```
 
 **Help:** execute the command "show version"
@@ -10091,11 +10062,172 @@ iosxr-infra, V 4.1.0[Default], Cisco Systems, at disk0:iosxr-infra-4.1.0
 - cisco_xr>
 - cisco_xr#
 
-### terminal width 511
+### show version brief
 
-**Output:** None
+**Output:**
+```
 
-**Help:** Execute the command terminal width 511. This automatically generated. Feel free to change it!
+Wed Jul 27 17:17:42.915 CST
+
+Cisco IOS XR Software, Version 5.3.2[Default]
+ Copyright (c) 2015 by Cisco Systems, Inc.
+
+ROM: System Bootstrap, Version 5.15(c) 1994-2012 by Cisco Systems,  Inc.
+
+rtr-01 uptime is 2 years, 51 weeks, 5 days, 11 hours, 1 minute
+System image file is "disk0:asr9k-os-mbi-5.3.2.sp1-1.0.0/0x100305/mbiasr9k-rsp3.vm"
+
+cisco ASR9K Series (Intel 686 F6M14S4) processor with 12582912K bytes of memory.
+Intel 686 F6M14S4 processor at 2130MHz, Revision 2.174
+ASR 9912 10 Line Card Slot Chassis with V2 AC PEM
+
+4 Management Ethernet
+132 GigabitEthernet/IEEE 802.3 interface(s)
+72 TenGigE
+72 DWDM controller(s)
+72 WANPHY controller(s)
+ 503k bytes of non-volatile configuration memory.
+6111M bytes of hard disk.
+ 12510192k bytes of disk0: (Sector size 512 bytes).
+12510192k bytes of disk1: (Sector size 512 bytes).
+```
+
+**Help:** execute the command "show version brief"
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### show vrf all detail
+
+**Output:**
+```
+
+Wed Jul 27 17:18:32.001 CST
+
+VRF red; RD not set; VPN ID not set
+ VRF mode: Regular
+Description not set
+Address family IPV4 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+
+VRF blue; RD not set; VPN ID not set
+VRF mode: Regular
+Description not set
+Interfaces:
+  BVI10
+ Address family IPV4 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+
+VRF green; RD not set; VPN ID not set
+VRF mode: Regular
+Description not set
+Interfaces:
+  GigabitEthernet200/0/0/1
+  GigabitEthernet200/0/0/2
+  GigabitEthernet300/0/0/1
+  GigabitEthernet300/0/0/2
+  TenGigE0/0/0/10.10
+  Bundle-Ether10.10
+  Bundle-Ether10.20
+  Bundle-Ether20.10
+  Bundle-Ether20.20
+  Bundle-Ether30.10
+  Bundle-Ether40.10
+  Bundle-Ether50.10
+  Loopback0
+ Address family IPV4 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+
+VRF purple; RD not set; VPN ID not set
+VRF mode: Regular
+ Description not set
+Interfaces:
+  Loopback1
+  Bundle-Ether10.10
+  Bundle-Ether10.20
+  Bundle-Ether10.30
+  GigabitEthernet100/0/0/10.10
+  GigabitEthernet100/0/0/10.20
+  GigabitEthernet200/0/0/20.10
+  GigabitEthernet200/0/0/20.20
+  GigabitEthernet300/0/0/30.10
+  GigabitEthernet300/0/0/30.20
+  TenGigE0/0/0/10.10
+  TenGigE0/2/0/20.10
+  TenGigE0/2/0/20.20
+Address family IPV4 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+
+VRF brown; RD not set; VPN ID not set
+VRF mode: Regular
+Description not set
+Interfaces:
+  GigabitEthernet100/0/0/10
+  GigabitEthernet300/0/0/20
+  Bundle-Ether10.10
+  Bundle-Ether10.20
+Address family IPV4 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+
+VRF vrf-test; RD not set; VPN ID not set
+VRF mode: Regular
+Description this is a description
+ Address family IPV4 Unicast
+  Import VPN route-target communities:
+    RT:65000:42
+  Export VPN route-target communities:
+    RT:65000:43
+  No import route policy
+  No export route policy
+Address family IPV6 Unicast
+  No import VPN route-target communities
+  No export VPN route-target communities
+  No import route policy
+  No export route policy
+```
+
+**Help:** execute the command "show vrf all detail"
 
 **Prompt:**
 - cisco_xr>
@@ -10105,7 +10237,17 @@ iosxr-infra, V 4.1.0[Default], Cisco Systems, at disk0:iosxr-infra-4.1.0
 
 **Output:** None
 
-**Help:** Execute the command terminal length 0. This automatically generated. Feel free to change it!
+**Help:** Execute the command terminal length 0. This automatically generated.
+
+**Prompt:**
+- cisco_xr>
+- cisco_xr#
+
+### terminal width 511
+
+**Output:** None
+
+**Help:** Execute the command terminal width 511. This automatically generated.
 
 **Prompt:**
 - cisco_xr>
@@ -10115,205 +10257,7 @@ iosxr-infra, V 4.1.0[Default], Cisco Systems, at disk0:iosxr-infra-4.1.0
 
 **Output:** None
 
-**Help:** Execute the command terminal width 512. This automatically generated. Feel free to change it!
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show bgp vrf all neighbors advertised-routes
-
-**Output:**
-```
-Sun Nov 17 19:47:39.864 BRA
-Network            Next Hop        From            AS Path
-Route Distinguisher: 3222:9196 (default for vrf VRF_NAME:9196)
-0.0.0.0/0          10.164.199.181  10.244.28.102  3222 65401i
-10.0.0.16/29       10.164.199.181  10.244.28.102  3222 65401?
-10.0.2.0/24        10.164.199.181  10.244.28.102  3222 65401?
-10.0.3.0/24        10.164.199.181  10.244.28.102  3222 65401?
-10.0.4.0/24        10.164.199.181  10.244.28.102  3222 65401?
-10.0.5.0/24        10.164.199.181  10.164.200.10   3222 65401?
-10.11.217.0/24     10.164.199.181  10.244.28.102  3222 65500i
-10.11.247.0/27     10.164.199.181  10.244.28.102  3222 65500i
-10.11.247.128/27   10.164.199.181  10.244.28.102  3222 65500i
-10.19.247.128/27   10.164.199.181  10.244.28.104  3222 65502 65502 65502 65502 65502i
-10.200.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
-10.235.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
-10.236.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
-10.238.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
-10.164.6.88/30     10.164.199.181  10.244.28.102  3222?
-10.164.192.248/30  10.164.199.181  10.244.28.102  3222 65401?
-10.164.192.252/30  10.164.199.181  10.244.28.102  3222?
-10.164.193.0/30    10.164.199.181  10.244.28.102  3222?
-10.164.193.4/30    10.164.199.181  Local           3222?
-10.164.193.180/30  10.164.199.181  Local           3222?
-10.164.194.196/30  10.164.199.181  10.244.28.102  3222?
-10.164.194.224/30  10.164.199.181  10.244.28.102  3222?
-10.164.195.24/30   10.164.199.181  Local           3222?
-10.164.195.28/30   10.164.199.181  10.244.28.102  3222?
-10.164.195.36/30   10.164.199.181  10.244.28.102  3222?
-10.164.195.40/30   10.164.199.181  Local           3222?
-10.164.195.44/30   10.164.199.181  10.244.28.102  3222?
-10.164.195.68/30   10.164.199.181  10.244.28.102  3222?
-10.164.195.72/30   10.164.199.181  Local           3222?
-10.164.195.76/30   10.164.199.181  10.244.28.102  3222?
-10.164.195.100/30  10.164.199.181  10.244.28.102  3222?
-10.164.195.104/30  10.164.199.181  Local           3222?
-10.164.195.108/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.124/30  10.164.199.181  Local           3222?
-10.164.200.128/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.132/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.164/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.168/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.172/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.176/30  10.164.199.181  Local           3222?
-10.164.200.180/30  10.164.199.181  10.244.28.102  3222?
-10.164.200.184/30  10.164.199.181  10.244.28.102  3222?
-10.164.201.28/30   10.164.199.181  Local           3222?
-10.164.201.32/30   10.164.199.181  10.244.28.102  3222?
-10.164.206.144/30  10.164.199.181  Local           3222?
-10.164.207.72/30   10.164.199.181  10.244.28.102  3222?
-10.164.207.80/30   10.164.199.181  Local           3222?
-169.247.1.236/32   10.164.199.181  10.244.28.102  3222 65000 65022i
-169.254.29.216/31  10.164.199.181  10.244.28.102  3222?
-172.21.0.0/16      10.164.199.181  10.244.28.102  3222 65401?
-172.197.1.0/24     10.164.199.181  10.244.28.102  3222 27652?
-172.197.2.104/32   10.164.199.181  10.244.28.102  3222 27652 65510i
-10.172.210.0/24   10.164.199.181  10.244.28.102  3222 65500 65500?
-10.172.211.0/26   10.164.199.181  10.244.28.102  3222 65500 65500?
-10.209.18.184/30  10.164.199.181  10.244.28.102  3222?
-10.214.86.80/30   10.164.199.181  10.244.28.102  3222?
-10.255.225.60/32  10.164.199.181  10.244.28.102  3222 65500 65500?
-
-Processed 57 prefixes, 57 paths
-
-```
-
-**Help:** execute the command "show bgp vrf all neighbors advertised-routes"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show eigrp neighbors
-
-**Output:**
-```
-Fri Jan 30 12:21:50.237 CST
-
-IPv4-EIGRP VR(EIGRP_1) Neighbors for AS(1) VRF default
-
-H   Address                 Interface       Hold Uptime   SRTT   RTO  Q  Seq
-                                            (sec)         (ms)       Cnt Num
-7   10.224.17.185           Te0/0/0/0         14     2w0d    1   200  0  1726
-6   10.224.17.191           Te0/0/0/1         11     2w0d    1   200  0  1894
-11  10.16.28.3              Fo0/0/1/0         13     7w6d    1   200  0  5276
-10  10.224.17.93            BV600             12    10w5d    1   200  0  54242
-9   10.224.17.89            BV600            152    10w5d    1   200  0  2451
-8   10.224.17.67            BV700             11    10w5d    2   200  0  54244
-5   10.224.16.241           Gi0/0/0/0         14    10w5d    6   200  0  4545276
-4   10.224.16.16            BE10              14    10w5d    1   200  0  17874171
-3   10.224.17.37            BE2               14    10w5d    1   200  0  178099
-2   10.224.16.1             BE1.1000           7    10w5d    1   200  0  54245
-1   10.224.17.39            BE4               14    10w5d    1   200  0  145002
-0   10.224.16.247           Te0/0/0/2.4000    12    10w5d    5   200  0  3283787
-
-
-```
-
-**Help:** execute the command "show eigrp neighbors"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show interfaces description
-
-**Output:**
-```
-Tue Sep 24 10:49:25.293 BRA
-
-Interface          Status      Protocol    Description
---------------------------------------------------------------------------------
-BE100              up          up          Ligacao -SAT01 | 10G | (satellite100)
-Lo0                up          up          Endereco de Acesso ao Roteador
-Lo10               up          up          SPB | BGP | ASN 123456
-Lo20               up          up          *** Management Loopback ***
-Nu0                up          up
-Gi100/0/0/0        up          up          LINK ETHERNET
-Gi100/0/0/0.10     up          up          MULTIPLANNING
-Gi100/0/0/0.150012 admin-down  admin-down  ADMIN DOWN
-Gi100/0/0/2        admin-down  admin-down
-Gi100/0/0/9        deleted     deleted     DELETED
-nG100/0/0/42       deleted     deleted
-nG100/0/0/43       down        down
-nT100/0/0/47       up          up
-PT0/RSP0/CPU0/0    admin-down  admin-down
-Mg0/RSP1/CPU0/0    admin-down  admin-down
-Mg0/RSP1/CPU0/1    admin-down  admin-down
-Te0/3/0/0          up          up          Ligacao | 10G | 10G/061 | (ten0/4/0/1/0)
-Te0/4/0/0          up          up          Ligacao | 10G | 10G/062 | (ten0/3/0/1/7)
-Te0/5/0/3          up          up          Ligacao -SAT04 | 10G | (satellite400)
-
-```
-
-**Help:** execute the command "show interfaces description"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show l2vpn mac-learning mac all location
-
-**Output:**
-```
-Tue Mar 14 10:56:45.557 CET
-Topo ID   Producer       Next Hop(s)       Mac Address       IP Address
--------   --------       -----------       --------------    ----------
-0         0/0/CPU0       Te0/0/0/24.2448   00c1.6402.7074
-0         0/0/CPU0       Te0/0/0/22.2448   5845.4cf3.094c
-4         0/0/CPU0       Te0/0/0/28.25     249e.aba4.31b3
-
-```
-
-**Help:** execute the command "show l2vpn mac-learning mac all location"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show platform
-
-**Output:**
-```
-Tue Mar  7 14:29:29.338 EST
-Node            Type                      State            Config State
------------------------------------------------------------------------------
-0/RSP0/CPU0     A9K-RSP440-TR(Active)     IOS XR RUN       PWR,NSHUT,MON
-0/RSP1/CPU0     A9K-RSP440-TR(Standby)    IOS XR RUN       PWR,NSHUT,MON
-0/FT0/SP        ASR-9010-FAN-V2           READY            
-0/FT1/SP        ASR-9010-FAN-V2           READY            
-0/0/0           A9K-MPA-2X40GE            OK               PWR,NSHUT,MON
-
-```
-
-**Help:** execute the command "show platform"
-
-**Prompt:**
-- cisco_xr>
-- cisco_xr#
-
-### show running-config hostname
-
-**Output:**
-```
-Thu Aug 29 16:30:30.674 CDT
-hostname rtr-01
-
-```
-
-**Help:** execute the command "show running-config hostname"
+**Help:** Execute the command terminal width 512. This automatically generated.
 
 **Prompt:**
 - cisco_xr>

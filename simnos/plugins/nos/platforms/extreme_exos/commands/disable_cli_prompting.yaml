@@ -1,0 +1,6 @@
+command: disable cli prompting
+type: simnos
+help: set the terminal width to maximum
+mode:
+- user
+- enable

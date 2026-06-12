@@ -1,0 +1,7 @@
+command: display service-set all
+type: simnos
+help: execute the command "display service-set all"
+mode:
+- user
+- enable
+output: display_service-set_all.txt

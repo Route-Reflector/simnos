@@ -7,6 +7,31 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### cat bsa bsaboot.inf
+
+**Output:**
+```
+flash:/BSA/binaries/OneOs
+flash:/BSA/config/bsaStart.cfg
+```
+
+**Help:** execute the command "cat bsa bsaboot.inf"
+
+**Prompt:**
+- oneaccess_oneos>
+- oneaccess_oneos#
+
+### _default_
+
+**Output:**
+```
+% Invalid input detected
+```
+
+**Help:** default output for unknown commands
+
+**Prompt:**
+
 ### enable
 
 **Output:** None
@@ -16,60 +41,11 @@
 **Prompt:**
 - oneaccess_oneos>
 
-### term len 0
-
-**Output:** None
-
-**Help:** disable paging
-
-**Prompt:**
-- oneaccess_oneos>
-- oneaccess_oneos#
-
-### screen-width 512
-
-**Output:**
-```
-error: unknown command
-```
-
-**Help:** set terminal width (ONEOS6, returns error to trigger ONEOS5 fallback)
-
-**Prompt:**
-- oneaccess_oneos>
-- oneaccess_oneos#
-
-### stty columns 255
-
-**Output:** None
-
-**Help:** set terminal width (ONEOS5 fallback)
-
-**Prompt:**
-- oneaccess_oneos>
-- oneaccess_oneos#
-
-### cat bsa bsaboot.inf
-
-**Output:**
-```
-flash:/BSA/binaries/OneOs
-flash:/BSA/config/bsaStart.cfg
-
-```
-
-**Help:** execute the command "cat bsa bsaboot.inf"
-
-**Prompt:**
-- oneaccess_oneos>
-- oneaccess_oneos#
-
 ### hostname
 
 **Output:**
 ```
 dops-lab-02
-
 ```
 
 **Help:** execute the command "hostname"
@@ -87,10 +63,22 @@ Listing the directory /BSA/binaries
 ..                                      0
 OneOs                            15896363
 ONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593
-
 ```
 
 **Help:** execute the command "ls"
+
+**Prompt:**
+- oneaccess_oneos>
+- oneaccess_oneos#
+
+### screen-width 512
+
+**Output:**
+```
+error: unknown command
+```
+
+**Help:** set terminal width (ONEOS6, returns error to trigger ONEOS5 fallback)
 
 **Prompt:**
 - oneaccess_oneos>
@@ -141,7 +129,6 @@ ONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593
    Packet data connection        : <not available>
    Last call end reason          : <not available>
    Data statistics               : <not available>
-
 ```
 
 **Help:** execute the command "show cellular-radio context"
@@ -168,7 +155,6 @@ ONEOS16-MONO_FT-V5.2R2E7_HA1.ZZZ 15848593
 
  PIN Information
   PIN code status                                      : entered OK 
-
 ```
 
 **Help:** execute the command "show cellular-radio equipment"
@@ -204,7 +190,6 @@ Details:
  Cell ID                                              :  18224898
  Tracking Area Code (TAC)                             :  18300
  Current Public Land Mobile Network (PLMN = MCC+MNC)  :  20610
-
 ```
 
 **Help:** execute the command "show cellular-radio network"
@@ -232,7 +217,6 @@ Bvi 2: 0 broadcasts forwarded
   10.2.0.20  10.1.0.151  10.88.1.11
 Bvi 3: 0 broadcasts forwarded
   10.1.0.151  10.2.0.20  10.88.1.11
-
 ```
 
 **Help:** execute the command "show helpers"
@@ -456,7 +440,6 @@ Null 0 is up, line protocol is up
        0 unknown protocols
   OUT: 0 packets, 0 bytes, 0 queue drops
        0 broadcasts, 0 multicasts, 0 errors, 0 discards
-
 ```
 
 **Help:** execute the command "show interfaces"
@@ -501,7 +484,6 @@ permit tcp 192.0.2.0 0.0.0.255 any eq telnet (0 matches)
 deny any any (0 matches)
 
 For info on ACLs used by IPSEC, please refer to show crypto acl [detail <name>] command. 
-
 ```
 
 **Help:** execute the command "show ip access-lists"
@@ -516,7 +498,6 @@ For info on ACLs used by IPSEC, please refer to show crypto acl [detail <name>] 
 ```
 AS path access list 102
     permit ^$
-
 ```
 
 **Help:** execute the command "show ip as-path-access-list"
@@ -537,7 +518,6 @@ Neighbor        V     AS     MsgRcvd MsgSent   TblVer  InQ OutQ Up/Down  State/P
 194.5.163.29   4      14737   13360   12237       34    0    0 4d05h57m       28
 
 Total number of neighbors 1
-
 ```
 
 **Help:** execute the command "show ip bgp summary"
@@ -571,7 +551,6 @@ dot11radio 0/0.1          <unassigned>    YES up                    up
 dot11radio 0/0.2          <unassigned>    YES up                    up      
 Null 0                    <unassigned>    YES up                    up      
 dot11radio 0/0            <unassigned>    YES up                    up      
-
 ```
 
 **Help:** execute the command "show ip interface brief"
@@ -599,7 +578,6 @@ BGP: ip prefix-list DENY-BGP: 3 entries
    seq 5 permit 192.4.21.0/24 le 32
    seq 10 permit 192.4.91.0/24 le 32
    seq 15 deny any
-
 ```
 
 **Help:** execute the command "show ip prefix-list"
@@ -623,7 +601,6 @@ none
 Key fingerprint:
 ssh-rsa 4096 bc:f8:c3:67:8f:de:f3:ec:5c:29:b5:a4:e4:25:de:7a
 SCP server enabled
-
 ```
 
 **Help:** execute the command "show ip ssh"
@@ -643,7 +620,6 @@ SCP server enabled
                                                              Loopback 777
                                                              Bvi 10
  TEST                              3
-
 ```
 
 **Help:** execute the command "show ip vrf brief"
@@ -663,7 +639,6 @@ App.  Call         Calling           Called   Call   Port BChan Call-ref call-id
 --------------------------------------------------------------------------------
 no isdn active calls...
 --------------------------------------------------------------------------------
-
 ```
 
 **Help:** execute the command "show isdn active"
@@ -698,7 +673,6 @@ Sys LEDs
 SYS LED VoIP color= GREEN , state=ON
 SYS LED COM  color=     - , state=OFF
 SYS LED Maintenance color=     - , state=OFF
-
 ```
 
 **Help:** execute the command "show isdn led-status"
@@ -750,7 +724,6 @@ SYS LED Maintenance color=     - , state=OFF
 		Rx frames on D channel  0
 		-layer 3 status
 		    no active call
-
 ```
 
 **Help:** execute the command "show isdn status all"
@@ -790,7 +763,6 @@ SYS LED Maintenance color=     - , state=OFF
 |               used    |   31 176  |  48.1%  |
 |               free    |   33 512  |  51.8%  |
 ===============================================
-
 ```
 
 **Help:** execute the command "show memory"
@@ -1249,7 +1221,6 @@ output queuing statistics:
     mean input rate 104400 bits/s, mean output rate 104400 bits/s
     packets output 704745364, packets dropped 707805 (0%)
     bytes output 222877578682, bytes dropped 939630669 (0%)
-
 ```
 
 **Help:** execute the command "show policy-interface output"
@@ -1305,7 +1276,6 @@ output queuing statistics:
 +------------------------------+---------------------------------+
 | Mreturn4                     |                                 |
 +------------------------------+---------------------------------+
-
 ```
 
 **Help:** execute the command "show product-info-area"
@@ -1330,7 +1300,6 @@ Power Fail detection                             : 9
 Total Software Requested Reboots                 : 7
   System defense - reboot after crash            : 6
   Administrator requested delayed reboot         : 1
-
 ```
 
 **Help:** execute the command "show reboot counters"
@@ -1362,7 +1331,6 @@ route-map CONNECTED-BGP permit 10
  set local-preference 100
  set metric       50
 exit
-
 ```
 
 **Help:** execute the command "show route-map"
@@ -1392,7 +1360,6 @@ aaa accounting commands 7 default stop-only group TACGROUP
 aaa accounting commands 1 default stop-only group TACGROUP
 aaa accounting commands 0 default stop-only group TACGROUP
 aaa authentication banner sequence 1 *-TACACS SERVER UNAVAILABLE-*
-
 ```
 
 **Help:** execute the command "show running-config aaa"
@@ -1423,7 +1390,6 @@ bind telnet tunnel 91
 bind telnet virtual-ethernet 1
 bind telnet vrf UNTRUST-TELNET
 bind telnet vrf default-router
-
 ```
 
 **Help:** execute the command "show running-config bind"
@@ -1476,7 +1442,6 @@ ip dhcp pool TEST1
 dns-server 1.1.1.1 192.168.50.20 192.168.50.30 2.2.2.2 3.3.3.3
 exit
 !
-
 ```
 
 **Help:** execute the command "show running-config ip dhcp"
@@ -1492,7 +1457,6 @@ exit
 ip route 94.105.1.119 255.255.255.255 192.168.100.2
 ip route 94.105.16.130 255.255.255.255 Bvi 200
 ip route 94.105.34.2 255.255.255.255 192.168.100.3
-
 ```
 
 **Help:** execute the command "show running-config ip route"
@@ -1509,7 +1473,6 @@ SNMP write community: Kl3t5k0p
 SNMP access control lists :52
 SNMP read community: 5pr1t5
 SNMP access control lists :52
-
 ```
 
 **Help:** execute the command "show snmp community"
@@ -1528,7 +1491,6 @@ server                                  source                                  
 
 broadcast client mode is not enabled
 SNTP Authentication is not enabled
-
 ```
 
 **Help:** execute the command "show sntp"
@@ -1550,7 +1512,6 @@ Binary file informations :
   computed checksum      = 0xD920F600
   target device          = One92
 file is OK
-
 ```
 
 **Help:** execute the command "show soft-file info"
@@ -1572,7 +1533,6 @@ Header checksum  : 0x16368E60
 Software version : OneOS-pCPE-ARM_pi1-6.6.1m3
 Creation date    : 2021-03-26 11:13:54
 Header checksum  : 0x73ED8876
-
 ```
 
 **Help:** execute the command "show software-image"
@@ -1604,7 +1564,6 @@ Header checksum  : 0x73ED8876
  Uplink  : AVDSL/1 Pair POTS 
  Wlan 0 : BCM43602 - 2,4GHz - 3x3
  Wlan 1 : BCM4366 - 5GHz - 4x4
-
 ```
 
 **Help:** execute the command "show system hardware"
@@ -1703,7 +1662,6 @@ cpsr           0x20030010       537067536
 *
 * End of file
 *
-
 ```
 
 **Help:** execute the command "show system secure-crashlog"
@@ -1738,10 +1696,27 @@ Current Non Critical Tasks CPU load       : 1.7%
 Average CPU load (5 / 60 Minutes)         : 15.8% / 15.6%
 
 Free / Max RAM      :  163,04 /  208,59 MB
-
 ```
 
 **Help:** execute the command "show system status"
+
+**Prompt:**
+- oneaccess_oneos>
+- oneaccess_oneos#
+
+### show tacacs-server
+
+**Output:**
+```
+----- List of TACACS+ server -----
+
+  IP address      Port      Secret Key                     Source address     VRF
+ 1.1.1.1   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+  2.2.2.2   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+  3.3.3.3   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
+```
+
+**Help:** execute the command "show tacacs-server"
 
 **Prompt:**
 - oneaccess_oneos>
@@ -1785,29 +1760,9 @@ Free / Max RAM      :  163,04 /  208,59 MB
   Number of connect fails     : 21
   Number of packets sent      : 105
   Number of packets received  : 105
-
 ```
 
 **Help:** execute the command "show tacacs"
-
-**Prompt:**
-- oneaccess_oneos>
-- oneaccess_oneos#
-
-### show tacacs-server
-
-**Output:**
-```
------ List of TACACS+ server -----
-
-  IP address      Port      Secret Key                     Source address     VRF
- 1.1.1.1   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
-  2.2.2.2   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
-  3.3.3.3   49      6b57e38f62d089b98be63ff357fccc9e9d959eba64bc   Loopback 1
-
-```
-
-**Help:** execute the command "show tacacs-server"
 
 **Prompt:**
 - oneaccess_oneos>
@@ -1868,7 +1823,6 @@ Free / Max RAM      :  163,04 /  208,59 MB
    Up Delay 2, Down Delay 2
 
    Poll Interval (in msec) 3000 
-
 ```
 
 **Help:** execute the command "show track all"
@@ -1883,7 +1837,6 @@ Free / Max RAM      :  163,04 /  208,59 MB
 ```
 
 No SFP module present
-
 ```
 
 **Help:** execute the command "show transceiver equipment"
@@ -2014,7 +1967,6 @@ No SFP module present
          Average Pdd          : 0 
 
      ----------------------------------------------------------------
-
 ```
 
 **Help:** execute the command "show voice mos"
@@ -2055,7 +2007,6 @@ No SFP module present
 		due to CPU limitation		0
 		due to denied by acl		0
 		due to unknown proxy		0
-
 ```
 
 **Help:** execute the command "show voice sip-gateway"
@@ -2075,7 +2026,6 @@ No SFP module present
 	port :  4   lp :  1   sense : POTS [FXS]  vp-state : noShutdown               
 	port :  5   lp :  2   sense : POTS [FXS]  vp-state : noShutdown               
 	port :  6   lp :  3   sense : POTS [FXS]  vp-state : noShutdown               
-
 ```
 
 **Help:** execute the command "show voice voice-port all"
@@ -2129,7 +2079,6 @@ No SFP module present
 			DSP unavailable				0
 			No VoIP resource available		0
 			Not specified				0
-
 ```
 
 **Help:** execute the command "show voice voice-port pri all"
@@ -2162,7 +2111,6 @@ No SFP module present
 		 10 |                                                                                               
 		  0 +---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+---+
 		      00  01  02  03  04  05  06  07  08  09  10  11  12  13  14  15  16  17  18  19  20  21  22  23   H.
-
 ```
 
 **Help:** execute the command "show voice voice-port pri all histo"
@@ -2173,7 +2121,10 @@ No SFP module present
 
 ### show voice voip-call active all
 
-**Output:** None
+**Output:**
+```
+
+```
 
 **Help:** execute the command "show voice voip-call active all"
 
@@ -4297,7 +4248,6 @@ No SFP module present
      MOS-CQ / MOS-LQ   : 4.34 / 4.39 
      ERL   : 26 dB
      ACOM  : 50 dB
-
 ```
 
 **Help:** execute the command "show voice voip-call any all"
@@ -4346,7 +4296,6 @@ GigabitEthernet 0/3 - Group 4
   Preemption is enabled, min delay is 15 sec
   Priority 105
   Master router is 172.16.6.241 (local), priority is 105
-
 ```
 
 **Help:** execute the command "show vrrp interface"
@@ -4355,14 +4304,27 @@ GigabitEthernet 0/3 - Group 4
 - oneaccess_oneos>
 - oneaccess_oneos#
 
-### _default_
+### stty columns 255
 
 **Output:**
 ```
-% Invalid input detected
+
 ```
 
-**Help:** default output for unknown commands
+**Help:** set terminal width (ONEOS5 fallback)
+
+**Prompt:**
+- oneaccess_oneos>
+- oneaccess_oneos#
+
+### term len 0
+
+**Output:**
+```
+
+```
+
+**Help:** disable paging
 
 **Prompt:**
 - oneaccess_oneos>

@@ -1,0 +1,7 @@
+command: show running-config object-group service
+type: simnos
+help: execute the command "show running-config object-group service"
+mode:
+- user
+- enable
+output: show_running-config_object-group_service.txt
