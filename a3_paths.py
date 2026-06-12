@@ -1,9 +1,9 @@
 """Shared A3 platform-data path + filename helpers (#264 / D1).
 
 A repo-root module (stdlib only — ``os`` / ``re``) so the invoke tasks
-(``tasks.py``) and the dev scripts (``migrate_platform_yaml.py`` /
-``sync_ntc_commands.py`` / ``regen_oracle_snapshots.py``) share one definition
-without any of them paying the cost of importing the ``simnos`` package. The
+(``tasks.py``) and the dev scripts (``sync_ntc_commands.py`` /
+``regen_oracle_snapshots.py``) share one definition without any of them paying
+the cost of importing the ``simnos`` package. The
 ``command`` field inside each command yaml is the SSoT; filenames are
 non-semantic, so the stem helpers drive conventions (lint warning / generated
 filenames), not load behavior.

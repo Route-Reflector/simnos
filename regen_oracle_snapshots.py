@@ -4,8 +4,8 @@
 The committed oracle (b) gate (``tests/core/test_migration_oracle_a3.py``)
 compares the A3 loader projection of each platform against a frozen
 ``tests/assets/oracle/<platform>.json``. The original snapshots were frozen by
-``migrate_platform_yaml.py`` from the *legacy adapter* and proved the migration
-was v2-equivalent (sealed in PR-3's green CI).
+the one-shot ``migrate_platform_yaml.py`` (since removed) from the *legacy
+adapter* and proved the migration was v2-equivalent (sealed in PR-3's green CI).
 
 After migration the regen path is from the A3 loader itself: an **intentional**
 edit to an A3 platform's commands changes the projection and fails the gate, so
