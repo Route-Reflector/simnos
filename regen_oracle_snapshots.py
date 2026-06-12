@@ -49,6 +49,8 @@ def main() -> None:
     parser.add_argument("platform", nargs="?", help="platform name (default: all A3 platforms)")
     args = parser.parse_args()
     platforms = [args.platform] if args.platform else list_a3_platform_names(A3_ROOT)
+    if not args.platform:
+        print(f"Re-baselining oracle snapshots for {len(platforms)} A3 platform(s)...")
     for platform in platforms:
         regen(platform)
 

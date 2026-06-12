@@ -208,6 +208,13 @@ def lint_platform_data(context):
     `check_platform_data`). Warning-tier (printed, non-blocking): filename
     convention + ``type: ntc`` provenance (see `check_platform_data_warnings`).
     """
+    # Loud on an empty platforms dir: after the A3 migration completed, 0
+    # platforms means a wrong path / broken checkout, not a legitimate
+    # pre-migration state — fail standalone instead of silently printing OK
+    # (3rd round claude #7; the CI snapshot-set pin catches it too).
+    if not list_a3_platform_names():
+        raise Exit(f"platform data lint: no A3 platforms found under {PLATFORMS_A3_DIR} (wrong path?)", code=1)
+
     warnings = check_platform_data_warnings()
     for warning in warnings:
         print(f"WARNING: {warning}")

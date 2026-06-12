@@ -75,6 +75,12 @@ class ModelNosAttributes(BaseModel):
     models below; safe only because `Nos.validate()` extracts schema
     fields explicitly (never `**self.__dict__`, which also carries
     `device` / `configuration_file`, #244 / D8).
+
+    Kept after the A3 migration removed the legacy yaml loader (#264 / PR-3):
+    `Nos.from_dict` / `validate` (inventory + constructor) and `_from_module`
+    (py plugin) still validate their boundary through this model. Slated for
+    removal when the inventory commands path is reworked in #266; until then
+    deleting it would break py-plugin / inventory loading (Decision 9).
     """
 
     model_config = ConfigDict(extra="forbid")

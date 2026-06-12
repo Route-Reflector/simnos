@@ -344,6 +344,13 @@ def main() -> None:
         print(f"Error: --output must not point to the simnos platform directory ({SIMNOS_A3_DIR})")
         sys.exit(1)
 
+    # A full run (no --platform) starts from a clean output dir so a platform that
+    # NTC dropped/renamed, or whose diff is now empty, leaves no stale candidate
+    # — the per-platform clears below only touch platforms still in the run
+    # (3rd round codex #2 / claude #2). A `--platform` run is left targeted.
+    if not args.platform and os.path.isdir(args.output):
+        shutil.rmtree(args.output)
+
     # Step 3: Process each platform
     total_new = 0
     platforms_with_diff = 0

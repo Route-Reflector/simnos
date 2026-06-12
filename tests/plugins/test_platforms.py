@@ -5,6 +5,7 @@ in the yaml and python files.
 """
 
 from importlib import import_module
+import os
 import re
 import types
 from typing import Any
@@ -12,6 +13,7 @@ from typing import Any
 from netmiko import ConnectHandler
 import pytest
 
+from a3_paths import PLATFORMS_DIR
 from simnos.core.nos import _find_device_classes
 from simnos.core.platform_loader import load_platform_dir
 from simnos.plugins.nos import nos_plugins
@@ -36,7 +38,7 @@ def default_output_for(platform: str) -> str:
     newline the ``.txt`` carries is stripped — wire comparisons use substring /
     are newline-insensitive.
     """
-    default_output = load_platform_dir(f"simnos/plugins/nos/platforms/{platform}").commands["_default_"].output
+    default_output = load_platform_dir(os.path.join(PLATFORMS_DIR, platform)).commands["_default_"].output
     # A non-literal `_default_` (output_template / no output) would make the
     # caller's `expected in output` vacuously pass on ""; the schema allows it,
     # so fail loudly instead of silently asserting nothing (2nd round claude #8).
