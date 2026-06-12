@@ -99,6 +99,12 @@ class CMDShell(Cmd):
         resolved_platform=None,
     ):
         self.nos: Nos = nos
+        # Platform name captured at build time for the hot-reload ownership filter
+        # (#264 #274 / D6). A later foreign py reload can overwrite live `nos.name`
+        # (`_from_module` commit phase), so the filter must compare against this
+        # frozen value, not `self.nos.name`, or a hijacked name would permanently
+        # skip this session's own A3 platform reload.
+        self._platform_name: str = nos.name
         self.ruler = ruler
         self.intro = intro
         self.base_prompt = base_prompt
@@ -183,9 +189,17 @@ class CMDShell(Cmd):
 
     # `Nos` state `from_file` mutates; snapshotted per reloaded file so a file
     # that loads but fails to normalize can be rolled back (2nd round codex #1).
-    _NOS_RELOAD_ATTRS = ("name", "initial_prompt", "enable_prompt", "config_prompt", "auth", "device")
+    _NOS_RELOAD_ATTRS = (
+        "name",
+        "initial_prompt",
+        "enable_prompt",
+        "config_prompt",
+        "auth",
+        "device",
+        "resolved_platform",
+    )
 
-    def reload_commands(self, changed_files: list):
+    def reload_commands(self, reload_targets: list):
         """Method to reload commands
 
         Lenient per file: hot reload is a dev feature and may observe a
@@ -205,13 +219,24 @@ class CMDShell(Cmd):
         The A3 platform parse is cached by `load_platform_dir`; drop that cache
         first so a reload re-reads the changed files instead of the stale parse
         (#264 / D6 cache bypass). No-op for legacy yaml/py reloads.
+
+        `reload_targets` are reload units (A3 platform dirs / `.py` modules), not
+        raw changed files (#274 / D1). A dir target for a *different* platform is
+        skipped (#274 / D6 ownership filter): the watcher sees the whole
+        `plugins/nos` tree, so without this a sibling platform's edit — or a
+        `git checkout` touching many platforms — would `_from_platform_dir`-replace
+        this session's `resolved_platform` and hijack it onto another NOS.
         """
         load_platform_dir.cache_clear()
-        for file in changed_files:
+        for target in reload_targets:
+            if os.path.isdir(target) and os.path.basename(target) != self._platform_name:
+                # Foreign A3 platform dir — not this session's platform. Skipping
+                # keeps a sibling edit / git checkout from hijacking the session.
+                continue
             snapshot_commands = dict(self.nos.commands)
             snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
             try:
-                self.nos.from_file(file)
+                self.nos.from_file(target)
                 self._rebuild()
             except Exception:
                 # Broad except, like `default()`: any plugin error must not
@@ -221,16 +246,16 @@ class CMDShell(Cmd):
                 self.nos.commands = snapshot_commands
                 for attr, value in snapshot_attrs.items():
                     setattr(self.nos, attr, value)
-                log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, file, traceback.format_exc())
+                log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, target, traceback.format_exc())
                 continue
 
     def precmd(self, line):
         """Method to return line before processing the command"""
         if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
-            changed_files = get_files_changed(nos.__path__[0])
-            if changed_files:
-                log.debug("Reloading... Files changed: %s", changed_files)
-                self.reload_commands(changed_files)
+            reload_targets = get_files_changed(nos.__path__[0])
+            if reload_targets:
+                log.debug("Reloading... Reload targets: %s", reload_targets)
+                self.reload_commands(reload_targets)
         return line
 
     def postcmd(self, stop, line):

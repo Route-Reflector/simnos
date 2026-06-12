@@ -10,12 +10,12 @@ from unittest.mock import patch
 
 from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.utils import (
-    change_jinja_to_corresponding_py,
     get_files_changed,
     get_files_lasttime_changed,
     get_files_recently_modified,
     get_files_under_directory,
     get_new_files,
+    resolve_reload_targets,
 )
 
 RANDOM_FILE: str = random.choice(
@@ -64,9 +64,12 @@ class ShellUtilsTest(TestCase):
         with the absolute `nos.__path__[0]`) may have primed the
         module-level `_files_lasttime_changed_old` snapshot; without a
         reset, the relative-path calls below would treat every file as
-        "new" and the first-call-returns-empty contract breaks.
+        "new" and the first-call-returns-empty contract breaks. `_watch_root`
+        is reset too so the next call re-seeds rather than diffing against a
+        prior root's snapshot (#274 / D7).
         """
         shell_utils._files_lasttime_changed_old.clear()
+        shell_utils._watch_root = None
 
     def tearDown(self):
         """Avoid leaking the stateful cache to other tests.
@@ -77,6 +80,7 @@ class ShellUtilsTest(TestCase):
         `_files_lasttime_changed_old` (ty adoption, M-9).
         """
         shell_utils._files_lasttime_changed_old.clear()
+        shell_utils._watch_root = None
 
     def test_get_files_under_directory(self):
         """
@@ -85,7 +89,10 @@ class ShellUtilsTest(TestCase):
         files = get_files_under_directory("simnos/plugins/nos")
         self.assertTrue(files)
         self.assertTrue(all(not file.endswith("__init__.py") for file in files))
-        self.assertTrue(all(file for file in files if file.endswith((".py", ".j2", ".yaml"))))
+        # Every returned file is a watched extension; `.txt` is now watched so an
+        # A3 literal-capture edit triggers a reload (#274 / D2).
+        self.assertTrue(all(file.endswith((".py", ".j2", ".yaml", ".txt")) for file in files))
+        self.assertTrue(any(file.endswith(".txt") for file in files))
 
     def test_get_files_lasttime_changed(self):
         """
@@ -106,32 +113,6 @@ class ShellUtilsTest(TestCase):
         old_files = ["file1", "file2"]
         new_files = ["file2", "file3"]
         self.assertEqual(get_new_files(old_files, new_files), ["file3"])
-
-    def test_change_jinja_to_corresponding_py(self):
-        """
-        Test to check if we change j2 files to corresponding py files
-        """
-        files = get_files_under_directory("simnos/plugins/nos")
-        files = [file for file in files if "cisco_ios" in file]
-        files = [file for file in files if file.endswith(".j2")]
-        files = change_jinja_to_corresponding_py(files)
-        self.assertTrue(files)
-        self.assertTrue(all(not file.endswith(".j2") for file in files))
-        self.assertTrue(all(file for file in files if file.endswith(".py")))
-        self.assertTrue(all("cisco_ios" in file for file in files))
-
-    def test_change_jinja_to_corresponding_py_null(self):
-        """
-        Test to check if we don't change any j2 files to corresponding py files
-        """
-        files = get_files_under_directory("simnos/plugins/nos")
-        files = [file for file in files if "cisco_ios" in file]
-        files = [file for file in files if file.endswith(".py")]
-        files = change_jinja_to_corresponding_py(files)
-        self.assertTrue(files)
-        self.assertTrue(all(not file.endswith(".j2") for file in files))
-        self.assertTrue(all(file for file in files if file.endswith(".py")))
-        self.assertTrue(all("cisco_ios" in file for file in files))
 
     def test_get_files_recently_modified(self):
         """
@@ -173,15 +154,20 @@ class ShellUtilsTest(TestCase):
 
     def test_get_files_changed(self):
         """
-        Test to check if we get the files that have been changed
+        Test to check if we get the reload targets for files that changed.
+
+        `get_files_changed` now returns reload targets, not raw changed files
+        (#274 / D1): a changed A3 command file is rolled up to its platform dir,
+        a `.py` module stays itself. The first call only seeds the snapshot.
         """
-        files = get_files_changed("simnos/plugins/nos")
-        self.assertFalse(files)
+        targets = get_files_changed("simnos/plugins/nos")
+        self.assertFalse(targets)  # first call: seed only, no diff
         with patch("os.stat", side_effect=mock_os_stat):
-            files = get_files_changed("simnos/plugins/nos")
-        self.assertTrue(files)
-        self.assertIn(RANDOM_FILE, files)
-        files = get_files_changed("simnos/plugins/nos")
+            targets = get_files_changed("simnos/plugins/nos")
+        self.assertTrue(targets)
+        # The single changed RANDOM_FILE maps to exactly its rollup target.
+        expected = resolve_reload_targets([RANDOM_FILE], "simnos/plugins/nos")
+        self.assertTrue(set(expected).issubset(set(targets)))
 
     def test_get_files_changed_null(self):
         """
@@ -191,3 +177,108 @@ class ShellUtilsTest(TestCase):
         self.assertFalse(files)
         files = get_files_changed("simnos/plugins/nos")
         self.assertFalse(files)
+
+
+# --- resolve_reload_targets (#274 / D1) --------------------------------------
+#
+# `resolve_reload_targets` maps changed files to the reload units `from_file`
+# accepts: an A3 file rolls up to its platform dir (`from_file` reloads a dir,
+# not a single command file), a `.py` module stays itself, a legacy py-plugin
+# `.j2` maps to its `.py`, everything else is dropped. These replace the old
+# `change_jinja_to_corresponding_py` tests, using a tmp tree for precision.
+
+
+def _make_nos_tree(base):
+    """Build a minimal ``plugins/nos``-shaped tree under ``base``; return its root."""
+    root = base / "nos"
+    cisco = root / "platforms" / "cisco_ios" / "commands"
+    cisco.mkdir(parents=True)
+    (root / "platforms" / "cisco_ios" / "platform.yaml").write_text("modes: {}\n", encoding="utf-8")
+    (cisco / "show.yaml").write_text("command: show\n", encoding="utf-8")
+    (cisco / "show.txt").write_text("out\n", encoding="utf-8")
+    (cisco / "show.j2").write_text("{{ base_prompt }}\n", encoding="utf-8")
+    (root / "platforms_py").mkdir(parents=True)
+    (root / "platforms_py" / "cisco_ios.py").write_text("NAME = 'cisco_ios'\n", encoding="utf-8")
+    return root
+
+
+def test_resolve_targets_a3_files_roll_up_to_platform_dir(tmp_path):
+    """Every A3 file (yaml/txt/j2/platform.yaml) rolls up to its platform dir."""
+    root = _make_nos_tree(tmp_path)
+    platform_dir = str(root / "platforms" / "cisco_ios")
+    for rel in ("platform.yaml", "commands/show.yaml", "commands/show.txt", "commands/show.j2"):
+        changed = str(root / "platforms" / "cisco_ios" / rel)
+        assert resolve_reload_targets([changed], str(root)) == [platform_dir]
+
+
+def test_resolve_targets_dedup_same_platform(tmp_path):
+    """Multiple edits in one platform collapse to a single dir target."""
+    root = _make_nos_tree(tmp_path)
+    platform_dir = str(root / "platforms" / "cisco_ios")
+    changed = [
+        str(root / "platforms" / "cisco_ios" / "commands" / "show.yaml"),
+        str(root / "platforms" / "cisco_ios" / "commands" / "show.txt"),
+        str(root / "platforms" / "cisco_ios" / "platform.yaml"),
+    ]
+    assert resolve_reload_targets(changed, str(root)) == [platform_dir]
+
+
+def test_resolve_targets_py_module_passthrough(tmp_path):
+    """A `platforms_py/<p>.py` edit stays itself (not mistaken for an A3 dir)."""
+    root = _make_nos_tree(tmp_path)
+    pyfile = str(root / "platforms_py" / "cisco_ios.py")
+    assert resolve_reload_targets([pyfile], str(root)) == [pyfile]
+
+
+def test_resolve_targets_legacy_jinja_configurations(tmp_path):
+    """A legacy `configurations/<p>.yaml.j2` maps to its `.py` module."""
+    root = _make_nos_tree(tmp_path)
+    j2 = str(root / "platforms_py" / "configurations" / "huawei_smartax.yaml.j2")
+    assert resolve_reload_targets([j2], str(root)) == [str(root / "platforms_py" / "huawei_smartax.py")]
+
+
+def test_resolve_targets_legacy_jinja_templates(tmp_path):
+    """A legacy `templates/<p>/<cmd>.j2` maps to its `.py` module."""
+    root = _make_nos_tree(tmp_path)
+    j2 = str(root / "platforms_py" / "templates" / "cisco_ios" / "show_run.j2")
+    assert resolve_reload_targets([j2], str(root)) == [str(root / "platforms_py" / "cisco_ios.py")]
+
+
+def test_resolve_targets_drops_non_plugin_and_stray(tmp_path):
+    """Non-plugin files and a stray file directly under `platforms/` are dropped."""
+    root = _make_nos_tree(tmp_path)
+    assert resolve_reload_targets([str(root / "README.txt")], str(root)) == []
+    # `platforms/foo.yaml` has no `<p>/` level (min-segment guard) -> dropped.
+    assert resolve_reload_targets([str(root / "platforms" / "foo.yaml")], str(root)) == []
+
+
+def test_resolve_targets_drops_deleted_platform_dir(tmp_path):
+    """An old-only path whose whole platform dir is gone is dropped (not reloaded)."""
+    root = _make_nos_tree(tmp_path)
+    ghost = str(root / "platforms" / "ghost" / "commands" / "show.yaml")
+    assert resolve_reload_targets([ghost], str(root)) == []
+
+
+def test_get_files_changed_root_change_reseeds(tmp_path):
+    """A changed watch root re-seeds instead of reporting all prior paths (#274 / D7)."""
+    shell_utils._files_lasttime_changed_old.clear()
+    shell_utils._watch_root = None
+    root_a = _make_nos_tree(tmp_path / "a")
+    root_b = _make_nos_tree(tmp_path / "b")
+    assert get_files_changed(str(root_a)) == []  # seed A
+    assert get_files_changed(str(root_b)) == []  # root change -> re-seed, no phantom diff
+    shell_utils._files_lasttime_changed_old.clear()
+    shell_utils._watch_root = None
+
+
+def test_get_files_changed_detects_deletion(tmp_path):
+    """Deleting a command file rolls up to the (healthy) platform dir (#274 / D7)."""
+    shell_utils._files_lasttime_changed_old.clear()
+    shell_utils._watch_root = None
+    root = _make_nos_tree(tmp_path)
+    platform_dir = str(root / "platforms" / "cisco_ios")
+    assert get_files_changed(str(root)) == []  # seed
+    (root / "platforms" / "cisco_ios" / "commands" / "show.yaml").unlink()
+    assert get_files_changed(str(root)) == [platform_dir]
+    shell_utils._files_lasttime_changed_old.clear()
+    shell_utils._watch_root = None
