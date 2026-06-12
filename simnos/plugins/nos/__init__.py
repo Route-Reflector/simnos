@@ -17,10 +17,7 @@ compatibility with callers that still import from the core module.
 """
 
 import glob
-import logging
 import os
-
-log = logging.getLogger(__name__)
 
 nos_plugins: dict = {}
 
