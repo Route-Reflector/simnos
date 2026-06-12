@@ -21,13 +21,13 @@ from __future__ import annotations
 
 import argparse
 import os
-import re
 import shutil
 import subprocess
 import sys
 
 import yaml
 
+from a3_paths import list_a3_platform_names, unique_command_stem
 from simnos.core.platform_loader import load_platform_dir
 
 NTC_REPO_URL = "https://github.com/networktocode/ntc-templates"
@@ -121,24 +121,6 @@ def select_primary_raw(platform: str, folder: str, raw_files: list[str]) -> str:
     return raw_files[0]
 
 
-def _sanitize_filename(command: str, used: set[str]) -> str:
-    """Map a command name to a lint-clean, collision-free A3 file stem (D1).
-
-    ``[a-z0-9_.-]`` only; the ``command`` field is the SSoT (Decision 1), so the
-    stem is non-semantic and a collision just gets a deterministic suffix. Shared
-    convention with ``migrate_platform_yaml._sanitize_filename``.
-    """
-    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
-    stem = re.sub(r"_+", "_", stem).strip("_") or "cmd"
-    candidate = stem
-    counter = 2
-    while candidate in used:
-        candidate = f"{stem}__{counter}"
-        counter += 1
-    used.add(candidate)
-    return candidate
-
-
 def get_ntc_commands(target_dir: str, platform: str) -> dict[str, dict]:
     """Extract commands and outputs from NTC Templates test data.
 
@@ -224,13 +206,7 @@ def get_platform_modes(platform: str) -> list[str]:
 
 def get_simnos_platforms() -> set[str]:
     """Get all platform names from the simnos A3 directory."""
-    if not os.path.isdir(SIMNOS_A3_DIR):
-        return set()
-    return {
-        entry
-        for entry in os.listdir(SIMNOS_A3_DIR)
-        if os.path.isfile(os.path.join(SIMNOS_A3_DIR, entry, "platform.yaml"))
-    }
+    return set(list_a3_platform_names(SIMNOS_A3_DIR))
 
 
 def compute_diff(
@@ -295,7 +271,7 @@ def write_diff_files(
 
     used_stems: set[str] = set()
     for cmd_name, cmd_data in new_commands.items():
-        stem = _sanitize_filename(cmd_name, used_stems)
+        stem = unique_command_stem(cmd_name, used_stems)
         mapping: dict = {
             "command": cmd_name,
             "type": "ntc",

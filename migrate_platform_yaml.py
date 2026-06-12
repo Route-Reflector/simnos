@@ -34,11 +34,11 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import sys
 
 import yaml
 
+from a3_paths import unique_command_stem
 from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import format_template_to_jinja
@@ -49,24 +49,6 @@ SNAPSHOT_DIR = "tests/assets/oracle"
 
 # Legacy scalar prompt -> canonical mode name (#264 / M2).
 PROMPT_FIELD_TO_MODE = (("initial_prompt", "user"), ("enable_prompt", "enable"), ("config_prompt", "config"))
-
-
-def _sanitize_filename(command: str, used: set[str]) -> str:
-    """Map a command name to a lint-clean, collision-free file stem (D1).
-
-    ``[a-z0-9_.-]`` only; spaces and other chars collapse to ``_``. The stem is
-    non-semantic (the ``command`` field is the SSoT, Decision 1), so a collision
-    just needs a deterministic suffix.
-    """
-    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
-    stem = re.sub(r"_+", "_", stem).strip("_") or "cmd"
-    candidate = stem
-    counter = 2
-    while candidate in used:
-        candidate = f"{stem}__{counter}"
-        counter += 1
-    used.add(candidate)
-    return candidate
 
 
 def _ensure_trailing_newline(text: str) -> str:
@@ -212,7 +194,7 @@ def convert(platform: str) -> None:
 
     used_stems: set[str] = set()
     for name, entry in legacy.get("commands", {}).items():
-        stem = _sanitize_filename(name, used_stems)
+        stem = unique_command_stem(name, used_stems)
         mapping = _convert_command(name, entry, stem, commands_dir, prompt_to_mode)
         text = yaml.safe_dump(mapping, sort_keys=False, allow_unicode=True, default_flow_style=False)
         _write(os.path.join(commands_dir, f"{stem}.yaml"), text)

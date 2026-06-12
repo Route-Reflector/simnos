@@ -15,6 +15,11 @@ import time
 from invoke import Exit, task
 import yaml
 
+# Stdlib-only shared helpers (no `simnos` import), so `invoke --list` and the
+# lint tasks stay free of the pydantic / paramiko load cost (#264 / D1).
+from a3_paths import PLATFORMS_DIR as PLATFORMS_A3_DIR
+from a3_paths import list_a3_platform_names, sanitize_command_stem
+
 
 def run_cmd(context, exec_cmd):
     """Run an invoke task command locally with a pty."""
@@ -42,19 +47,6 @@ def bandit(context):
 
 
 # --- A3 platform data lint (#264 / D8, D9) -----------------------------------
-
-PLATFORMS_A3_DIR = "simnos/plugins/nos/platforms"
-
-
-def _a3_platform_names(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
-    """Names of A3 platforms (dirs holding a ``platform.yaml``), sorted."""
-    if not os.path.isdir(platforms_dir):
-        return []
-    return sorted(
-        entry
-        for entry in os.listdir(platforms_dir)
-        if os.path.isfile(os.path.join(platforms_dir, entry, "platform.yaml"))
-    )
 
 
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
@@ -116,17 +108,6 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     return violations
 
 
-def _command_stem(command: str) -> str:
-    """The conventional A3 file stem for a command name (#264 / D1).
-
-    Same ``[a-z0-9_.-]`` sanitization the migrate / NTC-sync tools use; the
-    ``command`` field is the SSoT (filenames are non-semantic), so this drives a
-    warning-tier convention check, not a gate.
-    """
-    stem = re.sub(r"[^a-z0-9_.-]", "_", command.lower())
-    return re.sub(r"_+", "_", stem).strip("_") or "cmd"
-
-
 def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
     """Warning-tier A3 conventions (#264 / D9) — informational, never a gate.
 
@@ -153,7 +134,7 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
                 data = yaml.safe_load(f) or {}
             command = data.get("command")
             if isinstance(command, str):
-                base = _command_stem(command)
+                base = sanitize_command_stem(command)
                 # Accept the exact stem or the deterministic ``__<n>`` collision
                 # suffix the migrate / sync tools append (not an arbitrary ``__x``).
                 if stem != base and not re.fullmatch(rf"{re.escape(base)}__\d+", stem):
@@ -407,7 +388,7 @@ def gen_docs_platform_commands(ctx):
     from simnos.core.platform_loader import load_platform_dir
 
     docs_folder: str = "docs/platforms"
-    platforms: list[str] = _a3_platform_names()
+    platforms: list[str] = list_a3_platform_names()
 
     for platform in platforms:
         print(f"Generating Platform: {platform}")

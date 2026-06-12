@@ -8,14 +8,14 @@ worth pinning here is the surrounding plumbing the generator depends on:
 
 - the sweep semantics, so a removed platform's markdown is deleted on the next
   regeneration while hand-authored `index.md` / `index.ja.md` are preserved
-- A3 platform-name discovery (`_a3_platform_names`)
+- A3 platform-name discovery (`list_a3_platform_names`)
 - the nav display-name derivation and the mkdocs Platforms-nav rewrite
 """
 
 import pytest
 
+from a3_paths import list_a3_platform_names
 from tasks import (
-    _a3_platform_names,
     platform_display_name,
     rewrite_mkdocs_platforms_nav,
     sweep_orphaned_platform_docs,
@@ -139,17 +139,17 @@ class TestSweepOrphanedPlatformDocs:
 
 
 class TestA3PlatformNames:
-    """`_a3_platform_names` discovers A3 platform dirs (those with platform.yaml)."""
+    """`list_a3_platform_names` discovers A3 platform dirs (those with platform.yaml)."""
 
     def test_finds_dirs_with_platform_yaml(self, tmp_path):
         (tmp_path / "cisco_ios").mkdir()
         (tmp_path / "cisco_ios" / "platform.yaml").write_text("modes: {}\n", encoding="utf-8")
         (tmp_path / "not_a_platform").mkdir()  # no platform.yaml
         (tmp_path / "stray.txt").write_text("x", encoding="utf-8")
-        assert _a3_platform_names(str(tmp_path)) == ["cisco_ios"]
+        assert list_a3_platform_names(str(tmp_path)) == ["cisco_ios"]
 
     def test_absent_dir_is_empty(self, tmp_path):
-        assert _a3_platform_names(str(tmp_path / "nonexistent")) == []
+        assert list_a3_platform_names(str(tmp_path / "nonexistent")) == []
 
 
 class TestPlatformDisplayName:

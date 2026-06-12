@@ -26,19 +26,12 @@ import json
 import os
 import sys
 
+from a3_paths import list_a3_platform_names
 from simnos.core.platform_loader import load_platform_dir
 from tests.core.oracle_projection import project_resolved
 
 A3_ROOT = "simnos/plugins/nos/platforms"
 SNAPSHOT_DIR = "tests/assets/oracle"
-
-
-def _a3_platforms() -> list[str]:
-    if not os.path.isdir(A3_ROOT):
-        return []
-    return sorted(
-        entry for entry in os.listdir(A3_ROOT) if os.path.isfile(os.path.join(A3_ROOT, entry, "platform.yaml"))
-    )
 
 
 def regen(platform: str) -> None:
@@ -57,7 +50,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Re-baseline A3 migration-oracle snapshots from the A3 loader (#264).")
     parser.add_argument("platform", nargs="?", help="platform name (default: all A3 platforms)")
     args = parser.parse_args()
-    platforms = [args.platform] if args.platform else _a3_platforms()
+    platforms = [args.platform] if args.platform else list_a3_platform_names(A3_ROOT)
     for platform in platforms:
         regen(platform)
 
