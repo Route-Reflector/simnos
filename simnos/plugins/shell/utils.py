@@ -86,8 +86,8 @@ def _legacy_jinja_to_py(filepath: str) -> str | None:
     ``os.sep``-aware `_a3_platform_dir`).
     """
     parts = filepath.split("/")
-    if len(parts) >= 3 and parts[-2] == "configurations":
-        platform = parts[-1].replace(".yaml.j2", "").replace(".yaml", "")
+    if len(parts) >= 3 and parts[-2] == "configurations" and parts[-1].endswith(".yaml.j2"):
+        platform = parts[-1][: -len(".yaml.j2")]
         return "/".join([*parts[:-2], f"{platform}.py"])
     if len(parts) >= 4 and parts[-3] == "templates":
         return "/".join([*parts[:-3], f"{parts[-2]}.py"])

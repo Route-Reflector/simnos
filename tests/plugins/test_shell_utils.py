@@ -277,7 +277,10 @@ def test_resolve_targets_drops_unrecognized_jinja(tmp_path):
     root = _make_nos_tree(tmp_path)
     stray = str(root / "README.j2")
     unknown_shape = str(root / "platforms_py" / "notes" / "foo.j2")
-    assert resolve_reload_targets([stray, unknown_shape], str(root)) == []
+    # In the configurations dir but not a `<platform>.yaml.j2` — without the
+    # suffix check this would fabricate `README.j2.py` (2nd round codex #1).
+    non_config = str(root / "platforms_py" / "configurations" / "README.j2")
+    assert resolve_reload_targets([stray, unknown_shape, non_config], str(root)) == []
 
 
 def test_resolve_targets_drops_deleted_platform_dir(tmp_path):
