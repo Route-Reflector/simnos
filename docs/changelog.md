@@ -7,7 +7,7 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 
 **Breaking Changes**
 
-- Rename the inventory key `platform` to `device_type` (v3, #266). There is no compatibility alias: a v2 inventory using `platform:` is rejected at load. Migrate by rewriting the key (`sed -i 's/^\(\s*\)platform:/\1device_type:/' inventory.yaml`) or pin to v2 (`pip install "simnos<3"`, maintained as a migration window). A `device_type` accepts a platform's internal name, its `netmiko_device_type`, or its `ntc_platform` alias — all resolve to the same platform via the data-driven reverse index (#266)
+- Rename the inventory key `platform` to `device_type` (v3, #266). There is no compatibility alias: a v2 inventory using `platform:` is rejected at load. Migrate by rewriting the key (`sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml`) or pin to v2 (`pip install "simnos<3"`, maintained as a migration window). A `device_type` accepts a platform's internal name, its `netmiko_device_type`, or its `ntc_platform` alias — all resolve to the same platform via the data-driven reverse index (#266)
 
 **Enhancements**
 

@@ -683,6 +683,19 @@ class TestSysConfig:
             SimNOS(sys_config={"data_dir": "/srv"})
         assert any("data_dir" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records)
 
+    def test_sys_config_seed_does_not_pollute_default_inventory(self):
+        """sys_config seeding must not mutate the module-global default_inventory (1st round codex#1).
+
+        `SimNOS()` deepcopies `default_inventory` as its fallback, so seeding a
+        sys_config `variants_policy` into the inventory default stays per-instance.
+        Pins that the global stays clean and a subsequent plain `SimNOS()` host
+        does not inherit the prior instance's seeded policy (process-global leak).
+        """
+        SimNOS(sys_config={"variants_policy": {"select": "leak-probe"}})
+        assert "variants_policy" not in default_inventory["default"]
+        net = SimNOS()
+        assert next(iter(net.hosts.values())).variants_policy is None
+
 
 class TestPlatformsManifest:
     """

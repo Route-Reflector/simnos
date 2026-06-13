@@ -94,7 +94,12 @@ class SimNOS:
         plugins: list | None = None,
         sys_config: dict | str | None = None,
     ) -> None:
-        self.inventory: dict | str = inventory or default_inventory
+        # deepcopy the module-global fallback: `_load_inventory` reassigns
+        # `self.inventory["default"]` (and PR2 seeds sys_config into it), so
+        # aliasing the global would bake per-instance state into it and leak to
+        # later `SimNOS()` calls (1st round codex#1). An explicit `inventory` is
+        # the caller's own object and left untouched.
+        self.inventory: dict | str = inventory or copy.deepcopy(default_inventory)
         self.plugins: list = plugins or []
 
         self.hosts: dict[str, Host] = {}
@@ -259,7 +264,9 @@ class SimNOS:
         # host override. The CLI layer (#267) hooks in above env, outside this merge.
         self.inventory["default"] = {
             **default_inventory["default"],
-            **self._seed_inventory_default_from_sys_config(self.inventory.get("default", {})),
+            # `default: null` validates as None (schema allows it); `or {}` keeps
+            # the merge from a `dict(None)` crash with an opaque traceback (1st round claude#3).
+            **self._seed_inventory_default_from_sys_config(self.inventory.get("default") or {}),
         }
         ModelSimnosInventory(**self.inventory)
         log.debug("SimNOS inventory validation succeeded")

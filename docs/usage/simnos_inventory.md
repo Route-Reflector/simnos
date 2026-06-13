@@ -18,7 +18,7 @@ There are two ways to provide inventory data to SIMNOS:
     - **Rewrite the key** to move to v3. In a YAML inventory:
 
         ```bash
-        sed -i 's/^\(\s*\)platform:/\1device_type:/' inventory.yaml
+        sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml
         ```
 
         In a Python-dict inventory, rename the `"platform"` key to `"device_type"`.

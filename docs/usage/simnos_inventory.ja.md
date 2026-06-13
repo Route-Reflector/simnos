@@ -16,7 +16,7 @@ SIMNOS にインベントリデータを提供する方法は2つあります:
     - v3 へ移行する場合は**キーを書き換え**ます。YAML インベントリでは:
 
         ```bash
-        sed -i 's/^\(\s*\)platform:/\1device_type:/' inventory.yaml
+        sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml
         ```
 
         Python 辞書インベントリでは、`"platform"` キーを `"device_type"` にリネームします。
