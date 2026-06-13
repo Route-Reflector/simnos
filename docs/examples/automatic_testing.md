@@ -166,4 +166,4 @@ In this case I get the following result:
     By the default the `return_instance` is `False`, so if you want to use it, you need to set it to `True`.
 
 !!! note
-    When using the platform parameter, a random port will be assigned. This decision is intentional so that the tests does not affect other systems. If you want to use a specific port, you can specify it using the inventory.
+    When using the device_type parameter, a random port will be assigned. This decision is intentional so that the tests does not affect other systems. If you want to use a specific port, you can specify it using the inventory.
