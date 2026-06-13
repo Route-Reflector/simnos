@@ -272,9 +272,9 @@ class TestRatchet:
 
         The mirror of `test_fixed_default_still_in_baseline_fails` for the
         stub_help channel — the platform has no stub help anymore but the
-        baseline still freezes one, so the entry has to be removed (1st round
-        🦊#3). The swap test exercises this direction too, but a standalone
-        case keeps the rule-5 stub regression readable in isolation.
+        baseline still freezes one, so the entry has to be removed (#276 1st
+        round 🦊#3). The swap test exercises this direction too, but a
+        standalone case keeps the rule-5 stub regression readable in isolation.
         """
         self._clean_platform(tmp_path)
         baseline = self._baseline(tmp_path, "missing_default: []\nstub_help:\n  p:\n  - show clock\n")
@@ -287,7 +287,7 @@ class TestRatchet:
         The ratchet has no empty-glob self-guard (the `lint_platform_data`
         task owns that via `list_a3_platform_names()`), but a wrong dir
         against the shipped-style baseline still fails loudly: every baseline
-        platform is unseen, so rule 4 fires per entry (1st round 🦊#2 / 🐙#3).
+        platform is unseen, so rule 4 fires per entry (#276 1st round 🦊#2 / 🐙#3).
         """
         baseline = self._baseline(tmp_path, "missing_default:\n- alcatel_aos\nstub_help:\n  cisco_ios:\n  - show foo\n")
         violations = check_platform_data_ratchet(str(tmp_path / "nonexistent"), baseline)
