@@ -25,6 +25,11 @@ CONFIG_PROMPT: str = "{base_prompt}(config)#"
 # proving registry → shell → callable-output dispatch works for a py-only NOS.
 PY_ONLY_MARKER: str = "SYNTHETIC-PY-ONLY-MARKER"
 
+# This module's own `_default_` output. Distinct from the shell's BASIC_COMMANDS
+# default ("Unknown command"); the test asserts an unknown command returns THIS,
+# pinning that a py-only module's `_default_` wins the legacy merge precedence.
+PY_ONLY_DEFAULT: str = "% Invalid input detected at '^' marker."
+
 
 class SyntheticPyOnly(BaseDevice):
     """Minimal device exposing one dynamic command for the e2e pin."""
@@ -47,7 +52,7 @@ commands = {
         "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
     },
     "_default_": {
-        "output": "% Invalid input detected at '^' marker.",
+        "output": PY_ONLY_DEFAULT,
         "help": "Output to print for unknown commands",
         "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
     },
