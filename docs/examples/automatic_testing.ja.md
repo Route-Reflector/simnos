@@ -59,7 +59,7 @@ inventory = {
             "username": "user",
             "password": "user",
             "port": 6000,
-            "platform": "huawei_smartax",
+            "device_type": "huawei_smartax",
         }
     }
 }
@@ -120,7 +120,7 @@ with SimNOS(inventory=inventory) as net:
 ```python
 from simnos import simnos
 
-@simnos(platform="huawei_smartax")
+@simnos(device_type="huawei_smartax")
 def test_get_serial_number():
     """
     It tests that the function get_serial_number() gets
@@ -150,7 +150,7 @@ def test_get_serial_number():
 ```python
 from simnos import simnos
 
-@simnos(platform="huawei_smartax", return_instance=True)
+@simnos(device_type="huawei_smartax", return_instance=True)
 def get_ports_used_in_decorator():
     """ We want to see the ports of the fake device """
     host_ports = [host.port for host in net.hosts.values()]
@@ -166,4 +166,4 @@ def get_ports_used_in_decorator():
     デフォルトでは `return_instance` は `False` です。使用したい場合は `True` に設定する必要があります。
 
 !!! note
-    platform パラメータを使用すると、ランダムなポートが割り当てられます。これはテストが他のシステムに影響しないための意図的な仕様です。特定のポートを使用したい場合は、インベントリで指定できます。
+    device_type パラメータを使用すると、ランダムなポートが割り当てられます。これはテストが他のシステムに影響しないための意図的な仕様です。特定のポートを使用したい場合は、インベントリで指定できます。

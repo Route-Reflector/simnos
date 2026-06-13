@@ -71,7 +71,7 @@ hosts:
     password: user
     port: [6001, 6002]
     replicas: 2
-    platform: cisco_ios
+    device_type: cisco_ios
 ```
 
 Adjust inventory settings before running the container or update inventory content

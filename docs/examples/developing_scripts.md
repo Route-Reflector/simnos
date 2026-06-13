@@ -10,14 +10,14 @@ hosts:
     myRouter:
         username: admin
         password: admin
-        platform: huawei_smartax
+        device_type: huawei_smartax
         port: 6000
 ```
 You can call this file `inventory.yaml` 📕, but any other name is fine. Always, in all the YAML files,
 we need to put our devices with the `hosts:`. In the *hosts* we can add as many devices as we want
 as long as they each device has its own port. To add a devices we just put whichever name we want.
 
-For each device, we can set a `username`, `password`, `port` and `platform`. All the available platforms can be found [here](../platforms/index.md). In this case we have selected the platform `huawei_smartax` and credentials are username `admin` and password `admin`.
+For each device, we can set a `username`, `password`, `port` and `device_type`. All the available platforms can be found [here](../platforms/index.md). In this case we have selected the platform `huawei_smartax` and credentials are username `admin` and password `admin`.
 
 Then, create a Python script with the following content:
 ```python
@@ -57,7 +57,7 @@ If you want to try more, we want to encourage you to try more platforms, change 
 ## Using the dict
 As well, it is possible to use a dictionary instead of a `.yaml` file in the cases that you may want to have a programmatic way to define the variables. It is fairly similar to the other method described before, but in this case instead of having 2 files, we will keep all in 1 file.
 
-Imagine you want to be able to specify the platform using the CLI. The following script allows you to do the same, but defining the `platform`:
+Imagine you want to be able to specify the platform using the CLI. The following script allows you to do the same, but defining the `device_type`:
 
 ```python
 import argparse
@@ -68,7 +68,7 @@ parser = argparse.ArgumentParser(
     )
 
 parser.add_argument(
-    "platform",
+    "device_type",
     type=str,
     help="fake device network operating system"
     )
@@ -80,7 +80,7 @@ inventory = {
         "mySwitch": {
             "username": "admin",
             "password": "admin",
-            "platform": args.platform,
+            "device_type": args.device_type,
             "port": 6000
         }
     }

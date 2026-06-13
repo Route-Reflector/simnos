@@ -42,12 +42,12 @@ hosts:
   R1:
     username: admin
     password: admin
-    platform: cisco_ios
+    device_type: cisco_ios
     port: 6000
   R2:
     username: admin
     password: admin
-    platform: huawei_smartax
+    device_type: huawei_smartax
     port: 6001
 ```
 

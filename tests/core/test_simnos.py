@@ -18,6 +18,7 @@ import yaml
 from a3_paths import PLATFORMS_DIR
 from simnos.core.host import Host
 from simnos.core.nos import available_platforms
+from simnos.core.pydantic_models import ModelOverlay, ModelSysConfig
 from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import nos_plugins, resolve_device_type
@@ -522,6 +523,177 @@ class TestSimNOS:
         inventory = {"hosts": {"R1": {"port": 5001, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory)
         assert len(net.nos_plugins["cisco_ios"]) == 2, "Not all files detected"
+
+
+class TestReservedInventoryFields:
+    """#265 reserved inventory fields (`facts` / `overlay` / `variants_policy`).
+
+    #266 reserves them as the schema "器": accepted + validated, but consumed by
+    nobody (no-op) until #265 wires them up. These pin that they (a) load without
+    error, (b) reach the Host as attributes, and (c) warn loudly when set so the
+    no-op is never silent (Decision 5, anti-silent-bug).
+    """
+
+    def test_reserved_fields_accepted_and_reach_host(self):
+        """facts / overlay / variants_policy load and are stored on the Host."""
+        inventory = {
+            "hosts": {
+                "R1": {
+                    "port": 6100,
+                    "device_type": "cisco_ios",
+                    "facts": {"hostname": "R1", "serial": "ABC"},
+                    "overlay": {"dir": "/srv/overlay", "override_commands": True},
+                    "variants_policy": {"select": "default"},
+                }
+            }
+        }
+        net = SimNOS(inventory=inventory)
+        host = net.hosts["R1"]
+        assert host.facts == {"hostname": "R1", "serial": "ABC"}
+        assert host.overlay == {"dir": "/srv/overlay", "override_commands": True}
+        assert host.variants_policy == {"select": "default"}
+
+    def test_reserved_field_warns_when_set(self, caplog):
+        """A set reserved field emits a no-op warning (not a silent inert config)."""
+        inventory = {"hosts": {"R1": {"port": 6101, "device_type": "cisco_ios", "facts": {"k": "v"}}}}
+        with caplog.at_level(logging.WARNING, logger="simnos.core.host"):
+            SimNOS(inventory=inventory)
+        warnings = [r.getMessage() for r in caplog.records if "reserved field" in r.getMessage()]
+        assert any("'facts'" in m and "no effect yet" in m for m in warnings)
+
+    def test_reserved_fields_absent_no_warning(self, caplog):
+        """A plain inventory (no reserved fields) emits no reserved-field warning."""
+        inventory = {"hosts": {"R1": {"port": 6102, "device_type": "cisco_ios"}}}
+        with caplog.at_level(logging.WARNING, logger="simnos.core.host"):
+            SimNOS(inventory=inventory)
+        assert not [r for r in caplog.records if "reserved field" in r.getMessage()]
+
+    def test_overlay_schema_rejects_unknown_key(self):
+        """ModelOverlay keeps `extra="forbid"` — a typo'd overlay key is rejected."""
+        with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
+            ModelOverlay(dir="/srv/o", bogus=1)  # ty: ignore[unknown-argument]  # intentional: extra="forbid" probe
+
+    def test_reserved_field_extra_still_forbidden(self):
+        """Reserving fields does not loosen `extra="forbid"` on the inventory."""
+        inventory = {"hosts": {"R1": {"port": 6103, "device_type": "cisco_ios", "bogus_field": 1}}}
+        with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
+            SimNOS(inventory=inventory)
+
+
+class TestSysConfig:
+    """sys_config.yaml loading + precedence (#266 / D4).
+
+    sys_config holds environment-wide settings (`data_dir` / `variants_policy`);
+    #266 introduces loading (arg / env / cwd / home discovery), the
+    `SIMNOS_DATA_DIR` env override, and the `sys_config < inventory` precedence
+    rung. Both fields are no-op in #266 (consumed in #265 / #267).
+    """
+
+    def test_default_is_empty_resolved(self):
+        """No sys_config anywhere → resolved defaults (both fields None)."""
+        net = SimNOS()
+        assert net.sys_config == {"data_dir": None, "variants_policy": None}
+
+    def test_dict_arg_used_as_is(self):
+        """A dict arg is validated and stored verbatim."""
+        net = SimNOS(sys_config={"data_dir": "/srv/simnos"})
+        assert net.sys_config["data_dir"] == "/srv/simnos"
+
+    def test_path_arg_loaded(self, tmp_path):
+        """A str arg is read as a YAML path."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/file\n", encoding="utf-8")
+        net = SimNOS(sys_config=str(cfg))
+        assert net.sys_config["data_dir"] == "/from/file"
+
+    def test_missing_explicit_path_raises(self, tmp_path):
+        """An explicit path that does not exist is a loud error."""
+        with pytest.raises(FileNotFoundError, match="sys_config file not found"):
+            SimNOS(sys_config=str(tmp_path / "nope.yaml"))
+
+    def test_env_path_discovered(self, tmp_path, monkeypatch):
+        """`SIMNOS_SYS_CONFIG` env points at the file when no arg is given."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/env\n", encoding="utf-8")
+        monkeypatch.setenv("SIMNOS_SYS_CONFIG", str(cfg))
+        net = SimNOS()
+        assert net.sys_config["data_dir"] == "/from/env"
+
+    def test_cwd_discovered(self, tmp_path, monkeypatch):
+        """`./sys_config.yaml` in cwd is discovered when no arg/env is set."""
+        # env is already cleared by the autouse `_isolate_sys_config_env` fixture.
+        (tmp_path / "sys_config.yaml").write_text("data_dir: /from/cwd\n", encoding="utf-8")
+        monkeypatch.chdir(tmp_path)
+        net = SimNOS()
+        assert net.sys_config["data_dir"] == "/from/cwd"
+
+    def test_data_dir_env_overrides_file(self, tmp_path, monkeypatch):
+        """`SIMNOS_DATA_DIR` wins over the file's data_dir (env > sys_config)."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/file\n", encoding="utf-8")
+        monkeypatch.setenv("SIMNOS_DATA_DIR", "/from/env/override")
+        net = SimNOS(sys_config=str(cfg))
+        assert net.sys_config["data_dir"] == "/from/env/override"
+
+    def test_variants_policy_seeds_inventory_default(self):
+        """sys_config variants_policy seeds the inventory default → reaches hosts."""
+        net = SimNOS(
+            inventory={"hosts": {"R1": {"port": 6104, "device_type": "cisco_ios"}}},
+            sys_config={"variants_policy": {"select": "global"}},
+        )
+        assert net.hosts["R1"].variants_policy == {"select": "global"}
+
+    def test_inventory_default_wins_over_sys_config(self):
+        """A more specific inventory default beats the sys_config global (precedence)."""
+        net = SimNOS(
+            inventory={
+                "default": {"variants_policy": {"select": "inventory"}},
+                "hosts": {"R1": {"port": 6105, "device_type": "cisco_ios"}},
+            },
+            sys_config={"variants_policy": {"select": "global"}},
+        )
+        assert net.hosts["R1"].variants_policy == {"select": "inventory"}
+
+    def test_host_wins_over_sys_config(self):
+        """A per-host value beats both inventory default and sys_config (host most specific)."""
+        net = SimNOS(
+            inventory={
+                "hosts": {"R1": {"port": 6106, "device_type": "cisco_ios", "variants_policy": {"select": "host"}}}
+            },
+            sys_config={"variants_policy": {"select": "global"}},
+        )
+        assert net.hosts["R1"].variants_policy == {"select": "host"}
+
+    def test_extra_key_rejected(self):
+        """ModelSysConfig keeps `extra="forbid"` — an unknown key is rejected."""
+        with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
+            ModelSysConfig(data_dir="/x", bogus=1)  # ty: ignore[unknown-argument]  # intentional: extra="forbid" probe
+
+    def test_non_mapping_file_raises(self, tmp_path):
+        """A sys_config file that is not a mapping is a loud TypeError."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("- just\n- a\n- list\n", encoding="utf-8")
+        with pytest.raises(TypeError, match="sys_config must be a mapping"):
+            SimNOS(sys_config=str(cfg))
+
+    def test_data_dir_set_warns_noop(self, caplog):
+        """A set data_dir warns (it is reserved / no-op in #266)."""
+        with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
+            SimNOS(sys_config={"data_dir": "/srv"})
+        assert any("data_dir" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records)
+
+    def test_sys_config_seed_does_not_pollute_default_inventory(self):
+        """sys_config seeding must not mutate the module-global default_inventory (1st round codex#1).
+
+        `SimNOS()` deepcopies `default_inventory` as its fallback, so seeding a
+        sys_config `variants_policy` into the inventory default stays per-instance.
+        Pins that the global stays clean and a subsequent plain `SimNOS()` host
+        does not inherit the prior instance's seeded policy (process-global leak).
+        """
+        SimNOS(sys_config={"variants_policy": {"select": "leak-probe"}})
+        assert "variants_policy" not in default_inventory["default"]
+        net = SimNOS()
+        assert next(iter(net.hosts.values())).variants_policy is None
 
 
 class TestPlatformsManifest:

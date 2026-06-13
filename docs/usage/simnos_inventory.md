@@ -6,6 +6,27 @@ There are two ways to provide inventory data to SIMNOS:
 1. Using YAML file
 2. Using Python dictionary
 
+!!! warning "Migrating from v2: `platform` → `device_type`"
+    SIMNOS v3 renamed the inventory key `platform` to `device_type` (aligning with
+    netmiko / ansible). This is a **breaking change with no compatibility alias**:
+    a v2 inventory that still uses `platform:` is rejected at load. There are two
+    migration paths:
+
+    - **Pin to v2** if you need the old format unchanged. The v2 line (the current
+      `main` branch) is kept maintained as a migration window:
+      `pip install "simnos<3"`.
+    - **Rewrite the key** to move to v3. In a YAML inventory:
+
+        ```bash
+        sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml
+        ```
+
+        In a Python-dict inventory, rename the `"platform"` key to `"device_type"`.
+
+    A `device_type` may be named by a platform's internal name (`cisco_ios`), its
+    `netmiko_device_type`, or its `ntc_platform` alias — all resolve to the same
+    platform.
+
 ## Basic structure
 In all cases the inventory data must have the following structure independently of the method used to provide it:
 
@@ -36,9 +57,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "platform": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "platform": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "platform": "arista_eos"},
+        "router_cisco_ios": {"port": 6000, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": 6001, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": 6002, "device_type": "arista_eos"},
     }
 }
 ```
@@ -51,7 +72,7 @@ default:
   username: user
   password: user
   port: 6000
-  platform: cisco_ios
+  device_type: cisco_ios
 ```
 
 In this case, it will create a host named `router0` with the username `user`, password `user`, and port `6000`. The platform will be `cisco_ios`. If you want to create more hosts, you can add them to the `hosts` section:
@@ -60,10 +81,10 @@ In this case, it will create a host named `router0` with the username `user`, pa
 hosts:
     router1:
         port: 6001
-        platform: huawei_smartax
+        device_type: huawei_smartax
     router2:
         port: 6002
-        platform: cisco_ios
+        device_type: cisco_ios
 ```
 
 In this case, you are creating 2 hosts: `router1` and `router2`. `router1` will have the port `6001` and the platform `huawei_smartax`. `router2` will have the port `6002` and the platform `cisco_ios`. As the credentials are not provided in the `hosts` section, SIMNOS will use the default credentials.
@@ -88,7 +109,7 @@ inventory_data = {
             "username": "user",
             "password": "user",
             "port": 6000,
-            "platform": "cisco_ios",
+            "device_type": "cisco_ios",
         }
     }
 }
@@ -101,8 +122,8 @@ As before, in case that you want to create more hosts, you can add them to the `
 ``` python
 inventory_data = {
     "hosts": {
-        "router1": {"port": 6001, "platform": "huawei_smartax"},
-        "router2": {"port": 6002, "platform": "cisco_ios"}
+        "router1": {"port": 6001, "device_type": "huawei_smartax"},
+        "router2": {"port": 6002, "device_type": "cisco_ios"}
     }
 }
 ```
@@ -221,7 +242,7 @@ default:
 hosts:
   router:
     replicas: 10
-    platform: cisco_ios
+    device_type: cisco_ios
 ```
 
 ### Hosts replicas
@@ -294,7 +315,7 @@ The following options can be used either in the `default` section or in the `hos
 | --------------| ------------- | ---------------------------------- | ----------------------------------------------- |
 | `username`    | :person:      | username of the device             | `username: admin`                               |
 | `password`    | :key:         | password of the device             | `password: admin`                               |
-| `platform`    | :station:     | network operating system used      | `platform: cisco_ios`                           |
+| `device_type` | :station:     | network operating system used      | `device_type: cisco_ios`                        |
 | `port`        | :ship:        | port to connect to                 | `port: 6000`                                    |
 | `replicas`    | :repeat:      | number of hosts to create          | `replicas: 10`                                  |
 | `server`      | :satellite:   | server configuration               | See section [Server options](#server-options)   |

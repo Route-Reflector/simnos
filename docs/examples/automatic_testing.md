@@ -59,7 +59,7 @@ inventory = {
             "username": "user",
             "password": "user",
             "port": 6000,
-            "platform": "huawei_smartax",
+            "device_type": "huawei_smartax",
         }
     }
 }
@@ -120,7 +120,7 @@ Also, the previous example can be implemented using a decorator. This is even a 
 ```python
 from simnos import simnos
 
-@simnos(platform="huawei_smartax")
+@simnos(device_type="huawei_smartax")
 def test_get_serial_number():
     """
     It tests that the function get_serial_number() gets
@@ -150,7 +150,7 @@ Finally, just in case you want to access the fake devices, you can do it adding 
 ```python
 from simnos import simnos
 
-@simnos(platform="huawei_smartax", return_instance=True)
+@simnos(device_type="huawei_smartax", return_instance=True)
 def get_ports_used_in_decorator():
     """ We want to see the ports of the fake device """
     host_ports = [host.port for host in net.hosts.values()]
@@ -166,4 +166,4 @@ In this case I get the following result:
     By the default the `return_instance` is `False`, so if you want to use it, you need to set it to `True`.
 
 !!! note
-    When using the platform parameter, a random port will be assigned. This decision is intentional so that the tests does not affect other systems. If you want to use a specific port, you can specify it using the inventory.
+    When using the device_type parameter, a random port will be assigned. This decision is intentional so that the tests does not affect other systems. If you want to use a specific port, you can specify it using the inventory.

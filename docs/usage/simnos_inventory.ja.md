@@ -6,6 +6,25 @@ SIMNOS にインベントリデータを提供する方法は2つあります:
 1. YAML ファイルを使用する
 2. Python 辞書を使用する
 
+!!! warning "v2 からの移行: `platform` → `device_type`"
+    SIMNOS v3 では、インベントリのキー `platform` を `device_type` にリネームしました
+    (netmiko / ansible との用語統一)。これは**互換エイリアスを持たない破壊的変更**で、
+    旧 `platform:` を使った v2 インベントリはロード時に拒否されます。移行方法は2つあります:
+
+    - 旧形式をそのまま使いたい場合は **v2 に pin** してください。v2 系 (現 `main` ブランチ)
+      は移行期間として保守を継続します: `pip install "simnos<3"`。
+    - v3 へ移行する場合は**キーを書き換え**ます。YAML インベントリでは:
+
+        ```bash
+        sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml
+        ```
+
+        Python 辞書インベントリでは、`"platform"` キーを `"device_type"` にリネームします。
+
+    `device_type` には、プラットフォームの内部名 (`cisco_ios`)、その
+    `netmiko_device_type`、または `ntc_platform` エイリアスのいずれも指定でき、
+    すべて同じプラットフォームに解決されます。
+
 ## 基本構造
 すべてのケースで、提供方法に関係なく、インベントリデータは以下の構造を持つ必要があります:
 
@@ -36,9 +55,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "platform": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "platform": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "platform": "arista_eos"},
+        "router_cisco_ios": {"port": 6000, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": 6001, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": 6002, "device_type": "arista_eos"},
     }
 }
 ```
@@ -51,7 +70,7 @@ default:
   username: user
   password: user
   port: 6000
-  platform: cisco_ios
+  device_type: cisco_ios
 ```
 
 この場合、ユーザー名 `user`、パスワード `user`、ポート `6000` の `router0` という名前のホストが作成されます。プラットフォームは `cisco_ios` になります。より多くのホストを作成したい場合は、`hosts` セクションに追加できます:
@@ -60,10 +79,10 @@ default:
 hosts:
     router1:
         port: 6001
-        platform: huawei_smartax
+        device_type: huawei_smartax
     router2:
         port: 6002
-        platform: cisco_ios
+        device_type: cisco_ios
 ```
 
 この場合、`router1` と `router2` の2つのホストが作成されます。`router1` はポート `6001` でプラットフォーム `huawei_smartax`、`router2` はポート `6002` でプラットフォーム `cisco_ios` になります。認証情報が `hosts` セクションで提供されていないため、SIMNOS はデフォルトの認証情報を使用します。
@@ -88,7 +107,7 @@ inventory_data = {
             "username": "user",
             "password": "user",
             "port": 6000,
-            "platform": "cisco_ios",
+            "device_type": "cisco_ios",
         }
     }
 }
@@ -101,8 +120,8 @@ network = SimNOS(inventory=inventory_data)
 ``` python
 inventory_data = {
     "hosts": {
-        "router1": {"port": 6001, "platform": "huawei_smartax"},
-        "router2": {"port": 6002, "platform": "cisco_ios"}
+        "router1": {"port": 6001, "device_type": "huawei_smartax"},
+        "router2": {"port": 6002, "device_type": "cisco_ios"}
     }
 }
 ```
@@ -218,7 +237,7 @@ default:
 hosts:
   router:
     replicas: 10
-    platform: cisco_ios
+    device_type: cisco_ios
 ```
 
 ### ホストレプリカ
@@ -288,7 +307,7 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 | --------------| ------------- | ---------------------------------- | ----------------------------------------------- |
 | `username`    | :person:      | デバイスのユーザー名                  | `username: admin`                               |
 | `password`    | :key:         | デバイスのパスワード                  | `password: admin`                               |
-| `platform`    | :station:     | 使用するネットワークオペレーティングシステム | `platform: cisco_ios`                           |
+| `device_type` | :station:     | 使用するネットワークオペレーティングシステム | `device_type: cisco_ios`                           |
 | `port`        | :ship:        | 接続するポート                       | `port: 6000`                                    |
 | `replicas`    | :repeat:      | 作成するホスト数                     | `replicas: 10`                                  |
 | `server`      | :satellite:   | サーバー設定                         | [Server options](#server-options) セクションを参照     |
