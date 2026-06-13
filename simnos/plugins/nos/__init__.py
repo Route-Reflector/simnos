@@ -153,7 +153,10 @@ def assert_platform_supported(platform: str) -> None:
     """
     if resolve_device_type(platform) is None:
         # Join the names so the user-facing message does not leak the
-        # registry container type (tuple vs list repr).
+        # registry container type (tuple vs list repr). Spell out that
+        # netmiko/ntc aliases are accepted too, so a user who typed an alias
+        # is not misled by the canonical-only list (#266 1st round gemini #4).
         raise ValueError(
-            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {', '.join(available_platforms)}"
+            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: "
+            f"{', '.join(available_platforms)} (their netmiko_device_type / ntc_platform aliases are also accepted)."
         )

@@ -338,3 +338,22 @@ class TestDeviceTypeCollisions:
         self._meta(tmp_path, "p_b", netmiko="p_a")
         violations = check_platform_data_device_type_collisions(str(tmp_path))
         assert any("p_a" in v for v in violations)
+
+    def test_malformed_platform_yaml_is_violation_not_crash(self, tmp_path):
+        # A malformed platform.yaml yields a violation string, not a traceback —
+        # symmetric with the runtime index guard's warn+skip (1st round PR1
+        # cross-review gemini #6 / claude #4).
+        d = tmp_path / "broken"
+        d.mkdir(parents=True)
+        (d / "platform.yaml").write_text("netmiko_device_type: [unclosed\n", encoding="utf-8")
+        violations = check_platform_data_device_type_collisions(str(tmp_path))
+        assert any("broken/platform.yaml" in v for v in violations)
+
+    def test_non_mapping_platform_yaml_is_violation(self, tmp_path):
+        # A platform.yaml that parses to a non-mapping (e.g. a bare list) is a
+        # violation, not an AttributeError on `.get`.
+        d = tmp_path / "listy"
+        d.mkdir(parents=True)
+        (d / "platform.yaml").write_text("- just\n- a\n- list\n", encoding="utf-8")
+        violations = check_platform_data_device_type_collisions(str(tmp_path))
+        assert any("listy/platform.yaml" in v and "not a mapping" in v for v in violations)

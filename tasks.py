@@ -196,8 +196,18 @@ def check_platform_data_device_type_collisions(platforms_dir: str = PLATFORMS_A3
         register(platform, platform, "identity")
     for platform in names:
         meta_path = os.path.join(platforms_dir, platform, "platform.yaml")
-        with open(meta_path, encoding="utf-8") as f:
-            meta = yaml.safe_load(f) or {}
+        # A malformed platform.yaml becomes a violation string rather than a
+        # crashing traceback, so the lint stays symmetric with the runtime
+        # index guard's warn+skip degradation (#266 1st round gemini #6 / claude #4).
+        try:
+            with open(meta_path, encoding="utf-8") as f:
+                meta = yaml.safe_load(f)
+        except (yaml.YAMLError, OSError) as exc:
+            violations.append(f"{platform}/platform.yaml: unreadable for device_type collision check ({exc})")
+            continue
+        if not isinstance(meta, dict):
+            violations.append(f"{platform}/platform.yaml: not a mapping; cannot check device_type aliases")
+            continue
         register(meta.get("netmiko_device_type"), platform, "netmiko_device_type")
         register(meta.get("ntc_platform"), platform, "ntc_platform")
     return violations

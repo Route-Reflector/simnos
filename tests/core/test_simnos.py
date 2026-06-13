@@ -367,6 +367,22 @@ class TestSimNOS:
         # The alias resolves to the internal platform key (the reverse-index core).
         assert resolve_device_type("edgecore_sonic") == "edgecore"
 
+    def test_resolve_device_type_runtime_registered_and_unknown(self, monkeypatch):
+        """resolve_device_type serves a runtime-registered platform and None-passes the unknown (#266 / D2).
+
+        This is the mechanism the `nos.plugin` direct-write path relies on
+        (a custom plugin from `SimNOS(plugins=[...])`, or a `nos: {plugin: X}`
+        absent from the import-time index, 1st round codex #3): an unknown value
+        must return None so the `start()` chokepoint falls back to the raw key,
+        and a name added to `nos_plugins` after import must resolve by identity
+        via the dynamic fallback (not just the static reverse index).
+        """
+        import simnos.plugins.nos as nos_registry
+
+        assert resolve_device_type("runtime_only_nos") is None  # unknown → None (chokepoint passes raw through)
+        monkeypatch.setitem(nos_registry.nos_plugins, "runtime_only_nos", ["<runtime-registered>"])
+        assert resolve_device_type("runtime_only_nos") == "runtime_only_nos"  # identity via dynamic fallback
+
     def test_inventory_validation_cmdshell_plugin(self):
         """
         Test that the inventory is validated when
