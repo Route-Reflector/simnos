@@ -10,14 +10,14 @@ hosts:
     myRouter:
         username: admin
         password: admin
-        platform: huawei_smartax
+        device_type: huawei_smartax
         port: 6000
 ```
 このファイルを `inventory.yaml` 📕 と名付けることができますが、他の名前でも構いません。すべての YAML ファイルで、
 デバイスは `hosts:` の下に記述する必要があります。*hosts* の中には、各デバイスが固有のポートを持つ限り、
 好きなだけデバイスを追加できます。デバイスを追加するには、任意の名前を付けるだけです。
 
-各デバイスには `username`、`password`、`port`、`platform` を設定できます。利用可能なすべてのプラットフォームは[こちら](../platforms/index.md)で確認できます。この例ではプラットフォームに `huawei_smartax` を選択し、認証情報はユーザー名 `admin`、パスワード `admin` としています。
+各デバイスには `username`、`password`、`port`、`device_type` を設定できます。利用可能なすべてのプラットフォームは[こちら](../platforms/index.md)で確認できます。この例ではプラットフォームに `huawei_smartax` を選択し、認証情報はユーザー名 `admin`、パスワード `admin` としています。
 
 次に、以下の内容で Python スクリプトを作成します:
 ```python
@@ -57,7 +57,7 @@ ssh -p 6000 admin@localhost
 ## dict を使う方法
 `.yaml` ファイルの代わりに辞書を使用することも可能です。プログラム的に変数を定義したい場合に便利です。前述の方法とほぼ同様ですが、この場合は2つのファイルではなく1つのファイルにまとめます。
 
-CLI でプラットフォームを指定できるようにしたい場合を想像してください。以下のスクリプトは同じことを行いますが、`platform` を指定できます:
+CLI でプラットフォームを指定できるようにしたい場合を想像してください。以下のスクリプトは同じことを行いますが、`device_type` を指定できます:
 
 ```python
 import argparse
@@ -68,7 +68,7 @@ parser = argparse.ArgumentParser(
     )
 
 parser.add_argument(
-    "platform",
+    "device_type",
     type=str,
     help="fake device network operating system"
     )
@@ -80,7 +80,7 @@ inventory = {
         "mySwitch": {
             "username": "admin",
             "password": "admin",
-            "platform": args.platform,
+            "device_type": args.device_type,
             "port": 6000
         }
     }

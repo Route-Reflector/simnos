@@ -59,7 +59,7 @@ inventory = {
             "username": "user",
             "password": "user",
             "port": 6000,
-            "platform": "huawei_smartax",
+            "device_type": "huawei_smartax",
         }
     }
 }

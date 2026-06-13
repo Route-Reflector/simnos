@@ -34,6 +34,9 @@ class Host:
         simnos: "SimNOS",
         device_type: str | None = None,
         configuration_file: str | None = None,
+        facts: dict | None = None,
+        overlay: dict | None = None,
+        variants_policy: dict | None = None,
     ) -> None:
         self.name: str = name
         self.server_inventory: dict = server
@@ -52,6 +55,13 @@ class Host:
         self.nos = None
         self.device_type: str | None = device_type
         self.configuration_file: str | None = configuration_file
+        # #265 reservation (#266 / D1, Decision 5): stored but consumed by nobody
+        # in #266. Kept as attributes so #265 can wire them up without touching
+        # the Host signature again.
+        self.facts: dict | None = facts
+        self.overlay: dict | None = overlay
+        self.variants_policy: dict | None = variants_policy
+        self._warn_reserved_fields()
 
         if self.device_type:
             self.nos_inventory["plugin"] = self.device_type
@@ -111,6 +121,24 @@ class Host:
         self.server.stop()
         self.server = None
         self.running = False
+
+    def _warn_reserved_fields(self) -> None:
+        """Warn loudly for #265 reserved fields that are set but inert in #266.
+
+        `facts` / `overlay` / `variants_policy` are accepted and validated by the
+        inventory schema (the "器") but consumed by neither the loader nor the
+        shell until #265 wires them up. A `log.warning` here keeps a set-but-inert
+        config visible instead of a silent no-op (#266 / Decision 5, anti-silent-bug).
+        The value may come from the host, the inventory default, or a sys_config
+        seed (`variants_policy`), so the message stays provenance-neutral.
+        """
+        for field in ("facts", "overlay", "variants_policy"):
+            if getattr(self, field) is not None:
+                log.warning(
+                    "Host %s has reserved field %r set, which has no effect yet (activated in #265, currently no-op).",
+                    self.name,
+                    field,
+                )
 
     def _validate(self):
         """Validate that the host has the required attributes using pydantic"""

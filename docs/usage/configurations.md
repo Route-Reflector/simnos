@@ -9,7 +9,7 @@ hosts:
     username: user
     password: user
     port: 6000
-    platform: cisco_ios
+    device_type: cisco_ios
     configuration_file: my_configurations/cisco_ios.yaml.j2
 ```
 

@@ -71,7 +71,7 @@ hosts:
     password: user
     port: [6001, 6002]
     replicas: 2
-    platform: cisco_ios
+    device_type: cisco_ios
 ```
 
 コンテナを実行する前にインベントリ設定を調整するか、インベントリの内容を更新して

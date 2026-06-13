@@ -7,6 +7,8 @@ import concurrent.futures
 import copy
 import functools
 import logging
+import os
+from pathlib import Path
 import platform
 import socket
 import threading
@@ -16,7 +18,7 @@ import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import Nos
-from simnos.core.pydantic_models import ModelSimnosInventory
+from simnos.core.pydantic_models import ModelSimnosInventory, ModelSysConfig
 from simnos.core.servers import join_threads_with_deadline
 from simnos.core.timeouts import (
     SHUTDOWN_GLOBAL_DEADLINE,
@@ -70,6 +72,11 @@ class SimNOS:
                       OS path to .yaml file with inventory data
     :param plugins: Plugins to add extra devices/commands
                     currently not supported easily.
+    :param sys_config: SimNOS environment config (`sys_config.yaml`): a dict, an
+                       OS path to a .yaml file, or None to auto-discover
+                       (see ``_discover_sys_config``). Holds environment-wide
+                       settings (data_dir, variants_policy); the inventory holds
+                       topology (#266 / D4).
 
     Sample usage:
 
@@ -85,6 +92,7 @@ class SimNOS:
         self,
         inventory: dict | str | None = None,
         plugins: list | None = None,
+        sys_config: dict | str | None = None,
     ) -> None:
         self.inventory: dict | str = inventory or default_inventory
         self.plugins: list = plugins or []
@@ -96,6 +104,7 @@ class SimNOS:
         self.nos_plugins = nos_plugins
         self.servers_plugins = servers_plugins
 
+        self._load_sys_config(sys_config)
         self._load_inventory()
         self._init()
         self._register_nos_plugins()
@@ -124,6 +133,105 @@ class SimNOS:
             log.exception("stop() failed during SimNOS context manager __exit__")
             raise
 
+    # ----------------------------------------------------------------------
+    # sys_config (environment config) loading + precedence (#266 / D4)
+    # ----------------------------------------------------------------------
+
+    # Search order for sys_config.yaml when no dict/path is passed explicitly
+    # (Decision 6). cwd before home: a project-local file beats the user default.
+    _SYS_CONFIG_FILENAME = "sys_config.yaml"
+
+    def _load_sys_config(self, sys_config: dict | str | None) -> None:
+        """Resolve, validate and store the environment config (#266 / D4).
+
+        Stores the resolved settings on ``self.sys_config`` (global). The
+        precedence chain ``CLI > env > inventory(host > default) > sys_config >
+        builtin`` (Decision 7) is realized as: sys_config seeds the inventory
+        default (``_seed_inventory_default_from_sys_config``, so inventory wins),
+        the ``SIMNOS_DATA_DIR`` env var overrides the file's ``data_dir`` here
+        (env wins over file), and the CLI layer (#267) hooks in above env.
+        """
+        raw = self._discover_sys_config(sys_config)
+        resolved = ModelSysConfig(**raw).model_dump()
+        # env > sys_config file (Decision 7): SIMNOS_DATA_DIR overrides the file.
+        env_data_dir = os.environ.get("SIMNOS_DATA_DIR")
+        if env_data_dir:
+            resolved["data_dir"] = env_data_dir
+        self.sys_config: dict = resolved
+        self._warn_sys_config_noop()
+
+    def _discover_sys_config(self, sys_config: dict | str | None) -> dict:
+        """Find the sys_config source by the Decision 6 search order.
+
+        ① explicit ``sys_config`` arg (dict used as-is, str read as a path) →
+        ② env ``SIMNOS_SYS_CONFIG`` (path) → ③ ``./sys_config.yaml`` (cwd) →
+        ④ ``~/.simnos/sys_config.yaml`` → ⑤ builtin default (empty). An explicit
+        arg / env path that does not exist is a loud error (the caller asked for
+        it); the implicit cwd/home probes are skipped when absent.
+        """
+        if isinstance(sys_config, dict):
+            return sys_config
+        if isinstance(sys_config, str):
+            return self._read_sys_config_file(Path(sys_config), required=True)
+        env_path = os.environ.get("SIMNOS_SYS_CONFIG")
+        if env_path:
+            return self._read_sys_config_file(Path(env_path), required=True)
+        for candidate in (Path.cwd() / self._SYS_CONFIG_FILENAME, Path.home() / ".simnos" / self._SYS_CONFIG_FILENAME):
+            if candidate.is_file():
+                return self._read_sys_config_file(candidate, required=False)
+        return {}
+
+    @staticmethod
+    def _read_sys_config_file(path: Path, required: bool) -> dict:
+        """Read and parse a sys_config YAML file into a dict.
+
+        :param required: if True, a missing file raises (explicit arg/env asked
+                         for this path); if False, the caller already confirmed
+                         existence (implicit probe).
+        """
+        if not path.is_file():
+            if required:
+                raise FileNotFoundError(f"sys_config file not found: {path}")
+            return {}
+        with open(path, encoding="utf-8") as f:
+            data = yaml.safe_load(f.read())
+        if data is None:
+            return {}
+        if not isinstance(data, dict):
+            raise TypeError(f"sys_config must be a mapping, got {type(data).__name__} in {path}")
+        return data
+
+    def _warn_sys_config_noop(self) -> None:
+        """Warn loudly for the global sys_config value that is inert in #266.
+
+        ``data_dir`` is environment-global (never reaches a host) and consumed by
+        nobody until #265 wires it up, so surface a set-but-inert value here with
+        ``log.warning`` (Decision 5, anti-silent-bug). ``variants_policy`` is *not*
+        warned here: it seeds the inventory default and is surfaced per-host by
+        ``Host._warn_reserved_fields`` after the merge, so warning here too would
+        double-report it.
+        """
+        if self.sys_config.get("data_dir") is not None:
+            log.warning(
+                "sys_config sets 'data_dir', which is reserved and has no effect yet "
+                "(activated in #265, currently no-op).",
+            )
+
+    def _seed_inventory_default_from_sys_config(self, inventory_default: dict) -> dict:
+        """Seed inventory-default with sys_config's per-host settings (#266 / D4).
+
+        Realizes the ``inventory(default) > sys_config`` rung of the precedence
+        chain (Decision 7) for the per-host ``variants_policy``: sys_config's
+        global default sits *under* the inventory default (and per-host) so a more
+        specific inventory value wins. ``data_dir`` is environment-global, not a
+        per-host setting, so it stays on ``self.sys_config`` and is not seeded here.
+        """
+        seeded = dict(inventory_default)
+        policy = self.sys_config.get("variants_policy")
+        if policy is not None and "variants_policy" not in seeded:
+            seeded["variants_policy"] = policy
+        return seeded
+
     def _is_inventory_in_yaml(self) -> bool:
         """method that checks if the inventory is a yaml file."""
         return isinstance(self.inventory, str) and self.inventory.endswith((".yaml", ".yml"))
@@ -145,9 +253,13 @@ class SimNOS:
         if not isinstance(self.inventory, dict):
             raise TypeError(f"Inventory must be a dict or a path to a YAML file, got {type(self.inventory).__name__}")
 
+        # Precedence (Decision 7, last-wins): builtin < sys_config < inventory
+        # default < host. sys_config seeds the default below the inventory's own
+        # default; the per-host `{**default, **host}` merge in `_init` then lets a
+        # host override. The CLI layer (#267) hooks in above env, outside this merge.
         self.inventory["default"] = {
             **default_inventory["default"],
-            **self.inventory.get("default", {}),
+            **self._seed_inventory_default_from_sys_config(self.inventory.get("default", {})),
         }
         ModelSimnosInventory(**self.inventory)
         log.debug("SimNOS inventory validation succeeded")

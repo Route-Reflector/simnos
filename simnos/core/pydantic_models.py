@@ -389,6 +389,23 @@ class CMDShellPlugin(BaseModel):
     configuration: CMDShellConfig | None = None
 
 
+class ModelOverlay(BaseModel):
+    """User overlay reservation (#266 / D1, Decision 5) — wired up in #265.
+
+    The "器" (vessel) for the #265 output-only override: drop a captured `.txt`
+    under `dir` to replace a command's wire output. `override_commands` toggles
+    full command-tree replacement vs output-only merge. #266 only validates the
+    shape; the loader does not consume it yet (no-op, warned at load). The exact
+    schema is #265's design input, so this stays minimal — `extra="forbid"`
+    rejects typos but the field set is deliberately small (R4).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    dir: StrictStr | None = None
+    override_commands: StrictBool | None = None
+
+
 class InventoryDefaultSection(BaseModel):
     """
     Pydantic model for SimNOS inventory default section.
@@ -404,6 +421,18 @@ class InventoryDefaultSection(BaseModel):
     server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
+    # #265 reservation (#266 / D1, Decision 5): accepted + validated here so the
+    # inventory schema never breaks again when #265 wires up the behaviour, but
+    # consumed by neither the loader nor the shell in #266. A non-None value is
+    # surfaced at host load with `log.warning` (Host.__init__) so a "set but
+    # silently inert" config is loud, not a silent no-op (anti-silent-bug).
+    # `facts` is a free mapping (render variables, shape owned by #265); only
+    # `overlay` has a committed shape. `variants_policy` shape is #265's input,
+    # so it stays a permissive mapping to avoid a guessed schema forcing a second
+    # break (R4).
+    facts: dict | None = Field(None, description="#265 で有効化、現在 no-op (host render facts)")
+    overlay: ModelOverlay | None = Field(None, description="#265 で有効化、現在 no-op (output overlay)")
+    variants_policy: dict | None = Field(None, description="#265 で有効化、現在 no-op (output_variants 選択方針)")
 
 
 class HostConfig(InventoryDefaultSection):
@@ -435,3 +464,21 @@ class ModelSimnosInventory(BaseModel):
     hosts: dict[StrictStr, HostConfig]
 
     model_config = ConfigDict(extra="forbid")
+
+
+class ModelSysConfig(BaseModel):
+    """SimNOS environment config schema (`sys_config.yaml`, #266 / D4, Decision 6).
+
+    The minimal "environment vs topology" split: `sys_config.yaml` holds
+    environment-wide settings, the inventory holds topology. #266 introduces it
+    with two fields only — `data_dir` (overlay base dir default, #265 consumes)
+    and `variants_policy` (global default for the inventory per-host field of the
+    same name). Both are reserved/no-op in #266 (warned at load); full build-out
+    is deferred to #265 / #267 (案6-A). `variants_policy` mirrors the inventory
+    field's permissive mapping type (shape owned by #265, R4).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    data_dir: StrictStr | None = None
+    variants_policy: dict | None = None
