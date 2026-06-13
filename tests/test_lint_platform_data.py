@@ -1,6 +1,20 @@
-"""Unit tests for the A3 platform data lint (#264 / D8, D9, tasks.check_platform_data)."""
+"""Unit tests for the A3 platform data lint (#264 / D8, D9 + #276 ratchet).
 
-from tasks import check_platform_data, check_platform_data_warnings
+Covers `tasks.check_platform_data` (data conventions),
+`tasks.check_platform_data_warnings` (warning tier) and
+`tasks.check_platform_data_ratchet` (authoring baseline ratchet). The ratchet
+tests follow the deleted `tests/test_lint_platform_yaml.py` (#244): the real
+repo passes against the shipped baseline, and negative assets prove each rule
+actually fails — without these a bug in the lint logic would read as
+"everything is clean" forever.
+"""
+
+from tasks import (
+    check_platform_data,
+    check_platform_data_ratchet,
+    check_platform_data_warnings,
+    is_stub_help,
+)
 
 
 def _write(path, content, *, binary=False):
@@ -149,3 +163,106 @@ class TestWarnings:
         )
         _write(commands / "show_version.txt", "ok\n")
         assert check_platform_data_warnings(str(tmp_path)) == []
+
+
+class TestIsStubHelp:
+    """Pin the stub-help classification (#244 / P-13, ported in #276)."""
+
+    def test_lowercase_execute_prefix_is_stub(self):
+        assert is_stub_help('execute the command "show version"')
+
+    def test_capitalized_execute_prefix_is_stub(self):
+        assert is_stub_help("Execute the command terminal width 511. This automatically generated.")
+
+    def test_automatically_generated_marker_is_stub(self):
+        assert is_stub_help("Anything mentioning This automatically generated. counts")
+
+    def test_real_help_is_not_stub(self):
+        assert not is_stub_help("enter enable mode")
+
+
+class TestRatchet:
+    """Baseline-ratchet rules of `check_platform_data_ratchet` (#276).
+
+    Ported from the deleted `tests/test_lint_platform_yaml.py` (#244),
+    re-keyed for A3: baseline keys are platform names, stub identity sets
+    hold `command` field values.
+    """
+
+    EMPTY_BASELINE = "missing_default: []\nstub_help: {}\n"
+
+    def _baseline(self, tmp_path, content=EMPTY_BASELINE):
+        path = tmp_path / "baseline.yaml"
+        path.write_text(content, encoding="utf-8")
+        return str(path)
+
+    def _clean_platform(self, tmp_path, name="p"):
+        commands = _platform(tmp_path, name)
+        _write(commands / "_default_.yaml", "command: _default_\nhelp: default output for unknown commands\n")
+        _write(commands / "show_clock.yaml", "command: show clock\nhelp: Display the system clock\n")
+        return commands
+
+    def test_real_repo_is_clean(self):
+        """The shipped baseline matches the shipped A3 platform data."""
+        assert check_platform_data_ratchet() == []
+
+    def test_clean_platform_passes(self, tmp_path):
+        self._clean_platform(tmp_path)
+        assert check_platform_data_ratchet(str(tmp_path), self._baseline(tmp_path)) == []
+
+    def test_missing_default_outside_baseline_fails(self, tmp_path):
+        """Rule 1: a new platform without `_default_` is rejected."""
+        commands = _platform(tmp_path)
+        _write(commands / "show_clock.yaml", "command: show clock\nhelp: Display the system clock\n")
+        violations = check_platform_data_ratchet(str(tmp_path), self._baseline(tmp_path))
+        assert any("missing '_default_'" in v for v in violations)
+
+    def test_new_stub_help_fails_even_when_another_stub_is_fixed(self, tmp_path):
+        """Rule 2: identity set, not a count — swaps cannot slip through.
+
+        Pins the #244 2nd round 🦊#1 scenario: baseline froze `old cmd` as a
+        stub; the PR fixes it but adds `new cmd` with a stub. A per-platform
+        count would balance out; the identity set fails both directions.
+        """
+        commands = self._clean_platform(tmp_path)
+        _write(commands / "new_cmd.yaml", 'command: new cmd\nhelp: execute the command "new cmd"\n')
+        baseline = self._baseline(tmp_path, "missing_default: []\nstub_help:\n  p:\n  - old cmd\n")
+        violations = check_platform_data_ratchet(str(tmp_path), baseline)
+        assert any("'new cmd' adds an auto-generated stub help" in v for v in violations)
+        assert any("'old cmd' no longer has a stub help" in v for v in violations)
+
+    def test_heritage_sentence_fails_on_parsed_help(self, tmp_path):
+        """Rule 3: detection works on parsed values, so folding cannot hide it.
+
+        The sentence is authored folded across two lines — a raw-text grep
+        misses it (this fooled four independent measurements during the #244
+        design round), the parsed check does not.
+        """
+        commands = self._clean_platform(tmp_path)
+        _write(
+            commands / "legacy_cmd.yaml",
+            "command: legacy cmd\n"
+            "help: Execute the command legacy. This automatically generated. Feel\n"
+            "  free to change it!\n",
+        )
+        baseline = self._baseline(tmp_path, "missing_default: []\nstub_help:\n  p:\n  - legacy cmd\n")
+        violations = check_platform_data_ratchet(str(tmp_path), baseline)
+        assert any("still contains 'Feel free to change it!'" in v for v in violations)
+
+    def test_stale_baseline_entry_fails(self, tmp_path):
+        """Rule 4: a baseline entry for a removed platform must be cleaned up."""
+        self._clean_platform(tmp_path)
+        baseline = self._baseline(tmp_path, "missing_default:\n- gone_platform\nstub_help: {}\n")
+        violations = check_platform_data_ratchet(str(tmp_path), baseline)
+        assert any("the platform does not exist" in v for v in violations)
+
+    def test_fixed_default_still_in_baseline_fails(self, tmp_path):
+        """Rule 5: improving a platform forces shrinking the baseline in the same PR.
+
+        Without this, a forgotten baseline entry would let the violation
+        grow back unnoticed later (#244 2nd round 🦊#2).
+        """
+        self._clean_platform(tmp_path)
+        baseline = self._baseline(tmp_path, "missing_default:\n- p\nstub_help: {}\n")
+        violations = check_platform_data_ratchet(str(tmp_path), baseline)
+        assert any("still listed under missing_default" in v for v in violations)
