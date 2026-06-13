@@ -254,7 +254,7 @@ class TestRatchet:
         self._clean_platform(tmp_path)
         baseline = self._baseline(tmp_path, "missing_default:\n- gone_platform\nstub_help: {}\n")
         violations = check_platform_data_ratchet(str(tmp_path), baseline)
-        assert any("the platform does not exist" in v for v in violations)
+        assert any("not an A3 platform with command data" in v for v in violations)
 
     def test_fixed_default_still_in_baseline_fails(self, tmp_path):
         """Rule 5: improving a platform forces shrinking the baseline in the same PR.
@@ -266,3 +266,30 @@ class TestRatchet:
         baseline = self._baseline(tmp_path, "missing_default:\n- p\nstub_help: {}\n")
         violations = check_platform_data_ratchet(str(tmp_path), baseline)
         assert any("still listed under missing_default" in v for v in violations)
+
+    def test_fixed_stub_still_in_baseline_fails(self, tmp_path):
+        """Rule 5 (stub side): a fixed stub left in the baseline must shrink.
+
+        The mirror of `test_fixed_default_still_in_baseline_fails` for the
+        stub_help channel — the platform has no stub help anymore but the
+        baseline still freezes one, so the entry has to be removed (1st round
+        🦊#3). The swap test exercises this direction too, but a standalone
+        case keeps the rule-5 stub regression readable in isolation.
+        """
+        self._clean_platform(tmp_path)
+        baseline = self._baseline(tmp_path, "missing_default: []\nstub_help:\n  p:\n  - show clock\n")
+        violations = check_platform_data_ratchet(str(tmp_path), baseline)
+        assert any("'show clock' no longer has a stub help" in v for v in violations)
+
+    def test_wrong_path_fires_stale_entries(self, tmp_path):
+        """A typo'd platforms dir is not a silent pass.
+
+        The ratchet has no empty-glob self-guard (the `lint_platform_data`
+        task owns that via `list_a3_platform_names()`), but a wrong dir
+        against the shipped-style baseline still fails loudly: every baseline
+        platform is unseen, so rule 4 fires per entry (1st round 🦊#2 / 🐙#3).
+        """
+        baseline = self._baseline(tmp_path, "missing_default:\n- alcatel_aos\nstub_help:\n  cisco_ios:\n  - show foo\n")
+        violations = check_platform_data_ratchet(str(tmp_path / "nonexistent"), baseline)
+        assert any("alcatel_aos" in v and "not an A3 platform" in v for v in violations)
+        assert any("cisco_ios" in v and "not an A3 platform" in v for v in violations)

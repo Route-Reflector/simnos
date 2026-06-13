@@ -52,8 +52,8 @@ def bandit(context):
 def _iter_platform_command_dirs(platforms_dir: str):
     """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
 
-    The single walk the lint passes (`check_platform_data` /
-    `check_platform_data_warnings` / `check_platform_data_ratchet`) share — an
+    The single walk shared by the lint passes (`check_platform_data` /
+    `check_platform_data_warnings` / `check_platform_data_ratchet`) — an
     absent platforms dir or a platform without a ``commands/`` subdir is
     skipped, so callers loop over real targets only.
     """
@@ -259,6 +259,22 @@ def check_platform_data_ratchet(
     baseline keys are platform names and the stub identity sets hold
     `command` field values (the SSoT, not filenames).
 
+    Two intentional non-guards (vs the old monolithic lint):
+
+    - wrong path: unlike the old `check_platform_yaml`, this has no
+      "empty glob → loud" self-guard. The `lint_platform_data` task owns
+      that check (`list_a3_platform_names()` raises on an empty platforms
+      dir), so a typo'd path is caught before the ratchet runs. A direct
+      `check_platform_data_ratchet(wrong_dir, baseline)` call still fails
+      loudly today because the shipped baseline lists all 50 platforms, so
+      rule 4 fires once per stale entry (pinned by
+      `TestRatchet.test_wrong_path_fires_stale_entries`).
+    - duplicate `command`: two yamls in one platform declaring the same
+      `command` is a load error in `platform_loader` (and every platform is
+      load-tested in `tests/plugins/test_platforms.py`), so the last-wins
+      `helps[command]` here cannot mask a stub in practice — the loader is
+      the SSoT for command uniqueness, not this lint.
+
     Returns a list of human-readable violations (empty = clean).
     """
     with open(baseline_path, encoding="utf-8") as f:
@@ -303,9 +319,11 @@ def check_platform_data_ratchet(
             f"{platform}: command '{name}' help still contains {HERITAGE_HELP_SENTENCE!r}"
             for name in sorted(name for name, help_text in helps.items() if HERITAGE_HELP_SENTENCE in help_text)
         )
-    # rule 4: stale baseline entries
+    # rule 4: stale baseline entries (`seen` only holds platforms with a
+    # `commands/` dir, so a bare dir with no command data reads as stale too —
+    # the wording covers both "removed" and "no longer an A3 platform").
     violations.extend(
-        f"{platform}: listed in {baseline_path} but the platform does not exist — remove the stale entry"
+        f"{platform}: listed in {baseline_path} but is not an A3 platform with command data — remove the stale entry"
         for platform in sorted((baseline_missing | set(baseline_stub)) - seen)
     )
     return violations
