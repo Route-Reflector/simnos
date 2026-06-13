@@ -864,7 +864,7 @@ class HotReloadTest(TestCase):
 
     @pytest.mark.skipif(sys.platform == "win32", reason="Windows does not allow file movement on Github runners")
     @pytest.mark.xdist_group("hot-reload-fs")
-    @simnos(platform="cisco_ios", return_instance=True)
+    @simnos(device_type="cisco_ios", return_instance=True)
     def test_hot_reload_integration_py_jinja(self, net: SimNOS):
         """
         Test that the hot reload feature works correctly for a py-template edit.

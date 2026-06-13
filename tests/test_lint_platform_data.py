@@ -11,6 +11,7 @@ actually fails — without these a bug in the lint logic would read as
 
 from tasks import (
     check_platform_data,
+    check_platform_data_device_type_collisions,
     check_platform_data_ratchet,
     check_platform_data_warnings,
     is_stub_help,
@@ -293,3 +294,47 @@ class TestRatchet:
         violations = check_platform_data_ratchet(str(tmp_path / "nonexistent"), baseline)
         assert any("alcatel_aos" in v and "not an A3 platform" in v for v in violations)
         assert any("cisco_ios" in v and "not an A3 platform" in v for v in violations)
+
+
+class TestDeviceTypeCollisions:
+    """#266 / D2: device_type alias collisions across platforms are gated.
+
+    Mirrors the runtime reverse-index guard in `simnos.plugins.nos`; these
+    pin that the authoring-time lint catches the same conflicts (and does NOT
+    false-positive on the `name == netmiko == ntc` shape every platform ships
+    today, which a naive "key already seen" check would).
+    """
+
+    @staticmethod
+    def _meta(tmp_path, name, *, netmiko=None, ntc=None):
+        d = tmp_path / name
+        d.mkdir(parents=True, exist_ok=True)
+        lines = []
+        if netmiko is not None:
+            lines.append(f"netmiko_device_type: {netmiko}")
+        if ntc is not None:
+            lines.append(f"ntc_platform: {ntc}")
+        (d / "platform.yaml").write_text(("\n".join(lines) + "\n") if lines else "{}\n", encoding="utf-8")
+
+    def test_distinct_platforms_pass(self, tmp_path):
+        self._meta(tmp_path, "edgecore", netmiko="edgecore_sonic", ntc="edgecore")
+        self._meta(tmp_path, "cisco_ios", netmiko="cisco_ios", ntc="cisco_ios")
+        assert check_platform_data_device_type_collisions(str(tmp_path)) == []
+
+    def test_identity_equals_aliases_is_noop(self, tmp_path):
+        # name == netmiko == ntc (today's common case) must NOT false-positive.
+        self._meta(tmp_path, "cisco_ios", netmiko="cisco_ios", ntc="cisco_ios")
+        assert check_platform_data_device_type_collisions(str(tmp_path)) == []
+
+    def test_two_platforms_share_netmiko_alias_flagged(self, tmp_path):
+        self._meta(tmp_path, "p_a", netmiko="shared_dt")
+        self._meta(tmp_path, "p_b", netmiko="shared_dt")
+        violations = check_platform_data_device_type_collisions(str(tmp_path))
+        assert any("shared_dt" in v for v in violations)
+
+    def test_alias_colliding_with_other_identity_flagged(self, tmp_path):
+        # p_b's netmiko alias lands on p_a's identity name (2nd round gemini #3).
+        self._meta(tmp_path, "p_a")
+        self._meta(tmp_path, "p_b", netmiko="p_a")
+        violations = check_platform_data_device_type_collisions(str(tmp_path))
+        assert any("p_a" in v for v in violations)

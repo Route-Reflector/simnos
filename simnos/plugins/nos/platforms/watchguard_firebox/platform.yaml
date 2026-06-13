@@ -4,5 +4,5 @@ modes:
   config:
     prompt: "{{ base_prompt }}(config)#"
 initial_mode: user
-netmiko_device_type: watchguard_firebox
+netmiko_device_type: watchguard_fireware
 ntc_platform: watchguard_firebox

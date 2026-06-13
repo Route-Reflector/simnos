@@ -3,5 +3,5 @@ hosts:
     username: simnos
     password: simnos
     port: 5001
-    platform: huawei_smartax
+    device_type: huawei_smartax
     configuration_file: "tests/assets/test_module.yaml.j2"

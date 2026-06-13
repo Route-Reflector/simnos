@@ -17,7 +17,7 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.nos import available_platforms
-from tests.utils import NETMIKO_DEVICE_TYPE_MAP, generate_random_string, get_free_port, get_platforms_from_md
+from tests.utils import generate_random_string, get_free_port, get_platforms_from_md, netmiko_device_type_of
 
 
 class TestNetmiko:
@@ -44,7 +44,7 @@ class TestNetmiko:
                         "username": "usertest",
                         "password": "passwordtest",
                         "port": free_port,
-                        "platform": device_type,
+                        "device_type": device_type,
                     }
                 }
             }
@@ -57,7 +57,7 @@ class TestNetmiko:
                 "username": "usertest",
                 "password": "passwordtest",
                 "port": free_port,
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(device_type, device_type),
+                "device_type": netmiko_device_type_of(device_type),
             }
             print(f"Testing device_type: {device_type}")
             with ConnectHandler(**device_credentials):
@@ -87,25 +87,25 @@ class TestNetmiko:
                     "port": port_router0,
                     "username": generate_random_string(5),
                     "password": generate_random_string(8),
-                    "platform": random.choice(available_platforms),
+                    "device_type": random.choice(available_platforms),
                 },
                 "router1": {
                     "port": port_router1,
                     "username": generate_random_string(5),
                     "password": generate_random_string(8),
-                    "platform": random.choice(available_platforms),
+                    "device_type": random.choice(available_platforms),
                 },
             }
         }
         credentials = {}
         for router in inventory["hosts"]:
-            platform = inventory["hosts"][router]["platform"]
+            device_type = inventory["hosts"][router]["device_type"]
             credentials[router] = {
                 "host": "localhost",
                 "username": inventory["hosts"][router]["username"],
                 "password": inventory["hosts"][router]["password"],
                 "port": inventory["hosts"][router]["port"],
-                "device_type": NETMIKO_DEVICE_TYPE_MAP.get(platform, platform),
+                "device_type": netmiko_device_type_of(device_type),
             }
 
         net = SimNOS(inventory=inventory)

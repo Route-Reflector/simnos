@@ -301,7 +301,7 @@ class ModelHost(BaseModel):
     username: StrictStr
     password: StrictStr
     port: Port
-    platform: StrictStr | None = None
+    device_type: StrictStr | None = None
 
 
 # ---------------------------------------------------------------------------------------
@@ -400,7 +400,7 @@ class InventoryDefaultSection(BaseModel):
     password: StrictStr | None = None
     port: Port | list[Port] | None = None
     configuration_file: StrictStr | None = None
-    platform: StrictStr | None = None
+    device_type: StrictStr | None = None
     server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None

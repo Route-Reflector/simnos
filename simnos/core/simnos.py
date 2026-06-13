@@ -48,9 +48,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": DEFAULT_PORT_START, "platform": "cisco_ios"},
-        "router_huawei_smartax": {"port": DEFAULT_PORT_START + 1, "platform": "huawei_smartax"},
-        "router_arista_eos": {"port": DEFAULT_PORT_START + 2, "platform": "arista_eos"},
+        "router_cisco_ios": {"port": DEFAULT_PORT_START, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": DEFAULT_PORT_START + 1, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": DEFAULT_PORT_START + 2, "device_type": "arista_eos"},
     },
 }
 
@@ -468,23 +468,23 @@ def _get_free_port() -> int:
         return s.getsockname()[1]
 
 
-def simnos(platform: str | None = None, inventory: dict | str | None = None, return_instance: bool = False):
+def simnos(device_type: str | None = None, inventory: dict | str | None = None, return_instance: bool = False):
     """
     Decorator to run a test with SimNOS server.
     """
-    if platform and inventory:
-        raise ValueError("platform and inventory cannot be used together")
-    if not platform and not inventory:
-        raise ValueError("platform or inventory must be set")
-    if platform:
-        assert_platform_supported(platform)
+    if device_type and inventory:
+        raise ValueError("device_type and inventory cannot be used together")
+    if not device_type and not inventory:
+        raise ValueError("device_type or inventory must be set")
+    if device_type:
+        assert_platform_supported(device_type)
         inventory = {
             "hosts": {
                 "SimNOS": {
                     "username": "test",
                     "password": "test",
                     "port": _get_free_port(),
-                    "platform": platform,
+                    "device_type": device_type,
                 }
             }
         }

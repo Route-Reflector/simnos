@@ -3,9 +3,9 @@ hosts:
     username: simnos
     password: simnos
     port: 5001
-    platform: huawei_smartax
+    device_type: huawei_smartax
   R2:
     username: simnos
     password: simnos
     port: 6000
-    platform: cisco_ios
+    device_type: cisco_ios
