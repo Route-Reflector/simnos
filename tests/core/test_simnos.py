@@ -621,9 +621,8 @@ class TestSysConfig:
 
     def test_cwd_discovered(self, tmp_path, monkeypatch):
         """`./sys_config.yaml` in cwd is discovered when no arg/env is set."""
+        # env is already cleared by the autouse `_isolate_sys_config_env` fixture.
         (tmp_path / "sys_config.yaml").write_text("data_dir: /from/cwd\n", encoding="utf-8")
-        monkeypatch.delenv("SIMNOS_SYS_CONFIG", raising=False)
-        monkeypatch.delenv("SIMNOS_DATA_DIR", raising=False)
         monkeypatch.chdir(tmp_path)
         net = SimNOS()
         assert net.sys_config["data_dir"] == "/from/cwd"
