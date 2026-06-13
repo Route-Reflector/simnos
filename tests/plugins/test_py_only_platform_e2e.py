@@ -22,11 +22,15 @@ import pytest
 from simnos.core.nos import Nos
 import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
+from tests.assets.synthetic_py_only import PY_ONLY_MARKER
 from tests.utils import creds_from_host
 
+# The registry key is the filename stem; hardcoded (not derived from the asset's
+# NAME) so the `nos.name == PY_ONLY_NAME` assertion stays a real NAME==stem pin
+# rather than a vacuous self-comparison. PY_ONLY_MARKER is imported from the
+# asset (single source — its wire-delivered value is still asserted independently).
 PY_ONLY_NAME = "synthetic_py_only"
 PY_ONLY_MODULE = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets", "synthetic_py_only.py"))
-PY_ONLY_MARKER = "SYNTHETIC-PY-ONLY-MARKER"
 
 
 @pytest.fixture
@@ -57,6 +61,11 @@ def test_py_only_platform_takes_legacy_resolved_platform_path(register_py_only):
     # The dynamic output is a callable handler, not a literal — the py-only
     # value proposition (dynamic behavior with no A3 statics).
     assert callable(nos.commands["show py-only"]["output"])
+    # The 3 scalar prompts the legacy adapter consumes (build_resolved_platform
+    # passes exactly these to adapt_legacy_commands) are wired from the module.
+    assert nos.initial_prompt == "{base_prompt}>"
+    assert nos.enable_prompt == "{base_prompt}#"
+    assert nos.config_prompt == "{base_prompt}(config)#"
 
 
 @pytest.mark.timeout(60)
