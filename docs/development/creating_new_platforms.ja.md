@@ -68,6 +68,8 @@ A3 データ lint (`invoke lint-platform-data`、CI + pre-commit) が gate す�
 - **encoding**: すべての `.txt` / `.j2` 出力ファイルは UTF-8・LF のみ・末尾改行必須 (空の出力ファイルは 0 バイトのまま)。
 - **参照**: 各出力ファイルはちょうど 1 つの command yaml から参照される (1 yaml : 1 output)。未参照の出力ファイル (orphan)、欠落した参照先、共有参照を検出。
 - **拡張子規約**: literal channel (`output` / variant の `output`) は `.txt`、`output_template` は `.j2`。`.yml` の command ファイル (loader は `.yaml` のみ glob) を検出。
+- **`_default_` の存在**: 新規プラットフォームは必ず `_default_` command を定義する。rule 以前からのプラットフォームは `platform_data_lint_baseline.yaml` (repo root) に凍結済みで、この baseline は縮小しかしない。
+- **`help` テキスト**: 本物の help を書く。自動生成 stub (`execute the command "X"`) は baseline に凍結済みで、新規追加は lint が fail する。stub を本物の help に置き換える際は同じ PR で baseline エントリも削除する。heritage 文言 `"Feel free to change it!"` は無条件で reject される。
 
 加えて **warning** (非ブロッキング) も出力: ファイル名が sanitize 済コマンド名と不一致、`type: ntc` なのに `source` ブロック欠落。
 

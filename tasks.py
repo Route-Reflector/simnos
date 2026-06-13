@@ -52,10 +52,10 @@ def bandit(context):
 def _iter_platform_command_dirs(platforms_dir: str):
     """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
 
-    The single walk both lint passes (`check_platform_data` /
-    `check_platform_data_warnings`) share — an absent platforms dir or a platform
-    without a ``commands/`` subdir is skipped, so callers loop over real targets
-    only.
+    The single walk shared by the lint passes (`check_platform_data` /
+    `check_platform_data_warnings` / `check_platform_data_ratchet`) — an
+    absent platforms dir or a platform without a ``commands/`` subdir is
+    skipped, so callers loop over real targets only.
     """
     if not os.path.isdir(platforms_dir):
         return
@@ -63,6 +63,17 @@ def _iter_platform_command_dirs(platforms_dir: str):
         commands_dir = os.path.join(platforms_dir, platform, "commands")
         if os.path.isdir(commands_dir):
             yield platform, commands_dir
+
+
+def _iter_command_yamls(commands_dir: str):
+    """Yield ``(yaml_path, parsed_data)`` for every command yaml in the dir.
+
+    The glob + parse loop every lint pass repeats; an empty / null yaml parses
+    to ``{}`` so callers can ``.get`` without guarding.
+    """
+    for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+        with open(command_yaml, encoding="utf-8") as f:
+            yield command_yaml, yaml.safe_load(f) or {}
 
 
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
@@ -94,9 +105,7 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
             for stray in sorted(glob.glob(os.path.join(commands_dir, "*.yml")))
         )
         referenced: dict[str, list[str]] = {}
-        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
-            with open(command_yaml, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+        for command_yaml, data in _iter_command_yamls(commands_dir):
             for ref in _output_refs(data):
                 referenced.setdefault(ref, []).append(os.path.basename(command_yaml))
             violations.extend(_check_ref_extensions(data, platform, os.path.basename(command_yaml)))
@@ -134,10 +143,8 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
     """
     warnings: list[str] = []
     for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
-        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+        for command_yaml, data in _iter_command_yamls(commands_dir):
             stem = os.path.basename(command_yaml).removesuffix(".yaml")
-            with open(command_yaml, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
             command = data.get("command")
             if isinstance(command, str):
                 base = sanitize_command_stem(command)
@@ -205,14 +212,134 @@ def _check_output_encoding(path: str, rel: str) -> list[str]:
     return violations
 
 
+# --- A3 authoring ratchet (#276, ported from the #244 platform-yaml lint) ----
+
+PLATFORM_DATA_LINT_BASELINE = "platform_data_lint_baseline.yaml"
+HERITAGE_HELP_SENTENCE = "Feel free to change it!"
+
+
+def is_stub_help(help_text: str) -> bool:
+    """Return True for an auto-generated stub help (FakeNOS heritage).
+
+    Covers the lower/upper-case `execute the command ...` prefix and the
+    `This automatically generated` marker (#244 / P-13).
+
+    Deliberately prefix/marker-based, so a hand-edited help that keeps
+    the stub prefix still counts as a stub — improving a help means
+    dropping the prefix, not appending to it (conservative direction:
+    the false-positive side only freezes an entry in the baseline, it
+    never lets new drift through).
+    """
+    lowered = help_text.lower()
+    return lowered.startswith("execute the command") or "this automatically generated" in lowered
+
+
+def check_platform_data_ratchet(
+    platforms_dir: str = PLATFORMS_A3_DIR,
+    baseline_path: str = PLATFORM_DATA_LINT_BASELINE,
+) -> list[str]:
+    """Check the A3 platform dirs against the authoring ratchet (#276).
+
+    Baseline-ratchet rules (the baseline freezes today's drift; new drift
+    fails CI, improvements must shrink the baseline in the same PR):
+
+    1. every platform defines a `_default_` command (baseline-exempt)
+    2. no command gains an auto-generated stub help (identity set per
+       platform — a count would let "improve one, add one" slip through)
+    3. no help contains the heritage sentence "Feel free to change it!"
+       (checked on parsed help values: a raw-text grep is fooled by
+       folded scalars splitting the sentence across lines)
+    4. no baseline entry points at a platform that no longer exists
+    5. no baseline entry remains for a violation that was fixed
+       (forgetting to shrink the baseline would let later regressions
+       grow back unnoticed)
+
+    Ported from the #244 `check_platform_yaml` ratchet, re-keyed for A3:
+    the lint unit is the platform dir (not a monolithic yaml file), so the
+    baseline keys are platform names and the stub identity sets hold
+    `command` field values (the SSoT, not filenames).
+
+    Two intentional non-guards (vs the old monolithic lint):
+
+    - wrong path: unlike the old `check_platform_yaml`, this has no
+      "empty glob → loud" self-guard. The `lint_platform_data` task owns
+      that check (`list_a3_platform_names()` raises on an empty platforms
+      dir), so a typo'd path is caught before the ratchet runs. A direct
+      `check_platform_data_ratchet(wrong_dir, baseline)` call still fails
+      loudly today because the shipped baseline lists all 50 platforms, so
+      rule 4 fires once per stale entry (pinned by
+      `TestRatchet.test_wrong_path_fires_stale_entries`).
+    - duplicate `command`: two yamls in one platform declaring the same
+      `command` is a load error in `platform_loader` (and every platform is
+      load-tested in `tests/plugins/test_platforms.py`), so the last-wins
+      `helps[command]` here cannot mask a stub in practice — the loader is
+      the SSoT for command uniqueness, not this lint.
+
+    Returns a list of human-readable violations (empty = clean).
+    """
+    with open(baseline_path, encoding="utf-8") as f:
+        baseline = yaml.safe_load(f) or {}
+    baseline_missing = set(baseline.get("missing_default") or [])
+    baseline_stub = {platform: set(commands or []) for platform, commands in (baseline.get("stub_help") or {}).items()}
+
+    violations: list[str] = []
+    seen: set[str] = set()
+    for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
+        seen.add(platform)
+        commands: set[str] = set()
+        helps: dict[str, str] = {}
+        for _, data in _iter_command_yamls(commands_dir):
+            command = data.get("command")
+            if not isinstance(command, str):
+                continue
+            commands.add(command)
+            if isinstance(data.get("help"), str):
+                helps[command] = data["help"]
+        # rule 1 / 5: _default_ presence vs baseline
+        if "_default_" not in commands and platform not in baseline_missing:
+            violations.append(f"{platform}: missing '_default_' command (new platforms must define one)")
+        if "_default_" in commands and platform in baseline_missing:
+            violations.append(
+                f"{platform}: defines '_default_' but is still listed under missing_default — shrink {baseline_path}"
+            )
+        # rule 2 / 5: stub-help identity set vs baseline
+        current_stubs = {name for name, help_text in helps.items() if is_stub_help(help_text)}
+        allowed_stubs = baseline_stub.get(platform, set())
+        violations.extend(
+            f"{platform}: command '{name}' adds an auto-generated stub help — write a real one"
+            for name in sorted(current_stubs - allowed_stubs)
+        )
+        violations.extend(
+            f"{platform}: command '{name}' no longer has a stub help but is still listed under stub_help "
+            f"— shrink {baseline_path}"
+            for name in sorted(allowed_stubs - current_stubs)
+        )
+        # rule 3: heritage sentence
+        violations.extend(
+            f"{platform}: command '{name}' help still contains {HERITAGE_HELP_SENTENCE!r}"
+            for name in sorted(name for name, help_text in helps.items() if HERITAGE_HELP_SENTENCE in help_text)
+        )
+    # rule 4: stale baseline entries (`seen` only holds platforms with a
+    # `commands/` dir, so a bare dir with no command data reads as stale too —
+    # the wording covers both "removed" and "no longer an A3 platform").
+    violations.extend(
+        f"{platform}: listed in {baseline_path} but is not an A3 platform with command data — remove the stale entry"
+        for platform in sorted((baseline_missing | set(baseline_stub)) - seen)
+    )
+    return violations
+
+
 @task
 def lint_platform_data(context):
-    """Lint the A3 platform data directories (#264 / D8, D9).
+    """Lint the A3 platform data directories (#264 / D8, D9 + #276 ratchet).
 
     Gating: encoding (UTF-8 / LF / trailing newline), orphan output files,
     shared output references, extension convention, stray ``.yml`` (see
-    `check_platform_data`). Warning-tier (printed, non-blocking): filename
-    convention + ``type: ntc`` provenance (see `check_platform_data_warnings`).
+    `check_platform_data`) + the authoring baseline ratchet (`_default_`
+    presence / stub help / heritage wording, see
+    `check_platform_data_ratchet`). Warning-tier (printed, non-blocking):
+    filename convention + ``type: ntc`` provenance (see
+    `check_platform_data_warnings`).
     """
     # Loud on an empty platforms dir: after the A3 migration completed, 0
     # platforms means a wrong path / broken checkout, not a legitimate
@@ -227,7 +354,7 @@ def lint_platform_data(context):
     if warnings:
         print(f"({len(warnings)} warning(s) — informational, not blocking)")
 
-    violations = check_platform_data()
+    violations = check_platform_data() + check_platform_data_ratchet()
     for violation in violations:
         print(violation)
     if violations:

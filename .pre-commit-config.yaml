@@ -28,7 +28,7 @@ repos:
         language: system
         entry: bandit
         args: ["-c", "pyproject.toml", "--recursive", "."]
-  # A3 platform data conventions lint (#264 / D8, D9)
+  # A3 platform data conventions lint (#264 / D8, D9) + authoring ratchet (#276)
   - repo: local
     hooks:
       - id: lint-platform-data
@@ -37,6 +37,8 @@ repos:
         entry: invoke lint-platform-data
         # Fires on A3 data changes AND on edits to the lint logic / its
         # self-test, so touching the lint itself gets local feedback
-        # instead of waiting for CI (code 2nd round 🦊#4).
-        files: ^(simnos/plugins/nos/platforms/.*|tasks\.py|a3_paths\.py|tests/test_lint_platform_data\.py)$
+        # instead of waiting for CI (code 2nd round 🦊#4). The ratchet
+        # baseline is in this set too (#276): shrinking it without re-running
+        # the lint could leave a stale entry that only CI would catch.
+        files: ^(simnos/plugins/nos/platforms/.*|tasks\.py|a3_paths\.py|tests/test_lint_platform_data\.py|platform_data_lint_baseline\.yaml)$
         pass_filenames: false
