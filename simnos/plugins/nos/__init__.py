@@ -14,10 +14,23 @@ static command data.
 ``available_platforms`` is the public derived view of this registry —
 ``simnos.core.nos.available_platforms`` re-exports it for backward
 compatibility with callers that still import from the core module.
+
+Inventory refers to a platform by its ``device_type`` (#266): besides the
+internal platform name (= directory basename, the registry key), a platform's
+``netmiko_device_type`` / ``ntc_platform`` aliases also resolve to it via the
+``device_type_to_platform`` reverse index built below.
 """
 
 import glob
+import logging
 import os
+
+from pydantic import ValidationError
+import yaml
+
+from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta
+
+log = logging.getLogger(__name__)
 
 nos_plugins: dict = {}
 
@@ -27,12 +40,14 @@ current_directory = os.path.dirname(current_file_path)
 # Load A3 platform dirs (the command-data form, #264 / D6): each
 # `platforms/<name>/` holding a `platform.yaml` is one platform, discovered by
 # directory name (no parse needed for the registry).
+_a3_platform_dirs: dict[str, str] = {}
 platforms_directory_a3 = os.path.join(current_directory, "platforms")
 if os.path.isdir(platforms_directory_a3):
     for entry in sorted(os.listdir(platforms_directory_a3)):
         dirpath = os.path.join(platforms_directory_a3, entry)
-        if os.path.isfile(os.path.join(dirpath, "platform.yaml")):
+        if os.path.isfile(os.path.join(dirpath, PLATFORM_META_FILENAME)):
             nos_plugins[entry] = [dirpath]
+            _a3_platform_dirs[entry] = dirpath
 
 # load NOS from python modules updating the NOS.
 # The glob is non-recursive on purpose: authoring templates (BaseDevice in
@@ -55,16 +70,93 @@ for file in py_files:
 available_platforms: tuple[str, ...] = tuple(sorted(nos_plugins.keys()))
 
 
-def assert_platform_supported(platform: str) -> None:
-    """Raise ValueError if `platform` is not a registered NOS plugin.
+def _build_device_type_index() -> dict[str, str]:
+    """Build the ``device_type -> platform`` (registry key) reverse index (#266 / D2).
 
-    Shared by `Host._validate` and the `@simnos` test decorator so the
-    check and its error message live next to the registry they guard
-    (#237, G1 follow-up).
+    Each platform contributes up to three accepted ``device_type`` spellings:
+    its own name (*identity*), and the ``netmiko_device_type`` / ``ntc_platform``
+    aliases declared in ``platform.yaml``. Identity is registered first so a
+    platform name always wins over a colliding alias from another platform.
+
+    Collision rule (value comparison, not key presence): re-registering the same
+    ``(key -> platform)`` pair is a harmless no-op — the common case today, since
+    every platform currently has ``name == netmiko_device_type == ntc_platform``.
+    A key that would map to a *different* platform is a real collision and raises.
+    ``None`` / empty aliases are not registered.
+
+    Degradation (#266 / R2): a ``platform.yaml`` that fails to parse (YAML / I/O /
+    schema) is skipped with a warning rather than aborting the whole import. The
+    platform stays reachable by its identity name and fails loudly later at
+    ``Host.start()`` / ``load_platform_dir``.
     """
-    if platform not in available_platforms:
+    index: dict[str, str] = {}
+
+    def register(key: str | None, platform: str) -> None:
+        if not key:
+            return  # None / empty string is not a usable device_type
+        prev = index.get(key)
+        if prev is not None and prev != platform:
+            raise ValueError(f"device_type alias collision: {key!r} maps to both {prev!r} and {platform!r}")
+        index[key] = platform
+
+    # Identity first (every registered platform, A3 dir or .py module).
+    for platform in nos_plugins:
+        register(platform, platform)
+    # Aliases come from A3 platform.yaml only (.py modules carry no metadata).
+    for platform, dirpath in _a3_platform_dirs.items():
+        try:
+            meta = _load_platform_meta(os.path.join(dirpath, PLATFORM_META_FILENAME))
+        except (yaml.YAMLError, OSError, ValidationError, ValueError) as exc:
+            log.warning("device_type index: skipping %s metadata (%s) — identity name only", platform, exc)
+            continue
+        register(meta.netmiko_device_type, platform)
+        register(meta.ntc_platform, platform)
+    return index
+
+
+device_type_to_platform: dict[str, str] = _build_device_type_index()
+
+
+def resolve_device_type(device_type: str) -> str | None:
+    """Resolve an inventory ``device_type`` to its platform registry key (#266 / D2).
+
+    Returns the internal platform name for any accepted ``device_type``:
+    - a ``netmiko_device_type`` / ``ntc_platform`` alias, via the static index;
+    - any registered platform's own name (*identity*), checked dynamically
+      against ``nos_plugins`` so that platforms registered *after* import — a
+      custom plugin from ``SimNOS(plugins=[...])`` or a test-injected one —
+      still resolve by their own name even though the import-time index predates
+      them.
+
+    Returns ``None`` when the value is not a known device_type, which lets
+    callers fall back to the raw value (the chokepoint then hands it to the
+    registry ``.get(key, key)`` as-is).
+    """
+    mapped = device_type_to_platform.get(device_type)
+    if mapped is not None:
+        return mapped
+    if device_type in nos_plugins:
+        return device_type
+    return None
+
+
+def assert_platform_supported(platform: str) -> None:
+    """Raise ValueError if `platform` is not a registered/resolvable device_type.
+
+    Accepts either an internal platform name or a ``netmiko_device_type`` /
+    ``ntc_platform`` alias (anything `resolve_device_type` recognizes). Shared by
+    `Host._validate` and the `@simnos` test decorator so the check and its error
+    message live next to the registry they guard (#237, G1 follow-up; #266 D2
+    broadened it from a plain `available_platforms` membership test to alias
+    resolution). The message lists the canonical platform names; aliases resolve
+    to one of them.
+    """
+    if resolve_device_type(platform) is None:
         # Join the names so the user-facing message does not leak the
-        # registry container type (tuple vs list repr).
+        # registry container type (tuple vs list repr). Spell out that
+        # netmiko/ntc aliases are accepted too, so a user who typed an alias
+        # is not misled by the canonical-only list (#266 1st round gemini #4).
         raise ValueError(
-            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: {', '.join(available_platforms)}"
+            f"Platform {platform} is not supported by SIMNOS. Supported platforms are: "
+            f"{', '.join(available_platforms)} (their netmiko_device_type / ntc_platform aliases are also accepted)."
         )

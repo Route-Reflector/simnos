@@ -2,30 +2,38 @@
 This module contains utility functions for the tests.
 """
 
+import os
 import random
 import socket
 import string
 
 from simnos.core.host import Host
+from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta
 from simnos.plugins.nos import nos_plugins
-
-# Platforms where the simnos platform name differs from netmiko's device_type.
-# netmiko expects its own canonical device_type string, so these must be mapped
-# before building ConnectHandler kwargs (see netmiko_device()).
-# netmiko canonical names: https://github.com/ktbyers/netmiko/blob/master/PLATFORMS.md
-NETMIKO_DEVICE_TYPE_MAP: dict[str, str] = {
-    "edgecore": "edgecore_sonic",
-    "extreme_slxos": "extreme_slx",
-    "watchguard_firebox": "watchguard_fireware",
-}
 
 # Default credentials used to build single-host test inventories.
 TEST_USERNAME = "test_user"
 TEST_PASSWORD = "test_password"
 
 
+def netmiko_device_type_of(device_type: str) -> str:
+    """Return the netmiko canonical device_type for a simnos ``device_type``.
+
+    Replaces the old hardcoded NETMIKO_DEVICE_TYPE_MAP (#266 / D3): the
+    simnos→netmiko mapping now lives in each platform's ``platform.yaml``
+    (``netmiko_device_type``), the data SSoT. Falls back to ``device_type``
+    itself when the platform has no A3 metadata or no explicit
+    ``netmiko_device_type`` (the identity case, which is most platforms).
+    """
+    for path in nos_plugins.get(device_type, []):
+        meta_path = os.path.join(path, PLATFORM_META_FILENAME)
+        if os.path.isfile(meta_path):
+            return _load_platform_meta(meta_path).netmiko_device_type or device_type
+    return device_type
+
+
 def build_inventory(
-    platform: str,
+    device_type: str,
     *,
     host_key: str = "device",
     username: str = TEST_USERNAME,
@@ -39,7 +47,7 @@ def build_inventory(
     A free port is allocated when ``port`` is not given.
     """
     port = port if port is not None else get_free_port()
-    host = {"username": username, "password": password, "port": port, "platform": platform, **extra}
+    host = {"username": username, "password": password, "port": port, "device_type": device_type, **extra}
     return {"hosts": {host_key: host}}
 
 
@@ -48,8 +56,9 @@ def creds_from_host(host: Host) -> dict:
     return {"username": host.username, "password": host.password, "port": host.port}
 
 
-def netmiko_device(platform: str, creds: dict, **extra) -> dict:
-    """Build netmiko ``ConnectHandler`` kwargs (applies NETMIKO_DEVICE_TYPE_MAP).
+def netmiko_device(device_type: str, creds: dict, **extra) -> dict:
+    """Build netmiko ``ConnectHandler`` kwargs (maps the simnos ``device_type``
+    to netmiko's canonical device_type via platform.yaml, #266 / D3).
 
     ``**extra`` merges additional kwargs such as ``session_log``.
     """
@@ -58,7 +67,7 @@ def netmiko_device(platform: str, creds: dict, **extra) -> dict:
         "username": creds["username"],
         "password": creds["password"],
         "port": creds["port"],
-        "device_type": NETMIKO_DEVICE_TYPE_MAP.get(platform, platform),
+        "device_type": netmiko_device_type_of(device_type),
         **extra,
     }
 

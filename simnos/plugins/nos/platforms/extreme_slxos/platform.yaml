@@ -4,5 +4,5 @@ modes:
   config:
     prompt: "{{ base_prompt }}(config)#"
 initial_mode: user
-netmiko_device_type: extreme_slxos
+netmiko_device_type: extreme_slx
 ntc_platform: extreme_slxos

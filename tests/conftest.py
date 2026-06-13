@@ -15,11 +15,11 @@ from tests.utils import build_inventory
 
 @pytest.fixture
 def simnos_factory():
-    """Factory fixture: start a SimNOS for a platform, auto-stop on teardown."""
+    """Factory fixture: start a SimNOS for a device_type, auto-stop on teardown."""
     started: list[SimNOS] = []
 
-    def _make(platform: str, **overrides) -> SimNOS:
-        net = SimNOS(inventory=build_inventory(platform, **overrides))
+    def _make(device_type: str, **overrides) -> SimNOS:
+        net = SimNOS(inventory=build_inventory(device_type, **overrides))
         # Register before start() so a mid-start failure (partly-started hosts)
         # is still torn down. SimNOS.stop() is a no-op for unstarted hosts.
         started.append(net)

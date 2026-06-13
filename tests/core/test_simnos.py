@@ -20,7 +20,7 @@ from simnos.core.host import Host
 from simnos.core.nos import available_platforms
 from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
-from simnos.plugins.nos import nos_plugins
+from simnos.plugins.nos import nos_plugins, resolve_device_type
 from tests.utils import get_platforms_from_md, get_running_hosts, set_attr
 
 
@@ -128,13 +128,13 @@ class TestSimNOS:
                     "port": 5001,
                     "username": "simnos_R1",
                     "password": "simnos_R1",
-                    "platform": available_platforms[0],
+                    "device_type": available_platforms[0],
                 },
                 "R2": {
                     "port": 6000,
                     "username": "simnos_R2",
                     "password": "simnos_R2",
-                    "platform": available_platforms[0],
+                    "device_type": available_platforms[0],
                 },
             }
         }
@@ -259,7 +259,7 @@ class TestSimNOS:
         """
         Test that the function _init creates the hosts.
         """
-        inventory = {"hosts": {"R1": {"port": 5001, "platform": "cisco_ios"}}}
+        inventory = {"hosts": {"R1": {"port": 5001, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory)
         assert len(net.hosts) == 1
         assert "R1" in net.hosts
@@ -279,7 +279,7 @@ class TestSimNOS:
         """
         Test that the function _allocate_port allocates the port.
         """
-        inventory = {"hosts": {"R1": {"port": 5000, "platform": "cisco_ios"}}}
+        inventory = {"hosts": {"R1": {"port": 5000, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory=inventory)
         assert 5000 in net.allocated_ports
         assert len(net.allocated_ports) == 1
@@ -288,7 +288,7 @@ class TestSimNOS:
         """
         Test that the function _allocate_port allocates the port.
         """
-        inventory = {"hosts": {"R1": {"port": [5000, 5001], "replicas": 2, "platform": "cisco_ios"}}}
+        inventory = {"hosts": {"R1": {"port": [5000, 5001], "replicas": 2, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory=inventory)
         assert net.allocated_ports == {5000, 5001}
 
@@ -335,9 +335,53 @@ class TestSimNOS:
         Test that the function _check_platform raises an exception
         when the platform is wrong.
         """
-        inventory = {"hosts": {"R1": {"platform": "wrong_platform"}}}
+        inventory = {"hosts": {"R1": {"device_type": "wrong_platform"}}}
         with pytest.raises(ValueError, match=r"Platform wrong_platform is not supported by SIMNOS"):
             SimNOS(inventory=inventory)
+
+    def test_legacy_platform_key_rejected(self):
+        """The v2 `platform:` key is rejected in v3 (#266, 案3-A complete breaking).
+
+        v3 renamed the inventory field to `device_type` with no compat alias;
+        `extra="forbid"` on the inventory models makes a stale `platform:` a hard
+        load error (the migration path is a version pin / key rename, not an
+        in-place alias). This pins that the breaking change stays breaking.
+        """
+        inventory = {"hosts": {"R1": {"platform": "cisco_ios"}}}
+        with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
+            SimNOS(inventory=inventory)
+
+    def test_device_type_netmiko_alias_resolves(self):
+        """A netmiko-canonical `device_type` resolves to its internal platform (#266 / D2).
+
+        `edgecore_sonic` is edgecore's `netmiko_device_type` alias (not its
+        internal name); inventory may name a platform by that alias and the host
+        validates/builds without error, while `available_platforms` keeps the
+        internal name. This is the 2-key capability the alias index unlocks.
+        """
+        inventory = {"hosts": {"R1": {"device_type": "edgecore_sonic"}}}
+        net = SimNOS(inventory=inventory)
+        assert net.hosts["R1"].device_type == "edgecore_sonic"
+        assert "edgecore" in available_platforms
+        assert "edgecore_sonic" not in available_platforms
+        # The alias resolves to the internal platform key (the reverse-index core).
+        assert resolve_device_type("edgecore_sonic") == "edgecore"
+
+    def test_resolve_device_type_runtime_registered_and_unknown(self, monkeypatch):
+        """resolve_device_type serves a runtime-registered platform and None-passes the unknown (#266 / D2).
+
+        This is the mechanism the `nos.plugin` direct-write path relies on
+        (a custom plugin from `SimNOS(plugins=[...])`, or a `nos: {plugin: X}`
+        absent from the import-time index, 1st round codex #3): an unknown value
+        must return None so the `start()` chokepoint falls back to the raw key,
+        and a name added to `nos_plugins` after import must resolve by identity
+        via the dynamic fallback (not just the static reverse index).
+        """
+        import simnos.plugins.nos as nos_registry
+
+        assert resolve_device_type("runtime_only_nos") is None  # unknown → None (chokepoint passes raw through)
+        monkeypatch.setitem(nos_registry.nos_plugins, "runtime_only_nos", ["<runtime-registered>"])
+        assert resolve_device_type("runtime_only_nos") == "runtime_only_nos"  # identity via dynamic fallback
 
     def test_inventory_validation_cmdshell_plugin(self):
         """
@@ -348,7 +392,7 @@ class TestSimNOS:
             "hosts": {
                 "R1": {
                     "port": 6000,
-                    "platform": available_platforms[0],
+                    "device_type": available_platforms[0],
                     "shell": {
                         "plugin": "CMDShell",
                         "configuration": {},
@@ -373,7 +417,7 @@ class TestSimNOS:
             "hosts": {
                 "R1": {
                     "port": 6000,
-                    "platform": "huawei_smartax",
+                    "device_type": "huawei_smartax",
                     "configuration_file": "tests/assets/test_module.yaml.j2",
                 }
             }
@@ -475,7 +519,7 @@ class TestSimNOS:
         Test cisco_ios NOS loaded correctly as it has two sources: the A3
         platform dir (#264 — replaced the legacy cisco_ios.yaml) and cisco_ios.py.
         """
-        inventory = {"hosts": {"R1": {"port": 5001, "platform": "cisco_ios"}}}
+        inventory = {"hosts": {"R1": {"port": 5001, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory)
         assert len(net.nos_plugins["cisco_ios"]) == 2, "Not all files detected"
 
@@ -556,9 +600,9 @@ class TestPlatformsManifest:
             assert len(net.hosts) == 3
         assert threading.active_count() <= baseline
 
-    @simnos(platform="cisco_ios", return_instance=True)
-    def test_decorator_with_platform(self, net: SimNOS):
-        """Test that the decorator works with a platform."""
+    @simnos(device_type="cisco_ios", return_instance=True)
+    def test_decorator_with_device_type(self, net: SimNOS):
+        """Test that the decorator works with a device_type."""
         platforms_used = []
         for host in net.hosts.values():
             nos = host.nos
@@ -577,19 +621,19 @@ class TestPlatformsManifest:
         correctly the inventory, it will work.
         """
 
-    def test_decorator_raise_error_if_platform_and_inventory_provided(self):
-        """Test that the decorator raises an exception if both platform and inventory are set."""
-        with pytest.raises(ValueError, match=r"platform and inventory cannot be used together"):
+    def test_decorator_raise_error_if_device_type_and_inventory_provided(self):
+        """Test that the decorator raises an exception if both device_type and inventory are set."""
+        with pytest.raises(ValueError, match=r"device_type and inventory cannot be used together"):
 
-            @simnos(platform="cisco_ios", inventory="tests/assets/inventory.yaml")
+            @simnos(device_type="cisco_ios", inventory="tests/assets/inventory.yaml")
             def dummy_function():
                 pass
 
             dummy_function()
 
-    def test_decorator_raise_error_if_not_platform_or_inventory_provided(self):
-        """Test that the decorator raises an exception if neither platform nor inventory are set."""
-        with pytest.raises(ValueError, match=r"platform or inventory must be set"):
+    def test_decorator_raise_error_if_not_device_type_or_inventory_provided(self):
+        """Test that the decorator raises an exception if neither device_type nor inventory are set."""
+        with pytest.raises(ValueError, match=r"device_type or inventory must be set"):
 
             @simnos()
             def dummy_function():
@@ -639,16 +683,16 @@ class TestPlatformsManifest:
             )
 
     def test_simnos_decorator_rejects_unknown_platform(self):
-        """Pin that `simnos(platform=...)` raises at decorator-factory evaluation time.
+        """Pin that `simnos(device_type=...)` raises at decorator-factory evaluation time.
 
         The validation lives in the decorator factory body (before the
         inner `decorator(func)` is returned), so a typo like
-        `@simnos(platform="cisxo_ios")` raises at module load time rather
+        `@simnos(device_type="cisxo_ios")` raises at module load time rather
         than waiting until the wrapped function is called. Catching this
         early avoids paying test startup cost on a doomed run.
         """
         with pytest.raises(ValueError, match="not supported"):
-            simnos(platform="nonexistent_platform")
+            simnos(device_type="nonexistent_platform")
 
     def test_simnos_decorator_accepts_known_platform(self):
         """Pin that a known platform does not raise at decorator evaluation.
@@ -658,7 +702,7 @@ class TestPlatformsManifest:
         test ensures the validation discriminates correctly.
         """
         # Should not raise — known platform from registry.
-        decorator = simnos(platform="cisco_ios")
+        decorator = simnos(device_type="cisco_ios")
         assert callable(decorator)
 
 
@@ -752,9 +796,9 @@ class TestGlobalDeadline:
         """Sequential path: hosts past deadline are skipped with a warning."""
         inventory = {
             "hosts": {
-                "R1": {"port": 5001, "platform": "cisco_ios"},
-                "R2": {"port": 5002, "platform": "cisco_ios"},
-                "R3": {"port": 5003, "platform": "cisco_ios"},
+                "R1": {"port": 5001, "device_type": "cisco_ios"},
+                "R2": {"port": 5002, "device_type": "cisco_ios"},
+                "R3": {"port": 5003, "device_type": "cisco_ios"},
             }
         }
         net = SimNOS(inventory)
@@ -779,8 +823,8 @@ class TestGlobalDeadline:
         """Parallel path: executor uses shutdown(wait=False, cancel_futures=True)."""
         inventory = {
             "hosts": {
-                "R1": {"port": 5001, "platform": "cisco_ios"},
-                "R2": {"port": 5002, "platform": "cisco_ios"},
+                "R1": {"port": 5001, "device_type": "cisco_ios"},
+                "R2": {"port": 5002, "device_type": "cisco_ios"},
             }
         }
         net = SimNOS(inventory)
@@ -812,8 +856,8 @@ class TestGlobalDeadline:
         """Parallel path without timeout: executor uses shutdown(wait=True)."""
         inventory = {
             "hosts": {
-                "R1": {"port": 5001, "platform": "cisco_ios"},
-                "R2": {"port": 5002, "platform": "cisco_ios"},
+                "R1": {"port": 5001, "device_type": "cisco_ios"},
+                "R2": {"port": 5002, "device_type": "cisco_ios"},
             }
         }
         net = SimNOS(inventory)
@@ -843,8 +887,8 @@ class TestGlobalDeadline:
         """Parallel path with exception (not timeout): executor still uses shutdown(wait=True)."""
         inventory = {
             "hosts": {
-                "R1": {"port": 5001, "platform": "cisco_ios"},
-                "R2": {"port": 5002, "platform": "cisco_ios"},
+                "R1": {"port": 5001, "device_type": "cisco_ios"},
+                "R2": {"port": 5002, "device_type": "cisco_ios"},
             }
         }
         net = SimNOS(inventory)

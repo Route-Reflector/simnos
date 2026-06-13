@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelHost
-from simnos.plugins.nos import assert_platform_supported
+from simnos.plugins.nos import assert_platform_supported, resolve_device_type
 
 if TYPE_CHECKING:
     from simnos.core.simnos import SimNOS
@@ -32,7 +32,7 @@ class Host:
         shell: dict,
         nos: dict,
         simnos: "SimNOS",
-        platform: str | None = None,
+        device_type: str | None = None,
         configuration_file: str | None = None,
     ) -> None:
         self.name: str = name
@@ -50,11 +50,11 @@ class Host:
         self.shell_plugin = None
         self.nos_plugin = None
         self.nos = None
-        self.platform: str | None = platform
+        self.device_type: str | None = device_type
         self.configuration_file: str | None = configuration_file
 
-        if self.platform:
-            self.nos_inventory["plugin"] = self.platform
+        if self.device_type:
+            self.nos_inventory["plugin"] = self.device_type
 
         self._validate()
 
@@ -73,7 +73,14 @@ class Host:
             return
         self.server_plugin = self.simnos.servers_plugins[self.server_inventory["plugin"]]
         self.shell_plugin = self.simnos.shell_plugins[self.shell_inventory["plugin"]]
-        self.nos_plugin = self.simnos.nos_plugins.get(self.nos_inventory["plugin"], self.nos_inventory["plugin"])
+        # device_type -> platform (registry key) resolution chokepoint (#266 / D2,
+        # Decision 8): all three plugin-key paths converge here — an explicit
+        # `device_type` (assigned in __init__), the `nos.plugin` default, and a
+        # direct `nos: {plugin: ...}`. `resolve_device_type` maps netmiko/ntc
+        # aliases (and identity names) to the registry key; an unknown value
+        # (e.g. a runtime-registered custom plugin) falls through unchanged.
+        plugin_key = resolve_device_type(self.nos_inventory["plugin"]) or self.nos_inventory["plugin"]
+        self.nos_plugin = self.simnos.nos_plugins.get(plugin_key, plugin_key)
         self.nos = (
             Nos(filename=self.nos_plugin, configuration_file=self.configuration_file)
             if not isinstance(self.nos_plugin, Nos)
@@ -107,14 +114,16 @@ class Host:
 
     def _validate(self):
         """Validate that the host has the required attributes using pydantic"""
-        if self.platform:
-            self._check_if_platform_is_supported(self.platform)
+        if self.device_type:
+            self._check_if_platform_is_supported(self.device_type)
         ModelHost(**self.__dict__)
 
-    def _check_if_platform_is_supported(self, platform: str):
-        """Check if the platform is supported.
+    def _check_if_platform_is_supported(self, device_type: str):
+        """Check that `device_type` resolves to a supported platform.
 
         Thin wrapper around the registry-level helper; kept as a method
-        because tests patch / call it as the Host-level seam (#237).
+        because tests patch / call it as the Host-level seam (#237). The
+        argument is the inventory `device_type` (#266); `assert_platform_supported`
+        accepts both internal platform names and netmiko/ntc aliases.
         """
-        assert_platform_supported(platform)
+        assert_platform_supported(device_type)

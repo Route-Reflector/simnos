@@ -337,7 +337,7 @@ class InventoryValidationTest(unittest.TestCase):
                     "username": "admin",
                     "password": "admin",
                     "port": 6023,
-                    "platform": "cisco_ios",
+                    "device_type": "cisco_ios",
                     "server": {
                         "plugin": "TelnetServer",
                         "configuration": {
@@ -361,7 +361,7 @@ class InventoryValidationTest(unittest.TestCase):
                     "username": "admin",
                     "password": "admin",
                     "port": 6022,
-                    "platform": "cisco_ios",
+                    "device_type": "cisco_ios",
                     "server": {
                         "plugin": "ParamikoSshServer",
                         "configuration": {

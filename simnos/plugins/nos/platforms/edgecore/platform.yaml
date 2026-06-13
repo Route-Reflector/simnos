@@ -4,5 +4,5 @@ modes:
   enable:
     prompt: "{{ base_prompt }}#"
 initial_mode: user
-netmiko_device_type: edgecore
+netmiko_device_type: edgecore_sonic
 ntc_platform: edgecore

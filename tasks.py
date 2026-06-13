@@ -162,6 +162,57 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
     return warnings
 
 
+def check_platform_data_device_type_collisions(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Flag device_type alias collisions across A3 platforms (#266 / D2 defense-in-depth).
+
+    Mirrors the runtime reverse-index guard in :mod:`simnos.plugins.nos`: each
+    platform contributes its own name (*identity*) plus its ``netmiko_device_type``
+    / ``ntc_platform`` aliases as device_type keys. A key that resolves to more
+    than one platform is a collision — including an alias that lands on another
+    platform's identity name (2nd round gemini #3). The runtime guard already
+    raises on import; this surfaces the same conflict at authoring time with a
+    clear message instead of an import crash. Re-registering the same
+    ``(key -> platform)`` pair (the common ``name == netmiko == ntc`` case) is a
+    no-op, matching the runtime value-comparison rule.
+
+    Returns a list of human-readable violation strings (empty = clean).
+    """
+    index: dict[str, str] = {}
+    violations: list[str] = []
+
+    def register(key, platform: str, kind: str) -> None:
+        if not key or not isinstance(key, str):
+            return
+        prev = index.get(key)
+        if prev is not None and prev != platform:
+            violations.append(f"device_type collision: {key!r} ({kind} of {platform}) already maps to {prev}")
+            return
+        index[key] = platform
+
+    names = list_a3_platform_names(platforms_dir)
+    # Identity first (same order discipline as the runtime guard) so an alias
+    # colliding with another platform's name is reported against the alias.
+    for platform in names:
+        register(platform, platform, "identity")
+    for platform in names:
+        meta_path = os.path.join(platforms_dir, platform, "platform.yaml")
+        # A malformed platform.yaml becomes a violation string rather than a
+        # crashing traceback, so the lint stays symmetric with the runtime
+        # index guard's warn+skip degradation (#266 1st round gemini #6 / claude #4).
+        try:
+            with open(meta_path, encoding="utf-8") as f:
+                meta = yaml.safe_load(f)
+        except (yaml.YAMLError, OSError) as exc:
+            violations.append(f"{platform}/platform.yaml: unreadable for device_type collision check ({exc})")
+            continue
+        if not isinstance(meta, dict):
+            violations.append(f"{platform}/platform.yaml: not a mapping; cannot check device_type aliases")
+            continue
+        register(meta.get("netmiko_device_type"), platform, "netmiko_device_type")
+        register(meta.get("ntc_platform"), platform, "ntc_platform")
+    return violations
+
+
 def _variant_output_refs(command_data: dict) -> list[str]:
     """The output file each variant references (str-typed entries only)."""
     return [
@@ -337,7 +388,9 @@ def lint_platform_data(context):
     shared output references, extension convention, stray ``.yml`` (see
     `check_platform_data`) + the authoring baseline ratchet (`_default_`
     presence / stub help / heritage wording, see
-    `check_platform_data_ratchet`). Warning-tier (printed, non-blocking):
+    `check_platform_data_ratchet`) + device_type alias collisions across
+    platforms (#266, see `check_platform_data_device_type_collisions`).
+    Warning-tier (printed, non-blocking):
     filename convention + ``type: ntc`` provenance (see
     `check_platform_data_warnings`).
     """
@@ -354,7 +407,7 @@ def lint_platform_data(context):
     if warnings:
         print(f"({len(warnings)} warning(s) — informational, not blocking)")
 
-    violations = check_platform_data() + check_platform_data_ratchet()
+    violations = check_platform_data() + check_platform_data_ratchet() + check_platform_data_device_type_collisions()
     for violation in violations:
         print(violation)
     if violations:
@@ -576,7 +629,7 @@ def netmiko_check(ctx, device_type: str):
             "host1": {
                 "username": "user",
                 "password": "user",
-                "platform": device_type,
+                "device_type": device_type,
                 "port": 6000,
             }
         }
