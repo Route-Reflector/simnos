@@ -52,10 +52,10 @@ def bandit(context):
 def _iter_platform_command_dirs(platforms_dir: str):
     """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
 
-    The single walk both lint passes (`check_platform_data` /
-    `check_platform_data_warnings`) share — an absent platforms dir or a platform
-    without a ``commands/`` subdir is skipped, so callers loop over real targets
-    only.
+    The single walk the lint passes (`check_platform_data` /
+    `check_platform_data_warnings` / `check_platform_data_ratchet`) share — an
+    absent platforms dir or a platform without a ``commands/`` subdir is
+    skipped, so callers loop over real targets only.
     """
     if not os.path.isdir(platforms_dir):
         return
@@ -63,6 +63,17 @@ def _iter_platform_command_dirs(platforms_dir: str):
         commands_dir = os.path.join(platforms_dir, platform, "commands")
         if os.path.isdir(commands_dir):
             yield platform, commands_dir
+
+
+def _iter_command_yamls(commands_dir: str):
+    """Yield ``(yaml_path, parsed_data)`` for every command yaml in the dir.
+
+    The glob + parse loop every lint pass repeats; an empty / null yaml parses
+    to ``{}`` so callers can ``.get`` without guarding.
+    """
+    for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+        with open(command_yaml, encoding="utf-8") as f:
+            yield command_yaml, yaml.safe_load(f) or {}
 
 
 def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
@@ -94,9 +105,7 @@ def check_platform_data(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
             for stray in sorted(glob.glob(os.path.join(commands_dir, "*.yml")))
         )
         referenced: dict[str, list[str]] = {}
-        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
-            with open(command_yaml, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+        for command_yaml, data in _iter_command_yamls(commands_dir):
             for ref in _output_refs(data):
                 referenced.setdefault(ref, []).append(os.path.basename(command_yaml))
             violations.extend(_check_ref_extensions(data, platform, os.path.basename(command_yaml)))
@@ -134,10 +143,8 @@ def check_platform_data_warnings(platforms_dir: str = PLATFORMS_A3_DIR) -> list[
     """
     warnings: list[str] = []
     for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
-        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
+        for command_yaml, data in _iter_command_yamls(commands_dir):
             stem = os.path.basename(command_yaml).removesuffix(".yaml")
-            with open(command_yaml, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
             command = data.get("command")
             if isinstance(command, str):
                 base = sanitize_command_stem(command)
@@ -265,9 +272,7 @@ def check_platform_data_ratchet(
         seen.add(platform)
         commands: set[str] = set()
         helps: dict[str, str] = {}
-        for command_yaml in sorted(glob.glob(os.path.join(commands_dir, "*.yaml"))):
-            with open(command_yaml, encoding="utf-8") as f:
-                data = yaml.safe_load(f) or {}
+        for _, data in _iter_command_yamls(commands_dir):
             command = data.get("command")
             if not isinstance(command, str):
                 continue

@@ -98,6 +98,15 @@ The A3 data lint (`invoke lint-platform-data`, CI + pre-commit) gates:
 - **extension convention**: literal channels (`output` / a variant's `output`)
   use `.txt`; `output_template` uses `.j2`. A stray `.yml` command file (the
   loader only globs `.yaml`) is flagged.
+- **`_default_` presence**: every new platform must define a `_default_`
+  command. Platforms that predate the rule are frozen in
+  `platform_data_lint_baseline.yaml` (repo root); that baseline only ever
+  shrinks.
+- **`help` text**: write real help. Auto-generated stubs
+  (`execute the command "X"`) are frozen in the baseline and new ones fail
+  the lint; replacing a stub with real help requires removing its baseline
+  entry in the same PR. The heritage sentence `"Feel free to change it!"`
+  is rejected outright.
 
 It also prints **warnings** (non-blocking): a filename not matching the
 sanitized command name, and a `type: ntc` command missing its `source` block.
