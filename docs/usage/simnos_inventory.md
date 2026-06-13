@@ -315,7 +315,7 @@ The following options can be used either in the `default` section or in the `hos
 | --------------| ------------- | ---------------------------------- | ----------------------------------------------- |
 | `username`    | :person:      | username of the device             | `username: admin`                               |
 | `password`    | :key:         | password of the device             | `password: admin`                               |
-| `device_type` | :station:     | network operating system used      | `device_type: cisco_ios`                           |
+| `device_type` | :station:     | network operating system used      | `device_type: cisco_ios`                        |
 | `port`        | :ship:        | port to connect to                 | `port: 6000`                                    |
 | `replicas`    | :repeat:      | number of hosts to create          | `replicas: 10`                                  |
 | `server`      | :satellite:   | server configuration               | See section [Server options](#server-options)   |
