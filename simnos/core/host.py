@@ -31,7 +31,7 @@ class HostRenderConfig:
     """
 
     overlay_root: str | None = None
-    override_commands: "str | list[str] | dict[str, str] | None" = None
+    override_commands: str | list[str] | dict[str, str] | None = None
 
 
 class Host:

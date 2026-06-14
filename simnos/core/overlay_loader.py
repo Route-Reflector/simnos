@@ -150,12 +150,13 @@ def _encode_stem(command: str) -> str:
 
 
 def _validate_overlay_ref(ref: str, *, where: str) -> None:
-    """Reject a map file ref that escapes the overlay dir or is not `.txt` / `.j2`.
+    """Reject an overlay file ref that escapes the overlay dir or is not `.txt` / `.j2`.
 
-    The overlay map/list bypass the A3 authoring schema (which rejects path
-    traversal at its boundary), so the loader enforces the same invariant here:
-    a bare filename, no separators / ``..``, not absolute, ``.txt`` / ``.j2`` only
-    (design Decision 10c).
+    Called for both the map form (explicit ref) and the list form (the
+    command-derived ``stem.ext``). The overlay map/list bypass the A3 authoring
+    schema (which rejects path traversal at its boundary), so the loader enforces
+    the same invariant here: a bare filename, no separators / ``..``, not absolute,
+    ``.txt`` / ``.j2`` only (design Decision 10c).
     """
     if not ref or ref != os.path.basename(ref) or ref in (".", "..") or os.path.isabs(ref):
         raise ValueError(f"{where}: overlay file reference {ref!r} must be a bare filename in the overlay directory")

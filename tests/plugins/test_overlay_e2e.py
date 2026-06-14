@@ -8,6 +8,8 @@ the captured `.txt` must replace the packaged output over the wire, and the map
 form must let a host choose a specific capture file (the R11 case).
 """
 
+from typing import cast
+
 from netmiko import ConnectHandler
 import pytest
 
@@ -26,58 +28,42 @@ def _overlay_data_dir(tmp_path):
     return str(tmp_path), "show_version_custom.txt"
 
 
-def _start_net(inventory, data_dir):
-    net = SimNOS(inventory=inventory, sys_config={"data_dir": data_dir})
+def _show_version_over_wire(data_dir: str, *, overlay: dict | None = None) -> str:
+    """Start a cisco_ios host (optionally opted into `overlay`) and return its
+    `show version` output over a real netmiko session, stopping the server after.
+    """
+    host_cfg = {
+        "username": TEST_USERNAME,
+        "password": TEST_PASSWORD,
+        "port": get_free_port(),
+        "device_type": "cisco_ios",
+    }
+    if overlay is not None:
+        host_cfg["overlay"] = overlay
+    net = SimNOS(inventory={"hosts": {"device": host_cfg}}, sys_config={"data_dir": data_dir})
     net.start()
-    return net
+    try:
+        host = net.hosts["device"]
+        device = netmiko_device("cisco_ios", creds_from_host(host))
+        with ConnectHandler(**device) as conn:
+            # send_command's default (no textfsm/genie) returns str; the stub's
+            # union covers the parse modes this test does not use.
+            return cast(str, conn.send_command("show version"))
+    finally:
+        net.stop()
 
 
 @pytest.mark.timeout(60)
 def test_overlay_map_replaces_output_over_wire(_overlay_data_dir):
     """A host pulling a mapped capture file serves it instead of the packaged output."""
     data_dir, filename = _overlay_data_dir
-    inventory = {
-        "hosts": {
-            "device": {
-                "username": TEST_USERNAME,
-                "password": TEST_PASSWORD,
-                "port": get_free_port(),
-                "device_type": "cisco_ios",
-                "overlay": {"override_commands": {"show version": filename}},
-            }
-        }
-    }
-    net = _start_net(inventory, data_dir)
-    try:
-        host = net.hosts["device"]
-        device = netmiko_device("cisco_ios", creds_from_host(host))
-        with ConnectHandler(**device) as conn:
-            output = conn.send_command("show version")
-        assert OVERLAY_MARKER in output
-    finally:
-        net.stop()
+    output = _show_version_over_wire(data_dir, overlay={"override_commands": {"show version": filename}})
+    assert OVERLAY_MARKER in output
 
 
 @pytest.mark.timeout(60)
 def test_no_overlay_serves_packaged_output(_overlay_data_dir):
     """A host that does not opt in keeps the packaged output (the overlay marker is absent)."""
     data_dir, _filename = _overlay_data_dir
-    inventory = {
-        "hosts": {
-            "device": {
-                "username": TEST_USERNAME,
-                "password": TEST_PASSWORD,
-                "port": get_free_port(),
-                "device_type": "cisco_ios",
-            }
-        }
-    }
-    net = _start_net(inventory, data_dir)
-    try:
-        host = net.hosts["device"]
-        device = netmiko_device("cisco_ios", creds_from_host(host))
-        with ConnectHandler(**device) as conn:
-            output = conn.send_command("show version")
-        assert OVERLAY_MARKER not in output
-    finally:
-        net.stop()
+    output = _show_version_over_wire(data_dir)
+    assert OVERLAY_MARKER not in output
