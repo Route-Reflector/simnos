@@ -465,6 +465,12 @@ the package becomes a **new command**, valid in every mode. Unset / empty
   startup fails with an error — an opt-in that cannot be satisfied never silently
   falls back to packaged output.
 - **A3 platforms only.** Python-only (py-only) platforms do not support overlays.
+- **Filenames are bare names, matched exactly.** A list / `all` entry is matched
+  case-sensitively against the default-name file, so use the packaged command's
+  exact lowercase spelling. A command name that does not map cleanly to a
+  `stem_with_underscores.txt` filename (anything with `/` or other path
+  characters) must be selected with the **map** form, giving an explicit bare
+  filename — the list / `all` forms reject a non-bare generated name.
 - **Multi-capture commands.** Overriding a command that ships multiple captures
   (variants) collapses it to the single overlay output (logged at INFO).
 - **Not hot-reloaded.** The overlay dir is outside the packaged tree the dev

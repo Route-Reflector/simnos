@@ -213,6 +213,18 @@ class TestOverlayMerge:
         platform = build_resolved_platform(nos, inventory, render_config)
         assert platform.commands["show version"].output.render("R1") == "INVENTORY"
 
+    def test_overlay_overrides_py_command(self, tmp_path):
+        # The py inflow sits below the overlay (a3 < py < overlay < inventory): an
+        # overlay output wins over a py-module handler for the same command. Pins
+        # the `commands.update` order so a future reorder is caught.
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        handler = lambda **kwargs: "dynamic"  # noqa: E731 — minimal handler stand-in
+        nos.commands = {"show version": {"output": handler, "help": "dyn", "prompt": "{base_prompt}#"}}
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY over py\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
+        platform = build_resolved_platform(nos, {}, render_config)
+        assert platform.commands["show version"].output.render("R1") == "OVERLAY over py\n"
+
     def test_overlay_adds_new_command(self, tmp_path):
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         overlay_root = self._overlay(tmp_path, {"show_run.txt": "running-config\n"})

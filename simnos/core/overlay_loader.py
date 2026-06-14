@@ -103,9 +103,17 @@ def _select_list(overlay_root: str, commands: list[str]) -> list[tuple[str, str]
     pairs: list[tuple[str, str]] = []
     for command in commands:
         stem = _encode_stem(command)
-        candidates = [
-            f"{stem}{ext}" for ext in _ALLOWED_EXTS if os.path.isfile(os.path.join(overlay_root, f"{stem}{ext}"))
-        ]
+        # Validate the generated filename before touching the filesystem: a list
+        # entry like `../../etc/hostname` or `/tmp/leak` encodes to a non-bare ref
+        # that `os.path.join` would resolve outside the overlay root. Same
+        # root-confinement invariant the map form enforces (Decision 10c) — only
+        # `_select_map` validated it before (3rd round codex#1 / claude#1).
+        candidates: list[str] = []
+        for ext in _ALLOWED_EXTS:
+            ref = f"{stem}{ext}"
+            _validate_overlay_ref(ref, where=f"overlay command {command!r}")
+            if os.path.isfile(os.path.join(overlay_root, ref)):
+                candidates.append(ref)
         if not candidates:
             raise ValueError(
                 f"overlay command {command!r} is listed in override_commands but no "

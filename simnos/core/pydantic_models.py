@@ -440,18 +440,18 @@ class InventoryDefaultSection(BaseModel):
     server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
-    # #265 reservation (#266 / D1, Decision 5): accepted + validated here so the
-    # inventory schema never breaks again when #265 wires up the behaviour, but
-    # consumed by neither the loader nor the shell in #266. A non-None value is
-    # surfaced at host load with `log.warning` (Host.__init__) so a "set but
-    # silently inert" config is loud, not a silent no-op (anti-silent-bug).
-    # `facts` is a free mapping (render variables, shape owned by #265); only
-    # `overlay` has a committed shape. `variants_policy` shape is #265's input,
-    # so it stays a permissive mapping to avoid a guessed schema forcing a second
-    # break (R4).
-    facts: dict | None = Field(None, description="#265 で有効化、現在 no-op (host render facts)")
-    overlay: ModelOverlay | None = Field(None, description="#265 で有効化、現在 no-op (output overlay)")
-    variants_policy: dict | None = Field(None, description="#265 で有効化、現在 no-op (output_variants 選択方針)")
+    # Inventory render fields. `overlay` is consumed by #286 (Host.start resolves
+    # the overlay dir and threads it to the shell). `facts` / `variants_policy`
+    # remain #287 reservations — accepted + validated here so the inventory schema
+    # never breaks again when #287 wires them up, but consumed by nobody until then;
+    # a non-None value is surfaced at host load with `log.warning` (Host.__init__)
+    # so a "set but silently inert" config is loud, not a silent no-op
+    # (anti-silent-bug). `facts` is a free mapping (render variables, shape owned by
+    # #287); `variants_policy` likewise stays a permissive mapping to avoid a
+    # guessed schema forcing a second break (R4); only `overlay` has a committed shape.
+    facts: dict | None = Field(None, description="#287 で有効化、現在 no-op (host render facts)")
+    overlay: ModelOverlay | None = Field(None, description="#286 で有効化 (custom overlay / output override)")
+    variants_policy: dict | None = Field(None, description="#287 で有効化、現在 no-op (output_variants 選択方針)")
 
 
 class HostConfig(InventoryDefaultSection):

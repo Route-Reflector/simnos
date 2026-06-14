@@ -155,6 +155,13 @@ class TestLoudFailGuards:
         with pytest.raises(ValueError, match=r"must be a bare filename"):
             resolve_overlay(str(tmp_path), base, override_commands={"show version": "../escape.txt"})
 
+    def test_list_path_traversal_is_rejected(self, tmp_path):
+        # A list entry that encodes to a non-bare filename must be rejected before
+        # the filesystem probe — same root-confinement invariant as the map form.
+        base = _base(_command("show version"))
+        with pytest.raises(ValueError, match=r"must be a bare filename"):
+            resolve_overlay(str(tmp_path), base, override_commands=["../../etc/hostname"])
+
     def test_map_bad_extension_is_rejected(self, tmp_path):
         base = _base(_command("show version"))
         _write(tmp_path, "show_version.csv", "nope\n")
