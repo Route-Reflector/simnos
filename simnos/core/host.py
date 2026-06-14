@@ -152,11 +152,9 @@ class Host:
         override_commands = (self.overlay or {}).get("override_commands")
         if not override_commands:
             return None
-        # Overlay is A3-only (Decision 12): a legacy / py-only platform has no
-        # `resolved_platform`, and `build_resolved_platform` skips the overlay layer
-        # for it — so opting in there would silently no-op. Fail loudly instead.
-        # `self.nos` is built just above in `start()` before this is called; guard
-        # for the None case so direct unit calls (no start) keep testing the dir logic.
+        # `self.nos` is built just above in `start()` before this is called; the
+        # None guard lets direct unit calls (no start) keep testing the dir logic.
+        # The A3-only rationale lives in the docstring above.
         if self.nos is not None and self.nos.resolved_platform is None:
             raise ValueError(
                 f"Host {self.name}: overlay.override_commands is set but platform {plugin_key!r} is "

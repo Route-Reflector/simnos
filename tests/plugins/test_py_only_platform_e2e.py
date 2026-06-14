@@ -19,11 +19,12 @@ import os
 from netmiko import ConnectHandler
 import pytest
 
+from simnos import SimNOS
 from simnos.core.nos import Nos
 import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
 from tests.assets.synthetic_py_only import PY_ONLY_DEFAULT, PY_ONLY_MARKER
-from tests.utils import creds_from_host, netmiko_device
+from tests.utils import creds_from_host, get_free_port, netmiko_device
 
 # The injection key mirrors the real registry, which keys a py-only module on
 # its filename stem. The markers are imported from the asset (single source);
@@ -95,3 +96,29 @@ def test_py_only_platform_serves_dynamic_command_over_wire(register_py_only, sim
     assert PY_ONLY_MARKER in marker_output
     assert PY_ONLY_DEFAULT in default_output
     assert "Unknown command" not in default_output
+
+
+def test_py_only_platform_overlay_optin_is_loud_at_start(register_py_only):
+    """Opting a py-only (legacy) platform into the overlay fails loudly at start (#286).
+
+    Complements the direct `_resolve_overlay_root` unit test: this drives the real
+    `Host.start()` wiring, which builds the `Nos` (resolved_platform stays None for
+    py-only) and then resolves the overlay root — so the A3-only guard must fire
+    before the server is built, never silently serving the packaged output (the
+    legacy `build_resolved_platform` branch drops the overlay layer). Pins the
+    firing path against a future reorder of `Host.start` (2nd round codex #5).
+    """
+    inventory = {
+        "hosts": {
+            "device": {
+                "username": "u",
+                "password": "p",
+                "port": get_free_port(),
+                "device_type": register_py_only,
+                "overlay": {"override_commands": "all"},
+            }
+        }
+    }
+    net = SimNOS(inventory=inventory)
+    with pytest.raises(ValueError, match=r"legacy / py-only.*A3 platforms only"):
+        net.start()

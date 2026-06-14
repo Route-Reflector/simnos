@@ -121,7 +121,7 @@ def _select_list(overlay_root: str, commands: list[str]) -> list[tuple[str, str]
             )
         if len(candidates) > 1:
             raise ValueError(
-                f"overlay command {command!r} resolves to multiple files {candidates} in {overlay_root!r}; "
+                f"overlay command {command!r} resolves to multiple files {sorted(candidates)} in {overlay_root!r}; "
                 "keep only one of .txt / .j2"
             )
         pairs.append((command, candidates[0]))
