@@ -122,3 +122,44 @@ class TestHost:
         platform = available_platforms[0]
         # pylint: disable=protected-access
         host._check_if_platform_is_supported(platform)
+
+
+class TestResolveOverlayRoot:
+    """`Host._resolve_overlay_root` (#286): opt-in detection + loud-fail boundary.
+
+    The opt-in is `overlay.override_commands`; when set, sys_config.data_dir must
+    be configured and `<data_dir>/<plugin_key>/` must exist — an explicit opt-in
+    that cannot be satisfied is a loud error, never a silent fall-back (Decision 10a).
+    """
+
+    def _host(self, *, overlay, data_dir):
+        server = {"plugin": "server_plugin", "configuration": {}}
+        shell = {"plugin": "shell_plugin", "configuration": {}}
+        nos = {"plugin": "nos_plugin", "configuration": {}}
+        net = Mock()
+        net.sys_config = {"data_dir": data_dir}
+        with patch.object(Host, "_check_if_platform_is_supported"):
+            return Host("R1", "u", "p", 22, server, shell, nos, net, overlay=overlay)
+
+    def test_not_opted_in_returns_none(self):
+        host = self._host(overlay=None, data_dir="/srv")
+        assert host._resolve_overlay_root("cisco_ios") is None
+
+    def test_empty_override_commands_returns_none(self):
+        host = self._host(overlay={"override_commands": []}, data_dir="/srv")
+        assert host._resolve_overlay_root("cisco_ios") is None
+
+    def test_opted_in_without_data_dir_is_loud(self):
+        host = self._host(overlay={"override_commands": "all"}, data_dir=None)
+        with pytest.raises(ValueError, match=r"sys_config.data_dir is not configured"):
+            host._resolve_overlay_root("cisco_ios")
+
+    def test_opted_in_with_missing_dir_is_loud(self, tmp_path):
+        host = self._host(overlay={"override_commands": "all"}, data_dir=str(tmp_path))
+        with pytest.raises(ValueError, match=r"overlay directory .* does not exist"):
+            host._resolve_overlay_root("cisco_ios")
+
+    def test_opted_in_with_existing_dir_returns_path(self, tmp_path):
+        (tmp_path / "cisco_ios").mkdir()
+        host = self._host(overlay={"override_commands": "all"}, data_dir=str(tmp_path))
+        assert host._resolve_overlay_root("cisco_ios") == str(tmp_path / "cisco_ios")

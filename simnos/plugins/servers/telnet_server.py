@@ -11,7 +11,7 @@ import logging
 import socket
 import threading
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
@@ -22,6 +22,9 @@ from simnos.plugins.servers.tap_bridge import (
     shell_to_client_tap,
 )
 from simnos.plugins.servers.tap_io import TapIO
+
+if TYPE_CHECKING:
+    from simnos.core.host import HostRenderConfig
 
 log = logging.getLogger(__name__)
 
@@ -112,6 +115,7 @@ class TelnetServer(TCPServerBase):
         address: str = "127.0.0.1",
         timeout: int = 1,
         watchdog_interval: float = 1,
+        render_config: "HostRenderConfig | None" = None,
     ):
         super().__init__(address=address, port=port, timeout=timeout)
 
@@ -119,10 +123,12 @@ class TelnetServer(TCPServerBase):
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
         self.shell_configuration: dict = shell_configuration or {}
+        # Per-host overlay/render config (#286), carried to every connection's shell.
+        self._render_config: HostRenderConfig | None = render_config
         # Normalize the per-host command platform once (see ParamikoSshServer):
         # built at Host.start, shared across connections (#264 / Impact).
         build_shared = getattr(self.shell, "build_shared_platform", None)
-        self._shared_platform = build_shared(nos, self.nos_inventory_config) if build_shared else None
+        self._shared_platform = build_shared(nos, self.nos_inventory_config, render_config) if build_shared else None
         self.banner: str = banner
         self.username: str = username
         self.password: str = password
@@ -353,6 +359,7 @@ class TelnetServer(TCPServerBase):
                 nos_inventory_config=self.nos_inventory_config,
                 is_running=is_running,
                 resolved_platform=self._shared_platform,
+                render_config=self._render_config,
                 **self.shell_configuration,
             )
 

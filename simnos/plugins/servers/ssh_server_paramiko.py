@@ -8,7 +8,7 @@ from pathlib import Path
 import socket
 import threading
 import time
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import paramiko
 import paramiko.rsakey
@@ -22,6 +22,9 @@ from simnos.plugins.servers.tap_bridge import (
     shell_to_client_tap,
 )
 from simnos.plugins.servers.tap_io import TapIO
+
+if TYPE_CHECKING:
+    from simnos.core.host import HostRenderConfig
 
 log = logging.getLogger(__name__)
 
@@ -225,6 +228,7 @@ class ParamikoSshServer(TCPServerBase):
         timeout: int = 1,
         watchdog_interval: float = 1,
         authorized_keys: str | None = None,
+        render_config: "HostRenderConfig | None" = None,
     ):
         super().__init__(address=address, port=port, timeout=timeout)
 
@@ -232,12 +236,14 @@ class ParamikoSshServer(TCPServerBase):
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
         self.shell_configuration: dict = shell_configuration or {}
+        # Per-host overlay/render config (#286), carried to every connection's shell.
+        self._render_config: HostRenderConfig | None = render_config
         # Normalize the merged command platform once, here at Host.start, instead
         # of per connection: it is per-host invariant (#264 / Impact). This also
         # surfaces malformed inventory/data at startup rather than on the first
         # connection. Optional so a shell without the hook still self-builds.
         build_shared = getattr(self.shell, "build_shared_platform", None)
-        self._shared_platform = build_shared(nos, self.nos_inventory_config) if build_shared else None
+        self._shared_platform = build_shared(nos, self.nos_inventory_config, render_config) if build_shared else None
         self.ssh_banner: str = ssh_banner
         self.username: str = username
         self.password: str = password
@@ -463,6 +469,7 @@ class ParamikoSshServer(TCPServerBase):
                 nos_inventory_config=self.nos_inventory_config,
                 is_running=is_running,
                 resolved_platform=self._shared_platform,
+                render_config=self._render_config,
                 **self.shell_configuration,
             )
 

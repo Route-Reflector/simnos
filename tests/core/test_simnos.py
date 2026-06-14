@@ -526,11 +526,12 @@ class TestSimNOS:
 
 
 class TestReservedInventoryFields:
-    """#265 reserved inventory fields (`facts` / `overlay` / `variants_policy`).
+    """Inventory render fields (`facts` / `overlay` / `variants_policy`).
 
-    #266 reserves them as the schema "器": accepted + validated, but consumed by
-    nobody (no-op) until #265 wires them up. These pin that they (a) load without
-    error, (b) reach the Host as attributes, and (c) warn loudly when set so the
+    `overlay` is consumed by #286 (Host.start resolves the overlay dir); `facts` /
+    `variants_policy` stay #287 reservations — accepted + validated but no-op until
+    #287 wires them up. These pin that they (a) load without error, (b) reach the
+    Host as attributes, and (c) the still-reserved ones warn loudly when set so the
     no-op is never silent (Decision 5, anti-silent-bug).
     """
 
@@ -542,7 +543,7 @@ class TestReservedInventoryFields:
                     "port": 6100,
                     "device_type": "cisco_ios",
                     "facts": {"hostname": "R1", "serial": "ABC"},
-                    "overlay": {"dir": "/srv/overlay", "override_commands": True},
+                    "overlay": {"override_commands": ["show version"]},
                     "variants_policy": {"select": "default"},
                 }
             }
@@ -550,7 +551,7 @@ class TestReservedInventoryFields:
         net = SimNOS(inventory=inventory)
         host = net.hosts["R1"]
         assert host.facts == {"hostname": "R1", "serial": "ABC"}
-        assert host.overlay == {"dir": "/srv/overlay", "override_commands": True}
+        assert host.overlay == {"override_commands": ["show version"]}
         assert host.variants_policy == {"select": "default"}
 
     def test_reserved_field_warns_when_set(self, caplog):
@@ -571,7 +572,7 @@ class TestReservedInventoryFields:
     def test_overlay_schema_rejects_unknown_key(self):
         """ModelOverlay keeps `extra="forbid"` — a typo'd overlay key is rejected."""
         with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
-            ModelOverlay(dir="/srv/o", bogus=1)  # ty: ignore[unknown-argument]  # intentional: extra="forbid" probe
+            ModelOverlay(override_commands="all", bogus=1)  # ty: ignore[unknown-argument]  # intentional: extra="forbid" probe
 
     def test_reserved_field_extra_still_forbidden(self):
         """Reserving fields does not loosen `extra="forbid"` on the inventory."""
@@ -586,7 +587,8 @@ class TestSysConfig:
     sys_config holds environment-wide settings (`data_dir` / `variants_policy`);
     #266 introduces loading (arg / env / cwd / home discovery), the
     `SIMNOS_DATA_DIR` env override, and the `sys_config < inventory` precedence
-    rung. Both fields are no-op in #266 (consumed in #265 / #267).
+    rung. `data_dir` is consumed by the overlay loader in #286; `variants_policy`
+    is still no-op (consumed in #287).
     """
 
     def test_default_is_empty_resolved(self):
@@ -676,11 +678,16 @@ class TestSysConfig:
         with pytest.raises(TypeError, match="sys_config must be a mapping"):
             SimNOS(sys_config=str(cfg))
 
-    def test_data_dir_set_warns_noop(self, caplog):
-        """A set data_dir warns (it is reserved / no-op in #266)."""
+    def test_data_dir_set_does_not_warn_noop(self, caplog):
+        """A set data_dir no longer warns no-op — it is consumed by the overlay loader (#286).
+
+        A host only resolves the overlay dir from data_dir when it opts in via
+        `overlay.override_commands`; an unused data_dir is a valid environment
+        default, not a silently-inert config, so the #266 no-op warning is gone.
+        """
         with caplog.at_level(logging.WARNING, logger="simnos.core.simnos"):
             SimNOS(sys_config={"data_dir": "/srv"})
-        assert any("data_dir" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records)
+        assert not any("data_dir" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records)
 
     def test_sys_config_seed_does_not_pollute_default_inventory(self):
         """sys_config seeding must not mutate the module-global default_inventory (1st round codex#1).

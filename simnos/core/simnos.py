@@ -163,7 +163,6 @@ class SimNOS:
         if env_data_dir:
             resolved["data_dir"] = env_data_dir
         self.sys_config: dict = resolved
-        self._warn_sys_config_noop()
 
     def _discover_sys_config(self, sys_config: dict | str | None) -> dict:
         """Find the sys_config source by the Decision 6 search order.
@@ -205,22 +204,6 @@ class SimNOS:
         if not isinstance(data, dict):
             raise TypeError(f"sys_config must be a mapping, got {type(data).__name__} in {path}")
         return data
-
-    def _warn_sys_config_noop(self) -> None:
-        """Warn loudly for the global sys_config value that is inert in #266.
-
-        ``data_dir`` is environment-global (never reaches a host) and consumed by
-        nobody until #265 wires it up, so surface a set-but-inert value here with
-        ``log.warning`` (Decision 5, anti-silent-bug). ``variants_policy`` is *not*
-        warned here: it seeds the inventory default and is surfaced per-host by
-        ``Host._warn_reserved_fields`` after the merge, so warning here too would
-        double-report it.
-        """
-        if self.sys_config.get("data_dir") is not None:
-            log.warning(
-                "sys_config sets 'data_dir', which is reserved and has no effect yet "
-                "(activated in #265, currently no-op).",
-            )
 
     def _seed_inventory_default_from_sys_config(self, inventory_default: dict) -> dict:
         """Seed inventory-default with sys_config's per-host settings (#266 / D4).

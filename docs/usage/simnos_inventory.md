@@ -321,6 +321,7 @@ The following options can be used either in the `default` section or in the `hos
 | `server`      | :satellite:   | server configuration               | See section [Server options](#server-options)   |
 | `shell`       | :shell:       | shell configuration                | See section [Shell options](#shell-options)     |
 | `nos`         | :computer:    | NOS configuration                  | See section [NOS options](#nos-options)         |
+| `overlay`     | :card_index_dividers: | custom command overlay     | See section [Custom command overlay](#custom-command-overlay-data-layering) |
 
 ### Server options
 
@@ -382,5 +383,94 @@ server:
 | `plugin`                  | :electric_plug:           | NOS plugin to use                     | `plugin: cisco_ios`                                                     |
 | `configuration`           | :gear:                    | NOS configuration                     | The configuration entirely rely on the plugin                           |
 
+
+## Custom command overlay (data layering)
+
+The overlay lets you **replace the output of a packaged command** — or **add a
+command the package does not ship** — by dropping a captured output file next to
+SIMNOS instead of editing the packaged data. Because the files live outside the
+package, they survive a `pip` upgrade.
+
+It is the right tool when the *whole output* of a command differs (e.g. a capture
+from a specific device or OS version). When only *values* differ (hostname,
+serial, …) that is host facts, a separate mechanism.
+
+### Where the files live: `sys_config.data_dir`
+
+Overlay files live under an environment-global directory set in `sys_config.yaml`:
+
+```yaml
+# sys_config.yaml
+data_dir: /srv/simnos/overlays
+```
+
+`sys_config.yaml` is discovered from (in order) the `SimNOS(sys_config=...)` arg,
+the `SIMNOS_SYS_CONFIG` env var, `./sys_config.yaml`, then
+`~/.simnos/sys_config.yaml`. `SIMNOS_DATA_DIR` overrides the file's `data_dir`.
+
+Each platform reads from its own subdirectory named by the **internal platform
+name** (the registry key — e.g. `cisco_ios`, the same name `ntc_platform`
+resolves to), not the netmiko `device_type` alias:
+
+```
+/srv/simnos/overlays/
+└── cisco_ios/
+    ├── show_version.txt          # replaces `show version` output
+    └── show_run.txt              # adds `show run` (absent from the package)
+```
+
+Output files are **`.txt`** (literal wire text) or **`.j2`** (a jinja2 template;
+in this release only `{{ base_prompt }}` may be referenced — a template needing
+host facts is a loud error until facts land). A filename's stem maps to a command
+name by turning `_` into a space: `show_version.txt` → `show version` (matching
+the NTC raw-capture naming convention, case-sensitive).
+
+### Opting in: `overlay.override_commands`
+
+A host pulls from the overlay dir only when its inventory sets
+`overlay.override_commands`. It takes three forms:
+
+```yaml
+hosts:
+  R1:
+    device_type: cisco_ios
+    overlay:
+      override_commands: all                         # apply every .txt/.j2 in the dir
+  R2:
+    device_type: cisco_ios
+    overlay:
+      override_commands: ["show version", "show run"] # these commands, default-name files
+  R3:
+    device_type: cisco_ios
+    overlay:
+      override_commands:                              # explicit per-host capture file
+        show version: show_version_B.txt
+```
+
+- **`all`** — apply every `.txt` / `.j2` in `<data_dir>/<platform>/`.
+- **list** — apply each named command by its default-name file (`show version`
+  → `show_version.txt` / `.j2`).
+- **map** — `{command: filename}`, so two hosts can pull *different* capture files
+  for the same command (R1 → `show_version_A.txt`, R2 → `show_version_B.txt`).
+
+A command found in the packaged data is an **output-only override** — only its
+output is swapped; its modes / help / type are inherited. A command absent from
+the package becomes a **new command**, valid in every mode. Unset / empty
+`override_commands` means the overlay is not applied (no behaviour change).
+
+### Notes and limits
+
+- **Opt-in is loud.** If `override_commands` is set but `data_dir` is unconfigured,
+  the platform's overlay dir is missing, or a listed/mapped command has no file,
+  startup fails with an error — an opt-in that cannot be satisfied never silently
+  falls back to packaged output.
+- **A3 platforms only.** Python-only (py-only) platforms do not support overlays.
+- **Multi-capture commands.** Overriding a command that ships multiple captures
+  (variants) collapses it to the single overlay output (logged at INFO).
+- **Not hot-reloaded.** The overlay dir is outside the packaged tree the dev
+  hot-reload watcher sees; an overlay change takes effect on reconnect.
+- **Growing the catalog.** For mode-specific commands or commands you want to
+  share, contributing a packaged command (an A3 `commands/<cmd>.yaml` + output
+  file) is the canonical route; the overlay is for local, output-only tweaks.
 
 [^1]: To see the current defaults, check the [source code](https://github.com/Route-Reflector/simnos/blob/main/simnos/core/simnos.py) of SIMNOS.
