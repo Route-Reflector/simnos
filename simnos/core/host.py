@@ -4,7 +4,9 @@ It provides the methods to start and stop the server instance for the host.
 It also validates the host object using pydantic.
 """
 
+from dataclasses import dataclass
 import logging
+import os
 from typing import TYPE_CHECKING
 
 from simnos.core.nos import Nos
@@ -15,6 +17,21 @@ if TYPE_CHECKING:
     from simnos.core.simnos import SimNOS
 
 log = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class HostRenderConfig:
+    """Per-host render config the server carries from Host to the shell (#286 / C1).
+
+    A single carrier so the wiring (Host -> server -> ``build_shared_platform`` ->
+    ``build_resolved_platform`` -> shell) is threaded once. #286 fills ``overlay_*``;
+    #287 adds ``facts`` / random fields here without touching the signature again.
+    Both are ``None`` when the host has not opted into the overlay, in which case
+    the merge skips the overlay layer entirely (no behaviour change).
+    """
+
+    overlay_root: str | None = None
+    override_commands: str | list[str] | dict[str, str] | None = None
 
 
 class Host:
@@ -55,8 +72,10 @@ class Host:
         self.nos = None
         self.device_type: str | None = device_type
         self.configuration_file: str | None = configuration_file
-        # #265 reservation (#266 / D1, Decision 5): stored but consumed by nobody
-        # in #266. Kept as attributes so #265 can wire them up without touching
+        # Inventory render config. `overlay` is consumed by #286 (Host.start
+        # resolves the overlay dir and threads it to the shell via
+        # HostRenderConfig); `facts` / `variants_policy` are still #287 reservations
+        # (stored but inert, warned below) so #287 can wire them without touching
         # the Host signature again.
         self.facts: dict | None = facts
         self.overlay: dict | None = overlay
@@ -96,6 +115,10 @@ class Host:
             if not isinstance(self.nos_plugin, Nos)
             else self.nos_plugin
         )
+        render_config = HostRenderConfig(
+            overlay_root=self._resolve_overlay_root(plugin_key),
+            override_commands=(self.overlay or {}).get("override_commands"),
+        )
         self.server = self.server_plugin(
             shell=self.shell_plugin,
             shell_configuration=self.shell_inventory["configuration"],
@@ -104,10 +127,52 @@ class Host:
             port=self.port,
             username=self.username,
             password=self.password,
+            render_config=render_config,
             **self.server_inventory["configuration"],
         )
         self.server.start()
         self.running = True
+
+    def _resolve_overlay_root(self, plugin_key: str) -> str | None:
+        """Resolve this host's overlay dir, or None when overlay is not opted in (#286).
+
+        The opt-in is the inventory ``overlay.override_commands`` (empty/unset =
+        no overlay -> None, the merge skips the overlay layer). When set, the data
+        must be reachable: ``sys_config.data_dir`` must be configured and
+        ``<data_dir>/<plugin_key>/`` must exist. An explicit opt-in that cannot be
+        satisfied is a loud error, never a silent fall-back to packaged output
+        (design Decision 10a) — including opting in on a legacy / py-only platform,
+        whose merge path drops the overlay layer (`build_resolved_platform`), so a
+        non-A3 platform with overlay set must fail here rather than silently serve
+        the packaged output (Decision 12, J4). ``plugin_key`` is the registry key
+        (already passed through ``resolve_device_type`` in ``start()``), not the raw
+        inventory ``device_type`` — aliasing platforms and the ``nos.plugin`` path
+        would otherwise point the dir at the wrong (or no) name (Decision 3).
+        """
+        override_commands = (self.overlay or {}).get("override_commands")
+        if not override_commands:
+            return None
+        # `self.nos` is built just above in `start()` before this is called; the
+        # None guard lets direct unit calls (no start) keep testing the dir logic.
+        # The A3-only rationale lives in the docstring above.
+        if self.nos is not None and self.nos.resolved_platform is None:
+            raise ValueError(
+                f"Host {self.name}: overlay.override_commands is set but platform {plugin_key!r} is "
+                "legacy / py-only (no A3 command data); overlays apply to A3 platforms only."
+            )
+        data_dir = self.simnos.sys_config.get("data_dir")
+        if not data_dir:
+            raise ValueError(
+                f"Host {self.name}: overlay.override_commands is set but sys_config.data_dir is not "
+                "configured; cannot locate the overlay directory."
+            )
+        root = os.path.join(data_dir, plugin_key)
+        if not os.path.isdir(root):
+            raise ValueError(
+                f"Host {self.name}: overlay directory {root!r} does not exist "
+                f"(data_dir={data_dir!r}, platform={plugin_key!r})."
+            )
+        return root
 
     def stop(self):
         """Method to stop server instance for this host.
@@ -123,22 +188,31 @@ class Host:
         self.running = False
 
     def _warn_reserved_fields(self) -> None:
-        """Warn loudly for #265 reserved fields that are set but inert in #266.
+        """Warn loudly for #287 reserved fields that are set but inert.
 
-        `facts` / `overlay` / `variants_policy` are accepted and validated by the
-        inventory schema (the "器") but consumed by neither the loader nor the
-        shell until #265 wires them up. A `log.warning` here keeps a set-but-inert
-        config visible instead of a silent no-op (#266 / Decision 5, anti-silent-bug).
+        `facts` / `variants_policy` are accepted and validated by the inventory
+        schema (the "器") but consumed by neither the loader nor the shell until
+        #287 wires them up. A `log.warning` here keeps a set-but-inert config
+        visible instead of a silent no-op (#266 / Decision 5, anti-silent-bug).
         The value may come from the host, the inventory default, or a sys_config
-        seed (`variants_policy`), so the message stays provenance-neutral.
+        seed (`variants_policy`), so the message stays provenance-neutral. `overlay`
+        is consumed by #286 (Host.start) so it is not a whole-field reservation —
+        but its `random_commands` sub-field is the #287 vessel and stays inert, so
+        a set-but-inert `random_commands` is warned on its own (#287, anti-silent-bug).
         """
-        for field in ("facts", "overlay", "variants_policy"):
+        for field in ("facts", "variants_policy"):
             if getattr(self, field) is not None:
                 log.warning(
-                    "Host %s has reserved field %r set, which has no effect yet (activated in #265, currently no-op).",
+                    "Host %s has reserved field %r set, which has no effect yet (activated in #287, currently no-op).",
                     self.name,
                     field,
                 )
+        if (self.overlay or {}).get("random_commands"):
+            log.warning(
+                "Host %s has overlay.random_commands set, which has no effect yet "
+                "(activated in #287, currently no-op).",
+                self.name,
+            )
 
     def _validate(self):
         """Validate that the host has the required attributes using pydantic"""

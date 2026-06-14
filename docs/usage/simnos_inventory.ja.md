@@ -313,6 +313,7 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 | `server`      | :satellite:   | サーバー設定                         | [Server options](#server-options) セクションを参照     |
 | `shell`       | :shell:       | シェル設定                           | [Shell options](#shell-options) セクションを参照       |
 | `nos`         | :computer:    | NOS 設定                            | [NOS options](#nos-options) セクションを参照           |
+| `overlay`     | :card_index_dividers: | カスタムコマンドオーバーレイ   | [カスタムコマンドオーバーレイ](#カスタムコマンドオーバーレイデータレイヤリング) セクションを参照 |
 
 ### Server options
 
@@ -374,5 +375,100 @@ server:
 | `plugin`                  | :electric_plug:           | 使用する NOS プラグイン                 | `plugin: cisco_ios`                                                     |
 | `configuration`           | :gear:                    | NOS 設定                              | 設定はプラグインに完全に依存します                                           |
 
+
+## カスタムコマンドオーバーレイ（データレイヤリング）
+
+オーバーレイを使うと、パッケージ同梱データを編集せずに、SIMNOS の隣にキャプチャ
+した出力ファイルを置くだけで、**同梱コマンドの出力を差し替え**たり、**同梱に無い
+コマンドを追加**したりできます。ファイルはパッケージ外に置かれるため、`pip` で
+アップグレードしても消えません。
+
+コマンドの **出力全体** が異なる場合（特定デバイス／OS バージョンのキャプチャ等）に
+適しています。**値だけ**（hostname、serial など）が異なる場合は host facts という
+別の仕組みになります。
+
+### 置き場所: `sys_config.data_dir`
+
+オーバーレイファイルは `sys_config.yaml` で指定するマシン全体共通のディレクトリ配下
+に置きます:
+
+```yaml
+# sys_config.yaml
+data_dir: /srv/simnos/overlays
+```
+
+`sys_config.yaml` は（優先順）`SimNOS(sys_config=...)` 引数 → 環境変数
+`SIMNOS_SYS_CONFIG` → `./sys_config.yaml` → `~/.simnos/sys_config.yaml` の順で
+探索されます。`SIMNOS_DATA_DIR` はファイルの `data_dir` を上書きします。
+
+各プラットフォームは、netmiko の `device_type` 別名ではなく、**内部プラットフォーム名**
+（レジストリキー = `ntc_platform` が解決する名前、例: `cisco_ios`）のサブディレクトリ
+を読みます:
+
+```
+/srv/simnos/overlays/
+└── cisco_ios/
+    ├── show_version.txt          # `show version` の出力を差し替え
+    └── show_run.txt              # `show run` を追加（同梱に無い）
+```
+
+出力ファイルは **`.txt`**（リテラルのワイヤテキスト）または **`.j2`**（jinja2
+テンプレート。本リリースでは `{{ base_prompt }}` のみ参照可。host facts を必要とする
+テンプレートは facts 導入までエラー）です。ファイル名の stem は `_` を空白に変換して
+コマンド名に対応します: `show_version.txt` → `show version`（NTC raw キャプチャの
+命名規約に追従、大文字小文字を区別）。
+
+### 有効化: `overlay.override_commands`
+
+ホストは、インベントリで `overlay.override_commands` を設定したときだけオーバーレイ
+ディレクトリから読み込みます。3 形態あります:
+
+```yaml
+hosts:
+  R1:
+    device_type: cisco_ios
+    overlay:
+      override_commands: all                         # ディレクトリ内の .txt/.j2 を全適用
+  R2:
+    device_type: cisco_ios
+    overlay:
+      override_commands: ["show version", "show run"] # 既定名ファイルでこのコマンドだけ
+  R3:
+    device_type: cisco_ios
+    overlay:
+      override_commands:                              # ホストごとに明示ファイル選択
+        show version: show_version_B.txt
+```
+
+- **`all`** — `<data_dir>/<platform>/` 内の `.txt` / `.j2` を全適用。
+- **リスト** — 列挙したコマンドを既定名ファイル（`show version` →
+  `show_version.txt` / `.j2`）で適用。
+- **マップ** — `{コマンド: ファイル名}`。2 つのホストが同じコマンドに対して*異なる*
+  キャプチャファイルを選べます（R1 → `show_version_A.txt`、R2 →
+  `show_version_B.txt`）。
+
+同梱データに存在するコマンドは **出力のみの差し替え**（出力だけ入れ替え、modes /
+help / type は継承）。同梱に無いコマンドは **新規コマンド**（全モードで有効）として
+追加されます。`override_commands` 未指定／空はオーバーレイ非適用（挙動不変）です。
+
+### 注意と制限
+
+- **有効化は loud。** `override_commands` を設定したのに `data_dir` が未設定、対象
+  プラットフォームのオーバーレイディレクトリが無い、列挙／マップしたコマンドに対応
+  ファイルが無い場合は起動時にエラーになります（満たせない opt-in が同梱出力に黙って
+  フォールバックすることはありません）。
+- **A3 プラットフォームのみ。** Python のみ（py-only）のプラットフォームは非対応。
+- **ファイル名は bare 名で完全一致。** リスト／`all` のエントリは既定名ファイルに
+  大文字小文字を区別して一致させるため、同梱コマンドの正確な小文字表記を使ってください。
+  `stem_with_underscores.txt` 形式のファイル名にきれいに対応しないコマンド名（`/` など
+  パス文字を含むもの）は、**マップ**形態で明示的な bare ファイル名を指定してください
+  （リスト／`all` 形態は bare でない生成名を拒否します）。
+- **マルチキャプチャコマンド。** 複数キャプチャ（variants）を持つコマンドを差し替える
+  と単一のオーバーレイ出力に縮退します（INFO ログ）。
+- **ホットリロード対象外。** オーバーレイディレクトリは dev ホットリロード watcher が
+  見る同梱ツリー外です。変更は再接続で反映されます。
+- **カタログを増やすには。** モード指定コマンドや共有したいコマンドは、同梱コマンド
+  （A3 の `commands/<cmd>.yaml` + 出力ファイル）の貢献が正道です。オーバーレイは
+  ローカルな出力差し替え用です。
 
 [^1]: 現在のデフォルトを確認するには、SIMNOS の[ソースコード](https://github.com/Route-Reflector/simnos/blob/main/simnos/core/simnos.py)を参照してください。

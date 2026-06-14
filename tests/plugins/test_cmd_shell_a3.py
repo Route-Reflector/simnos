@@ -18,6 +18,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from simnos.core.host import HostRenderConfig
 from simnos.core.nos import Nos
 from simnos.plugins.shell import cmd_shell as cmd_shell_module
 from simnos.plugins.shell import utils as shell_utils
@@ -178,6 +179,84 @@ class TestShellA3Path:
             shell._rebuild()
         assert shell.commands is good_commands  # unchanged reference
         assert shell.prompt == good_prompt
+
+
+class TestOverlayMerge:
+    """User overlay layer in `build_resolved_platform` (#286 / Decision 14).
+
+    The overlay slots between the py inflow and inventory: a captured `.txt`
+    overrides the packaged A3 output, but a session-local inventory command still
+    wins. No render_config / no opt-in leaves the merge unchanged (regression).
+    """
+
+    def _overlay(self, tmp_path, files):
+        overlay_root = tmp_path / "overlay" / "cisco_ios"
+        overlay_root.mkdir(parents=True)
+        for name, content in files.items():
+            (overlay_root / name).write_text(content, encoding="utf-8")
+        return str(overlay_root)
+
+    def test_overlay_overrides_a3_static(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY version\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
+        platform = build_resolved_platform(nos, {}, render_config)
+        cmd = platform.commands["show version"]
+        assert cmd.output.render("R1") == "OVERLAY version\n"
+        assert cmd.modes == frozenset({"enable"})  # base modes inherited (output-only)
+
+    def test_inventory_wins_over_overlay(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
+        inventory = {"show version": {"output": "INVENTORY", "help": "inv", "prompt": "{base_prompt}#"}}
+        platform = build_resolved_platform(nos, inventory, render_config)
+        assert platform.commands["show version"].output.render("R1") == "INVENTORY"
+
+    def test_overlay_overrides_py_command(self, tmp_path):
+        # The py inflow sits below the overlay (a3 < py < overlay < inventory): an
+        # overlay output wins over a py-module handler for the same command. Pins
+        # the `commands.update` order so a future reorder is caught.
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        handler = lambda **kwargs: "dynamic"  # noqa: E731 — minimal handler stand-in
+        nos.commands = {"show version": {"output": handler, "help": "dyn", "prompt": "{base_prompt}#"}}
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY over py\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
+        platform = build_resolved_platform(nos, {}, render_config)
+        assert platform.commands["show version"].output.render("R1") == "OVERLAY over py\n"
+
+    def test_overlay_adds_new_command(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        overlay_root = self._overlay(tmp_path, {"show_run.txt": "running-config\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands=["show run"])
+        platform = build_resolved_platform(nos, {}, render_config)
+        cmd = platform.commands["show run"]
+        assert cmd.type == "custom"
+        assert cmd.modes == frozenset()  # all modes
+        assert cmd.output.render("R1") == "running-config\n"
+
+    def test_no_render_config_unchanged(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        platform = build_resolved_platform(nos, {}, None)
+        assert platform.commands["show version"].output.render("R1") == "Cisco IOS Software, Version 15.0\n"
+
+    def test_overlay_opt_out_when_override_commands_empty(self, tmp_path):
+        # overlay_root set but override_commands unset = not opted in (no overlay).
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands=None)
+        platform = build_resolved_platform(nos, {}, render_config)
+        assert platform.commands["show version"].output.render("R1") == "Cisco IOS Software, Version 15.0\n"
+
+    def test_build_shared_platform_threads_render_config(self, tmp_path):
+        # The server-side seam: build_shared_platform passes render_config through
+        # so the shared snapshot the server hands to every shell carries the overlay.
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY version\n"})
+        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
+        shared = CMDShell.build_shared_platform(nos, {}, render_config)
+        assert shared is not None
+        assert shared.commands["show version"].output.render("R1") == "OVERLAY version\n"
 
 
 def _touch_future(path):

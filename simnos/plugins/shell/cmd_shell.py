@@ -7,15 +7,19 @@ import copy
 import logging
 import os
 import traceback
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from simnos.core.command_adapter import adapt_commands, adapt_legacy_commands, reverse_map_from_modes
 from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
+from simnos.core.overlay_loader import resolve_overlay
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import ResolvedCommand, ResolvedPlatform
 from simnos.plugins import nos
 from simnos.plugins.shell.utils import get_files_changed
+
+if TYPE_CHECKING:
+    from simnos.core.host import HostRenderConfig
 
 log = logging.getLogger(__name__)
 
@@ -37,22 +41,29 @@ BASIC_COMMANDS: dict = {
 HANDLER_ERROR_OUTPUT = "% Internal error"
 
 
-def build_resolved_platform(nos: "Nos", inventory_commands: dict) -> ResolvedPlatform:
+def build_resolved_platform(
+    nos: "Nos", inventory_commands: dict, render_config: "HostRenderConfig | None" = None
+) -> ResolvedPlatform:
     """Merge the command inflows into one `ResolvedPlatform` (#264 / D6).
 
     The shell consumes one representation regardless of authoring form. Inflows
-    merge under one precedence — BASIC < NOS < inventory, later inflows winning:
+    merge under one precedence — BASIC < NOS < overlay < inventory, later inflows
+    winning:
 
     - **legacy NOS** (`nos.resolved_platform is None`): the merged dict (BASIC +
       NOS commands + inventory, all legacy form) goes through the legacy adapter,
-      which synthesizes the modes from the 3 scalar prompts.
+      which synthesizes the modes from the 3 scalar prompts. The user overlay is
+      A3-only (#286 / Decision 12), so it is not applied here.
     - **A3 NOS** (`nos.resolved_platform` set): modes come from the A3 platform;
       its resolved static commands sit between the still-legacy BASIC (below) and
       the legacy py-module / inventory inflows (above, keeping the py-override
       precedence). The legacy inflows are normalized with the A3 platform's
-      prompt->mode reverse map. Inventory / py aliases resolve within their own
-      inflow only; a cross-inflow alias (e.g. inventory aliasing an A3 command)
-      is out of scope until the inventory rework (#266) — shipped data has none.
+      prompt->mode reverse map. The user overlay (#286), when the host opted in,
+      slots between the py inflow and inventory so a captured `.txt` overrides the
+      packaged output but a session-local inventory command still wins. Inventory /
+      py aliases resolve within their own inflow only; a cross-inflow alias (e.g.
+      inventory aliasing an A3 command) is out of scope until the inventory rework
+      (#266) — shipped data has none.
 
     Pure (no session state): the result is per-host invariant, so the server
     builds it once and shares it across connections.
@@ -70,6 +81,15 @@ def build_resolved_platform(nos: "Nos", inventory_commands: dict) -> ResolvedPla
     commands.update(adapt_commands(copy.deepcopy(BASIC_COMMANDS), reverse_map))
     commands.update(a3.commands)
     commands.update(adapt_commands(copy.deepcopy(nos.commands or {}), reverse_map))
+    # User overlay (#286): a host opts in via inventory `overlay.override_commands`;
+    # the overlay dir was resolved + existence-checked by Host. Applied after py and
+    # before inventory (last-wins precedence, Decision 14).
+    if render_config is not None and render_config.overlay_root and render_config.override_commands:
+        overlay_commands = resolve_overlay(
+            render_config.overlay_root, a3, override_commands=render_config.override_commands
+        )
+        log.debug("overlay overrides %d command(s): %s", len(overlay_commands), sorted(overlay_commands))
+        commands.update(overlay_commands)
     commands.update(adapt_commands(copy.deepcopy(inventory_commands), reverse_map))
     # Carry `auth` so the merged platform mirrors the A3 source — auth is consumed
     # via `nos.auth`, but dropping it would re-introduce the silent-dead-end
@@ -97,6 +117,7 @@ class CMDShell(Cmd):
         completekey="tab",
         newline="\r\n",
         resolved_platform=None,
+        render_config=None,
     ):
         self.nos: Nos = nos
         # Platform name captured at build time for the hot-reload ownership filter
@@ -114,6 +135,11 @@ class CMDShell(Cmd):
         # NOS data; kept in authoring form and normalized through the adapter on
         # a hot-reload rebuild (#264 / D6).
         self._inventory_commands: dict = nos_inventory_config.get("commands", {})
+        # Per-host render config (overlay #286, facts #287). Held so a hot-reload
+        # `_rebuild` re-applies the overlay instead of dropping it (#286 / C1); in
+        # hot-reload dev mode the shared snapshot is None so this self-build path
+        # carries the overlay too.
+        self._render_config: HostRenderConfig | None = render_config
         # The merged platform is per-host invariant (base_prompt is the host name,
         # nos/inventory are shared), so the server normalizes it once at
         # Host.start and passes it to every connection's shell (#264 / Impact —
@@ -121,7 +147,7 @@ class CMDShell(Cmd):
         # construction) the shell builds its own. A malformed prompt template
         # fails loudly here (the #172 lenient fallback is gone, #264 / D5).
         if resolved_platform is None:
-            resolved_platform = build_resolved_platform(self.nos, self._inventory_commands)
+            resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
         self._apply_platform(resolved_platform)
 
         # call the base constructor of cmd.Cmd, with our own stdin and stdout
@@ -132,20 +158,24 @@ class CMDShell(Cmd):
         )
 
     @staticmethod
-    def build_shared_platform(nos: Nos, nos_inventory_config: dict) -> ResolvedPlatform | None:
+    def build_shared_platform(
+        nos: Nos, nos_inventory_config: dict, render_config: "HostRenderConfig | None" = None
+    ) -> ResolvedPlatform | None:
         """Build the per-host merged platform the server shares across connections.
 
         Called once at Host.start (by the server) so inventory/data errors fail
         there rather than on each connection, and so the normalization is not
-        repeated per connection (#264 / Impact).
+        repeated per connection (#264 / Impact). `render_config` carries the host's
+        overlay opt-in (#286) so the shared snapshot includes the overlay layer.
 
         Returns None when hot-reload is enabled (`SIMNOS_RELOAD_COMMANDS`): in
         that dev mode each connection must rebuild from the live `nos` so file
-        edits propagate to new connections, so there is no shared snapshot.
+        edits propagate to new connections, so there is no shared snapshot (the
+        per-shell `_render_config` carries the overlay through `_rebuild`).
         """
         if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
             return None
-        return build_resolved_platform(nos, nos_inventory_config.get("commands", {}))
+        return build_resolved_platform(nos, nos_inventory_config.get("commands", {}), render_config)
 
     def _apply_platform(self, platform: ResolvedPlatform) -> None:
         """Install a (built or shared) platform + refresh session mode / prompt."""
@@ -163,9 +193,10 @@ class CMDShell(Cmd):
 
         Atomic: `build_resolved_platform` raises before `_apply_platform` mutates
         anything, so a broken hot reload leaves the running session intact
-        (#264 / D5, D6).
+        (#264 / D5, D6). Re-applies the host's overlay via `_render_config` so a
+        hot reload does not silently drop it (#286 / C1).
         """
-        self._apply_platform(build_resolved_platform(self.nos, self._inventory_commands))
+        self._apply_platform(build_resolved_platform(self.nos, self._inventory_commands, self._render_config))
 
     def start(self):
         """Method to start the shell"""

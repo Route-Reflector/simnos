@@ -390,20 +390,39 @@ class CMDShellPlugin(BaseModel):
 
 
 class ModelOverlay(BaseModel):
-    """User overlay reservation (#266 / D1, Decision 5) — wired up in #265.
+    """User overlay control (custom data layering, #286 / P1-2a).
 
-    The "器" (vessel) for the #265 output-only override: drop a captured `.txt`
-    under `dir` to replace a command's wire output. `override_commands` toggles
-    full command-tree replacement vs output-only merge. #266 only validates the
-    shape; the loader does not consume it yet (no-op, warned at load). The exact
-    schema is #265's design input, so this stays minimal — `extra="forbid"`
-    rejects typos but the field set is deliberately small (R4).
+    Per-host control for the output-only override: drop a captured ``.txt`` /
+    ``.j2`` under ``<sys_config.data_dir>/<registry-key>/`` and list it here to
+    replace a packaged command's wire output (or add a command absent from the
+    package). The overlay *directory* is environment-global (``sys_config.data_dir``,
+    not per-host) — the #266-reserved per-host ``dir`` field is removed; what each
+    host pulls from it is the per-host control below.
+
+    ``override_commands`` (Decision 5) selects the commands this host pulls from
+    the overlay dir, in three forms:
+
+    - ``all`` — apply every ``.txt`` / ``.j2`` in the dir (stem ``_``->space is the
+      command name).
+    - a list — apply these commands by their default-name file (``show version``
+      -> ``show_version.txt`` / ``.j2``).
+    - a map — ``{command: filename}`` for an explicit per-host capture choice
+      (the R11 case: host A pulls ``show_version_A.txt``, host B ``_B``).
+
+    A command found in the base is an output-only override (only its output is
+    swapped); one absent from the base is a new command (all-modes, ``type=custom``).
+    Unset / empty = the overlay is not applied (this field is the opt-in). yaml
+    full-replacement is deferred to a future issue — #286 reads ``.txt`` / ``.j2``
+    output files only.
+
+    ``random_commands`` is the vessel for #287 (random selection from packaged
+    variants); it is validated here but inert until #287 wires it up.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    dir: StrictStr | None = None
-    override_commands: StrictBool | None = None
+    override_commands: Literal["all"] | list[StrictStr] | dict[StrictStr, StrictStr] | None = None
+    random_commands: list[StrictStr] | None = None  # #287 で有効化 (器)
 
 
 class InventoryDefaultSection(BaseModel):
@@ -421,18 +440,18 @@ class InventoryDefaultSection(BaseModel):
     server: ParamikoSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
-    # #265 reservation (#266 / D1, Decision 5): accepted + validated here so the
-    # inventory schema never breaks again when #265 wires up the behaviour, but
-    # consumed by neither the loader nor the shell in #266. A non-None value is
-    # surfaced at host load with `log.warning` (Host.__init__) so a "set but
-    # silently inert" config is loud, not a silent no-op (anti-silent-bug).
-    # `facts` is a free mapping (render variables, shape owned by #265); only
-    # `overlay` has a committed shape. `variants_policy` shape is #265's input,
-    # so it stays a permissive mapping to avoid a guessed schema forcing a second
-    # break (R4).
-    facts: dict | None = Field(None, description="#265 で有効化、現在 no-op (host render facts)")
-    overlay: ModelOverlay | None = Field(None, description="#265 で有効化、現在 no-op (output overlay)")
-    variants_policy: dict | None = Field(None, description="#265 で有効化、現在 no-op (output_variants 選択方針)")
+    # Inventory render fields. `overlay` is consumed by #286 (Host.start resolves
+    # the overlay dir and threads it to the shell). `facts` / `variants_policy`
+    # remain #287 reservations — accepted + validated here so the inventory schema
+    # never breaks again when #287 wires them up, but consumed by nobody until then;
+    # a non-None value is surfaced at host load with `log.warning` (Host.__init__)
+    # so a "set but silently inert" config is loud, not a silent no-op
+    # (anti-silent-bug). `facts` is a free mapping (render variables, shape owned by
+    # #287); `variants_policy` likewise stays a permissive mapping to avoid a
+    # guessed schema forcing a second break (R4); only `overlay` has a committed shape.
+    facts: dict | None = Field(None, description="#287 で有効化、現在 no-op (host render facts)")
+    overlay: ModelOverlay | None = Field(None, description="#286 で有効化 (custom overlay / output override)")
+    variants_policy: dict | None = Field(None, description="#287 で有効化、現在 no-op (output_variants 選択方針)")
 
 
 class HostConfig(InventoryDefaultSection):
@@ -470,12 +489,14 @@ class ModelSysConfig(BaseModel):
     """SimNOS environment config schema (`sys_config.yaml`, #266 / D4, Decision 6).
 
     The minimal "environment vs topology" split: `sys_config.yaml` holds
-    environment-wide settings, the inventory holds topology. #266 introduces it
-    with two fields only — `data_dir` (overlay base dir default, #265 consumes)
+    environment-wide settings, the inventory holds topology. #266 introduced it
+    with two fields only — `data_dir` (the environment-global overlay base dir)
     and `variants_policy` (global default for the inventory per-host field of the
-    same name). Both are reserved/no-op in #266 (warned at load); full build-out
-    is deferred to #265 / #267 (案6-A). `variants_policy` mirrors the inventory
-    field's permissive mapping type (shape owned by #265, R4).
+    same name). `data_dir` is consumed by the overlay loader in #286 (a host opts
+    in via `overlay.override_commands`, which resolves `<data_dir>/<registry-key>/`);
+    `variants_policy` is still reserved/no-op (warned per-host at load), deferred
+    to #287. `variants_policy` mirrors the inventory field's permissive mapping
+    type (shape owned by #287, R4).
     """
 
     model_config = ConfigDict(extra="forbid")
