@@ -569,6 +569,20 @@ class TestReservedInventoryFields:
             SimNOS(inventory=inventory)
         assert not [r for r in caplog.records if "reserved field" in r.getMessage()]
 
+    def test_overlay_random_commands_warns_noop(self, caplog):
+        """`overlay.random_commands` is the #287 vessel — inert in #286, so a set
+        value warns (anti-silent-bug) even though `overlay.override_commands` is consumed."""
+        inventory = {
+            "hosts": {
+                "R1": {"port": 6107, "device_type": "cisco_ios", "overlay": {"random_commands": ["show version"]}}
+            }
+        }
+        with caplog.at_level(logging.WARNING, logger="simnos.core.host"):
+            SimNOS(inventory=inventory)
+        assert any(
+            "overlay.random_commands" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records
+        )
+
     def test_overlay_schema_rejects_unknown_key(self):
         """ModelOverlay keeps `extra="forbid"` — a typo'd overlay key is rejected."""
         with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):

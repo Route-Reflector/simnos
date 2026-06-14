@@ -163,3 +163,13 @@ class TestResolveOverlayRoot:
         (tmp_path / "cisco_ios").mkdir()
         host = self._host(overlay={"override_commands": "all"}, data_dir=str(tmp_path))
         assert host._resolve_overlay_root("cisco_ios") == str(tmp_path / "cisco_ios")
+
+    def test_opted_in_on_legacy_platform_is_loud(self, tmp_path):
+        # Overlay is A3-only: opting in on a legacy / py-only platform (no
+        # resolved_platform) would silently no-op in build_resolved_platform, so it
+        # must fail loudly here rather than serve the packaged output (Decision 12).
+        (tmp_path / "py_plat").mkdir()
+        host = self._host(overlay={"override_commands": "all"}, data_dir=str(tmp_path))
+        host.nos = Mock(resolved_platform=None)  # legacy / py-only: no A3 platform
+        with pytest.raises(ValueError, match=r"legacy / py-only.*A3 platforms only"):
+            host._resolve_overlay_root("py_plat")

@@ -141,14 +141,27 @@ class Host:
         must be reachable: ``sys_config.data_dir`` must be configured and
         ``<data_dir>/<plugin_key>/`` must exist. An explicit opt-in that cannot be
         satisfied is a loud error, never a silent fall-back to packaged output
-        (design Decision 10a). ``plugin_key`` is the registry key (already passed
-        through ``resolve_device_type`` in ``start()``), not the raw inventory
-        ``device_type`` — aliasing platforms and the ``nos.plugin`` path would
-        otherwise point the dir at the wrong (or no) name (Decision 3).
+        (design Decision 10a) — including opting in on a legacy / py-only platform,
+        whose merge path drops the overlay layer (`build_resolved_platform`), so a
+        non-A3 platform with overlay set must fail here rather than silently serve
+        the packaged output (Decision 12, J4). ``plugin_key`` is the registry key
+        (already passed through ``resolve_device_type`` in ``start()``), not the raw
+        inventory ``device_type`` — aliasing platforms and the ``nos.plugin`` path
+        would otherwise point the dir at the wrong (or no) name (Decision 3).
         """
         override_commands = (self.overlay or {}).get("override_commands")
         if not override_commands:
             return None
+        # Overlay is A3-only (Decision 12): a legacy / py-only platform has no
+        # `resolved_platform`, and `build_resolved_platform` skips the overlay layer
+        # for it — so opting in there would silently no-op. Fail loudly instead.
+        # `self.nos` is built just above in `start()` before this is called; guard
+        # for the None case so direct unit calls (no start) keep testing the dir logic.
+        if self.nos is not None and self.nos.resolved_platform is None:
+            raise ValueError(
+                f"Host {self.name}: overlay.override_commands is set but platform {plugin_key!r} is "
+                "legacy / py-only (no A3 command data); overlays apply to A3 platforms only."
+            )
         data_dir = self.simnos.sys_config.get("data_dir")
         if not data_dir:
             raise ValueError(
@@ -185,7 +198,9 @@ class Host:
         visible instead of a silent no-op (#266 / Decision 5, anti-silent-bug).
         The value may come from the host, the inventory default, or a sys_config
         seed (`variants_policy`), so the message stays provenance-neutral. `overlay`
-        is omitted — it is consumed by #286 (Host.start).
+        is consumed by #286 (Host.start) so it is not a whole-field reservation —
+        but its `random_commands` sub-field is the #287 vessel and stays inert, so
+        a set-but-inert `random_commands` is warned on its own (#287, anti-silent-bug).
         """
         for field in ("facts", "variants_policy"):
             if getattr(self, field) is not None:
@@ -194,6 +209,12 @@ class Host:
                     self.name,
                     field,
                 )
+        if (self.overlay or {}).get("random_commands"):
+            log.warning(
+                "Host %s has overlay.random_commands set, which has no effect yet "
+                "(activated in #287, currently no-op).",
+                self.name,
+            )
 
     def _validate(self):
         """Validate that the host has the required attributes using pydantic"""

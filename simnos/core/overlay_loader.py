@@ -91,7 +91,7 @@ def _select_all(overlay_root: str) -> list[tuple[str, str]]:
     for command, files in sorted(by_command.items()):
         if len(files) > 1:
             raise ValueError(
-                f"overlay command {command!r} resolves to multiple files {files} in {overlay_root!r}; "
+                f"overlay command {command!r} resolves to multiple files {sorted(files)} in {overlay_root!r}; "
                 "a command must map to exactly one .txt or .j2 (remove the duplicate)"
             )
         pairs.append((command, files[0]))
