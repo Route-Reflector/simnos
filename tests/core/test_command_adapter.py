@@ -202,6 +202,13 @@ class TestAdaptAlias:
         assert resolved["sh clock"].output.text == "12:00"  # dispatch fields from target
         assert resolved["sh clock"].help == ""  # help is the alias's own (see test_alias_help_is_own_not_target)
         assert resolved["sh clock"].modes == frozenset({"user"})
+        # #287 / D6: the legacy adapter dict-merges + reconstructs (no `replace`
+        # auto-inherit), so canonical_name must be propagated explicitly from the
+        # alias target — pin it so the legacy path is not the silent asymmetry
+        # that re-introduces an alias "transforming" between variant states
+        # (codex#1 5th). The real command's canonical_name is its own name.
+        assert resolved["sh clock"].canonical_name == "show clock"
+        assert resolved["show clock"].canonical_name == "show clock"
 
     def test_alias_help_is_own_not_target(self):
         """An alias shows its own help (blank if absent), not the target's (#264 / D6).

@@ -1,0 +1,19 @@
+[
+  {
+    "prompt": "rtr-01#",
+    "command": "show version",
+    "parsed": [
+      {
+        "version": "15.8(3)M2",
+        "hostname": "rtr-01",
+        "uptime": "1 week, 3 days, 16 hours, 11 minutes",
+        "serial": [
+          "991UCMIHG4UAJ1J010CQG"
+        ],
+        "config_register": "0x0",
+        "running_image": "flash0:/vios-adventerprisek9-m",
+        "reload_reason": "Unknown reason"
+      }
+    ]
+  }
+]

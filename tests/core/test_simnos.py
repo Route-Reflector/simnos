@@ -528,11 +528,12 @@ class TestSimNOS:
 class TestReservedInventoryFields:
     """Inventory render fields (`facts` / `overlay` / `variants_policy`).
 
-    `overlay` is consumed by #286 (Host.start resolves the overlay dir); `facts` /
-    `variants_policy` stay #287 reservations — accepted + validated but no-op until
-    #287 wires them up. These pin that they (a) load without error, (b) reach the
-    Host as attributes, and (c) the still-reserved ones warn loudly when set so the
-    no-op is never silent (Decision 5, anti-silent-bug).
+    `overlay` is consumed by #286 (Host.start resolves the overlay dir);
+    `variants_policy` by #287 (threaded to the shell). `facts` stays a reservation
+    for the Layer-2 follow-up issue — accepted + validated but no-op. These pin
+    that they (a) load without error, (b) reach the Host as attributes, and (c)
+    the still-reserved `facts` warns loudly when set so the no-op is never silent
+    (Decision 5, anti-silent-bug).
     """
 
     def test_reserved_fields_accepted_and_reach_host(self):
@@ -544,7 +545,7 @@ class TestReservedInventoryFields:
                     "device_type": "cisco_ios",
                     "facts": {"hostname": "R1", "serial": "ABC"},
                     "overlay": {"override_commands": ["show version"]},
-                    "variants_policy": {"select": "default"},
+                    "variants_policy": {"select": 0},
                 }
             }
         }
@@ -552,7 +553,7 @@ class TestReservedInventoryFields:
         host = net.hosts["R1"]
         assert host.facts == {"hostname": "R1", "serial": "ABC"}
         assert host.overlay == {"override_commands": ["show version"]}
-        assert host.variants_policy == {"select": "default"}
+        assert host.variants_policy == {"select": 0}
 
     def test_reserved_field_warns_when_set(self, caplog):
         """A set reserved field emits a no-op warning (not a silent inert config)."""
@@ -583,6 +584,30 @@ class TestReservedInventoryFields:
             "overlay.random_commands" in r.getMessage() and "no effect yet" in r.getMessage() for r in caplog.records
         )
 
+    def test_variants_policy_set_does_not_warn_noop(self, caplog):
+        """`variants_policy` is consumed by #287 (not a reservation), so setting it
+        emits no reserved-field no-op warning — the #287 regression pin for the
+        removed #266 warning (3rd round claude#3)."""
+        inventory = {"hosts": {"R1": {"port": 6108, "device_type": "cisco_ios", "variants_policy": {"select": 1}}}}
+        with caplog.at_level(logging.WARNING, logger="simnos.core.host"):
+            SimNOS(inventory=inventory)
+        assert not [
+            r for r in caplog.records if "reserved field" in r.getMessage() and "variants_policy" in r.getMessage()
+        ]
+
+    def test_seed_without_random_select_warns(self, caplog):
+        """`variants_policy.seed` set while `select` is not 'random' is inert (seed
+        only affects random selection), so it warns — anti-silent-bug (3rd round
+        claude#2, the test for the 1st-round claude#3 warning)."""
+        inventory = {
+            "hosts": {"R1": {"port": 6109, "device_type": "cisco_ios", "variants_policy": {"select": 0, "seed": 1234}}}
+        }
+        with caplog.at_level(logging.WARNING, logger="simnos.core.host"):
+            SimNOS(inventory=inventory)
+        assert any(
+            "variants_policy.seed" in r.getMessage() and "the seed is ignored" in r.getMessage() for r in caplog.records
+        )
+
     def test_overlay_schema_rejects_unknown_key(self):
         """ModelOverlay keeps `extra="forbid"` — a typo'd overlay key is rejected."""
         with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
@@ -602,7 +627,7 @@ class TestSysConfig:
     #266 introduces loading (arg / env / cwd / home discovery), the
     `SIMNOS_DATA_DIR` env override, and the `sys_config < inventory` precedence
     rung. `data_dir` is consumed by the overlay loader in #286; `variants_policy`
-    is still no-op (consumed in #287).
+    is consumed by #287 (threaded to the shell).
     """
 
     def test_default_is_empty_resolved(self):
@@ -652,33 +677,37 @@ class TestSysConfig:
         assert net.sys_config["data_dir"] == "/from/env/override"
 
     def test_variants_policy_seeds_inventory_default(self):
-        """sys_config variants_policy seeds the inventory default → reaches hosts."""
+        """sys_config variants_policy seeds the inventory default → reaches hosts.
+
+        sys_config is validated + `model_dump`ed (`_load_sys_config`), so a
+        sys_config-sourced `variants_policy` materializes the typed model's
+        default fields (`seed: None`); the inventory path keeps the raw dict.
+        Both parse to the same `ModelVariantsPolicy` at Host.start (#287 / D8).
+        """
         net = SimNOS(
             inventory={"hosts": {"R1": {"port": 6104, "device_type": "cisco_ios"}}},
-            sys_config={"variants_policy": {"select": "global"}},
+            sys_config={"variants_policy": {"select": 1}},
         )
-        assert net.hosts["R1"].variants_policy == {"select": "global"}
+        assert net.hosts["R1"].variants_policy == {"select": 1, "seed": None}
 
     def test_inventory_default_wins_over_sys_config(self):
         """A more specific inventory default beats the sys_config global (precedence)."""
         net = SimNOS(
             inventory={
-                "default": {"variants_policy": {"select": "inventory"}},
+                "default": {"variants_policy": {"select": 2}},
                 "hosts": {"R1": {"port": 6105, "device_type": "cisco_ios"}},
             },
-            sys_config={"variants_policy": {"select": "global"}},
+            sys_config={"variants_policy": {"select": 1}},
         )
-        assert net.hosts["R1"].variants_policy == {"select": "inventory"}
+        assert net.hosts["R1"].variants_policy == {"select": 2}
 
     def test_host_wins_over_sys_config(self):
         """A per-host value beats both inventory default and sys_config (host most specific)."""
         net = SimNOS(
-            inventory={
-                "hosts": {"R1": {"port": 6106, "device_type": "cisco_ios", "variants_policy": {"select": "host"}}}
-            },
-            sys_config={"variants_policy": {"select": "global"}},
+            inventory={"hosts": {"R1": {"port": 6106, "device_type": "cisco_ios", "variants_policy": {"select": 3}}}},
+            sys_config={"variants_policy": {"select": 1}},
         )
-        assert net.hosts["R1"].variants_policy == {"select": "host"}
+        assert net.hosts["R1"].variants_policy == {"select": 3}
 
     def test_extra_key_rejected(self):
         """ModelSysConfig keeps `extra="forbid"` — an unknown key is rejected."""
@@ -711,7 +740,7 @@ class TestSysConfig:
         Pins that the global stays clean and a subsequent plain `SimNOS()` host
         does not inherit the prior instance's seeded policy (process-global leak).
         """
-        SimNOS(sys_config={"variants_policy": {"select": "leak-probe"}})
+        SimNOS(sys_config={"variants_policy": {"select": 5}})
         assert "variants_policy" not in default_inventory["default"]
         net = SimNOS()
         assert next(iter(net.hosts.values())).variants_policy is None

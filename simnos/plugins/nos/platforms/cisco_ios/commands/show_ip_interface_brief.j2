@@ -1,0 +1,3 @@
+Interface                  IP-Address      OK? Method Status                Protocol
+{% for row in parsed %}{{ "%-27s%-16s" | format(row.intf, row.ipaddr) }}YES NVRAM  {{ "%-22s" | format(row.status) }}{{ row.proto }}
+{% endfor -%}

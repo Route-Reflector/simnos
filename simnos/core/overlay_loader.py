@@ -17,9 +17,12 @@ Unlike :func:`simnos.core.platform_loader.load_platform_dir`, the overlay has no
   (``modes=frozenset()``), ``type="custom"``, no transition.
 
 Only ``.txt`` (literal wire text) and ``.j2`` (jinja2 template) are read; yaml
-full-replacement is deferred to a future issue. A facts-bearing ``.j2`` is a
-build-time loud error here — #286 has no facts-injection path, so it would only
-fail at render (connect) time, which breaks determinism; facts arrive in #287.
+full-replacement is deferred to a future issue. A facts-bearing ``.j2`` pulls
+its render values from an adjacent sidecar ``<stem>.json`` (#287 / Layer 1):
+``_resolve_output_file`` validates at build time, so a template that needs a
+value the sidecar does not supply fails loud here instead of at connect time
+(#286 rejected every facts-bearing ``.j2`` because it had no injection path;
+#287 opens that path).
 
 The output-file *channel* is decided by extension (``.txt``->literal /
 ``.j2``->template), unlike the A3 loader where the authoring yaml field decides
@@ -165,23 +168,24 @@ def _validate_overlay_ref(ref: str, *, where: str) -> None:
 
 
 def _read_overlay_output(overlay_root: str, filename: str, command: str) -> ResolvedOutput:
-    """Read one overlay file into a `ResolvedOutput`; facts-bearing `.j2` is loud.
+    """Read one overlay file into a `ResolvedOutput` (#287 / Layer 1).
 
     Reuses the part loader (`_resolve_output_file`), translating the extension to
-    its ``as_template`` channel. A ``.j2`` whose template needs variables beyond
-    ``base_prompt`` (already stripped by ``compile_template``) is rejected at build
-    time: #286 has no facts-injection path, so `StrictUndefined` would raise only
-    at render (connect) time — a silent path that breaks determinism (Decision 8).
+    its ``as_template`` channel. For a ``.j2`` the adjacent sidecar
+    ``<stem>.json`` supplies render values and `_resolve_output_file` validates
+    them at build time: a template needing a value the sidecar does not provide
+    fails loud here, not at connect time (#287 / D4, D5). #286 rejected every
+    facts-bearing ``.j2`` outright (no injection path); #287 opens that path via
+    the sidecar, so the explicit ``required_vars`` rejection is gone — the build
+    gate inside `_resolve_output_file` is now the single source of that loud-fail.
     """
-    output = _resolve_output_file(
-        filename, overlay_root, as_template=filename.endswith(".j2"), where=f"overlay command {command!r}"
+    return _resolve_output_file(
+        filename,
+        overlay_root,
+        as_template=filename.endswith(".j2"),
+        where=f"overlay command {command!r}",
+        command_name=command,
     )
-    if output.required_vars:
-        raise ValueError(
-            f"overlay command {command!r}: template {filename!r} needs host facts {sorted(output.required_vars)} "
-            "which #286 cannot inject (facts arrive in #287); use a plain .txt or a base_prompt-only template"
-        )
-    return output
 
 
 def _build_overlay_command(

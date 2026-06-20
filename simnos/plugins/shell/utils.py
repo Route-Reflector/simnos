@@ -18,8 +18,12 @@ def get_files_under_directory(directory):
         files += [os.path.join(root, filename) for filename in filenames]
     files = [file for file in files if os.path.isfile(file)]
     # `.txt` is the A3 literal-capture extension (#274 / D2): editing a command's
-    # output file must trigger a reload like editing its yaml does.
-    files = [file for file in files if file.endswith((".py", ".j2", ".yaml", ".txt"))]
+    # output file must trigger a reload like editing its yaml does. `.json` is the
+    # #287 sidecar (the render values for a `.j2`): editing a value (e.g. version)
+    # must likewise reload, since that round-trip edit is the feature's whole
+    # point — `resolve_reload_targets` rolls a `commands/*.json` change up to its
+    # platform dir, whose rebuild re-reads the sidecar (#287 / D5, codex#4).
+    files = [file for file in files if file.endswith((".py", ".j2", ".yaml", ".txt", ".json"))]
     files = [file for file in files if not file.endswith("__init__.py")]
     return files
 

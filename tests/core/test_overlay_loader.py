@@ -125,11 +125,25 @@ class TestTemplateOverlay:
         assert cmd.output.kind == "template"
         assert cmd.output.render("R1") == "prompt is R1\n"
 
-    def test_facts_bearing_template_is_loud_fail(self, tmp_path):
+    def test_facts_bearing_template_without_sidecar_is_loud_fail(self, tmp_path):
+        # #287: a facts-bearing `.j2` is no longer rejected outright — it needs a
+        # sidecar `<stem>.json` to supply its values. Without one, the build-time
+        # loud check reports the unsatisfiable var (the #286 blanket rejection is
+        # replaced by this gate).
         base = _base(_command("show version"))
         _write(tmp_path, "show_version.j2", "hostname {{ hostname }}\n")
-        with pytest.raises(ValueError, match=r"needs host facts.*hostname.*#287"):
+        with pytest.raises(ValueError, match=r"needs render var.*hostname.*sidecar"):
             resolve_overlay(str(tmp_path), base, override_commands="all")
+
+    def test_facts_bearing_template_with_sidecar_renders(self, tmp_path):
+        # The new #287 capability: a sidecar json next to the `.j2` supplies the
+        # render values, so the facts-bearing overlay template now builds + renders.
+        base = _base(_command("show version"))
+        _write(tmp_path, "show_version.j2", "hostname {{ hostname }}\n")
+        _write(tmp_path, "show_version.json", '{"hostname": "edge-1"}')
+        cmd = resolve_overlay(str(tmp_path), base, override_commands="all")["show version"]
+        assert cmd.output.kind == "template"
+        assert cmd.output.render("R1") == "hostname edge-1\n"
 
 
 class TestLoudFailGuards:

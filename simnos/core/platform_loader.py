@@ -32,6 +32,7 @@ from simnos.core.resolved_command import (
     ResolvedPlatform,
     compile_template,
 )
+from simnos.core.values_loader import load_values, validate_render_values
 
 PLATFORM_META_FILENAME = "platform.yaml"
 COMMANDS_SUBDIR = "commands"
@@ -184,7 +185,11 @@ def _resolve_command(
             (
                 v.name,
                 _resolve_output_file(
-                    v.output, commands_dir, as_template=False, where=f"command {model.command!r} variant {v.name!r}"
+                    v.output,
+                    commands_dir,
+                    as_template=False,
+                    where=f"command {model.command!r} variant {v.name!r}",
+                    command_name=model.command,
                 ),
             )
             for v in model.variants
@@ -192,11 +197,21 @@ def _resolve_command(
         # variants[0] is the served primary (deterministic default — D3).
         output = variants[0][1]
     elif model.output is not None:
-        output = _resolve_output_file(model.output, commands_dir, as_template=False, where=f"command {model.command!r}")
+        output = _resolve_output_file(
+            model.output,
+            commands_dir,
+            as_template=False,
+            where=f"command {model.command!r}",
+            command_name=model.command,
+        )
         variants = ()
     elif model.output_template is not None:
         output = _resolve_output_file(
-            model.output_template, commands_dir, as_template=True, where=f"command {model.command!r}"
+            model.output_template,
+            commands_dir,
+            as_template=True,
+            where=f"command {model.command!r}",
+            command_name=model.command,
         )
         variants = ()
     else:
@@ -217,13 +232,21 @@ def _resolve_command(
     )
 
 
-def _resolve_output_file(ref: str, commands_dir: str, *, as_template: bool, where: str) -> ResolvedOutput:
+def _resolve_output_file(
+    ref: str, commands_dir: str, *, as_template: bool, where: str, command_name: str
+) -> ResolvedOutput:
     """Read an adjacent output file into a `ResolvedOutput`.
 
     The authoring *field* decides the channel, not the extension: ``output`` /
     variants are read verbatim (literal wire text), ``output_template`` is
     compiled as jinja2. ``.txt`` / ``.j2`` are a lint-level naming convention,
     not load semantics.
+
+    For the template channel the adjacent sidecar ``<stem>.json`` (if any) is
+    read into ``values`` and the result is validated at build time: a template
+    that needs a value the sidecar does not supply fails loud here rather than
+    at connect time (#287 / Layer 1, D4/D5). ``command_name`` matches the
+    sidecar envelope entry.
     """
     filepath = os.path.join(commands_dir, ref)
     if not os.path.isfile(filepath):
@@ -235,5 +258,8 @@ def _resolve_output_file(ref: str, commands_dir: str, *, as_template: bool, wher
             template, required = compile_template(content)
         except TemplateSyntaxError as e:
             raise ValueError(f"{where}: output template {ref!r} has a jinja2 syntax error: {e}") from e
-        return ResolvedOutput(kind="template", template=template, required_vars=required)
+        values = load_values(filepath, command_name)
+        output = ResolvedOutput(kind="template", template=template, required_vars=required, values=values)
+        validate_render_values(output, command_name, source=filepath)
+        return output
     return ResolvedOutput(kind="literal", text=content)

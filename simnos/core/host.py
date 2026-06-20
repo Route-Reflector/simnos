@@ -10,7 +10,7 @@ import os
 from typing import TYPE_CHECKING
 
 from simnos.core.nos import Nos
-from simnos.core.pydantic_models import ModelHost
+from simnos.core.pydantic_models import ModelHost, ModelVariantsPolicy
 from simnos.plugins.nos import assert_platform_supported, resolve_device_type
 
 if TYPE_CHECKING:
@@ -25,13 +25,21 @@ class HostRenderConfig:
 
     A single carrier so the wiring (Host -> server -> ``build_shared_platform`` ->
     ``build_resolved_platform`` -> shell) is threaded once. #286 fills ``overlay_*``;
-    #287 adds ``facts`` / random fields here without touching the signature again.
-    Both are ``None`` when the host has not opted into the overlay, in which case
-    the merge skips the overlay layer entirely (no behaviour change).
+    #287 adds ``variants_policy`` / ``host_name`` here without touching the
+    signature again (a future Layer-2 ``facts`` field will slot in the same way).
+    The ``overlay_*`` fields are ``None`` when the host has not opted into the
+    overlay, in which case the merge skips the overlay layer entirely.
+
+    ``variants_policy`` is the typed per-host variant-selection policy (#287 / D6);
+    ``host_name`` is the stable inventory host id (``Host.name``) used as the
+    seeded-hash host term — not ``base_prompt``, which the shell config can
+    override and several hosts can share (#287 / D6 E).
     """
 
     overlay_root: str | None = None
     override_commands: str | list[str] | dict[str, str] | None = None
+    variants_policy: "ModelVariantsPolicy | None" = None
+    host_name: str | None = None
 
 
 class Host:
@@ -72,11 +80,11 @@ class Host:
         self.nos = None
         self.device_type: str | None = device_type
         self.configuration_file: str | None = configuration_file
-        # Inventory render config. `overlay` is consumed by #286 (Host.start
-        # resolves the overlay dir and threads it to the shell via
-        # HostRenderConfig); `facts` / `variants_policy` are still #287 reservations
-        # (stored but inert, warned below) so #287 can wire them without touching
-        # the Host signature again.
+        # Inventory render config. `overlay` is consumed by #286 and
+        # `variants_policy` by #287 (Host.start resolves them and threads them to
+        # the shell via HostRenderConfig); `facts` stays a reservation (stored but
+        # inert, warned below) for the Layer-2 follow-up issue, so it can be wired
+        # later without touching the Host signature again.
         self.facts: dict | None = facts
         self.overlay: dict | None = overlay
         self.variants_policy: dict | None = variants_policy
@@ -115,9 +123,17 @@ class Host:
             if not isinstance(self.nos_plugin, Nos)
             else self.nos_plugin
         )
+        # Parse the per-host variant policy to its typed model at the carrier
+        # boundary so the shell only ever sees `ModelVariantsPolicy`, never a raw
+        # dict (#287 / D6 K — typed-model-first). The inventory schema already
+        # validated this value (precedence-merged whole, D8), so re-parsing only
+        # materializes the typed object + defaults (select=0).
+        variants_policy = ModelVariantsPolicy(**self.variants_policy) if self.variants_policy else None
         render_config = HostRenderConfig(
             overlay_root=self._resolve_overlay_root(plugin_key),
             override_commands=(self.overlay or {}).get("override_commands"),
+            variants_policy=variants_policy,
+            host_name=self.name,
         )
         self.server = self.server_plugin(
             shell=self.shell_plugin,
@@ -188,30 +204,42 @@ class Host:
         self.running = False
 
     def _warn_reserved_fields(self) -> None:
-        """Warn loudly for #287 reserved fields that are set but inert.
+        """Warn loudly for reserved fields that are set but inert.
 
-        `facts` / `variants_policy` are accepted and validated by the inventory
-        schema (the "器") but consumed by neither the loader nor the shell until
-        #287 wires them up. A `log.warning` here keeps a set-but-inert config
-        visible instead of a silent no-op (#266 / Decision 5, anti-silent-bug).
-        The value may come from the host, the inventory default, or a sys_config
-        seed (`variants_policy`), so the message stays provenance-neutral. `overlay`
-        is consumed by #286 (Host.start) so it is not a whole-field reservation —
-        but its `random_commands` sub-field is the #287 vessel and stays inert, so
-        a set-but-inert `random_commands` is warned on its own (#287, anti-silent-bug).
+        `facts` is accepted + validated by the inventory schema (the "器") but is
+        deferred to the Layer-2 follow-up issue (global facts / cross-command
+        coherence); #287 wires only per-host `variants_policy`, so `facts` stays a
+        set-but-inert no-op and is warned here to keep it visible instead of
+        silent (#266 / Decision 5, anti-silent-bug). `overlay` is consumed by #286
+        (Host.start); its `random_commands` sub-field is a *future* per-command
+        variant-policy vessel that #287 does not wire, so a set-but-inert
+        `random_commands` is warned on its own (#287 / D8 C, anti-silent-bug).
+
+        `variants_policy` is consumed by #287 (Host.start threads it through
+        `HostRenderConfig` to the shell), so it is not a reservation — but a
+        ``seed`` set while ``select`` is not ``"random"`` is inert (seed only
+        matters for random selection), so that misconfiguration is warned on its
+        own to keep it from being a silent no-op (1st round claude#3).
         """
-        for field in ("facts", "variants_policy"):
-            if getattr(self, field) is not None:
-                log.warning(
-                    "Host %s has reserved field %r set, which has no effect yet (activated in #287, currently no-op).",
-                    self.name,
-                    field,
-                )
+        if self.facts is not None:
+            log.warning(
+                "Host %s has reserved field 'facts' set, which has no effect yet "
+                "(activated in the Layer-2 follow-up issue, currently no-op).",
+                self.name,
+            )
         if (self.overlay or {}).get("random_commands"):
             log.warning(
                 "Host %s has overlay.random_commands set, which has no effect yet "
-                "(activated in #287, currently no-op).",
+                "(reserved for a future per-command variant policy, currently no-op).",
                 self.name,
+            )
+        variants_policy = self.variants_policy or {}
+        if variants_policy.get("seed") is not None and variants_policy.get("select") != "random":
+            log.warning(
+                "Host %s sets variants_policy.seed but select is %r (not 'random'); the seed is ignored "
+                "(it only affects random selection).",
+                self.name,
+                variants_policy.get("select"),
             )
 
     def _validate(self):

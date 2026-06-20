@@ -69,12 +69,20 @@ class TestLoadHappyPath:
             commands,
             "scripting.yaml",
             "command: set scripting\ntype: simnos\noutput_template: scripting.j2\n",
-            output_files={"scripting.j2": "{{ base_prompt }} ready for {{ hostname }}\n"},
+            output_files={
+                "scripting.j2": "{{ base_prompt }} ready for {{ hostname }}\n",
+                # #287: a `.j2` needing a non-base_prompt var must have its sidecar
+                # json supply it, else the build-time loud check rejects it.
+                "scripting.json": '{"hostname": "core1"}',
+            },
         )
         cmd = load_platform_dir(str(root)).commands["set scripting"]
         assert cmd.output.kind == "template"
-        # base_prompt is excluded; the host fact `hostname` is carried for #265.
+        # base_prompt is excluded; `hostname` is carried (#265) and supplied by the
+        # sidecar json so the build-time loud check passes and render uses it (#287).
         assert cmd.output.required_vars == frozenset({"hostname"})
+        assert dict(cmd.output.values) == {"hostname": "core1"}
+        assert cmd.output.render("R1") == "R1 ready for core1\n"
 
     def test_template_renders_base_prompt_only(self, tmp_path):
         root, commands = _platform(tmp_path)
@@ -148,6 +156,12 @@ class TestLoadHappyPath:
         assert alias.modes == frozenset({"user"})
         assert alias.help == "abbrev for show version"  # own help
         assert alias.name == "sh ver"
+        # #287 / D6: the alias inherits the target's canonical_name via
+        # `dataclasses.replace` (it only overrides name/help), so every alias of
+        # one command shares one per-session variant state. The real command's
+        # canonical_name is its own name.
+        assert alias.canonical_name == "show version"
+        assert platform.commands["show version"].canonical_name == "show version"
 
 
 class TestLoadRejections:

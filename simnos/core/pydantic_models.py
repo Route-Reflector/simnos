@@ -389,6 +389,31 @@ class CMDShellPlugin(BaseModel):
     configuration: CMDShellConfig | None = None
 
 
+class ModelVariantsPolicy(BaseModel):
+    """Typed variant-selection policy (#287 / D6, D8).
+
+    Promotes the #266 permissive ``variants_policy`` mapping to a committed
+    schema now that #287 consumes it. Two dials:
+
+    - ``select`` — a non-negative ``int`` (default ``0``) pins one variant index
+      (fully deterministic, the legacy ``variants[0]`` behaviour); the literal
+      ``"random"`` defers the choice to ``seed``.
+    - ``seed`` — only meaningful when ``select == "random"``: set = reproducible
+      per-host sticky selection (``hash(seed, host, command)``); unset = a fresh
+      random draw per connection (realism, non-reproducible).
+
+    ``select`` is a `StrictInt` so ``True``/``1.0`` are rejected (a bool index is
+    a config mistake, not "index 1"), and ``ge=0`` forbids negatives — a negative
+    modulo would silently pick a tail variant and hide the error (#287 / D6 J).
+    ``extra="forbid"`` makes a mistyped key (``selct``) loud rather than inert.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    select: Annotated[StrictInt, Field(ge=0)] | Literal["random"] = 0
+    seed: StrictInt | None = None
+
+
 class ModelOverlay(BaseModel):
     """User overlay control (custom data layering, #286 / P1-2a).
 
@@ -415,14 +440,16 @@ class ModelOverlay(BaseModel):
     full-replacement is deferred to a future issue — #286 reads ``.txt`` / ``.j2``
     output files only.
 
-    ``random_commands`` is the vessel for #287 (random selection from packaged
-    variants); it is validated here but inert until #287 wires it up.
+    ``random_commands`` is the vessel for a *future* per-command variant policy
+    axis (which commands opt into random selection). #287 wires only host-wide
+    ``variants_policy``; ``random_commands`` stays validated-but-inert with its
+    load-time warning maintained until that future per-command issue (#287 / D8 C).
     """
 
     model_config = ConfigDict(extra="forbid")
 
     override_commands: Literal["all"] | list[StrictStr] | dict[StrictStr, StrictStr] | None = None
-    random_commands: list[StrictStr] | None = None  # #287 で有効化 (器)
+    random_commands: list[StrictStr] | None = None  # future per-command 器 (warning 維持)
 
 
 class InventoryDefaultSection(BaseModel):
@@ -447,11 +474,12 @@ class InventoryDefaultSection(BaseModel):
     # a non-None value is surfaced at host load with `log.warning` (Host.__init__)
     # so a "set but silently inert" config is loud, not a silent no-op
     # (anti-silent-bug). `facts` is a free mapping (render variables, shape owned by
-    # #287); `variants_policy` likewise stays a permissive mapping to avoid a
-    # guessed schema forcing a second break (R4); only `overlay` has a committed shape.
-    facts: dict | None = Field(None, description="#287 で有効化、現在 no-op (host render facts)")
+    # the Layer-2 follow-up issue); `variants_policy` is now a committed schema
+    # (`ModelVariantsPolicy`, #287 / D8) since #287 consumes it; only `facts`
+    # stays permissive until Layer 2 (R4).
+    facts: dict | None = Field(None, description="Layer 2 (global facts) で有効化、現在 no-op (host render facts)")
     overlay: ModelOverlay | None = Field(None, description="#286 で有効化 (custom overlay / output override)")
-    variants_policy: dict | None = Field(None, description="#287 で有効化、現在 no-op (output_variants 選択方針)")
+    variants_policy: ModelVariantsPolicy | None = Field(None, description="#287 で有効化 (variant 選択方針)")
 
 
 class HostConfig(InventoryDefaultSection):
@@ -494,12 +522,14 @@ class ModelSysConfig(BaseModel):
     and `variants_policy` (global default for the inventory per-host field of the
     same name). `data_dir` is consumed by the overlay loader in #286 (a host opts
     in via `overlay.override_commands`, which resolves `<data_dir>/<registry-key>/`);
-    `variants_policy` is still reserved/no-op (warned per-host at load), deferred
-    to #287. `variants_policy` mirrors the inventory field's permissive mapping
-    type (shape owned by #287, R4).
+    `variants_policy` is now consumed by #287 as the global default under the
+    inventory; it shares the inventory field's committed `ModelVariantsPolicy`
+    schema (#287 / D8). The whole dict flows through the
+    ``inventory(default) > sys_config`` precedence as one unit before validation,
+    so ``select`` and ``seed`` must co-reside in one source mapping (D8 C).
     """
 
     model_config = ConfigDict(extra="forbid")
 
     data_dir: StrictStr | None = None
-    variants_policy: dict | None = None
+    variants_policy: ModelVariantsPolicy | None = None
