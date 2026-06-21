@@ -3,10 +3,10 @@
 Covers `simnos.plugins.utils.cli`: import side-effect safety (no module-level
 `parse_args`/`basicConfig`), the `build_parser` contract (subcommand required,
 `-i`/`-d`/`-n`/`--sys-config` non-empty + strip, `-i`/`-d` mutex, `-l` placement
-+ normalization), the ad-hoc
-inventory builder (default/explicit/zero port, host-name + credential folding),
-the `_cmd_up` dispatch + reload-env lifecycle across every raise path, and
-`list-platforms` output. `_cmd_up`'s blocking `while True: time.sleep` loop is
++ normalization), the ad-hoc inventory builder (default/explicit/zero port,
+host-name + credential folding), the `_cmd_up` dispatch + reload-env lifecycle
+across every raise path, and `list-platforms` output. `_cmd_up`'s blocking
+`while True: time.sleep` loop is
 broken by patching `cli.time.sleep` to raise `KeyboardInterrupt` (the same
 signal a real Ctrl-C delivers), so the "normal" path is exercised without a
 real server. The empty-`SIMNOS_SYS_CONFIG` loud-fail lives with the other
