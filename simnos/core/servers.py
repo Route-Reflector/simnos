@@ -97,9 +97,31 @@ class TCPServerBase(ABC):
 
             self._listen_thread = threading.Thread(target=self._listen)
             self._listen_thread.start()
-        except Exception:
-            self._cleanup_resources()
-            self._is_running.clear()
+        except BaseException:
+            # BaseException, not Exception: a KeyboardInterrupt mid-start (the
+            # operator aborts startup) must still roll the partial start back.
+            # Mirror stop()'s teardown ORDER — clear the flag, wake select(),
+            # join the listen thread, THEN close sockets — so a listen thread
+            # that already spawned does not race `_cleanup_resources()` closing
+            # the selector/socket out from under its `select()` loop. Clearing
+            # `_is_running` first also guarantees a later stop() early-returns
+            # instead of tripping its `_listen_thread is not None` assertion.
+            #
+            # `_cleanup_resources()` runs in a `finally` so the sockets are freed
+            # even if the clear/wake/join is cut short by a second interrupt. The
+            # `is_alive()` guard is required: if `start()` itself raised, the
+            # thread object exists but was never started, and joining an
+            # unstarted thread raises RuntimeError — which would mask the
+            # original error and skip cleanup (#291). We re-raise immediately.
+            try:
+                self._is_running.clear()
+                if self._wakeup_w is not None:
+                    with contextlib.suppress(OSError):
+                        self._wakeup_w.send(b"\x00")
+                if self._listen_thread is not None and self._listen_thread.is_alive():
+                    self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
+            finally:
+                self._cleanup_resources()
             raise
 
     def _bind_sockets(self):
@@ -133,19 +155,24 @@ class TCPServerBase(ABC):
         if not self._is_running.is_set():
             return
 
-        self._is_running.clear()
-
-        if self._wakeup_w is not None:
-            with contextlib.suppress(OSError):
-                self._wakeup_w.send(b"\x00")
-
-        # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
-        # _is_running.is_set() guard at the top of stop() returns early if start()
-        # hasn't been called, so self._listen_thread is set here; narrow for ty.
-        assert self._listen_thread is not None  # noqa: S101 — post-condition of start()
-        self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
-
+        # `_is_running.clear()` + the wakeup + the thread joins all run under the
+        # cleanup try/finally so `_cleanup_resources()` still frees the sockets
+        # if an interrupt lands anywhere in the teardown. Clearing inside the try
+        # also means a retry stop() (which only proceeds while `_is_running` is
+        # set) can still clean up after an interrupted attempt (#291, symmetric
+        # with start()'s rollback).
         try:
+            self._is_running.clear()
+            if self._wakeup_w is not None:
+                with contextlib.suppress(OSError):
+                    self._wakeup_w.send(b"\x00")
+
+            # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
+            # _is_running.is_set() guard at the top of stop() returns early if start()
+            # hasn't been called, so self._listen_thread is set here; narrow for ty.
+            assert self._listen_thread is not None  # noqa: S101 — post-condition of start()
+            self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
+
             alive = join_threads_with_deadline(
                 self._connection_threads,
                 SHUTDOWN_SERVER_STOP_DEADLINE,

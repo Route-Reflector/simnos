@@ -90,6 +90,84 @@ class TestHost:
         assert host.server_plugin.call_count == 2
         assert host.server.start.call_count == 2
 
+    def test_start_failure_stops_server_and_resets(self, host):
+        """A mid-start server.start() failure cleans up and does not dangle.
+
+        Pins the partial-start defense-in-depth (#291): SimNOS.stop() filters
+        on running=True, so a host whose server.start() raised (running stays
+        False) is excluded from cluster shutdown. Host.start() therefore stops
+        the just-built server and drops the reference before re-raising, so no
+        server is left started-but-unreachable on the failed host.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = server_factory.return_value
+        failed_server.start.side_effect = RuntimeError("bind failed")
+        with pytest.raises(RuntimeError, match="bind failed"):
+            host.start()
+        failed_server.stop.assert_called_once()
+        assert host.server is None
+        assert not host.running
+
+    def test_start_failure_cleanup_error_does_not_mask_original(self, host):
+        """A cleanup stop() failure does not hide the original start() error.
+
+        The re-raised exception must be the *same* object as the real start()
+        failure (the cause a caller needs), not a secondary error from the
+        best-effort cleanup stop() (#291). Pinning that cleanup stop() was
+        actually called proves the suppression path ran (without it, dropping
+        the cleanup line would leave this test green). State is reset regardless.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = server_factory.return_value
+        start_error = RuntimeError("bind failed")
+        failed_server.start.side_effect = start_error
+        failed_server.stop.side_effect = OSError("stop boom")
+        with pytest.raises(RuntimeError, match="bind failed") as exc_info:
+            host.start()
+        assert exc_info.value is start_error
+        failed_server.stop.assert_called_once()
+        assert host.server is None
+        assert not host.running
+
+    def test_start_baseexception_still_cleans_up(self, host):
+        """A BaseException (e.g. Ctrl+C) mid-start still triggers cleanup (#291).
+
+        KeyboardInterrupt is the most likely partial-start trigger (the operator
+        aborts startup). `except Exception` would miss it, leaving the server
+        set and running=False — which SimNOS.stop() skips but
+        _collect_server_threads() still picks up, hanging the shutdown join. The
+        catch is `except BaseException`, so the server is stopped and dropped
+        before the interrupt re-raises.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = server_factory.return_value
+        failed_server.start.side_effect = KeyboardInterrupt
+        with pytest.raises(KeyboardInterrupt):
+            host.start()
+        failed_server.stop.assert_called_once()
+        assert host.server is None
+        assert not host.running
+
+    def test_restart_after_failed_start_builds_fresh_server(self, host):
+        """A retry after a failed start() builds a new server (#291).
+
+        Dropping `self.server` on the failure path keeps the double-start guard
+        (gates on `running`, still False) open, so a retry is a real restart
+        that constructs a fresh server rather than re-using the failed one.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = Mock()
+        failed_server.start.side_effect = RuntimeError("bind failed")
+        good_server = Mock()
+        server_factory.side_effect = [failed_server, good_server]
+        with pytest.raises(RuntimeError, match="bind failed"):
+            host.start()
+        assert host.server is None
+        host.start()
+        assert host.server is good_server
+        assert host.running
+        good_server.start.assert_called_once()
+
     def test_stop(self, host):
         """
         It test that when the host is called the stop,
@@ -103,6 +181,20 @@ class TestHost:
         assert not host.running
         mock_server.stop.assert_called_once()
         assert host.server is None
+
+    def test_stop_resets_state_even_if_server_stop_raises(self, host):
+        """Host.stop() resets state even if server.stop() is interrupted (#291).
+
+        The server self-cleans in its own finally, so the host must drop the
+        reference + clear running regardless, keeping the host out of
+        SimNOS._collect_server_threads(). Symmetric with start()'s rollback.
+        """
+        host.start()
+        host.server.stop.side_effect = KeyboardInterrupt
+        with pytest.raises(KeyboardInterrupt):
+            host.stop()
+        assert host.server is None
+        assert not host.running
 
     def test_platform_is_wrong(self, host):
         """

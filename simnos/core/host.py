@@ -146,8 +146,32 @@ class Host:
             render_config=render_config,
             **self.server_inventory["configuration"],
         )
-        self.server.start()
-        self.running = True
+        # Defense-in-depth for a partial start (#291). A host whose `start()`
+        # raised keeps `running == False`, so `SimNOS.stop()` (filters on
+        # `running == True`) never stops it, yet `SimNOS._collect_server_threads()`
+        # still collects its threads (it gates on `server is not None`) — a
+        # dangling server here makes the shutdown join block. Stop the just-built
+        # server and drop the reference + reset `running` before re-raising.
+        #
+        # The catch is `BaseException`, not `Exception`: the most likely
+        # partial-start trigger is a `KeyboardInterrupt` (the operator aborts
+        # startup), which `except Exception` would miss. `self.running = True`
+        # lives INSIDE the try so an interrupt in the gap after a successful
+        # `server.start()` is still rolled back rather than leaving the dangling
+        # state. Cleanup is best-effort: a failure is logged (not raised) so it
+        # cannot mask the original error, and the reference/flag reset regardless.
+        try:
+            self.server.start()
+            self.running = True
+        except BaseException:
+            try:
+                self.server.stop()
+            except Exception:
+                log.exception("Host %s: cleanup after a failed start() raised", self.name)
+            finally:
+                self.server = None
+                self.running = False
+            raise
 
     def _resolve_overlay_root(self, plugin_key: str) -> str | None:
         """Resolve this host's overlay dir, or None when overlay is not opted in (#286).
@@ -195,13 +219,21 @@ class Host:
 
         No-op if the server was never started or has already been stopped
         (``self.server is None``); this guards against double-stop calls.
+
+        The state reset runs in a ``finally`` so the host does not dangle if
+        ``server.stop()`` is cut short by an interrupt — the server self-cleans
+        in its own ``finally``, so dropping the reference + clearing ``running``
+        keeps the host out of ``SimNOS._collect_server_threads()`` (#291,
+        symmetric with the rollback in ``start()``).
         """
         if self.server is None:
             log.debug("Host %s has no running server; stop() is a no-op", self.name)
             return
-        self.server.stop()
-        self.server = None
-        self.running = False
+        try:
+            self.server.stop()
+        finally:
+            self.server = None
+            self.running = False
 
     def _warn_reserved_fields(self) -> None:
         """Warn loudly for reserved fields that are set but inert.
