@@ -90,6 +90,40 @@ class TestHost:
         assert host.server_plugin.call_count == 2
         assert host.server.start.call_count == 2
 
+    def test_start_failure_stops_server_and_resets(self, host):
+        """A mid-start server.start() failure cleans up and does not dangle.
+
+        Pins the partial-start defense-in-depth (#291): SimNOS.stop() filters
+        on running=True, so a host whose server.start() raised (running stays
+        False) is excluded from cluster shutdown. Host.start() therefore stops
+        the just-built server and drops the reference before re-raising, so no
+        server is left started-but-unreachable on the failed host.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = server_factory.return_value
+        failed_server.start.side_effect = RuntimeError("bind failed")
+        with pytest.raises(RuntimeError, match="bind failed"):
+            host.start()
+        failed_server.stop.assert_called_once()
+        assert host.server is None
+        assert not host.running
+
+    def test_start_failure_cleanup_error_does_not_mask_original(self, host):
+        """A cleanup stop() failure does not hide the original start() error.
+
+        The re-raised exception must be the real start() failure (the cause a
+        caller needs), not a secondary error from the best-effort cleanup
+        stop() (#291). The host state is still reset regardless.
+        """
+        server_factory = host.simnos.servers_plugins["server_plugin"]
+        failed_server = server_factory.return_value
+        failed_server.start.side_effect = RuntimeError("bind failed")
+        failed_server.stop.side_effect = OSError("stop boom")
+        with pytest.raises(RuntimeError, match="bind failed"):
+            host.start()
+        assert host.server is None
+        assert not host.running
+
     def test_stop(self, host):
         """
         It test that when the host is called the stop,

@@ -146,7 +146,24 @@ class Host:
             render_config=render_config,
             **self.server_inventory["configuration"],
         )
-        self.server.start()
+        # Defense-in-depth for a partial start (#291). The built-in
+        # `TCPServerBase.start()` already self-cleans its sockets/threads on a
+        # mid-way failure, so `server.stop()` here is a no-op for them. But the
+        # orchestration layer (`SimNOS.stop()` filters on `running == True`)
+        # skips a host whose `start()` raised — `running` stays False — so a
+        # server plugin that does *not* self-clean would leak with no safety
+        # net. Stop the just-built server and drop the reference before
+        # re-raising; a cleanup failure must not mask the original start()
+        # error (the real cause), so it is logged rather than raised.
+        try:
+            self.server.start()
+        except Exception:
+            try:
+                self.server.stop()
+            except Exception:
+                log.exception("Host %s: cleanup after a failed start() raised", self.name)
+            self.server = None
+            raise
         self.running = True
 
     def _resolve_overlay_root(self, plugin_key: str) -> str | None:
