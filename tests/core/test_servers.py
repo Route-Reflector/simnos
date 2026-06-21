@@ -626,3 +626,53 @@ class StartFailureRollbackTest(unittest.TestCase):
 
         assert events == ["send", "join", "cleanup"]
         assert not servers._is_running.is_set()
+
+
+class SignalListenStopTest(unittest.TestCase):
+    """`TCPServerBase._signal_listen_stop` — the teardown step shared by stop()
+    and start()'s rollback (#294): clear the running flag + best-effort wakeup.
+    """
+
+    def test_clears_running_and_sends_wakeup(self):
+        """The helper clears `_is_running` and sends one wakeup byte."""
+        servers = StubServer()
+        servers._is_running.set()
+        mock_wakeup_w = MagicMock()
+        servers._wakeup_w = mock_wakeup_w
+
+        servers._signal_listen_stop()
+
+        assert not servers._is_running.is_set()
+        mock_wakeup_w.send.assert_called_once_with(b"\x00")
+
+    def test_no_wakeup_socket_is_noop(self):
+        """With no wakeup socket the helper still clears the flag, no crash."""
+        servers = StubServer()
+        servers._is_running.set()
+        servers._wakeup_w = None
+
+        servers._signal_listen_stop()
+
+        assert not servers._is_running.is_set()
+
+    def test_wakeup_oserror_is_logged_not_raised(self):
+        """A failing wakeup send is logged at debug and does not propagate (#294).
+
+        The send is best-effort: a broken wakeup socket must not stop teardown
+        (the caller falls back to the timeout-bounded join). The OSError is
+        logged rather than suppressed silently so a slow shutdown leaves a
+        diagnostic breadcrumb. Without the `log.debug` the assertLogs block
+        fails (no records); without the `except OSError` the error propagates
+        out of the helper, so the assertions below are never reached.
+        """
+        servers = StubServer()
+        servers._is_running.set()
+        mock_wakeup_w = MagicMock()
+        mock_wakeup_w.send.side_effect = OSError("broken pipe")
+        servers._wakeup_w = mock_wakeup_w
+
+        with self.assertLogs("simnos.core.servers", level="DEBUG") as captured:
+            servers._signal_listen_stop()  # must not raise
+
+        assert any("wakeup send failed" in message for message in captured.output)
+        assert not servers._is_running.is_set()
