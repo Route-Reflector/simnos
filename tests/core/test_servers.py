@@ -3,6 +3,7 @@ Test module for simnos.core.servers.
 The file can be found under simnos/core/servers.py
 """
 
+import logging
 import socket
 import sys
 import threading
@@ -626,3 +627,71 @@ class StartFailureRollbackTest(unittest.TestCase):
 
         assert events == ["send", "join", "cleanup"]
         assert not servers._is_running.is_set()
+
+
+class SignalListenStopTest(unittest.TestCase):
+    """`TCPServerBase._signal_listen_stop` — the teardown step shared by stop()
+    and start()'s rollback (#294): clear the running flag + best-effort wakeup.
+    """
+
+    def test_clears_running_and_sends_wakeup(self):
+        """The helper clears `_is_running` *before* sending the wakeup byte.
+
+        The clear-before-send order is the contract: the listen loop re-checks
+        `_is_running` after select() wakes, so the flag must already be clear
+        when the wakeup arrives. Pinned directly via the send side_effect (which
+        records the flag state at send time), not just the end state — otherwise
+        a future send -> clear swap would slip past an end-state-only check.
+        """
+        servers = StubServer()
+        servers._is_running.set()
+        flag_clear_at_send: list[bool] = []
+        mock_wakeup_w = MagicMock()
+        mock_wakeup_w.send.side_effect = lambda *a, **k: flag_clear_at_send.append(not servers._is_running.is_set())
+        servers._wakeup_w = mock_wakeup_w
+
+        servers._signal_listen_stop()
+
+        assert not servers._is_running.is_set()
+        mock_wakeup_w.send.assert_called_once_with(b"\x00")
+        assert flag_clear_at_send == [True]  # flag was already clear when send fired
+
+    def test_no_wakeup_socket_is_noop(self):
+        """With no wakeup socket the helper still clears the flag, no crash."""
+        servers = StubServer()
+        servers._is_running.set()
+        servers._wakeup_w = None
+
+        servers._signal_listen_stop()
+
+        assert not servers._is_running.is_set()
+
+    def test_wakeup_oserror_is_logged_not_raised(self):
+        """A failing wakeup send is logged at debug and does not propagate (#294).
+
+        The send is best-effort: a broken wakeup socket must not stop teardown
+        (the caller falls back to the timeout-bounded join). The OSError is
+        logged rather than suppressed silently so a slow shutdown leaves a
+        diagnostic breadcrumb. Without the `log.debug` the assertLogs block
+        fails (no records); without the `except OSError` the error propagates
+        out of the helper, so the assertions below are never reached.
+
+        The record-level asserts pin B's contract directly: DEBUG level + the
+        captured OSError traceback (`exc_info=True`). A message-substring check
+        alone would silently pass if `exc_info=True` or the level were dropped.
+        """
+        servers = StubServer()
+        servers._is_running.set()
+        mock_wakeup_w = MagicMock()
+        mock_wakeup_w.send.side_effect = OSError("broken pipe")
+        servers._wakeup_w = mock_wakeup_w
+
+        with self.assertLogs("simnos.core.servers", level="DEBUG") as captured:
+            servers._signal_listen_stop()  # must not raise
+
+        assert not servers._is_running.is_set()
+        record = captured.records[0]
+        assert record.levelno == logging.DEBUG
+        assert "wakeup send failed" in record.getMessage()
+        assert record.exc_info is not None  # exc_info=True captured the traceback
+        assert isinstance(record.exc_info[1], OSError)

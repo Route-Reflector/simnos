@@ -100,10 +100,11 @@ class TCPServerBase(ABC):
         except BaseException:
             # BaseException, not Exception: a KeyboardInterrupt mid-start (the
             # operator aborts startup) must still roll the partial start back.
-            # Mirror stop()'s teardown ORDER — clear the flag, wake select(),
-            # join the listen thread, THEN close sockets — so a listen thread
-            # that already spawned does not race `_cleanup_resources()` closing
-            # the selector/socket out from under its `select()` loop. Clearing
+            # Mirror stop()'s teardown ORDER — signal the listen loop to stop
+            # (clear the flag + wake select()), join the listen thread, THEN
+            # close sockets — so a listen thread that already spawned does not
+            # race `_cleanup_resources()` closing the selector/socket out from
+            # under its `select()` loop. `_signal_listen_stop()` clearing
             # `_is_running` first also guarantees a later stop() early-returns
             # instead of tripping its `_listen_thread is not None` assertion.
             #
@@ -114,15 +115,35 @@ class TCPServerBase(ABC):
             # unstarted thread raises RuntimeError — which would mask the
             # original error and skip cleanup (#291). We re-raise immediately.
             try:
-                self._is_running.clear()
-                if self._wakeup_w is not None:
-                    with contextlib.suppress(OSError):
-                        self._wakeup_w.send(b"\x00")
+                self._signal_listen_stop()
                 if self._listen_thread is not None and self._listen_thread.is_alive():
                     self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
             finally:
                 self._cleanup_resources()
             raise
+
+    def _signal_listen_stop(self):
+        """Signal the listen loop to stop: clear the running flag and wake select().
+
+        Shared by stop() and start()'s rollback — the one byte sent over the
+        wakeup socketpair unblocks the listen thread's select() instantly
+        instead of waiting out the safety-net timeout. The caller is responsible
+        for joining the listen thread afterwards (the join differs between the
+        two paths: stop() asserts the thread exists, the rollback guards on
+        is_alive() because start() may have raised before the thread started).
+
+        The wakeup send is best-effort: a broken wakeup socket must not stop
+        shutdown — the caller still falls back to the SHUTDOWN_IO_TIMEOUT-bounded
+        join. The OSError is logged at debug rather than suppressed silently so a
+        slow shutdown (select() exiting via timeout instead of the wakeup) leaves
+        a diagnostic breadcrumb (#294).
+        """
+        self._is_running.clear()
+        if self._wakeup_w is not None:
+            try:
+                self._wakeup_w.send(b"\x00")
+            except OSError:
+                log.debug("wakeup send failed; listen thread will exit via select() timeout", exc_info=True)
 
     def _bind_sockets(self):
         """
@@ -155,17 +176,14 @@ class TCPServerBase(ABC):
         if not self._is_running.is_set():
             return
 
-        # `_is_running.clear()` + the wakeup + the thread joins all run under the
-        # cleanup try/finally so `_cleanup_resources()` still frees the sockets
-        # if an interrupt lands anywhere in the teardown. Clearing inside the try
-        # also means a retry stop() (which only proceeds while `_is_running` is
-        # set) can still clean up after an interrupted attempt (#291, symmetric
-        # with start()'s rollback).
+        # `_signal_listen_stop()` (clear + wakeup) + the thread joins all run
+        # under the cleanup try/finally so `_cleanup_resources()` still frees the
+        # sockets if an interrupt lands anywhere in the teardown. Clearing inside
+        # the try also means a retry stop() (which only proceeds while
+        # `_is_running` is set) can still clean up after an interrupted attempt
+        # (#291, symmetric with start()'s rollback).
         try:
-            self._is_running.clear()
-            if self._wakeup_w is not None:
-                with contextlib.suppress(OSError):
-                    self._wakeup_w.send(b"\x00")
+            self._signal_listen_stop()
 
             # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
             # _is_running.is_set() guard at the top of stop() returns early if start()
