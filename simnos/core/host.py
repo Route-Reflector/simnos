@@ -219,13 +219,21 @@ class Host:
 
         No-op if the server was never started or has already been stopped
         (``self.server is None``); this guards against double-stop calls.
+
+        The state reset runs in a ``finally`` so the host does not dangle if
+        ``server.stop()`` is cut short by an interrupt — the server self-cleans
+        in its own ``finally``, so dropping the reference + clearing ``running``
+        keeps the host out of ``SimNOS._collect_server_threads()`` (#291,
+        symmetric with the rollback in ``start()``).
         """
         if self.server is None:
             log.debug("Host %s has no running server; stop() is a no-op", self.name)
             return
-        self.server.stop()
-        self.server = None
-        self.running = False
+        try:
+            self.server.stop()
+        finally:
+            self.server = None
+            self.running = False
 
     def _warn_reserved_fields(self) -> None:
         """Warn loudly for reserved fields that are set but inert.

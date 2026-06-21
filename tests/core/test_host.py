@@ -182,6 +182,20 @@ class TestHost:
         mock_server.stop.assert_called_once()
         assert host.server is None
 
+    def test_stop_resets_state_even_if_server_stop_raises(self, host):
+        """Host.stop() resets state even if server.stop() is interrupted (#291).
+
+        The server self-cleans in its own finally, so the host must drop the
+        reference + clear running regardless, keeping the host out of
+        SimNOS._collect_server_threads(). Symmetric with start()'s rollback.
+        """
+        host.start()
+        host.server.stop.side_effect = KeyboardInterrupt
+        with pytest.raises(KeyboardInterrupt):
+            host.stop()
+        assert host.server is None
+        assert not host.running
+
     def test_platform_is_wrong(self, host):
         """
         The test passes if the ValueError is raised when the platform is not supported.

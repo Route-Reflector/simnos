@@ -108,13 +108,13 @@ class TCPServerBase(ABC):
             # instead of tripping its `_listen_thread is not None` assertion.
             #
             # `_cleanup_resources()` runs in a `finally` so the sockets are freed
-            # even if the wake/join is cut short by a second interrupt. The
+            # even if the clear/wake/join is cut short by a second interrupt. The
             # `is_alive()` guard is required: if `start()` itself raised, the
             # thread object exists but was never started, and joining an
             # unstarted thread raises RuntimeError — which would mask the
             # original error and skip cleanup (#291). We re-raise immediately.
-            self._is_running.clear()
             try:
+                self._is_running.clear()
                 if self._wakeup_w is not None:
                     with contextlib.suppress(OSError):
                         self._wakeup_w.send(b"\x00")
@@ -155,12 +155,14 @@ class TCPServerBase(ABC):
         if not self._is_running.is_set():
             return
 
-        self._is_running.clear()
-
-        # The wakeup + thread joins run under the cleanup try/finally so
-        # `_cleanup_resources()` still frees the sockets if an interrupt lands
-        # during the wake or a join (#291, symmetric with start()'s rollback).
+        # `_is_running.clear()` + the wakeup + the thread joins all run under the
+        # cleanup try/finally so `_cleanup_resources()` still frees the sockets
+        # if an interrupt lands anywhere in the teardown. Clearing inside the try
+        # also means a retry stop() (which only proceeds while `_is_running` is
+        # set) can still clean up after an interrupted attempt (#291, symmetric
+        # with start()'s rollback).
         try:
+            self._is_running.clear()
             if self._wakeup_w is not None:
                 with contextlib.suppress(OSError):
                     self._wakeup_w.send(b"\x00")

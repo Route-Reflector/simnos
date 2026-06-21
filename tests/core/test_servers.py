@@ -233,11 +233,16 @@ class ServersTest(unittest.TestCase):
         with pytest.raises(KeyboardInterrupt):
             servers.stop()
 
-        # _cleanup_resources() ran despite the interrupted join.
+        # _cleanup_resources() ran despite the interrupted join: OS handles
+        # closed AND the internal references reset (so a retry/start is clean).
         mock_selector.close.assert_called_once()
         mock_sock.close.assert_called_once()
         mock_wakeup_w.close.assert_called_once()
         mock_wakeup_r.close.assert_called_once()
+        assert servers._selector is None
+        assert servers._socket is None
+        assert servers._wakeup_r is None
+        assert servers._wakeup_w is None
 
     @patch("threading.Event")
     @patch("threading.Thread")
