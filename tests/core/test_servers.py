@@ -518,30 +518,71 @@ class StartFailureRollbackTest(unittest.TestCase):
     @patch("simnos.core.servers.socket.socketpair")
     @patch("simnos.core.servers.threading.Thread")
     @patch("simnos.core.servers.TCPServerBase._bind_sockets")
-    def test_start_rollback_joins_listen_thread_on_interrupt(
+    def test_start_rollback_skips_join_for_unstarted_thread(
         self, mock_bind_sockets, mock_thread_cls, mock_socketpair, mock_selector_cls
     ):
-        """A KeyboardInterrupt after the listen thread spawns joins it before cleanup (#291).
+        """Rollback never joins an unstarted listen thread, and still cleans up (#291).
 
-        Once the listen thread is running, rollback must clear `_is_running`,
-        wake select(), and join the thread *before* `_cleanup_resources()`
-        closes the selector/socket — otherwise the live `_listen` loop races a
-        half-closed selector. Pins the teardown order, not just the end state.
+        If `_listen_thread.start()` itself raises (Ctrl+C or an OS thread limit),
+        the thread object exists but was never started — joining it raises
+        RuntimeError (emulated here via join's side_effect), which would mask the
+        original error and skip cleanup. The `is_alive()` guard skips the join,
+        so the original interrupt propagates and `_cleanup_resources()` still
+        frees the sockets. Removing the guard makes join() fire the RuntimeError
+        and this test fail.
         """
         mock_wakeup_r, mock_wakeup_w = MagicMock(), MagicMock()
         mock_socketpair.return_value = (mock_wakeup_r, mock_wakeup_w)
         mock_thread = MagicMock()
-        mock_thread.start.side_effect = KeyboardInterrupt  # interrupt just as the thread spawns
+        mock_thread.start.side_effect = KeyboardInterrupt  # interrupt as the thread spawns
+        mock_thread.is_alive.return_value = False  # never started
+        mock_thread.join.side_effect = RuntimeError("cannot join thread before it is started")
         mock_thread_cls.return_value = mock_thread
 
         servers = StubServer()
         servers._socket = MagicMock()  # simulate _bind_sockets success
 
-        with pytest.raises(KeyboardInterrupt):
+        with pytest.raises(KeyboardInterrupt):  # original error, not the join RuntimeError
             servers.start()
 
+        mock_thread.join.assert_not_called()  # guard skipped the unstarted join
         assert not servers._is_running.is_set()
-        mock_wakeup_w.send.assert_called_once()  # select() woken...
-        mock_thread.join.assert_called_once()  # ...thread joined before resources close
         assert servers._selector is None
         assert servers._socket is None
+        assert servers._wakeup_r is None
+        assert servers._wakeup_w is None
+
+    @patch("simnos.core.servers.selectors.DefaultSelector")
+    @patch("simnos.core.servers.socket.socketpair")
+    @patch("simnos.core.servers.threading.Thread")
+    @patch("simnos.core.servers.TCPServerBase._bind_sockets")
+    def test_start_rollback_teardown_order_on_interrupt(
+        self, mock_bind_sockets, mock_thread_cls, mock_socketpair, mock_selector_cls
+    ):
+        """Rollback runs wake -> join -> cleanup in that order on a live thread (#291).
+
+        With the listen thread alive, the selector must be woken and the thread
+        joined *before* `_cleanup_resources()` closes the selector/socket, else
+        the running `_listen` loop races a half-closed selector. Pins the
+        relative order via a shared event list (not just that each step ran).
+        """
+        events: list[str] = []
+        mock_wakeup_r, mock_wakeup_w = MagicMock(), MagicMock()
+        mock_wakeup_w.send.side_effect = lambda *a: events.append("send")
+        mock_socketpair.return_value = (mock_wakeup_r, mock_wakeup_w)
+        mock_thread = MagicMock()
+        mock_thread.is_alive.return_value = True  # simulate an interrupt with a live thread
+        mock_thread.start.side_effect = KeyboardInterrupt
+        mock_thread.join.side_effect = lambda *a, **k: events.append("join")
+        mock_thread_cls.return_value = mock_thread
+
+        servers = StubServer()
+        servers._socket = MagicMock()  # simulate _bind_sockets success
+
+        with patch.object(StubServer, "_cleanup_resources", autospec=True) as mock_cleanup:
+            mock_cleanup.side_effect = lambda self: events.append("cleanup")
+            with pytest.raises(KeyboardInterrupt):
+                servers.start()
+
+        assert events == ["send", "join", "cleanup"]
+        assert not servers._is_running.is_set()

@@ -146,31 +146,20 @@ class Host:
             render_config=render_config,
             **self.server_inventory["configuration"],
         )
-        # Defense-in-depth for a partial start (#291). The built-in
-        # `TCPServerBase.start()` self-cleans its sockets/threads on a mid-way
-        # failure, so `server.stop()` here is a no-op for them. But the
-        # orchestration layer skips a host whose `start()` raised — `running`
-        # stays False, so `SimNOS.stop()` (filters on `running == True`) never
-        # stops it, while `SimNOS._collect_server_threads()` still collects its
-        # threads (it gates on `server is not None`), so a server left dangling
-        # here makes the shutdown join block. Stop the just-built server and
-        # drop the reference (and reset `running`) before re-raising.
+        # Defense-in-depth for a partial start (#291). A host whose `start()`
+        # raised keeps `running == False`, so `SimNOS.stop()` (filters on
+        # `running == True`) never stops it, yet `SimNOS._collect_server_threads()`
+        # still collects its threads (it gates on `server is not None`) — a
+        # dangling server here makes the shutdown join block. Stop the just-built
+        # server and drop the reference + reset `running` before re-raising.
         #
         # The catch is `BaseException`, not `Exception`: the most likely
         # partial-start trigger is a `KeyboardInterrupt` (the operator aborts
-        # startup), which `except Exception` would miss — leaving the server set
-        # and hanging the join above. `self.running = True` lives INSIDE the try
-        # so an interrupt in the gap between a successful `server.start()` and
-        # the flag set is still caught and rolled back (otherwise the host is
-        # left server-set / running-False — exactly the dangling state).
-        #
-        # We re-raise immediately, so catching `BaseException` only adds a
-        # cleanup pass on the way out. The cleanup itself is a single
-        # best-effort attempt (not a guarantee): a failure is logged rather than
-        # raised so it cannot mask the original error, and the reference/flag are
-        # reset regardless. A second `BaseException` *during* cleanup (a double
-        # Ctrl+C) can replace the original error, but `self.server` is still
-        # dropped so no leak/hang results.
+        # startup), which `except Exception` would miss. `self.running = True`
+        # lives INSIDE the try so an interrupt in the gap after a successful
+        # `server.start()` is still rolled back rather than leaving the dangling
+        # state. Cleanup is best-effort: a failure is logged (not raised) so it
+        # cannot mask the original error, and the reference/flag reset regardless.
         try:
             self.server.start()
             self.running = True
