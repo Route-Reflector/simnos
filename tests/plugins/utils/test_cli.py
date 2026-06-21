@@ -2,8 +2,8 @@
 
 Covers `simnos.plugins.utils.cli`: import side-effect safety (no module-level
 `parse_args`/`basicConfig`), the `build_parser` contract (subcommand required,
-`-i`/`-d`/`--sys-config` non-empty + `-i`/`-d` mutex, `-l` placement +
-normalization), the ad-hoc
+`-i`/`-d`/`-n`/`--sys-config` non-empty + strip, `-i`/`-d` mutex, `-l` placement
++ normalization), the ad-hoc
 inventory builder (default/explicit/zero port, host-name + credential folding),
 the `_cmd_up` dispatch + reload-env lifecycle across every raise path, and
 `list-platforms` output. `_cmd_up`'s blocking `while True: time.sleep` loop is
@@ -55,14 +55,23 @@ class TestBuildParser:
             cli.build_parser().parse_args(["up", "-i", "inv.yaml", "-d", "cisco_ios"])
         assert exc.value.code == 2
 
-    @pytest.mark.parametrize("flag", ["-i", "-d"])
+    @pytest.mark.parametrize("flag", ["-i", "-d", "-n", "--sys-config"])
     @pytest.mark.parametrize("value", ["", "   "])
-    def test_empty_source_flags_rejected_at_parse(self, flag, value):
-        # `-d ""` / `-i ""` must die at the CLI boundary (exit 2), never reach the
-        # facade where truthiness would silently mis-launch (#267 / D2).
+    def test_non_empty_flags_rejected_at_parse(self, flag, value):
+        # Every _non_empty flag must die at the CLI boundary (exit 2) on an
+        # empty/whitespace value, never reach the facade where truthiness would
+        # silently mis-launch (-i/-d) or a whitespace host key form (-n) — the
+        # contract is pinned here, not facade-side (#267 / D2, gemini#1 2nd).
         with pytest.raises(SystemExit) as exc:
             cli.build_parser().parse_args(["up", flag, value])
         assert exc.value.code == 2
+
+    @pytest.mark.parametrize(("flag", "dest"), [("-i", "inventory"), ("-d", "device_type"), ("-n", "host_name")])
+    def test_non_empty_flags_strip_padding(self, flag, dest):
+        # A padded value is normalized so whitespace never leaks into platform /
+        # path / host-key resolution downstream (gemini#1 1st/2nd).
+        args = cli.build_parser().parse_args(["up", flag, "  cisco_ios  "])
+        assert getattr(args, dest) == "cisco_ios"
 
     def test_neither_source_is_valid(self):
         args = cli.build_parser().parse_args(["up"])
@@ -292,11 +301,6 @@ class TestAdhocLoudValidation:
         with pytest.raises(ValidationError) as exc:
             cli._cmd_up(cli.build_parser().parse_args(["up", "-d", "cisco_ios", "-p", "0"]))
         assert any("port" in e["loc"] and e["type"] == "greater_than_equal" for e in exc.value.errors())
-
-    def test_sys_config_empty_rejected_at_parse(self):
-        with pytest.raises(SystemExit) as exc:
-            cli.build_parser().parse_args(["up", "--sys-config", ""])
-        assert exc.value.code == 2
 
 
 class TestListPlatforms:

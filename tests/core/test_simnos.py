@@ -673,6 +673,14 @@ class TestSysConfig:
         with pytest.raises(ValueError, match="SIMNOS_SYS_CONFIG is set but empty"):
             SimNOS()
 
+    def test_padded_env_path_is_stripped(self, tmp_path, monkeypatch):
+        """A padded env path is stripped before use, matching --sys-config (#267, gemini#2 2nd)."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/env\n", encoding="utf-8")
+        monkeypatch.setenv("SIMNOS_SYS_CONFIG", f"  {cfg}  ")
+        net = SimNOS()
+        assert net.sys_config["data_dir"] == "/from/env"
+
     def test_cwd_discovered(self, tmp_path, monkeypatch):
         """`./sys_config.yaml` in cwd is discovered when no arg/env is set."""
         # env is already cleared by the autouse `_isolate_sys_config_env` fixture.
