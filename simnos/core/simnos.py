@@ -176,9 +176,12 @@ class SimNOS:
         if isinstance(sys_config, dict):
             return sys_config
         if isinstance(sys_config, str):
-            return self._read_sys_config_file(Path(sys_config), required=True)
-        env_path = os.environ.get("SIMNOS_SYS_CONFIG")
-        if env_path:
+            # Strip to stay symmetric with the env branch (#267, claude#3 3rd).
+            return self._read_sys_config_file(Path(sys_config.strip()), required=True)
+        if "SIMNOS_SYS_CONFIG" in os.environ:
+            env_path = os.environ["SIMNOS_SYS_CONFIG"].strip()
+            if not env_path:
+                raise ValueError("SIMNOS_SYS_CONFIG is set but empty; unset it or provide a path")
             return self._read_sys_config_file(Path(env_path), required=True)
         for candidate in (Path.cwd() / self._SYS_CONFIG_FILENAME, Path.home() / ".simnos" / self._SYS_CONFIG_FILENAME):
             if candidate.is_file():

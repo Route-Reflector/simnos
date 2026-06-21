@@ -92,8 +92,32 @@ In this case, you are creating 2 hosts: `router1` and `router2`. `router1` will 
 To use the YAML file, you can use the SIMNOS CLI tool:
 
 ``` bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
+
+### CLI subcommands
+
+The CLI is organized into subcommands:
+
+``` bash
+# Start the predefined 3-host example (no inventory needed):
+simnos up
+
+# Start a single host ad-hoc, without writing an inventory file:
+simnos up --device-type cisco_ios --port 6000
+
+# Start from an inventory file:
+simnos up -i path/to/inventory.yaml
+
+# List the platforms you can use as a device_type:
+simnos list-platforms
+```
+
+`simnos up` accepts `--device-type` (`-d`) for an ad-hoc single host, or
+`-i`/`--inventory` for a file — the two are mutually exclusive. With neither, the
+built-in 3-host example starts. Ad-hoc credentials default to the built-in
+`user`/`user`; override them with `--username`/`--password`. The log level is set
+with `-l`/`--log-level` after the subcommand (e.g. `simnos up -l DEBUG`).
 
 ## Python dictionary
 Although YAML is the easier way to provide inventory data to SIMNOS, using Python dictionary is more flexible and allows for more complex inventory data structures. As a matter of fact, python dictionaries are used internally by SIMNOS to handle the inventory data.
@@ -186,7 +210,7 @@ Alternative to running above code is to supply custom inventory to
 SIMNOS CLI tool:
 
 ```bash
-simnos -i path/to/my_inventory.yaml
+simnos up -i path/to/my_inventory.yaml
 ```
 
 Where `my_inventory.yaml` could contain equivalent to above Python code

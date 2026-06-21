@@ -91,7 +91,7 @@ ssh -p 6001 admin@localhost
 SIMNOS にはコマンドラインツールが付属しています。
 事前定義されたサンプルを以下のコマンドで実行できます:
 ```bash
-simnos
+simnos up
 ```
 
 この場合、3台のデバイスが作成されます:
@@ -101,7 +101,7 @@ simnos
 
 インベントリファイルを指定することもできます:
 ```bash
-simnos --inventory inventory.yaml
+simnos up --inventory inventory.yaml
 ```
 
 ## 謝辞

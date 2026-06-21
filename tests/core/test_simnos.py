@@ -660,6 +660,34 @@ class TestSysConfig:
         net = SimNOS()
         assert net.sys_config["data_dir"] == "/from/env"
 
+    def test_empty_env_is_loud(self, monkeypatch):
+        """`SIMNOS_SYS_CONFIG=""` (set but empty) is a config mistake, not a
+        silent fall-through to cwd/home discovery (#267 / D4)."""
+        monkeypatch.setenv("SIMNOS_SYS_CONFIG", "")
+        with pytest.raises(ValueError, match="SIMNOS_SYS_CONFIG is set but empty"):
+            SimNOS()
+
+    def test_whitespace_only_env_is_loud(self, monkeypatch):
+        """A whitespace-only value is treated the same as empty (#267 / D4)."""
+        monkeypatch.setenv("SIMNOS_SYS_CONFIG", "   ")
+        with pytest.raises(ValueError, match="SIMNOS_SYS_CONFIG is set but empty"):
+            SimNOS()
+
+    def test_padded_env_path_is_stripped(self, tmp_path, monkeypatch):
+        """A padded env path is stripped before use, matching --sys-config (#267, gemini#2 2nd)."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/env\n", encoding="utf-8")
+        monkeypatch.setenv("SIMNOS_SYS_CONFIG", f"  {cfg}  ")
+        net = SimNOS()
+        assert net.sys_config["data_dir"] == "/from/env"
+
+    def test_padded_str_arg_is_stripped(self, tmp_path):
+        """A padded str sys_config arg is stripped too, symmetric with the env branch (#267, claude#3 3rd)."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/arg\n", encoding="utf-8")
+        net = SimNOS(sys_config=f"  {cfg}  ")
+        assert net.sys_config["data_dir"] == "/from/arg"
+
     def test_cwd_discovered(self, tmp_path, monkeypatch):
         """`./sys_config.yaml` in cwd is discovered when no arg/env is set."""
         # env is already cleared by the autouse `_isolate_sys_config_env` fixture.
