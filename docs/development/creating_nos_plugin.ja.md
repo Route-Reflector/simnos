@@ -184,7 +184,7 @@ hosts:
 素早くテストするには、ターミナルで以下のコマンドを実行してください:
 
 ```bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from a Python file
@@ -319,7 +319,7 @@ hosts:
 
 素早くテストするには、ターミナルで以下のコマンドを実行してください:
 ```bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from the Nos class

@@ -7,7 +7,7 @@ One of the biggest problems we have identified when developing is that we make a
 The command is as follows:
 
 ```bash
-simnos --reload-commands
+simnos up --reload-commands
 ```
 
 !!! warning

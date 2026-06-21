@@ -90,8 +90,32 @@ hosts:
 YAML ファイルを使用するには、SIMNOS CLI ツールを使用できます:
 
 ``` bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
+
+### CLI サブコマンド
+
+CLI はサブコマンドで構成されています:
+
+``` bash
+# 事前定義された 3 ホストの例を起動 (インベントリ不要):
+simnos up
+
+# インベントリファイルを書かずに単一ホストをアドホック起動:
+simnos up --device-type cisco_ios --port 6000
+
+# インベントリファイルから起動:
+simnos up -i path/to/inventory.yaml
+
+# device_type として使えるプラットフォーム一覧を表示:
+simnos list-platforms
+```
+
+`simnos up` は アドホック単一ホスト用の `--device-type` (`-d`)、またはファイル用の
+`-i`/`--inventory` を受け付けます (両者は排他)。どちらも指定しない場合は組み込みの
+3 ホストの例が起動します。アドホックの認証情報は組み込みの `user`/`user` が既定で、
+`--username`/`--password` で上書きできます。ログレベルはサブコマンドの後ろで
+`-l`/`--log-level` を指定します (例: `simnos up -l DEBUG`)。
 
 ## Python 辞書
 YAML はインベントリデータを SIMNOS に提供する最も簡単な方法ですが、Python 辞書はより柔軟で、より複雑なインベントリデータ構造を扱えます。実際のところ、Python 辞書は SIMNOS 内部でインベントリデータを処理するために使用されています。
@@ -182,7 +206,7 @@ print(network.list_hosts())
 上記のコードを実行する代わりに、SIMNOS CLI ツールにカスタムインベントリを提供することもできます:
 
 ```bash
-simnos -i path/to/my_inventory.yaml
+simnos up -i path/to/my_inventory.yaml
 ```
 
 `my_inventory.yaml` には、上記の Python コードと同等の YAML 構造のインベントリを含めることができます:

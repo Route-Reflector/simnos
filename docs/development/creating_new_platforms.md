@@ -7,7 +7,7 @@ class on top (#264).
 
 !!! tip
     A hot-reloader reloads **Python modules** when they change inside
-    `simnos/plugins/nos` (`simnos --reload-commands`). Hot-reload of an A3
+    `simnos/plugins/nos` (`simnos up --reload-commands`). Hot-reload of an A3
     platform directory is a separate, deferred capability (#274); for now an A3
     edit is picked up on the next server start.
 

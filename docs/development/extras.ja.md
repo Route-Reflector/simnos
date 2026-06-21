@@ -7,7 +7,7 @@
 コマンドは以下の通りです:
 
 ```bash
-simnos --reload-commands
+simnos up --reload-commands
 ```
 
 !!! warning

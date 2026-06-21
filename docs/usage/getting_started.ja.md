@@ -24,7 +24,7 @@ ssh -p 6001 user@localhost # huawei_smartax
 上記のコードを実行する代わりに、引数なしで SIMNOS CLI を実行することもできます:
 
 ```bash
-simnos
+simnos up
 ```
 
 !!! warning "セキュリティに関する注意"

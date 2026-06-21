@@ -92,7 +92,7 @@ And here are some commands :computer: you can try:
 SIMNOS comes with a CLI tool that allows you to start the simulation from the
 command line. You can try a predefined example by running:
 ```bash
-simnos
+simnos up
 ```
 
 In this case 3 devices will be created:
@@ -102,7 +102,7 @@ In this case 3 devices will be created:
 
 You can also specify the inventory file to use:
 ```bash
-simnos --inventory inventory.yaml
+simnos up --inventory inventory.yaml
 ```
 
 ## Acknowledgements

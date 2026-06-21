@@ -198,7 +198,7 @@ hosts:
 And to quickly test it, you can run this command in the terminal:
 
 ```bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from a Python file
@@ -333,7 +333,7 @@ hosts:
 
 And to test it quickly, you can run the following command in the terminal:
 ```bash
-simnos -i path/to/inventory.yaml
+simnos up -i path/to/inventory.yaml
 ```
 
 ## Create a NOS plugin from the Nos class

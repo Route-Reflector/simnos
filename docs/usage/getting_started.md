@@ -25,7 +25,7 @@ The equivalent to running above code would be to run SIMNOS CLI without
 any arguments:
 
 ```bash
-simnos
+simnos up
 ```
 
 !!! warning "Security notice"
