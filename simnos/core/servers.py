@@ -157,17 +157,20 @@ class TCPServerBase(ABC):
 
         self._is_running.clear()
 
-        if self._wakeup_w is not None:
-            with contextlib.suppress(OSError):
-                self._wakeup_w.send(b"\x00")
-
-        # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
-        # _is_running.is_set() guard at the top of stop() returns early if start()
-        # hasn't been called, so self._listen_thread is set here; narrow for ty.
-        assert self._listen_thread is not None  # noqa: S101 — post-condition of start()
-        self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
-
+        # The wakeup + thread joins run under the cleanup try/finally so
+        # `_cleanup_resources()` still frees the sockets if an interrupt lands
+        # during the wake or a join (#291, symmetric with start()'s rollback).
         try:
+            if self._wakeup_w is not None:
+                with contextlib.suppress(OSError):
+                    self._wakeup_w.send(b"\x00")
+
+            # fail-safe join — wakeup socket may have failed; bound by SHUTDOWN_IO_TIMEOUT.
+            # _is_running.is_set() guard at the top of stop() returns early if start()
+            # hasn't been called, so self._listen_thread is set here; narrow for ty.
+            assert self._listen_thread is not None  # noqa: S101 — post-condition of start()
+            self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
+
             alive = join_threads_with_deadline(
                 self._connection_threads,
                 SHUTDOWN_SERVER_STOP_DEADLINE,
