@@ -112,8 +112,9 @@ class TestBuildAdhocInventory:
         assert inv["hosts"]["cisco_ios"]["port"] == 7000
 
     def test_port_zero_not_coerced_to_default(self):
-        # `0` must survive as-is so `_allocate_port_single` rejects it loudly,
-        # rather than `0 or DEFAULT` silently becoming 6000 (#267 / D2).
+        # `0` must survive as-is (not `0 or DEFAULT` → 6000) so the inventory
+        # model's Port field (ge=1) rejects it loudly during construction; the
+        # real-construction raise is pinned in TestAdhocLoudValidation (#267 / D2).
         inv = cli._build_adhoc_inventory(self._args(["up", "-d", "cisco_ios", "-p", "0"]))
         assert inv["hosts"]["cisco_ios"]["port"] == 0
 
@@ -216,6 +217,13 @@ class TestCmdUpDispatch:
         assert "--username" in caplog.text
         assert "default inventory" in caplog.text
 
+    def test_stray_host_name_warns_without_source(self, monkeypatch, caplog, _no_sleep):
+        # Pins the host_name dest -> --host-name CLI-string mapping in _ADHOC_FLAGS
+        # (a typo there would silently drop it from the warning, claude#3 2nd).
+        with caplog.at_level(logging.WARNING):
+            self._run(monkeypatch, ["up", "-n", "R1"])
+        assert "--host-name" in caplog.text
+
     def test_no_stray_warning_in_adhoc_mode(self, monkeypatch, caplog, _no_sleep):
         with caplog.at_level(logging.WARNING):
             self._run(monkeypatch, ["up", "-d", "cisco_ios", "-p", "7000"])
@@ -276,11 +284,14 @@ class TestAdhocLoudValidation:
         # `--port 0` survives the builder (not coerced to 6000), then the
         # inventory model's Port field (ge=1) rejects it during real SimNOS
         # construction — the loud seam is pydantic, not _allocate_port_single,
-        # but the "never silently default" contract holds (codex#1 1st).
+        # but the "never silently default" contract holds (codex#1 1st). Pin the
+        # error to the host's port/ge constraint so an unrelated future schema
+        # break does not pass this test (codex#2 2nd).
         from pydantic import ValidationError
 
-        with pytest.raises(ValidationError):
+        with pytest.raises(ValidationError) as exc:
             cli._cmd_up(cli.build_parser().parse_args(["up", "-d", "cisco_ios", "-p", "0"]))
+        assert any("port" in e["loc"] and e["type"] == "greater_than_equal" for e in exc.value.errors())
 
     def test_sys_config_empty_rejected_at_parse(self):
         with pytest.raises(SystemExit) as exc:
@@ -298,8 +309,17 @@ class TestListPlatforms:
             assert name in out
 
 
+@pytest.fixture
+def _restore_root_level():
+    """Restore the root logger level: main() calls real basicConfig(force=True),
+    which would otherwise leak the last level into the rest of the session (claude#2 2nd)."""
+    saved = logging.getLogger().level
+    yield
+    logging.getLogger().setLevel(saved)
+
+
 class TestMain:
-    def test_force_basicconfig_applies_each_call(self, monkeypatch):
+    def test_force_basicconfig_applies_each_call(self, monkeypatch, _restore_root_level):
         # force=True so a second main() in the same process re-applies the level
         # (import-safe entry must be re-callable from tests, #267 / Risks).
         monkeypatch.setattr(cli, "_cmd_list_platforms", lambda args: 0)
@@ -308,7 +328,7 @@ class TestMain:
         cli.main(["list-platforms", "-l", "DEBUG"])
         assert logging.getLogger().level == logging.DEBUG
 
-    def test_list_platforms_returns_zero(self, capsys):
+    def test_list_platforms_returns_zero(self, capsys, _restore_root_level):
         assert cli.main(["list-platforms"]) == 0
         assert capsys.readouterr().out  # printed something
 

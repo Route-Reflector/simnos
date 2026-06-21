@@ -28,9 +28,10 @@ _LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 def _non_empty(value: str) -> str:
     """argparse type: reject empty/whitespace-only strings and strip the rest.
 
-    Used on the path/identifier flags (``-i`` / ``-d`` / ``--sys-config``) so an
-    empty value fails loudly at the CLI boundary (exit 2) and a padded one is
-    normalized. Relying on facade-side truthiness (``SimNOS.__init__``'s
+    Used on the path/identifier flags (``-i`` / ``-d`` / ``-n`` / ``--sys-config``)
+    so an empty value fails loudly at the CLI boundary (exit 2) and a padded one
+    is normalized — notably ``-n "   "`` would otherwise become a whitespace host
+    key (gemini#1 2nd). Relying on facade-side truthiness (``SimNOS.__init__``'s
     ``inventory or default``, ``Host``'s ``if self.device_type:``) would let an
     empty string silently mis-launch (default 3-host / builtin cisco_ios), so
     the contract is pinned here instead (#267 / Decision 2). Stripping keeps a
@@ -75,7 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Ad-hoc single-host platform (no inventory needed)",
     )
     up.add_argument("-p", "--port", type=int, default=None, help="Ad-hoc listen port")
-    up.add_argument("-n", "--host-name", dest="host_name", default=None, help="Ad-hoc host name")
+    up.add_argument("-n", "--host-name", dest="host_name", type=_non_empty, default=None, help="Ad-hoc host name")
     up.add_argument("-u", "--username", default=None, help="Ad-hoc username (default: builtin)")
     up.add_argument("-w", "--password", default=None, help="Ad-hoc password (default: builtin)")
     up.add_argument("--sys-config", dest="sys_config", type=_non_empty, default=None, help="Explicit sys_config path")
