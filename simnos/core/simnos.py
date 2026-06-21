@@ -176,7 +176,8 @@ class SimNOS:
         if isinstance(sys_config, dict):
             return sys_config
         if isinstance(sys_config, str):
-            return self._read_sys_config_file(Path(sys_config), required=True)
+            # Strip to stay symmetric with the env branch (#267, claude#3 3rd).
+            return self._read_sys_config_file(Path(sys_config.strip()), required=True)
         if "SIMNOS_SYS_CONFIG" in os.environ:
             env_path = os.environ["SIMNOS_SYS_CONFIG"].strip()
             if not env_path:

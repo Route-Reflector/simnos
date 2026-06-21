@@ -66,10 +66,14 @@ class TestBuildParser:
             cli.build_parser().parse_args(["up", flag, value])
         assert exc.value.code == 2
 
-    @pytest.mark.parametrize(("flag", "dest"), [("-i", "inventory"), ("-d", "device_type"), ("-n", "host_name")])
+    @pytest.mark.parametrize(
+        ("flag", "dest"),
+        [("-i", "inventory"), ("-d", "device_type"), ("-n", "host_name"), ("--sys-config", "sys_config")],
+    )
     def test_non_empty_flags_strip_padding(self, flag, dest):
-        # A padded value is normalized so whitespace never leaks into platform /
-        # path / host-key resolution downstream (gemini#1 1st/2nd).
+        # Every _non_empty flag normalizes a padded value so whitespace never
+        # leaks into platform / path / host-key resolution downstream — kept
+        # symmetric with the reject parametrize (gemini#1 1st/2nd, codex#2 3rd).
         args = cli.build_parser().parse_args(["up", flag, "  cisco_ios  "])
         assert getattr(args, dest) == "cisco_ios"
 
@@ -314,16 +318,23 @@ class TestListPlatforms:
 
 
 @pytest.fixture
-def _restore_root_level():
-    """Restore the root logger level: main() calls real basicConfig(force=True),
-    which would otherwise leak the last level into the rest of the session (claude#2 2nd)."""
-    saved = logging.getLogger().level
+def _restore_root_logging():
+    """Restore the root logger after main()'s real basicConfig(force=True), which
+    swaps out the level AND the handler set — not just the level (codex#1 3rd /
+    claude#2 2nd). Without this, the new StreamHandler leaks into the session."""
+    root = logging.getLogger()
+    saved_level = root.level
+    saved_handlers = root.handlers[:]
     yield
-    logging.getLogger().setLevel(saved)
+    for handler in root.handlers:
+        if handler not in saved_handlers:
+            handler.close()
+    root.handlers[:] = saved_handlers
+    root.setLevel(saved_level)
 
 
 class TestMain:
-    def test_force_basicconfig_applies_each_call(self, monkeypatch, _restore_root_level):
+    def test_force_basicconfig_applies_each_call(self, monkeypatch, _restore_root_logging):
         # force=True so a second main() in the same process re-applies the level
         # (import-safe entry must be re-callable from tests, #267 / Risks).
         monkeypatch.setattr(cli, "_cmd_list_platforms", lambda args: 0)
@@ -332,7 +343,7 @@ class TestMain:
         cli.main(["list-platforms", "-l", "DEBUG"])
         assert logging.getLogger().level == logging.DEBUG
 
-    def test_list_platforms_returns_zero(self, capsys, _restore_root_level):
+    def test_list_platforms_returns_zero(self, capsys, _restore_root_logging):
         assert cli.main(["list-platforms"]) == 0
         assert capsys.readouterr().out  # printed something
 

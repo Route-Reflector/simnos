@@ -681,6 +681,13 @@ class TestSysConfig:
         net = SimNOS()
         assert net.sys_config["data_dir"] == "/from/env"
 
+    def test_padded_str_arg_is_stripped(self, tmp_path):
+        """A padded str sys_config arg is stripped too, symmetric with the env branch (#267, claude#3 3rd)."""
+        cfg = tmp_path / "sys_config.yaml"
+        cfg.write_text("data_dir: /from/arg\n", encoding="utf-8")
+        net = SimNOS(sys_config=f"  {cfg}  ")
+        assert net.sys_config["data_dir"] == "/from/arg"
+
     def test_cwd_discovered(self, tmp_path, monkeypatch):
         """`./sys_config.yaml` in cwd is discovered when no arg/env is set."""
         # env is already cleared by the autouse `_isolate_sys_config_env` fixture.
