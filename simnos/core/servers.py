@@ -97,7 +97,14 @@ class TCPServerBase(ABC):
 
             self._listen_thread = threading.Thread(target=self._listen)
             self._listen_thread.start()
-        except Exception:
+        except BaseException:
+            # BaseException, not Exception: a KeyboardInterrupt mid-start (the
+            # operator aborts startup) must still clear `_is_running` and free
+            # the partial sockets/threads. Otherwise a later stop() trips the
+            # `_listen_thread is not None` assertion — it passes the
+            # `_is_running` guard but the thread was never assigned — and the
+            # bound socket leaks before `_cleanup_resources()` runs (#291). We
+            # re-raise immediately.
             self._cleanup_resources()
             self._is_running.clear()
             raise

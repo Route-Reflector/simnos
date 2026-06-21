@@ -147,22 +147,32 @@ class Host:
             **self.server_inventory["configuration"],
         )
         # Defense-in-depth for a partial start (#291). The built-in
-        # `TCPServerBase.start()` already self-cleans its sockets/threads on a
-        # mid-way failure, so `server.stop()` here is a no-op for them. But the
-        # orchestration layer (`SimNOS.stop()` filters on `running == True`)
-        # skips a host whose `start()` raised — `running` stays False — so a
-        # server plugin that does *not* self-clean would leak with no safety
-        # net. Stop the just-built server and drop the reference before
-        # re-raising; a cleanup failure must not mask the original start()
-        # error (the real cause), so it is logged rather than raised.
+        # `TCPServerBase.start()` self-cleans its sockets/threads on a mid-way
+        # failure, so `server.stop()` here is a no-op for them. But the
+        # orchestration layer skips a host whose `start()` raised — `running`
+        # stays False, so `SimNOS.stop()` (filters on `running == True`) never
+        # stops it, while `SimNOS._collect_server_threads()` still collects its
+        # threads (it gates on `server is not None`), so a server left dangling
+        # here makes the shutdown join block. Stop the just-built server and
+        # drop the reference before re-raising.
+        #
+        # The catch is `BaseException`, not `Exception`: the most likely
+        # partial-start trigger is a `KeyboardInterrupt` (the operator aborts
+        # startup), which `except Exception` would miss — leaving the server set
+        # and hanging the join above. We re-raise immediately, so catching
+        # `BaseException` only adds a cleanup pass on the way out. The cleanup
+        # itself is a single best-effort attempt (not a guarantee): a failure is
+        # logged rather than raised so it cannot mask the original error (the
+        # real cause), and `self.server` is dropped regardless.
         try:
             self.server.start()
-        except Exception:
+        except BaseException:
             try:
                 self.server.stop()
             except Exception:
                 log.exception("Host %s: cleanup after a failed start() raised", self.name)
-            self.server = None
+            finally:
+                self.server = None
             raise
         self.running = True
 

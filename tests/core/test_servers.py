@@ -491,3 +491,25 @@ class StartFailureRollbackTest(unittest.TestCase):
         assert not servers._is_running.is_set()
         mock_wakeup_r.close.assert_called()
         mock_wakeup_w.close.assert_called()
+
+    @patch("simnos.core.servers.socket.socketpair")
+    @patch("simnos.core.servers.TCPServerBase._bind_sockets")
+    def test_start_rollback_on_keyboard_interrupt(self, mock_bind_sockets, mock_socketpair):
+        """A KeyboardInterrupt mid-start still rolls back (#291).
+
+        The rollback catches BaseException, not just Exception: an operator
+        aborting startup (Ctrl+C) must still clear `_is_running` and close the
+        partial sockets, otherwise a later stop() trips the `_listen_thread`
+        assertion and leaks the bound socket.
+        """
+        mock_socketpair.side_effect = KeyboardInterrupt
+        servers = StubServer()
+        servers._socket = MagicMock()  # simulate _bind_sockets success
+
+        with pytest.raises(KeyboardInterrupt):
+            servers.start()
+
+        assert not servers._is_running.is_set()
+        assert servers._socket is None
+        assert servers._wakeup_r is None
+        assert servers._wakeup_w is None
