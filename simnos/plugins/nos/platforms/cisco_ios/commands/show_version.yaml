@@ -4,4 +4,4 @@ help: execute the command "show version"
 mode:
 - user
 - enable
-output: show_version.txt
+output_template: show_version.j2

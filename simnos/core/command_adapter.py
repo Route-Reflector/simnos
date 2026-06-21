@@ -181,7 +181,18 @@ def adapt_commands(commands: dict, reverse_map: dict[str, str]) -> dict[str, Res
     for name, entry in commands.items():
         if not isinstance(entry, dict):
             raise ValueError(f"command {name!r}: expected a mapping, got {type(entry).__name__}")
+        # An alias resolves to its target's canonical name so every alias of one
+        # command shares one per-session variant state (#287 / D6). The legacy
+        # path dict-merges + constructs a fresh `ResolvedCommand`, so unlike the
+        # A3 `replace` path it cannot inherit `canonical_name` for free — capture
+        # the target name here (before the merge) and pass it through explicitly
+        # (#287, codex#1 5th). `_resolve_alias` is single-level, so for an
+        # alias->alias chain this is the *immediate* target, not the final real
+        # command; shipped legacy data (arista_eos) has no such chains, so this
+        # is a doc-only asymmetry vs A3's `_follow_alias` (claude#3 6th).
+        canonical_name: str = ""
         if "alias" in entry:
+            canonical_name = entry["alias"]
             merged = _resolve_alias(name, entry, commands)
             if merged is None:
                 continue
@@ -191,12 +202,17 @@ def adapt_commands(commands: dict, reverse_map: dict[str, str]) -> dict[str, Res
             # usually absent, i.e. blank — not the target's (#264 / D6).
             merged["help"] = entry.get("help", "")
             entry = merged
-        resolved[name] = _adapt_command(name, entry, reverse_map)
+        resolved[name] = _adapt_command(name, entry, reverse_map, canonical_name=canonical_name)
     return resolved
 
 
-def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> ResolvedCommand:
-    """Normalize a single (alias-merged) legacy command entry."""
+def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str], *, canonical_name: str = "") -> ResolvedCommand:
+    """Normalize a single (alias-merged) legacy command entry.
+
+    `canonical_name` is the alias target's name (passed by `adapt_commands` for
+    an alias); empty for a real command, which `ResolvedCommand.__post_init__`
+    backfills to the command's own name (#287 / D6).
+    """
     # `_default_` is the unconditional fallback: v2 never matches its prompt
     # (#264 / D5), so its mode set is empty (= valid in every mode) and any
     # authored prompt is dropped.
@@ -253,6 +269,7 @@ def _adapt_command(name: str, entry: dict, reverse_map: dict[str, str]) -> Resol
         exit=bool(entry.get("exit")),
         type="simnos",
         source=None,
+        canonical_name=canonical_name,
     )
 
 

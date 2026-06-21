@@ -91,10 +91,12 @@ class ShellUtilsTest(TestCase):
         files = get_files_under_directory("simnos/plugins/nos")
         self.assertTrue(files)
         self.assertTrue(all(not file.endswith("__init__.py") for file in files))
-        # Every returned file is a watched extension; `.txt` is now watched so an
-        # A3 literal-capture edit triggers a reload (#274 / D2).
-        self.assertTrue(all(file.endswith((".py", ".j2", ".yaml", ".txt")) for file in files))
+        # Every returned file is a watched extension; `.txt` is watched so an A3
+        # literal-capture edit triggers a reload (#274 / D2), and `.json` so a
+        # #287 sidecar value edit reloads too.
+        self.assertTrue(all(file.endswith((".py", ".j2", ".yaml", ".txt", ".json")) for file in files))
         self.assertTrue(any(file.endswith(".txt") for file in files))
+        self.assertTrue(any(file.endswith(".json") for file in files))
 
     def test_get_files_lasttime_changed(self):
         """

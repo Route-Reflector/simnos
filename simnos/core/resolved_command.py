@@ -20,10 +20,12 @@ makes the two equivalent for the brace-escape and ``{base_prompt}`` cases the
 legacy data actually uses (#264 / D6, D8).
 """
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 import re
 import string
-from typing import TYPE_CHECKING, Literal
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Any, Literal
 
 from jinja2 import Environment, StrictUndefined, Template
 from jinja2 import meta as jinja_meta
@@ -51,6 +53,26 @@ _TEMPLATE_ENV = Environment(
 )
 
 _FORMATTER = string.Formatter()
+
+
+def _deep_freeze(value: Any) -> Any:
+    """Recursively convert a json-ish value into a read-only structure (#287).
+
+    A shallow ``MappingProxyType`` only protects the outer dict; a nested
+    ``parsed`` list (or a row dict inside it) stays mutable, so a template like
+    ``{{ parsed.pop() }}`` could mutate the shared, cached value and poison every
+    other session that renders the same command (1st round codex#1 / gemini#1).
+    Freeze the whole tree: ``Mapping`` -> ``MappingProxyType``, ``list``/``tuple``
+    -> ``tuple``, scalars unchanged. Render only reads, so frozen types are
+    transparent to jinja (``parsed[0].version`` / ``{% for row in parsed %}`` work
+    on a tuple of ``MappingProxyType`` exactly as on a list of dict).
+    """
+    if isinstance(value, Mapping):
+        return MappingProxyType({k: _deep_freeze(v) for k, v in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_deep_freeze(v) for v in value)
+    return value
+
 
 # A `{% endraw %}` tag (jinja2 tolerates whitespace and the +/- trim markers)
 # is the only sequence that can break out of a `{% raw %}` wrapping. Match just
@@ -160,6 +182,23 @@ class ResolvedOutput:
     template: Template | None = None
     handler: "CommandHandler | None" = None
     required_vars: frozenset[str] = frozenset()
+    values: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Harden `values` into a deeply read-only copy (#287, codex#3 6th + codex#1 1st).
+
+        `ResolvedOutput` is cached and shared across every session (the
+        platform-level ``functools.cache``), so a render-time mutation of
+        `values` — including a nested ``parsed`` list/row — would be cache
+        poisoning. `_deep_freeze` recursively converts the whole tree to
+        read-only types so the contract is enforced, not just documented, and
+        severs any alias to the dict the normalizer returned. Run
+        unconditionally (no ``MappingProxyType`` shortcut): a shallow
+        ``MappingProxyType`` passed in would otherwise keep a mutable nested
+        list/row, leaving the contract incomplete (2nd round codex#3); re-freezing
+        an already-frozen tree is a cheap build-time copy.
+        """
+        object.__setattr__(self, "values", _deep_freeze(self.values))
 
     def render(self, base_prompt: str) -> str | None:
         """Render literal/template output; None for none/handler kinds.
@@ -169,11 +208,16 @@ class ResolvedOutput:
         it — the caller dispatches handlers separately. Callers MUST branch on
         `kind` first (handler/none and a genuinely empty body both surface as
         None here, so a None return is not by itself "write nothing").
+
+        `values` (sidecar-json facts, #287) are splatted alongside
+        ``base_prompt`` for ``template`` kind; they are empty for the legacy
+        ``base_prompt``-only templates and ignored by literal/handler kinds, so
+        those paths render exactly as before (#287 / D2).
         """
         if self.kind == "literal":
             return self.text
         if self.kind == "template" and self.template is not None:
-            return self.template.render(base_prompt=base_prompt)
+            return self.template.render(base_prompt=base_prompt, **self.values)
         return None
 
 
@@ -197,6 +241,15 @@ class ResolvedCommand:
     the alternates following (``variant_2`` ..). This is the one semantics all
     inflows normalize to — the legacy adapter rebuilds it from v2's separate
     ``output`` / ``output_variants`` (#264 / D3, D7).
+
+    `canonical_name` is the name of the command this one resolves to: its own
+    `name` for a real command, or the alias *target*'s name for an alias. The
+    shell keys per-session variant state on it so every alias of one command
+    shares one chosen state (#287 / D6 — without this, an alias would pick its
+    own variant and the box would appear to "transform" between aliases). It
+    defaults to `name`; `__post_init__` backfills it so real commands and the
+    A3 ``dataclasses.replace`` alias path inherit it for free, while the legacy
+    adapter passes the target name explicitly (#287, codex#1 4th/5th).
     """
 
     name: str
@@ -208,6 +261,17 @@ class ResolvedCommand:
     exit: bool
     type: str
     source: dict | None = None
+    canonical_name: str = ""
+
+    def __post_init__(self) -> None:
+        # Backfill canonical_name to the command's own name when unset (empty
+        # sentinel — a real command's name is never empty). A real command
+        # resolves to itself; an A3 alias built via
+        # ``dataclasses.replace(target, name=...)`` copies the target's already
+        # backfilled canonical_name (replace does not touch it) so it inherits
+        # automatically (#287 / D6, codex#1 4th).
+        if not self.canonical_name:
+            object.__setattr__(self, "canonical_name", self.name)
 
 
 @dataclass(frozen=True)

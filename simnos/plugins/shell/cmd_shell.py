@@ -4,8 +4,10 @@ Custom shell class to interact with NOS.
 
 from cmd import Cmd
 import copy
+import hashlib
 import logging
 import os
+import random
 import traceback
 from typing import TYPE_CHECKING, cast
 
@@ -14,14 +16,33 @@ from simnos.core.command_contract import CommandHandler, CommandResult
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
 from simnos.core.platform_loader import load_platform_dir
-from simnos.core.resolved_command import ResolvedCommand, ResolvedPlatform
+from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput, ResolvedPlatform
 from simnos.plugins import nos
 from simnos.plugins.shell.utils import get_files_changed
 
 if TYPE_CHECKING:
     from simnos.core.host import HostRenderConfig
+    from simnos.core.pydantic_models import ModelVariantsPolicy
 
 log = logging.getLogger(__name__)
+
+
+def _stable_hash(seed: int, host: str, command: str) -> int:
+    """Deterministic hash for seeded variant selection (#287 / D6, gemini#3).
+
+    ``hash()`` is salted per-process by ``PYTHONHASHSEED`` so it cannot be used
+    for a selection that must be reproducible across runs/tools. sha256 over the
+    three terms pins the algorithm; the caller takes ``% N``. The host term is
+    the stable inventory id (``Host.name``), not ``base_prompt`` (overridable /
+    shared), and the command term is the canonical name so all aliases of one
+    command hash alike (#287 / D6 E, codex#1). The terms are joined on a NUL byte
+    (which cannot occur in a command name or a sane host id) rather than ``:`` so
+    no host/command pair can collide by shifting the separator (1st round
+    claude#4).
+    """
+    digest = hashlib.sha256(f"{seed}\x00{host}\x00{command}".encode()).hexdigest()
+    return int(digest, 16)
+
 
 # Special, always-present commands fed through the same legacy adapter as the
 # NOS data (#264 / D5). They carry no `prompt`, so the adapter resolves them to
@@ -135,11 +156,29 @@ class CMDShell(Cmd):
         # NOS data; kept in authoring form and normalized through the adapter on
         # a hot-reload rebuild (#264 / D6).
         self._inventory_commands: dict = nos_inventory_config.get("commands", {})
-        # Per-host render config (overlay #286, facts #287). Held so a hot-reload
-        # `_rebuild` re-applies the overlay instead of dropping it (#286 / C1); in
-        # hot-reload dev mode the shared snapshot is None so this self-build path
-        # carries the overlay too.
+        # Per-host render config (overlay #286, variants_policy #287). Held so a
+        # hot-reload `_rebuild` re-applies the overlay instead of dropping it
+        # (#286 / C1); in hot-reload dev mode the shared snapshot is None so this
+        # self-build path carries the overlay too.
         self._render_config: HostRenderConfig | None = render_config
+        # Per-session variant state (#287 / D6, D7). Initialized BEFORE the first
+        # `_apply_platform` below, because `_build_variant_maps` reads all three
+        # (AttributeError guard, claude#5):
+        #  - `_variant_indices`: canonical_name -> chosen index, fixed for the
+        #    whole session (shared by every alias of a command).
+        #  - `_variant_outputs`: cmd.name -> ResolvedOutput, rebuilt each apply
+        #    against the latest commands (dispatch identity; a legacy alias may
+        #    override its own output_variants, codex#1 6th).
+        #  - `_variants_policy` / `_host_name`: the policy + stable host id used
+        #    to decide an index (host id, not base_prompt — D6 E).
+        self._variant_indices: dict[str, int] = {}
+        self._variant_outputs: dict[str, ResolvedOutput] = {}
+        self._variants_policy: ModelVariantsPolicy | None = render_config.variants_policy if render_config else None
+        self._host_name: str = render_config.host_name if render_config and render_config.host_name else base_prompt
+        # Per-connection RNG for seed-less `select: random` — a fresh draw each
+        # connection (true non-determinism, the realism opt-in; D6). Seeded
+        # selection uses `_stable_hash` instead, not this RNG.
+        self._connection_rng = random.Random()  # noqa: S311 — variant pick, not cryptographic
         # The merged platform is per-host invariant (base_prompt is the host name,
         # nos/inventory are shared), so the server normalizes it once at
         # Host.start and passes it to every connection's shell (#264 / Impact —
@@ -178,15 +217,134 @@ class CMDShell(Cmd):
         return build_resolved_platform(nos, nos_inventory_config.get("commands", {}), render_config)
 
     def _apply_platform(self, platform: ResolvedPlatform) -> None:
-        """Install a (built or shared) platform + refresh session mode / prompt."""
+        """Install a (built or shared) platform + refresh session mode / prompt.
+
+        Two-phase atomic commit (#287 / R8): everything that can raise — building
+        the variant maps (validates `variants_policy.select` + variant pool
+        lengths) and rendering the prompt — runs first against local candidates,
+        touching no live state. Only once all of it has succeeded does the commit
+        block install `commands` / variant maps / mode / prompt together. So a
+        broken hot reload (bad `select`, mismatched pool, undefined mode prompt)
+        leaves the running session intact, preserving `_rebuild`'s atomic
+        contract. The commit block below MUST stay exception-free.
+
+        This method owns RNG atomicity for the *whole* build/validate phase: a
+        seedless-random variant decision advances `self._connection_rng`, and the
+        prompt render runs *after* it, so the snapshot/rollback must span both —
+        otherwise a prompt-render failure would roll back commands/maps but leak
+        the consumed randomness (2nd round codex#2). On success the advances are
+        kept (those variants are committed).
+        """
+        rng_state = self._connection_rng.getstate()
+        try:
+            # --- build/validate phase (may raise; live state untouched) ---
+            new_indices, new_outputs = self._build_variant_maps(platform.commands)
+            # Keep the user's current mode across a hot reload when it still exists;
+            # otherwise (first build, or a reload that dropped the mode) start at the
+            # platform's initial mode.
+            candidate_mode = (
+                self.current_mode if getattr(self, "current_mode", None) in platform.modes else platform.initial_mode
+            )
+            prompt = platform.modes[candidate_mode].render_prompt(self.base_prompt)
+        except Exception:
+            self._connection_rng.setstate(rng_state)  # failed build leaves no trace (commands untouched, RNG restored)
+            raise
+        # --- commit phase (exception-free) ---
         self.platform = platform
         self.commands = platform.commands
-        # Keep the user's current mode across a hot reload when it still exists;
-        # otherwise (first build, or a reload that dropped the mode) start at the
-        # platform's initial mode.
-        if getattr(self, "current_mode", None) not in platform.modes:
-            self.current_mode = platform.initial_mode
-        self.prompt = platform.modes[self.current_mode].render_prompt(self.base_prompt)
+        self._variant_indices = new_indices
+        self._variant_outputs = new_outputs
+        self.current_mode = candidate_mode
+        self.prompt = prompt
+
+    def _decide_variant_index(self, cmd: ResolvedCommand) -> int:
+        """Pick the variant index for one variant-bearing command (#287 / D6).
+
+        `select` is an int (fixed, deterministic — the default 0 reproduces the
+        legacy `variants[0]`) or ``"random"``. Random with a seed is reproducible
+        per host (`_stable_hash`, sticky across reconnects); random without a seed
+        is a fresh draw per connection. An explicit out-of-range int is loud (no
+        silent modulo, which would hide a config error — codex#2 3rd).
+        """
+        n = len(cmd.variants)  # caller only invokes this for variant-bearing commands (n > 0)
+        policy = self._variants_policy
+        sel = policy.select if policy else 0  # None policy -> select 0 (legacy-compatible default)
+        if sel == "random":
+            seed = policy.seed if policy else None  # policy is non-None on this branch (sel came from it)
+            if seed is not None:
+                return _stable_hash(seed, self._host_name, cmd.canonical_name) % n
+            return self._connection_rng.randrange(n)
+        if not 0 <= sel < n:
+            raise ValueError(
+                f"variants_policy.select={sel} out of range for {cmd.canonical_name!r} (valid: 0..{n - 1})"
+            )
+        return sel
+
+    def _build_variant_maps(
+        self, commands: dict[str, ResolvedCommand]
+    ) -> tuple[dict[str, int], dict[str, ResolvedOutput]]:
+        """Build candidate (indices, outputs) maps for a platform (#287 / D6, R8).
+
+        Pure builder: reads `self._variant_indices` (carried session state) but
+        mutates no `self.*`, so a raise here cannot corrupt the live session — the
+        caller (`_apply_platform`) commits the returned maps only on success.
+
+        - **indices** are keyed on `canonical_name` and the session keeps them
+          fixed (existing canonicals are inherited, never re-decided on reload);
+          a new variant-bearing canonical that appears on a hot reload is decided
+          lazily, and a canonical that vanished is pruned.
+        - **outputs** are keyed on `cmd.name` (dispatch identity) and rebuilt from
+          the latest `commands`, so a legacy alias overriding its own
+          `output_variants` keeps its own output while still sharing the
+          canonical's chosen index (codex#1 6th).
+        - every command sharing a `canonical_name` must expose the same variant
+          pool length, else the shared index is ambiguous — loud (codex#1 6th).
+          A3 aliases (`replace`) always match; only legacy `output_variants`
+          overrides can diverge.
+        - an inherited **explicit int** index that a hot reload pushed out of
+          range (the pool shrank below `select`) is loud, not silently wrapped —
+          the same loud-on-out-of-range contract a fresh connect enforces, so the
+          two paths stay consistent (2nd round gemini#1 / codex#1). **Random** has
+          no fixed-index contract, so it refits with `% n` (D9) — and the refit is
+          *written back* to the index map, so a later pool re-expansion cannot
+          revive the pre-shrink index and flip-flop the session's choice (3rd
+          round codex#1). For a seeded policy this means a session whose pool was
+          resized no longer matches a fresh connect's ``hash % n`` — an
+          acknowledged design caveat of hot-reload pool changes (D6).
+
+        RNG atomicity for a seedless-random decision is owned by the caller
+        (`_apply_platform` snapshots/rolls back across this build *and* the prompt
+        render), so this builder does not roll back the RNG itself.
+        """
+        indices = dict(self._variant_indices)
+        outputs: dict[str, ResolvedOutput] = {}
+        pool_len: dict[str, int] = {}
+        is_random = self._variants_policy is not None and self._variants_policy.select == "random"
+        for cmd in commands.values():
+            if not cmd.variants:
+                continue
+            canon = cmd.canonical_name
+            n = len(cmd.variants)
+            if pool_len.setdefault(canon, n) != n:
+                raise ValueError(
+                    f"variant pool length mismatch for canonical {canon!r}: "
+                    f"{pool_len[canon]} vs {n} (aliases must share one pool)"
+                )
+            if canon not in indices:
+                indices[canon] = self._decide_variant_index(cmd)
+            idx = indices[canon]
+            if not is_random and not 0 <= idx < n:
+                raise ValueError(
+                    f"variants_policy.select={idx} out of range for {canon!r} after a hot reload "
+                    f"shrank its variant pool to {n} (valid: 0..{n - 1})"
+                )
+            idx = idx % n  # no-op for the in-range int validated above; refits only a stale random index (#287 / D9)
+            if is_random:
+                indices[canon] = idx  # persist the refit so a later re-expansion can't revive the stale index (codex#1)
+            outputs[cmd.name] = cmd.variants[idx][1]
+        # Prune indices for canonicals no longer present (hot reload dropped them).
+        indices = {canon: i for canon, i in indices.items() if canon in pool_len}
+        return indices, outputs
 
     def _rebuild(self) -> None:
         """Re-merge the inflows and install the result (hot-reload path).
@@ -384,7 +542,15 @@ class CMDShell(Cmd):
         if cmd is not None and self._in_current_mode(cmd):
             if cmd.exit:
                 return True
-            output = cmd.output
+            # Consult the per-session variant map ONLY for variant-bearing
+            # commands (#287 / D6, codex#2 5th). The `cmd.variants` guard is
+            # required: a command stripped to a single output by an overlay has
+            # `variants=()` and is absent from `_variant_outputs`, so without the
+            # guard `.get(cmd.name, cmd.output)` is fine — but the guard makes the
+            # intent explicit and prevents an overlay-stripped command from ever
+            # reaching a sibling's variant output. `cmd.name` (dispatch identity)
+            # keys the lookup so a legacy alias returns its own output.
+            output = self._variant_outputs.get(cmd.name, cmd.output) if cmd.variants else cmd.output
             transition = cmd.new_mode
         else:
             if cmd is not None:

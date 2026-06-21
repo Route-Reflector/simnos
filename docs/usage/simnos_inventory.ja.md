@@ -314,6 +314,7 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 | `shell`       | :shell:       | シェル設定                           | [Shell options](#shell-options) セクションを参照       |
 | `nos`         | :computer:    | NOS 設定                            | [NOS options](#nos-options) セクションを参照           |
 | `overlay`     | :card_index_dividers: | カスタムコマンドオーバーレイ   | [カスタムコマンドオーバーレイ](#カスタムコマンドオーバーレイデータレイヤリング) セクションを参照 |
+| `variants_policy` | :game_die:        | マルチキャプチャコマンドがどのバリアントを返すか | [バリアント選択](#バリアント選択variants_policy) セクションを参照 |
 
 ### Server options
 
@@ -413,10 +414,11 @@ data_dir: /srv/simnos/overlays
 ```
 
 出力ファイルは **`.txt`**（リテラルのワイヤテキスト）または **`.j2`**（jinja2
-テンプレート。本リリースでは `{{ base_prompt }}` のみ参照可。host facts を必要とする
-テンプレートは facts 導入までエラー）です。ファイル名の stem は `_` を空白に変換して
-コマンド名に対応します: `show_version.txt` → `show version`（NTC raw キャプチャの
-命名規約に追従、大文字小文字を区別）。
+テンプレート）です。`.j2` は `{{ base_prompt }}` に加え、隣接する
+**サイドカー `<stem>.json`** が供給する値を参照できます（[テンプレート描画値](#テンプレート描画値サイドカー-json)
+を参照）。値を供給するサイドカーが無いまま値を必要とする `.j2` はビルド時のエラーに
+なります。ファイル名の stem は `_` を空白に変換してコマンド名に対応します:
+`show_version.txt` → `show version`（NTC raw キャプチャの命名規約に追従、大文字小文字を区別）。
 
 ### 有効化: `overlay.override_commands`
 
@@ -470,5 +472,75 @@ help / type は継承）。同梱に無いコマンドは **新規コマンド**
 - **カタログを増やすには。** モード指定コマンドや共有したいコマンドは、同梱コマンド
   （A3 の `commands/<cmd>.yaml` + 出力ファイル）の貢献が正道です。オーバーレイは
   ローカルな出力差し替え用です。
+
+## テンプレート描画値（サイドカー JSON）
+
+`.j2` コマンド出力（同梱・オーバーレイ問わず）は `{{ base_prompt }}` に加え、隣接する
+**サイドカー `<stem>.json`** の値で描画されます。これは KeroRoute /
+[ntc-templates](https://github.com/networktocode/ntc-templates) の `--parse` 出力を
+そのまま保存したものです。出力全体ではなく*値*（例: 報告されるソフトウェアバージョン）
+だけを変えられるので、クライアントのバージョン条件分岐ロジックを、その版の実機を
+用意せずに検証できます。描画後の出力を再 parse すると編集した値が返ります
+（コマンド単位の**ラウンドトリップ**）。
+
+```
+cisco_ios/commands/
+├── show_version.j2      # ...Version {{ parsed[0].version }}, RELEASE...
+└── show_version.json    # `version` を供給する --parse 出力
+```
+
+サイドカーは、KeroRoute の保存形式に依らず parse 行が常に **`parsed`** で参照できる
+描画名前空間に正規化されます:
+
+- **エンベロープ** `[{ "command": "show version", "parsed": [ ... ] }]` — `command`
+  が一致するエントリを選択（空白・大文字小文字を無視）。
+- **bare 行リスト** `[ { ...row... }, ... ]`（textfsm） — `parsed` として包む。
+- **プレーンオブジェクト** `{ ... }` — そのまま使用。
+
+よってテンプレートは `{{ parsed[0].version }}`（単一レコード）や
+`{% for row in parsed %}…{% endfor %}`（テーブル）で書けます。同梱 `cisco_ios` の
+`show version` と `show ip interface brief` が `.j2` + サイドカーのデモです。
+
+検証は**ビルド時に loud**: サイドカーが供給しない値（トップレベル／ネストキー欠落）を
+必要とする `.j2`、または予約キー `base_prompt` を使うサイドカーは起動時にエラーになり、
+接続時に黙って失敗することはありません。**同梱**サイドカー（A3 プラットフォームディレクトリ
+内）は `.json` の編集が `.j2` 同様に dev ホットリロードを発火します。**オーバーレイ**
+サイドカーは外部の `data_dir` 配下にあり watcher の監視外なので、編集は再接続時に反映されます
+（オーバーレイの `.txt`/`.j2` と同じ）。
+
+> コマンド単位のサイドカー値はコマンドローカルです。コマンド間の整合（hostname や
+> interface を一度変えると全コマンドが揃う）は別の**グローバル facts** 機構で、将来の
+> リリースに先送りです。インベントリの `facts` フィールドはそのための予約で、現状は
+> no-op（warning）です。
+
+## バリアント選択（`variants_policy`）
+
+一部の同梱コマンドは 1 コマンドの**複数キャプチャ**（機能設定済み／未設定などルータの
+別状態）を持ちます。既定では先頭（`variants[0]`）を返します。`variants_policy`（ホスト
+単位、または `sys_config.yaml` のグローバル既定としてインベントリ配下）でどれを返すかを
+選べ、1 SSH セッション中は固定されます（セッション途中で状態は変わりません）:
+
+```yaml
+hosts:
+  R1:
+    device_type: cisco_ios
+    variants_policy:
+      select: 0          # int インデックス（既定 0）— 完全に決定的
+  R2:
+    device_type: cisco_ios
+    variants_policy:
+      select: random     # 接続時に 1 つ抽選
+      seed: 1234          # 任意: 再現可能・ホスト単位で sticky
+```
+
+- **`select: <int>`** — そのインデックスに固定（既定 `0`）。範囲外は loud エラーで、
+  黙って wrap しません。
+- **`select: random` + `seed`** — 再現可能: 同じ `seed` + ホストは常に同じバリアントに
+  解決（再接続を跨いで sticky）。ホストが異なれば状態が散ります。
+- **`select: random`**（`seed` 無し） — 接続ごとに新規抽選（リアリズム — 「接続するまで
+  どの状態か分からない」）。再現はできません。
+
+決定性が既定で、ランダム性は意図的な二重 opt-in です。マルチキャプチャコマンドを単一
+出力に縮退させるオーバーレイ（上記）は、そのコマンドをバリアント選択の対象外にします。
 
 [^1]: 現在のデフォルトを確認するには、SIMNOS の[ソースコード](https://github.com/Route-Reflector/simnos/blob/main/simnos/core/simnos.py)を参照してください。

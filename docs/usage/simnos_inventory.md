@@ -322,6 +322,7 @@ The following options can be used either in the `default` section or in the `hos
 | `shell`       | :shell:       | shell configuration                | See section [Shell options](#shell-options)     |
 | `nos`         | :computer:    | NOS configuration                  | See section [NOS options](#nos-options)         |
 | `overlay`     | :card_index_dividers: | custom command overlay     | See section [Custom command overlay](#custom-command-overlay-data-layering) |
+| `variants_policy` | :game_die:        | which variant a multi-capture command serves | See section [Variant selection](#variant-selection-variants_policy) |
 
 ### Server options
 
@@ -419,11 +420,13 @@ resolves to), not the netmiko `device_type` alias:
     └── show_run.txt              # adds `show run` (absent from the package)
 ```
 
-Output files are **`.txt`** (literal wire text) or **`.j2`** (a jinja2 template;
-in this release only `{{ base_prompt }}` may be referenced — a template needing
-host facts is a loud error until facts land). A filename's stem maps to a command
-name by turning `_` into a space: `show_version.txt` → `show version` (matching
-the NTC raw-capture naming convention, case-sensitive).
+Output files are **`.txt`** (literal wire text) or **`.j2`** (a jinja2 template).
+A `.j2` may reference `{{ base_prompt }}` plus values supplied by an adjacent
+**sidecar `<stem>.json`** — see [Template render values](#template-render-values-sidecar-json).
+A `.j2` that needs a value with no sidecar to supply it is a loud build-time
+error. A filename's stem maps to a command name by turning `_` into a space:
+`show_version.txt` → `show version` (matching the NTC raw-capture naming
+convention, case-sensitive).
 
 ### Opting in: `overlay.override_commands`
 
@@ -478,5 +481,80 @@ the package becomes a **new command**, valid in every mode. Unset / empty
 - **Growing the catalog.** For mode-specific commands or commands you want to
   share, contributing a packaged command (an A3 `commands/<cmd>.yaml` + output
   file) is the canonical route; the overlay is for local, output-only tweaks.
+
+## Template render values (sidecar JSON)
+
+A `.j2` command output (packaged or overlay) renders from `{{ base_prompt }}`
+**plus** values read from an adjacent **sidecar `<stem>.json`** — the verbatim
+`--parse` output of a KeroRoute / [ntc-templates](https://github.com/networktocode/ntc-templates)
+run. This lets you change *values* (not the whole output) — for example bump the
+reported software version — to exercise a client's version-conditional logic
+without owning hardware at that version. Re-parsing the rendered output returns
+your edited value (a per-command **round-trip**).
+
+```
+cisco_ios/commands/
+├── show_version.j2      # ...Version {{ parsed[0].version }}, RELEASE...
+└── show_version.json    # the --parse output that supplies `version`
+```
+
+The sidecar is normalized into a render namespace where the parsed rows are
+always reachable as **`parsed`**, regardless of how KeroRoute saved them:
+
+- an **envelope** `[{ "command": "show version", "parsed": [ ... ] }]` — the
+  entry whose `command` matches is selected (whitespace/case-insensitive);
+- a **bare row list** `[ { ...row... }, ... ]` (textfsm) — wrapped as `parsed`;
+- a **plain object** `{ ... }` — used as-is.
+
+So a template writes `{{ parsed[0].version }}` (single record) or
+`{% for row in parsed %}…{% endfor %}` (table). The packaged `cisco_ios`
+`show version` and `show ip interface brief` ship as `.j2` + sidecar demos.
+
+Validation is **loud at build time**: a `.j2` whose required value the sidecar
+does not supply (top-level or a missing nested key), or a sidecar using the
+reserved `base_prompt` key, fails at startup — never silently at connect time.
+For a **packaged** sidecar (inside an A3 platform dir), editing the `.json`
+triggers the dev hot-reload like editing the `.j2`. An **overlay** sidecar lives
+under the external `data_dir`, which the watcher does not see, so an overlay
+sidecar edit takes effect on reconnect (same as the overlay `.txt`/`.j2`).
+
+> Per-command sidecar values are command-local. Cross-command coherence
+> (changing a hostname/interface once and having every command agree) is a
+> separate **global facts** mechanism deferred to a future release; the
+> `facts` inventory field is reserved for it and currently a no-op (warned).
+
+## Variant selection (`variants_policy`)
+
+Some packaged commands ship **multiple captures** of one command — different
+router states (a feature configured vs not). By default SIMNOS serves the first
+(`variants[0]`). `variants_policy` (per host, or as a `sys_config.yaml` global
+default under the inventory) picks which one, and stays fixed for the whole SSH
+session (the box does not change state mid-session):
+
+```yaml
+hosts:
+  R1:
+    device_type: cisco_ios
+    variants_policy:
+      select: 0          # int index (default 0) — fully deterministic
+  R2:
+    device_type: cisco_ios
+    variants_policy:
+      select: random     # pick one at connect time
+      seed: 1234          # optional: reproducible, sticky per host
+```
+
+- **`select: <int>`** — pin that index (default `0`). Out-of-range is a loud
+  error, not a silent wrap.
+- **`select: random` + `seed`** — reproducible: the same `seed` + host always
+  resolves to the same variant (sticky across reconnects); different hosts spread
+  across states.
+- **`select: random`** with no `seed` — a fresh random draw each connection
+  (realism — "you don't know which state the box is in until you connect"); not
+  reproducible.
+
+Determinism is the default; randomness is a deliberate double opt-in. An overlay
+that collapses a multi-capture command to a single output (above) takes it out of
+variant selection.
 
 [^1]: To see the current defaults, check the [source code](https://github.com/Route-Reflector/simnos/blob/main/simnos/core/simnos.py) of SIMNOS.
