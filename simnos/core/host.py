@@ -154,18 +154,26 @@ class Host:
         # stops it, while `SimNOS._collect_server_threads()` still collects its
         # threads (it gates on `server is not None`), so a server left dangling
         # here makes the shutdown join block. Stop the just-built server and
-        # drop the reference before re-raising.
+        # drop the reference (and reset `running`) before re-raising.
         #
         # The catch is `BaseException`, not `Exception`: the most likely
         # partial-start trigger is a `KeyboardInterrupt` (the operator aborts
         # startup), which `except Exception` would miss — leaving the server set
-        # and hanging the join above. We re-raise immediately, so catching
-        # `BaseException` only adds a cleanup pass on the way out. The cleanup
-        # itself is a single best-effort attempt (not a guarantee): a failure is
-        # logged rather than raised so it cannot mask the original error (the
-        # real cause), and `self.server` is dropped regardless.
+        # and hanging the join above. `self.running = True` lives INSIDE the try
+        # so an interrupt in the gap between a successful `server.start()` and
+        # the flag set is still caught and rolled back (otherwise the host is
+        # left server-set / running-False — exactly the dangling state).
+        #
+        # We re-raise immediately, so catching `BaseException` only adds a
+        # cleanup pass on the way out. The cleanup itself is a single
+        # best-effort attempt (not a guarantee): a failure is logged rather than
+        # raised so it cannot mask the original error, and the reference/flag are
+        # reset regardless. A second `BaseException` *during* cleanup (a double
+        # Ctrl+C) can replace the original error, but `self.server` is still
+        # dropped so no leak/hang results.
         try:
             self.server.start()
+            self.running = True
         except BaseException:
             try:
                 self.server.stop()
@@ -173,8 +181,8 @@ class Host:
                 log.exception("Host %s: cleanup after a failed start() raised", self.name)
             finally:
                 self.server = None
+                self.running = False
             raise
-        self.running = True
 
     def _resolve_overlay_root(self, plugin_key: str) -> str | None:
         """Resolve this host's overlay dir, or None when overlay is not opted in (#286).

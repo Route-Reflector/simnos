@@ -99,14 +99,22 @@ class TCPServerBase(ABC):
             self._listen_thread.start()
         except BaseException:
             # BaseException, not Exception: a KeyboardInterrupt mid-start (the
-            # operator aborts startup) must still clear `_is_running` and free
-            # the partial sockets/threads. Otherwise a later stop() trips the
-            # `_listen_thread is not None` assertion — it passes the
-            # `_is_running` guard but the thread was never assigned — and the
-            # bound socket leaks before `_cleanup_resources()` runs (#291). We
+            # operator aborts startup) must still roll the partial start back.
+            # Mirror stop()'s teardown ORDER — clear the flag, wake select(),
+            # join the listen thread, THEN close sockets — so a listen thread
+            # that already spawned does not race `_cleanup_resources()` closing
+            # the selector/socket out from under its `select()` loop. Clearing
+            # `_is_running` first (before cleanup, which a second interrupt could
+            # abort) also guarantees a later stop() early-returns instead of
+            # tripping its `_listen_thread is not None` assertion (#291). We
             # re-raise immediately.
-            self._cleanup_resources()
             self._is_running.clear()
+            if self._wakeup_w is not None:
+                with contextlib.suppress(OSError):
+                    self._wakeup_w.send(b"\x00")
+            if self._listen_thread is not None:
+                self._listen_thread.join(timeout=SHUTDOWN_IO_TIMEOUT)
+            self._cleanup_resources()
             raise
 
     def _bind_sockets(self):

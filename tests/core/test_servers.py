@@ -513,3 +513,35 @@ class StartFailureRollbackTest(unittest.TestCase):
         assert servers._socket is None
         assert servers._wakeup_r is None
         assert servers._wakeup_w is None
+
+    @patch("simnos.core.servers.selectors.DefaultSelector")
+    @patch("simnos.core.servers.socket.socketpair")
+    @patch("simnos.core.servers.threading.Thread")
+    @patch("simnos.core.servers.TCPServerBase._bind_sockets")
+    def test_start_rollback_joins_listen_thread_on_interrupt(
+        self, mock_bind_sockets, mock_thread_cls, mock_socketpair, mock_selector_cls
+    ):
+        """A KeyboardInterrupt after the listen thread spawns joins it before cleanup (#291).
+
+        Once the listen thread is running, rollback must clear `_is_running`,
+        wake select(), and join the thread *before* `_cleanup_resources()`
+        closes the selector/socket — otherwise the live `_listen` loop races a
+        half-closed selector. Pins the teardown order, not just the end state.
+        """
+        mock_wakeup_r, mock_wakeup_w = MagicMock(), MagicMock()
+        mock_socketpair.return_value = (mock_wakeup_r, mock_wakeup_w)
+        mock_thread = MagicMock()
+        mock_thread.start.side_effect = KeyboardInterrupt  # interrupt just as the thread spawns
+        mock_thread_cls.return_value = mock_thread
+
+        servers = StubServer()
+        servers._socket = MagicMock()  # simulate _bind_sockets success
+
+        with pytest.raises(KeyboardInterrupt):
+            servers.start()
+
+        assert not servers._is_running.is_set()
+        mock_wakeup_w.send.assert_called_once()  # select() woken...
+        mock_thread.join.assert_called_once()  # ...thread joined before resources close
+        assert servers._selector is None
+        assert servers._socket is None
