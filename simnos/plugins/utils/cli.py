@@ -26,17 +26,21 @@ _LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
 def _non_empty(value: str) -> str:
-    """argparse type: reject empty/whitespace-only strings at parse time (exit 2).
+    """argparse type: reject empty/whitespace-only strings and strip the rest.
 
-    Used on ``-i`` / ``-d`` so ``-d ""`` / ``-i ""`` fail loudly at the CLI
-    boundary. Relying on facade-side truthiness (``SimNOS.__init__``'s
+    Used on the path/identifier flags (``-i`` / ``-d`` / ``--sys-config``) so an
+    empty value fails loudly at the CLI boundary (exit 2) and a padded one is
+    normalized. Relying on facade-side truthiness (``SimNOS.__init__``'s
     ``inventory or default``, ``Host``'s ``if self.device_type:``) would let an
     empty string silently mis-launch (default 3-host / builtin cisco_ios), so
-    the contract is pinned here instead (#267 / Decision 2).
+    the contract is pinned here instead (#267 / Decision 2). Stripping keeps a
+    padded value (``-d " cisco_ios "``) from leaking whitespace into platform /
+    path resolution downstream (gemini#1 1st).
     """
-    if not value.strip():
+    stripped = value.strip()
+    if not stripped:
         raise argparse.ArgumentTypeError("must not be empty")
-    return value
+    return stripped
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -74,7 +78,7 @@ def build_parser() -> argparse.ArgumentParser:
     up.add_argument("-n", "--host-name", dest="host_name", default=None, help="Ad-hoc host name")
     up.add_argument("-u", "--username", default=None, help="Ad-hoc username (default: builtin)")
     up.add_argument("-w", "--password", default=None, help="Ad-hoc password (default: builtin)")
-    up.add_argument("--sys-config", dest="sys_config", default=None, help="Explicit sys_config path")
+    up.add_argument("--sys-config", dest="sys_config", type=_non_empty, default=None, help="Explicit sys_config path")
     up.add_argument("-r", "--reload-commands", dest="reload", action="store_true", help="Dev: reload commands")
     up.set_defaults(func=_cmd_up)
 
@@ -84,14 +88,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _build_adhoc_inventory(args) -> dict:
-    """Minimal NEW single-host inventory; builtin default fills the rest (simnos.py:248-253).
+    """Minimal NEW single-host inventory; the builtin default fills the rest.
 
-    必ず新規 dict を返す — ``_load_inventory`` が dict を mutate するため。不正な
-    device_type は SimNOS 構築後 ``Host._validate`` (host.py:245-248) →
-    ``_check_if_platform_is_supported`` (host.py:251-259) → ``assert_platform_supported``
-    が loud に弾く。``port`` は ``is not None`` で判定し、明示 ``0`` を 6000 に
-    化けさせず起動時の port 範囲チェック (``_allocate_port_single``、simnos.py:377)
-    へ通す。
+    必ず新規 dict を返す — ``_load_inventory`` は渡された dict に builtin ``default``
+    floor を in-place merge するため、caller-owned object を渡してはいけない。不正な
+    ``device_type`` は SimNOS 構築後 ``Host._validate`` → ``_check_if_platform_is_supported``
+    → ``assert_platform_supported`` が loud に弾く。``port`` は ``is not None`` で判定
+    して明示 ``0`` を default に化けさせず保持し、inventory model の ``Port`` field
+    (``ge=1``) が ``SimNOS`` 構築時に loud に弾く (codex#1 1st: 拒否 seam は pydantic
+    検証で `_allocate_port_single` ではない、ただし「0 を silent に default 化しない」
+    契約は成立)。
     """
     port = args.port if args.port is not None else DEFAULT_PORT_START
     host = {"device_type": args.device_type, "port": port}
@@ -126,10 +132,11 @@ def _cmd_up(args) -> int:
     if args.reload:
         os.environ["SIMNOS_RELOAD_COMMANDS"] = "ON"
     # `with SimNOS()` は使わない: __enter__(start) が途中失敗すると __exit__(stop) が
-    # 呼ばれず部分起動 host が漏れる。SimNOS() 構築 + start を try 内に入れ stop/env
-    # 復元を finally に置く。SimNOS.__init__ は inventory/device_type を validate する
-    # ため不正 ad-hoc はここで raise しうる → 構築も try に含めないと reload env 復元が
-    # 漏れる。`net = None` guard で構築失敗時の net.stop() を回避。
+    # 呼ばれず stop() に到達できない。明示 try/finally なら全経路で stop() を試みる。
+    # SimNOS.__init__ も inventory/device_type を validate して raise しうるため構築も
+    # try 内に入れ、構築失敗時も reload env を復元する。`net = None` guard で構築失敗時
+    # の net.stop() を回避。(net.stop() 自体は起動完了 host のみ停止する — server.start()
+    # 途中 raise host の cleanup は core 側の別課題、#267 では追わない。)
     net = None
     try:
         net = SimNOS(inventory=inventory, sys_config=args.sys_config)
@@ -144,7 +151,7 @@ def _cmd_up(args) -> int:
         # env 復元を内側 finally に置き process-global state を全経路で戻す。
         try:
             if net is not None:
-                net.stop()  # partial 起動も停止 (host_running=True filter)
+                net.stop()  # 起動完了 host を停止 (全 exit 経路で到達)
         finally:
             if prior_reload is None:
                 os.environ.pop("SIMNOS_RELOAD_COMMANDS", None)

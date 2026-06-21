@@ -2,7 +2,8 @@
 
 Covers `simnos.plugins.utils.cli`: import side-effect safety (no module-level
 `parse_args`/`basicConfig`), the `build_parser` contract (subcommand required,
-`-i`/`-d` mutex + non-empty, `-l` placement + normalization), the ad-hoc
+`-i`/`-d`/`--sys-config` non-empty + `-i`/`-d` mutex, `-l` placement +
+normalization), the ad-hoc
 inventory builder (default/explicit/zero port, host-name + credential folding),
 the `_cmd_up` dispatch + reload-env lifecycle across every raise path, and
 `list-platforms` output. `_cmd_up`'s blocking `while True: time.sleep` loop is
@@ -247,13 +248,16 @@ class TestCmdUpReloadLifecycle:
             cli._cmd_up(cli.build_parser().parse_args(["up", "-r", "-d", "cisco_ios"]))
         assert self._ENV not in os.environ  # restored despite no net to stop
 
-    def test_start_failure_stops_partial_and_restores_env(self, monkeypatch, _no_sleep):
+    def test_start_failure_calls_stop_and_restores_env(self, monkeypatch, _no_sleep):
+        # The CLI-level contract: a start() failure still reaches net.stop() in
+        # the finally (whether stop() can tear down a partially-started host is a
+        # separate core concern, not pinned here — codex#2 1st).
         monkeypatch.delenv(self._ENV, raising=False)
         net = _FakeNet(start_exc=RuntimeError("bind failed"))
         _patch_simnos(monkeypatch, net=net)
         with pytest.raises(RuntimeError, match="bind failed"):
             cli._cmd_up(cli.build_parser().parse_args(["up", "-r"]))
-        assert net.stopped  # partial start is cleaned up
+        assert net.stopped  # stop() attempted on start failure
         assert self._ENV not in os.environ
 
     def test_stop_failure_still_restores_env(self, monkeypatch, _no_sleep):
@@ -263,6 +267,25 @@ class TestCmdUpReloadLifecycle:
         with pytest.raises(RuntimeError, match="stop boom"):
             cli._cmd_up(cli.build_parser().parse_args(["up", "-r"]))
         assert self._ENV not in os.environ  # inner finally restores even if stop raises
+
+
+class TestAdhocLoudValidation:
+    """The minimal ad-hoc dict still hits the facade's loud guards (#267 / Risks)."""
+
+    def test_port_zero_rejected_at_real_construction(self):
+        # `--port 0` survives the builder (not coerced to 6000), then the
+        # inventory model's Port field (ge=1) rejects it during real SimNOS
+        # construction — the loud seam is pydantic, not _allocate_port_single,
+        # but the "never silently default" contract holds (codex#1 1st).
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            cli._cmd_up(cli.build_parser().parse_args(["up", "-d", "cisco_ios", "-p", "0"]))
+
+    def test_sys_config_empty_rejected_at_parse(self):
+        with pytest.raises(SystemExit) as exc:
+            cli.build_parser().parse_args(["up", "--sys-config", ""])
+        assert exc.value.code == 2
 
 
 class TestListPlatforms:
@@ -284,3 +307,22 @@ class TestMain:
         assert logging.getLogger().level == logging.WARNING
         cli.main(["list-platforms", "-l", "DEBUG"])
         assert logging.getLogger().level == logging.DEBUG
+
+    def test_list_platforms_returns_zero(self, capsys):
+        assert cli.main(["list-platforms"]) == 0
+        assert capsys.readouterr().out  # printed something
+
+    def test_no_subcommand_exits_2(self):
+        with pytest.raises(SystemExit) as exc:
+            cli.main([])
+        assert exc.value.code == 2
+
+
+class TestRunCli:
+    """The pyproject entry point wraps main()'s return code in SystemExit (codex#4 1st)."""
+
+    def test_run_cli_propagates_main_return_code(self, monkeypatch):
+        monkeypatch.setattr(cli, "main", lambda: 0)
+        with pytest.raises(SystemExit) as exc:
+            cli.run_cli()
+        assert exc.value.code == 0
