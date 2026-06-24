@@ -235,12 +235,14 @@ class SharedLoop:
         Called by ``SimNOS.stop()`` after stopping the requested hosts. Tears the
         loop down only when the registry is empty (refcount == 0); otherwise other
         async hosts are still running and the loop must stay up (partial stop).
-        Returns True when a teardown ran.
+        A ``FAILED`` loop (a prior teardown could not join the thread) is retried
+        here so ``stop()`` stays idempotently recoverable (gemini 1st#2). Returns
+        True when a teardown ran.
         """
         with self._lock:
-            if self._state is not LoopState.RUNNING:
+            if self._state not in (LoopState.RUNNING, LoopState.FAILED):
                 return False
-            if self._listeners:
+            if self._state is LoopState.RUNNING and self._listeners:
                 return False  # other async hosts still running
             self._state = LoopState.STOPPING
         self._global_teardown(deadline)
@@ -254,7 +256,10 @@ class SharedLoop:
         ``finally`` (see ``_start_locked``), so this only has to stop the loop and
         join the thread. Emergency cleanup runs in ``finally`` so the bounded
         executor + loop refs are released even if something above raises. If the
-        loop thread cannot be joined within budget the state goes ``FAILED``.
+        loop thread cannot be joined within budget the state goes ``FAILED`` and
+        the refs are **kept** so a later ``teardown_if_idle`` can retry the join
+        (gemini 1st#2) — detaching them would orphan a still-running thread with no
+        handle to re-join.
         """
         loop = self._loop
         executor = self._executor
@@ -273,11 +278,14 @@ class SharedLoop:
                 thread.join(timeout=self._remaining(deadline))
                 alive = thread.is_alive()
             with self._lock:
-                self._loop = None
-                self._thread = None
-                self._executor = None
                 self._listeners.clear()
-                self._state = LoopState.FAILED if alive else LoopState.STOPPED
+                if alive:
+                    self._state = LoopState.FAILED  # keep refs for a retry join
+                else:
+                    self._loop = None
+                    self._thread = None
+                    self._executor = None
+                    self._state = LoopState.STOPPED
             if alive:
                 log.warning("shared loop thread did not exit within timeout; loop left in FAILED state")
 

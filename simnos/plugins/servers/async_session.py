@@ -91,6 +91,15 @@ async def run_async_push_session(
       ``io_errors`` raise) rather than a polled ``is_running`` flag — the shared
       loop closes the session on stop (§1a).
 
+    **Write-failure policy (§3a, codex/claude 1st):** the sync path's asymmetry
+    (immediate-echo ``TimeoutError`` = disconnect vs response-batch ``TimeoutError``
+    = retry) does *not* apply here. asyncssh has no per-write timeout — it applies
+    backpressure through ``drain`` flow-control, so the retry case never arises;
+    a real write failure surfaces as an ``io_errors`` raise and is treated as a
+    disconnect for both echo and response. The byte *content* is unchanged; only
+    the (timeout-specific) failure handling differs, which is inherent to swapping
+    a poll-timeout transport for a flow-controlled one.
+
     ``initial_skip_lf`` consumes a trailing LF/NUL left by a preceding channel
     login (auth_none), matching ``run_push_session``.
     """

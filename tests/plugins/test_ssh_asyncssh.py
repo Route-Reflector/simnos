@@ -33,6 +33,13 @@ _HOST = "127.0.0.1"
 # the env var; the default exercises the real acceptance number.
 _STRESS_HOSTS = int(os.environ.get("SIMNOS_ASYNC_STRESS_HOSTS", "100"))
 
+# Budget for the dispatch worker pool to drain after stop. The bounded executor is
+# shut down with wait=False (does not join the daemon `simnos-dispatch` workers, by
+# design — a non-cooperative handler must not block stop), so the workers exit on
+# their own shortly after; a generous deadline keeps the convergence assertion from
+# flaking on a loaded CI box (claude 1st#2).
+_THREAD_CONVERGE_DEADLINE = 10
+
 
 def _free_ports(n: int) -> list[int]:
     """Allocate *n* distinct free TCP ports (bound simultaneously, then released)."""
@@ -122,7 +129,7 @@ def test_async_ssh_100_host_concurrent_no_failures():
 
     assert net._shared_loop.state is LoopState.STOPPED
     # Executor convergence: the loop thread + bounded dispatch pool are released.
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + _THREAD_CONVERGE_DEADLINE
     while threading.active_count() > baseline and time.monotonic() < deadline:
         time.sleep(0.05)
     assert threading.active_count() <= baseline, f"threads did not converge: {[t.name for t in threading.enumerate()]}"
@@ -168,6 +175,51 @@ def test_double_stop_is_idempotent():
         net.stop()
         net.stop()  # second stop is a no-op
         assert net._shared_loop.state is LoopState.STOPPED
+
+
+def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):
+    """stop must converge even with a non-cooperative (slow) in-flight dispatch (codex 1st#3).
+
+    A dispatch that blocks the executor thread (can't be cancelled) must not hang
+    stop: aclose closes the session and cancels the awaiting task within the bounded
+    budget, and the late executor result lands on a closed transport (generation
+    isolation — the result never reaches the wire). The orphaned worker exits on its
+    own afterwards. Here we pin the convergence + STOPPED state under that load.
+    """
+    from simnos.plugins.shell.cmd_shell import CMDShell
+
+    original_dispatch = CMDShell.dispatch
+
+    def slow_dispatch(self, line):
+        if line == "slowcmd":
+            time.sleep(3)  # non-cooperative: blocks the dispatch worker thread
+        return original_dispatch(self, line)
+
+    monkeypatch.setattr(CMDShell, "dispatch", slow_dispatch)
+
+    (port,) = _free_ports(1)
+    with _running(_multi_host_inventory([port])) as net:
+        sock = socket.create_connection((_HOST, port), timeout=10)
+        transport = paramiko.Transport(sock)
+        try:
+            transport.start_client(timeout=10)
+            transport.auth_password(TEST_USERNAME, TEST_PASSWORD)
+            channel = transport.open_session(timeout=10)
+            channel.get_pty()
+            channel.invoke_shell()
+            time.sleep(0.3)  # let the intro flush
+            channel.sendall(b"slowcmd\r")  # dispatch now sleeping in the executor
+            time.sleep(0.5)
+            started = time.monotonic()
+            net.stop()  # stop while the dispatch is in-flight
+            elapsed = time.monotonic() - started
+        finally:
+            transport.close()
+
+    assert net._shared_loop.state is LoopState.STOPPED
+    # Must converge well under the drain budget (10s): a regression that blocks on
+    # the non-cooperative dispatch instead of detaching it stalls to ~10s.
+    assert elapsed < 8, f"stop did not converge with an in-flight dispatch ({elapsed:.1f}s)"
 
 
 def _write_authorized_keys(tmp_path, key: paramiko.PKey) -> str:
@@ -277,7 +329,7 @@ def test_mixed_ssh_async_and_telnet():
         assert net._shared_loop.refcount == 1
 
     assert net._shared_loop.state is LoopState.STOPPED
-    deadline = time.monotonic() + 5
+    deadline = time.monotonic() + _THREAD_CONVERGE_DEADLINE
     while threading.active_count() > baseline and time.monotonic() < deadline:
         time.sleep(0.05)
     assert threading.active_count() <= baseline

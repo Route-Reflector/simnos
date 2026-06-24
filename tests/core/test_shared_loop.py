@@ -148,6 +148,23 @@ def test_failed_state_refuses_restart(loop):
         loop.ensure_running()
 
 
+def test_failed_state_recovers_via_teardown(loop):
+    """A FAILED loop is recoverable: teardown_if_idle retries the join (gemini 1st#2).
+
+    ensure_running's FAILED message tells the caller to retry stop(); that retry
+    (SimNOS.stop -> teardown_if_idle) must actually re-run the teardown. The refs
+    are kept on FAILED, so when the (here actually joinable) loop thread exits the
+    retry reaches STOPPED and the loop is restartable again.
+    """
+    loop.ensure_running()
+    with loop._lock:
+        loop._state = LoopState.FAILED  # simulate a prior teardown that could not join
+    assert loop.teardown_if_idle() is True
+    assert loop.state is LoopState.STOPPED
+    loop.ensure_running()
+    assert loop.state is LoopState.RUNNING
+
+
 def test_invalid_max_workers_rejected():
     """max_workers < 1 is a loud error."""
     with pytest.raises(ValueError, match="max_workers"):

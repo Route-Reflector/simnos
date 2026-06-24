@@ -228,9 +228,12 @@ class AsyncSshServer:
         # Per-server run flag the shells observe: cleared on stop so an in-flight
         # dispatch returns close (cooperative stop, §1a).
         self._is_running = threading.Event()
+        # Set once aclose starts so a session that begins handshaking *after* the
+        # drain snapshot bows out instead of leaking past teardown (claude 1st#1).
+        self._closing = False
         # Active sessions, drained on aclose (§1a host-scope 5a).
         self._processes: set[asyncssh.SSHServerProcess] = set()
-        self._tasks: set = set()
+        self._tasks: set[asyncio.Task] = set()
 
     @property
     def managed_threads(self) -> list[threading.Thread]:
@@ -282,16 +285,54 @@ class AsyncSshServer:
 
     # ------------------------------------------------------------------ lifecycle
     def start(self) -> None:
-        """Register this host's listener on the shared loop (§1)."""
+        """Register this host's listener on the shared loop (§1).
+
+        On a failed/timed-out ``create_server`` the pending coroutine is cancelled
+        and any listener it managed to create is closed, so a failed start leaves
+        no orphan listener socket (codex 1st#1). The loop-idle cleanup — when this
+        failure leaves the loop with refcount 0 — is ``SimNOS.stop()``'s job
+        (``teardown_if_idle``), reached via the caller's ``stop()`` / context
+        manager ``__exit__``.
+        """
         if self._simnos is None:
             raise RuntimeError("AsyncSshServer requires a SimNOS reference (set by Host.start)")
         self._shared_loop = self._simnos.ensure_shared_loop()
         self._is_running.set()
-        self._acceptor = self._shared_loop.run_coro(self._create_server(), timeout=_CREATE_SERVER_TIMEOUT)
+        future = self._shared_loop.submit_coro(self._create_server())
+        try:
+            future.result(timeout=_CREATE_SERVER_TIMEOUT)
+        except BaseException:
+            future.cancel()
+            self._abort_failed_start()
+            raise
         self._shared_loop.register(self)
 
+    def _abort_failed_start(self) -> None:
+        """Close a listener left by a failed/timed-out start (codex 1st#1).
+
+        ``_create_server`` stores the acceptor on ``self`` as soon as it exists, so
+        even when ``result()`` gave up waiting (and the coroutine then completed)
+        the listener is reachable here and closed on the loop. Best-effort: a stuck
+        loop must not turn a start failure into a hang.
+        """
+        loop = self._shared_loop
+        if loop is None:
+            return
+        with contextlib.suppress(Exception):
+            loop.run_coro(self._aclose_acceptor(), timeout=SHUTDOWN_IO_TIMEOUT)
+
+    async def _aclose_acceptor(self) -> None:
+        """Close + await the listener socket (on the loop thread)."""
+        acceptor, self._acceptor = self._acceptor, None
+        if acceptor is not None:
+            acceptor.close()
+            with contextlib.suppress(Exception):
+                await acceptor.wait_closed()
+
     async def _create_server(self) -> "asyncssh.SSHAcceptor":
-        return await asyncssh.create_server(
+        # Store on self before returning so _abort_failed_start can close it even
+        # if start()'s result() already timed out (codex 1st#1).
+        self._acceptor = await asyncssh.create_server(
             lambda: _SimnosSSHServer(
                 self.username, self.password, self._allow_auth_none, self._authorized_keys, self.ssh_banner
             ),
@@ -306,6 +347,7 @@ class AsyncSshServer:
             reuse_address=True,
             reuse_port=(sys.platform == "linux"),
         )
+        return self._acceptor
 
     def stop(self) -> None:
         """Stop this host: drain its listener + sessions on the shared loop (§1a 5a).
@@ -317,16 +359,23 @@ class AsyncSshServer:
         self._is_running.clear()
         if self._shared_loop is not None:
             self._shared_loop.drain_host(self)
-        self._acceptor = None
+        # Do NOT null self._acceptor here: if drain_host timed out, the queued
+        # aclose runs later and still needs the reference to close the listener
+        # socket (clearing it would leak the socket → EADDRINUSE, gemini 1st#1).
+        # The instance is discarded by Host.start after stop(), so no leak.
 
     async def aclose(self) -> None:
         """Close the listener + drain active sessions (called by the shared loop).
 
-        Runs on the loop thread. Stops accepting, signals in-flight dispatch to
-        close (``_is_running`` cleared in ``stop``), closes each active session so
-        its read returns EOF, then awaits the session tasks with a bounded budget
-        (cancelling any stragglers) so teardown leaves no orphaned tasks.
+        Runs on the loop thread. Marks the server closing (so a session that
+        begins handshaking after the snapshot below bows out, claude 1st#1), stops
+        accepting, signals in-flight dispatch to close (``_is_running`` cleared in
+        ``stop``), closes each active session so its read returns EOF, then awaits
+        the session tasks with a bounded budget — cancelling any stragglers and
+        awaiting them so their ``finally`` runs (gemini 1st#3) — leaving no
+        orphaned task or listener.
         """
+        self._closing = True
         self._is_running.clear()
         if self._acceptor is not None:
             self._acceptor.close()
@@ -338,9 +387,21 @@ class AsyncSshServer:
             _, pending = await asyncio.wait(tasks, timeout=SHUTDOWN_IO_TIMEOUT)
             for t in pending:
                 t.cancel()
+            if pending:
+                # Give the cancelled tasks a brief, BOUNDED moment to run their
+                # finally (gemini 1st#3) — but do not block on a non-cooperative
+                # dispatch whose executor job cannot be cancelled. Such a handler is
+                # detached (§1a, codex 1st#3) so stop converges within the budget;
+                # its late result lands on the now-closed transport and is discarded
+                # (generation isolation via per-session shell + transport close).
+                await asyncio.wait(pending, timeout=SHUTDOWN_IO_TIMEOUT)
         if self._acceptor is not None:
+            # Bounded: wait_closed can otherwise block on a detached session's
+            # connection (a non-cooperative dispatch above), which would defeat the
+            # detach and stall stop to the drain budget. The listening socket is
+            # already closed by acceptor.close(); this just confirms shutdown.
             with contextlib.suppress(Exception):
-                await self._acceptor.wait_closed()
+                await asyncio.wait_for(self._acceptor.wait_closed(), timeout=SHUTDOWN_IO_TIMEOUT)
 
     # ------------------------------------------------------------------ per-session
     async def _handle_process(self, process: "asyncssh.SSHServerProcess") -> None:
@@ -350,8 +411,15 @@ class AsyncSshServer:
         auth_none channel login, then the push session driving ``shell.dispatch``
         via the bounded executor. asyncssh closes ``process`` when this returns.
         """
+        # A connection that finishes handshaking after aclose took its drain
+        # snapshot must not start a session on a stopping host (claude 1st#1).
+        if self._closing:
+            with contextlib.suppress(Exception):
+                process.close()
+            return
         task = asyncio.current_task()
-        self._tasks.add(task)
+        if task is not None:
+            self._tasks.add(task)
         self._processes.add(process)
         transport = AsyncSSHProcessTransport(process)
         try:
@@ -400,7 +468,8 @@ class AsyncSshServer:
             # this session only (§3a observability, #294-aligned).
             log.exception("AsyncSshServer session crashed")
         finally:
-            self._tasks.discard(task)
+            if task is not None:
+                self._tasks.discard(task)
             self._processes.discard(process)
             with contextlib.suppress(Exception):
                 process.close()
