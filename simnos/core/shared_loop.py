@@ -223,7 +223,7 @@ class SharedLoop:
         loop = self._loop
         if loop is None or loop.is_closed():
             return
-        budget = self._remaining(deadline, SHUTDOWN_SERVER_STOP_DEADLINE)
+        budget = self._remaining(deadline)
         try:
             self.submit_coro(listener.aclose()).result(timeout=budget)
         except Exception:
@@ -270,7 +270,7 @@ class SharedLoop:
             if loop is not None and not loop.is_closed():
                 loop.call_soon_threadsafe(loop.stop)
             if thread is not None:
-                thread.join(timeout=self._remaining(deadline, SHUTDOWN_SERVER_STOP_DEADLINE))
+                thread.join(timeout=self._remaining(deadline))
                 alive = thread.is_alive()
             with self._lock:
                 self._loop = None
@@ -282,8 +282,8 @@ class SharedLoop:
                 log.warning("shared loop thread did not exit within timeout; loop left in FAILED state")
 
     @staticmethod
-    def _remaining(deadline: float | None, fallback: float) -> float:
-        """Seconds left until *deadline* (monotonic), or *fallback* when unset."""
+    def _remaining(deadline: float | None) -> float:
+        """Seconds left until *deadline* (monotonic), or the per-server budget when unset."""
         if deadline is None:
-            return min(fallback, SHUTDOWN_SERVER_STOP_DEADLINE)
+            return SHUTDOWN_SERVER_STOP_DEADLINE
         return max(SHUTDOWN_IO_TIMEOUT, deadline - time.monotonic())
