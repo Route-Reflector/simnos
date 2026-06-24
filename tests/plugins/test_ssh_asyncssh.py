@@ -13,6 +13,7 @@ These drive raw paramiko channels (byte-exact, lighter than netmiko) against rea
 ``AsyncSshServer`` listeners on the SimNOS-owned shared loop.
 """
 
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 import os
@@ -20,11 +21,13 @@ import socket
 import threading
 import time
 
+import asyncssh
 import paramiko
 import pytest
 
 from simnos import SimNOS
 from simnos.core.shared_loop import LoopState
+from simnos.plugins.servers.ssh_server_asyncssh import AsyncSshServer
 from simnos.plugins.shell.cmd_shell import CMDShell
 from tests.utils import TEST_PASSWORD, TEST_USERNAME
 
@@ -176,6 +179,55 @@ def test_double_stop_is_idempotent():
         net.stop()
         net.stop()  # second stop is a no-op
         assert net._shared_loop.state is LoopState.STOPPED
+
+
+def test_start_failure_converges_with_no_leak(monkeypatch):
+    """A failed create_server leaves the loop cleanable + no thread leak (codex 2nd#6).
+
+    create_server raises (e.g. bind failure): start() must re-raise, Host.start
+    rolls back, and the caller's stop() tears the now-idle loop down to STOPPED
+    with no orphaned thread.
+    """
+
+    async def _failing_create(*args, **kwargs):
+        raise OSError("simulated bind failure")
+
+    monkeypatch.setattr(asyncssh, "create_server", _failing_create)
+
+    (port,) = _free_ports(1)
+    baseline = threading.active_count()
+    net = SimNOS(inventory=_multi_host_inventory([port]))
+    try:
+        with pytest.raises(OSError, match="simulated bind failure"):
+            net.start()
+    finally:
+        net.stop()
+    assert net._shared_loop.state is LoopState.STOPPED
+    deadline = time.monotonic() + _THREAD_CONVERGE_DEADLINE
+    while threading.active_count() > baseline and time.monotonic() < deadline:
+        time.sleep(0.05)
+    assert threading.active_count() <= baseline
+
+
+def test_discard_late_acceptor_closes_completed_future():
+    """The late-acceptor done-callback closes a listener produced after start gave up (codex 2nd#1)."""
+    closed = threading.Event()
+
+    class _FakeAcceptor:
+        def close(self):
+            closed.set()
+
+    future: concurrent.futures.Future = concurrent.futures.Future()
+    future.set_result(_FakeAcceptor())
+    AsyncSshServer._discard_late_acceptor(future)
+    assert closed.is_set()
+
+
+def test_discard_late_acceptor_ignores_cancelled_future():
+    """A cancelled create future has no acceptor to reclaim — callback is a no-op."""
+    future: concurrent.futures.Future = concurrent.futures.Future()
+    future.cancel()
+    AsyncSshServer._discard_late_acceptor(future)  # must not raise
 
 
 def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):

@@ -23,6 +23,7 @@ Lifecycle (§1a):
 import asyncio
 from collections.abc import Awaitable
 import concurrent.futures
+import contextlib
 import enum
 import logging
 import os
@@ -273,7 +274,14 @@ class SharedLoop:
         finally:
             alive = False
             if loop is not None and not loop.is_closed():
-                loop.call_soon_threadsafe(loop.stop)
+                # The is_closed() check and call_soon_threadsafe are not atomic: the
+                # loop thread may close the loop (its run_forever finally) in between,
+                # so a concurrent close races to "Event loop is closed". Suppress it
+                # — a closed loop is already stopping, and an unsuppressed RuntimeError
+                # here would skip the join + state update and strand the machine in
+                # STOPPING, breaking FAILED recovery / idempotent stop (gemini 2nd#1).
+                with contextlib.suppress(RuntimeError):
+                    loop.call_soon_threadsafe(loop.stop)
             if thread is not None:
                 thread.join(timeout=self._remaining(deadline))
                 alive = thread.is_alive()

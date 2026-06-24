@@ -18,6 +18,7 @@ GEX: asyncssh handles moduli itself, so the paramiko GEX workaround
 """
 
 import asyncio
+import concurrent.futures
 import contextlib
 import io
 import logging
@@ -289,23 +290,46 @@ class AsyncSshServer:
 
         On a failed/timed-out ``create_server`` the pending coroutine is cancelled
         and any listener it managed to create is closed, so a failed start leaves
-        no orphan listener socket (codex 1st#1). The loop-idle cleanup — when this
-        failure leaves the loop with refcount 0 — is ``SimNOS.stop()``'s job
+        no orphan listener socket (codex 1st#1) — including the case where the
+        create completes *after* ``result()`` gave up: a done-callback closes that
+        late acceptor (codex 2nd#1). The loop-idle cleanup — when this failure
+        leaves the loop with refcount 0 — is ``SimNOS.stop()``'s job
         (``teardown_if_idle``), reached via the caller's ``stop()`` / context
         manager ``__exit__``.
         """
         if self._simnos is None:
             raise RuntimeError("AsyncSshServer requires a SimNOS reference (set by Host.start)")
         self._shared_loop = self._simnos.ensure_shared_loop()
+        self._closing = False  # fresh start (defensive if an instance is reused, codex 2nd#4)
         self._is_running.set()
         future = self._shared_loop.submit_coro(self._create_server())
         try:
             future.result(timeout=_CREATE_SERVER_TIMEOUT)
         except BaseException:
             future.cancel()
+            # If the create still completes after we gave up (cancellation lost the
+            # race, or it finished right at the timeout), close the acceptor it
+            # yields so no listener leaks (codex 2nd#1).
+            future.add_done_callback(self._discard_late_acceptor)
             self._abort_failed_start()
             raise
         self._shared_loop.register(self)
+
+    @staticmethod
+    def _discard_late_acceptor(future: "concurrent.futures.Future") -> None:
+        """Close a listener a cancelled/timed-out start produced after giving up.
+
+        Runs on the loop thread (run_coroutine_threadsafe completes the future
+        there), so ``acceptor.close()`` is loop-safe. A cancelled future has no
+        acceptor to reclaim; a completed one is closed (idempotent with
+        ``_abort_failed_start`` if both fire).
+        """
+        if future.cancelled():
+            return
+        with contextlib.suppress(Exception):
+            acceptor = future.result()
+            if acceptor is not None:
+                acceptor.close()
 
     def _abort_failed_start(self) -> None:
         """Close a listener left by a failed/timed-out start (codex 1st#1).
@@ -457,7 +481,13 @@ class AsyncSshServer:
 
             async def dispatch(line: str):
                 # Off-load the blocking dispatch (custom handlers / hot-reload) to
-                # the bounded executor so the loop thread stays free (§2a).
+                # the bounded executor so the loop thread stays free (§2a). A
+                # non-cooperative handler that outlives stop (its executor job
+                # cannot be cancelled) completes after the loop is torn down; the
+                # run_in_executor done-callback then logs a harmless "Event loop is
+                # closed" — the late result lands nowhere (the awaiting task was
+                # cancelled and the transport is closed = generation isolation,
+                # claude 2nd#2).
                 return await loop.run_in_executor(executor, client_shell.dispatch, line)
 
             await run_async_push_session(transport, client_shell, dispatch, initial_skip_lf=skip_lf)
