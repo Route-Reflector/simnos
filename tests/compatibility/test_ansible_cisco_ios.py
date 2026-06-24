@@ -3,6 +3,16 @@
 Uses ansible-playbook via subprocess against simnos. Requires
 `cisco.ios` + `ansible.netcommon` collections (installed in the
 compatibility CI job before running these tests).
+
+SSH backend (#297 Stage 2, テーマE / E2): the inventory pins
+``ansible_network_cli_ssh_type: libssh`` (ansible-pylibssh) rather than the
+paramiko default. The v3 SSH transport is asyncssh, and ansible's *paramiko*
+backend offers a local key first, fails, then resends a SERVICE_REQUEST on retry
+— which asyncssh rejects (``Unexpected service in service request``). That
+strictness is hardcoded in asyncssh with no public-API override (E1 is not
+achievable), so the supported ansible backend against simnos is libssh. The
+"green" definition for this compat job is therefore pylibssh-backend; the
+paramiko backend is a known incompatibility, not a regression to chase.
 """
 
 import os
@@ -25,6 +35,7 @@ def _write_inventory(path: Path, creds: dict) -> None:
               ansible_user: {creds["username"]}
               ansible_password: {creds["password"]}
               ansible_connection: ansible.netcommon.network_cli
+              ansible_network_cli_ssh_type: libssh
               ansible_network_os: cisco.ios.ios
               ansible_become: true
               ansible_become_method: enable

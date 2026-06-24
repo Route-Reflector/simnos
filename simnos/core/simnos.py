@@ -20,6 +20,7 @@ from simnos.core.host import Host
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import ModelSimnosInventory, ModelSysConfig
 from simnos.core.servers import join_threads_with_deadline
+from simnos.core.shared_loop import SharedLoop
 from simnos.core.timeouts import (
     SHUTDOWN_GLOBAL_DEADLINE,
     SHUTDOWN_SAFETY_NET_DEADLINE,
@@ -40,7 +41,7 @@ default_inventory = {
         "password": "user",
         "port": DEFAULT_PORT_START,
         "server": {
-            "plugin": "ParamikoSshServer",
+            "plugin": "AsyncSshServer",
             "configuration": {
                 "address": "127.0.0.1",
                 "timeout": 1,
@@ -108,6 +109,13 @@ class SimNOS:
         self.shell_plugins = shell_plugins
         self.nos_plugins = nos_plugins
         self.servers_plugins = servers_plugins
+
+        # The shared asyncio loop async server plugins (AsyncSshServer) run on
+        # (#297 Stage 2, §1). Owned here as a SimNOS-scoped resource; the loop
+        # thread + bounded executor start lazily on the first async host start
+        # (``ensure_shared_loop``) and are torn down once in ``stop()`` when no
+        # async host remains. Sync paramiko/telnet servers do not touch it.
+        self._shared_loop = SharedLoop()
 
         self._load_sys_config(sys_config)
         self._load_inventory()
@@ -382,6 +390,16 @@ class SimNOS:
             raise ValueError(f"Port {port} already in use")
         self.allocated_ports.add(port)
 
+    def ensure_shared_loop(self) -> SharedLoop:
+        """Start (lazily) and return the SimNOS-owned shared asyncio loop (§1).
+
+        Called by async server plugins (``AsyncSshServer.start``) so the loop
+        thread + bounded executor exist before a listener is registered. Idempotent
+        while running; recreates the loop after a full stop (restart).
+        """
+        self._shared_loop.ensure_running()
+        return self._shared_loop
+
     def _get_hosts_as_list(self, hosts: str | list[str] | None = None) -> list[Host]:
         """
         Helper method to get hosts as list
@@ -456,6 +474,11 @@ class SimNOS:
         if managed_threads:
             remaining = max(0, deadline - time.monotonic())
             self._join_threads(managed_threads, timeout=min(SHUTDOWN_SAFETY_NET_DEADLINE, remaining))
+        # Tear the shared loop down once no async host remains registered (§1a 5b):
+        # global teardown is SimNOS's job (the loop thread is joined here once, not
+        # per host). A partial stop that leaves async hosts running is a no-op here
+        # (refcount > 0), so the loop keeps serving them.
+        self._shared_loop.teardown_if_idle(deadline)
 
     def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
         """Collect all managed threads from host servers before stopping."""

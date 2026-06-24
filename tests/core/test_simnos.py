@@ -105,7 +105,7 @@ class TestSimNOS:
             assert host.username == expected["username"]
             assert host.password == expected["password"]
             assert host.port == expected["port"]
-            assert host.server_inventory["plugin"] == "ParamikoSshServer"
+            assert host.server_inventory["plugin"] == "AsyncSshServer"
             if _is_in_docker() and "WSL2" in platform.release():
                 assert host.server_inventory["configuration"]["address"] == "0.0.0.0"
             else:
