@@ -326,7 +326,10 @@ class AsyncSshServer:
         """
         if future.cancelled():
             return
-        with contextlib.suppress(Exception):
+        # suppress BaseException, not Exception: this runs as a future done-callback
+        # on the loop thread, and a BaseException set on the future (or raised by
+        # close) must not escape into the loop (gemini 3rd#4).
+        with contextlib.suppress(BaseException):
             acceptor = future.result()
             if acceptor is not None:
                 acceptor.close()

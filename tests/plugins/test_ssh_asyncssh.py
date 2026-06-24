@@ -13,9 +13,10 @@ These drive raw paramiko channels (byte-exact, lighter than netmiko) against rea
 ``AsyncSshServer`` listeners on the SimNOS-owned shared loop.
 """
 
+import asyncio
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
-from contextlib import contextmanager
+from contextlib import contextmanager, suppress
 import os
 import socket
 import threading
@@ -207,6 +208,41 @@ def test_start_failure_converges_with_no_leak(monkeypatch):
     while threading.active_count() > baseline and time.monotonic() < deadline:
         time.sleep(0.05)
     assert threading.active_count() <= baseline
+
+
+def test_start_timeout_closes_late_acceptor(monkeypatch):
+    """A create that completes *after* start() timed out has its listener closed
+    via the done-callback — the real timeout→late-acceptor path (codex 3rd#2).
+
+    create_server is slowed past a shortened start timeout and made to complete
+    despite the cancel (swallowing CancelledError), modelling an asyncssh create
+    that wins the cancel race. The ``_discard_late_acceptor`` done-callback must
+    then close the orphaned acceptor.
+    """
+    closed = threading.Event()
+
+    class _FakeAcceptor:
+        def close(self):
+            closed.set()
+
+    async def _slow_create(*args, **kwargs):
+        # Swallow the cancel and complete anyway -> a "late" acceptor produced
+        # after start() gave up (models a create that wins the cancel race).
+        with suppress(asyncio.CancelledError):
+            await asyncio.sleep(1.0)
+        return _FakeAcceptor()
+
+    monkeypatch.setattr("simnos.plugins.servers.ssh_server_asyncssh._CREATE_SERVER_TIMEOUT", 0.3)
+    monkeypatch.setattr(asyncssh, "create_server", _slow_create)
+
+    (port,) = _free_ports(1)
+    net = SimNOS(inventory=_multi_host_inventory([port]))
+    try:
+        with pytest.raises(TimeoutError):
+            net.start()
+        assert closed.wait(timeout=5), "late acceptor was not closed by the done-callback"
+    finally:
+        net.stop()
 
 
 def test_discard_late_acceptor_closes_completed_future():
