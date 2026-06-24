@@ -394,18 +394,29 @@ class PushShell(Protocol):
     def dispatch(self, line: str) -> "DispatchResult": ...
 
 
+def _assemble_wire(writes: list[str]) -> bytes:
+    """Normalize each shell write and join to wire bytes (#297 / §3a).
+
+    `process_tap_line` is applied per write, mirroring how `shell_to_client_tap`
+    processed each shell stdout write individually (NUL strip / bare-LF → CRLF).
+    This is the session-handler write-unit assembly shared by SSH (Stage 1) and
+    telnet (Stage 3).
+    """
+    return "".join(process_tap_line(w) for w in writes).encode("utf-8")
+
+
 def _render_intro(shell: PushShell) -> bytes:
     """Initial wire bytes: the shell intro line + the first prompt (#297 / §3a).
 
     Mirrors `cmd.Cmd.cmdloop` writing ``str(intro)+"\\n"`` then ``self.prompt``
-    as two stdout writes; `process_tap_line` is applied per write (matching the
-    legacy `shell_to_client_tap`) so the CR/LF/NUL normalization is identical.
+    as two stdout writes (assembled per write so CR/LF/NUL normalization matches
+    the legacy `shell_to_client_tap`).
     """
     writes: list[str] = []
     if shell.intro:
         writes.append(f"{shell.intro}\n")
     writes.append(shell.prompt)
-    return "".join(process_tap_line(w) for w in writes).encode("utf-8")
+    return _assemble_wire(writes)
 
 
 def _render_response(shell: PushShell, result: "DispatchResult") -> bytes:
@@ -416,15 +427,14 @@ def _render_response(shell: PushShell, result: "DispatchResult") -> bytes:
     echo coalescing without the timing-dependent ``_COALESCE_DELAY``. On a close
     result neither body nor prompt is emitted (the legacy `default` wrote
     nothing on its close paths), leaving just the newline echo. Body lines
-    reproduce `writeline`'s per-line ``newline``; `process_tap_line` is applied
-    per write so NUL strip / bare-LF conversion matches `shell_to_client_tap`.
+    reproduce `writeline`'s per-line ``newline``.
     """
     writes: list[str] = ["\r\n"]  # line-terminator echo, held until dispatch
     if not result.close:
         if result.body is not None:
             writes.extend(line + shell.newline for line in str(result.body).splitlines())
         writes.append(result.prompt)
-    return "".join(process_tap_line(w) for w in writes).encode("utf-8")
+    return _assemble_wire(writes)
 
 
 def _send_response(transport: TransportAdapter, data: bytes, is_running: threading.Event) -> bool:

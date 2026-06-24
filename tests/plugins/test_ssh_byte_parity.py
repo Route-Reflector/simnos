@@ -98,13 +98,16 @@ def _format_transcript(steps: list[tuple[bytes, bytes]]) -> str:
 
 
 def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]]) -> None:
-    """Compare the transcript against the golden, or record it when asked."""
+    """Compare the transcript against the golden, or record it when explicitly asked."""
     transcript = _format_transcript(steps)
     golden_path = _GOLDEN_DIR / f"{name}.txt"
-    if _RECORD or not golden_path.exists():
+    if _RECORD:
         _GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(transcript, encoding="utf-8")
         pytest.skip(f"recorded golden {golden_path} ({len(transcript)} chars)")
+    # A missing golden fails loudly rather than silently re-recording (which would
+    # let a deleted/absent baseline pass as a no-op). Regenerate deliberately.
+    assert golden_path.exists(), f"golden {golden_path} missing; regenerate with SIMNOS_RECORD_GOLDEN=1"
     expected = golden_path.read_text(encoding="utf-8")
     assert transcript == expected, (
         f"SSH wire transcript drifted from golden {golden_path}.\n"
