@@ -104,6 +104,11 @@ def setup():
         )
 
 
+# Both docker tests drive the same `docker compose` project (one container set);
+# xdist_group pins them to a single worker so they run sequentially under
+# `-n auto` instead of one test's `compose down` tearing down the other's
+# container mid-run (#297).
+@pytest.mark.xdist_group("docker_compose")
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
 @pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container(setup):
@@ -125,6 +130,7 @@ def test_container(setup):
     assert all("Traceback" not in i for i in outputs)
 
 
+@pytest.mark.xdist_group("docker_compose")  # serialize with test_container (shared compose project, #297)
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
 @pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container_multiple_connections(setup):
