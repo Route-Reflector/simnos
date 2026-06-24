@@ -4,6 +4,7 @@ Custom shell class to interact with NOS.
 
 from cmd import Cmd
 import copy
+from dataclasses import dataclass
 import hashlib
 import logging
 import os
@@ -116,6 +117,31 @@ def build_resolved_platform(
     # via `nos.auth`, but dropping it would re-introduce the silent-dead-end
     # asymmetry the auth wiring fixed (2nd round codex/claude #3).
     return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands, auth=a3.auth)
+
+
+@dataclass(frozen=True)
+class DispatchResult:
+    """Structured result of one dispatched line (#297 / §3a).
+
+    The push session driver turns this into wire bytes. ``cmd.Cmd.cmdloop`` /
+    ``onecmd`` cannot represent multi-line output, no output, session close, or
+    a post-transition prompt in a single ``str``, so the I/O-independent
+    dispatch core returns the pieces explicitly:
+
+    - ``body``: text to render with ``writeline`` semantics, or ``None`` for no
+      output (empty line, EOF, a handler returning no ``output``). The driver
+      suppresses it when ``close`` is set — the legacy ``default`` never wrote a
+      body on any close path.
+    - ``prompt``: the prompt to show after this line (already reflects a mode
+      transition applied during dispatch).
+    - ``close``: the session should close after this line.
+    - ``mode``: the mode after dispatch (observability / tests).
+    """
+
+    body: str | None
+    prompt: str
+    close: bool
+    mode: str
 
 
 class CMDShell(Cmd):
@@ -455,8 +481,13 @@ class CMDShell(Cmd):
         """Whether `cmd` is valid in the current mode (empty modes = all)."""
         return not cmd.modes or self.current_mode in cmd.modes
 
-    def do_help(self, arg):
-        """List help for commands valid in the current mode.
+    def _help_body(self) -> str:
+        """Build the help listing for the current mode as body text (no I/O).
+
+        Extracted from `do_help` so the cmd.Cmd cmdloop path (telnet) and the
+        push dispatch core (#297, SSH) share one implementation. Returns the
+        lines joined by `self.newline`; the caller applies `writeline`
+        semantics (cmdloop via `do_help`, push via the session handler).
 
         Intentional refinement over v2 (2nd round claude #2): v2 `do_help`
         read the raw unmerged entries, so an alias without its own prompt was
@@ -483,7 +514,11 @@ class CMDShell(Cmd):
         for k, v in lines.items():
             padding = " " * (width - len(k)) + "  "
             help_msg.append(f"{k}{padding}{v}")
-        self.writeline(self.newline.join(help_msg))
+        return self.newline.join(help_msg)
+
+    def do_help(self, arg):
+        """List help for commands valid in the current mode (cmd.Cmd cmdloop adapter)."""
+        self.writeline(self._help_body())
 
     def _apply_new_mode(self, mode_name: str, command: str) -> None:
         """Transition to `mode_name`; an unknown name keeps the current mode.
@@ -528,8 +563,18 @@ class CMDShell(Cmd):
         # cannot narrow the TypedDict member out of the union by isinstance).
         return {"output": cast("str | None", ret)}
 
-    def default(self, line):
-        """Dispatch `line`: resolve -> mode check -> render/invoke -> transition.
+    def _dispatch_general(self, line) -> tuple[str | None, bool]:
+        """Resolve + invoke one general command; return ``(body, close)``.
+
+        The I/O-independent heart of dispatch, shared by the cmd.Cmd `default`
+        adapter (telnet cmdloop) and the push `dispatch` core (#297, SSH).
+        Applies a mode transition as a live-session side effect (§1a) but
+        writes nothing — the caller renders `body`.
+
+        ``close`` is True for an exit command, a handler returning ``exit``, or
+        a server shutdown observed mid-dispatch. The legacy `default`
+        suppressed the body on every one of those close paths, so callers MUST
+        NOT render `body` when `close` is set.
 
         The exception boundary is the `_invoke_handler` block only: resolution,
         the mode check and the transition never raise (an unknown command is a
@@ -541,7 +586,7 @@ class CMDShell(Cmd):
         cmd = self.commands.get(line)
         if cmd is not None and self._in_current_mode(cmd):
             if cmd.exit:
-                return True
+                return None, True
             # Consult the per-session variant map ONLY for variant-bearing
             # commands (#287 / D6, codex#2 5th). The `cmd.variants` guard is
             # required: a command stripped to a single output by an overlay has
@@ -580,7 +625,7 @@ class CMDShell(Cmd):
                 log.error("shell '%s' command %r handler crashed\n%s", self.base_prompt, line, traceback.format_exc())
                 result = {"output": HANDLER_ERROR_OUTPUT}
             if result.get("exit"):
-                return True
+                return None, True
             # A handler transition applies only when the command has no static
             # one (a static `new_mode` was the last write in the v2 order).
             if transition is None:
@@ -590,8 +635,50 @@ class CMDShell(Cmd):
             body = output.render(self.base_prompt)
         if transition is not None:
             self._apply_new_mode(transition, line)
+        # Server shutdown observed mid-dispatch: close without writing the body
+        # (the legacy `default` returned True here before any writeline).
         if not self.is_running.is_set():
-            return True
-        if body is not None:
+            return body, True
+        return body, False
+
+    def default(self, line):
+        """Dispatch one general command for the cmd.Cmd cmdloop (telnet path).
+
+        Thin adapter over `_dispatch_general` (#297): the push SSH driver calls
+        the core directly, while telnet still routes through `cmd.Cmd.cmdloop`,
+        which calls this. The body is written only when the session is not
+        closing — matching the legacy suppression of the body on every close
+        path — and the bool return drives `cmd.Cmd`'s stop handling.
+        """
+        body, close = self._dispatch_general(line)
+        if not close and body is not None:
             self.writeline(body)
-        return False
+        return close
+
+    def dispatch(self, line: str) -> DispatchResult:
+        """I/O-independent dispatch core for the push session driver (#297 / §3a).
+
+        Reproduces `cmd.Cmd.onecmd`'s routing (precmd -> help / EOF / empty /
+        general -> postcmd) so the SSH push session produces the same wire as
+        the telnet cmdloop path (which still routes through `cmd.Cmd`). Returns
+        a structured `DispatchResult` the session handler renders to wire bytes;
+        it never writes to stdout. Mode transitions / variant / hot-reload run
+        as today via `_dispatch_general` / `precmd`.
+
+        Only `do_EOF` / `do_help` exist on this shell, so the routing maps them
+        explicitly and sends everything else to `_dispatch_general` (the
+        `default` target). A NOS command named `help` / `EOF` stays shadowed by
+        the `do_*` method exactly as under `cmd.Cmd`.
+        """
+        line = self.precmd(line)
+        cmd_name, _arg, parsed = self.parseline(line)
+        if not parsed:
+            body, close = None, False  # emptyline(): no output
+        elif cmd_name == "EOF":
+            body, close = None, True  # do_EOF: stop
+        elif cmd_name == "help":
+            body, close = self._help_body(), False  # do_help (current-mode listing)
+        else:
+            body, close = self._dispatch_general(parsed)  # cmd '' or unknown do_* -> default
+        close = bool(self.postcmd(close, parsed))
+        return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)

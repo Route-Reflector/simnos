@@ -22,6 +22,7 @@ data, so a data edit (not this refactor) is the only legitimate reason for a
 golden update.
 """
 
+from concurrent.futures import ThreadPoolExecutor
 import os
 from pathlib import Path
 import socket
@@ -59,7 +60,7 @@ def _drain(channel: paramiko.Channel) -> bytes:
     while True:
         try:
             chunk = channel.recv(4096)
-        except (TimeoutError, socket.timeout):
+        except TimeoutError:
             if buf:
                 break  # had data, now idle -> response complete
             if time.monotonic() - start > _DRAIN_OVERALL:
@@ -133,18 +134,18 @@ def test_byte_parity_interactive_session(cisco_ios_port):
         steps.append((b"", _drain(channel)))
         # A scripted sequence exercising the wire machinery deterministically.
         script = [
-            b"show vlan\r",            # valid command, static table + prompt
-            b"enable\r",               # mode user -> enable (prompt changes)
-            b"\r",                     # empty line: bare newline echo + prompt
-            b"show vlan\r",            # valid in enable too
-            b"configure terminal\r",   # mode enable -> config
-            b"end\r",                  # mode config -> enable
-            b"?\r",                    # help listing for the current mode
-            b"no such command\r",      # unknown -> _default_ output
-            b"sh\x00ow vlan\r",        # NUL dropped mid-line, command still dispatched
-            b"show vlan\r\n",          # CR LF pair: LF consumed, one dispatch
-            b"show vlan\n",            # bare LF terminator
-            b"exit\r",                 # exit command (mode-dependent behaviour)
+            b"show vlan\r",  # valid command, static table + prompt
+            b"enable\r",  # mode user -> enable (prompt changes)
+            b"\r",  # empty line: bare newline echo + prompt
+            b"show vlan\r",  # valid in enable too
+            b"configure terminal\r",  # mode enable -> config
+            b"end\r",  # mode config -> enable
+            b"?\r",  # help listing for the current mode
+            b"no such command\r",  # unknown -> _default_ output
+            b"sh\x00ow vlan\r",  # NUL dropped mid-line, command still dispatched
+            b"show vlan\r\n",  # CR LF pair: LF consumed, one dispatch
+            b"show vlan\n",  # bare LF terminator
+            b"exit\r",  # exit command (mode-dependent behaviour)
         ]
         for chunk in script:
             channel.sendall(chunk)
@@ -153,6 +154,37 @@ def test_byte_parity_interactive_session(cisco_ios_port):
         channel.close()
         transport.close()
     _assert_or_record("interactive_session", steps)
+
+
+def test_ssh_push_concurrent_connections(cisco_ios_port):
+    """Stage 1 light stress (#297 / §4, claude#7): the push driver must not
+    regress the thread-per-connection model under concurrency.
+
+    N clients connect in parallel; each authenticates, changes mode, runs a
+    command, and must get its own correct prompt + output back (no crossed
+    wires, no dropped sessions). This is the lightweight sync-transport + push
+    check the spike never measured; the heavy 100-host failure-0 stress lands
+    in Stage 2 with asyncssh. Tunable via SIMNOS_PUSH_STRESS_N for local runs.
+    """
+    n = int(os.environ.get("SIMNOS_PUSH_STRESS_N", "30"))
+
+    def _one_session(_i: int) -> bool:
+        transport, channel = _open_shell_channel(cisco_ios_port)
+        try:
+            assert b"device>" in _drain(channel)  # intro + user prompt
+            channel.sendall(b"enable\r")
+            assert b"device#" in _drain(channel)  # mode transition
+            channel.sendall(b"show vlan\r")
+            response = _drain(channel)
+            assert b"VLAN Name" in response and response.endswith(b"device#")
+            return True
+        finally:
+            channel.close()
+            transport.close()
+
+    with ThreadPoolExecutor(max_workers=n) as pool:
+        results = list(pool.map(_one_session, range(n)))
+    assert all(results), f"{results.count(False)}/{n} concurrent push sessions failed"
 
 
 def test_byte_parity_eof_on_disconnect(cisco_ios_port):
