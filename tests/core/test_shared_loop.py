@@ -7,7 +7,6 @@ on. The async-server integration (real listeners, byte parity, 100-host stress)
 lives in the SSH tests; here a fake ``AsyncListener`` stands in.
 """
 
-import asyncio
 import threading
 
 import pytest
@@ -16,17 +15,12 @@ from simnos.core.shared_loop import LoopState, SharedLoop
 
 
 class _FakeListener:
-    """Minimal AsyncListener: records that aclose ran, optionally blocks on it."""
+    """Minimal AsyncListener: records that aclose ran on the loop."""
 
-    def __init__(self, block: threading.Event | None = None) -> None:
+    def __init__(self) -> None:
         self.closed = threading.Event()
-        self._block = block
 
     async def aclose(self) -> None:
-        if self._block is not None:
-            # Cooperatively wait (on the loop) until released, to model a slow drain.
-            while not self._block.is_set():
-                await asyncio.sleep(0.01)
         self.closed.set()
 
 

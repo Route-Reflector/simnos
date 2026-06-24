@@ -102,13 +102,26 @@ class _SimnosSSHServer(asyncssh.SSHServer):
         password: str,
         allow_auth_none: bool,
         authorized_keys: "set[bytes]",
+        ssh_banner: str,
     ) -> None:
         self._username = username
         self._password = password
         self._allow_auth_none = allow_auth_none
         self._authorized_keys = authorized_keys
+        self._ssh_banner = ssh_banner
+        self._conn: asyncssh.SSHServerConnection | None = None
+        self._banner_sent = False
+
+    def connection_made(self, conn: "asyncssh.SSHServerConnection") -> None:
+        self._conn = conn
 
     def begin_auth(self, username: str) -> bool:
+        # Pre-auth banner (parity with ParamikoSshServerInterface.get_banner):
+        # sent once at the start of auth, consumed by the client's auth handler
+        # (so it never appears on the post-auth shell channel / byte-parity golden).
+        if self._ssh_banner and not self._banner_sent and self._conn is not None:
+            self._conn.send_auth_banner(f"{self._ssh_banner}\r\n", lang="en-US")
+            self._banner_sent = True
         # False = no SSH-level auth required (auth_none platforms: the Dell-style
         # channel login then runs inside the session, see _handle_process).
         return not self._allow_auth_none
@@ -198,6 +211,9 @@ class AsyncSshServer:
         self.password: str = password
         self.address: str = address
         self.port: int = port
+        # timeout / watchdog_interval are inert on the async path (shutdown is
+        # driven by closing the listener/sessions on the shared loop, not a recv
+        # poll); kept for ParamikoSshServer signature + config parity.
         self.timeout: int = timeout
         self.watchdog_interval: float = watchdog_interval
         self._simnos = simnos
@@ -276,7 +292,9 @@ class AsyncSshServer:
 
     async def _create_server(self) -> "asyncssh.SSHAcceptor":
         return await asyncssh.create_server(
-            lambda: _SimnosSSHServer(self.username, self.password, self._allow_auth_none, self._authorized_keys),
+            lambda: _SimnosSSHServer(
+                self.username, self.password, self._allow_auth_none, self._authorized_keys, self.ssh_banner
+            ),
             self.address,
             self.port,
             server_host_keys=[self._host_key],
