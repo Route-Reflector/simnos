@@ -25,6 +25,7 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.shared_loop import LoopState
+from simnos.plugins.shell.cmd_shell import CMDShell
 from tests.utils import TEST_PASSWORD, TEST_USERNAME
 
 _HOST = "127.0.0.1"
@@ -186,8 +187,6 @@ def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):
     isolation — the result never reaches the wire). The orphaned worker exits on its
     own afterwards. Here we pin the convergence + STOPPED state under that load.
     """
-    from simnos.plugins.shell.cmd_shell import CMDShell
-
     original_dispatch = CMDShell.dispatch
 
     def slow_dispatch(self, line):

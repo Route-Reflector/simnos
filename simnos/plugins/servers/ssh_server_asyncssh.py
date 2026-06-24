@@ -370,10 +370,10 @@ class AsyncSshServer:
         Runs on the loop thread. Marks the server closing (so a session that
         begins handshaking after the snapshot below bows out, claude 1st#1), stops
         accepting, signals in-flight dispatch to close (``_is_running`` cleared in
-        ``stop``), closes each active session so its read returns EOF, then awaits
-        the session tasks with a bounded budget — cancelling any stragglers and
-        awaiting them so their ``finally`` runs (gemini 1st#3) — leaving no
-        orphaned task or listener.
+        ``stop``), closes each active session so its read returns EOF, then waits
+        on the session tasks with a bounded budget — cancelling any stragglers and
+        giving them a bounded moment to run their ``finally`` (gemini 1st#3) —
+        leaving no orphaned task or listener.
         """
         self._closing = True
         self._is_running.clear()
