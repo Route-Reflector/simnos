@@ -1715,21 +1715,28 @@ class TeardownFixTests(unittest.TestCase):
 
     @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
-    def test_channel_settimeout_is_called(
+    def test_channel_settimeout_is_clamped_for_shutdown(
         self,
         mock_transport_cls: MagicMock,
         mock_run_push_session: MagicMock,
     ):
-        """connection_function should call channel.settimeout(self.timeout)."""
+        """The channel recv timeout (= the push loop's shutdown-poll interval) is
+        clamped to min(timeout, watchdog_interval, SHUTDOWN_IO_TIMEOUT) so a large
+        configured timeout cannot delay stop convergence (#297, codex#1)."""
         mock_session = MagicMock()
         mock_channel = MagicMock()
         mock_session.accept.return_value = mock_channel
         mock_transport_cls.return_value = mock_session
 
-        server = ParamikoSshServer(**self.arguments)
+        # timeout=30 (>> SHUTDOWN_IO_TIMEOUT) must be clamped down to the poll bound.
+        # (make_paramiko_server_args omits timeout/watchdog_interval, so these are
+        # not duplicate kwargs.)
+        server = ParamikoSshServer(**self.arguments, timeout=30, watchdog_interval=0.5)
         server.connection_function(MagicMock(), Mock())
 
-        mock_channel.settimeout.assert_called_once_with(server.timeout)
+        expected = min(server.timeout, server.watchdog_interval, SHUTDOWN_IO_TIMEOUT)
+        assert expected == 0.5  # sanity: the clamp actually bites here
+        mock_channel.settimeout.assert_called_once_with(expected)
 
     @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
@@ -1898,7 +1905,7 @@ class SshIntegrationTests(unittest.TestCase):
         )
         self.server.port = self.port
 
-    def _connect_and_wait_for_intro(self) -> paramiko.SSHClient:
+    def _connect_and_wait_for_intro(self, port: int | None = None) -> paramiko.SSHClient:
         """Open a real SSH shell and read until the intro/prompt arrives.
 
         Receiving the intro proves the push session loop sent it and is now
@@ -1906,7 +1913,7 @@ class SshIntegrationTests(unittest.TestCase):
         """
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
-        client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
+        client.connect("127.0.0.1", port=port or self.port, username="admin", password="admin", timeout=5)
         channel = client.invoke_shell()
         channel.settimeout(5)
         received = b""
@@ -1965,6 +1972,48 @@ class SshIntegrationTests(unittest.TestCase):
         finally:
             client.close()
             self.server.stop()
+
+    def test_ssh_large_timeout_still_converges_on_stop(self):
+        """A large channel `timeout` must not delay stop convergence (#297, codex#1).
+
+        The push loop wakes on the channel recv timeout to re-check is_running.
+        Without bounding it, a `timeout` above SHUTDOWN_SERVER_PER_THREAD_JOIN (2s)
+        would leave the connection thread parked past the join budget. The clamp
+        in connection_function (min(timeout, watchdog_interval, SHUTDOWN_IO_TIMEOUT))
+        keeps convergence within budget; this builds a server with timeout=30 to
+        pin it (without the clamp the thread would survive ~30s and fail).
+        """
+        nos = MagicMock()
+        nos.initial_prompt = "Router>"
+        nos.commands = {}
+        nos.auth = None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", 0))
+            port = s.getsockname()[1]
+        server = ParamikoSshServer(
+            shell=_PushConvergenceShell,
+            nos=nos,
+            nos_inventory_config={},
+            port=port,
+            username="admin",
+            password="admin",
+            address="127.0.0.1",
+            timeout=30,  # >> SHUTDOWN_SERVER_PER_THREAD_JOIN; the clamp must rescue convergence
+            watchdog_interval=0.1,
+        )
+        server.port = port
+        server.start()
+        client = self._connect_and_wait_for_intro(port=port)
+        try:
+            t0 = time.monotonic()
+            server.stop()
+            elapsed = time.monotonic() - t0
+            self._assert_stop_time(elapsed)
+            alive = [t for t in server._connection_threads if t.is_alive()]
+            self.assertEqual(alive, [], f"connection thread parked by large timeout: {alive}")
+        finally:
+            client.close()
+            server.stop()
 
     def test_ssh_incomplete_handshake_stop_converges(self):
         """TCP-only connection (no SSH handshake) + stop() should converge."""

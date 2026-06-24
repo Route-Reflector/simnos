@@ -390,8 +390,15 @@ class ParamikoSshServer(TCPServerBase):
                 return
 
             # Timeout responsibility lives here (not in the adapter / shared
-            # helpers): configure it before any channel I/O below.
-            channel.settimeout(self.timeout)
+            # helpers): configure it before any channel I/O below. The push
+            # session loop wakes on this recv timeout to re-check `is_running`,
+            # so it doubles as the shutdown-poll interval that the old watchdog
+            # thread provided. Bound it by `watchdog_interval` and
+            # `SHUTDOWN_IO_TIMEOUT` so a large configured `timeout` cannot delay
+            # stop convergence past the per-thread join budget (#297, codex#1);
+            # a byte arrives immediately regardless, so interactive latency is
+            # unaffected.
+            channel.settimeout(min(self.timeout, self.watchdog_interval, SHUTDOWN_IO_TIMEOUT))
 
             # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
             # login before starting the shell.  When publickey auth is also configured,

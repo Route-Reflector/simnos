@@ -13,10 +13,6 @@ from netmiko import ConnectHandler
 import paramiko
 import pytest
 
-# Readiness polling completes a few SSH handshakes before the server is up,
-# which paramiko logs as noisy banner-read tracebacks; silence them.
-logging.getLogger("paramiko.transport").setLevel(logging.CRITICAL)
-
 IN_GITHUB_ACTIONS: bool = os.getenv("GITHUB_ACTIONS") is not None
 
 router1 = {
@@ -63,23 +59,31 @@ def _wait_for_ssh(host, port, timeout=30, interval=0.3):
     """
     deadline = time.monotonic() + timeout
     last_err: Exception | None = None
-    while time.monotonic() < deadline:
-        try:
-            sock = socket.create_connection((host, port), timeout=2)
-        except OSError as e:
-            last_err = e
-            time.sleep(interval)
-            continue
-        transport = paramiko.Transport(sock)
-        try:
-            transport.start_client(timeout=3)
-            return
-        except Exception as e:  # banner not ready yet / connection reset
-            last_err = e
-            time.sleep(interval)
-        finally:
-            transport.close()
-    raise TimeoutError(f"SSH on {host}:{port} not ready after {timeout}s ({last_err})")
+    # The pre-ready handshakes log noisy banner-read tracebacks; silence them
+    # only for the duration of this probe (scoped, not a worker-global mutation).
+    transport_log = logging.getLogger("paramiko.transport")
+    prev_level = transport_log.level
+    transport_log.setLevel(logging.CRITICAL)
+    try:
+        while time.monotonic() < deadline:
+            try:
+                sock = socket.create_connection((host, port), timeout=2)
+            except OSError as e:
+                last_err = e
+                time.sleep(interval)
+                continue
+            transport = paramiko.Transport(sock)
+            try:
+                transport.start_client(timeout=3)
+                return
+            except Exception as e:  # banner not ready yet / connection reset
+                last_err = e
+                time.sleep(interval)
+            finally:
+                transport.close()
+        raise TimeoutError(f"SSH on {host}:{port} not ready after {timeout}s ({last_err})")
+    finally:
+        transport_log.setLevel(prev_level)
 
 
 @pytest.fixture

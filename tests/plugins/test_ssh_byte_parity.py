@@ -23,6 +23,7 @@ golden update.
 """
 
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import os
 from pathlib import Path
 import socket
@@ -34,8 +35,8 @@ import pytest
 from simnos import SimNOS
 from tests.utils import TEST_PASSWORD, TEST_USERNAME, build_inventory
 
-# Where the frozen golden transcripts live (one file per scenario).
-_GOLDEN_DIR = Path(__file__).parent.parent / "assets" / "golden_transcripts" / "cisco_ios"
+# Where the frozen golden transcripts live (one subdir per platform, one file per scenario).
+_GOLDEN_BASE = Path(__file__).parent.parent / "assets" / "golden_transcripts"
 
 # Set to regenerate the golden from the *current* wire behaviour. Use only to
 # capture the unmodified-v3 baseline, or after a deliberate, reviewed wire change.
@@ -97,12 +98,13 @@ def _format_transcript(steps: list[tuple[bytes, bytes]]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]]) -> None:
+def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]], *, platform: str = "cisco_ios") -> None:
     """Compare the transcript against the golden, or record it when explicitly asked."""
     transcript = _format_transcript(steps)
-    golden_path = _GOLDEN_DIR / f"{name}.txt"
+    golden_dir = _GOLDEN_BASE / platform
+    golden_path = golden_dir / f"{name}.txt"
     if _RECORD:
-        _GOLDEN_DIR.mkdir(parents=True, exist_ok=True)
+        golden_dir.mkdir(parents=True, exist_ok=True)
         golden_path.write_text(transcript, encoding="utf-8")
         pytest.skip(f"recorded golden {golden_path} ({len(transcript)} chars)")
     # A missing golden fails loudly rather than silently re-recording (which would
@@ -115,16 +117,23 @@ def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]]) -> None:
     )
 
 
-@pytest.fixture
-def cisco_ios_port():
-    """Start a single cisco_ios SSH host and yield its port; auto-stop."""
-    inventory = build_inventory("cisco_ios")
+@contextmanager
+def _running_host(device_type: str):
+    """Start a single-host SimNOS for *device_type* and yield its port; auto-stop."""
+    inventory = build_inventory(device_type)
     net = SimNOS(inventory=inventory)
     net.start()
     try:
         yield inventory["hosts"]["device"]["port"]
     finally:
         net.stop()
+
+
+@pytest.fixture
+def cisco_ios_port():
+    """Start a single cisco_ios SSH host and yield its port; auto-stop."""
+    with _running_host("cisco_ios") as port:
+        yield port
 
 
 def test_byte_parity_interactive_session(cisco_ios_port):
@@ -208,3 +217,24 @@ def test_byte_parity_eof_on_disconnect(cisco_ios_port):
         channel.close()
         transport.close()
     _assert_or_record("eof_on_disconnect", steps)
+
+
+def test_byte_parity_session_close_command():
+    """Pin the wire for a real session-closing command (exit:true), #297 codex#2.
+
+    cisco_ios's `exit` is shadowed by an A3 config-mode command, so the
+    interactive golden never exercises a `DispatchResult.close` over the wire.
+    alcatel_aos `ex` is `exit: true` in user mode, so it drives the close path:
+    char echoes + the newline echo, then the server closes (no body, no prompt).
+    """
+    with _running_host("alcatel_aos") as port:
+        transport, channel = _open_shell_channel(port)
+        steps: list[tuple[bytes, bytes]] = []
+        try:
+            steps.append((b"", _drain(channel)))  # intro + first prompt
+            channel.sendall(b"ex\r")  # exit: true -> close after the newline echo
+            steps.append((b"ex\r", _drain(channel)))  # "ex\r\n" then EOF (server closed)
+        finally:
+            channel.close()
+            transport.close()
+    _assert_or_record("session_close", steps, platform="alcatel_aos")

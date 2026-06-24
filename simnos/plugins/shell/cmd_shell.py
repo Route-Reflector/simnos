@@ -680,5 +680,10 @@ class CMDShell(Cmd):
             body, close = self._help_body(), False  # do_help (current-mode listing)
         else:
             body, close = self._dispatch_general(parsed)  # cmd '' or unknown do_* -> default
-        close = bool(self.postcmd(close, parsed))
+        # postcmd gets the post-precmd line (pre-parseline), matching
+        # cmd.Cmd.cmdloop's `self.postcmd(stop, line)` — not the parseline-
+        # transformed `parsed` (e.g. "?" -> "help ") — so a postcmd override
+        # sees the same argument on the telnet (cmdloop) and SSH (push) paths
+        # (#297, claude#1).
+        close = bool(self.postcmd(close, line))
         return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)

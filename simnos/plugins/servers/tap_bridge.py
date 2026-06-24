@@ -532,15 +532,20 @@ def run_push_session(
 
         if byte in (b"\r", b"\n"):
             skip_lf = byte == b"\r"
-            line = buffer.decode("utf-8")
+            # errors="replace" keeps a malformed-UTF-8 line from crashing the
+            # session loop (gemini#2). Valid UTF-8 — all the byte-parity goldens
+            # — is unaffected, so the wire contract is preserved.
+            line = buffer.decode("utf-8", errors="replace")
             buffer.clear()
             result = shell.dispatch(line)
             try:
-                _send_response(transport, _render_response(shell, result), is_running)
+                sent = _send_response(transport, _render_response(shell, result), is_running)
             except transport.io_errors as e:
                 log.error("tap_bridge.run_push_session [%s] client write error: %s", transport.name, e)
                 break
-            if result.close:
+            # Stop on close, or when shutdown raced the send (symmetric with the
+            # intro send guard above, claude#3).
+            if result.close or not sent:
                 break
         else:
             # Regular character: immediate echo (interactive latency unchanged).
