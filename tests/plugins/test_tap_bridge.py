@@ -544,3 +544,16 @@ class RunPushSessionTest(unittest.TestCase):
         shell = _PushShell()
         run_push_session(transport, shell, countdown_run_srv(0))  # already shut down
         self.assertEqual(shell.dispatched, [])
+
+    def test_malformed_utf8_does_not_crash_session(self):
+        """A malformed-UTF-8 byte is replaced, not fatal (errors="replace", gemini#2/codex r2).
+
+        The line decode uses errors="replace", so an invalid byte becomes U+FFFD
+        and the session keeps running (dispatches the line + answers) instead of
+        raising UnicodeDecodeError and killing the loop.
+        """
+        transport = FakeTransport([b"a", b"\xff", b"b", b"\r"])
+        shell = _PushShell(prompt="R>")
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, ["a�b"])  # U+FFFD replacement, no crash
+        self.assertEqual(transport.sent[-1], b"\r\nR>")  # session answered normally
