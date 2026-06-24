@@ -1,0 +1,4 @@
+--- step 0: send=b''
+b'Custom SSH Shell\r\ndevice>'
+--- step 1: send=b'ex\r'
+b'ex\r\n'

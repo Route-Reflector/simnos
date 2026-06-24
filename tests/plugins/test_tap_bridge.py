@@ -24,8 +24,10 @@ from simnos.plugins.servers.tap_bridge import (
     client_to_shell_tap,
     interactive_login,
     read_line,
+    run_push_session,
     shell_to_client_tap,
 )
+from simnos.plugins.shell.cmd_shell import DispatchResult
 from tests.plugins.tap_test_helpers import countdown_run_srv, live_run_srv
 
 
@@ -40,7 +42,9 @@ class FakeTransport:
         self.recv_script = list(recv_script or [])
         self.nul_resets_skip_lf = nul_resets_skip_lf
         self.sent: list[bytes] = []
-        self.send_errors: list[BaseException] = []  # popped per sendall call
+        # Popped per sendall call; a None entry means "this send succeeds"
+        # (lets a test pass an earlier send and fail a later one).
+        self.send_errors: list[BaseException | None] = []
         self.closed = False
 
     def recv_byte(self):
@@ -53,7 +57,11 @@ class FakeTransport:
 
     def sendall(self, data: bytes) -> None:
         if self.send_errors:
-            raise self.send_errors.pop(0)
+            err = self.send_errors.pop(0)
+            if err is not None:
+                raise err
+            # None = "this send succeeds" — lets a test pass an earlier send
+            # (e.g. the push intro) and fail a later one.
         self.sent.append(data)
 
     def is_closed(self) -> bool:
@@ -406,3 +414,146 @@ class LoginToTapBoundaryTest(unittest.TestCase):
             with self.subTest(nul_resets_skip_lf=quirk):
                 writes = self._run(b"admin\r\nsecret\rXcmd\n", nul_resets_skip_lf=quirk)
                 self.assertEqual(writes, ["Xcmd\n"])
+
+
+class _PushShell:
+    """Minimal shell implementing the push-driver surface (#297).
+
+    Returns a scripted `DispatchResult` per dispatched line (default: no body,
+    same prompt, no close) and records the lines it received.
+    """
+
+    def __init__(self, *, intro="Intro", prompt="R>", newline="\r\n", script=None):
+        self.intro = intro
+        self.prompt = prompt
+        self.newline = newline
+        self._script = list(script or [])
+        self.dispatched: list[str] = []
+
+    def dispatch(self, line: str) -> DispatchResult:
+        self.dispatched.append(line)
+        if self._script:
+            return self._script.pop(0)
+        return DispatchResult(body=None, prompt=self.prompt, close=False, mode="user")
+
+
+class RunPushSessionTest(unittest.TestCase):
+    """Push session driver (#297 / §3, §3a): byte assembly + exit policies."""
+
+    def test_intro_sent_first(self):
+        """The session opens with the intro line + the first prompt (start_session)."""
+        transport = FakeTransport([])  # EOF immediately
+        shell = _PushShell(intro="Intro", prompt="R>")
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(transport.sent[0], b"Intro\r\nR>")
+
+    def test_char_echo_is_immediate(self):
+        """Regular characters are echoed one at a time before any dispatch."""
+        transport = FakeTransport([b"a", b"b"])  # no terminator -> no dispatch
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(transport.sent[1:], [b"a", b"b"])
+        self.assertEqual(shell.dispatched, [])
+
+    def test_line_dispatch_and_response_unit(self):
+        """A terminator dispatches the buffered line; newline echo + prompt are one write."""
+        transport = FakeTransport([b"h", b"i", b"\r"])
+        shell = _PushShell(prompt="R>")
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, ["hi"])
+        # intro, 'h', 'i', then the single response unit (newline echo + prompt).
+        self.assertEqual(transport.sent[1:], [b"h", b"i", b"\r\nR>"])
+
+    def test_body_rendered_with_writeline_semantics(self):
+        """Multi-line body: each line gets the shell newline; prompt follows in one unit."""
+        result = DispatchResult(body="line1\nline2", prompt="R>", close=False, mode="user")
+        transport = FakeTransport([b"x", b"\r"])
+        shell = _PushShell(prompt="R>", script=[result])
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(transport.sent[-1], b"\r\nline1\r\nline2\r\nR>")
+
+    def test_nul_is_dropped_not_echoed(self):
+        """A NUL byte is dropped (no echo, no buffer); the command still dispatches."""
+        transport = FakeTransport([b"a", b"\x00", b"b", b"\r"], nul_resets_skip_lf=False)
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, ["ab"])
+        self.assertNotIn(b"\x00", transport.sent)
+
+    def test_close_result_ends_session_without_prompt(self):
+        """A close result emits only the newline echo and stops reading further bytes."""
+        result = DispatchResult(body="bye", prompt="R>", close=True, mode="user")
+        transport = FakeTransport([b"x", b"\r", b"y"])
+        shell = _PushShell(prompt="R>", script=[result])
+        run_push_session(transport, shell, live_run_srv())
+        # newline echo only (no body, no prompt) on close; 'y' is never echoed.
+        self.assertEqual(transport.sent[-1], b"\r\n")
+        self.assertNotIn(b"y", transport.sent)
+
+    def test_recv_eof_breaks(self):
+        """recv EOF (script exhausted) ends the loop after the intro."""
+        transport = FakeTransport([])
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(transport.sent, [b"Intro\r\nR>"])
+
+    def test_recv_io_error_breaks(self):
+        """recv io_errors ends the loop (disconnect)."""
+        transport = FakeTransport([OSError("gone")])
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, [])
+
+    def test_recv_timeout_then_is_closed_breaks(self):
+        """On a recv timeout the loop re-checks liveness; a closed transport breaks."""
+        transport = FakeTransport([TimeoutError()])
+        transport.closed = True
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, [])
+
+    def test_recv_timeout_continues_when_alive(self):
+        """On a recv timeout with a live transport the loop keeps reading."""
+        transport = FakeTransport([TimeoutError(), b"a", b"\r"])
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, ["a"])
+
+    def test_echo_send_timeout_is_disconnect(self):
+        """An immediate-echo send timeout disconnects (write failure policy §3a)."""
+        transport = FakeTransport([b"a", b"b"])
+        transport.send_errors = [None, TimeoutError()]  # intro ok, first char echo times out
+        shell = _PushShell()
+        run_push_session(transport, shell, live_run_srv())
+        # Loop broke on the first char echo, so 'b' was never reached.
+        self.assertEqual(shell.dispatched, [])
+
+    def test_batch_send_timeout_retries(self):
+        """A response (batch) send timeout is retried, not a disconnect (§3a)."""
+        result = DispatchResult(body="ok", prompt="R>", close=True, mode="user")
+        transport = FakeTransport([b"x", b"\r"])
+        transport.send_errors = [None, None, TimeoutError()]  # intro ok, echo ok, batch times out once
+        shell = _PushShell(script=[result])
+        run_push_session(transport, shell, live_run_srv())
+        # The response unit was retried and ultimately sent.
+        self.assertEqual(transport.sent[-1], b"\r\n")
+
+    def test_is_running_cleared_exits_loop(self):
+        """A cleared run flag stops the loop before reading any byte."""
+        transport = FakeTransport([b"a", b"\r"])
+        shell = _PushShell()
+        run_push_session(transport, shell, countdown_run_srv(0))  # already shut down
+        self.assertEqual(shell.dispatched, [])
+
+    def test_malformed_utf8_does_not_crash_session(self):
+        """A malformed-UTF-8 byte is replaced, not fatal (errors="replace", gemini#2/codex r2).
+
+        The line decode uses errors="replace", so an invalid byte becomes U+FFFD
+        and the session keeps running (dispatches the line + answers) instead of
+        raising UnicodeDecodeError and killing the loop.
+        """
+        transport = FakeTransport([b"a", b"\xff", b"b", b"\r"])
+        shell = _PushShell(prompt="R>")
+        run_push_session(transport, shell, live_run_srv())
+        self.assertEqual(shell.dispatched, ["a�b"])  # U+FFFD replacement, no crash
+        self.assertEqual(transport.sent[-1], b"\r\nR>")  # session answered normally

@@ -25,7 +25,26 @@ from simnos.plugins.servers.ssh_server_paramiko import (
 )
 from simnos.plugins.servers.tap_bridge import client_to_shell_tap, read_line, shell_to_client_tap
 from simnos.plugins.servers.tap_io import TapIO
+from simnos.plugins.shell.cmd_shell import DispatchResult
 from tests.plugins.tap_test_helpers import countdown_run_srv, live_run_srv
+
+
+class _PushConvergenceShell:
+    """Minimal real push shell for the SSH teardown-convergence tests (#297).
+
+    Implements the surface `run_push_session` needs (intro / prompt / newline /
+    dispatch). The server constructs it with the usual shell kwargs (stdin /
+    stdout / nos / is_running / ...), all ignored except `is_running`.
+    """
+
+    def __init__(self, *, is_running, **kwargs):
+        self.intro = "Test Shell"
+        self.prompt = "Router>"
+        self.newline = "\r\n"
+        self.is_running = is_running
+
+    def dispatch(self, line: str) -> DispatchResult:
+        return DispatchResult(body=f"echo: {line}", prompt=self.prompt, close=False, mode="user")
 
 
 class ParamikoSshServerInterfaceTest(unittest.TestCase):
@@ -902,71 +921,28 @@ class ParamikoSshServerTest(unittest.TestCase):
         ParamikoSshServer._moduli_loaded = None
         self.arguments: dict = make_paramiko_server_args()
 
-    def test_watchdog_run_srv_loop(self):
-        """Check that the watchdog run_srv loop is executed."""
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running: Mock = Mock()
-        mock_run_srv: Mock = Mock()
-        mock_session: Mock = Mock()
-        mock_shell: Mock = Mock()
-        mock_run_srv.is_set.side_effect = [True, False]
-        paramiko_server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        self.assertEqual(mock_run_srv.is_set.call_count, 2)
-
-    def test_watchdog_session_is_not_alive(self):
-        """Check that the watchdog session is not alive."""
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running: Mock = Mock()
-        mock_run_srv: Mock = Mock()
-        mock_session: Mock = Mock()
-        mock_shell: Mock = Mock()
-        mock_session.is_alive.return_value = False
-        paramiko_server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        mock_session.is_alive.assert_called_once()
-        mock_run_srv.is_set.assert_called_once()
-        mock_shell.stop.assert_called_once()
-
-    def test_watchdog_shell_stop_when_is_running_false(self):
-        """Check that the watchdog shell is stopped when is_running is False."""
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running: Mock = Mock()
-        mock_run_srv: Mock = Mock()
-        mock_session: Mock = Mock()
-        mock_shell: Mock = Mock()
-        mock_run_srv.is_set.side_effect = [True] * 2 + [False]
-        mock_is_running.is_set.side_effect = [True] * 1 + [False]
-        paramiko_server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        mock_shell.stop.assert_called_once()
-
-    def test_watchdog_shell_stop_when_session_is_alive_false(self):
-        """Check that the watchdog shell is stopped when the session is alive is False."""
-        paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running: Mock = Mock()
-        mock_run_srv: Mock = Mock()
-        mock_session: Mock = Mock()
-        mock_shell: Mock = Mock()
-        mock_session.is_alive.side_effect = [True] * 1 + [False]
-        paramiko_server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        mock_shell.stop.assert_called_once()
-
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
     def test_connection_function(
         self,
         mock_transport: MagicMock,
-        mock_shell_to_client_tap: MagicMock,
-        mock_client_to_shell_tap: MagicMock,
+        mock_run_push_session: MagicMock,
     ):
-        """Check that the connection function is executed correctly."""
+        """connection_function drives the session via the push driver (#297).
+
+        The two tap threads + watchdog were folded into `run_push_session`,
+        which runs on this connection thread; assert it is invoked once with the
+        shell and the server's `is_running` flag.
+        """
         mock_client: MagicMock = MagicMock()
         mock_is_running = Mock()
         paramiko_server: ParamikoSshServer = ParamikoSshServer(**self.arguments)
         paramiko_server.connection_function(mock_client, mock_is_running)
 
         mock_transport.assert_called_once()
-        mock_shell_to_client_tap.assert_called_once()
-        mock_client_to_shell_tap.assert_called_once()
+        mock_run_push_session.assert_called_once()
+        # is_running is forwarded as the session's run flag (3rd positional arg).
+        self.assertIs(mock_run_push_session.call_args.args[2], mock_is_running)
 
     @mock.patch("paramiko.Transport")
     def test_connection_function_accept_returns_none(self, mock_transport_cls: MagicMock):
@@ -1655,30 +1631,9 @@ class TeardownFixTests(unittest.TestCase):
         ParamikoSshServer._default_key = None
         self.arguments: dict = make_paramiko_server_args()
 
-    # -- Watchdog tests --------------------------------------------------------
-
-    def test_ssh_watchdog_breaks_on_is_running_cleared(self):
-        """Watchdog should break and call shell.stop() once when is_running clears."""
-        server = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running = Mock()
-        mock_run_srv = Mock()
-        mock_session = Mock()
-        mock_shell = Mock()
-        mock_run_srv.is_set.side_effect = [True, False]
-        mock_is_running.is_set.return_value = False
-        server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        mock_shell.stop.assert_called_once()
-
-    def test_ssh_watchdog_breaks_on_session_not_alive(self):
-        """Watchdog should break and call shell.stop() once when session is dead."""
-        server = ParamikoSshServer(**self.arguments, watchdog_interval=0.01)
-        mock_is_running = Mock()
-        mock_run_srv = Mock()
-        mock_session = Mock()
-        mock_shell = Mock()
-        mock_session.is_alive.return_value = False
-        server.watchdog(mock_is_running, mock_run_srv, mock_session, mock_shell)
-        mock_shell.stop.assert_called_once()
+    # Watchdog tests removed with the watchdog method (#297 / §3): the push
+    # session loop propagates stop via the channel recv timeout + is_running
+    # re-check (covered by RunPushSessionTest and SshIntegrationTests).
 
     # -- client_to_shell_tap tests -------------------------------------------
 
@@ -1758,37 +1713,40 @@ class TeardownFixTests(unittest.TestCase):
 
     # -- connection_function tests --------------------------------------------
 
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
-    def test_channel_settimeout_is_called(
+    def test_channel_settimeout_is_clamped_for_shutdown(
         self,
         mock_transport_cls: MagicMock,
-        mock_shell_to_client_tap: MagicMock,
-        mock_client_to_shell_tap: MagicMock,
+        mock_run_push_session: MagicMock,
     ):
-        """connection_function should call channel.settimeout(self.timeout)."""
+        """The channel recv timeout (= the push loop's shutdown-poll interval) is
+        clamped to min(timeout, watchdog_interval, SHUTDOWN_IO_TIMEOUT) so a large
+        configured timeout cannot delay stop convergence (#297, codex#1)."""
         mock_session = MagicMock()
         mock_channel = MagicMock()
         mock_session.accept.return_value = mock_channel
         mock_transport_cls.return_value = mock_session
 
-        server = ParamikoSshServer(**self.arguments)
+        # timeout=30 (>> SHUTDOWN_IO_TIMEOUT) must be clamped down to the poll bound.
+        # (make_paramiko_server_args omits timeout/watchdog_interval, so these are
+        # not duplicate kwargs.)
+        server = ParamikoSshServer(**self.arguments, timeout=30, watchdog_interval=0.5)
         server.connection_function(MagicMock(), Mock())
 
-        mock_channel.settimeout.assert_called_once_with(server.timeout)
+        expected = min(server.timeout, server.watchdog_interval, SHUTDOWN_IO_TIMEOUT)
+        assert expected == 0.5  # sanity: the clamp actually bites here
+        mock_channel.settimeout.assert_called_once_with(expected)
 
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
     def test_channel_login_send_error_closes_connection(
         self,
         mock_transport_cls: MagicMock,
-        mock_shell_to_client_tap: MagicMock,
-        mock_client_to_shell_tap: MagicMock,
+        mock_run_push_session: MagicMock,
     ):
         """PR2 caller-wrap pin: a send error during channel login closes the
-        connection without starting taps/shell and without propagating."""
+        connection without starting the push session and without propagating."""
         mock_session = MagicMock()
         mock_channel = MagicMock()
         mock_session.accept.return_value = mock_channel
@@ -1806,8 +1764,7 @@ class TeardownFixTests(unittest.TestCase):
             mock_iface_cls.return_value.auth_method_used = "none"
             server.connection_function(MagicMock(), Mock())  # must not raise
 
-        mock_client_to_shell_tap.assert_not_called()
-        mock_shell_to_client_tap.assert_not_called()
+        mock_run_push_session.assert_not_called()
         mock_session.close.assert_called_once()
 
     @mock.patch("paramiko.Transport")
@@ -1867,37 +1824,31 @@ class TeardownFixTests(unittest.TestCase):
         assert mock_session.banner_timeout == SHUTDOWN_IO_TIMEOUT
         assert mock_session.handshake_timeout == SHUTDOWN_IO_TIMEOUT
 
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.client_to_shell_tap")
-    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.shell_to_client_tap")
+    @mock.patch("simnos.plugins.servers.ssh_server_paramiko.run_push_session")
     @mock.patch("paramiko.Transport")
-    def test_tapper_threads_are_daemon(
+    def test_connection_function_spawns_no_inner_threads(
         self,
         mock_transport_cls: MagicMock,
-        mock_shell_to_client_tap: MagicMock,
-        mock_client_to_shell_tap: MagicMock,
+        mock_run_push_session: MagicMock,
     ):
-        """Tapper and watchdog threads should be created with daemon=True."""
+        """The push driver runs on the connection thread itself (#297 / §3).
+
+        The old two tapper threads + watchdog are gone; connection_function
+        must not spawn any inner thread (the connection thread's daemon-ness is
+        owned by TCPServerBase._listen, pinned in test_servers.py).
+        """
         mock_session = MagicMock()
         mock_channel = MagicMock()
         mock_session.accept.return_value = mock_channel
         mock_transport_cls.return_value = mock_session
 
-        threads_created = []
-        original_thread = threading.Thread
-
-        def capture_thread(*args, **kwargs):
-            t = original_thread(*args, **kwargs)
-            threads_created.append(t)
-            return t
-
         server = ParamikoSshServer(**self.arguments)
-        with mock.patch("simnos.plugins.servers.ssh_server_paramiko.threading.Thread", side_effect=capture_thread):
+        with mock.patch(
+            "simnos.plugins.servers.ssh_server_paramiko.threading.Thread", side_effect=AssertionError("no inner thread")
+        ):
             server.connection_function(MagicMock(), Mock())
 
-        # 3 threads: client_to_shell_tapper, shell_to_client_tapper, watchdog
-        assert len(threads_created) == 3
-        for t in threads_created:
-            assert t.daemon, f"Thread {t.name} should be daemon"
+        mock_run_push_session.assert_called_once()
 
     @mock.patch("paramiko.Transport")
     def test_start_server_exception_triggers_cleanup(self, mock_transport_cls: MagicMock):
@@ -1935,7 +1886,7 @@ class SshIntegrationTests(unittest.TestCase):
         nos.commands = {}
         nos.auth = None
 
-        self.shell_cls = MagicMock()
+        self.shell_cls = _PushConvergenceShell
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind(("127.0.0.1", 0))
@@ -1954,81 +1905,115 @@ class SshIntegrationTests(unittest.TestCase):
         )
         self.server.port = self.port
 
-    def _make_blocking_shell(self):
-        """Create a shell factory whose start() blocks until stop() is called.
+    def _connect_and_wait_for_intro(self, port: int | None = None) -> paramiko.SSHClient:
+        """Open a real SSH shell and read until the intro/prompt arrives.
 
-        Returns (shell_started, shell_stop_called) events and installs the
-        factory on self.shell_cls.
+        Receiving the intro proves the push session loop sent it and is now
+        blocked in recv — the precondition for a meaningful teardown test.
         """
-        shell_stop_called = threading.Event()
-        shell_started = threading.Event()
-
-        def shell_factory(*args, **kwargs):
-            shell_instance = MagicMock()
-            shell_instance.start.side_effect = lambda: shell_started.set() or shell_stop_called.wait(timeout=10)
-            shell_instance.stop.side_effect = lambda: shell_stop_called.set()
-            return shell_instance
-
-        self.shell_cls.side_effect = shell_factory
-        return shell_started, shell_stop_called
+        client = paramiko.SSHClient()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
+        client.connect("127.0.0.1", port=port or self.port, username="admin", password="admin", timeout=5)
+        channel = client.invoke_shell()
+        channel.settimeout(5)
+        received = b""
+        while b"Router>" not in received:
+            received += channel.recv(1024)
+        return client
 
     def _assert_threads_converged(self):
         """Assert all server connection threads have exited."""
         alive = [t for t in self.server._connection_threads if t.is_alive()]
         self.assertEqual(len(alive), 0, f"Threads still alive: {alive}")
 
+    def _wait_threads_converged(self, timeout: float):
+        """Poll until every connection thread has exited or *timeout* elapses."""
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            if not any(t.is_alive() for t in self.server._connection_threads):
+                return
+            time.sleep(0.05)
+
     def _assert_stop_time(self, elapsed):
         """Assert stop() completed within the expected time budget."""
         budget = SHUTDOWN_IO_TIMEOUT * 3 + 2
         self.assertLess(elapsed, budget, f"stop() took {elapsed:.1f}s, expected < {budget}s")
 
-    def test_ssh_stop_propagates_shell_stop_and_threads_converge(self):
-        """After SSH session + stop(), shell.stop() is called and threads converge."""
-        shell_started, shell_stop_called = self._make_blocking_shell()
+    def test_ssh_session_converges_on_client_disconnect(self):
+        """A client disconnect ends the push session loop and the connection thread converges (#297).
 
+        Replaces the old shell.stop()-propagation pin: the push loop has no
+        blocking cmdloop to interrupt — it exits when recv sees EOF.
+        """
         self.server.start()
         try:
-            client = paramiko.SSHClient()
-            client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
-            client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
-            try:
-                client.invoke_shell()
-                self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
-            finally:
-                client.close()
-
-            self.assertTrue(
-                shell_stop_called.wait(timeout=5),
-                "shell.stop() was not called after client disconnect",
-            )
+            client = self._connect_and_wait_for_intro()
+            client.close()  # disconnect -> server-side recv EOF -> push loop exits
+            self._wait_threads_converged(timeout=5)
+            self._assert_threads_converged()  # converged on disconnect alone, before server.stop()
         finally:
             self.server.stop()
 
-        self._assert_threads_converged()
+    def test_ssh_server_stop_converges_with_client_connected(self):
+        """server.stop() while a client is connected converges the push session within budget (#297).
 
-    def test_ssh_server_stop_first_propagates_shell_stop(self):
-        """server.stop() while client is connected should propagate shell.stop() and converge."""
-        shell_started, shell_stop_called = self._make_blocking_shell()
-
+        stop() clears is_running; the push loop's channel recv timeout re-checks
+        it and exits (replacing the old watchdog's stop propagation, §3).
+        """
         self.server.start()
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())  # noqa: S507
+        client = self._connect_and_wait_for_intro()
         try:
-            client.connect("127.0.0.1", port=self.port, username="admin", password="admin", timeout=5)
-            client.invoke_shell()
-            self.assertTrue(shell_started.wait(timeout=5), "shell did not start")
-
             t0 = time.monotonic()
             self.server.stop()
             elapsed = time.monotonic() - t0
 
-            self.assertTrue(shell_stop_called.is_set(), "shell.stop() was not called after server.stop()")
             self._assert_stop_time(elapsed)
+            self._assert_threads_converged()
         finally:
             client.close()
             self.server.stop()
 
-        self._assert_threads_converged()
+    def test_ssh_large_timeout_still_converges_on_stop(self):
+        """A large channel `timeout` must not delay stop convergence (#297, codex#1).
+
+        The push loop wakes on the channel recv timeout to re-check is_running.
+        Without bounding it, a `timeout` above SHUTDOWN_SERVER_PER_THREAD_JOIN (2s)
+        would leave the connection thread parked past the join budget. The clamp
+        in connection_function (min(timeout, watchdog_interval, SHUTDOWN_IO_TIMEOUT))
+        keeps convergence within budget; this builds a server with timeout=30 to
+        pin it (without the clamp the thread would survive ~30s and fail).
+        """
+        nos = MagicMock()
+        nos.initial_prompt = "Router>"
+        nos.commands = {}
+        nos.auth = None
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(("127.0.0.1", 0))
+            port = s.getsockname()[1]
+        server = ParamikoSshServer(
+            shell=_PushConvergenceShell,
+            nos=nos,
+            nos_inventory_config={},
+            port=port,
+            username="admin",
+            password="admin",
+            address="127.0.0.1",
+            timeout=30,  # >> SHUTDOWN_SERVER_PER_THREAD_JOIN; the clamp must rescue convergence
+            watchdog_interval=0.1,
+        )
+        server.port = port
+        server.start()
+        client = self._connect_and_wait_for_intro(port=port)
+        try:
+            t0 = time.monotonic()
+            server.stop()
+            elapsed = time.monotonic() - t0
+            self._assert_stop_time(elapsed)
+            alive = [t for t in server._connection_threads if t.is_alive()]
+            self.assertEqual(alive, [], f"connection thread parked by large timeout: {alive}")
+        finally:
+            client.close()
+            server.stop()
 
     def test_ssh_incomplete_handshake_stop_converges(self):
         """TCP-only connection (no SSH handshake) + stop() should converge."""

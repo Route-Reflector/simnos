@@ -3,12 +3,14 @@ Module tests for compatibility with Docker containers.
 """
 
 # pylint: disable=unused-argument
+import logging
 import os
 import socket
 import subprocess
 import time
 
 from netmiko import ConnectHandler
+import paramiko
 import pytest
 
 IN_GITHUB_ACTIONS: bool = os.getenv("GITHUB_ACTIONS") is not None
@@ -45,16 +47,43 @@ def _skip_docker_tests() -> bool:
         return True
 
 
-def _wait_for_port(host, port, timeout=30, interval=0.5):
-    """Wait until a TCP port is accepting connections."""
+def _wait_for_ssh(host, port, timeout=30, interval=0.3):
+    """Wait until the container's SSH server can complete a protocol banner exchange.
+
+    A published Docker port is accepted by the proxy the instant the container
+    starts — long before SIMNOS binds and starts speaking SSH inside it (host
+    key generation + platform load take ~2s). A plain TCP probe therefore
+    returns far too early and the test connects before the server is ready
+    ("Error reading SSH protocol banner"). Probe an actual SSH handshake so the
+    test proceeds only once the server can serve one.
+    """
     deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
-        try:
-            with socket.create_connection((host, port), timeout=1):
+    last_err: Exception | None = None
+    # The pre-ready handshakes log noisy banner-read tracebacks; silence them
+    # only for the duration of this probe (scoped, not a worker-global mutation).
+    transport_log = logging.getLogger("paramiko.transport")
+    prev_level = transport_log.level
+    transport_log.setLevel(logging.CRITICAL)
+    try:
+        while time.monotonic() < deadline:
+            try:
+                sock = socket.create_connection((host, port), timeout=2)
+            except OSError as e:
+                last_err = e
+                time.sleep(interval)
+                continue
+            transport = paramiko.Transport(sock)
+            try:
+                transport.start_client(timeout=3)
                 return
-        except OSError:
-            time.sleep(interval)
-    raise TimeoutError(f"Port {port} not ready after {timeout}s")
+            except Exception as e:  # banner not ready yet / connection reset
+                last_err = e
+                time.sleep(interval)
+            finally:
+                transport.close()
+        raise TimeoutError(f"SSH on {host}:{port} not ready after {timeout}s ({last_err})")
+    finally:
+        transport_log.setLevel(prev_level)
 
 
 @pytest.fixture
@@ -65,8 +94,8 @@ def setup():
             ["docker", "compose", "-f", "docker/docker-compose.yaml", "up", "-d"],
             check=True,
         )
-        _wait_for_port("localhost", 12723)
-        _wait_for_port("localhost", 12724)
+        _wait_for_ssh("localhost", 12723)
+        _wait_for_ssh("localhost", 12724)
         yield
     finally:
         subprocess.run(
@@ -75,6 +104,11 @@ def setup():
         )
 
 
+# Both docker tests drive the same `docker compose` project (one container set);
+# xdist_group pins them to a single worker so they run sequentially under
+# `-n auto` instead of one test's `compose down` tearing down the other's
+# container mid-run (#297).
+@pytest.mark.xdist_group("docker_compose")
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
 @pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container(setup):
@@ -96,6 +130,7 @@ def test_container(setup):
     assert all("Traceback" not in i for i in outputs)
 
 
+@pytest.mark.xdist_group("docker_compose")  # serialize with test_container (shared compose project, #297)
 @pytest.mark.skipif(_skip_docker_tests(), reason="Docker is not available or in CI.")
 @pytest.mark.timeout(600)  # cold `docker compose up` (image build) can exceed the global 300s (#233)
 def test_container_multiple_connections(setup):

@@ -45,4 +45,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 USER nonroot
 
-CMD ["simnos", "-i", "/app/docker/inventory.yaml"]
+CMD ["simnos", "up", "-i", "/app/docker/inventory.yaml"]

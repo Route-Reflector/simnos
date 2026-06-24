@@ -16,10 +16,13 @@ import io
 import logging
 import threading
 import time
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.tap_io import TapIO, process_tap_line
+
+if TYPE_CHECKING:
+    from simnos.plugins.shell.cmd_shell import DispatchResult
 
 log = logging.getLogger(__name__)
 
@@ -374,3 +377,186 @@ def interactive_login(
         entered_user,
     )
     return authenticated, skip_lf
+
+
+class PushShell(Protocol):
+    """The shell surface `run_push_session` drives (CMDShell implements it, #297).
+
+    Duck-typed so the session handler stays shell-agnostic and Stage 3 telnet
+    can reuse the same driver: `dispatch` is the I/O-independent core, while
+    `intro` / `prompt` / `newline` supply the wire framing.
+    """
+
+    intro: str | None
+    prompt: str
+    newline: str
+
+    def dispatch(self, line: str) -> "DispatchResult": ...
+
+
+def _assemble_wire(writes: list[str]) -> bytes:
+    """Normalize each shell write and join to wire bytes (#297 / §3a).
+
+    `process_tap_line` is applied per write, mirroring how `shell_to_client_tap`
+    processed each shell stdout write individually (NUL strip / bare-LF → CRLF).
+    This is the session-handler write-unit assembly shared by SSH (Stage 1) and
+    telnet (Stage 3).
+    """
+    return "".join(process_tap_line(w) for w in writes).encode("utf-8")
+
+
+def _render_intro(shell: PushShell) -> bytes:
+    """Initial wire bytes: the shell intro line + the first prompt (#297 / §3a).
+
+    Mirrors `cmd.Cmd.cmdloop` writing ``str(intro)+"\\n"`` then ``self.prompt``
+    as two stdout writes (assembled per write so CR/LF/NUL normalization matches
+    the legacy `shell_to_client_tap`).
+    """
+    writes: list[str] = []
+    if shell.intro:
+        writes.append(f"{shell.intro}\n")
+    writes.append(shell.prompt)
+    return _assemble_wire(writes)
+
+
+def _render_response(shell: PushShell, result: "DispatchResult") -> bytes:
+    """Wire bytes for one dispatched line: newline echo + body + next prompt (#297 / §3a).
+
+    The line-terminator echo (``\\r\\n``) is held until dispatch completes and
+    emitted as the first part of this single write unit, reproducing the legacy
+    echo coalescing without the timing-dependent ``_COALESCE_DELAY``. On a close
+    result neither body nor prompt is emitted (the legacy `default` wrote
+    nothing on its close paths), leaving just the newline echo. Body lines
+    reproduce `writeline`'s per-line ``newline``.
+    """
+    writes: list[str] = ["\r\n"]  # line-terminator echo, held until dispatch
+    if not result.close:
+        if result.body is not None:
+            writes.extend(line + shell.newline for line in str(result.body).splitlines())
+        writes.append(result.prompt)
+    return _assemble_wire(writes)
+
+
+def _send_response(transport: TransportAdapter, data: bytes, is_running: threading.Event) -> bool:
+    """Send a response block, retrying a send timeout (batch write policy §3a).
+
+    Mirrors `shell_to_client_tap`'s retry-on-timeout: a slow client whose send
+    times out is retried rather than disconnected (deliberately asymmetric with
+    the immediate-echo policy, which treats a timeout as a disconnect). Returns
+    True once sent; False if shutdown raced the retry. `io_errors` propagate to
+    the caller.
+    """
+    while is_running.is_set():
+        try:
+            transport.sendall(data)
+            return True
+        except TimeoutError:
+            log.debug(
+                "tap_bridge.run_push_session [%s] write timeout (%d bytes), retrying",
+                transport.name,
+                len(data),
+            )
+            continue
+    return False
+
+
+def run_push_session(
+    transport: TransportAdapter,
+    shell: PushShell,
+    is_running: threading.Event,
+    *,
+    initial_skip_lf: bool = False,
+) -> None:
+    """Drive one client session with push dispatch on a single thread (#297 / §3, §3a).
+
+    Folds the former `client_to_shell_tap` + `shell_to_client_tap` + `TapIO` +
+    `cmd.Cmd.cmdloop` into one read -> echo -> dispatch -> write loop per
+    connection. The transport stays synchronous (paramiko channel) in Stage 1;
+    Stage 2 drives the same `shell.dispatch` core from an async session. The
+    wire byte stream is identical to the legacy tap pair (pinned by
+    `tests/plugins/test_ssh_byte_parity.py`).
+
+    Backpressure that the old code enforced with `shell_replied_event` (no new
+    input echoed until the previous prompt is sent) is structural here: one
+    thread reads a terminator, dispatches, writes the response+prompt, and only
+    then reads the next byte.
+
+    `is_running` is the server-level run flag (shared across connections), read
+    only here: the loop exits when the server stops, the client disconnects, or
+    the shell closes. The caller configures the transport's recv timeout
+    beforehand; a recv timeout is a periodic wake to re-check shutdown +
+    liveness (replacing the old watchdog thread's stop propagation, §3).
+    `initial_skip_lf` consumes a trailing LF/NUL left by a preceding channel
+    login (auth_none).
+    """
+    # Send the intro + first prompt through the same retry/io-error path as a
+    # response batch (the legacy intro went via shell_to_client_tap, which
+    # retried timeouts and broke on io_errors); a client that vanished during
+    # channel setup must tear down cleanly, not raise out of the thread.
+    try:
+        if not _send_response(transport, _render_intro(shell), is_running):
+            return
+    except transport.io_errors:
+        log.debug("tap_bridge.run_push_session [%s] intro write closed", transport.name)
+        return
+    buffer = bytearray()
+    skip_lf = initial_skip_lf
+    while is_running.is_set():
+        try:
+            byte = transport.recv_byte()
+        except TimeoutError:
+            # Periodic wake: re-check shutdown + transport liveness, then keep
+            # reading. recv timeout is configured by the caller, not here.
+            if transport.is_closed():
+                break
+            continue
+        except transport.io_errors:
+            log.debug("tap_bridge.run_push_session [%s] read closed", transport.name)
+            break
+
+        if byte is None:
+            break  # EOF / peer gone (adapters normalize b"" to None)
+
+        # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL is
+        # a complete sequence, so reset skip_lf; SSH preserves it.
+        if byte == b"\x00":
+            if transport.nul_resets_skip_lf:
+                skip_lf = False
+            continue
+
+        # Consume the LF half of a CR LF pair.
+        if skip_lf:
+            skip_lf = False
+            if byte == b"\n":
+                continue
+
+        if byte in (b"\r", b"\n"):
+            skip_lf = byte == b"\r"
+            # errors="replace" keeps a malformed-UTF-8 line from crashing the
+            # session loop (gemini#2). Valid UTF-8 — all the byte-parity goldens
+            # — is unaffected, so the wire contract is preserved.
+            line = buffer.decode("utf-8", errors="replace")
+            buffer.clear()
+            result = shell.dispatch(line)
+            try:
+                sent = _send_response(transport, _render_response(shell, result), is_running)
+            except transport.io_errors as e:
+                log.error("tap_bridge.run_push_session [%s] client write error: %s", transport.name, e)
+                break
+            # Stop on close, or when shutdown raced the send (symmetric with the
+            # intro send guard above, claude#3).
+            if result.close or not sent:
+                break
+        else:
+            # Regular character: immediate echo (interactive latency unchanged).
+            try:
+                transport.sendall(byte)
+            except TimeoutError as e:
+                # Immediate echo timeout is a disconnect (write failure policy
+                # §3a, asymmetric with the batch retry in _send_response).
+                log.error("tap_bridge.run_push_session [%s] echo write timeout: %s", transport.name, e)
+                break
+            except transport.io_errors as e:
+                log.error("tap_bridge.run_push_session [%s] client write error: %s", transport.name, e)
+                break
+            buffer += byte

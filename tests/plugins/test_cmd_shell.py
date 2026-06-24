@@ -908,3 +908,21 @@ class HotReloadTest(TestCase):
                 assert output == "test output"
             finally:
                 undo_change_file()
+
+
+def test_dispatch_router_assumes_only_eof_and_help_do_methods():
+    """Pin the do_* method set the push `dispatch()` router hardcodes (#297, claude#2).
+
+    `CMDShell.dispatch()` reproduces `cmd.Cmd.onecmd` routing by handling
+    `do_EOF` / `do_help` by name and sending everything else to
+    `_dispatch_general` (the `default` target). A newly added `do_*` method would
+    be invoked by the telnet cmdloop (`cmd.Cmd.onecmd` -> `getattr`) but fall
+    through to `_dispatch_general` on the SSH push path, silently diverging the
+    wire. This guard fails loudly so the new method's routing must be added to
+    `dispatch()` alongside it.
+    """
+    do_methods = {m for m in dir(CMDShell) if m.startswith("do_")}
+    assert do_methods == {"do_EOF", "do_help"}, (
+        f"CMDShell gained do_* method(s) {do_methods - {'do_EOF', 'do_help'}}; "
+        f"add their routing to CMDShell.dispatch() (#297) and update this pin."
+    )

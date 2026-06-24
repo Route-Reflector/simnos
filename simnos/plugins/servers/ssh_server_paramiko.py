@@ -3,12 +3,12 @@ This module implements an SSH server done using
 paramiko as the SSH connection library.
 """
 
+import io
 import logging
 from pathlib import Path
 import socket
 import threading
-import time
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 import paramiko
 import paramiko.rsakey
@@ -17,11 +17,9 @@ from simnos.core.nos import Nos
 from simnos.core.servers import TCPServerBase
 from simnos.core.timeouts import SHUTDOWN_IO_TIMEOUT
 from simnos.plugins.servers.tap_bridge import (
-    client_to_shell_tap,
     interactive_login,
-    shell_to_client_tap,
+    run_push_session,
 )
-from simnos.plugins.servers.tap_io import TapIO
 
 if TYPE_CHECKING:
     from simnos.core.host import HostRenderConfig
@@ -331,28 +329,6 @@ class ParamikoSshServer(TCPServerBase):
                     log.warning("No known key type found, skipping line: %s", line)
         return keys
 
-    def watchdog(
-        self,
-        is_running: threading.Event,
-        run_srv: threading.Event,
-        session: paramiko.Transport,
-        shell: Any,
-    ):
-        """
-        Method to monitor server liveness and recover where possible.
-        """
-        while run_srv.is_set():
-            if not session.is_alive():
-                log.warning("ParamikoSshServer.watchdog - session not alive, stopping shell")
-                break
-
-            if not is_running.is_set():
-                break
-
-            time.sleep(min(self.watchdog_interval, SHUTDOWN_IO_TIMEOUT))
-
-        shell.stop()
-
     def _channel_login(self, channel) -> tuple[bool, bool]:
         """
         Perform channel-level login for auth_none platforms (e.g. Dell PowerConnect).
@@ -376,10 +352,6 @@ class ParamikoSshServer(TCPServerBase):
         )
 
     def connection_function(self, client: socket.socket, is_running: threading.Event):
-        shell_replied_event = threading.Event()
-        run_srv = threading.Event()
-        run_srv.set()
-
         # determine if this NOS requires auth_none
         allow_auth_none = getattr(self.nos, "auth", None) == "none"
 
@@ -418,8 +390,15 @@ class ParamikoSshServer(TCPServerBase):
                 return
 
             # Timeout responsibility lives here (not in the adapter / shared
-            # helpers): configure it before any channel I/O below.
-            channel.settimeout(self.timeout)
+            # helpers): configure it before any channel I/O below. The push
+            # session loop wakes on this recv timeout to re-check `is_running`,
+            # so it doubles as the shutdown-poll interval that the old watchdog
+            # thread provided. Bound it by `watchdog_interval` and
+            # `SHUTDOWN_IO_TIMEOUT` so a large configured `timeout` cannot delay
+            # stop convergence past the per-thread join budget (#297, codex#1);
+            # a byte arrives immediately regardless, so interactive latency is
+            # unaffected.
+            channel.settimeout(min(self.timeout, self.watchdog_interval, SHUTDOWN_IO_TIMEOUT))
 
             # For auth_none platforms (e.g. Dell PowerConnect), perform channel-level
             # login before starting the shell.  When publickey auth is also configured,
@@ -436,35 +415,17 @@ class ParamikoSshServer(TCPServerBase):
                     log.warning("Channel login failed, closing connection")
                     return
 
-            # create stdio for the shell
-            shell_stdin, shell_stdout = TapIO(run_srv), TapIO(run_srv)
-
-            # bridge the channel and the shell through the shared tap pair
+            # bridge the channel and the shell through the push session driver
             transport_adapter = ParamikoChannelAdapter(channel)
 
-            # start intermediate thread to tap into
-            # the client->shell_stdin bytes stream
-            client_to_shell_tapper = threading.Thread(
-                target=client_to_shell_tap,
-                args=(transport_adapter, shell_stdin, shell_replied_event, run_srv),
-                kwargs={"initial_skip_lf": skip_lf, "shell_stdout": shell_stdout},
-                daemon=True,
-            )
-            client_to_shell_tapper.start()
-
-            # start intermediate thread to tap into
-            # the shell_stdout->client bytes stream
-            shell_to_client_tapper = threading.Thread(
-                target=shell_to_client_tap,
-                args=(transport_adapter, shell_stdout, shell_replied_event, run_srv),
-                daemon=True,
-            )
-            shell_to_client_tapper.start()
-
-            # create the client shell
+            # Create the client shell. The push driver calls `shell.dispatch`
+            # directly (W3, #297); cmd.Cmd's stdin/stdout are vestigial on this
+            # path (no cmdloop), so they are stub StringIO streams. `is_running`
+            # is the server-level run flag the dispatch core and the session
+            # loop both observe for shutdown.
             client_shell = self.shell(
-                stdin=shell_stdin,
-                stdout=shell_stdout,
+                stdin=io.StringIO(),
+                stdout=io.StringIO(),
                 nos=self.nos,
                 nos_inventory_config=self.nos_inventory_config,
                 is_running=is_running,
@@ -473,20 +434,13 @@ class ParamikoSshServer(TCPServerBase):
                 **self.shell_configuration,
             )
 
-            # start watchdog thread
-            watchdog_thread = threading.Thread(
-                target=self.watchdog, args=(is_running, run_srv, session, client_shell), daemon=True
-            )
-            watchdog_thread.start()
-
-            # running this command will block this function until shell exits
-            client_shell.start()
-            log.debug("ParamikoSshServer.connection_function stopped shell thread")
+            # Drive the session on this connection thread: read -> echo ->
+            # dispatch -> write. Blocks until the client disconnects, the shell
+            # closes, or the server stops (channel recv timeout + is_running
+            # re-check replace the old watchdog thread, §3).
+            run_push_session(transport_adapter, client_shell, is_running, initial_skip_lf=skip_lf)
+            log.debug("ParamikoSshServer.connection_function session ended")
 
         finally:
-            # Stop all server threads
-            run_srv.clear()
-            log.debug("ParamikoSshServer.connection_function stopped server threads")
-
             session.close()
             log.debug("ParamikoSshServer.connection_function closed transport %s", session)
