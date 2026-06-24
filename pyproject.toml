@@ -36,6 +36,7 @@ classifiers = [
 requires-python = ">=3.13,<3.15"
 dependencies = [
     "paramiko>=4.0,<6.0",
+    "asyncssh>=2.23,<3.0",
     "pyyaml<7.0",
     "pydantic<3.0",
     "jinja2>=3.1.6",
@@ -177,6 +178,9 @@ dev = [
 ]
 compatibility = [
     # netmiko is already in `dev` (default group), so not repeated here
-    "scrapli",        # scrapli interop test
-    "ansible-core",   # ansible interop test (cli_command / ios_facts)
+    "scrapli",          # scrapli interop test
+    "ansible-core",     # ansible interop test (cli_command / ios_facts)
+    "ansible-pylibssh", # ansible libssh backend — required against the asyncssh
+                        # transport (paramiko backend trips the auth-retry
+                        # disconnect, #297 Stage 2 テーマE / E2)
 ]

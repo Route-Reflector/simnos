@@ -116,7 +116,12 @@ class TelnetServer(TCPServerBase):
         timeout: int = 1,
         watchdog_interval: float = 1,
         render_config: "HostRenderConfig | None" = None,
+        simnos: object = None,
     ):
+        # `simnos` is the SimNOS back reference Host.start passes uniformly to
+        # every server plugin (#297 Stage 2); only AsyncSshServer uses it (for the
+        # shared loop). Accepted and ignored here.
+        del simnos
         super().__init__(address=address, port=port, timeout=timeout)
 
         self.nos: Nos = nos
