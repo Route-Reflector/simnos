@@ -31,4 +31,4 @@ Server->>Client: "14:38:11.292 PST Tue Feb 10 2009"
 
 - **Echo coalescing:** Server plugins batch echo characters and shell responses into a single `sendall()` call, preventing intermittent empty output with netmiko `send_command()`.
 - **CRLF handling:** Both SSH and Telnet servers normalize line endings (CR, LF, CR+LF) to ensure consistent behavior across platforms.
-- **Thread-safe I/O:** The `TapIO` bridge provides blocking `readline()` with condition-variable wakeup, replacing polling-based I/O between server and shell layers.
+- **Thread-safe I/O:** The `TapIO` bridge provided blocking `readline()` with condition-variable wakeup between the server and shell layers (retired in v3 — the async push-dispatch session loop on asyncssh / telnetlib3 supersedes it, #297).
