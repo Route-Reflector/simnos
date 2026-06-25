@@ -15,9 +15,9 @@ full potential.
 
 Server plugins act as an access layer, simulating device connections.
 
-### ParamikoSshServer
+### AsyncSshServer
 
-::: simnos.plugins.servers.ssh_server_paramiko.ParamikoSshServer
+::: simnos.plugins.servers.ssh_server_asyncssh.AsyncSshServer
     rendering:
       heading_level: 4
       show_object_full_path: false
@@ -31,12 +31,13 @@ Server plugins act as an access layer, simulating device connections.
 
 ### Internal
 
-#### TapIO
+#### AsyncServerBase
 
-Thread-safe I/O bridge shared by both SSH and Telnet server plugins.
-This is an internal helper, not a public API.
+Shared async-server lifecycle (start/stop/aclose, session registry, dispatch
+wiring) on the SimNOS-owned shared event loop. This is an internal base class,
+not a public API.
 
-::: simnos.plugins.servers.tap_io.TapIO
+::: simnos.plugins.servers.async_server_base.AsyncServerBase
     rendering:
       heading_level: 5
       show_object_full_path: false

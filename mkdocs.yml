@@ -91,7 +91,6 @@ nav:
       - Extras: "development/extras.md"
       - Documentation: "development/documentation.md"
       - Tasks: "development/tasks.md"
-      - Regenerate moduli: "development/regenerate_moduli.md"
   - Collaborators: "collaborators.md"
   - Changelog: "changelog.md"
   - API:

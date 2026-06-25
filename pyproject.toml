@@ -35,7 +35,6 @@ classifiers = [
 ]
 requires-python = ">=3.13,<3.15"
 dependencies = [
-    "paramiko>=4.0,<6.0",
     "asyncssh>=2.23,<3.0",
     "telnetlib3>=4.0,<5.0",
     "pyyaml<7.0",
@@ -108,8 +107,8 @@ skips = ["B101", "B601"]
 # Phase 3 (#251) complete: the whole tree is ty-clean and scanned with no
 # exclusions. The former exclusions were lifted in this order:
 #   - Phase 1 (#216) had excluded ssh_server_paramiko (paramiko is untyped and
-#     types-paramiko v4 was incompatible with paramiko 5.0); the production file
-#     is now ty-clean without stubs, so the entry was dropped.
+#     types-paramiko v4 was incompatible with paramiko 5.0); the file was made
+#     ty-clean without stubs, then removed entirely in #297 Stage 4.
 #   - Phase 2 (#218) had excluded tests/ (MagicMock dynamic attributes and
 #     function-state fixtures defeated static analysis); tests/ was brought to
 #     0 diagnostics (cast/assert narrowing + localized `# ty: ignore` for
@@ -160,6 +159,10 @@ build-backend = "uv_build"
 dev = [
     "ruff>=0.14.4", # Linter
     "ruamel-yaml", # YAML parser
+    "paramiko>=4.0,<6.0", # SSH client for the byte-parity / asyncssh-server tests
+                          # (raw Transport/Channel gives byte-exact wire control);
+                          # the paramiko *server* was removed in #297 Stage 4, so
+                          # paramiko is no longer a runtime dependency.
     "ty>=0.0.1a26", # Type checkers
     "pytest", # Testing framework
     "pytest-timeout", # Pytest: Timeout tests

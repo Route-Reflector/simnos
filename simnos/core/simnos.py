@@ -110,12 +110,11 @@ class SimNOS:
         self.nos_plugins = nos_plugins
         self.servers_plugins = servers_plugins
 
-        # The shared asyncio loop async server plugins (AsyncSshServer +
-        # telnetlib3 TelnetServer, Stage 3) run on (#297, §1). Owned here as a
-        # SimNOS-scoped resource; the loop thread + bounded executor start lazily
-        # on the first async host start (``ensure_shared_loop``) and are torn down
-        # once in ``stop()`` when no async host remains. The legacy sync
-        # ParamikoSshServer does not touch it.
+        # The shared asyncio loop the async server plugins (AsyncSshServer +
+        # telnetlib3 TelnetServer) run on (#297, §1). Owned here as a SimNOS-scoped
+        # resource; the loop thread + bounded executor start lazily on the first
+        # async host start (``ensure_shared_loop``) and are torn down once in
+        # ``stop()`` when no async host remains.
         self._shared_loop = SharedLoop()
 
         self._load_sys_config(sys_config)
@@ -496,8 +495,10 @@ class SimNOS:
     ) -> None:
         """
         Join SimNOS-managed threads after all hosts are stopped.
-        Server threads are already joined by TCPServerBase.stop();
-        this is a safety net for any stragglers.
+
+        The async server plugins own no per-connection threads (``managed_threads``
+        is empty — sessions live on the SimNOS shared loop, torn down by
+        ``teardown_if_idle``), so this is a safety net for any stragglers.
         """
         total = timeout if timeout is not None else SHUTDOWN_SAFETY_NET_DEADLINE
         alive = join_threads_with_deadline(threads, total, SHUTDOWN_SAFETY_NET_PER_THREAD)

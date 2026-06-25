@@ -47,7 +47,7 @@ default_inventory = {
         "password": "user",
         "port": 6000,
         "server": {
-            "plugin": "ParamikoSshServer",
+            "plugin": "AsyncSshServer",
             "configuration": {
                 "address": "127.0.0.1",
                 "timeout": 1,
@@ -165,7 +165,7 @@ fake_network = {
         "password": "user",
         "port": [5000, 6000],
         "server": {
-            "plugin": "ParamikoSshServer",
+            "plugin": "AsyncSshServer",
             "configuration": {
                 "ssh_key_file": "./ssh-keys/ssh_host_rsa_key",
                 "timeout": 1,
@@ -181,7 +181,7 @@ fake_network = {
             "username": "simnos", # (2)
             "password": "simnos",
             "server": {
-                "plugin": "ParamikoSshServer",
+                "plugin": "AsyncSshServer",
                 "configuration": {"address": "0.0.0.0"},  # (1)
             },
             "shell": {
@@ -222,7 +222,7 @@ default:
   username: user
   port: [5000, 6000]
   server:
-    plugin: ParamikoSshServer
+    plugin: AsyncSshServer
     configuration:
       address: 127.0.0.1
       ssh_key_file: ./ssh-keys/ssh_host_rsa_key
@@ -239,7 +239,7 @@ hosts:
     port: 5001
     username: simnos
     server:
-      plugin: ParamikoSshServer
+      plugin: AsyncSshServer
       configuration:
         address: 0.0.0.0
     shell:
@@ -260,7 +260,7 @@ default:
   username: user
   port: [5000, 6000]
   server:
-    plugin: ParamikoSshServer
+    plugin: AsyncSshServer
     configuration:
       address: 0.0.0.0
 hosts:
@@ -312,7 +312,7 @@ server configuration. If you put a password, include it as the `ssh_key_file_pas
 
 SIMNOS internally uses [Pydantic](https://docs.pydantic.dev/latest/concepts/models/)
 models to validate inventory data and raise `ValidationError` if inventory does
-not comply with defined schema. The server section supports both `ParamikoSshServer` (SSH)
+not comply with defined schema. The server section supports both `AsyncSshServer` (SSH)
 and `TelnetServer` (Telnet) plugins.
 
 You can generate the current JSON Schema with:
@@ -325,8 +325,8 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 
 Key points of the schema:
 
-- `server` accepts either `ParamikoSshServerPlugin` or `TelnetServerPlugin` (via `anyOf`)
-- `ParamikoSshServerConfig` includes: `ssh_key_file`, `ssh_key_file_password`, `ssh_banner`, `timeout`, `address`, `watchdog_interval`, `authorized_keys`
+- `server` accepts either `AsyncSshServerPlugin` or `TelnetServerPlugin` (via `anyOf`)
+- `AsyncSshServerConfig` includes: `ssh_key_file`, `ssh_key_file_password`, `ssh_banner`, `timeout`, `address`, `watchdog_interval`, `authorized_keys`
 - `TelnetServerConfig` includes: `banner`, `timeout`, `address`, `watchdog_interval`
 - All configuration fields are optional with sensible defaults
 
@@ -352,12 +352,12 @@ The following options can be used either in the `default` section or in the `hos
 
 | Option                    | Emoji                     | Description                           | E.g.                                                                      |
 | ------------------------- | ------------------------- | ------------------------------------- | ------------------------------------------------------------------------- |
-| `plugin`                  | :electric_plug:           | server plugin to use                  | `plugin: ParamikoSshServer`                                               |
+| `plugin`                  | :electric_plug:           | server plugin to use                  | `plugin: AsyncSshServer`                                               |
 | `configuration`           | :gear:                    | server configuration                  | See section [Server configuration options](#server-configuration-options) |
 
 ### Server configuration options
 
-SIMNOS supports two server plugins: **ParamikoSshServer** (SSH, default) and **TelnetServer** (Telnet).
+SIMNOS supports two server plugins: **AsyncSshServer** (SSH, default) and **TelnetServer** (Telnet).
 
 #### Common options (both SSH and Telnet)
 
@@ -367,7 +367,7 @@ SIMNOS supports two server plugins: **ParamikoSshServer** (SSH, default) and **T
 | `address`                 | :globe_with_meridians:    | address to bind server to             | `address: 127.0.0.1`                           |
 | `watchdog_interval`       | :dog:                     | interval for watchdog                 | `watchdog_interval: 1`                         |
 
-#### ParamikoSshServer options
+#### AsyncSshServer options
 
 | Option                    | Emoji                     | Description                           | E.g.                                           |
 | ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |

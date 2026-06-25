@@ -14,7 +14,7 @@ SIMNOS is a micro-kernel framework that has already a lot of network operating s
 Currently, SIMNOS has these pluggable systems:
 
 - **NOS plugins:** plugins to simulate Network Operating System commands. This is where the commands and their responses are kept.
-- **Server Plugins:** plugins responsible for running various servers to connect with. It supports SSH (via `paramiko`) and Telnet.
+- **Server Plugins:** plugins responsible for running various servers to connect with. It supports SSH (via `asyncssh`) and Telnet (via `telnetlib3`).
 - **Shell Plugins:** plugins to simulate command line interface shell. It parses and process the commands. It is the middleware between the server and the NOS.
 
 ``` mermaid

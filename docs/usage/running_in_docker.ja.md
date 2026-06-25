@@ -60,7 +60,7 @@ ssh localhost -l user -p 12723                              # (4)
 ```yaml
 default:
   server:
-    plugin: "ParamikoSshServer"
+    plugin: "AsyncSshServer"
     configuration:
       address: "0.0.0.0"
       timeout: 1

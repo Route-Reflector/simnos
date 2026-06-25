@@ -1,10 +1,11 @@
 """asyncssh-backed SSH server plugin (#297 Stage 2, §2).
 
-Drop-in replacement for :class:`ParamikoSshServer`: the same ``__init__``
-signature so ``Host.start`` builds it identically, the same NOS data / CMDShell /
-render_config, the same wire bytes (pinned by the byte-parity goldens). Only the
-transport differs — asyncssh on the SimNOS-owned shared event loop
-(:mod:`simnos.core.shared_loop`) instead of a paramiko thread per connection.
+The SSH server plugin (it replaced the former paramiko server in #297 Stage 4):
+the ``__init__`` signature ``Host.start`` builds against, the NOS data / CMDShell /
+render_config wiring, and the wire bytes (pinned by the byte-parity goldens) are
+all transport-independent. The transport is asyncssh on the SimNOS-owned shared
+event loop (:mod:`simnos.core.shared_loop`), one task per connection rather than a
+thread per connection.
 
 The spike (#296) proved the shape: asyncssh handles 100 concurrent connections at
 the transport layer; the failures came from bridging a *blocking* shell loop per
@@ -17,8 +18,8 @@ wiring) lives in :class:`AsyncServerBase`, shared with the telnetlib3 ``TelnetSe
 (Stage 3); this module only supplies the SSH transport + auth.
 
 GEX: asyncssh handles moduli itself, so the paramiko GEX workaround
-(``_DISABLED_GEX_ALGORITHMS`` / bundled moduli) is not referenced on this path
-(removed wholesale in Stage 4).
+(``_DISABLED_GEX_ALGORITHMS`` / bundled moduli) was removed wholesale with the
+paramiko server in Stage 4.
 """
 
 import asyncio
@@ -262,8 +263,8 @@ class AsyncSshServer(AsyncServerBase):
             encoding=None,  # binary channel → byte-exact parity with paramiko
             process_factory=self._handle_process,
             allow_pty=True,
-            # Restart-friendly bind (parity with TCPServerBase SO_REUSEADDR/PORT)
-            # so stop→start does not hit EADDRINUSE.
+            # Restart-friendly bind (SO_REUSEADDR + SO_REUSEPORT on Linux) so
+            # stop→start does not hit EADDRINUSE.
             reuse_address=True,
             reuse_port=(sys.platform == "linux"),
         )
