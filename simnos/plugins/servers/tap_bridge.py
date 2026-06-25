@@ -35,8 +35,9 @@ _COALESCE_DELAY = 0.001
 class TransportAdapter(Protocol):
     """Minimal transport surface required by the tap functions.
 
-    Implementations: ParamikoChannelAdapter (ssh_server_paramiko),
-    TelnetSocketAdapter (telnet_server).
+    Implementations: ParamikoChannelAdapter (ssh_server_paramiko). The legacy
+    raw-socket Telnet adapter was retired when Telnet moved to telnetlib3 +
+    async push (#297 Stage 3); this sync tap path is paramiko-only until Stage 4.
 
     Timeout responsibility: adapters do NOT manage I/O timeouts. The caller
     (connection_function) configures them on the underlying channel/socket

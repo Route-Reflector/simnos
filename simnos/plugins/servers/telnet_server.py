@@ -164,11 +164,7 @@ class TelnetServer(AsyncServerBase):
         kernel receive buffer empty, so the close is a graceful FIN that delivers
         the message (Stage 3 先行検証, no explicit drain needed).
         """
-        # A connection that finishes negotiation after aclose took its drain
-        # snapshot must not start a session on a stopping host (claude 1st#1).
-        if self._closing:
-            with contextlib.suppress(Exception):
-                writer.close()
+        if self._bow_out_if_closing(writer):
             return
         async with self._session_scope(writer):
             transport = TelnetPushTransport(reader, writer)

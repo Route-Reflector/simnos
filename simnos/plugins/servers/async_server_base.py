@@ -253,6 +253,20 @@ class AsyncServerBase:
                 await asyncio.wait_for(self._acceptor.wait_closed(), timeout=SHUTDOWN_IO_TIMEOUT)
 
     # ------------------------------------------------------------------ per-session
+    def _bow_out_if_closing(self, session: object) -> bool:
+        """Close + skip a connection that arrived after teardown began (claude 1st#1).
+
+        A connection that finishes handshaking/negotiation *after* ``aclose`` took
+        its drain snapshot must not start a session on a stopping host. Returns True
+        (and closes the session handle) when the server is already closing, so the
+        per-session handler can bow out before registering anything.
+        """
+        if self._closing:
+            with contextlib.suppress(Exception):
+                self._close_session(session)
+            return True
+        return False
+
     @contextlib.asynccontextmanager
     async def _session_scope(self, session: object) -> "AsyncIterator[None]":
         """Register the current task + session handle, and clean up on exit (§1a).

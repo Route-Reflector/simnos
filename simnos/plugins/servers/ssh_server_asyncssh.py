@@ -22,7 +22,6 @@ GEX: asyncssh handles moduli itself, so the paramiko GEX workaround
 """
 
 import asyncio
-import contextlib
 import logging
 import sys
 import threading
@@ -281,11 +280,7 @@ class AsyncSshServer(AsyncServerBase):
         auth_none channel login, then the push session driving ``shell.dispatch``
         via the bounded executor. asyncssh closes ``process`` when this returns.
         """
-        # A connection that finishes handshaking after aclose took its drain
-        # snapshot must not start a session on a stopping host (claude 1st#1).
-        if self._closing:
-            with contextlib.suppress(Exception):
-                process.close()
+        if self._bow_out_if_closing(process):
             return
         async with self._session_scope(process):
             transport = AsyncSSHProcessTransport(process)
