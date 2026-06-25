@@ -10,18 +10,30 @@ here, transport-agnostic, and is pinned end-to-end by the byte-parity goldens in
 History: this module also hosted the synchronous tap pair + ``run_push_session``
 that drove the paramiko SSH channel and the raw-socket Telnet server. Those were
 retired with the paramiko server in #297 Stage 4; only the wire-assembly helpers
-the async path reuses remain.
+the async path reuses remain (the per-line ``process_tap_line`` normalisation,
+formerly in the standalone ``tap_io`` module, was folded in here at the same time).
 """
 
 import logging
 from typing import TYPE_CHECKING, Protocol
 
-from simnos.plugins.servers.tap_io import process_tap_line
-
 if TYPE_CHECKING:
     from simnos.plugins.shell.cmd_shell import DispatchResult
 
 log = logging.getLogger(__name__)
+
+
+def process_tap_line(line: str) -> str:
+    """Sanitise a single line of shell output for the network client.
+
+    - Strips NUL bytes.
+    - Converts bare ``\\n`` to ``\\r\\n`` (leaves existing ``\\r\\n`` intact).
+    """
+    if "\x00" in line:
+        line = line.replace("\x00", "")
+    if "\r\n" not in line and "\n" in line:
+        line = line.replace("\n", "\r\n")
+    return line
 
 
 class PushShell(Protocol):
