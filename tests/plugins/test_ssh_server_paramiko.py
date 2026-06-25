@@ -296,7 +296,7 @@ class TapIOTest(unittest.TestCase):
 
 
 class ParamikoChannelAdapterTest(unittest.TestCase):
-    """Direct pins for ParamikoChannelAdapter (mirrors TelnetSocketAdapterTest).
+    """Direct pins for ParamikoChannelAdapter (the SSH transport adapter).
 
     recv_byte's b"" -> None EOF normalization (D3) and the is_closed()
     closed-or-inactive truth table (U2) are pinned at the adapter level so a

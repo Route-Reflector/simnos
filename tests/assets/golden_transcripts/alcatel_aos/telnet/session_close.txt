@@ -1,0 +1,8 @@
+--- step 0: send=b'<connect>'
+b'SIMNOS Telnet Server\r\nUsername: '
+--- step 1: send=b'<username>'
+b'test_user\r\nPassword: '
+--- step 2: send=b'<password>'
+b'\r\nCustom SSH Shell\r\ndevice>'
+--- step 3: send=b'ex\r'
+b'ex\r\n'

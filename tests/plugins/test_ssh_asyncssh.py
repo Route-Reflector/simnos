@@ -6,7 +6,7 @@ Covers the Stage 2 acceptance gates the byte-parity goldens don't:
   (the W2-without-W3 hybrid dropped sessions under 100-host load; W3 push dispatch
   on the shared loop must not).
 - **lifecycle** (§5) — partial stop keeps other hosts serving, restart, double
-  stop, and mixed SSH(async) + Telnet(paramiko-era) teardown — plus the
+  stop, and mixed SSH(async) + Telnet(async, Stage 3) teardown — plus the
   no-thread-leak / loop-converges-to-STOPPED guarantee (executor convergence).
 
 These drive raw paramiko channels (byte-exact, lighter than netmiko) against real
@@ -27,9 +27,10 @@ import paramiko
 import pytest
 
 from simnos import SimNOS
-from simnos.core.shared_loop import LoopState
-from simnos.plugins.servers.ssh_server_asyncssh import AsyncSshServer
+from simnos.core.shared_loop import LoopState, SharedLoop
+from simnos.plugins.servers.async_server_base import AsyncServerBase
 from simnos.plugins.shell.cmd_shell import CMDShell
+from tests.plugins.telnet_test_helpers import telnet_login_run
 from tests.utils import TEST_PASSWORD, TEST_USERNAME
 
 _HOST = "127.0.0.1"
@@ -232,7 +233,8 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
             await asyncio.sleep(1.0)
         return _FakeAcceptor()
 
-    monkeypatch.setattr("simnos.plugins.servers.ssh_server_asyncssh._CREATE_SERVER_TIMEOUT", 0.3)
+    # The create budget now lives in the shared AsyncServerBase (Stage 3 dedup).
+    monkeypatch.setattr("simnos.plugins.servers.async_server_base._CREATE_LISTENER_TIMEOUT", 0.3)
     monkeypatch.setattr(asyncssh, "create_server", _slow_create)
 
     (port,) = _free_ports(1)
@@ -246,24 +248,50 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
 
 
 def test_discard_late_acceptor_closes_completed_future():
-    """The late-acceptor done-callback closes a listener produced after start gave up (codex 2nd#1)."""
+    """The late-acceptor done-callback closes a listener produced after start gave
+    up, routing close() onto the loop thread (codex 2nd#2 / gemini 1st#1).
+
+    The callback can fire synchronously on the caller thread (future already done at
+    ``add_done_callback`` time), so ``acceptor.close()`` must run via
+    ``call_soon_threadsafe`` — not inline — to stay loop-safe. The test asserts both
+    that close ran AND that it ran on the loop thread, not the caller thread: a
+    regression that closed inline would still set ``closed`` but on the wrong thread,
+    so the thread-identity assertion is what actually pins the fix (codex 2nd#2).
+    """
     closed = threading.Event()
+    close_thread: dict[str, int] = {}
 
     class _FakeAcceptor:
         def close(self):
+            close_thread["ident"] = threading.get_ident()
             closed.set()
 
-    future: concurrent.futures.Future = concurrent.futures.Future()
-    future.set_result(_FakeAcceptor())
-    AsyncSshServer._discard_late_acceptor(future)
-    assert closed.is_set()
+    shared_loop = SharedLoop()
+    shared_loop.ensure_running()
+    # A bare AsyncServerBase carrying only _shared_loop (the one attribute the
+    # callback touches); __new__ skips the heavy __init__ while keeping the type.
+    server = AsyncServerBase.__new__(AsyncServerBase)
+    server._shared_loop = shared_loop
+
+    try:
+        future: concurrent.futures.Future = concurrent.futures.Future()
+        future.set_result(_FakeAcceptor())
+        # The future is already done, so the callback runs inline on THIS thread.
+        server._discard_late_acceptor(future)
+        assert closed.wait(timeout=5), "acceptor.close() was not scheduled on the loop thread"
+        assert close_thread["ident"] != threading.get_ident(), "close() ran on the caller thread, not the loop"
+    finally:
+        shared_loop.teardown_if_idle()
 
 
 def test_discard_late_acceptor_ignores_cancelled_future():
     """A cancelled create future has no acceptor to reclaim — callback is a no-op."""
+    server = AsyncServerBase.__new__(AsyncServerBase)
+    server._shared_loop = None
+
     future: concurrent.futures.Future = concurrent.futures.Future()
     future.cancel()
-    AsyncSshServer._discard_late_acceptor(future)  # must not raise
+    server._discard_late_acceptor(future)  # must not raise
 
 
 def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):
@@ -386,11 +414,11 @@ def test_publickey_advertised_only_with_authorized_keys(tmp_path):
 
 
 def test_mixed_ssh_async_and_telnet():
-    """Async SSH and paramiko-era Telnet coexist and both tear down cleanly (§1).
+    """Async SSH and async Telnet coexist on the shared loop and tear down cleanly.
 
-    During the Stage 2-3 migration an inventory can mix AsyncSshServer (shared
-    loop, managed_threads == []) and TelnetServer (its own thread). Both must
-    stop and the process must return to its thread baseline.
+    Both AsyncSshServer and the telnetlib3 TelnetServer (Stage 3) register on the
+    shared loop (refcount == 2, managed_threads == []), both serve, and a full stop
+    returns the loop to STOPPED and the process to its thread baseline (§1).
     """
     ssh_port, telnet_port = _free_ports(2)
     inventory = {
@@ -413,7 +441,10 @@ def test_mixed_ssh_async_and_telnet():
     baseline = threading.active_count()
     with _running(inventory) as net:
         assert _run_one_command(ssh_port, b"show vlan\r", b"VLAN Name")
-        assert net._shared_loop.refcount == 1
+        # Telnet is async too now: both hosts are registered on the shared loop.
+        telnet_out = asyncio.run(telnet_login_run(telnet_port, b"show vlan\r", marker=b"device>"))
+        assert b"VLAN Name" in telnet_out
+        assert net._shared_loop.refcount == 2
 
     assert net._shared_loop.state is LoopState.STOPPED
     deadline = time.monotonic() + _THREAD_CONVERGE_DEADLINE
