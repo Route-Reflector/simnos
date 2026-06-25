@@ -6,7 +6,7 @@ Covers the Stage 2 acceptance gates the byte-parity goldens don't:
   (the W2-without-W3 hybrid dropped sessions under 100-host load; W3 push dispatch
   on the shared loop must not).
 - **lifecycle** (§5) — partial stop keeps other hosts serving, restart, double
-  stop, and mixed SSH(async) + Telnet(paramiko-era) teardown — plus the
+  stop, and mixed SSH(async) + Telnet(async, Stage 3) teardown — plus the
   no-thread-leak / loop-converges-to-STOPPED guarantee (executor convergence).
 
 These drive raw paramiko channels (byte-exact, lighter than netmiko) against real
@@ -30,6 +30,7 @@ from simnos import SimNOS
 from simnos.core.shared_loop import LoopState
 from simnos.plugins.servers.ssh_server_asyncssh import AsyncSshServer
 from simnos.plugins.shell.cmd_shell import CMDShell
+from tests.plugins.telnet_test_helpers import telnet_login_run
 from tests.utils import TEST_PASSWORD, TEST_USERNAME
 
 _HOST = "127.0.0.1"
@@ -232,7 +233,8 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
             await asyncio.sleep(1.0)
         return _FakeAcceptor()
 
-    monkeypatch.setattr("simnos.plugins.servers.ssh_server_asyncssh._CREATE_SERVER_TIMEOUT", 0.3)
+    # The create budget now lives in the shared AsyncServerBase (Stage 3 dedup).
+    monkeypatch.setattr("simnos.plugins.servers.async_server_base._CREATE_LISTENER_TIMEOUT", 0.3)
     monkeypatch.setattr(asyncssh, "create_server", _slow_create)
 
     (port,) = _free_ports(1)
@@ -386,11 +388,11 @@ def test_publickey_advertised_only_with_authorized_keys(tmp_path):
 
 
 def test_mixed_ssh_async_and_telnet():
-    """Async SSH and paramiko-era Telnet coexist and both tear down cleanly (§1).
+    """Async SSH and async Telnet coexist on the shared loop and tear down cleanly.
 
-    During the Stage 2-3 migration an inventory can mix AsyncSshServer (shared
-    loop, managed_threads == []) and TelnetServer (its own thread). Both must
-    stop and the process must return to its thread baseline.
+    Both AsyncSshServer and the telnetlib3 TelnetServer (Stage 3) register on the
+    shared loop (refcount == 2, managed_threads == []), both serve, and a full stop
+    returns the loop to STOPPED and the process to its thread baseline (§1).
     """
     ssh_port, telnet_port = _free_ports(2)
     inventory = {
@@ -413,7 +415,10 @@ def test_mixed_ssh_async_and_telnet():
     baseline = threading.active_count()
     with _running(inventory) as net:
         assert _run_one_command(ssh_port, b"show vlan\r", b"VLAN Name")
-        assert net._shared_loop.refcount == 1
+        # Telnet is async too now: both hosts are registered on the shared loop.
+        telnet_out = asyncio.run(telnet_login_run(telnet_port, b"show vlan\r", marker=b"device>"))
+        assert b"VLAN Name" in telnet_out
+        assert net._shared_loop.refcount == 2
 
     assert net._shared_loop.state is LoopState.STOPPED
     deadline = time.monotonic() + _THREAD_CONVERGE_DEADLINE

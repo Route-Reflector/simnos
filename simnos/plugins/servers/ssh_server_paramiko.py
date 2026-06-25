@@ -230,8 +230,8 @@ class ParamikoSshServer(TCPServerBase):
         simnos: object = None,
     ):
         # `simnos` is the SimNOS back reference Host.start passes uniformly to
-        # every server plugin (#297 Stage 2); only AsyncSshServer uses it (for the
-        # shared loop). Accepted and ignored here (paramiko is removed in Stage 4).
+        # every server plugin (#297); the async plugins use it for the shared loop.
+        # This legacy sync paramiko server accepts and ignores it (removed Stage 4).
         del simnos
         super().__init__(address=address, port=port, timeout=timeout)
 

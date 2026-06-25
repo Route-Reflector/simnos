@@ -375,8 +375,11 @@ class AsyncSshServerPlugin(BaseModel):
 
 
 class TelnetServerConfig(BaseModel):
-    """
-    Pydantic model for Telnet server configuration.
+    """Pydantic model for the (telnetlib3) Telnet server configuration.
+
+    ``timeout`` / ``watchdog_interval`` are accepted for inventory compatibility
+    but inert on the async path (#297 Stage 3): shutdown is driven by closing the
+    listener/sessions on the shared loop, not a recv poll.
     """
 
     banner: StrictStr | None = "SIMNOS Telnet Server"
