@@ -268,16 +268,16 @@ def test_discard_late_acceptor_closes_completed_future():
 
     shared_loop = SharedLoop()
     shared_loop.ensure_running()
-
-    class _Stub:
-        _shared_loop = shared_loop
+    # A bare AsyncServerBase carrying only _shared_loop (the one attribute the
+    # callback touches); __new__ skips the heavy __init__ while keeping the type.
+    server = AsyncServerBase.__new__(AsyncServerBase)
+    server._shared_loop = shared_loop
 
     try:
         future: concurrent.futures.Future = concurrent.futures.Future()
         future.set_result(_FakeAcceptor())
-        # Call via the base (unbound) with a stub self carrying only _shared_loop;
-        # the future is already done, so the callback runs inline on THIS thread.
-        AsyncServerBase._discard_late_acceptor(_Stub(), future)
+        # The future is already done, so the callback runs inline on THIS thread.
+        server._discard_late_acceptor(future)
         assert closed.wait(timeout=5), "acceptor.close() was not scheduled on the loop thread"
         assert close_thread["ident"] != threading.get_ident(), "close() ran on the caller thread, not the loop"
     finally:
@@ -286,13 +286,12 @@ def test_discard_late_acceptor_closes_completed_future():
 
 def test_discard_late_acceptor_ignores_cancelled_future():
     """A cancelled create future has no acceptor to reclaim — callback is a no-op."""
-
-    class _Stub:
-        _shared_loop = None
+    server = AsyncServerBase.__new__(AsyncServerBase)
+    server._shared_loop = None
 
     future: concurrent.futures.Future = concurrent.futures.Future()
     future.cancel()
-    AsyncServerBase._discard_late_acceptor(_Stub(), future)  # must not raise
+    server._discard_late_acceptor(future)  # must not raise
 
 
 def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):

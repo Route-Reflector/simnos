@@ -19,8 +19,9 @@ Why telnetlib3 (#296 spike F7 + #297 Stage 3 先行検証):
 - The raw-socket server's ``_drain_pending_input`` (RST→FIN guarantee, #268) is
   **not** needed: asyncio's StreamReader continuously drains the kernel receive
   buffer into an in-memory buffer, so unread input never sits in the kernel buffer
-  at ``close()`` time and the close is a graceful FIN (verified on the auth-failure
-  path, Stage 3 先行検証 ``s3_close_path.py``).
+  at ``close()`` time and the close is a graceful FIN — pinned by
+  ``test_telnet_auth_failure_raw_surplus_delivers_message_and_fin`` (wrong creds +
+  16KB surplus unread input still closes with FIN).
 """
 
 import asyncio
