@@ -1,10 +1,11 @@
 """asyncssh-backed SSH server plugin (#297 Stage 2, §2).
 
-Drop-in replacement for :class:`ParamikoSshServer`: the same ``__init__``
-signature so ``Host.start`` builds it identically, the same NOS data / CMDShell /
-render_config, the same wire bytes (pinned by the byte-parity goldens). Only the
-transport differs — asyncssh on the SimNOS-owned shared event loop
-(:mod:`simnos.core.shared_loop`) instead of a paramiko thread per connection.
+The SSH server plugin (it replaced the former paramiko server in #297 Stage 4):
+the ``__init__`` signature ``Host.start`` builds against, the NOS data / CMDShell /
+render_config wiring, and the wire bytes (pinned by the byte-parity goldens) are
+all transport-independent. The transport is asyncssh on the SimNOS-owned shared
+event loop (:mod:`simnos.core.shared_loop`), one task per connection rather than a
+thread per connection.
 
 The spike (#296) proved the shape: asyncssh handles 100 concurrent connections at
 the transport layer; the failures came from bridging a *blocking* shell loop per
@@ -17,8 +18,8 @@ wiring) lives in :class:`AsyncServerBase`, shared with the telnetlib3 ``TelnetSe
 (Stage 3); this module only supplies the SSH transport + auth.
 
 GEX: asyncssh handles moduli itself, so the paramiko GEX workaround
-(``_DISABLED_GEX_ALGORITHMS`` / bundled moduli) is not referenced on this path
-(removed wholesale in Stage 4).
+(``_DISABLED_GEX_ALGORITHMS`` / bundled moduli) was removed wholesale with the
+paramiko server in Stage 4.
 """
 
 import asyncio
@@ -43,15 +44,16 @@ log = logging.getLogger(__name__)
 class AsyncSSHProcessTransport:
     """AsyncPushTransport over an asyncssh ``SSHServerProcess`` (binary channel).
 
-    ``encoding=None`` makes the channel binary so the byte stream matches paramiko
-    exactly. The PTY signal events asyncssh surfaces from ``read`` (window resize,
+    ``encoding=None`` makes the channel binary so the byte stream is byte-exact
+    (pinned by the byte-parity goldens). The PTY signal events asyncssh surfaces
+    from ``read`` (window resize,
     Ctrl-C/Break, soft EOF) are *not* disconnects, so ``recv`` swallows them and
     keeps reading — only a real EOF (``b""``) or an ``io_errors`` raise ends the
     session.
     """
 
     io_errors = (OSError, EOFError, ConnectionError, asyncssh.Error)
-    nul_resets_skip_lf = False  # SSH has no CR NUL convention (parity with paramiko adapter)
+    nul_resets_skip_lf = False  # SSH has no CR NUL convention (RFC 854 is Telnet-only)
     name = "ssh"
 
     def __init__(self, process: "asyncssh.SSHServerProcess") -> None:
@@ -72,15 +74,14 @@ class AsyncSSHProcessTransport:
 
 
 class _SimnosSSHServer(asyncssh.SSHServer):
-    """Connection-level auth (parity with ``ParamikoSshServerInterface``, §2).
+    """Connection-level SSH auth (§2).
 
     password / publickey / keyboard-interactive / none, plus MikroTik-style ``+``
     suffix username matching.
 
-    publickey is advertised **only when authorized_keys is configured** — the same
-    rule as paramiko's ``get_allowed_auths`` (which prepends ``publickey`` only
-    when keys are loaded). This matters for the asyncssh↔paramiko-client
-    interop (#297 テーマE / E2): a paramiko client that fails one auth method and
+    publickey is advertised **only when authorized_keys is configured**. This
+    matters for the asyncssh↔paramiko-client interop (#297 テーマE / E2): a paramiko
+    client that fails one auth method and
     retries another resends ``SERVICE_REQUEST(ssh-userauth)``, which asyncssh
     rejects (``Unexpected service in service request``) — a hardcoded protocol
     check with no public-API override. So advertising publickey on a host with no
@@ -110,8 +111,8 @@ class _SimnosSSHServer(asyncssh.SSHServer):
         self._conn = conn
 
     def begin_auth(self, username: str) -> bool:
-        # Pre-auth banner (parity with ParamikoSshServerInterface.get_banner):
-        # sent once at the start of auth, consumed by the client's auth handler
+        # Pre-auth banner (sent before authentication, distinct from the shell
+        # intro): sent once at the start of auth, consumed by the client's auth handler
         # (so it never appears on the post-auth shell channel / byte-parity golden).
         if self._ssh_banner and not self._banner_sent and self._conn is not None:
             self._conn.send_auth_banner(f"{self._ssh_banner}\r\n", lang="en-US")
@@ -130,9 +131,8 @@ class _SimnosSSHServer(asyncssh.SSHServer):
         return True
 
     def get_kbdint_challenge(self, username: str, lang: str, submethods: str):
-        # Single hidden Password prompt (parity with the paramiko
-        # keyboard-interactive InteractiveQuery). An unknown user gets no
-        # challenge (False) so the method fails cleanly.
+        # Single hidden Password prompt for keyboard-interactive auth. An unknown
+        # user gets no challenge (False) so the method fails cleanly.
         if self._match_username(username):
             return "", "", "", (("Password: ", False),)
         return False
@@ -141,8 +141,8 @@ class _SimnosSSHServer(asyncssh.SSHServer):
         return len(responses) == 1 and responses[0] == self._password
 
     def public_key_auth_supported(self) -> bool:
-        # Advertise publickey only when keys are configured (paramiko parity); see
-        # the class docstring for the auth-retry-disconnect rationale.
+        # Advertise publickey only when keys are configured; see the class
+        # docstring for the auth-retry-disconnect rationale.
         return bool(self._authorized_keys)
 
     def validate_public_key(self, username: str, key) -> bool:
@@ -160,14 +160,14 @@ class _SimnosSSHServer(asyncssh.SSHServer):
 class AsyncSshServer(AsyncServerBase):
     """asyncssh SSH server plugin on the SimNOS-owned shared loop (§1 / §2).
 
-    Same constructor signature as ``ParamikoSshServer`` plus a ``simnos`` back
+    The constructor signature ``Host.start`` builds against, plus a ``simnos`` back
     reference (added by ``Host.start``) so it can reach the shared loop. The generic
     lifecycle is in :class:`AsyncServerBase`; this class supplies the asyncssh
     listener + auth.
     """
 
-    # One auto-generated RSA-2048 host key per process (parity with paramiko's
-    # shared _default_key: same alg + size, so KEX cost is comparable).
+    # One auto-generated RSA-2048 host key shared across the process (class-level,
+    # regenerated each run).
     _default_key = None
     _default_key_lock = threading.Lock()
 
@@ -207,17 +207,16 @@ class AsyncSshServer(AsyncServerBase):
         self.ssh_banner: str = ssh_banner
         self._authorized_keys = self._load_authorized_keys(authorized_keys)
         self._host_key = self._get_host_key(ssh_key_file, ssh_key_file_password)
-        # auth_none (Dell PowerConnect channel login): nos.auth == "none"
-        # (parity with ParamikoSshServer.connection_function).
+        # auth_none (Dell PowerConnect channel login): nos.auth == "none".
         self._allow_auth_none = getattr(nos, "auth", None) == "none"
 
     @staticmethod
     def _load_authorized_keys(path: str | None) -> "set[bytes]":
         """Parse an OpenSSH authorized_keys file into a set of base64 key blobs.
 
-        Mirrors ``ParamikoSshServer._load_authorized_keys`` in intent (bare key
-        lines, skip comment/blank/marker lines). Stored value = the base64 middle
-        field of the OpenSSH line, matched in ``validate_public_key``.
+        Bare key lines; comment / blank / marker lines are skipped. Stored value =
+        the base64 middle field of the OpenSSH line, matched in
+        ``validate_public_key``.
         """
         keys: set[bytes] = set()
         if not path:
@@ -259,11 +258,11 @@ class AsyncSshServer(AsyncServerBase):
             self.address,
             self.port,
             server_host_keys=[self._host_key],
-            encoding=None,  # binary channel → byte-exact parity with paramiko
+            encoding=None,  # binary channel → byte-exact wire (pinned by the goldens)
             process_factory=self._handle_process,
             allow_pty=True,
-            # Restart-friendly bind (parity with TCPServerBase SO_REUSEADDR/PORT)
-            # so stop→start does not hit EADDRINUSE.
+            # Restart-friendly bind (SO_REUSEADDR + SO_REUSEPORT on Linux) so
+            # stop→start does not hit EADDRINUSE.
             reuse_address=True,
             reuse_port=(sys.platform == "linux"),
         )
@@ -276,9 +275,9 @@ class AsyncSshServer(AsyncServerBase):
     async def _handle_process(self, process: "asyncssh.SSHServerProcess") -> None:
         """asyncssh process handler: one interactive shell session (§3a).
 
-        Parity with ``ParamikoSshServer.connection_function`` but async: optional
-        auth_none channel login, then the push session driving ``shell.dispatch``
-        via the bounded executor. asyncssh closes ``process`` when this returns.
+        Per-connection handler (async): optional auth_none channel login, then the
+        push session driving ``shell.dispatch`` via the bounded executor. asyncssh
+        closes ``process`` when this returns.
         """
         if self._bow_out_if_closing(process):
             return

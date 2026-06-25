@@ -8,20 +8,12 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 **Breaking Changes**
 
 - Rename the inventory key `platform` to `device_type` (v3, #266). There is no compatibility alias: a v2 inventory using `platform:` is rejected at load. Migrate by rewriting the key (`sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml`) or pin to v2 (`pip install "simnos<3"`, maintained as a migration window). A `device_type` accepts a platform's internal name, its `netmiko_device_type`, or its `ntc_platform` alias — all resolve to the same platform via the data-driven reverse index (#266)
+- Replace the SSH and Telnet server transports with asynchronous backends on a shared asyncio event loop: SSH now runs on `asyncssh` (was paramiko) and Telnet on `telnetlib3`, both driven by a single push-dispatch session loop (#297). The `ParamikoSshServer` plugin and its inventory configuration are removed — use `AsyncSshServer` (the default SSH plugin); existing `ssh_key_file` / `ssh_banner` / `authorized_keys` options carry over. The bundled DH-GEX moduli file and the paramiko GEX workaround are gone (asyncssh negotiates moduli itself), and `paramiko` is no longer a runtime dependency (retained as a dev dependency for the byte-parity / interop test clients)
 
 **Enhancements**
 
 - Introduce `sys_config.yaml`, a minimal environment-config file (`data_dir`, `variants_policy`) distinct from the topology inventory. Discovered via the `sys_config=` argument, the `SIMNOS_SYS_CONFIG` env var, `./sys_config.yaml`, or `~/.simnos/sys_config.yaml`; `SIMNOS_DATA_DIR` overrides `data_dir`. Establishes the setting precedence `CLI > env > inventory(host > default) > sys_config > builtin`. Both fields are reserved (no-op, warned at load) and wired up in #265 / #267 (#266)
 - Reserve the inventory fields `facts`, `overlay`, and `variants_policy` as the schema vessel for #265. They are validated but consumed by nobody yet; a set-but-inert value is surfaced with a `log.warning` rather than silently ignored (#266)
-- Add 4096-bit safe primes (37 entries) to the bundled DH-GEX moduli file at `simnos/plugins/servers/moduli`. The file now contains 1735 entries across three bit sizes (2048-bit × 1177, 3072-bit × 521, 4096-bit × 37). Generated on a Windows host via PowerShell 7 `ForEach-Object -Parallel` to avoid the VM-host runtime that made the 4096-bit batch deferred in v2.3.1 (#193)
-
-**Tests**
-
-- Add `test_bundled_moduli_contains_expected_bit_sizes` pinning the {2047, 3071, 4095} bit-size set plus a per-size minimum count, so accidental truncation or partial regeneration that leaves only a handful of entries is caught (#193)
-
-**Tooling**
-
-- Add a Windows PowerShell `## Alternative` section to `docs/development/regenerate_moduli.md` (+ `.ja.md`) documenting the `ForEach-Object -Parallel` generation flow used for the 4096-bit batch, including CRLF→LF conversion and a `nproc` cross-reference on the new bash `2c` step (#193)
 
 ## v2.3.1
 

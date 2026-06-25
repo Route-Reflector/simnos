@@ -9,7 +9,3 @@
 ## Nos Class
 
 ::: simnos.core.nos.Nos
-
-## TCPServerBase Class
-
-::: simnos.core.servers.TCPServerBase

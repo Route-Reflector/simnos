@@ -47,7 +47,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 #: Per-host listener creation budget (seconds): create runs on the shared loop and
-#: is awaited synchronously by start() (parity with the paramiko bind).
+#: is awaited synchronously by start() (a bounded analogue of a blocking bind).
 _CREATE_LISTENER_TIMEOUT = 30
 
 
@@ -89,7 +89,7 @@ class AsyncServerBase:
         self.shell_configuration: dict = shell_configuration or {}
         self._render_config: HostRenderConfig | None = render_config
         # Normalize the merged platform once at Host.start (per-host invariant,
-        # surfaces malformed data at startup) — parity with ParamikoSshServer.
+        # surfaces malformed data at startup rather than on the first connection).
         build_shared = getattr(self.shell, "build_shared_platform", None)
         self._shared_platform = build_shared(nos, self.nos_inventory_config, render_config) if build_shared else None
         self.username: str = username
@@ -121,9 +121,8 @@ class AsyncServerBase:
         """No SimNOS-managed threads: the loop is owned by SimNOS, not the plugin.
 
         Returning [] keeps ``_collect_server_threads`` from joining the shared loop
-        thread once per async host (it is joined once by ``SimNOS.stop()``), and
-        lets it coexist with paramiko-era sync servers that still return real
-        threads during the migration (Decision 2).
+        thread once per async host — it is joined once by ``SimNOS.stop()``
+        (Decision 2).
         """
         return []
 

@@ -326,36 +326,12 @@ class NosPlugin(BaseModel):
     configuration: NosPluginConfig | None = None
 
 
-class ParamikoSshServerConfig(BaseModel):
-    """
-    Pydantic model for Paramiko SSH server configuration.
-    """
-
-    ssh_key_file: StrictStr | None = None
-    ssh_key_file_password: StrictStr | None = None
-    ssh_banner: StrictStr | None = "SIMNOS Paramiko SSH Server"
-    timeout: StrictInt | None = 1
-    address: Literal["localhost"] | IPvAnyAddress | None = None
-    watchdog_interval: StrictInt | None = 1
-    authorized_keys: StrictStr | None = None
-
-
-class ParamikoSshServerPlugin(BaseModel):
-    """
-    Pydantic model for Paramiko SSH server plugin.
-    """
-
-    plugin: Literal["ParamikoSshServer"]
-    configuration: ParamikoSshServerConfig | None = None
-
-
 class AsyncSshServerConfig(BaseModel):
     """Pydantic model for the asyncssh SSH server configuration (#297 Stage 2).
 
-    Same fields as ``ParamikoSshServerConfig`` so an inventory can switch the SSH
-    transport by name alone. ``timeout`` / ``watchdog_interval`` are accepted for
-    signature parity (the async path drives shutdown via loop close, not a recv
-    poll), so they are inert here but kept for drop-in inventory compatibility.
+    ``timeout`` / ``watchdog_interval`` are accepted for signature parity (the
+    async path drives shutdown via loop close, not a recv poll), so they are inert
+    here but kept for drop-in inventory compatibility.
     """
 
     ssh_key_file: StrictStr | None = None
@@ -492,7 +468,7 @@ class InventoryDefaultSection(BaseModel):
     port: Port | list[Port] | None = None
     configuration_file: StrictStr | None = None
     device_type: StrictStr | None = None
-    server: AsyncSshServerPlugin | ParamikoSshServerPlugin | TelnetServerPlugin | None = None
+    server: AsyncSshServerPlugin | TelnetServerPlugin | None = None
     shell: CMDShellPlugin | None = None
     nos: NosPlugin | None = None
     # Inventory render fields. `overlay` is consumed by #286 (Host.start resolves

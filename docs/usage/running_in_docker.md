@@ -60,7 +60,7 @@ that is used to start SIMNOS inside a container:
 ```yaml
 default:
   server:
-    plugin: "ParamikoSshServer"
+    plugin: "AsyncSshServer"
     configuration:
       address: "0.0.0.0"
       timeout: 1

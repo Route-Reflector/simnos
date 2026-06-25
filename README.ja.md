@@ -31,7 +31,7 @@ SIMNOS は [FakeNOS](https://github.com/fakenos/fakenos)（Denis Mulyalin 氏が
 - Python サポート: 3.13 / 3.14
 - CI: GitHub Actions ワークフローの近代化
 - NOS プラットフォーム: 5 種を追加有効化（brocade_fastiron, ciena_saos, fortinet, juniper_screenos, ruckus_fastiron）
-- Paramiko: 4.0 にアップグレード（DH Group Exchange サーバーモードのワークアラウンド含む）
+- トランスポート: 共有イベントループ上の非同期 SSH（asyncssh）+ Telnet（telnetlib3）、push-dispatch セッション処理
 
 ## なぜ？
 

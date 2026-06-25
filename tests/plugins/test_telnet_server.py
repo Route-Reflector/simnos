@@ -92,14 +92,14 @@ class InventoryValidationTest(unittest.TestCase):
                     "password": "admin",
                     "port": 6022,
                     "device_type": "cisco_ios",
-                    "server": {"plugin": "ParamikoSshServer", "configuration": {"ssh_banner": "SSH", "timeout": 1}},
+                    "server": {"plugin": "AsyncSshServer", "configuration": {"ssh_banner": "SSH", "timeout": 1}},
                 }
             }
         }
         inventory = ModelSimnosInventory(**data)
         server = inventory.hosts["switch1"].server
         assert server is not None
-        self.assertEqual(server.plugin, "ParamikoSshServer")
+        self.assertEqual(server.plugin, "AsyncSshServer")
 
 
 class SecurityWarningTest(unittest.TestCase):

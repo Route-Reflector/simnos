@@ -16,7 +16,7 @@ from invoke import Exit, task
 import yaml
 
 # Stdlib-only shared helpers (no `simnos` import), so `invoke --list` and the
-# lint tasks stay free of the pydantic / paramiko load cost (#264 / D1).
+# lint tasks stay free of the pydantic / asyncssh load cost (#264 / D1).
 from a3_paths import PLATFORMS_DIR as PLATFORMS_A3_DIR
 from a3_paths import list_a3_platform_names, sanitize_command_stem
 

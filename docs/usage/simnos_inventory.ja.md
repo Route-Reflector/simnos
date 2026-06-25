@@ -45,7 +45,7 @@ default_inventory = {
         "password": "user",
         "port": 6000,
         "server": {
-            "plugin": "ParamikoSshServer",
+            "plugin": "AsyncSshServer",
             "configuration": {
                 "address": "127.0.0.1",
                 "timeout": 1,
@@ -163,7 +163,7 @@ fake_network = {
         "password": "user",
         "port": [5000, 6000],
         "server": {
-            "plugin": "ParamikoSshServer",
+            "plugin": "AsyncSshServer",
             "configuration": {
                 "ssh_key_file": "./ssh-keys/ssh_host_rsa_key",
                 "timeout": 1,
@@ -179,7 +179,7 @@ fake_network = {
             "username": "simnos", # (2)
             "password": "simnos",
             "server": {
-                "plugin": "ParamikoSshServer",
+                "plugin": "AsyncSshServer",
                 "configuration": {"address": "0.0.0.0"},  # (1)
             },
             "shell": {
@@ -217,7 +217,7 @@ default:
   username: user
   port: [5000, 6000]
   server:
-    plugin: ParamikoSshServer
+    plugin: AsyncSshServer
     configuration:
       address: 127.0.0.1
       ssh_key_file: ./ssh-keys/ssh_host_rsa_key
@@ -234,7 +234,7 @@ hosts:
     port: 5001
     username: simnos
     server:
-      plugin: ParamikoSshServer
+      plugin: AsyncSshServer
       configuration:
         address: 0.0.0.0
     shell:
@@ -255,7 +255,7 @@ default:
   username: user
   port: [5000, 6000]
   server:
-    plugin: ParamikoSshServer
+    plugin: AsyncSshServer
     configuration:
       address: 0.0.0.0
 hosts:
@@ -305,7 +305,7 @@ Windows キーを押して、`Manage Optional Features` と入力します。Ope
 SIMNOS は内部で [Pydantic](https://docs.pydantic.dev/latest/concepts/models/)
 モデルを使用してインベントリデータを検証し、インベントリが定義されたスキーマに
 準拠しない場合は `ValidationError` を発生させます。サーバーセクションは
-`ParamikoSshServer`（SSH）と `TelnetServer`（Telnet）の両方のプラグインをサポートしています。
+`AsyncSshServer`（SSH）と `TelnetServer`（Telnet）の両方のプラグインをサポートしています。
 
 以下のコマンドで現在の JSON スキーマを生成できます:
 
@@ -317,8 +317,8 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 
 スキーマの要点:
 
-- `server` は `ParamikoSshServerPlugin` または `TelnetServerPlugin` のいずれかを受け入れます（`anyOf`）
-- `ParamikoSshServerConfig` の設定項目: `ssh_key_file`, `ssh_key_file_password`, `ssh_banner`, `timeout`, `address`, `watchdog_interval`, `authorized_keys`
+- `server` は `AsyncSshServerPlugin` または `TelnetServerPlugin` のいずれかを受け入れます（`anyOf`）
+- `AsyncSshServerConfig` の設定項目: `ssh_key_file`, `ssh_key_file_password`, `ssh_banner`, `timeout`, `address`, `watchdog_interval`, `authorized_keys`
 - `TelnetServerConfig` の設定項目: `banner`, `timeout`, `address`, `watchdog_interval`
 - すべての設定フィールドは任意で、適切なデフォルト値が設定されています
 
@@ -344,12 +344,12 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                                                         |
 | ------------------------- | ------------------------- | ------------------------------------- | ------------------------------------------------------------------------- |
-| `plugin`                  | :electric_plug:           | 使用するサーバープラグイン               | `plugin: ParamikoSshServer`                                               |
+| `plugin`                  | :electric_plug:           | 使用するサーバープラグイン               | `plugin: AsyncSshServer`                                               |
 | `configuration`           | :gear:                    | サーバー設定                           | [Server configuration options](#server-configuration-options) セクションを参照 |
 
 ### Server configuration options
 
-SIMNOS は2つのサーバープラグインをサポートしています: **ParamikoSshServer**（SSH、デフォルト）と **TelnetServer**（Telnet）。
+SIMNOS は2つのサーバープラグインをサポートしています: **AsyncSshServer**（SSH、デフォルト）と **TelnetServer**（Telnet）。
 
 #### 共通オプション（SSH・Telnet 両方）
 
@@ -359,7 +359,7 @@ SIMNOS は2つのサーバープラグインをサポートしています: **Pa
 | `address`                 | :globe_with_meridians:    | サーバーのバインドアドレス               | `address: 127.0.0.1`                           |
 | `watchdog_interval`       | :dog:                     | ウォッチドッグの間隔                    | `watchdog_interval: 1`                         |
 
-#### ParamikoSshServer オプション
+#### AsyncSshServer オプション
 
 | オプション                 | 絵文字                     | 説明                                  | 例                                              |
 | ------------------------- | ------------------------- | ------------------------------------- | ---------------------------------------------- |

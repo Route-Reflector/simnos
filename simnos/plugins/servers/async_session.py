@@ -1,10 +1,11 @@
-"""Async push-dispatch session driver (#297 Stage 2, §3 / §3a).
+"""Async push-dispatch session driver (#297 Stage 2 / 3, §3 / §3a).
 
-The async counterpart to ``tap_bridge.run_push_session``: it drives one client
-session over an event-driven transport (asyncssh process in Stage 2) using the
-**same** wire-assembly helpers (``_render_intro`` / ``_render_response``), so the
-byte stream is identical to the paramiko push path — pinned by the byte-parity
-goldens in ``tests/plugins/test_ssh_byte_parity.py``.
+Drives one client session over an event-driven transport (asyncssh process /
+telnetlib3 stream) using the wire-assembly helpers (``_render_intro`` /
+``_render_response``), so the byte stream is identical across the SSH and Telnet
+transports — pinned by the byte-parity goldens in
+``tests/plugins/test_ssh_byte_parity.py`` /
+``tests/plugins/test_telnet_byte_parity.py``.
 
 The spike (#296) proved that bridging a *blocking* shell loop per session is the
 100-host failure source, so here the read loop is event-driven on the event-loop
@@ -33,24 +34,24 @@ log = logging.getLogger(__name__)
 
 # asyncssh stdin reads arrive in chunks; one read may carry several bytes/lines.
 # The §3a byte state machine iterates the chunk byte-by-byte so per-character echo
-# stays byte-identical to the synchronous paramiko path.
+# stays byte-stable regardless of how the transport segments the stream.
 _READ_CHUNK = 4096
 
 
 class AsyncPushTransport(Protocol):
     """Minimal async transport surface the session driver needs (§3a, claude#3).
 
-    Mirrors ``tap_bridge.TransportAdapter`` but with an async ``recv`` (the read
-    is event-driven, not a blocking pull). ``send`` buffers a write; ``drain``
-    applies flow-control backpressure at response boundaries so a slow client
-    cannot make the server buffer without bound under the 100-host load.
+    The ``recv`` is event-driven (an async read, not a blocking pull). ``send``
+    buffers a write; ``drain`` applies flow-control backpressure at response
+    boundaries so a slow client cannot make the server buffer without bound under
+    the 100-host load.
     """
 
     #: Exceptions that mean "I/O failed / peer gone" for this transport.
     io_errors: tuple[type[BaseException], ...]
 
-    #: RFC 854 CR NUL quirk switch (False for SSH, True for Telnet) — same
-    #: contract as ``TransportAdapter.nul_resets_skip_lf``.
+    #: RFC 854 CR NUL quirk switch (False for SSH, True for Telnet): True makes a
+    #: NUL clear the pending CR-LF skip (CR NUL is a complete Telnet sequence).
     nul_resets_skip_lf: bool
 
     #: Short name for log messages ("ssh").
@@ -78,30 +79,27 @@ async def run_async_push_session(
 ) -> None:
     """Drive one client session with async push dispatch (#297 Stage 2, §3a).
 
-    The state machine is identical to ``run_push_session`` (regular char =
-    immediate echo; line terminator = held ``\\r\\n`` echo + body + prompt in one
-    write), so the wire bytes match the paramiko push path. The differences are
-    structural, not behavioural on the wire:
+    The wire state machine is: regular char = immediate echo; line terminator =
+    held ``\\r\\n`` echo + body + prompt in one write (the wire assembly lives in
+    ``_render_intro`` / ``_render_response``). It is event-driven, not a blocking
+    loop:
 
-    - the read is ``await transport.recv(...)`` (event-driven) instead of a
-      blocking per-byte pull, so the event-loop thread is free between bytes;
+    - the read is ``await transport.recv(...)`` (event-driven) so the event-loop
+      thread is free between bytes;
     - ``shell.dispatch`` runs via the injected ``dispatch`` coroutine (bounded
       executor), so a slow handler does not block the loop (§2a);
     - shutdown is propagated by the transport closing (``recv`` -> ``b""`` / an
       ``io_errors`` raise) rather than a polled ``is_running`` flag — the shared
       loop closes the session on stop (§1a).
 
-    **Write-failure policy (§3a, codex/claude 1st):** the sync path's asymmetry
-    (immediate-echo ``TimeoutError`` = disconnect vs response-batch ``TimeoutError``
-    = retry) does *not* apply here. asyncssh has no per-write timeout — it applies
-    backpressure through ``drain`` flow-control, so the retry case never arises;
-    a real write failure surfaces as an ``io_errors`` raise and is treated as a
-    disconnect for both echo and response. The byte *content* is unchanged; only
-    the (timeout-specific) failure handling differs, which is inherent to swapping
-    a poll-timeout transport for a flow-controlled one.
+    **Write-failure policy (§3a, codex/claude 1st):** there is no per-write timeout
+    here. asyncssh / telnetlib3 apply backpressure through ``drain`` flow-control,
+    so a slow client never produces a write timeout to retry; a real write failure
+    surfaces as an ``io_errors`` raise and is treated as a disconnect for both echo
+    and response.
 
     ``initial_skip_lf`` consumes a trailing LF/NUL left by a preceding channel
-    login (auth_none), matching ``run_push_session``.
+    login (auth_none).
     """
     try:
         transport.send(_render_intro(shell))
@@ -140,7 +138,7 @@ async def run_async_push_session(
             if byte in (b"\r", b"\n"):
                 skip_lf = byte == b"\r"
                 # errors="replace" keeps malformed UTF-8 from crashing the
-                # session (parity with run_push_session, gemini#2).
+                # session (gemini#2).
                 line = bytes(buffer).decode("utf-8", errors="replace")
                 buffer.clear()
                 result = await dispatch(line)
@@ -154,7 +152,7 @@ async def run_async_push_session(
                     return
             else:
                 # Regular character: immediate echo (interactive latency
-                # unchanged). The raw byte is echoed, matching run_push_session.
+                # unchanged). The raw byte is echoed verbatim.
                 try:
                     transport.send(byte)
                 except transport.io_errors as e:
@@ -164,13 +162,12 @@ async def run_async_push_session(
 
 
 async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf: bool) -> tuple[str, bool]:
-    """Read one line byte-by-byte (async mirror of ``tap_bridge.read_line``).
+    """Read one line byte-by-byte for the in-band login.
 
     Returns ``(line without trailing CR/LF, next_skip_lf)``; a CR sets
     ``next_skip_lf=True`` so the next read consumes the LF half of a CR LF pair.
     Reads one byte per ``recv`` (login is short and not perf-critical, so this
-    avoids a leftover-buffer between the two reads). EOF returns the partial line
-    (same contract as the sync ``read_line``).
+    avoids a leftover-buffer between the two reads). EOF returns the partial line.
     """
     buf = b""
     while True:
@@ -204,20 +201,19 @@ async def async_interactive_login(
     user_prompt: bytes,
     pass_prompt: bytes,
 ) -> tuple[bool, bool]:
-    """Async channel-level login (mirror of ``tap_bridge.interactive_login``).
+    """Async in-band login (username/password prompts over the data channel).
 
     Used for auth_none platforms (e.g. Dell PowerConnect) before the shell, and
     for the Telnet in-band login (#297 Stage 3). Returns ``(authenticated,
     skip_lf)``; ``skip_lf`` is forwarded to ``run_async_push_session`` as
     ``initial_skip_lf`` so it consumes the trailing LF/NUL left by the final CR of
-    the password line. The wire interaction is byte-identical to the sync path.
+    the password line.
 
     Each prompt is ``send``-buffered without an explicit ``drain``; the prompt
     still reaches the client because the following ``await _async_read_line``
     yields to the loop, which flushes the (small) write before the read blocks for
     input. The single ``drain`` after the closing ``\\r\\n`` provides the one
-    backpressure point. This deferred-flush shape keeps the wire byte-identical to
-    the sync ``interactive_login`` (it does not drain per prompt either).
+    backpressure point.
     """
     transport.send(user_prompt)
     entered_user, skip_lf = await _async_read_line(transport, echo=True, skip_lf=False)

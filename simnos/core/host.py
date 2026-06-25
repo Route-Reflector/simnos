@@ -145,9 +145,7 @@ class Host:
             password=self.password,
             render_config=render_config,
             # The async server plugins (AsyncSshServer + telnetlib3 TelnetServer)
-            # reach the SimNOS-owned shared loop through this back reference; the
-            # legacy sync ParamikoSshServer accepts and ignores it for a uniform
-            # construction call.
+            # reach the SimNOS-owned shared loop through this back reference.
             simnos=self.simnos,
             **self.server_inventory["configuration"],
         )

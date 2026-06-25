@@ -34,7 +34,7 @@ SIMNOS is an independent project derived from [FakeNOS](https://github.com/faken
 - Python support: 3.13 / 3.14
 - CI: Modernized GitHub Actions workflow
 - NOS platforms: 5 additional platforms enabled (brocade_fastiron, ciena_saos, fortinet, juniper_screenos, ruckus_fastiron)
-- Paramiko: 4.0+ (currently resolving to 5.0.0) with DH Group Exchange server-mode workaround
+- Transports: async SSH (asyncssh) + Telnet (telnetlib3) on a shared event loop, with push-dispatch session handling
 
 ## Why?
 
