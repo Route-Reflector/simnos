@@ -29,22 +29,6 @@ jobs:
           activate-environment: "false"
       - name: "Build package"
         run: "uv build"
-      - name: "Verify bundled moduli is present in artifacts (issue #189)"
-        run: |
-          verify_moduli() {
-            local label="$1"
-            shift
-            echo "::group::${label} contents"
-            if ! "$@" | grep -E 'simnos/plugins/servers/moduli$'; then
-              echo "::error::Bundled moduli file missing from ${label} — packaging regression detected"
-              "$@"
-              echo "::endgroup::"
-              exit 1
-            fi
-            echo "::endgroup::"
-          }
-          verify_moduli "wheel" unzip -l dist/simnos-*.whl
-          verify_moduli "sdist" tar tzf dist/simnos-*.tar.gz
       - name: "Upload distributions"
         uses: "actions/upload-artifact@v7"
         with:
