@@ -11,6 +11,7 @@ client, and the auth-failure close path (message delivered + graceful FIN).
 import asyncio
 from contextlib import contextmanager
 import socket
+import threading
 import time
 import unittest
 from unittest.mock import MagicMock
@@ -19,9 +20,10 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.pydantic_models import ModelSimnosInventory
+from simnos.core.shared_loop import LoopState
 from simnos.plugins.servers import servers_plugins
 from simnos.plugins.servers.telnet_server import TelnetServer, _is_loopback
-from tests.plugins.telnet_test_helpers import telnet_login_run
+from tests.plugins.telnet_test_helpers import open_and_login, telnet_login_run
 from tests.utils import TEST_PASSWORD, TEST_USERNAME, build_inventory
 
 _TELNET_SERVER = {"plugin": "TelnetServer", "configuration": {}}
@@ -149,15 +151,24 @@ def test_telnet_auth_failure_delivers_message_and_fin():
     """Wrong credentials: the failure message reaches the client and the close is a
     graceful FIN, not an RST (Stage 3 先行検証 — asyncio keeps the kernel receive
     buffer empty so there is no unread-data RST, replacing the raw-socket
-    ``_drain_pending_input`` mechanism, #268)."""
+    ``_drain_pending_input`` mechanism, #268).
+
+    The #268 RST happens when the server closes a socket that still has *unread*
+    bytes in its kernel receive buffer, so the regression must put surplus data
+    there: after the wrong credentials the client sends a burst it never lets the
+    server consume cooperatively. The close must still be a FIN that delivers
+    ``Authentication failed.`` — which holds because asyncio's StreamReader has
+    already pulled those bytes off the kernel socket (codex 1st#1)."""
+    surplus = b"x" * 16384  # unread bytes left in the server's receive path at close
     with _running_telnet_host() as port:
         sock = socket.create_connection(("127.0.0.1", port), timeout=8)
         sock.settimeout(8)
         try:
-            # Wrong username + wrong password. telnetlib3 buffers these until the
-            # shell runs (the client does not answer negotiation); async_interactive
-            # _login then reads them, fails, and the server closes.
-            sock.sendall(b"wrong\r\nwrong\r\n")
+            # Wrong username + wrong password, then a surplus burst. telnetlib3
+            # buffers all of it (the client does not answer negotiation);
+            # async_interactive_login reads the credentials, fails, and the server
+            # closes while the surplus is still in flight / buffered.
+            sock.sendall(b"wrong\r\nwrong\r\n" + surplus)
             buf = b""
             eof = False
             deadline = time.monotonic() + 6.0
@@ -175,7 +186,7 @@ def test_telnet_auth_failure_delivers_message_and_fin():
         finally:
             sock.close()
     assert b"Authentication failed" in buf  # (1) message delivered
-    assert eof  # (2) graceful FIN, not RST
+    assert eof  # (2) graceful FIN, not RST, despite surplus unread input
 
 
 @pytest.mark.parametrize("device_type", ["cisco_ios"])
@@ -192,6 +203,57 @@ def test_telnet_serves_after_restart(device_type):
         assert b"VLAN Name" in out
     finally:
         net.stop()
+
+
+def test_telnet_stop_drains_active_session():
+    """Stopping a Telnet host with a live, mid-session client tears the session down
+    and converges to STOPPED — the telnet-transport-specific active-session drain
+    (claude 1st#4). ``aclose`` closes the telnetlib3 writer, which feeds EOF to the
+    session's reader so ``run_async_push_session`` returns; the client observes the
+    same EOF. SSH lifecycle tests cover the shared base path, but the telnetlib3
+    close→reader-EOF coupling is pinned here so a telnetlib3 close-semantics change
+    cannot regress it silently."""
+    logged_in = threading.Event()
+    release = threading.Event()
+    saw_eof = threading.Event()
+
+    inventory = build_inventory("cisco_ios", server=_TELNET_SERVER)
+    port = inventory["hosts"]["device"]["port"]
+    net = SimNOS(inventory=inventory)
+    net.start()
+
+    def _client():
+        async def _run():
+            reader, writer = await open_and_login(port)
+            try:
+                logged_in.set()
+                # Stay connected until the server closes us (EOF) or the test releases.
+                while not release.is_set():
+                    try:
+                        chunk = await asyncio.wait_for(reader.read(1024), timeout=0.2)
+                    except TimeoutError:
+                        continue
+                    if not chunk:
+                        saw_eof.set()  # server closed the session (aclose)
+                        break
+            finally:
+                writer.close()
+
+        asyncio.new_event_loop().run_until_complete(_run())
+
+    client = threading.Thread(target=_client, daemon=True)
+    client.start()
+    try:
+        assert logged_in.wait(timeout=10), "telnet client did not log in"
+        assert net._shared_loop.refcount == 1
+        net.stop()  # aclose closes the active session -> client reader hits EOF
+        assert net._shared_loop.state is LoopState.STOPPED
+        assert saw_eof.wait(timeout=10), "active telnet session was not closed by stop()"
+    finally:
+        release.set()
+        client.join(timeout=5)
+        if net._shared_loop.state is not LoopState.STOPPED:
+            net.stop()
 
 
 @pytest.mark.timeout(120)

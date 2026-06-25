@@ -206,11 +206,18 @@ async def async_interactive_login(
 ) -> tuple[bool, bool]:
     """Async channel-level login (mirror of ``tap_bridge.interactive_login``).
 
-    Used for auth_none platforms (e.g. Dell PowerConnect) before the shell.
-    Returns ``(authenticated, skip_lf)``; ``skip_lf`` is forwarded to
-    ``run_async_push_session`` as ``initial_skip_lf`` so it consumes the trailing
-    LF/NUL left by the final CR of the password line. The wire interaction is
-    byte-identical to the sync path.
+    Used for auth_none platforms (e.g. Dell PowerConnect) before the shell, and
+    for the Telnet in-band login (#297 Stage 3). Returns ``(authenticated,
+    skip_lf)``; ``skip_lf`` is forwarded to ``run_async_push_session`` as
+    ``initial_skip_lf`` so it consumes the trailing LF/NUL left by the final CR of
+    the password line. The wire interaction is byte-identical to the sync path.
+
+    Each prompt is ``send``-buffered without an explicit ``drain``; the prompt
+    still reaches the client because the following ``await _async_read_line``
+    yields to the loop, which flushes the (small) write before the read blocks for
+    input. The single ``drain`` after the closing ``\\r\\n`` provides the one
+    backpressure point. This deferred-flush shape keeps the wire byte-identical to
+    the sync ``interactive_login`` (it does not drain per prompt either).
     """
     transport.send(user_prompt)
     entered_user, skip_lf = await _async_read_line(transport, echo=True, skip_lf=False)

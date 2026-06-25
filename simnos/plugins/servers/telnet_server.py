@@ -44,8 +44,10 @@ log = logging.getLogger(__name__)
 
 #: Negotiation settle budget (seconds) before telnetlib3 runs the shell. The
 #: telnetlib3 default (4.0) is generous; this lower bound keeps the login prompt
-#: prompt for a client that doesn't fully answer negotiation (a responsive client
-#: settles well before this and is unaffected).
+#: responsive. The shell (``_handle_client``) is what sends the banner + login
+#: prompts, so a client that does NOT fully answer negotiation waits up to this
+#: budget before seeing the banner / ``Username:`` prompt. A responsive client
+#: (netmiko, a telnetlib3 client) settles well before this and is unaffected.
 _CONNECT_MAXWAIT = 1.0
 
 
@@ -68,7 +70,10 @@ class TelnetPushTransport:
     the pending skip_lf (SSH has no such convention).
     """
 
-    io_errors = (OSError, EOFError, ConnectionError)
+    # ConnectionError is a subclass of OSError, so (OSError, EOFError) already
+    # covers it; EOFError is listed because telnetlib3's binary reader can raise
+    # it on an abrupt peer close (not an OSError subclass).
+    io_errors = (OSError, EOFError)
     nul_resets_skip_lf = True  # RFC 854: CR NUL is a complete sequence
     name = "telnet"
 
@@ -184,12 +189,20 @@ class TelnetServer(AsyncServerBase):
                     with contextlib.suppress(*transport.io_errors):
                         transport.send(b"Authentication failed.\r\n")
                         await transport.drain()
+                    # No explicit receive-buffer drain before close (the raw-socket
+                    # server's _drain_pending_input, #268): asyncio's StreamReader has
+                    # already pulled any unread client bytes off the kernel socket, so
+                    # _session_scope's writer.close() is a graceful FIN that delivers
+                    # the message — pinned by test_telnet_auth_failure_delivers_
+                    # message_and_fin (incl. surplus unread input).
                     return
                 await self._drive_session(transport, skip_lf=skip_lf)
             except asyncio.CancelledError:
                 raise
-            except (OSError, EOFError, ConnectionError) as exc:
-                # Peer gone mid-session is normal; log at debug, tear down quietly.
+            except transport.io_errors as exc:
+                # Peer gone during banner/login is normal; log at debug, tear down
+                # quietly (an in-session disconnect is already absorbed by the push
+                # driver, which catches transport.io_errors and returns).
                 log.debug("Telnet session I/O ended: %s", exc)
             except Exception:
                 # A session-level crash must not take down the loop; log + tear

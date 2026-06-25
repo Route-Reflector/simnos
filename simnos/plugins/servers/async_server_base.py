@@ -157,24 +157,31 @@ class AsyncServerBase:
             raise
         self._shared_loop.register(self)
 
-    @staticmethod
-    def _discard_late_acceptor(future: "concurrent.futures.Future") -> None:
+    def _discard_late_acceptor(self, future: "concurrent.futures.Future") -> None:
         """Close a listener a cancelled/timed-out start produced after giving up.
 
-        Runs on the loop thread (run_coroutine_threadsafe completes the future
-        there), so ``acceptor.close()`` is loop-safe. A cancelled future has no
-        acceptor to reclaim; a completed one is closed (idempotent with
-        ``_abort_failed_start`` if both fire).
+        This done-callback usually runs on the loop thread (the create coroutine
+        completes there after ``start`` gave up waiting), but it can ALSO run
+        synchronously on the calling thread: ``concurrent.futures.Future``
+        invokes a callback inline when the future is *already* done at
+        ``add_done_callback`` time (e.g. the create finished right at the timeout
+        boundary, gemini 1st#1). ``acceptor.close()`` is not thread-safe (it drives
+        ``loop.remove_reader`` on the selector), so it is always routed onto the
+        loop via ``call_soon_threadsafe`` rather than called inline. A cancelled
+        future has no acceptor to reclaim; a completed one is closed (idempotent
+        with ``_abort_failed_start`` if both fire).
         """
         if future.cancelled():
             return
-        # suppress BaseException, not Exception: this runs as a future done-callback
-        # on the loop thread, and a BaseException set on the future (or raised by
-        # close) must not escape into the loop (gemini 3rd#4).
+        # suppress BaseException: a BaseException set on the future (or raised while
+        # scheduling) must not escape — for a synchronous (caller-thread) invocation
+        # it would propagate into start()'s caller; for a loop-thread invocation it
+        # must not escape into the loop (gemini 3rd#4).
         with contextlib.suppress(BaseException):
             acceptor = future.result()
-            if acceptor is not None:
-                acceptor.close()
+            shared_loop = self._shared_loop
+            if acceptor is not None and shared_loop is not None and not shared_loop.loop.is_closed():
+                shared_loop.loop.call_soon_threadsafe(acceptor.close)
 
     def _abort_failed_start(self) -> None:
         """Close a listener left by a failed/timed-out start (codex 1st#1).

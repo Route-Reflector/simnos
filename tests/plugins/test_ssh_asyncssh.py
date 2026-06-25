@@ -27,8 +27,8 @@ import paramiko
 import pytest
 
 from simnos import SimNOS
-from simnos.core.shared_loop import LoopState
-from simnos.plugins.servers.ssh_server_asyncssh import AsyncSshServer
+from simnos.core.shared_loop import LoopState, SharedLoop
+from simnos.plugins.servers.async_server_base import AsyncServerBase
 from simnos.plugins.shell.cmd_shell import CMDShell
 from tests.plugins.telnet_test_helpers import telnet_login_run
 from tests.utils import TEST_PASSWORD, TEST_USERNAME
@@ -248,24 +248,44 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
 
 
 def test_discard_late_acceptor_closes_completed_future():
-    """The late-acceptor done-callback closes a listener produced after start gave up (codex 2nd#1)."""
+    """The late-acceptor done-callback closes a listener produced after start gave
+    up, routing close() onto the loop thread (codex 2nd#1 / gemini 1st#1).
+
+    The callback can fire synchronously on the caller thread (future already done at
+    ``add_done_callback`` time), so ``acceptor.close()`` must run via
+    ``call_soon_threadsafe`` — not inline — to stay loop-safe.
+    """
     closed = threading.Event()
 
     class _FakeAcceptor:
         def close(self):
             closed.set()
 
-    future: concurrent.futures.Future = concurrent.futures.Future()
-    future.set_result(_FakeAcceptor())
-    AsyncSshServer._discard_late_acceptor(future)
-    assert closed.is_set()
+    shared_loop = SharedLoop()
+    shared_loop.ensure_running()
+
+    class _Stub:
+        _shared_loop = shared_loop
+
+    try:
+        future: concurrent.futures.Future = concurrent.futures.Future()
+        future.set_result(_FakeAcceptor())
+        # Call via the base (unbound) with a stub self carrying only _shared_loop.
+        AsyncServerBase._discard_late_acceptor(_Stub(), future)
+        assert closed.wait(timeout=5), "acceptor.close() was not scheduled on the loop thread"
+    finally:
+        shared_loop.teardown_if_idle()
 
 
 def test_discard_late_acceptor_ignores_cancelled_future():
     """A cancelled create future has no acceptor to reclaim — callback is a no-op."""
+
+    class _Stub:
+        _shared_loop = None
+
     future: concurrent.futures.Future = concurrent.futures.Future()
     future.cancel()
-    AsyncSshServer._discard_late_acceptor(future)  # must not raise
+    AsyncServerBase._discard_late_acceptor(_Stub(), future)  # must not raise
 
 
 def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):

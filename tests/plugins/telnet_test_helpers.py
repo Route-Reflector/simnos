@@ -78,6 +78,26 @@ async def capture_telnet_transcript(
     return steps
 
 
+async def open_and_login(
+    port: int, *, username: str = TEST_USERNAME, password: str = TEST_PASSWORD
+) -> "tuple[telnetlib3.TelnetReader, telnetlib3.TelnetWriter]":
+    """Open a Telnet connection and complete login; return its (reader, writer).
+
+    The push session is running on the server when this returns; the caller drives
+    and closes the connection. Used by the lifecycle test that holds a live session
+    open across ``stop`` (the telnet-specific active-session drain).
+    """
+    reader, writer = await telnetlib3.open_connection(_HOST, port, encoding=False, connect_minwait=_CONNECT_MINWAIT)
+    await _read_idle(reader)  # banner + Username:
+    writer.write(username.encode() + b"\r")
+    await writer.drain()
+    await _read_idle(reader)  # echo + Password:
+    writer.write(password.encode() + b"\r")
+    await writer.drain()
+    await _read_idle(reader)  # intro + first prompt
+    return reader, writer
+
+
 async def telnet_login_run(port: int, command: bytes, *, marker: bytes) -> bytes:
     """Log in and run one *command*, returning the response; assert-friendly helper.
 
