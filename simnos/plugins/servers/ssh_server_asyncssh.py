@@ -267,7 +267,7 @@ class AsyncSshServer(AsyncServerBase):
             reuse_address=True,
             reuse_port=(sys.platform == "linux"),
         )
-        return self._acceptor  # SSHAcceptor satisfies the _Listener protocol
+        return self._acceptor  # SSHAcceptor satisfies the Listener protocol
 
     def _close_session(self, session: object) -> None:
         session.close()  # type: ignore[attr-defined]  # session is an SSHServerProcess

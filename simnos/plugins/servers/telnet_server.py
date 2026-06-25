@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING
 import telnetlib3
 
 from simnos.core.nos import Nos
-from simnos.plugins.servers.async_server_base import AsyncServerBase, _Listener
+from simnos.plugins.servers.async_server_base import AsyncServerBase, Listener
 from simnos.plugins.servers.async_session import async_interactive_login
 
 if TYPE_CHECKING:
@@ -140,10 +140,10 @@ class TelnetServer(AsyncServerBase):
             )
 
     # ------------------------------------------------------------------ hooks
-    async def _create_listener(self) -> _Listener:
+    async def _create_listener(self) -> Listener:
         # Store on self before returning so _abort_failed_start can close it even
         # if start()'s result() already timed out (codex 1st#1). telnetlib3 returns
-        # an asyncio.Server (close() + wait_closed() = the _Listener protocol);
+        # an asyncio.Server (close() + wait_closed() = the Listener protocol);
         # asyncio's create_server defaults reuse_address=True on POSIX, so stop→start
         # does not hit EADDRINUSE (parity with the asyncssh reuse_address bind).
         self._acceptor = await telnetlib3.create_server(

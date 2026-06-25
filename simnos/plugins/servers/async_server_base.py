@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 _CREATE_LISTENER_TIMEOUT = 30
 
 
-class _Listener(Protocol):
+class Listener(Protocol):
     """The minimal listener surface the base lifecycle needs (asyncssh / asyncio)."""
 
     def close(self) -> None: ...
@@ -104,7 +104,7 @@ class AsyncServerBase:
         self._simnos = simnos
 
         self._shared_loop: SharedLoop | None = None
-        self._acceptor: _Listener | None = None
+        self._acceptor: Listener | None = None
         # Per-server run flag the shells observe: cleared on stop so an in-flight
         # dispatch returns close (cooperative stop, §1a).
         self._is_running = threading.Event()
@@ -173,14 +173,20 @@ class AsyncServerBase:
         """
         if future.cancelled():
             return
-        # suppress BaseException: a BaseException set on the future (or raised while
-        # scheduling) must not escape — for a synchronous (caller-thread) invocation
-        # it would propagate into start()'s caller; for a loop-thread invocation it
-        # must not escape into the loop (gemini 3rd#4).
-        with contextlib.suppress(BaseException):
+        # suppress(Exception), not BaseException: future.result() re-raises the create
+        # coroutine's failure (OSError / asyncssh.Error) and call_soon_threadsafe raises
+        # RuntimeError if the loop has since closed — both are Exception subclasses.
+        # KeyboardInterrupt / SystemExit are deliberately NOT suppressed: this can run
+        # inline on the caller thread (the future was already done at add_done_callback
+        # time), where an operator's Ctrl-C must still abort (gemini 2nd#1).
+        with contextlib.suppress(Exception):
             acceptor = future.result()
             shared_loop = self._shared_loop
-            if acceptor is not None and shared_loop is not None and not shared_loop.loop.is_closed():
+            if acceptor is not None and shared_loop is not None:
+                # Route close onto the loop thread — acceptor.close() drives the
+                # selector (remove_reader) and is not safe to call from the caller
+                # thread. A closed loop raises RuntimeError here, caught by the suppress
+                # above, so no (racy) is_closed() pre-check is needed (gemini 2nd#1).
                 shared_loop.loop.call_soon_threadsafe(acceptor.close)
 
     def _abort_failed_start(self) -> None:
@@ -341,7 +347,7 @@ class AsyncServerBase:
         await run_async_push_session(transport, client_shell, dispatch, initial_skip_lf=skip_lf)
 
     # ------------------------------------------------------------------ hooks
-    async def _create_listener(self) -> _Listener:
+    async def _create_listener(self) -> Listener:
         """Create the transport listener on the loop; store + return it.
 
         Must set ``self._acceptor`` to the created listener *before* returning so

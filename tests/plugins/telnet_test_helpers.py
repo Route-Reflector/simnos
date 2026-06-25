@@ -29,7 +29,7 @@ async def _read_idle(reader: "telnetlib3.TelnetReader") -> bytes:
     across reads yields the same transcript every run regardless of segmentation.
     """
     out = bytearray()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     start = loop.time()
     while True:
         try:
@@ -117,7 +117,7 @@ async def telnet_login_run(port: int, command: bytes, *, marker: bytes) -> bytes
         writer.write(command)
         await writer.drain()
         out = bytearray()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         deadline = loop.time() + _OVERALL
         while marker not in out and loop.time() < deadline:
             chunk = await _read_idle(reader)

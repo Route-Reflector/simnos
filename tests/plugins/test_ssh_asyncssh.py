@@ -249,16 +249,21 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
 
 def test_discard_late_acceptor_closes_completed_future():
     """The late-acceptor done-callback closes a listener produced after start gave
-    up, routing close() onto the loop thread (codex 2nd#1 / gemini 1st#1).
+    up, routing close() onto the loop thread (codex 2nd#2 / gemini 1st#1).
 
     The callback can fire synchronously on the caller thread (future already done at
     ``add_done_callback`` time), so ``acceptor.close()`` must run via
-    ``call_soon_threadsafe`` — not inline — to stay loop-safe.
+    ``call_soon_threadsafe`` — not inline — to stay loop-safe. The test asserts both
+    that close ran AND that it ran on the loop thread, not the caller thread: a
+    regression that closed inline would still set ``closed`` but on the wrong thread,
+    so the thread-identity assertion is what actually pins the fix (codex 2nd#2).
     """
     closed = threading.Event()
+    close_thread: dict[str, int] = {}
 
     class _FakeAcceptor:
         def close(self):
+            close_thread["ident"] = threading.get_ident()
             closed.set()
 
     shared_loop = SharedLoop()
@@ -270,9 +275,11 @@ def test_discard_late_acceptor_closes_completed_future():
     try:
         future: concurrent.futures.Future = concurrent.futures.Future()
         future.set_result(_FakeAcceptor())
-        # Call via the base (unbound) with a stub self carrying only _shared_loop.
+        # Call via the base (unbound) with a stub self carrying only _shared_loop;
+        # the future is already done, so the callback runs inline on THIS thread.
         AsyncServerBase._discard_late_acceptor(_Stub(), future)
         assert closed.wait(timeout=5), "acceptor.close() was not scheduled on the loop thread"
+        assert close_thread["ident"] != threading.get_ident(), "close() ran on the caller thread, not the loop"
     finally:
         shared_loop.teardown_if_idle()
 
