@@ -10,8 +10,9 @@ here, transport-agnostic, and is pinned end-to-end by the byte-parity goldens in
 History: this module also hosted the synchronous tap pair + ``run_push_session``
 that drove the paramiko SSH channel and the raw-socket Telnet server. Those were
 retired with the paramiko server in #297 Stage 4; only the wire-assembly helpers
-the async path reuses remain (the per-line ``process_tap_line`` normalisation,
-formerly in the standalone ``tap_io`` module, was folded in here at the same time).
+the async path reuses remain (the per-line ``_process_tap_line`` normalisation,
+formerly the standalone ``tap_io`` module's ``process_tap_line``, was folded in
+here at the same time).
 """
 
 import logging
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-def process_tap_line(line: str) -> str:
+def _process_tap_line(line: str) -> str:
     """Sanitise a single line of shell output for the network client.
 
     - Strips NUL bytes.
@@ -54,12 +55,12 @@ class PushShell(Protocol):
 def _assemble_wire(writes: list[str]) -> bytes:
     """Normalize each shell write and join to wire bytes (#297 / §3a).
 
-    `process_tap_line` is applied per write, mirroring how the legacy
+    `_process_tap_line` is applied per write, mirroring how the legacy
     `shell_to_client_tap` processed each shell stdout write individually (NUL
     strip / bare-LF → CRLF). This is the session-handler write-unit assembly
     shared by SSH and Telnet.
     """
-    return "".join(process_tap_line(w) for w in writes).encode("utf-8")
+    return "".join(_process_tap_line(w) for w in writes).encode("utf-8")
 
 
 def _render_intro(shell: PushShell) -> bytes:
