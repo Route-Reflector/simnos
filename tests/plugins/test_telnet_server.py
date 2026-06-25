@@ -147,7 +147,7 @@ def test_telnet_login_and_command():
     assert out.rstrip(b" ").endswith(b"device>")
 
 
-def test_telnet_auth_failure_delivers_message_and_fin():
+def test_telnet_auth_failure_raw_surplus_delivers_message_and_fin():
     """Wrong credentials: the failure message reaches the client and the close is a
     graceful FIN, not an RST (Stage 3 先行検証 — asyncio keeps the kernel receive
     buffer empty so there is no unread-data RST, replacing the raw-socket

@@ -193,8 +193,9 @@ class TelnetServer(AsyncServerBase):
                     # server's _drain_pending_input, #268): asyncio's StreamReader has
                     # already pulled any unread client bytes off the kernel socket, so
                     # _session_scope's writer.close() is a graceful FIN that delivers
-                    # the message — pinned by test_telnet_auth_failure_delivers_
-                    # message_and_fin (incl. surplus unread input).
+                    # the message — pinned by
+                    # test_telnet_auth_failure_raw_surplus_delivers_message_and_fin
+                    # (wrong creds + surplus unread input still closes with FIN).
                     return
                 await self._drive_session(transport, skip_lf=skip_lf)
             except asyncio.CancelledError:
