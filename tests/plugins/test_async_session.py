@@ -145,6 +145,13 @@ def test_editing_incomplete_csi_then_enter_still_dispatches():
     assert b"out:show vlan" in out
 
 
+def test_editing_lone_esc_then_letter_inserts_the_letter():
+    """A lone ESC before a printable key drops the ESC and keeps the key, rather than
+    swallowing it (only ESC [ / ESC O begin a sequence) — claude 2nd#4."""
+    out = _drive(_FakeTransport([b"show vla\x1bn\r"]), _FakeShell(), editing=True)
+    assert b"out:show vlan" in out
+
+
 def test_editing_runaway_escape_resyncs():
     """An unterminated escape is dropped at _MAX_ESC_LEN and the session recovers,
     so the following real command still dispatches (codex 1st#4)."""

@@ -195,13 +195,16 @@ class _LineEditor:
             self._pos = len(self._line)
 
     def _replace_line(self, new: bytes) -> None:
-        """Erase the displayed line and draw ``new`` (cursor at end)."""
-        self._send(b"\b" * self._pos)  # cursor to start
-        self._send(b" " * len(self._line))  # overwrite old glyphs
-        self._send(b"\b" * len(self._line))  # back to start
+        """Erase the displayed line and draw ``new`` (cursor at end) in one write.
+
+        Cursor to start (``\\b`` * pos) -> overwrite old glyphs with spaces -> back
+        to start -> draw ``new``, coalesced into a single ``send`` so a chunking
+        transport cannot split the redraw into micro-packets (gemini 2nd#4).
+        """
+        old_len = len(self._line)
+        self._send(b"\b" * self._pos + b" " * old_len + b"\b" * old_len + new)
         self._line = bytearray(new)
         self._pos = len(self._line)
-        self._send(bytes(self._line))
 
     def set_line(self, new: bytes) -> None:
         """Replace the line (Tab completion)."""
@@ -352,7 +355,15 @@ async def run_async_push_session(
                     esc = bytearray(b"\x1b")  # (re)start; abandon any partial sequence
                     continue
                 if esc:
-                    if b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
+                    if len(esc) == 1 and byte not in (b"[", b"O"):
+                        # The byte right after ESC must be '[' or 'O' to begin a
+                        # CSI/SS3 sequence. Anything else means the ESC was lone (a
+                        # stray ESC, or an unhandled meta-key like Alt+key): drop the
+                        # ESC and reprocess this byte on the normal path below, so a
+                        # lone ESC neither swallows the following character (claude
+                        # 2nd#4) nor the following Enter/Backspace.
+                        esc.clear()
+                    elif b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
                         esc += byte
                         action = _parse_escape(bytes(esc))
                         if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
@@ -361,11 +372,12 @@ async def run_async_push_session(
                         if action not in ("incomplete", "discard"):
                             editor.apply_action(action)
                         continue  # escape consumed (applied / discarded / maxlen-dropped)
-                    # A control byte (Enter / Backspace / Tab / ...) cannot continue an
-                    # escape: abandon the malformed sequence and reprocess this byte on
-                    # the normal path below instead of swallowing it until the escape
-                    # buffer fills (gemini 1st#1 / claude 1st#2).
-                    esc.clear()
+                    else:
+                        # A control byte mid-CSI cannot continue the escape: abandon
+                        # the malformed sequence and reprocess this byte on the normal
+                        # path below instead of swallowing it until the escape buffer
+                        # fills (gemini 1st#1 / claude 1st#2).
+                        esc.clear()
 
                 # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
                 # is a complete sequence, so reset skip_lf; SSH preserves it.
