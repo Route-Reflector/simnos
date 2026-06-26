@@ -21,6 +21,26 @@ ssh -p 6000 user@localhost # cisco_ios
 ssh -p 6001 user@localhost # huawei_smartax
 ```
 
+## Interactive line editing (SSH)
+
+When you connect over **SSH** interactively, SIMNOS gives you real-device-style
+line editing:
+
+- **←/→** move the cursor within the line; **↑/↓** browse command history.
+- **Backspace** / **Delete** edit the current line.
+- **Tab** completes a command from those valid in the current mode.
+- **`?`** lists the commands available in the current mode.
+
+Editing only reacts to those interactive keystrokes. Automation tools that send
+whole lines (Netmiko, Scrapli, Ansible) never trigger it, so they see exactly the
+same plain byte stream as before — the editing layer never alters the wire for a
+scraper. This means **one running instance serves both a human SSH session and an
+automation client identically**: connect by hand to verify behaviour, then point
+Netmiko at the same port.
+
+Line editing is **SSH-only**; the Telnet server keeps the plain (non-editing)
+stream.
+
 The equivalent to running above code would be to run SIMNOS CLI without
 any arguments:
 

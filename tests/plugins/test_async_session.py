@@ -31,6 +31,9 @@ class _FakeShell:
             return DispatchResult(body=None, prompt=self.prompt, close=False, mode="user")
         return DispatchResult(body=f"out:{line}", prompt=self.prompt, close=False, mode="user")
 
+    def completion_candidates(self, prefix: str) -> list[str]:
+        return []  # these tests drive the push path with editing off; Tab is never consulted
+
 
 class _FakeTransport:
     """AsyncPushTransport over a scripted byte stream; records writes.
@@ -113,6 +116,48 @@ def test_eof_drops_partial_line():
     """An unterminated line at EOF is echoed but not dispatched (no spurious out)."""
     out = _drive(_FakeTransport([b"show ver"]), _FakeShell())
     assert out == b"Custom SSH Shell\r\ndevice>show ver"  # echo only, no response
+
+
+# ---------------------------------------------------------------- editing flag (#303 P3-1)
+def test_editing_off_treats_esc_bs_tab_as_literal_bytes():
+    """With editing=False (Telnet) ESC / BS / Tab are ordinary bytes: echoed raw and
+    carried into the dispatched line — no cursor/edit interception (codex 1st#1).
+
+    This pins the byte-parity contract on the editing=False side: the editing
+    branches are bypassed entirely, so the wire matches the pre-P3-1 machine.
+    """
+    payload = b"a\tb\x7fc\x1b[D"  # Tab, DEL, and a cursor-left CSI as literal input
+    out = _drive(_FakeTransport([payload + b"\r"]), _FakeShell(), editing=False)
+    assert payload in out  # every byte echoed verbatim
+    assert b"out:" + payload in out  # and the whole payload reached dispatch
+
+
+def test_editing_lone_esc_then_enter_still_dispatches():
+    """A lone ESC before Enter must abort the (empty) escape and dispatch the line,
+    not swallow the CR (gemini 1st#1 / claude 1st#2)."""
+    out = _drive(_FakeTransport([b"show vlan\x1b\r"]), _FakeShell(), editing=True)
+    assert b"out:show vlan" in out
+
+
+def test_editing_incomplete_csi_then_enter_still_dispatches():
+    """An incomplete CSI (ESC [) before Enter aborts the escape and dispatches."""
+    out = _drive(_FakeTransport([b"show vlan\x1b[\r"]), _FakeShell(), editing=True)
+    assert b"out:show vlan" in out
+
+
+def test_editing_lone_esc_then_letter_inserts_the_letter():
+    """A lone ESC before a printable key drops the ESC and keeps the key, rather than
+    swallowing it (only ESC [ / ESC O begin a sequence) — claude 2nd#4."""
+    out = _drive(_FakeTransport([b"show vla\x1bn\r"]), _FakeShell(), editing=True)
+    assert b"out:show vlan" in out
+
+
+def test_editing_runaway_escape_resyncs():
+    """An unterminated escape is dropped at _MAX_ESC_LEN and the session recovers,
+    so the following real command still dispatches (codex 1st#4)."""
+    junk = b"\x1b[" + b"1" * 6  # 8 bytes: fills the escape buffer, dropped at maxlen
+    out = _drive(_FakeTransport([junk + b"show vlan\r"]), _FakeShell(), editing=True)
+    assert b"out:show vlan" in out
 
 
 def test_malformed_utf8_does_not_crash():

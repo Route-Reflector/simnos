@@ -481,6 +481,28 @@ class CMDShell(Cmd):
         """Whether `cmd` is valid in the current mode (empty modes = all)."""
         return not cmd.modes or self.current_mode in cmd.modes
 
+    def _dispatchable_commands(self) -> list[tuple[str, ResolvedCommand]]:
+        """(name, cmd) pairs dispatchable in the current mode (skip `_special_`).
+
+        The single current-mode command source shared by the help listing
+        (`_help_body`) and the SSH editor's Tab completion
+        (`completion_candidates`, #303 P3-1), so both list exactly the commands
+        that would actually dispatch right now.
+        """
+        return [
+            (name, cmd)
+            for name, cmd in self.commands.items()
+            if not (name.startswith("_") and name.endswith("_")) and self._in_current_mode(cmd)
+        ]
+
+    def completion_candidates(self, prefix: str) -> list[str]:
+        """Current-mode command names that start with `prefix` (#303 P3-1, Tab).
+
+        Exact-prefix only (a flat ``startswith`` over the whole command name);
+        leading-token abbreviation is P3-2. Sorted for a stable completion menu.
+        """
+        return sorted(name for name, _cmd in self._dispatchable_commands() if name.startswith(prefix))
+
     def _help_body(self) -> str:
         """Build the help listing for the current mode as body text (no I/O).
 
@@ -500,13 +522,7 @@ class CMDShell(Cmd):
         """
         lines = {}  # dict of {cmd: cmd_help}
         width = 0  # record longest command width for padding
-        for name, cmd in self.commands.items():
-            # skip special commands
-            if name.startswith("_") and name.endswith("_"):
-                continue
-            # skip commands not valid in the current mode
-            if not self._in_current_mode(cmd):
-                continue
+        for name, cmd in self._dispatchable_commands():
             lines[name] = cmd.help
             width = max(width, len(name))
         # form help lines
