@@ -51,6 +51,10 @@ class PushShell(Protocol):
 
     def dispatch(self, line: str) -> "DispatchResult": ...
 
+    def completion_candidates(self, prefix: str) -> list[str]:
+        """Current-mode command names starting with ``prefix`` (#303 P3-1 Tab)."""
+        ...
+
 
 def _assemble_wire(writes: list[str]) -> bytes:
     """Normalize each shell write and join to wire bytes (#297 / §3a).

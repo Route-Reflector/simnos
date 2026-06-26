@@ -334,6 +334,12 @@ class AsyncServerBase:
 
         return dispatch
 
+    #: Enable in-band line editing (cursor / history / backspace / Tab) for this
+    #: transport's sessions (#303 P3-1). SSH overrides to True; Telnet stays False
+    #: (editing is SSH-only — Telnet keeps the plain push driver). Editing fires
+    #: only on interactive keys, so the byte-parity goldens hold either way.
+    _editing: bool = False
+
     async def _drive_session(self, transport: "AsyncPushTransport", *, skip_lf: bool = False) -> None:
         """Drive one authenticated session with the shared push driver (§3a).
 
@@ -343,7 +349,7 @@ class AsyncServerBase:
         """
         client_shell = self._build_shell()
         dispatch = self._make_dispatch(client_shell)
-        await run_async_push_session(transport, client_shell, dispatch, initial_skip_lf=skip_lf)
+        await run_async_push_session(transport, client_shell, dispatch, initial_skip_lf=skip_lf, editing=self._editing)
 
     # ------------------------------------------------------------------ hooks
     async def _create_listener(self) -> Listener:

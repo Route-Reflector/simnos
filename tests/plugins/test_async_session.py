@@ -31,6 +31,9 @@ class _FakeShell:
             return DispatchResult(body=None, prompt=self.prompt, close=False, mode="user")
         return DispatchResult(body=f"out:{line}", prompt=self.prompt, close=False, mode="user")
 
+    def completion_candidates(self, prefix: str) -> list[str]:
+        return []  # these tests drive the push path with editing off; Tab is never consulted
+
 
 class _FakeTransport:
     """AsyncPushTransport over a scripted byte stream; records writes.

@@ -70,12 +70,217 @@ class AsyncPushTransport(Protocol):
         ...
 
 
+# --------------------------------------------------------------------- line editor
+# Interactive line editing for the SSH push session (#303 P3-1). This rides ON TOP
+# of the binary byte machine in run_async_push_session and only fires on keystrokes
+# a scraper never sends — cursor moves, history, backspace, Tab. Regular characters
+# (appended at the line end) and the CR/LF/NUL terminators are echoed/handled exactly
+# as before, so the byte-parity goldens (which send only whole lines) are unchanged.
+# Editing is gated by the `editing` flag (SSH=True, Telnet=False).
+#
+# Terminal-width wrapping is intentionally NOT modelled (the redraw assumes the line
+# fits on one row): a line longer than the terminal wraps and the \b-based redraw
+# miscounts. This only affects a human editing a >width line — a scraper never edits
+# — so the contract is safe; horizontal-scroll/wrap is a P3-4 follow-up.
+
+#: CSI/SS3 final sequence (after the ``\x1b[`` / ``\x1bO`` prefix) → editor action.
+_CSI_ACTIONS = {
+    b"A": "up",
+    b"B": "down",
+    b"C": "right",
+    b"D": "left",
+    b"H": "home",
+    b"F": "end",
+    b"1~": "home",
+    b"4~": "end",
+    b"3~": "delete",
+}
+_MAX_ESC_LEN = 8  # give up on an unterminated escape past this many bytes
+
+
+def _parse_escape(seq: bytes) -> str:
+    """Classify an accumulating escape sequence (starts with ``\\x1b``).
+
+    Returns ``"incomplete"`` while more bytes are needed, a known action name
+    (``"left"`` / ``"up"`` / ...), or ``"discard"`` for a complete-but-unhandled
+    sequence (swallowed, never echoed).
+    """
+    if len(seq) < 2:
+        return "incomplete"
+    if seq[1:2] not in (b"[", b"O"):
+        return "discard"  # ESC + non-CSI/SS3 — not an editing key
+    if len(seq) < 3:
+        return "incomplete"
+    if 0x40 <= seq[-1] <= 0x7E:  # CSI/SS3 final byte → sequence complete
+        return _CSI_ACTIONS.get(bytes(seq[2:]), "discard")
+    return "incomplete"  # still collecting parameter bytes
+
+
+class _LineEditor:
+    """The line being typed: buffer + cursor + history, with echo via ``send``.
+
+    For input arriving at the line end (a scraper's whole-line send) ``insert``
+    echoes the raw byte and appends — byte-identical to the pre-P3-1 machine. The
+    redraw paths (mid-line insert, backspace, cursor, history, completion) only run
+    for interactive keys, so the byte-parity goldens are unaffected.
+    """
+
+    def __init__(self, send: "Callable[[bytes], None]") -> None:
+        self._send = send
+        self._line = bytearray()
+        self._pos = 0  # cursor byte offset within the line
+        self._history: list[bytes] = []
+        self._hist_idx: int | None = None  # None = editing a fresh (non-history) line
+        self._saved = b""  # the in-progress line stashed when browsing history
+
+    @property
+    def line_text(self) -> str:
+        return self._line.decode("utf-8", errors="replace")
+
+    def insert(self, byte: bytes) -> None:
+        if self._pos == len(self._line):
+            self._send(byte)  # fast path: raw echo at end (byte-parity preserved)
+            self._line += byte
+            self._pos += 1
+            return
+        # Mid-line insert (only after a cursor move): echo the tail, then step back.
+        self._line[self._pos : self._pos] = byte
+        self._pos += 1
+        tail = bytes(self._line[self._pos - 1 :])
+        self._send(tail)
+        self._send(b"\b" * (len(tail) - 1))
+
+    def backspace(self) -> None:
+        if self._pos == 0:
+            return
+        del self._line[self._pos - 1 : self._pos]
+        self._pos -= 1
+        tail = bytes(self._line[self._pos :])
+        self._send(b"\b" + tail + b" ")  # move left, rewrite tail, clear the freed cell
+        self._send(b"\b" * (len(tail) + 1))  # cursor back to the edit point
+
+    def delete(self) -> None:
+        if self._pos >= len(self._line):
+            return
+        del self._line[self._pos : self._pos + 1]
+        tail = bytes(self._line[self._pos :])
+        self._send(tail + b" ")
+        self._send(b"\b" * (len(tail) + 1))
+
+    def cursor_left(self) -> None:
+        if self._pos > 0:
+            self._pos -= 1
+            self._send(b"\b")
+
+    def cursor_right(self) -> None:
+        if self._pos < len(self._line):
+            self._send(bytes(self._line[self._pos : self._pos + 1]))
+            self._pos += 1
+
+    def cursor_home(self) -> None:
+        if self._pos:
+            self._send(b"\b" * self._pos)
+            self._pos = 0
+
+    def cursor_end(self) -> None:
+        if self._pos < len(self._line):
+            self._send(bytes(self._line[self._pos :]))
+            self._pos = len(self._line)
+
+    def _replace_line(self, new: bytes) -> None:
+        """Erase the displayed line and draw ``new`` (cursor at end)."""
+        self._send(b"\b" * self._pos)  # cursor to start
+        self._send(b" " * len(self._line))  # overwrite old glyphs
+        self._send(b"\b" * len(self._line))  # back to start
+        self._line = bytearray(new)
+        self._pos = len(self._line)
+        self._send(bytes(self._line))
+
+    def set_line(self, new: bytes) -> None:
+        """Replace the line (Tab completion)."""
+        self._replace_line(new)
+
+    def history_prev(self) -> None:
+        if not self._history:
+            return
+        if self._hist_idx is None:
+            self._hist_idx = len(self._history)
+            self._saved = bytes(self._line)  # stash the fresh line to restore later
+        if self._hist_idx > 0:
+            self._hist_idx -= 1
+            self._replace_line(self._history[self._hist_idx])
+
+    def history_next(self) -> None:
+        if self._hist_idx is None:
+            return
+        if self._hist_idx < len(self._history) - 1:
+            self._hist_idx += 1
+            self._replace_line(self._history[self._hist_idx])
+        else:  # past the newest entry → restore the stashed in-progress line
+            self._hist_idx = None
+            self._replace_line(self._saved)
+
+    def redraw(self) -> None:
+        """Re-emit the current line (cursor preserved) after foreign output."""
+        self._send(bytes(self._line))
+        back = len(self._line) - self._pos
+        if back:
+            self._send(b"\b" * back)
+
+    def apply_action(self, action: str) -> None:
+        """Dispatch a parsed escape action to the matching edit operation."""
+        if action == "left":
+            self.cursor_left()
+        elif action == "right":
+            self.cursor_right()
+        elif action == "up":
+            self.history_prev()
+        elif action == "down":
+            self.history_next()
+        elif action == "home":
+            self.cursor_home()
+        elif action == "end":
+            self.cursor_end()
+        elif action == "delete":
+            self.delete()
+        # "discard" / unknown: swallow (no echo)
+
+    def take_line(self) -> bytes:
+        """Return the finished line and reset; non-blank lines enter history."""
+        line = bytes(self._line)
+        if line.strip() and (not self._history or self._history[-1] != line):
+            self._history.append(line)
+        self._line = bytearray()
+        self._pos = 0
+        self._hist_idx = None
+        return line
+
+
+def _complete(editor: _LineEditor, shell: "PushShell", transport: AsyncPushTransport) -> None:
+    """Tab completion: exact-prefix over the current-mode command names (#303 P3-1).
+
+    One candidate completes the line (+ a trailing space); several are listed on a
+    fresh line and the prompt + line are redrawn; none rings the bell. None of this
+    is byte-parity-pinned — a scraper never sends Tab.
+    """
+    candidates = shell.completion_candidates(editor.line_text)
+    if len(candidates) == 1:
+        editor.set_line(candidates[0].encode("utf-8") + b" ")
+    elif len(candidates) > 1:
+        listing = "  ".join(candidates)
+        transport.send(b"\r\n" + listing.encode("utf-8") + b"\r\n" + shell.prompt.encode("utf-8"))
+        editor.redraw()
+    else:
+        transport.send(b"\x07")  # bell — no match
+
+
 async def run_async_push_session(
     transport: AsyncPushTransport,
     shell: "PushShell",
     dispatch: Callable[[str], Awaitable["DispatchResult"]],
     *,
     initial_skip_lf: bool = False,
+    editing: bool = False,
 ) -> None:
     """Drive one client session with async push dispatch (#297 Stage 2, §3a).
 
@@ -100,6 +305,12 @@ async def run_async_push_session(
 
     ``initial_skip_lf`` consumes a trailing LF/NUL left by a preceding channel
     login (auth_none).
+
+    ``editing`` (SSH=True, Telnet=False, #303 P3-1) enables in-band line editing —
+    cursor moves, history, backspace, Tab — driven by the :class:`_LineEditor`.
+    These fire ONLY on interactive keys a scraper never sends; regular characters
+    and the CR/LF/NUL terminators are echoed/handled byte-for-byte as before, so the
+    byte-parity goldens hold whether editing is on or off.
     """
     try:
         transport.send(_render_intro(shell))
@@ -108,7 +319,8 @@ async def run_async_push_session(
         log.debug("async_session [%s] intro write closed", transport.name)
         return
 
-    buffer = bytearray()
+    editor = _LineEditor(transport.send)
+    esc = bytearray()  # accumulates an in-flight escape sequence (editing only)
     skip_lf = initial_skip_lf
     while True:
         try:
@@ -121,44 +333,54 @@ async def run_async_push_session(
 
         for i in range(len(data)):
             byte = data[i : i + 1]
-
-            # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
-            # is a complete sequence, so reset skip_lf; SSH preserves it.
-            if byte == b"\x00":
-                if transport.nul_resets_skip_lf:
-                    skip_lf = False
-                continue
-
-            # Consume the LF half of a CR LF pair.
-            if skip_lf:
-                skip_lf = False
-                if byte == b"\n":
+            try:
+                # Interactive escape sequence (cursor / history / delete). Only
+                # entered when editing and on ESC — a scraper never gets here.
+                if esc or (editing and byte == b"\x1b"):
+                    esc += byte
+                    action = _parse_escape(bytes(esc))
+                    if action == "incomplete":
+                        if len(esc) >= _MAX_ESC_LEN:
+                            esc.clear()  # unterminated escape — drop and resync
+                        continue
+                    esc.clear()
+                    editor.apply_action(action)
                     continue
 
-            if byte in (b"\r", b"\n"):
-                skip_lf = byte == b"\r"
-                # errors="replace" keeps malformed UTF-8 from crashing the
-                # session (gemini#2).
-                line = bytes(buffer).decode("utf-8", errors="replace")
-                buffer.clear()
-                result = await dispatch(line)
-                try:
+                # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
+                # is a complete sequence, so reset skip_lf; SSH preserves it.
+                if byte == b"\x00":
+                    if transport.nul_resets_skip_lf:
+                        skip_lf = False
+                    continue
+
+                # Consume the LF half of a CR LF pair.
+                if skip_lf:
+                    skip_lf = False
+                    if byte == b"\n":
+                        continue
+
+                if byte in (b"\r", b"\n"):
+                    skip_lf = byte == b"\r"
+                    # errors="replace" keeps malformed UTF-8 from crashing the
+                    # session (gemini#2).
+                    line = editor.take_line().decode("utf-8", errors="replace")
+                    result = await dispatch(line)
                     transport.send(_render_response(shell, result))
                     await transport.drain()
-                except transport.io_errors as e:
-                    log.error("async_session [%s] client write error: %s", transport.name, e)
-                    return
-                if result.close:
-                    return
-            else:
-                # Regular character: immediate echo (interactive latency
-                # unchanged). The raw byte is echoed verbatim.
-                try:
-                    transport.send(byte)
-                except transport.io_errors as e:
-                    log.error("async_session [%s] client write error: %s", transport.name, e)
-                    return
-                buffer += byte
+                    if result.close:
+                        return
+                elif editing and byte in (b"\x08", b"\x7f"):
+                    editor.backspace()
+                elif editing and byte == b"\t":
+                    _complete(editor, shell, transport)
+                else:
+                    # Regular character: immediate raw echo at the line end
+                    # (interactive latency + byte-parity unchanged).
+                    editor.insert(byte)
+            except transport.io_errors as e:
+                log.error("async_session [%s] client write error: %s", transport.name, e)
+                return
 
 
 async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf: bool) -> tuple[str, bool]:

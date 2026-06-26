@@ -166,6 +166,12 @@ class AsyncSshServer(AsyncServerBase):
     listener + auth.
     """
 
+    # In-band line editing is SSH-only (#303 P3-1): the binary push driver layers
+    # cursor / history / backspace / Tab on interactive keystrokes. Telnet keeps the
+    # base default (False). Scrapers never send editing keys, so the byte-parity
+    # goldens are unaffected.
+    _editing = True
+
     # One auto-generated RSA-2048 host key shared across the process (class-level,
     # regenerated each run).
     _default_key = None
