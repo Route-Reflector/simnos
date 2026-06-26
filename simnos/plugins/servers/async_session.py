@@ -78,10 +78,13 @@ class AsyncPushTransport(Protocol):
 # as before, so the byte-parity goldens (which send only whole lines) are unchanged.
 # Editing is gated by the `editing` flag (SSH=True, Telnet=False).
 #
-# Terminal-width wrapping is intentionally NOT modelled (the redraw assumes the line
-# fits on one row): a line longer than the terminal wraps and the \b-based redraw
-# miscounts. This only affects a human editing a >width line — a scraper never edits
-# — so the contract is safe; horizontal-scroll/wrap is a P3-4 follow-up.
+# Two simplifications, both interactive-only (a scraper never edits, so the wire
+# contract is unaffected either way):
+#   - Terminal-width wrapping is NOT modelled — the redraw assumes the line fits on
+#     one row, so a line longer than the terminal miscounts its \b-based redraw
+#     (horizontal-scroll/wrap is a P3-4 follow-up).
+#   - The cursor moves by BYTE, not grapheme — ASCII-exact, multibyte best-effort
+#     (editing a multibyte character may split it). Network CLIs are ASCII.
 
 #: CSI/SS3 final sequence (after the ``\x1b[`` / ``\x1bO`` prefix) → editor action.
 _CSI_ACTIONS = {
