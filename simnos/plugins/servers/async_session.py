@@ -20,6 +20,7 @@ executor-agnostic (and unit-testable with fakes):
   bounded executor and returns the :class:`DispatchResult`.
 """
 
+from collections import deque
 from collections.abc import Awaitable, Callable
 import logging
 from typing import TYPE_CHECKING, Protocol
@@ -99,6 +100,7 @@ _CSI_ACTIONS = {
     b"3~": "delete",
 }
 _MAX_ESC_LEN = 8  # give up on an unterminated escape past this many bytes
+_HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memory)
 
 
 def _parse_escape(seq: bytes) -> str:
@@ -132,7 +134,9 @@ class _LineEditor:
         self._send = send
         self._line = bytearray()
         self._pos = 0  # cursor byte offset within the line
-        self._history: list[bytes] = []
+        # Bounded so a long-lived session's history cannot grow without limit
+        # (gemini/claude 1st: drops the oldest entry past _HISTORY_MAX).
+        self._history: deque[bytes] = deque(maxlen=_HISTORY_MAX)
         self._hist_idx: int | None = None  # None = editing a fresh (non-history) line
         self._saved = b""  # the in-progress line stashed when browsing history
 
@@ -264,7 +268,11 @@ def _complete(editor: _LineEditor, shell: "PushShell", transport: AsyncPushTrans
 
     One candidate completes the line (+ a trailing space); several are listed on a
     fresh line and the prompt + line are redrawn; none rings the bell. None of this
-    is byte-parity-pinned — a scraper never sends Tab.
+    is byte-parity-pinned: the contract rests on a scraper never sending Tab (nor
+    BS / ESC). The goldens contain none; a platform that one day embeds a literal
+    tab in a command payload would be intercepted here and diverge — out of P3-1
+    scope (claude 1st#5). Completion uses the whole line (cursor-position-aware
+    completion is P3-2, gemini/claude 1st).
     """
     candidates = shell.completion_candidates(editor.line_text)
     if len(candidates) == 1:
@@ -337,18 +345,27 @@ async def run_async_push_session(
         for i in range(len(data)):
             byte = data[i : i + 1]
             try:
-                # Interactive escape sequence (cursor / history / delete). Only
-                # entered when editing and on ESC — a scraper never gets here.
-                if esc or (editing and byte == b"\x1b"):
-                    esc += byte
-                    action = _parse_escape(bytes(esc))
-                    if action == "incomplete":
-                        if len(esc) >= _MAX_ESC_LEN:
-                            esc.clear()  # unterminated escape — drop and resync
-                        continue
-                    esc.clear()
-                    editor.apply_action(action)
+                # Interactive escape sequence (cursor / history / delete). A scraper
+                # sends no ESC, so editing=False (and a non-editing session) never
+                # enters here and the byte falls through to the unchanged machine.
+                if editing and byte == b"\x1b":
+                    esc = bytearray(b"\x1b")  # (re)start; abandon any partial sequence
                     continue
+                if esc:
+                    if b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
+                        esc += byte
+                        action = _parse_escape(bytes(esc))
+                        if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
+                            continue  # still collecting
+                        esc.clear()
+                        if action not in ("incomplete", "discard"):
+                            editor.apply_action(action)
+                        continue  # escape consumed (applied / discarded / maxlen-dropped)
+                    # A control byte (Enter / Backspace / Tab / ...) cannot continue an
+                    # escape: abandon the malformed sequence and reprocess this byte on
+                    # the normal path below instead of swallowing it until the escape
+                    # buffer fills (gemini 1st#1 / claude 1st#2).
+                    esc.clear()
 
                 # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
                 # is a complete sequence, so reset skip_lf; SSH preserves it.

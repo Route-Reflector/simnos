@@ -20,9 +20,10 @@ import time
 
 import pytest
 
-from simnos.plugins.servers.async_session import _LineEditor, _parse_escape
+from simnos.plugins.servers.async_session import _complete, _LineEditor, _parse_escape
 from simnos.plugins.servers.ssh_server_asyncssh import AsyncSshServer
 from simnos.plugins.servers.telnet_server import TelnetServer
+from tests.plugins.test_async_session import _FakeShell, _FakeTransport
 from tests.plugins.test_ssh_byte_parity import _open_shell_channel, _running_host
 
 
@@ -89,14 +90,6 @@ def test_backspace_deletes_last_char():
     assert b"\x08" in sent[0]
 
 
-def test_midline_insert_after_cursor_left():
-    editor, _ = _editor()
-    _feed(editor, b"shw")
-    editor.cursor_left()  # cursor between 'sh' and 'w'
-    editor.insert(b"o")  # -> "show"
-    assert editor.line_text == "show"
-
-
 def test_delete_key_removes_char_under_cursor():
     editor, _ = _editor()
     _feed(editor, b"sshow")
@@ -112,6 +105,75 @@ def test_cursor_home_and_end():
     assert sent[-1] == b"\b" * 3
     editor.cursor_end()
     assert sent[-1] == b"abc"
+
+
+def test_cursor_right_echoes_char_under_cursor():
+    editor, sent = _editor()
+    _feed(editor, b"ab")
+    editor.cursor_home()
+    sent.clear()
+    editor.cursor_right()  # re-echo 'a' to advance the cursor
+    assert b"".join(sent) == b"a"
+
+
+def test_midline_insert_redraws_tail():
+    """Inserting mid-line echoes the char + the shifted tail, then steps back over it."""
+    editor, sent = _editor()
+    _feed(editor, b"shw")
+    editor.cursor_left()  # cursor between 'sh' and 'w'
+    sent.clear()
+    editor.insert(b"o")
+    assert b"".join(sent) == b"ow\b"  # echo "o"+tail "w", then \b back over "w"
+    assert editor.line_text == "show"
+
+
+def test_delete_redraws_shifted_tail():
+    editor, sent = _editor()
+    _feed(editor, b"sshow")
+    editor.cursor_home()
+    sent.clear()
+    editor.delete()  # remove the leading duplicate 's'
+    assert b"".join(sent) == b"show \b\b\b\b\b"  # rewrite tail + clear cell, cursor back
+    assert editor.line_text == "show"
+
+
+# ---------------------------------------------------------------- unit: _complete (Tab)
+class _CompShell(_FakeShell):
+    """A _FakeShell (conforms to PushShell) with a configurable completion source."""
+
+    def __init__(self, commands):
+        self._commands = commands
+
+    def completion_candidates(self, prefix):
+        return sorted(c for c in self._commands if c.startswith(prefix))
+
+
+def test_complete_single_candidate_completes_line():
+    tr = _FakeTransport([])
+    editor = _LineEditor(tr.send)
+    _feed(editor, b"show ve")
+    _complete(editor, _CompShell(["show version", "show vlan"]), tr)  # only "show version" matches
+    assert editor.take_line() == b"show version "  # completed + trailing space
+
+
+def test_complete_multiple_candidates_lists_then_redraws():
+    tr = _FakeTransport([])
+    editor = _LineEditor(tr.send)
+    _feed(editor, b"show v")
+    tr.out.clear()
+    _complete(editor, _CompShell(["show version", "show vlan"]), tr)
+    # candidates on a fresh line (sorted: "version" < "vlan"), then prompt + line redrawn
+    assert bytes(tr.out) == b"\r\nshow version  show vlan\r\ndevice>show v"
+    assert editor.line_text == "show v"  # the line itself is unchanged
+
+
+def test_complete_no_match_rings_bell():
+    tr = _FakeTransport([])
+    editor = _LineEditor(tr.send)
+    _feed(editor, b"xyz")
+    tr.out.clear()
+    _complete(editor, _CompShell(["show version"]), tr)
+    assert bytes(tr.out) == b"\x07"  # bell, line untouched
 
 
 def test_history_recall_and_restore():
