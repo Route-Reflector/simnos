@@ -556,8 +556,8 @@ class CMDShell(Cmd):
                 return ("none", [])
             exact = [c for c in matched if c[2][j] == itok]
             if exact:
-                matched = exact
-            if len({c[2][j] for c in matched}) > 1:
+                matched = exact  # all share this exact token -> never ambiguous here
+            elif len({c[2][j] for c in matched}) > 1:
                 return ("ambiguous", [])
             candidates = matched
         return ("ok", candidates)
@@ -734,12 +734,11 @@ class CMDShell(Cmd):
             kind, payload = self._resolve_abbreviation(line)
             if kind == "command":
                 cmd = cast("ResolvedCommand", payload)
-            elif kind == "ambiguous":
-                cmd = self.commands.get("_ambiguous_")
-                abbrev_input = line
-            elif kind == "incomplete":
-                cmd = self.commands.get("_incomplete_")
-                abbrev_input = line
+            elif kind in ("ambiguous", "incomplete"):
+                special = self.commands.get("_ambiguous_" if kind == "ambiguous" else "_incomplete_")
+                if special is not None:  # BASIC always provides these; guard the degraded case
+                    cmd = special
+                    abbrev_input = line  # set only when the special was actually swapped in
         if cmd is not None and self._in_current_mode(cmd):
             if cmd.exit:
                 return None, True
@@ -791,12 +790,12 @@ class CMDShell(Cmd):
             body = output.render(self.base_prompt)
         # Interpolate the typed line into an abbreviation diagnostic (#303 / P3-2),
         # after the body is finalized and before the transition / shutdown checks.
+        # `abbrev_input` is set only when an `_ambiguous_` / `_incomplete_` special
+        # was actually swapped in above, so this never fires on the normal path.
         # Restricted to literal / template kinds: a handler already receives `line`
         # and formats its own body, so replacing here would double-substitute; the
         # `body is not None` guard keeps a handler / none kind override from
-        # crashing on `None.replace`. `output` (not `cmd.output`) keys the kind so
-        # the rare degraded path — special missing, `cmd` fell back to None /
-        # `_default_` — is None-safe.
+        # crashing on `None.replace`.
         if abbrev_input is not None and body is not None and output.kind in ("literal", "template"):
             body = body.replace("{input}", abbrev_input)
         if transition is not None:

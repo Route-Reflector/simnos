@@ -25,7 +25,10 @@ import pytest
 from simnos.core.nos import Nos
 from simnos.core.resolved_command import ResolvedOutput
 from simnos.plugins.nos import nos_plugins
+from simnos.plugins.servers.async_session import _complete, _LineEditor
 from simnos.plugins.shell.cmd_shell import CMDShell
+from tests.plugins.test_async_session import _FakeTransport
+from tests.plugins.test_ssh_line_editor import _feed
 
 # The packaged Cisco-style defaults (BASIC_COMMANDS), after the adapter collapses
 # the escaped ``{{input}}`` to a literal ``{input}`` and dispatch substitutes it.
@@ -324,3 +327,41 @@ def test_abbreviation_on_ssh_dispatch_path():
     result = shell.dispatch("s i i b")  # ambiguous
     assert result.body == '% Ambiguous command:  "s i i b"'
     assert result.close is False
+
+
+def test_complete_abbreviated_leading_token_through_real_complete():
+    """End-to-end: a real shell's token-grain `completion_candidates` drives the
+    SSH `_complete` line-replacement so a leading-token abbreviation expands the
+    whole line (#303 P3-2, claude 1st#3). The async_session `_complete` unit
+    tests use a flat-`startswith` stub, so this is the only place the real
+    token-grain completion meets the real line editor."""
+    shell = _enable(_shell("cisco_ios"))
+    tr = _FakeTransport([])
+    editor = _LineEditor(tr.send)
+    _feed(editor, b"sh ver")  # leading-token abbreviation, unique -> show version
+    _complete(editor, shell, tr)
+    assert editor.take_line() == b"show version "
+
+
+def test_abbreviation_handler_receives_typed_line():
+    """A handler reached via abbreviation gets the *typed* (abbreviated) line as
+    its `command`, consistent with exact dispatch (the handler always sees the
+    literal typed line; the wire echo shows what the user typed). Pinned so the
+    contract is intentional rather than incidental (codex 1st#4)."""
+    shell = _legacy_shell({"show version": {"output": "v", "prompt": "{base_prompt}#"}})
+    shell.current_mode = "enable"
+    seen = []
+
+    def handler(device, *, base_prompt, current_mode, current_prompt, command):
+        seen.append(command)
+        return "ok"
+
+    shell.commands = {
+        **shell.commands,
+        "show version": dataclasses.replace(
+            shell.commands["show version"], output=ResolvedOutput(kind="handler", handler=handler)
+        ),
+    }
+    body, _ = shell._dispatch_general("sh ver")  # abbreviation -> handler command
+    assert body == "ok"
+    assert seen == ["sh ver"]  # the typed abbreviation, not the canonical "show version"
