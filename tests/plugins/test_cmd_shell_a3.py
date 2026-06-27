@@ -390,7 +390,7 @@ class TestA3HotReload:
         """A reload that drops the current mode resets the session to initial_mode."""
         platform_dir = _a3_platform(tmp_path)
         shell = _shell_for(Nos(filename=str(platform_dir)))
-        shell.default("enable")
+        shell._dispatch_general("enable")
         assert shell.current_mode == "enable"
         # Rewrite the platform as user-only (and retarget/remove the commands
         # that referenced the enable mode, so the reload itself succeeds).

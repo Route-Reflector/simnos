@@ -67,10 +67,13 @@ def _running_event():
 
 
 def _served(shell, line="show test"):
-    """Dispatch a line and return the wire text the shell wrote."""
-    shell.stdout = io.StringIO()
-    shell.default(line)
-    return shell.stdout.getvalue()
+    """Dispatch a line through the shared core and return its rendered body.
+
+    `default` was removed in #303 P3-3; `_dispatch_general` returns the body the
+    shell would have written (variant outputs here are single-line).
+    """
+    body, _close = shell._dispatch_general(line)
+    return body or ""
 
 
 class TestIntSelect:

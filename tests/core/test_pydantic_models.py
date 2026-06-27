@@ -7,6 +7,7 @@ from pydantic import ValidationError
 import pytest
 
 from simnos.core.pydantic_models import (
+    CMDShellConfig,
     InventoryDefaultSection,
     ModelCommandAuthoring,
     ModelHost,
@@ -167,3 +168,36 @@ class TestModelPlatformMeta:
     def test_rejects_initial_mode_not_in_modes(self):
         with pytest.raises(ValidationError, match="initial_mode"):
             ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="enable")  # ty: ignore[invalid-argument-type]
+
+
+class TestCMDShellConfig:
+    """Schema pins for the shell configuration after the cmd.Cmd removal (#303 P3-3).
+
+    `ruler` / `completekey` were cmd.Cmd cmdloop-only knobs and were removed with
+    the base class; `extra="forbid"` now rejects them (and any other unknown key)
+    at load time rather than letting them reach `CMDShell.__init__` as unexpected
+    keywords and crash at connect time. `base_prompt` stays an accepted field
+    because `Host` injects it (and inventory may override it).
+    """
+
+    def test_accepts_supported_fields(self):
+        """intro / newline / base_prompt are the surviving live knobs."""
+        cfg = CMDShellConfig(intro="hi", newline="\n", base_prompt="r1")
+        assert cfg.intro == "hi"
+        assert cfg.newline == "\n"
+        assert cfg.base_prompt == "r1"
+
+    def test_empty_config_is_valid(self):
+        """A bare `{}` (the default inventory shell config) validates."""
+        assert CMDShellConfig().base_prompt is None
+
+    @pytest.mark.parametrize("removed_key", ["ruler", "completekey"])
+    def test_rejects_removed_cmdloop_knobs(self, removed_key):
+        """The removed cmd.Cmd knobs are now loud ValidationErrors, not silent."""
+        with pytest.raises(ValidationError):
+            CMDShellConfig(**{removed_key: "x"})
+
+    def test_rejects_unknown_key(self):
+        """Any unknown key is rejected at load time (extra='forbid')."""
+        with pytest.raises(ValidationError):
+            CMDShellConfig(typo="x")  # ty: ignore[unknown-argument]  # intentional: forbid pin

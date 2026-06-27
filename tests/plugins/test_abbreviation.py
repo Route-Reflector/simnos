@@ -17,7 +17,6 @@ byte-identical (the byte-parity goldens pin that separately). These tests cover:
 """
 
 import dataclasses
-import io
 import threading
 
 import pytest
@@ -309,16 +308,17 @@ def test_packaged_specials_never_transition_or_close(platform):
         assert not cmd.modes  # valid in every mode (no prompt)
 
 
-# --------------------------------------------------------------- 8. telnet + ssh paths
-def test_abbreviation_on_telnet_default_path():
-    """The cmd.Cmd `default` adapter (telnet cmdloop) shares `_dispatch_general`,
-    so abbreviation works there too — line editing stays SSH-only (pinned in
-    test_ssh_line_editor), but the resolution itself is path-independent."""
-    out = io.StringIO()
-    shell = _enable(_shell("cisco_ios", stdout=out))
-    close = shell.default("sh ver")
+# --------------------------------------------------------------- 8. shared dispatch core path
+def test_abbreviation_through_dispatch_general_core():
+    """Both transports share `_dispatch_general`, so abbreviation works on the
+    shared core regardless of transport — line editing stays SSH-only (pinned in
+    test_ssh_line_editor), but the resolution itself is path-independent
+    (cmd.Cmd `default` adapter removed in #303 P3-3)."""
+    shell = _enable(_shell("cisco_ios"))
+    body, close = shell._dispatch_general("sh ver")
     assert close is False
-    assert "Cisco IOS" in out.getvalue()
+    assert body is not None
+    assert "Cisco IOS" in body
 
 
 def test_abbreviation_on_ssh_dispatch_path():

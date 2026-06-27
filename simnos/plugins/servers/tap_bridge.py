@@ -75,9 +75,10 @@ def _assemble_wire(writes: list[str]) -> bytes:
 def _render_intro(shell: PushShell) -> bytes:
     """Initial wire bytes: the shell intro line + the first prompt (#297 / §3a).
 
-    Mirrors `cmd.Cmd.cmdloop` writing ``str(intro)+"\\n"`` then ``self.prompt``
-    as two stdout writes (assembled per write so CR/LF/NUL normalization matches
-    the legacy `shell_to_client_tap`).
+    Reproduces the framing the legacy `cmd.Cmd.cmdloop` produced (removed in #303
+    P3-3): ``str(intro)+"\\n"`` then ``self.prompt`` as two stdout writes
+    (assembled per write so CR/LF/NUL normalization matches the legacy
+    `shell_to_client_tap`).
     """
     writes: list[str] = []
     if shell.intro:

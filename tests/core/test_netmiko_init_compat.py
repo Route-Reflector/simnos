@@ -228,7 +228,7 @@ def _classify_callable_commands(
     non-time reasons.
 
     The expected value is computed by invoking the callable with the
-    same 4-arg contract as `cmd_shell.default` (device, base_prompt=,
+    same 4-arg contract as `CMDShell._invoke_handler` (device, base_prompt=,
     current_prompt=, command=) and taken **verbatim** — the shell does
     not apply `.format(base_prompt=...)` to callable output (#241 /
     D-b: handlers receive base_prompt and format themselves), so the

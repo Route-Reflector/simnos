@@ -2,7 +2,7 @@
 Shared helpers for the device-class unit tests in this package (T-14 / #230).
 
 Each test_<nos>.py invokes plugin callables with the same contract as
-`cmd_shell.default` (device, base_prompt=, current_mode=, current_prompt=,
+`CMDShell._invoke_handler` (device, base_prompt=, current_mode=, current_prompt=,
 command=); this module holds that invocation and the common base_prompt so the
 per-platform files stay focused on their pins.
 """
