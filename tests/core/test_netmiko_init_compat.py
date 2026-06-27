@@ -503,7 +503,7 @@ class TestShutdownEOF:
 
     @pytest.mark.timeout(30)
     def test_shell_exits_cleanly_on_server_stop(self):
-        """Shell should exit via do_EOF when server stops, no thread leaks."""
+        """Shell should exit on EOF (dispatch close branch) when server stops, no thread leaks."""
         port = get_free_port()
         net = _make_simnos("cisco_ios", port)
         try:

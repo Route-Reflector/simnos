@@ -26,7 +26,6 @@ and drive each accepted connection through :meth:`_session_scope` +
 import asyncio
 import concurrent.futures
 import contextlib
-import io
 import logging
 import threading
 from typing import TYPE_CHECKING, Protocol
@@ -303,8 +302,6 @@ class AsyncServerBase:
     def _build_shell(self):
         """Build the per-session shell (shared NOS data + per-host render config)."""
         return self.shell(
-            stdin=io.StringIO(),
-            stdout=io.StringIO(),
             nos=self.nos,
             nos_inventory_config=self.nos_inventory_config,
             is_running=self._is_running,

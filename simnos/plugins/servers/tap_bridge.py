@@ -93,9 +93,9 @@ def _render_response(shell: PushShell, result: "DispatchResult") -> bytes:
     The line-terminator echo (``\\r\\n``) is held until dispatch completes and
     emitted as the first part of this single write unit, reproducing the legacy
     echo coalescing without the timing-dependent ``_COALESCE_DELAY``. On a close
-    result neither body nor prompt is emitted (the legacy `default` wrote
-    nothing on its close paths), leaving just the newline echo. Body lines
-    reproduce `writeline`'s per-line ``newline``.
+    result neither body nor prompt is emitted (the legacy `default` adapter wrote
+    nothing on its close paths), leaving just the newline echo. Each body line
+    gets a trailing ``newline``, reproducing the legacy per-line shell output.
     """
     writes: list[str] = ["\r\n"]  # line-terminator echo, held until dispatch
     if not result.close:

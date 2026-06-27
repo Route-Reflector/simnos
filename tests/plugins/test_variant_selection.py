@@ -10,7 +10,6 @@ The shell is built directly against tmp A3 platforms (the real tree is never
 mutated), mirroring `test_cmd_shell_a3.py`.
 """
 
-import io
 import threading
 
 import pytest
@@ -50,8 +49,6 @@ def _platform_with_variants(tmp_path, *, n=3, extra_yaml: dict[str, str] | None 
 def _shell(nos, *, policy=None, host_name="R1", base_prompt="R1"):
     render_config = HostRenderConfig(variants_policy=policy, host_name=host_name)
     return CMDShell(
-        stdin=None,
-        stdout=io.StringIO(),
         nos=nos,
         nos_inventory_config={},
         base_prompt=base_prompt,

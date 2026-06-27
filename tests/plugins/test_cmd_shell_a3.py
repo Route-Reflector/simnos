@@ -56,8 +56,6 @@ def _a3_platform(tmp_path, *, auth=None):
 
 def _shell_for(nos, *, inventory_config=None):
     return CMDShell(
-        stdin=None,
-        stdout=None,
         nos=nos,
         nos_inventory_config=inventory_config or {},
         base_prompt="R1",
@@ -146,8 +144,6 @@ class TestShellA3Path:
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         shared = build_resolved_platform(nos, {})
         shell = CMDShell(
-            stdin=None,
-            stdout=None,
             nos=nos,
             nos_inventory_config={},
             base_prompt="R1",

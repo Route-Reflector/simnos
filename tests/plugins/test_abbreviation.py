@@ -40,13 +40,11 @@ INCOMPLETE_DIAG = "% Incomplete command."
 SWEEP_PLATFORMS = ["cisco_ios", "arista_eos", "huawei_smartax", "juniper_junos"]
 
 
-def _shell(name: str, *, stdout=None) -> CMDShell:
+def _shell(name: str) -> CMDShell:
     """A real merged-platform shell for `name`, ready to dispatch."""
     is_running = threading.Event()
     is_running.set()  # otherwise _dispatch_general reports server shutdown
     return CMDShell(
-        stdin=None,
-        stdout=stdout,
         nos=Nos(filename=nos_plugins[name]),
         nos_inventory_config={},
         base_prompt="device",
@@ -54,7 +52,7 @@ def _shell(name: str, *, stdout=None) -> CMDShell:
     )
 
 
-def _legacy_shell(commands: dict, *, stdout=None) -> CMDShell:
+def _legacy_shell(commands: dict) -> CMDShell:
     """A legacy (3-prompt) shell built from an in-memory command dict."""
     nos = Nos()
     nos.from_dict(
@@ -69,8 +67,6 @@ def _legacy_shell(commands: dict, *, stdout=None) -> CMDShell:
     is_running = threading.Event()
     is_running.set()
     return CMDShell(
-        stdin=None,
-        stdout=stdout,
         nos=nos,
         nos_inventory_config={},
         base_prompt="device",

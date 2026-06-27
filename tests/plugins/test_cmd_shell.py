@@ -40,8 +40,6 @@ def _nos_from_yaml_asset(path: str = "tests/assets/yaml_nos.yaml") -> Nos:
 def make_cmd_shell_args() -> dict:
     """Build the CMDShell constructor kwargs shared across cmd_shell tests (SSoT)."""
     return {
-        "stdin": None,
-        "stdout": None,
         "nos": _nos_from_yaml_asset(),
         "nos_inventory_config": {},
         "base_prompt": "test",
@@ -134,6 +132,18 @@ def test_parseline_matches_stdlib_oracle(cmd_shell_args, line):
     assert shell._parseline(line) == cmd.Cmd().parseline(line)
 
 
+def test_no_do_shell_keeps_bang_fall_through():
+    """CMDShell defines no `do_shell`, which `_parseline`'s `!` branch relies on (#303 P3-3).
+
+    `_parseline` maps a leading `!` to `(None, None, line)` (fall-through to
+    `_default_`) precisely because there is no `do_shell` to route to, and
+    `dispatch` special-cases only EOF / help. This guards that contract: the
+    oracle test compares against a bare `cmd.Cmd()`, so a `do_shell` added to
+    CMDShell would silently change the `!` wire without failing it.
+    """
+    assert not hasattr(CMDShell, "do_shell")
+
+
 # pylint: disable=too-many-public-methods
 class TestCmdShell(TestCase):
     """Test the CmdShell class."""
@@ -187,13 +197,6 @@ class TestCmdShell(TestCase):
         )
         with self.assertRaises(ValueError):
             CMDShell(**self.arguments)
-
-    def test_writeline(self):
-        """Test that the writeline method writes a line to stdout with a newline at the end."""
-        shell = CMDShell(**self.arguments)
-        stdout = set_attr(shell, "stdout", Mock())
-        shell.writeline("test")
-        stdout.write.assert_called_once_with("test\r\n")
 
     def test_dispatch_blank_line_no_output(self):
         """A blank line dispatches to no output and does not close (was test_emptyline).

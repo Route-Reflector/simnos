@@ -150,10 +150,10 @@ class DispatchResult:
     a single ``str``, so the I/O-independent dispatch core returns the pieces
     explicitly:
 
-    - ``body``: text to render with ``writeline`` semantics, or ``None`` for no
-      output (empty line, EOF, a handler returning no ``output``). The driver
-      suppresses it when ``close`` is set — the legacy ``default`` adapter never
-      wrote a body on any close path.
+    - ``body``: text the driver renders line-by-line with ``newline``, or
+      ``None`` for no output (empty line, EOF, a handler returning no
+      ``output``). The driver suppresses it when ``close`` is set — the legacy
+      ``default`` adapter never wrote a body on any close path.
     - ``prompt``: the prompt to show after this line (already reflects a mode
       transition applied during dispatch).
     - ``close``: the session should close after this line.
@@ -178,8 +178,6 @@ class CMDShell:
 
     def __init__(
         self,
-        stdin,
-        stdout,
         nos,
         nos_inventory_config,
         base_prompt,
@@ -236,11 +234,6 @@ class CMDShell:
         if resolved_platform is None:
             resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
         self._apply_platform(resolved_platform)
-
-        # Hold our own stdin/stdout. These were formerly set by `cmd.Cmd.__init__`
-        # (removed with the base class in #303 P3-3); `writeline` uses `stdout`.
-        self.stdin = stdin
-        self.stdout = stdout
 
     @staticmethod
     def build_shared_platform(
@@ -401,11 +394,6 @@ class CMDShell:
         hot reload does not silently drop it (#286 / C1).
         """
         self._apply_platform(build_resolved_platform(self.nos, self._inventory_commands, self._render_config))
-
-    def writeline(self, value):
-        """Method to write a line to stdout with newline at the end"""
-        for line in str(value).splitlines():
-            self.stdout.write(line + self.newline)
 
     # `Nos` state `from_file` mutates; snapshotted per reload target so a target
     # that loads but fails to normalize can be rolled back (2nd round codex #1).
@@ -615,8 +603,8 @@ class CMDShell:
 
         Called by the push `dispatch` core when the parsed command is `help`
         (a leading `?` or a typed `help`), shared by both transports (#297 / #303
-        P3-3). Returns the lines joined by `self.newline`; the session handler
-        applies `writeline` semantics to render it.
+        P3-3). Returns the lines joined by `self.newline`; the driver renders the
+        resulting body to the wire.
 
         Intentional refinement over v2 (2nd round claude #2): v2 `do_help`
         read the raw unmerged entries, so an alias without its own prompt was
@@ -781,8 +769,8 @@ class CMDShell:
             body = body.replace("{input}", abbrev_input)
         if transition is not None:
             self._apply_new_mode(transition, line)
-        # Server shutdown observed mid-dispatch: close without writing the body
-        # (the legacy `default` returned True here before any writeline).
+        # Server shutdown observed mid-dispatch: close without rendering the body
+        # (the legacy `default` adapter returned True here before writing output).
         if not self.is_running.is_set():
             return body, True
         return body, False
