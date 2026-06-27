@@ -461,9 +461,9 @@ class CMDShell:
             except Exception:
                 # Broad except, like the dispatch core's handler guard: any
                 # plugin error must not crash the session. Roll back the partial
-                # nos mutation so the
-                # broken file does not poison subsequent reloads, then log the
-                # traceback so a genuine plugin bug stays diagnosable.
+                # nos mutation so the broken file does not poison subsequent
+                # reloads, then log the traceback so a genuine plugin bug stays
+                # diagnosable.
                 self.nos.commands = snapshot_commands
                 for attr, value in snapshot_attrs.items():
                     setattr(self.nos, attr, value)

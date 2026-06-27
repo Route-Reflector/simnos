@@ -368,7 +368,7 @@ class TestCmdShell(TestCase):
         self.assertTrue(any("unknown mode 'nope'" in msg for msg in captured.output))
         self.assertEqual(body, "body")
 
-    def test_default_static_new_mode_wins_over_handler(self):
+    def test_dispatch_static_new_mode_wins_over_handler(self):
         """A command's static new_mode overrides a handler-returned one (#264 / claude #8).
 
         Replicates v2's write order (handler new_prompt applied first, the
@@ -493,7 +493,7 @@ class TestCmdShell(TestCase):
         body, _close = shell._dispatch_general("test")
         self.assertEqual(body, "% Invalid input detected at '^' marker.")
 
-    def test_default_alias_target_missing_falls_back_default(self):
+    def test_dispatch_alias_target_missing_falls_back_default(self):
         """An alias whose target command is gone degrades to `_default_`.
 
         The adapter drops a broken alias at load (logged), so it never reaches
@@ -601,7 +601,7 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, "dynamic unknown: known")
 
-    def test_default_callable_default_dict_return_gets_full_dispatch(self):
+    def test_dispatch_callable_default_dict_return_gets_full_dispatch(self):
         """A dict-returning callable `_default_` gets the same dispatch (#241 / #264).
 
         Pins that the unification is complete: a callable `_default_` flows
@@ -629,7 +629,7 @@ class TestCmdShell(TestCase):
         self.assertEqual(shell.prompt, "test#")
         self.assertEqual(body, "locked out")
 
-    def test_default_handler_crash_writes_fixed_error_line(self):
+    def test_dispatch_handler_crash_writes_fixed_error_line(self):
         """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
 
         Pins #241/D4: real NOSes never print Python tracebacks, and the
@@ -647,7 +647,7 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, HANDLER_ERROR_OUTPUT)
 
-    def test_default_handler_crash_logs_full_traceback(self):
+    def test_dispatch_handler_crash_logs_full_traceback(self):
         """A crashing handler's traceback goes to the server log.
 
         Pins #241/D4 (the diagnosability half): dropping the wire
@@ -669,7 +669,7 @@ class TestCmdShell(TestCase):
         self.assertIn("RuntimeError: boom-for-log", captured.output[0])
         self.assertIn("Traceback", captured.output[0])
 
-    def test_default_callable_dict_output_passed_through_unformatted(self):
+    def test_dispatch_callable_dict_output_passed_through_unformatted(self):
         """Callable-dict output is written verbatim, never re-rendered (#241 / D-b).
 
         Handlers render themselves, so brace-containing device output reaches
@@ -682,7 +682,7 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, "value is {base_prompt.foo}")
 
-    def test_default_callable_str_output_passed_through_unformatted(self):
+    def test_dispatch_callable_str_output_passed_through_unformatted(self):
         """Callable str output is written verbatim too (#241 / D-b).
 
         The str-return twin of the dict pin above: literal braces in a
@@ -695,7 +695,7 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, "literal {brace} stays")
 
-    def test_default_command_transitions_mode(self):
+    def test_dispatch_command_transitions_mode(self):
         """A command with a new_mode transitions the shell and re-renders the prompt.
 
         `enable` (yaml_nos) declares new_mode=enable; dispatching it from the
