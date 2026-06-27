@@ -739,7 +739,7 @@ class HotReloadTest(TestCase):
             os.environ.pop("SIMNOS_RELOAD_COMMANDS")
 
     def test_hot_reload_not_activated_doesnt_enter(self):
-        """Test that the if is not set  hot_reload method does nothing."""
+        """Test that precmd's hot-reload branch is skipped when SIMNOS_RELOAD_COMMANDS is unset."""
         os.environ.pop("SIMNOS_RELOAD_COMMANDS")
         shell = CMDShell(**self.arguments)
         mock_get_files_changed = set_attr(shell, "get_files_changed", Mock())
