@@ -41,6 +41,28 @@ Netmiko at the same port.
 Line editing is **SSH-only**; the Telnet server keeps the plain (non-editing)
 stream.
 
+## Command abbreviation
+
+Like a real NOS, SIMNOS accepts **abbreviated commands**: each token may be
+shortened to an unambiguous prefix, so `sh ver` runs `show version` and `conf t`
+runs `configure terminal`. This works on both SSH and Telnet, and on both the
+exact-typed and Tab-completed forms.
+
+- Every token must be present — trailing tokens cannot be dropped. A strict
+  prefix of a longer command (e.g. `sh ip`) answers `% Incomplete command.`,
+  matching real IOS.
+- An abbreviation that matches more than one command answers
+  `% Ambiguous command:  "<input>"`.
+- Abbreviation only fires when the typed line is **not** an exact command, so a
+  full command's bytes on the wire are unchanged — scrapers that send full
+  commands are never affected.
+
+Resolution and Tab completion target each command's **canonical** spelling, so
+aliases resolve toward their canonical form (a full alias still works when typed
+in full). The default `% Ambiguous` / `% Incomplete` wording is Cisco IOS style;
+a platform can override it from its data (the `_ambiguous_` / `_incomplete_`
+commands, alongside `_default_`).
+
 The equivalent to running above code would be to run SIMNOS CLI without
 any arguments:
 

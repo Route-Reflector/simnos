@@ -52,7 +52,12 @@ class PushShell(Protocol):
     def dispatch(self, line: str) -> "DispatchResult": ...
 
     def completion_candidates(self, prefix: str) -> list[str]:
-        """Current-mode command names starting with ``prefix`` (#303 P3-1 Tab)."""
+        """Whole-line current-mode command names completing ``prefix`` (#303 Tab).
+
+        P3-1 matched an exact prefix; P3-2 widened this to leading-token
+        abbreviation, still returning whole-line names (the line-replacement
+        contract is unchanged).
+        """
         ...
 
 

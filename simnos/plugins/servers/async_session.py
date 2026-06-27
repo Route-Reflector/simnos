@@ -267,15 +267,16 @@ class _LineEditor:
 
 
 def _complete(editor: _LineEditor, shell: "PushShell", transport: AsyncPushTransport) -> None:
-    """Tab completion: exact-prefix over the current-mode command names (#303 P3-1).
+    """Tab completion over the current-mode command names (#303 P3-1 / P3-2).
 
     One candidate completes the line (+ a trailing space); several are listed on a
     fresh line and the prompt + line are redrawn; none rings the bell. None of this
     is byte-parity-pinned: the contract rests on a scraper never sending Tab (nor
     BS / ESC). The goldens contain none; a platform that one day embeds a literal
-    tab in a command payload would be intercepted here and diverge — out of P3-1
-    scope (claude 1st#5). Completion uses the whole line (cursor-position-aware
-    completion is P3-2, gemini/claude 1st).
+    tab in a command payload would be intercepted here and diverge — out of scope
+    (claude 1st#5). The candidate list comes from ``shell.completion_candidates``,
+    which P3-2 widened from exact-prefix to leading-token abbreviation while still
+    returning whole-line command names, so this driver is unchanged.
     """
     candidates = shell.completion_candidates(editor.line_text)
     if len(candidates) == 1:
