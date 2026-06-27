@@ -23,7 +23,7 @@ import threading
 import pytest
 
 from simnos.core.nos import Nos
-from simnos.core.resolved_command import ResolvedOutput
+from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers.async_session import _complete, _LineEditor
 from simnos.plugins.shell.cmd_shell import CMDShell
@@ -175,6 +175,7 @@ def test_alias_safety_arista():
     # canonical `terminal length 0`, alias `term length 0`: no false ambiguity.
     kind, payload = shell._resolve_abbreviation("te l 0")
     assert kind == "command"
+    assert isinstance(payload, ResolvedCommand)
     assert payload.canonical_name == "terminal length 0"
     # `term l 0` (abbreviating the alias's own surface, which shares the canonical
     # prefix) also resolves to the canonical.
