@@ -205,19 +205,19 @@ def set_attr[T](obj: object, name: str, value: T) -> T:
 
     For tests only — it deliberately bypasses static type checks, so do not use
     it in production code. Tests mock attributes that are typed as methods
-    (e.g. ``shell.writeline``), which ty rejects on plain assignment and ruff
-    B010 rejects via ``setattr(obj, "literal", ...)``. Routing the assignment
-    through this helper (variable ``name`` → not B010; ``obj: object`` → ty
-    accepts) sidesteps both.
+    (e.g. ``shell.get_files_changed``), which ty rejects on plain assignment and
+    ruff B010 rejects via ``setattr(obj, "literal", ...)``. Routing the
+    assignment through this helper (variable ``name`` → not B010; ``obj: object``
+    → ty accepts) sidesteps both.
 
     ``value`` is generic so a single helper covers every test assignment:
     ``Mock()``, ``Mock(side_effect=...)``, a plain function, or a dict literal.
 
     Two call styles are both intended:
-    - bound: ``wl = set_attr(shell, "writeline", Mock())`` then ``wl.assert_*``
-      — the ``-> T`` return drops the access-side ``cast(Mock, ...)``.
-    - bare: ``set_attr(shell, "writeline", Mock())`` — return ignored, used when
-      the mock only guards a side effect (e.g. stdout=None) and is not asserted.
+    - bound: ``m = set_attr(shell, "get_files_changed", Mock())`` then
+      ``m.assert_*`` — the ``-> T`` return drops the access-side ``cast(Mock, ...)``.
+    - bare: ``set_attr(shell.nos, "from_file", Mock(side_effect=...))`` — return
+      ignored, used when the mock only drives a side effect and is not asserted.
     """
     setattr(obj, name, value)
     return value

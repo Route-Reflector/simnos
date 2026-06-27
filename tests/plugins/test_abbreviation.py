@@ -13,7 +13,7 @@ byte-identical (the byte-parity goldens pin that separately). These tests cover:
 7. the ``_ambiguous_`` / ``_incomplete_`` specials are overridable and flow
    through the normal dispatch pipeline (handler override is None-safe, and the
    specials never transition or close);
-8. abbreviation works on the telnet (``default``) and SSH (``dispatch``) paths.
+8. abbreviation works on the shared ``_dispatch_general`` core both transports use.
 """
 
 import dataclasses
