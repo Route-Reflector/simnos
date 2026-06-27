@@ -39,6 +39,27 @@ ssh -p 6001 user@localhost # huawei_smartax
 
 行編集は **SSH 専用**です。Telnet サーバーはプレーン（編集なし）のストリームを維持します。
 
+## コマンドの省略入力
+
+実機の NOS と同様に、SIMNOS は**コマンドの省略入力**を受け付けます。各トークンを
+曖昧でない範囲で短縮でき、`sh ver` は `show version`、`conf t` は
+`configure terminal` として実行されます。SSH / Telnet の双方で、また直接入力と
+Tab 補完の双方で機能します。
+
+- すべてのトークンが必要で、末尾のトークンは省略できません。より長いコマンドの
+  単なる接頭辞（例: `sh ip`）は、実機 IOS と同じく `% Incomplete command.` を
+  返します。
+- 複数のコマンドに一致する省略入力は `% Ambiguous command:  "<入力>"` を返します。
+- 省略入力は、入力行が**完全一致コマンドでない**ときにのみ発火します。そのため
+  完全なコマンドの wire 上のバイト列は不変で、コマンドをまるごと送信する scraper
+  には一切影響しません。
+
+解決と Tab 補完は各コマンドの **canonical（正規）** な綴りに寄せられるため、
+別名（alias）は canonical な綴りへ解決されます（別名も完全に入力すれば動作します）。
+既定の `% Ambiguous` / `% Incomplete` 文言は Cisco IOS 形式ですが、各プラットフォーム
+はデータ側で上書きできます（`_default_` と並ぶ `_ambiguous_` / `_incomplete_`
+コマンド）。
+
 上記のコードを実行する代わりに、引数なしで SIMNOS CLI を実行することもできます:
 
 ```bash

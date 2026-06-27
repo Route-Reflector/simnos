@@ -54,6 +54,27 @@ BASIC_COMMANDS: dict = {
         "output": "Unknown command",
         "help": "Output to print for unknown commands",
     },
+    # Abbreviation diagnostics (#303 / P3-2). Overridable specials like
+    # `_default_` — the default wording is Cisco IOS style (no captured oracle
+    # exists, so it follows public IOS documentation; re-pin if a capture is
+    # obtained), and huawei/junos can override it from platform data. The
+    # dispatcher fills a literal `{input}` placeholder with the typed line via
+    # `str.replace`. These entries flow through the legacy adapter
+    # (`format_template_to_jinja`), which treats `{...}` as a `str.format` field
+    # and rejects any field but `base_prompt`, so the placeholder is written
+    # **escaped** as `{{input}}` here: the adapter collapses it to a literal
+    # `{input}` (no template render), which `_dispatch_general` then substitutes.
+    # An override may carry `{input}` only as literal / A3 `.j2` text or via a
+    # handler (which formats itself from its `command` argument); a legacy
+    # py-module str.format template with a bare `{input}` fails loudly at load.
+    "_ambiguous_": {
+        "output": '% Ambiguous command:  "{{input}}"',
+        "help": "Output for an ambiguous command abbreviation",
+    },
+    "_incomplete_": {
+        "output": "% Incomplete command.",
+        "help": "Output for an incomplete command abbreviation",
+    },
 }
 
 # Wire response when a command handler (callable output) crashes. Real NOSes
@@ -495,13 +516,114 @@ class CMDShell(Cmd):
             if not (name.startswith("_") and name.endswith("_")) and self._in_current_mode(cmd)
         ]
 
-    def completion_candidates(self, prefix: str) -> list[str]:
-        """Current-mode command names that start with `prefix` (#303 P3-1, Tab).
+    def _abbrev_candidates(self) -> list[tuple[str, ResolvedCommand, list[str]]]:
+        """Abbreviation resolution space: current-mode canonical commands (#303 P3-2).
 
-        Exact-prefix only (a flat ``startswith`` over the whole command name);
-        leading-token abbreviation is P3-2. Sorted for a stable completion menu.
+        `_dispatchable_commands()` already applies the mode / `_special_` filter;
+        this further keeps only `name == cmd.canonical_name` (the real commands,
+        dropping aliases). Excluding alias surface tokens from the search space
+        is what kills false ambiguity / false pruning between word-variant
+        aliases of one canonical (e.g. `terminal length 0` real vs `term length
+        0` alias). Each candidate carries its token list so callers narrow
+        positionally. The canonical surface is the spelling the platform author
+        chose as canonical (`canonical_name` = alias target name), not
+        necessarily the longest form — so an alias's *partial* abbreviation
+        resolves toward that canonical (cisco_ios canonical = full form; arista
+        `conf t` canonical = short form).
         """
-        return sorted(name for name, _cmd in self._dispatchable_commands() if name.startswith(prefix))
+        return [(name, cmd, name.split()) for name, cmd in self._dispatchable_commands() if name == cmd.canonical_name]
+
+    def _narrow(self, tokens: list[str]) -> tuple[str, list[tuple[str, ResolvedCommand, list[str]]]]:
+        """Positionally narrow the canonical candidates by `tokens` (#303 P3-2).
+
+        Returns ``(status, candidates)`` with status ``"ok"`` (narrowed, possibly
+        still longer than the input), ``"ambiguous"`` (a position matches more
+        than one distinct surface token), or ``"none"`` (nothing matches).
+
+        Commands shorter than the input can never match, so they are pruned up
+        front — this also keeps `c[2][j]` in range for the whole loop and stops a
+        short command from pruning a longer one. At each position an exact token
+        match wins over a strict-prefix match (so `ip` is not shadowed by `ipv6`).
+        Because the candidate set is canonical-only, distinct surface tokens at a
+        position mean distinct real commands = genuine ambiguity.
+        """
+        candidates = [c for c in self._abbrev_candidates() if len(c[2]) >= len(tokens)]
+        if not candidates:
+            return ("none", [])
+        for j, itok in enumerate(tokens):
+            matched = [c for c in candidates if c[2][j].startswith(itok)]
+            if not matched:
+                return ("none", [])
+            exact = [c for c in matched if c[2][j] == itok]
+            if exact:
+                matched = exact
+            if len({c[2][j] for c in matched}) > 1:
+                return ("ambiguous", [])
+            candidates = matched
+        return ("ok", candidates)
+
+    def _resolve_abbreviation(self, line: str) -> tuple[str, ResolvedCommand | str | None]:
+        """Resolve an abbreviated command line, real-IOS style (#303 P3-2).
+
+        Called only after the exact-match lookup misses, so full commands never
+        reach here and their wire stays byte-identical. Returns ``(kind,
+        payload)``:
+
+        - ``("command", ResolvedCommand)``: a unique full command (token counts
+          match, each input token a prefix of the canonical token).
+        - ``("ambiguous", line)``: a position matches more than one command.
+        - ``("incomplete", line)``: the input is a strict prefix of a longer
+          command but reaches no full command (trailing tokens cannot be
+          omitted, matching IOS).
+        - ``("none", None)``: nothing matches → caller falls back to `_default_`.
+        """
+        tokens = line.split()  # collapses whitespace, like a real device
+        if not tokens:
+            return ("none", None)
+        status, candidates = self._narrow(tokens)
+        if status == "ambiguous":
+            return ("ambiguous", line)
+        if status == "none":
+            return ("none", None)
+        full = [c for c in candidates if len(c[2]) == len(tokens)]
+        if full:  # dict keys are unique, so at most one full match
+            return ("command", full[0][1])
+        return ("incomplete", line)
+
+    def _resolve_prefix_path(self, head: list[str]) -> list[tuple[str, ResolvedCommand, list[str]]]:
+        """Canonical candidates under `head` for Tab completion (#303 P3-2).
+
+        Empty `head` (empty prefix / trailing space) lists every current-mode
+        canonical command, preserving P3-1's "empty input lists all"; an
+        ambiguous / unmatched head returns ``[]`` (Tab stays silent where
+        dispatch would answer with a diagnostic).
+        """
+        if not head:
+            return self._abbrev_candidates()
+        status, candidates = self._narrow(head)
+        return candidates if status == "ok" else []
+
+    def completion_candidates(self, prefix: str) -> list[str]:
+        """Whole-line command names completing `prefix`, token-grain (#303 P3-2).
+
+        Extends P3-1's flat exact-prefix `startswith` to leading-token
+        abbreviation: the head tokens are resolved positionally (`_resolve_prefix_path`,
+        shared with `_resolve_abbreviation`) and the last token prefix-matches the
+        next canonical token. The return stays a list of whole-line full command
+        names so the SSH `_complete` line-replacement contract (and its tests) is
+        unchanged — `sh ip i<TAB>` expands to `show ip interface`, IOS style.
+        Candidates are canonical-only (aliases resolve toward their canonical),
+        so Tab is asymmetric with the help listing, which still shows aliases.
+        Sorted for a stable completion menu.
+        """
+        tokens = prefix.split()
+        trailing = prefix == "" or prefix.endswith(" ")
+        head = tokens if trailing else tokens[:-1]
+        last = "" if trailing else tokens[-1]
+        resolved = self._resolve_prefix_path(head)
+        return sorted(
+            {name for name, _cmd, toks in resolved if len(toks) > len(head) and toks[len(head)].startswith(last)}
+        )
 
     def _help_body(self) -> str:
         """Build the help listing for the current mode as body text (no I/O).
@@ -600,6 +722,24 @@ class CMDShell(Cmd):
         """
         log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
         cmd = self.commands.get(line)
+        # Command abbreviation (#303 / P3-2): only on an exact-match miss, so a
+        # full command's wire is byte-identical (scrapers send full commands and
+        # never reach here). An ambiguous / incomplete abbreviation swaps in the
+        # `_ambiguous_` / `_incomplete_` overridable special so it flows through
+        # the very same dispatch pipeline as `_default_` (handler / new_mode
+        # supported); `abbrev_input` then drives the `{input}` interpolation
+        # after the body is finalized.
+        abbrev_input = None
+        if cmd is None:
+            kind, payload = self._resolve_abbreviation(line)
+            if kind == "command":
+                cmd = cast("ResolvedCommand", payload)
+            elif kind == "ambiguous":
+                cmd = self.commands.get("_ambiguous_")
+                abbrev_input = line
+            elif kind == "incomplete":
+                cmd = self.commands.get("_incomplete_")
+                abbrev_input = line
         if cmd is not None and self._in_current_mode(cmd):
             if cmd.exit:
                 return None, True
@@ -649,6 +789,16 @@ class CMDShell(Cmd):
             body = result.get("output")
         else:
             body = output.render(self.base_prompt)
+        # Interpolate the typed line into an abbreviation diagnostic (#303 / P3-2),
+        # after the body is finalized and before the transition / shutdown checks.
+        # Restricted to literal / template kinds: a handler already receives `line`
+        # and formats its own body, so replacing here would double-substitute; the
+        # `body is not None` guard keeps a handler / none kind override from
+        # crashing on `None.replace`. `output` (not `cmd.output`) keys the kind so
+        # the rare degraded path — special missing, `cmd` fell back to None /
+        # `_default_` — is None-safe.
+        if abbrev_input is not None and body is not None and output.kind in ("literal", "template"):
+            body = body.replace("{input}", abbrev_input)
         if transition is not None:
             self._apply_new_mode(transition, line)
         # Server shutdown observed mid-dispatch: close without writing the body
