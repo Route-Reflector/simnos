@@ -374,14 +374,22 @@ class TelnetServerPlugin(BaseModel):
 
 
 class CMDShellConfig(BaseModel):
-    """
-    Pydantic model for CMD shell configuration.
+    """Pydantic model for CMD shell configuration.
+
+    `ruler` / `completekey` were cmd.Cmd cmdloop-only knobs and were removed with
+    the cmd.Cmd base in #303 P3-3; `extra="forbid"` now rejects them (and any
+    other unknown key) at load time rather than letting it reach
+    `CMDShell.__init__` as an unexpected keyword and crash at connect time.
+    `base_prompt` is injected by `Host` (`shell.configuration` setdefault) and
+    may also be set in inventory to override the host-name prompt, so it is an
+    explicit field here to stay forbid-compatible.
     """
 
+    model_config = ConfigDict(extra="forbid")
+
     intro: StrictStr | None = "Custom SSH Shell"
-    ruler: StrictStr | None = ""
-    completekey: StrictStr | None = "tab"
     newline: StrictStr | None = "\r\n"
+    base_prompt: StrictStr | None = Field(default=None, description="Overrides the default host-name base prompt")
 
 
 class CMDShellPlugin(BaseModel):

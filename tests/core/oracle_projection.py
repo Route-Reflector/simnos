@@ -10,7 +10,8 @@ through this one function, so the snapshot and the test can never drift apart.
 history + design D7 hold the conversion record.)
 
 The projection captures the client-observable behavior: rendered output as
-``splitlines()`` (wire-equivalent — ``writeline`` absorbs trailing newlines),
+``splitlines()`` (wire-equivalent — the driver's ``_render_response`` joins each
+body line with ``newline``, absorbing trailing newlines),
 the modes a command is visible in, the transition target, exit / help, and the
 full multi-capture variant list (each variant's name + rendered body, not just
 the count — so a variant-body conversion error is caught, not only a missing

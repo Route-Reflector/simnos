@@ -2,6 +2,7 @@
 Module to test the cmd_shell plugin.
 """
 
+import cmd
 import importlib
 import os
 import shutil
@@ -39,8 +40,6 @@ def _nos_from_yaml_asset(path: str = "tests/assets/yaml_nos.yaml") -> Nos:
 def make_cmd_shell_args() -> dict:
     """Build the CMDShell constructor kwargs shared across cmd_shell tests (SSoT)."""
     return {
-        "stdin": None,
-        "stdout": None,
         "nos": _nos_from_yaml_asset(),
         "nos_inventory_config": {},
         "base_prompt": "test",
@@ -55,11 +54,12 @@ def cmd_shell_args():
 
 
 def _expected_baseline(args: dict) -> dict:
-    """Attribute values a CMDShell takes with no optional kwargs."""
+    """Attribute values a CMDShell takes with no optional kwargs.
+
+    `ruler` / `completekey` were removed with the cmd.Cmd base in #303 P3-3.
+    """
     return {
         "intro": "Custom SSH Shell",
-        "ruler": "",
-        "completekey": "tab",
         "newline": "\r\n",
         "prompt": "test>",
         "base_prompt": args["base_prompt"],
@@ -71,25 +71,19 @@ def _expected_baseline(args: dict) -> dict:
     [
         ({}, {}),  # no optional kwargs (baseline)
         ({"intro": "Test Intro"}, {"intro": "Test Intro"}),
-        ({"ruler": "Test Ruler"}, {"ruler": "Test Ruler"}),
-        ({"completekey": "Test Completekey"}, {"completekey": "Test Completekey"}),
         ({"newline": "Test Newline"}, {"newline": "Test Newline"}),
         (
             {
                 "intro": "Test Intro",
-                "ruler": "Test Ruler",
-                "completekey": "Test Completekey",
                 "newline": "Test Newline",
             },
             {
                 "intro": "Test Intro",
-                "ruler": "Test Ruler",
-                "completekey": "Test Completekey",
                 "newline": "Test Newline",
             },
         ),
     ],
-    ids=["baseline", "intro", "ruler", "completekey", "newline", "all"],
+    ids=["baseline", "intro", "newline", "all"],
 )
 def test_init_kwargs(cmd_shell_args, override_kwargs, expected_override):
     """baseline + each optional kwarg; untouched attrs stay at their defaults."""
@@ -101,6 +95,53 @@ def test_init_kwargs(cmd_shell_args, override_kwargs, expected_override):
     assert shell.is_running is cmd_shell_args["is_running"]
     assert shell.nos is cmd_shell_args["nos"]
     assert shell.commands != {}
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "",
+        "   ",
+        "\t",
+        "show version",
+        "show  version",
+        "sh ver",
+        "?",
+        "?show version",
+        "? show version",
+        "!foo",
+        "! foo",
+        "/foo",
+        "-x",
+        "1cmd",
+        "show-version",
+        "show ?",
+        "EOF",
+        "exit\r",
+    ],
+)
+def test_parseline_matches_stdlib_oracle(cmd_shell_args, line):
+    """`_parseline` stays byte-identical to the cmd.Cmd.parseline it replaced (#303 P3-3).
+
+    Production no longer depends on stdlib `cmd`; this test imports it only as a
+    reference oracle so any drift from the historical lexing contract (strip,
+    leading ``?`` -> ``help ``, no-``do_shell`` ``!`` fall-through, identchars
+    scan) fails loudly. SIMNOS defines no `do_shell`, matching a bare `cmd.Cmd()`.
+    """
+    shell = CMDShell(**cmd_shell_args)
+    assert shell._parseline(line) == cmd.Cmd().parseline(line)
+
+
+def test_no_do_shell_keeps_bang_fall_through():
+    """CMDShell defines no `do_shell`, which `_parseline`'s `!` branch relies on (#303 P3-3).
+
+    `_parseline` maps a leading `!` to `(None, None, line)` (fall-through to
+    `_default_`) precisely because there is no `do_shell` to route to, and
+    `dispatch` special-cases only EOF / help. This guards that contract: the
+    oracle test compares against a bare `cmd.Cmd()`, so a `do_shell` added to
+    CMDShell would silently change the `!` wire without failing it.
+    """
+    assert not hasattr(CMDShell, "do_shell")
 
 
 # pylint: disable=too-many-public-methods
@@ -157,32 +198,17 @@ class TestCmdShell(TestCase):
         with self.assertRaises(ValueError):
             CMDShell(**self.arguments)
 
-    def test_start(self):
-        """Test that the start method calls cmdloop."""
-        shell = CMDShell(**self.arguments)
-        mock_cmdloop = set_attr(shell, "cmdloop", Mock())
-        shell.start()
-        mock_cmdloop.assert_called_once()
+    def test_dispatch_blank_line_no_output(self):
+        """A blank line dispatches to no output and does not close (was test_emptyline).
 
-    def test_stop(self):
-        """Test that the stop method writes "exit" to stdin."""
+        The cmd.Cmd `emptyline` hook was removed in #303 P3-3; `dispatch` now
+        handles the empty case via `_parseline` returning a falsy parsed line.
+        """
         shell = CMDShell(**self.arguments)
-        stdin = set_attr(shell, "stdin", Mock())
-        shell.stop()
-        stdin.write.assert_called_once_with("exit\r\n")
-
-    def test_writeline(self):
-        """Test that the writeline method writes a line to stdout with a newline at the end."""
-        shell = CMDShell(**self.arguments)
-        stdout = set_attr(shell, "stdout", Mock())
-        shell.writeline("test")
-        stdout.write.assert_called_once_with("test\r\n")
-
-    def test_emptyline(self):
-        """Test that the emptyline method does nothing."""
-        shell = CMDShell(**self.arguments)
-        result = shell.emptyline()
-        self.assertIsNone(result)
+        shell.is_running.set()
+        result = shell.dispatch("")
+        self.assertIsNone(result.body)
+        self.assertFalse(result.close)
 
     def test_precmd(self):
         """Test that the precmd method returns the line."""
@@ -214,11 +240,13 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         self.assertEqual(shell.postcmd(False, ""), False)
 
-    def test_do_help(self):
-        """Test that the do_help method writes the help message to stdout."""
+    def test_help_body(self):
+        """`_help_body` builds the current-mode help listing (was do_help).
+
+        `do_help` was removed in #303 P3-3; `dispatch` calls `_help_body`
+        directly when the parsed command is `help` (a leading `?` or `help`).
+        """
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.do_help("")
         expected_output: list[str] = [
             "exit                Exit commands shell",
             "enable              enter exec prompt",
@@ -227,10 +255,10 @@ class TestCmdShell(TestCase):
             "terminal width 511  Set terminal width to 511",
             "terminal length 0   Set terminal length to 0",
         ]
-        writeline.assert_called_once_with("\r\n".join(expected_output))
+        self.assertEqual(shell._help_body(), "\r\n".join(expected_output))
 
-    def test_do_help_alias_hidden_outside_target_modes(self):
-        """do_help lists a prompt-less alias only in its target modes (#264 / claude #2).
+    def test_help_body_alias_hidden_outside_target_modes(self):
+        """`_help_body` lists a prompt-less alias only in its target modes (#264 / claude #2).
 
         Intentional refinement over v2 (which listed prompt-less aliases in
         every mode via the raw unmerged entry): `sh clock` aliases `show clock`
@@ -238,13 +266,9 @@ class TestCmdShell(TestCase):
         Dispatch was already mode-scoped in v2; only the help listing changes.
         """
         shell = CMDShell(**self.arguments)  # current_mode == "user"
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.do_help("")
-        self.assertIn("sh clock", writeline.call_args[0][0])
+        self.assertIn("sh clock", shell._help_body())
         shell.current_mode = "config"
-        writeline.reset_mock()
-        shell.do_help("")
-        self.assertNotIn("sh clock", writeline.call_args[0][0])
+        self.assertNotIn("sh clock", shell._help_body())
 
     def test__in_current_mode_empty_modes_always_visible(self):
         """A command with no declared modes is valid in every mode (#264 / D5).
@@ -273,36 +297,36 @@ class TestCmdShell(TestCase):
         shell.current_mode = "config"
         self.assertFalse(shell._in_current_mode(clock))
 
-    def test_default_command_correct(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_general_command_correct(self):
+        """A known command returns its rendered body and does not close (was default)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("show clock")
-        writeline.assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
+        body, close = shell._dispatch_general("show clock")
+        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022")
+        self.assertFalse(close)
 
-    def test_default_command_with_alias(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_general_command_with_alias(self):
+        """An alias resolves to the same body as its target (was default)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("sh clock")
-        writeline.assert_called_once_with("*21:01:33.000 AET 01 01 01 2022")
+        body, close = shell._dispatch_general("sh clock")
+        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022")
+        self.assertFalse(close)
 
-    def test_default_command_is_function(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_general_command_is_function(self):
+        """A callable-output command returns its computed body (was default)."""
         self.arguments["is_running"].set()
         self.arguments["nos"] = Nos(filename="tests/assets/module.py")
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("show clock")
-        writeline.assert_called_once_with(time.ctime())
+        body, close = shell._dispatch_general("show clock")
+        self.assertEqual(body, time.ctime())
+        self.assertFalse(close)
 
     def _make_callable_dict_shell(self, output_callable):
         """Build a shell whose 'cmd' command output is `output_callable`.
 
-        Consumer-side pins for the handler dispatch branch of `default()` —
-        the dict-returning cases (new_mode transition / exit / output
+        Consumer-side pins for the handler dispatch branch of `_dispatch_general`
+        — the dict-returning cases (new_mode transition / exit / output
         extraction, the counterpart of the producer-side device-class tests
         in tests/plugins/nos/, T-14 / #230), plus the str-passthrough (D-b)
         and crash (D4) pins. The synthetic platform declares all three
@@ -328,28 +352,26 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         return shell
 
-    def test_default_callable_dict_new_mode(self):
+    def test_dispatch_callable_dict_new_mode(self):
         """Callable dict with new_mode transitions the shell to that mode."""
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "", "new_mode": "enable"})
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("cmd")
-        self.assertFalse(stop)
+        body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
         self.assertEqual(shell.current_mode, "enable")
         self.assertEqual(shell.prompt, "test#")
-        writeline.assert_called_once_with("")
+        self.assertEqual(body, "")
 
-    def test_default_callable_dict_unknown_new_mode_is_lenient(self):
+    def test_dispatch_callable_dict_unknown_new_mode_is_lenient(self):
         """A handler returning an unknown mode logs and stays put (#264 / D5)."""
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "body", "new_mode": "nope"})
-        writeline = set_attr(shell, "writeline", Mock())
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            stop = shell.default("cmd")
-        self.assertFalse(stop)
+            body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
         self.assertEqual(shell.current_mode, "user")  # unchanged
         self.assertTrue(any("unknown mode 'nope'" in msg for msg in captured.output))
-        writeline.assert_called_once_with("body")
+        self.assertEqual(body, "body")
 
-    def test_default_static_new_mode_wins_over_handler(self):
+    def test_dispatch_static_new_mode_wins_over_handler(self):
         """A command's static new_mode overrides a handler-returned one (#264 / claude #8).
 
         Replicates v2's write order (handler new_prompt applied first, the
@@ -373,26 +395,28 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        set_attr(shell, "writeline", Mock())
-        shell.default("cmd")
+        shell._dispatch_general("cmd")
         self.assertEqual(shell.current_mode, "enable")  # static new_mode, not handler's "config"
 
-    def test_default_callable_dict_exit(self):
-        """Callable dict with exit=True signals shell termination."""
-        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"exit": True})
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("cmd")
-        self.assertTrue(stop)
-        writeline.assert_not_called()
+    def test_dispatch_callable_dict_exit(self):
+        """Callable dict with exit=True closes with no body (was default suppression).
 
-    def test_default_callable_dict_output_only(self):
-        """Callable dict with output only writes it, prompt unchanged."""
+        The exit path returns `(None, True)`, so there is no body to suppress —
+        the close-time body-suppression contract itself lives in the driver and
+        is pinned by the byte-parity goldens (#303 P3-3).
+        """
+        shell = self._make_callable_dict_shell(lambda device, **kwargs: {"exit": True})
+        body, close = shell._dispatch_general("cmd")
+        self.assertTrue(close)
+        self.assertIsNone(body)
+
+    def test_dispatch_callable_dict_output_only(self):
+        """Callable dict with output only returns it, prompt unchanged."""
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "dynamic body"})
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("cmd")
-        self.assertFalse(stop)
+        body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
         self.assertEqual(shell.prompt, "test>")
-        writeline.assert_called_once_with("dynamic body")
+        self.assertEqual(body, "dynamic body")
 
     def _make_prompt_form_shell(self, prompt_value):
         """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
@@ -419,21 +443,19 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         return shell
 
-    def test_default_prompt_str_authoring_dispatches(self):
+    def test_dispatch_prompt_str_authoring_dispatches(self):
         """A bare-str `prompt` resolves to the current mode and dispatches."""
         shell = self._make_prompt_form_shell("{base_prompt}>")
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("form ok")
+        body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, "form ok")
 
-    def test_default_prompt_list_authoring_dispatches(self):
+    def test_dispatch_prompt_list_authoring_dispatches(self):
         """A list `prompt` resolves to a mode set including the current mode."""
         shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("form ok")
+        body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, "form ok")
 
     def test_inventory_commands_resolve_through_adapter_and_dispatch(self):
         """Inventory-defined commands are normalized through the adapter too.
@@ -453,31 +475,28 @@ class TestCmdShell(TestCase):
             },
         }
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
         # The inventory command is normalized through the adapter like any
         # inflow: its "{base_prompt}>" prompt resolves to the user mode.
         self.assertEqual(shell.commands["inv cmd"].modes, frozenset({"user"}))
-        stop = shell.default("inv cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("inventory ok")
+        body, close = shell._dispatch_general("inv cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, "inventory ok")
 
-    def test_default_command_not_matching_prompt(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_command_not_matching_prompt(self):
+        """A command not valid in the current mode answers with `_default_`."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("show version")
-        writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        body, _close = shell._dispatch_general("show version")
+        self.assertEqual(body, "% Invalid input detected at '^' marker.")
 
-    def test_default_command_incorrect(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_command_incorrect(self):
+        """An unknown command answers with the `_default_` output."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("test")
-        writeline.assert_called_once_with("% Invalid input detected at '^' marker.")
+        body, _close = shell._dispatch_general("test")
+        self.assertEqual(body, "% Invalid input detected at '^' marker.")
 
-    def test_default_alias_target_missing_falls_back_default(self):
+    def test_dispatch_alias_target_missing_falls_back_default(self):
         """An alias whose target command is gone degrades to `_default_`.
 
         The adapter drops a broken alias at load (logged), so it never reaches
@@ -498,9 +517,8 @@ class TestCmdShell(TestCase):
             )
             shell = CMDShell(**self.arguments)
         self.assertNotIn("broken alias", shell.commands)
-        writeline = set_attr(shell, "writeline", Mock())
-        shell.default("broken alias")
-        writeline.assert_called_once_with("% Invalid input")
+        body, _close = shell._dispatch_general("broken alias")
+        self.assertEqual(body, "% Invalid input")
 
     def test_invoke_handler_str_return_normalized(self):
         """`_invoke_handler` wraps a str return into a CommandResult dict.
@@ -568,27 +586,25 @@ class TestCmdShell(TestCase):
         shell = CMDShell(**self.arguments)
         return shell
 
-    def test_default_callable_default_invoked_on_unknown_command(self):
+    def test_dispatch_callable_default_invoked_on_unknown_command(self):
         """An unknown command invokes a callable `_default_` (#241)."""
         shell = self._make_callable_default_shell()
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("nope")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("dynamic unknown: nope")
+        body, close = shell._dispatch_general("nope")
+        self.assertFalse(close)
+        self.assertEqual(body, "dynamic unknown: nope")
 
-    def test_default_callable_default_invoked_on_mode_mismatch(self):
+    def test_dispatch_callable_default_invoked_on_mode_mismatch(self):
         """A mode mismatch invokes a callable `_default_` (#241 / #264).
 
         `known` is enable-only; typed in user mode it misses, and the fallback
         invokes the callable `_default_` through `_invoke_handler`.
         """
         shell = self._make_callable_default_shell()
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("known")  # valid only in enable, current mode is user
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("dynamic unknown: known")
+        body, close = shell._dispatch_general("known")  # valid only in enable, current mode is user
+        self.assertFalse(close)
+        self.assertEqual(body, "dynamic unknown: known")
 
-    def test_default_callable_default_dict_return_gets_full_dispatch(self):
+    def test_dispatch_callable_default_dict_return_gets_full_dispatch(self):
         """A dict-returning callable `_default_` gets the same dispatch (#241 / #264).
 
         Pins that the unification is complete: a callable `_default_` flows
@@ -610,14 +626,13 @@ class TestCmdShell(TestCase):
             }
         )
         shell = CMDShell(**self.arguments)
-        writeline = set_attr(shell, "writeline", Mock())
-        stop = shell.default("nope")
-        self.assertFalse(stop)
+        body, close = shell._dispatch_general("nope")
+        self.assertFalse(close)
         self.assertEqual(shell.current_mode, "enable")
         self.assertEqual(shell.prompt, "test#")
-        writeline.assert_called_once_with("locked out")
+        self.assertEqual(body, "locked out")
 
-    def test_default_handler_crash_writes_fixed_error_line(self):
+    def test_dispatch_handler_crash_writes_fixed_error_line(self):
         """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
 
         Pins #241/D4: real NOSes never print Python tracebacks, and the
@@ -630,13 +645,12 @@ class TestCmdShell(TestCase):
             raise RuntimeError("boom")
 
         shell = self._make_callable_dict_shell(crash)
-        writeline = set_attr(shell, "writeline", Mock())
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            stop = shell.default("cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with(HANDLER_ERROR_OUTPUT)
+            body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, HANDLER_ERROR_OUTPUT)
 
-    def test_default_handler_crash_logs_full_traceback(self):
+    def test_dispatch_handler_crash_logs_full_traceback(self):
         """A crashing handler's traceback goes to the server log.
 
         Pins #241/D4 (the diagnosability half): dropping the wire
@@ -649,18 +663,16 @@ class TestCmdShell(TestCase):
             raise RuntimeError("boom-for-log")
 
         shell = self._make_callable_dict_shell(crash)
-        # crash-path guard: default() writes HANDLER_ERROR_OUTPUT via writeline,
-        # and stdout is None, so writeline must be mocked even though this test
-        # only asserts on the log (return unused → bare set_attr).
-        set_attr(shell, "writeline", Mock())
+        # `_dispatch_general` returns (body, close) without writing, so no
+        # writeline mock is needed; this test only asserts on the log.
         with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.default("cmd")
+            shell._dispatch_general("cmd")
         self.assertEqual(len(captured.output), 1)
         self.assertIn("handler crashed", captured.output[0])
         self.assertIn("RuntimeError: boom-for-log", captured.output[0])
         self.assertIn("Traceback", captured.output[0])
 
-    def test_default_callable_dict_output_passed_through_unformatted(self):
+    def test_dispatch_callable_dict_output_passed_through_unformatted(self):
         """Callable-dict output is written verbatim, never re-rendered (#241 / D-b).
 
         Handlers render themselves, so brace-containing device output reaches
@@ -668,13 +680,12 @@ class TestCmdShell(TestCase):
         output, hence **no error log**. Holds for dict and str returns alike.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: {"output": "value is {base_prompt.foo}"})
-        writeline = set_attr(shell, "writeline", Mock())
         with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            stop = shell.default("cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("value is {base_prompt.foo}")
+            body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, "value is {base_prompt.foo}")
 
-    def test_default_callable_str_output_passed_through_unformatted(self):
+    def test_dispatch_callable_str_output_passed_through_unformatted(self):
         """Callable str output is written verbatim too (#241 / D-b).
 
         The str-return twin of the dict pin above: literal braces in a
@@ -682,13 +693,12 @@ class TestCmdShell(TestCase):
         wire untouched, with no render step and no error log.
         """
         shell = self._make_callable_dict_shell(lambda device, **kwargs: "literal {brace} stays")
-        writeline = set_attr(shell, "writeline", Mock())
         with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            stop = shell.default("cmd")
-        self.assertFalse(stop)
-        writeline.assert_called_once_with("literal {brace} stays")
+            body, close = shell._dispatch_general("cmd")
+        self.assertFalse(close)
+        self.assertEqual(body, "literal {brace} stays")
 
-    def test_default_command_transitions_mode(self):
+    def test_dispatch_command_transitions_mode(self):
         """A command with a new_mode transitions the shell and re-renders the prompt.
 
         `enable` (yaml_nos) declares new_mode=enable; dispatching it from the
@@ -697,22 +707,22 @@ class TestCmdShell(TestCase):
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        set_attr(shell, "writeline", Mock())  # stdout is None; guard only
-        shell.default("enable")
+        shell._dispatch_general("enable")
         self.assertEqual(shell.current_mode, "enable")
         self.assertEqual(shell.prompt, "test#")
 
-    def test_default_command_exit(self):
-        """Test that the default method does nothing."""
+    def test_dispatch_command_exit(self):
+        """An exit command closes the session (was default returning True)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        self.assertTrue(shell.default("exit"))
+        _body, close = shell._dispatch_general("exit")
+        self.assertTrue(close)
 
-    def test_do_eof(self):
-        """Test that do_EOF returns True to exit cmdloop gracefully."""
+    def test_dispatch_eof_closes_session(self):
+        """`dispatch("EOF")` closes the session (was do_EOF returning True)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        self.assertTrue(shell.do_EOF(""))
+        self.assertTrue(shell.dispatch("EOF").close)
 
 
 class HotReloadTest(TestCase):
@@ -729,7 +739,7 @@ class HotReloadTest(TestCase):
             os.environ.pop("SIMNOS_RELOAD_COMMANDS")
 
     def test_hot_reload_not_activated_doesnt_enter(self):
-        """Test that the if is not set  hot_reload method does nothing."""
+        """Test that precmd's hot-reload branch is skipped when SIMNOS_RELOAD_COMMANDS is unset."""
         os.environ.pop("SIMNOS_RELOAD_COMMANDS")
         shell = CMDShell(**self.arguments)
         mock_get_files_changed = set_attr(shell, "get_files_changed", Mock())
@@ -908,21 +918,3 @@ class HotReloadTest(TestCase):
                 assert output == "test output"
             finally:
                 undo_change_file()
-
-
-def test_dispatch_router_assumes_only_eof_and_help_do_methods():
-    """Pin the do_* method set the push `dispatch()` router hardcodes (#297, claude#2).
-
-    `CMDShell.dispatch()` reproduces `cmd.Cmd.onecmd` routing by handling
-    `do_EOF` / `do_help` by name and sending everything else to
-    `_dispatch_general` (the `default` target). A newly added `do_*` method would
-    be invoked by the telnet cmdloop (`cmd.Cmd.onecmd` -> `getattr`) but fall
-    through to `_dispatch_general` on the SSH push path, silently diverging the
-    wire. This guard fails loudly so the new method's routing must be added to
-    `dispatch()` alongside it.
-    """
-    do_methods = {m for m in dir(CMDShell) if m.startswith("do_")}
-    assert do_methods == {"do_EOF", "do_help"}, (
-        f"CMDShell gained do_* method(s) {do_methods - {'do_EOF', 'do_help'}}; "
-        f"add their routing to CMDShell.dispatch() (#297) and update this pin."
-    )

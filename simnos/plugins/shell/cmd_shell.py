@@ -2,13 +2,13 @@
 Custom shell class to interact with NOS.
 """
 
-from cmd import Cmd
 import copy
 from dataclasses import dataclass
 import hashlib
 import logging
 import os
 import random
+import string
 import traceback
 from typing import TYPE_CHECKING, cast
 
@@ -144,15 +144,16 @@ def build_resolved_platform(
 class DispatchResult:
     """Structured result of one dispatched line (#297 / §3a).
 
-    The push session driver turns this into wire bytes. ``cmd.Cmd.cmdloop`` /
-    ``onecmd`` cannot represent multi-line output, no output, session close, or
-    a post-transition prompt in a single ``str``, so the I/O-independent
-    dispatch core returns the pieces explicitly:
+    The push session driver turns this into wire bytes. The legacy
+    ``cmd.Cmd.cmdloop`` / ``onecmd`` (removed in #303 P3-3) could not represent
+    multi-line output, no output, session close, or a post-transition prompt in
+    a single ``str``, so the I/O-independent dispatch core returns the pieces
+    explicitly:
 
-    - ``body``: text to render with ``writeline`` semantics, or ``None`` for no
-      output (empty line, EOF, a handler returning no ``output``). The driver
-      suppresses it when ``close`` is set — the legacy ``default`` never wrote a
-      body on any close path.
+    - ``body``: text the driver renders line-by-line with ``newline``, or
+      ``None`` for no output (empty line, EOF, a handler returning no
+      ``output``). The driver suppresses it when ``close`` is set — the legacy
+      ``default`` adapter never wrote a body on any close path.
     - ``prompt``: the prompt to show after this line (already reflects a mode
       transition applied during dispatch).
     - ``close``: the session should close after this line.
@@ -165,24 +166,23 @@ class DispatchResult:
     mode: str
 
 
-class CMDShell(Cmd):
+class CMDShell:
     """
     Custom shell class to interact with NOS.
     """
 
-    use_rawinput = False
+    # Same value as the former ``cmd.Cmd.identchars``; ``_parseline`` reads
+    # ``self.identchars`` to extract the leading command token, so it must be a
+    # class attr now that the ``cmd.Cmd`` base is gone (#303 P3-3).
+    identchars = string.ascii_letters + string.digits + "_"
 
     def __init__(
         self,
-        stdin,
-        stdout,
         nos,
         nos_inventory_config,
         base_prompt,
         is_running,
         intro="Custom SSH Shell",
-        ruler="",
-        completekey="tab",
         newline="\r\n",
         resolved_platform=None,
         render_config=None,
@@ -194,7 +194,6 @@ class CMDShell(Cmd):
         # frozen value, not `self.nos.name`, or a hijacked name would permanently
         # skip this session's own A3 platform reload.
         self._platform_name: str = nos.name
-        self.ruler = ruler
         self.intro = intro
         self.base_prompt = base_prompt
         self.newline = newline
@@ -235,13 +234,6 @@ class CMDShell(Cmd):
         if resolved_platform is None:
             resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
         self._apply_platform(resolved_platform)
-
-        # call the base constructor of cmd.Cmd, with our own stdin and stdout
-        super().__init__(
-            completekey=completekey,
-            stdin=stdin,
-            stdout=stdout,
-        )
 
     @staticmethod
     def build_shared_platform(
@@ -403,26 +395,6 @@ class CMDShell(Cmd):
         """
         self._apply_platform(build_resolved_platform(self.nos, self._inventory_commands, self._render_config))
 
-    def start(self):
-        """Method to start the shell"""
-        self.cmdloop()
-
-    def stop(self):
-        """Method to stop the shell"""
-        self.stdin.write("exit" + self.newline)
-
-    def writeline(self, value):
-        """Method to write a line to stdout with newline at the end"""
-        for line in str(value).splitlines():
-            self.stdout.write(line + self.newline)
-
-    def do_EOF(self, line):
-        """Handle EOF from readline — exit the shell gracefully."""
-        return True
-
-    def emptyline(self):
-        """This method to do nothing if empty line entered"""
-
     # `Nos` state `from_file` mutates; snapshotted per reload target so a target
     # that loads but fails to normalize can be rolled back (2nd round codex #1).
     _NOS_RELOAD_ATTRS = (
@@ -475,10 +447,11 @@ class CMDShell(Cmd):
                 self.nos.from_file(target)
                 self._rebuild()
             except Exception:
-                # Broad except, like `default()`: any plugin error must not
-                # crash the session. Roll back the partial nos mutation so the
-                # broken file does not poison subsequent reloads, then log the
-                # traceback so a genuine plugin bug stays diagnosable.
+                # Broad except, like the dispatch core's handler guard: any
+                # plugin error must not crash the session. Roll back the partial
+                # nos mutation so the broken file does not poison subsequent
+                # reloads, then log the traceback so a genuine plugin bug stays
+                # diagnosable.
                 self.nos.commands = snapshot_commands
                 for attr, value in snapshot_attrs.items():
                     setattr(self.nos, attr, value)
@@ -628,10 +601,10 @@ class CMDShell(Cmd):
     def _help_body(self) -> str:
         """Build the help listing for the current mode as body text (no I/O).
 
-        Extracted from `do_help` so the cmd.Cmd cmdloop path (telnet) and the
-        push dispatch core (#297, SSH) share one implementation. Returns the
-        lines joined by `self.newline`; the caller applies `writeline`
-        semantics (cmdloop via `do_help`, push via the session handler).
+        Called by the push `dispatch` core when the parsed command is `help`
+        (a leading `?` or a typed `help`), shared by both transports (#297 / #303
+        P3-3). Returns the lines joined by `self.newline`; the driver renders the
+        resulting body to the wire.
 
         Intentional refinement over v2 (2nd round claude #2): v2 `do_help`
         read the raw unmerged entries, so an alias without its own prompt was
@@ -653,10 +626,6 @@ class CMDShell(Cmd):
             padding = " " * (width - len(k)) + "  "
             help_msg.append(f"{k}{padding}{v}")
         return self.newline.join(help_msg)
-
-    def do_help(self, arg):
-        """List help for commands valid in the current mode (cmd.Cmd cmdloop adapter)."""
-        self.writeline(self._help_body())
 
     def _apply_new_mode(self, mode_name: str, command: str) -> None:
         """Transition to `mode_name`; an unknown name keeps the current mode.
@@ -704,13 +673,13 @@ class CMDShell(Cmd):
     def _dispatch_general(self, line) -> tuple[str | None, bool]:
         """Resolve + invoke one general command; return ``(body, close)``.
 
-        The I/O-independent heart of dispatch, shared by the cmd.Cmd `default`
-        adapter (telnet cmdloop) and the push `dispatch` core (#297, SSH).
-        Applies a mode transition as a live-session side effect (§1a) but
-        writes nothing — the caller renders `body`.
+        The I/O-independent heart of dispatch, called by the push `dispatch`
+        core (#297, SSH; both transports since #303 P3-3). Applies a mode
+        transition as a live-session side effect (§1a) but writes nothing — the
+        caller renders `body`.
 
         ``close`` is True for an exit command, a handler returning ``exit``, or
-        a server shutdown observed mid-dispatch. The legacy `default`
+        a server shutdown observed mid-dispatch. The legacy `default` adapter
         suppressed the body on every one of those close paths, so callers MUST
         NOT render `body` when `close` is set.
 
@@ -720,7 +689,7 @@ class CMDShell(Cmd):
         `_apply_new_mode`), so `HANDLER_ERROR_OUTPUT` structurally means "a
         command handler crashed" and nothing else (#241 / #264).
         """
-        log.debug("shell.default '%s' running command '%s'", self.base_prompt, [line])
+        log.debug("shell.dispatch '%s' running command '%s'", self.base_prompt, [line])
         cmd = self.commands.get(line)
         # Command abbreviation (#303 / P3-2): only on an exact-match miss, so a
         # full command's wire is byte-identical (scrapers send full commands and
@@ -764,7 +733,7 @@ class CMDShell(Cmd):
                 # Keep the unknown-command trail v2 logged (observability for
                 # typo / undefined-command diagnosis); the wire answer is the
                 # same `_default_` output (2nd round claude #5).
-                log.debug("shell.default '%s' command %r not found", self.base_prompt, line)
+                log.debug("shell.dispatch '%s' command %r not found", self.base_prompt, line)
             # Unknown command and mode mismatch both answer with the `_default_`
             # output — a silent shell would make clients (e.g. Netmiko) wait for
             # a timeout. The `_default_` answer never applies a transition.
@@ -800,55 +769,61 @@ class CMDShell(Cmd):
             body = body.replace("{input}", abbrev_input)
         if transition is not None:
             self._apply_new_mode(transition, line)
-        # Server shutdown observed mid-dispatch: close without writing the body
-        # (the legacy `default` returned True here before any writeline).
+        # Server shutdown observed mid-dispatch: close without rendering the body
+        # (the legacy `default` adapter returned True here before writing output).
         if not self.is_running.is_set():
             return body, True
         return body, False
 
-    def default(self, line):
-        """Dispatch one general command for the cmd.Cmd cmdloop (telnet path).
+    def _parseline(self, line: str) -> tuple[str | None, str | None, str]:
+        """Lex one line into ``(command, arg, line)``, replacing cmd.Cmd.parseline (#303 P3-3).
 
-        Thin adapter over `_dispatch_general` (#297): the push SSH driver calls
-        the core directly, while telnet still routes through `cmd.Cmd.cmdloop`,
-        which calls this. The body is written only when the session is not
-        closing — matching the legacy suppression of the body on every close
-        path — and the bool return drives `cmd.Cmd`'s stop handling.
+        Byte-for-byte compatible with the stdlib behaviour `dispatch` relied on:
+        strips the line, maps a leading ``?`` to ``help ...`` (drives the help
+        golden), and extracts the leading identifier as the command token. SIMNOS
+        defines no ``do_shell`` (and `dispatch` only special-cases EOF / help),
+        so a leading ``!`` yields no command and falls through to ``_default_`` —
+        exactly as cmd.Cmd did. That ``!`` branch depends on the no-``do_shell``
+        contract.
         """
-        body, close = self._dispatch_general(line)
-        if not close and body is not None:
-            self.writeline(body)
-        return close
+        line = line.strip()
+        if not line:
+            return None, None, line
+        if line[0] == "?":
+            line = "help " + line[1:]
+        elif line[0] == "!":
+            return None, None, line  # no do_shell -> falls through to the _default_ path
+        i, n = 0, len(line)
+        while i < n and line[i] in self.identchars:
+            i += 1
+        return line[:i], line[i:].strip(), line
 
     def dispatch(self, line: str) -> DispatchResult:
         """I/O-independent dispatch core for the push session driver (#297 / §3a).
 
-        Reproduces `cmd.Cmd.onecmd`'s routing (precmd -> help / EOF / empty /
-        general -> postcmd) so the SSH push session produces the same wire as
-        the telnet cmdloop path (which still routes through `cmd.Cmd`). Returns
-        a structured `DispatchResult` the session handler renders to wire bytes;
-        it never writes to stdout. Mode transitions / variant / hot-reload run
-        as today via `_dispatch_general` / `precmd`.
+        Lexes the line with `_parseline` and routes it (precmd -> help / EOF /
+        blank / general -> postcmd) so both transports (SSH asyncssh, Telnet
+        telnetlib3) produce the same wire (#303 P3-3 replaced the former cmd.Cmd
+        `onecmd`/`cmdloop` path). Returns a structured `DispatchResult` the
+        session handler renders to wire bytes; it never writes to stdout. Mode
+        transitions / variant / hot-reload run via `_dispatch_general` / `precmd`.
 
-        Only `do_EOF` / `do_help` exist on this shell, so the routing maps them
-        explicitly and sends everything else to `_dispatch_general` (the
-        `default` target). A NOS command named `help` / `EOF` stays shadowed by
-        the `do_*` method exactly as under `cmd.Cmd`.
+        The router special-cases only `EOF` (close) and `help` (current-mode
+        listing); everything else goes to `_dispatch_general`. A NOS command
+        named `help` / `EOF` stays shadowed by these explicit branches.
         """
         line = self.precmd(line)
-        cmd_name, _arg, parsed = self.parseline(line)
+        cmd_name, _arg, parsed = self._parseline(line)
         if not parsed:
-            body, close = None, False  # emptyline(): no output
+            body, close = None, False  # blank line: no output
         elif cmd_name == "EOF":
-            body, close = None, True  # do_EOF: stop
+            body, close = None, True  # EOF line: close session
         elif cmd_name == "help":
-            body, close = self._help_body(), False  # do_help (current-mode listing)
+            body, close = self._help_body(), False  # leading `?` / `help`: current-mode listing
         else:
-            body, close = self._dispatch_general(parsed)  # cmd '' or unknown do_* -> default
-        # postcmd gets the post-precmd line (pre-parseline), matching
-        # cmd.Cmd.cmdloop's `self.postcmd(stop, line)` — not the parseline-
-        # transformed `parsed` (e.g. "?" -> "help ") — so a postcmd override
-        # sees the same argument on the telnet (cmdloop) and SSH (push) paths
-        # (#297, claude#1).
+            body, close = self._dispatch_general(parsed)  # general command path
+        # postcmd gets the post-precmd line (pre-parseline) — not the
+        # parseline-transformed `parsed` (e.g. "?" -> "help ") — so a postcmd
+        # override sees the line as typed on both transports (#297, claude#1).
         close = bool(self.postcmd(close, line))
         return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)

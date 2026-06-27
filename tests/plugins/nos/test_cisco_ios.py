@@ -2,7 +2,7 @@
 Device-class unit tests for the cisco_ios Python plugin (T-14 / #230).
 
 Producer-side pins for the callable outputs: each callable is invoked
-with the same 4-arg contract as `cmd_shell.default` (device,
+with the same 4-arg contract as `CMDShell._invoke_handler` (device,
 base_prompt=, current_prompt=, command=). Full render comparison would
 be a tautology against the Jinja2 template, so these tests pin
 meaningful invariants instead: key substrings, `{{base_prompt}}`

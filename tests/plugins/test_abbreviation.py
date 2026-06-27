@@ -13,11 +13,10 @@ byte-identical (the byte-parity goldens pin that separately). These tests cover:
 7. the ``_ambiguous_`` / ``_incomplete_`` specials are overridable and flow
    through the normal dispatch pipeline (handler override is None-safe, and the
    specials never transition or close);
-8. abbreviation works on the telnet (``default``) and SSH (``dispatch``) paths.
+8. abbreviation works on the shared ``_dispatch_general`` core both transports use.
 """
 
 import dataclasses
-import io
 import threading
 
 import pytest
@@ -41,13 +40,11 @@ INCOMPLETE_DIAG = "% Incomplete command."
 SWEEP_PLATFORMS = ["cisco_ios", "arista_eos", "huawei_smartax", "juniper_junos"]
 
 
-def _shell(name: str, *, stdout=None) -> CMDShell:
+def _shell(name: str) -> CMDShell:
     """A real merged-platform shell for `name`, ready to dispatch."""
     is_running = threading.Event()
     is_running.set()  # otherwise _dispatch_general reports server shutdown
     return CMDShell(
-        stdin=None,
-        stdout=stdout,
         nos=Nos(filename=nos_plugins[name]),
         nos_inventory_config={},
         base_prompt="device",
@@ -55,7 +52,7 @@ def _shell(name: str, *, stdout=None) -> CMDShell:
     )
 
 
-def _legacy_shell(commands: dict, *, stdout=None) -> CMDShell:
+def _legacy_shell(commands: dict) -> CMDShell:
     """A legacy (3-prompt) shell built from an in-memory command dict."""
     nos = Nos()
     nos.from_dict(
@@ -70,8 +67,6 @@ def _legacy_shell(commands: dict, *, stdout=None) -> CMDShell:
     is_running = threading.Event()
     is_running.set()
     return CMDShell(
-        stdin=None,
-        stdout=stdout,
         nos=nos,
         nos_inventory_config={},
         base_prompt="device",
@@ -309,16 +304,17 @@ def test_packaged_specials_never_transition_or_close(platform):
         assert not cmd.modes  # valid in every mode (no prompt)
 
 
-# --------------------------------------------------------------- 8. telnet + ssh paths
-def test_abbreviation_on_telnet_default_path():
-    """The cmd.Cmd `default` adapter (telnet cmdloop) shares `_dispatch_general`,
-    so abbreviation works there too — line editing stays SSH-only (pinned in
-    test_ssh_line_editor), but the resolution itself is path-independent."""
-    out = io.StringIO()
-    shell = _enable(_shell("cisco_ios", stdout=out))
-    close = shell.default("sh ver")
+# --------------------------------------------------------------- 8. shared dispatch core path
+def test_abbreviation_through_dispatch_general_core():
+    """Both transports share `_dispatch_general`, so abbreviation works on the
+    shared core regardless of transport — line editing stays SSH-only (pinned in
+    test_ssh_line_editor), but the resolution itself is path-independent
+    (cmd.Cmd `default` adapter removed in #303 P3-3)."""
+    shell = _enable(_shell("cisco_ios"))
+    body, close = shell._dispatch_general("sh ver")
     assert close is False
-    assert "Cisco IOS" in out.getvalue()
+    assert body is not None
+    assert "Cisco IOS" in body
 
 
 def test_abbreviation_on_ssh_dispatch_path():

@@ -3,9 +3,9 @@
 A NOS plugin may set a command's ``output`` to a callable instead of a
 static string (see :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a
 live example). This module is the single place where that callable's
-signature and return shape are written down — `CMDShell.default()`
-dispatches against it and plugin authors can import it for type
-annotations (optional; plain functions matching the shape work as-is).
+signature and return shape are written down — `CMDShell._dispatch_general()`
+(via `_invoke_handler`) dispatches against it and plugin authors can import it
+for type annotations (optional; plain functions matching the shape work as-is).
 """
 
 from typing import TYPE_CHECKING, Protocol, TypedDict

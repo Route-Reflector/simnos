@@ -75,9 +75,10 @@ def _assemble_wire(writes: list[str]) -> bytes:
 def _render_intro(shell: PushShell) -> bytes:
     """Initial wire bytes: the shell intro line + the first prompt (#297 / §3a).
 
-    Mirrors `cmd.Cmd.cmdloop` writing ``str(intro)+"\\n"`` then ``self.prompt``
-    as two stdout writes (assembled per write so CR/LF/NUL normalization matches
-    the legacy `shell_to_client_tap`).
+    Reproduces the framing the legacy `cmd.Cmd.cmdloop` produced (removed in #303
+    P3-3): ``str(intro)+"\\n"`` then ``self.prompt`` as two stdout writes
+    (assembled per write so CR/LF/NUL normalization matches the legacy
+    `shell_to_client_tap`).
     """
     writes: list[str] = []
     if shell.intro:
@@ -92,9 +93,9 @@ def _render_response(shell: PushShell, result: "DispatchResult") -> bytes:
     The line-terminator echo (``\\r\\n``) is held until dispatch completes and
     emitted as the first part of this single write unit, reproducing the legacy
     echo coalescing without the timing-dependent ``_COALESCE_DELAY``. On a close
-    result neither body nor prompt is emitted (the legacy `default` wrote
-    nothing on its close paths), leaving just the newline echo. Body lines
-    reproduce `writeline`'s per-line ``newline``.
+    result neither body nor prompt is emitted (the legacy `default` adapter wrote
+    nothing on its close paths), leaving just the newline echo. Each body line
+    gets a trailing ``newline``, reproducing the legacy per-line shell output.
     """
     writes: list[str] = ["\r\n"]  # line-terminator echo, held until dispatch
     if not result.close:

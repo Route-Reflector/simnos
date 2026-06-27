@@ -228,7 +228,7 @@ def _classify_callable_commands(
     non-time reasons.
 
     The expected value is computed by invoking the callable with the
-    same 4-arg contract as `cmd_shell.default` (device, base_prompt=,
+    same 4-arg contract as `CMDShell._invoke_handler` (device, base_prompt=,
     current_prompt=, command=) and taken **verbatim** — the shell does
     not apply `.format(base_prompt=...)` to callable output (#241 /
     D-b: handlers receive base_prompt and format themselves), so the
@@ -503,7 +503,7 @@ class TestShutdownEOF:
 
     @pytest.mark.timeout(30)
     def test_shell_exits_cleanly_on_server_stop(self):
-        """Shell should exit via do_EOF when server stops, no thread leaks."""
+        """Shell should exit on EOF (dispatch close branch) when server stops, no thread leaks."""
         port = get_free_port()
         net = _make_simnos("cisco_ios", port)
         try:
