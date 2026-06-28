@@ -284,6 +284,22 @@ class ModelPlatformPaging(BaseModel):
 
     more_prompt: StrictStr = " --More-- "
 
+    @field_validator("more_prompt")
+    @classmethod
+    def _single_line_ascii(cls, value: str) -> str:
+        # The pager erases `more_prompt` with `\b`*N + ' '*N + `\b`*N where
+        # N = len(more_prompt), which only erases correctly when char count == byte
+        # count == display columns: a single-line ASCII string (#307 / P3-4, codex#3).
+        # A newline / control char / non-ASCII / empty prompt would mis-erase, so
+        # reject it at load time rather than corrupting the wire at runtime.
+        if not value:
+            raise ValueError("paging.more_prompt must not be empty")
+        if not value.isascii():
+            raise ValueError(f"paging.more_prompt must be ASCII (got {value!r}); wide glyphs break the erase width")
+        if any(c < " " for c in value):
+            raise ValueError(f"paging.more_prompt must be a single line with no control characters (got {value!r})")
+        return value
+
 
 class ModelPlatformMeta(BaseModel):
     """A3 per-platform metadata schema (`platform.yaml`, #264 / D2).

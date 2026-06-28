@@ -189,6 +189,20 @@ class TestModelPlatformMeta:
         juniper = ModelPlatformMeta(modes=modes, initial_mode="user", paging={"more_prompt": "---(more)---"})  # ty: ignore[invalid-argument-type]
         assert juniper.paging is not None and juniper.paging.more_prompt == "---(more)---"
 
+    @pytest.mark.parametrize(
+        ("bad", "match"),
+        [
+            ("", "must not be empty"),
+            ("もっと", "must be ASCII"),  # wide glyphs break the \b-based erase width
+            ("a\nb", "single line"),
+        ],
+    )
+    def test_paging_more_prompt_rejects_non_ascii_single_line(self, bad, match):
+        """`more_prompt` must be a non-empty single-line ASCII string so the pager's
+        `\\b`*N erase matches the displayed width (#307 / P3-4, codex#3)."""
+        with pytest.raises(ValidationError, match=match):
+            ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="user", paging={"more_prompt": bad})  # ty: ignore[invalid-argument-type]
+
 
 class TestCMDShellConfig:
     """Schema pins for the shell configuration after the cmd.Cmd removal (#303 P3-3).

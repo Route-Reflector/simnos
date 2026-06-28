@@ -257,7 +257,11 @@ class _PagingShell(_FakeShell):
         self._body = body
 
     def dispatch(self, line: str) -> DispatchResult:
-        return DispatchResult(body=self._body, prompt=self.prompt, close=False, mode="user")
+        # The long (paging) body is returned for "show"; any other line gets a short
+        # single-line body so a command typed AFTER a pager quit does not itself page
+        # (used by the buffered-tail regression test). All other paging tests use "show".
+        body = self._body if line == "show" else f"out:{line}"
+        return DispatchResult(body=body, prompt=self.prompt, close=False, mode="user")
 
 
 def test_resolve_rows():
@@ -308,6 +312,21 @@ def test_paging_q_quits_with_prompt_and_discards_rest():
     out = _drive(_FakeTransport([b"show\r", b"q"], rows=3), _PagingShell("L1\nL2\nL3\nL4\nL5"))
     assert out == b"Custom SSH Shell\r\ndevice>show\r\nL1\r\nL2\r\nL3\r\n" + _MORE + _ERASE + b"device>"
     assert b"L4" not in out and b"L5" not in out
+
+
+def test_paging_q_then_buffered_tail_command_runs():
+    """Bytes pipelined after a pager `q` in the SAME recv chunk are processed by the
+    main loop as a normal command — the payoff of the shared `read_byte` source (codex 1st#8)."""
+    # "show\r" pages; then "q" quits and the trailing "x\r" (same chunk) dispatches as "x".
+    out = _drive(_FakeTransport([b"show\r", b"qx\r"], rows=3), _PagingShell("L1\nL2\nL3\nL4\nL5"))
+    assert (
+        out
+        == (
+            b"Custom SSH Shell\r\ndevice>show"
+            b"\r\nL1\r\nL2\r\nL3\r\n" + _MORE + _ERASE + b"device>"  # first page + q-quit (erase + prompt)
+            b"x\r\nout:x\r\ndevice>"  # tail "x" echoed + dispatched normally (not re-paged)
+        )
+    )
 
 
 def test_paging_unknown_key_ignored_no_echo():

@@ -358,8 +358,12 @@ async def _emit_paged(
         return _assemble_wire([line + shell.newline for line in body_lines[start : start + count]])
 
     # First page: held newline echo + first `rows` lines + the pager prompt. The
-    # gate guarantees total > rows, so a marker is always due here.
+    # gate guarantees total > rows, so a marker is always due here. Each page is
+    # drained before the next key wait so a client that pipelines many page keys in
+    # one packet cannot make the outbound buffer grow without bound — same
+    # backpressure the main loop applies per response (gemini 1st#1).
     transport.send(_assemble_wire(["\r\n"]) + _wire(0, rows) + more)
+    await transport.drain()
     sent = rows
 
     while sent < total:
@@ -373,7 +377,7 @@ async def _emit_paged(
             skip_lf = False
             byte = await read_byte()
             if byte is None:
-                return False
+                return skip_lf  # EOF after consuming the CR pair (skip_lf already False); send no prompt
         skip_lf = False
         if byte == b" ":
             count = min(rows, total - sent)
@@ -382,6 +386,7 @@ async def _emit_paged(
             count = 1
         elif byte in (b"q", b"Q"):
             transport.send(erase + prompt_bytes)
+            await transport.drain()
             return skip_lf
         else:
             continue  # ignore any other key (no echo, no bell, no advance)
@@ -389,6 +394,7 @@ async def _emit_paged(
         sent += count
         trailing = more if sent < total else prompt_bytes
         transport.send(erase + body + trailing)
+        await transport.drain()
     return skip_lf
 
 
@@ -525,10 +531,16 @@ async def run_async_push_session(
                 # NAWS, or a `disables_paging` command ran), a close / no-body
                 # result, or a body that fits → the byte-identical `_render_response`
                 # path. Only a body that genuinely overflows `rows` is paged, so the
-                # byte-parity goldens never reach `_emit_paged`.
-                rows = None if shell.paging_disabled else _resolve_rows(transport.page_rows(), shell.page_default_rows)
+                # byte-parity goldens never reach `_emit_paged`. `rows` is computed
+                # (a pty/NAWS syscall) only for a renderable body, so close / empty /
+                # paging-disabled lines skip it entirely (claude 1st#4).
                 body_lines = str(result.body).splitlines() if result.body is not None else []
-                if rows is None or result.close or result.body is None or len(body_lines) <= rows:
+                rows = (
+                    None
+                    if result.close or result.body is None or shell.paging_disabled
+                    else _resolve_rows(transport.page_rows(), shell.page_default_rows)
+                )
+                if rows is None or len(body_lines) <= rows:
                     transport.send(_render_response(shell, result))
                 else:
                     # `_emit_paged` carries skip_lf in/out so the LF/NUL half of a

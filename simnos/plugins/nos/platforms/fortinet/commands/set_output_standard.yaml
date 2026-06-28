@@ -1,5 +1,6 @@
 command: set output standard
 type: simnos
+disables_paging: true
 help: set output to standard mode
 mode:
 - user

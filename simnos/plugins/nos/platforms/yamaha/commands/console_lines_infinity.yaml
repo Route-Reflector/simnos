@@ -1,5 +1,6 @@
 command: console lines infinity
 type: simnos
+disables_paging: true
 help: set the terminal width to maximum
 mode:
 - user
