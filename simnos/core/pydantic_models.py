@@ -296,7 +296,9 @@ class ModelPlatformPaging(BaseModel):
             raise ValueError("paging.more_prompt must not be empty")
         if not value.isascii():
             raise ValueError(f"paging.more_prompt must be ASCII (got {value!r}); wide glyphs break the erase width")
-        if any(c < " " for c in value):
+        # Control chars C0 (`c < " "`, incl. CR/LF/NUL/TAB) and DEL (0x7f) render in
+        # ~0 columns, breaking the char==column erase assumption (claude 2nd#3).
+        if any(c < " " or c == "\x7f" for c in value):
             raise ValueError(f"paging.more_prompt must be a single line with no control characters (got {value!r})")
         return value
 

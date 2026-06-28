@@ -532,22 +532,24 @@ async def run_async_push_session(
                 # result, or a body that fits → the byte-identical `_render_response`
                 # path. Only a body that genuinely overflows `rows` is paged, so the
                 # byte-parity goldens never reach `_emit_paged`. `rows` is computed
-                # (a pty/NAWS syscall) only for a renderable body, so close / empty /
-                # paging-disabled lines skip it entirely (claude 1st#4).
-                body_lines = str(result.body).splitlines() if result.body is not None else []
+                # (a pty/NAWS syscall) only for a renderable body (close / empty /
+                # paging-disabled lines skip it, claude 1st#4); `body_lines` is split
+                # only when paging is possible, so the common non-paged path splits
+                # the body once in `_render_response` rather than twice (gemini 2nd#2).
                 rows = (
                     None
                     if result.close or result.body is None or shell.paging_disabled
                     else _resolve_rows(transport.page_rows(), shell.page_default_rows)
                 )
-                if rows is None or len(body_lines) <= rows:
+                if rows is None or len(body_lines := str(result.body).splitlines()) <= rows:
                     transport.send(_render_response(shell, result))
+                    await transport.drain()
                 else:
                     # `_emit_paged` carries skip_lf in/out so the LF/NUL half of a
                     # final pager Enter is consumed by the main loop, not dispatched
-                    # as a phantom blank line.
+                    # as a phantom blank line. It drains each page itself, so no
+                    # drain is needed here (claude 2nd nit).
                     skip_lf = await _emit_paged(transport, shell, result, body_lines, rows, read_byte, skip_lf)
-                await transport.drain()
                 if result.close:
                     return
             elif editing and byte in (b"\x08", b"\x7f"):

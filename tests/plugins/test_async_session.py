@@ -63,6 +63,7 @@ class _FakeTransport:
         fail_on: bytes | None = None,
         rows: int | None = None,
         nul_resets_skip_lf: bool = False,
+        fail_drain_on: bytes | None = None,
     ) -> None:
         # `chunks` is preserved as a list (not flattened) so a test can pin
         # cross-chunk boundaries: recv() yields one chunk at a time, so a CR in
@@ -75,6 +76,10 @@ class _FakeTransport:
         # path); a positive int makes the driver page over-long bodies (#307).
         self._rows = rows
         self.nul_resets_skip_lf = nul_resets_skip_lf
+        # When set, drain() raises once the given marker has been written — lets a
+        # test pin that a write-side drain failure (not just send) tears the session
+        # down via the main loop's io_errors handler (#307, codex 2nd#1).
+        self._fail_drain_on = fail_drain_on
 
     async def recv(self, n: int) -> bytes:
         while self._chunks and self._chunks[0] == b"":
@@ -94,7 +99,8 @@ class _FakeTransport:
         self.out += data
 
     async def drain(self) -> None:
-        pass
+        if self._fail_drain_on is not None and self._fail_drain_on in self.out:
+            raise OSError("simulated drain failure")
 
     def page_rows(self) -> int | None:
         return self._rows
@@ -312,6 +318,16 @@ def test_paging_q_quits_with_prompt_and_discards_rest():
     out = _drive(_FakeTransport([b"show\r", b"q"], rows=3), _PagingShell("L1\nL2\nL3\nL4\nL5"))
     assert out == b"Custom SSH Shell\r\ndevice>show\r\nL1\r\nL2\r\nL3\r\n" + _MORE + _ERASE + b"device>"
     assert b"L4" not in out and b"L5" not in out
+
+
+def test_paging_drain_failure_ends_session_cleanly():
+    """A drain failure after a page send (write-side io_error) tears the session down
+    via the main loop's per-byte io_errors handler, not an unhandled exception (codex 2nd#1)."""
+    # drain raises once the first page (containing --More--) is written; the intro
+    # drain (no --More-- yet) succeeds, so the session reaches the pager first.
+    out = _drive(_FakeTransport([b"show\r", b" "], rows=3, fail_drain_on=_MORE), _PagingShell("L1\nL2\nL3\nL4\nL5"))
+    assert out.endswith(_MORE)  # first page emitted, then its drain raised -> clean return
+    assert b"L4" not in out  # the Space advance never ran (session ended at the failed drain)
 
 
 def test_paging_q_then_buffered_tail_command_runs():
