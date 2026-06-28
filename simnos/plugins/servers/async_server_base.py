@@ -81,11 +81,17 @@ class AsyncServerBase:
         watchdog_interval: float = 1,
         render_config: "HostRenderConfig | None" = None,
         simnos: "SimNOS | None" = None,
+        page_default_rows: int = 24,
     ) -> None:
         self.nos: Nos = nos
         self.nos_inventory_config: dict = nos_inventory_config
         self.shell: type = shell
         self.shell_configuration: dict = shell_configuration or {}
+        # Fallback page height for the `--More--` pager (sys_config.paging.default_rows,
+        # #307 / P3-4). Threaded to every session's shell in `_build_shell`. Kept off
+        # `shell_configuration` (which is inventory-derived) so the environment-wide
+        # sys_config value flows through a distinct, non-colliding path.
+        self.page_default_rows: int = page_default_rows
         self._render_config: HostRenderConfig | None = render_config
         # Normalize the merged platform once at Host.start (per-host invariant,
         # surfaces malformed data at startup rather than on the first connection).
@@ -307,6 +313,7 @@ class AsyncServerBase:
             is_running=self._is_running,
             resolved_platform=self._shared_platform,
             render_config=self._render_config,
+            page_default_rows=self.page_default_rows,
             **self.shell_configuration,
         )
 

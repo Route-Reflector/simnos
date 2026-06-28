@@ -1,5 +1,6 @@
 command: terminal more disable
 type: simnos
+disables_paging: true
 help: Execute the command terminal more disable. This automatically generated.
 mode:
 - user

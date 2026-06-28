@@ -227,6 +227,11 @@ def cisco_ios_channel():
     with _running_host("cisco_ios") as port:
         transport, channel = _open_shell_channel(port)
         _drain(channel)  # intro + first prompt
+        # These tests exercise line editing, not paging; the default 80x24 pty would
+        # otherwise page `show vlan` at `--More--` and swallow the editing keys
+        # (e.g. up-arrow). Disable paging up front, like a real scraper (#307 / P3-4).
+        channel.sendall(b"terminal length 0\r")
+        _drain(channel)
         try:
             yield channel
         finally:

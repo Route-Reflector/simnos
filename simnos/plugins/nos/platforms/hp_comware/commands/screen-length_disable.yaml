@@ -1,5 +1,6 @@
 command: screen-length disable
 type: simnos
+disables_paging: true
 help: set the terminal width to maximum (kept available in user view for netmiko `disable_paging`
   interop; real HP requires system view)
 mode:

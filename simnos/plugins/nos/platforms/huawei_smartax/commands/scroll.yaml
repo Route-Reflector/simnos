@@ -1,5 +1,6 @@
 command: scroll
 type: simnos
+disables_paging: true
 help: disables the paging so the output is complete always
 mode:
 - user

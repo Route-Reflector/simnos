@@ -147,6 +147,10 @@ class Host:
             # The async server plugins (AsyncSshServer + telnetlib3 TelnetServer)
             # reach the SimNOS-owned shared loop through this back reference.
             simnos=self.simnos,
+            # Environment-wide pager page height (#307 / P3-4). sys_config always
+            # materializes `paging.default_rows` (ModelPaging default 24), so the
+            # `.get` chain is a defensive fallback only.
+            page_default_rows=self.simnos.sys_config.get("paging", {}).get("default_rows", 24),
             **self.server_inventory["configuration"],
         )
         # Defense-in-depth for a partial start (#291). A host whose `start()`

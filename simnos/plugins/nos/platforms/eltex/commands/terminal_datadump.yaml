@@ -1,5 +1,6 @@
 command: terminal datadump
 type: simnos
+disables_paging: true
 help: set terminal width to maximum
 mode:
 - user

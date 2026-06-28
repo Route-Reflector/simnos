@@ -137,7 +137,16 @@ def build_resolved_platform(
     # Carry `auth` so the merged platform mirrors the A3 source — auth is consumed
     # via `nos.auth`, but dropping it would re-introduce the silent-dead-end
     # asymmetry the auth wiring fixed (2nd round codex/claude #3).
-    return ResolvedPlatform(modes=a3.modes, initial_mode=a3.initial_mode, commands=commands, auth=a3.auth)
+    return ResolvedPlatform(
+        modes=a3.modes,
+        initial_mode=a3.initial_mode,
+        commands=commands,
+        auth=a3.auth,
+        # Carry the A3 paging prompt through the merge — otherwise a per-host
+        # merged platform would silently fall back to the default `--More--` even
+        # when the platform authored its own (#307 / P3-4).
+        more_prompt=a3.more_prompt,
+    )
 
 
 @dataclass(frozen=True)
@@ -186,6 +195,7 @@ class CMDShell:
         newline="\r\n",
         resolved_platform=None,
         render_config=None,
+        page_default_rows=24,
     ):
         self.nos: Nos = nos
         # Platform name captured at build time for the hot-reload ownership filter
@@ -198,6 +208,13 @@ class CMDShell:
         self.base_prompt = base_prompt
         self.newline = newline
         self.is_running = is_running
+        # Paging (#307 / P3-4). `page_default_rows` is the fallback page height
+        # (sys_config.paging.default_rows, wired through the server); `more_prompt`
+        # is installed from the resolved platform in `_apply_platform`. The push
+        # driver reads both, plus `paging_disabled` — a sticky per-session flag a
+        # `disables_paging` command flips (the realism of `terminal length 0`).
+        self.page_default_rows: int = page_default_rows
+        self._paging_disabled: bool = False
         # Inventory-defined commands are a third inflow alongside BASIC and the
         # NOS data; kept in authoring form and normalized through the adapter on
         # a hot-reload rebuild (#264 / D6).
@@ -295,6 +312,19 @@ class CMDShell:
         self._variant_outputs = new_outputs
         self.current_mode = candidate_mode
         self.prompt = prompt
+        # The pager prompt rides with the platform so a hot reload that swaps it
+        # also refreshes the `--More--` string (#307 / P3-4).
+        self.more_prompt = platform.more_prompt
+
+    @property
+    def paging_disabled(self) -> bool:
+        """Whether a `disables_paging` command has turned paging off this session.
+
+        Read by the push driver (`PushShell` protocol) before each response: once
+        a `terminal length 0`-style command runs in-mode the flag stays set for
+        the session (sticky; re-enabling is out of scope, #307 / P3-4).
+        """
+        return self._paging_disabled
 
     def _decide_variant_index(self, cmd: ResolvedCommand) -> int:
         """Pick the variant index for one variant-bearing command (#287 / D6).
@@ -711,6 +741,15 @@ class CMDShell:
         if cmd is not None and self._in_current_mode(cmd):
             if cmd.exit:
                 return None, True
+            # Sticky paging disable (#307 / P3-4): set only here — abbreviation is
+            # already resolved (so `term len 0` works too) and the `_in_current_mode`
+            # gate has passed (so a mode-mismatched command that falls through to
+            # `_default_` does NOT disable, matching the real NOS). An A3 alias
+            # inherits the target's `disables_paging` via the loader's `replace`, so
+            # this also fires for alias spellings.
+            if cmd.disables_paging:
+                self._paging_disabled = True
+                log.debug("shell '%s' paging disabled by command %r", self.base_prompt, line)
             # Consult the per-session variant map ONLY for variant-bearing
             # commands (#287 / D6, codex#2 5th). The `cmd.variants` guard is
             # required: a command stripped to a single output by an overlay has

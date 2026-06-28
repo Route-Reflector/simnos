@@ -1,5 +1,6 @@
 command: screen-length 0 temporary
 type: simnos
+disables_paging: true
 help: Execute the command screen-length 0 temporary. This automatically generated.
 mode:
 - user

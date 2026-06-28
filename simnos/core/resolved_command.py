@@ -262,6 +262,12 @@ class ResolvedCommand:
     type: str
     source: dict | None = None
     canonical_name: str = ""
+    # `disables_paging` marks a session-level "turn paging off" command (e.g.
+    # `terminal length 0`, #307 / P3-4). The shell sets a sticky session flag when
+    # such a command runs in-mode; the push driver then renders without the
+    # `--More--` pager. An A3 alias built via ``dataclasses.replace(target, ...)``
+    # inherits the target's value for free (alias authoring rows cannot set it).
+    disables_paging: bool = False
 
     def __post_init__(self) -> None:
         # Backfill canonical_name to the command's own name when unset (empty
@@ -307,3 +313,9 @@ class ResolvedPlatform:
     initial_mode: str
     commands: dict[str, ResolvedCommand]
     auth: str | None = None
+    # The platform's ``--More--`` pager prompt (#307 / P3-4), authored in
+    # ``platform.yaml`` under ``paging.more_prompt`` (Cisco ``" --More-- "`` /
+    # Juniper ``"---(more)---"`` / Huawei ``"---- More ----"``). The shell exposes
+    # it to the push driver; the default mirrors Cisco IOS. The legacy adapter
+    # leaves the default (legacy NOS have no A3 ``platform.yaml``).
+    more_prompt: str = " --More-- "

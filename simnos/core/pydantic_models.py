@@ -169,6 +169,12 @@ class ModelCommandAuthoring(BaseModel):
     variants: list[ModelCommandVariant] | None = None
     exit: StrictBool | None = None
     alias: StrictStr | None = None
+    # Session-level "disable paging" flag (#307 / P3-4). Set on the real command
+    # whose output stubs paging off (e.g. `terminal length 0`); the shell flips a
+    # sticky session flag when it runs in-mode and the push driver then skips the
+    # `--More--` pager. Forbidden on an alias (it inherits the target's value via
+    # the loader's `replace`, see `_check_combination`).
+    disables_paging: StrictBool | None = None
 
     @field_validator("output", "output_template")
     @classmethod
@@ -214,6 +220,7 @@ class ModelCommandAuthoring(BaseModel):
                 "output_template": self.output_template,
                 "variants": self.variants,
                 "exit": self.exit,
+                "disables_paging": self.disables_paging,
             }
             present = sorted(k for k, v in forbidden.items() if v is not None)
             if present:
@@ -264,13 +271,28 @@ class ModelModeDef(BaseModel):
     prompt: StrictStr
 
 
+class ModelPlatformPaging(BaseModel):
+    """A3 per-platform paging settings (`platform.yaml` `paging:`, #307 / P3-4).
+
+    Only the `--More--` prompt string is per-platform (Cisco ``" --More-- "`` /
+    Juniper ``"---(more)---"`` / Huawei ``"---- More ----"``). The page height
+    source (pty/NAWS rows, falling back to `sys_config.paging.default_rows`) is an
+    environment concern, not a platform one, so it lives in `ModelPaging` instead.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    more_prompt: StrictStr = " --More-- "
+
+
 class ModelPlatformMeta(BaseModel):
     """A3 per-platform metadata schema (`platform.yaml`, #264 / D2).
 
     Modes are declared centrally (name -> prompt template); commands reference
     mode names only (M2). No `name` field — the platform name is the directory
     name (D1). `netmiko_device_type` / `ntc_platform` are data placeholders the
-    consumer side wires up in #266.
+    consumer side wires up in #266. `paging` is the optional P3-4 pager settings
+    (#307); omitted = the Cisco-style default `--More--` prompt.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -280,6 +302,7 @@ class ModelPlatformMeta(BaseModel):
     auth: StrictStr | None = None
     netmiko_device_type: StrictStr | None = None
     ntc_platform: StrictStr | None = None
+    paging: ModelPlatformPaging | None = None
 
     @model_validator(mode="after")
     def _check_modes(self) -> "ModelPlatformMeta":
@@ -525,6 +548,22 @@ class ModelSimnosInventory(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ModelPaging(BaseModel):
+    """Environment-wide paging settings (`sys_config.yaml` `paging:`, #307 / P3-4).
+
+    `default_rows` is the page height the push driver falls back to when a client
+    requests a pty (SSH) / negotiates NAWS (Telnet) but reports no usable row
+    count. `gt=0` makes a 0/negative value loud rather than silently breaking the
+    pager (a 0-row page would loop forever / draw nothing). Always materialized
+    (default_factory) so `sys_config["paging"]["default_rows"]` is present even
+    when the file omits `paging:` entirely.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    default_rows: int = Field(default=24, gt=0)
+
+
 class ModelSysConfig(BaseModel):
     """SimNOS environment config schema (`sys_config.yaml`, #266 / D4, Decision 6).
 
@@ -545,3 +584,4 @@ class ModelSysConfig(BaseModel):
 
     data_dir: StrictStr | None = None
     variants_policy: ModelVariantsPolicy | None = None
+    paging: ModelPaging = Field(default_factory=ModelPaging)

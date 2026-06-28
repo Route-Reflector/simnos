@@ -25,7 +25,7 @@ from collections.abc import Awaitable, Callable
 import logging
 from typing import TYPE_CHECKING, Protocol
 
-from simnos.plugins.servers.tap_bridge import _render_intro, _render_response
+from simnos.plugins.servers.tap_bridge import _assemble_wire, _render_intro, _render_response
 
 if TYPE_CHECKING:
     from simnos.plugins.servers.tap_bridge import PushShell
@@ -68,6 +68,16 @@ class AsyncPushTransport(Protocol):
 
     async def drain(self) -> None:
         """Wait until queued writes have drained below the transport's limit."""
+        ...
+
+    def page_rows(self) -> int | None:
+        """Page height for the `--More--` pager, or None to disable paging (#307).
+
+        ``None`` means the gate is off (no pty on SSH / NAWS not negotiated on
+        Telnet) and the driver never pages. A positive int is the client's
+        reported row count; a 0/negative pty height is left for the driver's
+        ``_resolve_rows`` to fall back to the configured default.
+        """
         ...
 
 
@@ -289,6 +299,99 @@ def _complete(editor: _LineEditor, shell: "PushShell", transport: AsyncPushTrans
         transport.send(b"\x07")  # bell — no match
 
 
+# --------------------------------------------------------------------- paging (#307)
+def _resolve_rows(raw: int | None, default_rows: int) -> int | None:
+    """Resolve the effective page height from the transport's reported rows (#307).
+
+    ``None`` (no pty / NAWS not negotiated) keeps paging off; a non-positive count
+    (pty present but height unknown) falls back to ``default_rows``; a positive
+    count is used as-is.
+    """
+    if raw is None:
+        return None
+    return raw if raw > 0 else default_rows
+
+
+async def _emit_paged(
+    transport: AsyncPushTransport,
+    shell: "PushShell",
+    result: "DispatchResult",
+    body_lines: list[str],
+    rows: int,
+    read_byte: "Callable[[], Awaitable[bytes | None]]",
+    skip_lf: bool,
+) -> bool:
+    """Render an over-long response through the ``--More--`` pager (#307 / P3-4).
+
+    Called ONLY when the body genuinely exceeds ``rows`` — the line-count gate in
+    the driver keeps every shorter response (incl. a pty scraper's tall pages) on
+    the byte-identical ``_render_response`` path, so this never touches the
+    byte-parity contract. Returns the carried ``skip_lf`` so the main loop can
+    consume the LF/NUL half of a final pager Enter (no phantom blank-line dispatch).
+
+    Wire contract (pinned by ``tests/plugins/test_ssh_paging.py``):
+
+    - First page: held ``\\r\\n`` echo + the first ``rows`` body lines (each
+      assembled exactly like ``_render_response`` via ``_assemble_wire``) +
+      ``more_prompt`` (no trailing newline), as one write.
+    - ``Space`` → erase ``more_prompt`` + next ``rows`` lines + remainder marker;
+      ``Enter`` (CR/LF) → erase + next 1 line + remainder marker. The marker is
+      ``more_prompt`` while lines remain, else ``result.prompt`` (the completing
+      write also ends the pager).
+    - ``q``/``Q`` → erase ``more_prompt`` + ``result.prompt``, discarding the rest.
+    - EOF (``read_byte`` returns None = client gone mid-pager) → discard, return
+      WITHOUT a prompt (the peer is already gone).
+    - Continuation keys are never echoed; any other key is ignored (no bell).
+
+    The ``more_prompt`` erase is ``\\b``*N + ``" "``*N + ``\\b``*N with
+    N = ``len(more_prompt)``, assuming a single-line ASCII prompt (true for the
+    Cisco-style default; CJK display widths are a terminal-width follow-up).
+    """
+    more = shell.more_prompt.encode("utf-8")
+    n = len(shell.more_prompt)
+    erase = b"\b" * n + b" " * n + b"\b" * n
+    total = len(body_lines)
+    nul_resets = transport.nul_resets_skip_lf
+    prompt_bytes = _assemble_wire([result.prompt])
+
+    def _wire(start: int, count: int) -> bytes:
+        return _assemble_wire([line + shell.newline for line in body_lines[start : start + count]])
+
+    # First page: held newline echo + first `rows` lines + the pager prompt. The
+    # gate guarantees total > rows, so a marker is always due here.
+    transport.send(_assemble_wire(["\r\n"]) + _wire(0, rows) + more)
+    sent = rows
+
+    while sent < total:
+        byte = await read_byte()
+        if byte is None:
+            return skip_lf  # client gone mid-pager: discard the rest, send no prompt
+        # Consume the LF (or Telnet NUL) half of a preceding CR — the launching
+        # command's CR-LF on entry, or a prior pager Enter's — read from the SAME
+        # stream so a cross-chunk split cannot mistake it for a fresh pager key.
+        if skip_lf and (byte == b"\n" or (nul_resets and byte == b"\x00")):
+            skip_lf = False
+            byte = await read_byte()
+            if byte is None:
+                return False
+        skip_lf = False
+        if byte == b" ":
+            count = min(rows, total - sent)
+        elif byte in (b"\r", b"\n"):
+            skip_lf = byte == b"\r"
+            count = 1
+        elif byte in (b"q", b"Q"):
+            transport.send(erase + prompt_bytes)
+            return skip_lf
+        else:
+            continue  # ignore any other key (no echo, no bell, no advance)
+        body = _wire(sent, count)
+        sent += count
+        trailing = more if sent < total else prompt_bytes
+        transport.send(erase + body + trailing)
+    return skip_lf
+
+
 async def run_async_push_session(
     transport: AsyncPushTransport,
     shell: "PushShell",
@@ -337,83 +440,115 @@ async def run_async_push_session(
     editor = _LineEditor(transport.send)
     esc = bytearray()  # accumulates an in-flight escape sequence (editing only)
     skip_lf = initial_skip_lf
-    while True:
-        try:
-            data = await transport.recv(_READ_CHUNK)
-        except transport.io_errors:
-            log.debug("async_session [%s] read closed", transport.name)
-            return
-        if not data:
-            return  # EOF / peer gone
 
-        for i in range(len(data)):
-            byte = data[i : i + 1]
+    # Single input source (#307). The main loop AND the `--More--` pager both pull
+    # bytes from `read_byte`, so a pager key pipelined into the same recv chunk is
+    # never lost nor double-processed (the for-range loop this replaced could not
+    # share its un-consumed chunk tail with `_emit_paged`). A recv-side disconnect
+    # is caught here and surfaced as a clean read-closed (None); a write-side
+    # io_errors still raises out of the per-byte `try` below ("client write
+    # error") — the two-layer recv/write split the old two handlers kept.
+    buf = b""
+    buf_pos = 0
+
+    async def read_byte() -> bytes | None:
+        nonlocal buf, buf_pos
+        if buf_pos >= len(buf):
             try:
-                # Interactive escape sequence (cursor / history / delete). A scraper
-                # sends no ESC, so editing=False (and a non-editing session) never
-                # enters here and the byte falls through to the unchanged machine.
-                if editing and byte == b"\x1b":
-                    esc = bytearray(b"\x1b")  # (re)start; abandon any partial sequence
-                    continue
-                if esc:
-                    if len(esc) == 1 and byte not in (b"[", b"O"):
-                        # The byte right after ESC must be '[' or 'O' to begin a
-                        # CSI/SS3 sequence. Anything else means the ESC was lone (a
-                        # stray ESC, or an unhandled meta-key like Alt+key): drop the
-                        # ESC and reprocess this byte on the normal path below, so a
-                        # lone ESC neither swallows the following character (claude
-                        # 2nd#4) nor the following Enter/Backspace.
-                        esc.clear()
-                    elif b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
-                        esc += byte
-                        action = _parse_escape(bytes(esc))
-                        if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
-                            continue  # still collecting
-                        esc.clear()
-                        if action not in ("incomplete", "discard"):
-                            editor.apply_action(action)
-                        continue  # escape consumed (applied / discarded / maxlen-dropped)
-                    else:
-                        # A control byte mid-CSI cannot continue the escape: abandon
-                        # the malformed sequence and reprocess this byte on the normal
-                        # path below instead of swallowing it until the escape buffer
-                        # fills (gemini 1st#1 / claude 1st#2).
-                        esc.clear()
+                buf = await transport.recv(_READ_CHUNK)
+            except transport.io_errors:
+                log.debug("async_session [%s] read closed", transport.name)
+                return None
+            buf_pos = 0
+            if not buf:
+                return None  # EOF / peer gone
+        b = buf[buf_pos : buf_pos + 1]
+        buf_pos += 1
+        return b
 
-                # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
-                # is a complete sequence, so reset skip_lf; SSH preserves it.
-                if byte == b"\x00":
-                    if transport.nul_resets_skip_lf:
-                        skip_lf = False
-                    continue
-
-                # Consume the LF half of a CR LF pair.
-                if skip_lf:
-                    skip_lf = False
-                    if byte == b"\n":
-                        continue
-
-                if byte in (b"\r", b"\n"):
-                    skip_lf = byte == b"\r"
-                    # errors="replace" keeps malformed UTF-8 from crashing the
-                    # session (gemini#2).
-                    line = editor.take_line().decode("utf-8", errors="replace")
-                    result = await dispatch(line)
-                    transport.send(_render_response(shell, result))
-                    await transport.drain()
-                    if result.close:
-                        return
-                elif editing and byte in (b"\x08", b"\x7f"):
-                    editor.backspace()
-                elif editing and byte == b"\t":
-                    _complete(editor, shell, transport)
+    while True:
+        byte = await read_byte()
+        if byte is None:
+            return  # EOF / read closed (recv error already logged in read_byte)
+        try:
+            # Interactive escape sequence (cursor / history / delete). A scraper
+            # sends no ESC, so editing=False (and a non-editing session) never
+            # enters here and the byte falls through to the unchanged machine.
+            if editing and byte == b"\x1b":
+                esc = bytearray(b"\x1b")  # (re)start; abandon any partial sequence
+                continue
+            if esc:
+                if len(esc) == 1 and byte not in (b"[", b"O"):
+                    # The byte right after ESC must be '[' or 'O' to begin a
+                    # CSI/SS3 sequence. Anything else means the ESC was lone (a
+                    # stray ESC, or an unhandled meta-key like Alt+key): drop the
+                    # ESC and reprocess this byte on the normal path below, so a
+                    # lone ESC neither swallows the following character (claude
+                    # 2nd#4) nor the following Enter/Backspace.
+                    esc.clear()
+                elif b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
+                    esc += byte
+                    action = _parse_escape(bytes(esc))
+                    if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
+                        continue  # still collecting
+                    esc.clear()
+                    if action not in ("incomplete", "discard"):
+                        editor.apply_action(action)
+                    continue  # escape consumed (applied / discarded / maxlen-dropped)
                 else:
-                    # Regular character: immediate raw echo at the line end
-                    # (interactive latency + byte-parity unchanged).
-                    editor.insert(byte)
-            except transport.io_errors as e:
-                log.error("async_session [%s] client write error: %s", transport.name, e)
-                return
+                    # A control byte mid-CSI cannot continue the escape: abandon
+                    # the malformed sequence and reprocess this byte on the normal
+                    # path below instead of swallowing it until the escape buffer
+                    # fills (gemini 1st#1 / claude 1st#2).
+                    esc.clear()
+
+            # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
+            # is a complete sequence, so reset skip_lf; SSH preserves it.
+            if byte == b"\x00":
+                if transport.nul_resets_skip_lf:
+                    skip_lf = False
+                continue
+
+            # Consume the LF half of a CR LF pair.
+            if skip_lf:
+                skip_lf = False
+                if byte == b"\n":
+                    continue
+
+            if byte in (b"\r", b"\n"):
+                skip_lf = byte == b"\r"
+                # errors="replace" keeps malformed UTF-8 from crashing the
+                # session (gemini#2).
+                line = editor.take_line().decode("utf-8", errors="replace")
+                result = await dispatch(line)
+                # Line-count gate (#307 / P3-4, keystone): paging is off (no pty /
+                # NAWS, or a `disables_paging` command ran), a close / no-body
+                # result, or a body that fits → the byte-identical `_render_response`
+                # path. Only a body that genuinely overflows `rows` is paged, so the
+                # byte-parity goldens never reach `_emit_paged`.
+                rows = None if shell.paging_disabled else _resolve_rows(transport.page_rows(), shell.page_default_rows)
+                body_lines = str(result.body).splitlines() if result.body is not None else []
+                if rows is None or result.close or result.body is None or len(body_lines) <= rows:
+                    transport.send(_render_response(shell, result))
+                else:
+                    # `_emit_paged` carries skip_lf in/out so the LF/NUL half of a
+                    # final pager Enter is consumed by the main loop, not dispatched
+                    # as a phantom blank line.
+                    skip_lf = await _emit_paged(transport, shell, result, body_lines, rows, read_byte, skip_lf)
+                await transport.drain()
+                if result.close:
+                    return
+            elif editing and byte in (b"\x08", b"\x7f"):
+                editor.backspace()
+            elif editing and byte == b"\t":
+                _complete(editor, shell, transport)
+            else:
+                # Regular character: immediate raw echo at the line end
+                # (interactive latency + byte-parity unchanged).
+                editor.insert(byte)
+        except transport.io_errors as e:
+            log.error("async_session [%s] client write error: %s", transport.name, e)
+            return
 
 
 async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf: bool) -> tuple[str, bool]:

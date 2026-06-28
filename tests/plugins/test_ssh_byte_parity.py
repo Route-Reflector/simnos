@@ -145,7 +145,12 @@ def test_byte_parity_interactive_session(cisco_ios_port):
         # step 0: the shell intro + first prompt (no input sent yet)
         steps.append((b"", _drain(channel)))
         # A scripted sequence exercising the wire machinery deterministically.
+        # A real scraper disables paging first (netmiko sends `terminal length 0`);
+        # the paramiko client here requests an 80x24 pty, so without this `show vlan`
+        # (30 lines) would page at `--More--`. Disabling paging up front reproduces
+        # the pre-paging wire byte-for-byte for every following step (#307 / P3-4).
         script = [
+            b"terminal length 0\r",  # disable paging (sticky) — faithful scraper behaviour
             b"show vlan\r",  # valid command, static table + prompt
             b"enable\r",  # mode user -> enable (prompt changes)
             b"\r",  # empty line: bare newline echo + prompt
@@ -184,6 +189,12 @@ def test_ssh_push_concurrent_connections(cisco_ios_port):
         transport, channel = _open_shell_channel(cisco_ios_port)
         try:
             assert b"device>" in _drain(channel)  # intro + user prompt
+            # Disable paging up front: this test uses an 80x24 pty and asserts the
+            # response ends with the prompt, which `--More--` paging would break.
+            # It is assertion-based (outside the golden), so it needs the explicit
+            # disable a real scraper sends (#307 / P3-4, claude#2).
+            channel.sendall(b"terminal length 0\r")
+            _drain(channel)
             channel.sendall(b"enable\r")
             assert b"device#" in _drain(channel)  # mode transition
             channel.sendall(b"show vlan\r")

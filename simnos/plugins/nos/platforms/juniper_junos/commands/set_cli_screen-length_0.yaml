@@ -1,5 +1,6 @@
 command: set cli screen-length 0
 type: simnos
+disables_paging: true
 help: Execute the command set cli screen-length 0. This automatically generated.
 mode:
 - user

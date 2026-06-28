@@ -8295,7 +8295,7 @@
   },
   "terminal length 0": {
     "exit": false,
-    "help": "Execute the command terminal length 0. This automatically generated.",
+    "help": "Set terminal length to 0",
     "modes": [
       "enable",
       "user"
@@ -8306,7 +8306,7 @@
   },
   "terminal width 511": {
     "exit": false,
-    "help": "Execute the command terminal width 511. This automatically generated.",
+    "help": "Set terminal width to 511",
     "modes": [
       "enable",
       "user"
