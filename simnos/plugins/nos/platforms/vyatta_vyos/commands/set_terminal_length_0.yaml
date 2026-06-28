@@ -1,5 +1,6 @@
 command: set terminal length 0
 type: simnos
+disables_paging: true
 help: set the terminal to max width
 mode:
 - user

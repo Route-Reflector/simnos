@@ -631,9 +631,20 @@ class TestSysConfig:
     """
 
     def test_default_is_empty_resolved(self):
-        """No sys_config anywhere → resolved defaults (both fields None)."""
+        """No sys_config anywhere → resolved defaults (data_dir/variants_policy None,
+        paging materialized with default_rows=24, #307 / P3-4)."""
         net = SimNOS()
-        assert net.sys_config == {"data_dir": None, "variants_policy": None}
+        assert net.sys_config == {"data_dir": None, "variants_policy": None, "paging": {"default_rows": 24}}
+
+    def test_paging_default_rows_override(self):
+        """`paging.default_rows` is read from sys_config and validated (gt=0, #307)."""
+        net = SimNOS(sys_config={"paging": {"default_rows": 40}})
+        assert net.sys_config["paging"]["default_rows"] == 40
+
+    def test_paging_default_rows_rejects_non_positive(self):
+        """A 0/negative default_rows is loud — a 0-row page would break the pager (#307)."""
+        with pytest.raises(ValueError, match="greater than 0"):
+            SimNOS(sys_config={"paging": {"default_rows": 0}})
 
     def test_dict_arg_used_as_is(self):
         """A dict arg is validated and stored verbatim."""

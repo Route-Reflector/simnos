@@ -72,6 +72,19 @@ class AsyncSSHProcessTransport:
     async def drain(self) -> None:
         await self._process.stdout.drain()
 
+    def page_rows(self) -> int | None:
+        """Pty height for paging, or None when the client requested no pty (#307).
+
+        No pty (``get_terminal_type()`` is None) → None → the gate is off and the
+        driver never pages (exec-style / non-interactive clients). With a pty the
+        reported height is returned as-is; a 0/unknown height is left for the
+        driver's ``_resolve_rows`` to fall back to ``page_default_rows``.
+        """
+        if self._process.get_terminal_type() is None:
+            return None
+        # get_terminal_size() -> (width, height, pixwidth, pixheight).
+        return self._process.get_terminal_size()[1]
+
 
 class _SimnosSSHServer(asyncssh.SSHServer):
     """Connection-level SSH auth (§2).
@@ -195,6 +208,7 @@ class AsyncSshServer(AsyncServerBase):
         authorized_keys: str | None = None,
         render_config: "HostRenderConfig | None" = None,
         simnos: "SimNOS | None" = None,
+        page_default_rows: int = 24,
     ) -> None:
         super().__init__(
             shell,
@@ -209,6 +223,7 @@ class AsyncSshServer(AsyncServerBase):
             watchdog_interval=watchdog_interval,
             render_config=render_config,
             simnos=simnos,
+            page_default_rows=page_default_rows,
         )
         self.ssh_banner: str = ssh_banner
         self._authorized_keys = self._load_authorized_keys(authorized_keys)

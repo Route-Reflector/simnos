@@ -61,7 +61,12 @@ def load_platform_dir(path: str) -> ResolvedPlatform:
     commands_dir = os.path.join(path, COMMANDS_SUBDIR)
     authored = _load_command_files(commands_dir)
     commands = _resolve_commands(authored, modes, commands_dir)
-    return ResolvedPlatform(modes=modes, initial_mode=meta.initial_mode, commands=commands, auth=meta.auth)
+    # Pass `more_prompt` only when the platform authored one, so the single source
+    # of the Cisco-style default ``" --More-- "`` stays on `ResolvedPlatform` (#307).
+    paging_kwargs = {"more_prompt": meta.paging.more_prompt} if meta.paging else {}
+    return ResolvedPlatform(
+        modes=modes, initial_mode=meta.initial_mode, commands=commands, auth=meta.auth, **paging_kwargs
+    )
 
 
 def _read_yaml_mapping(filepath: str) -> dict:
@@ -229,6 +234,7 @@ def _resolve_command(
         # `type` is required for a real (non-alias) command (schema-enforced).
         type=model.type or "simnos",
         source=model.source,
+        disables_paging=bool(model.disables_paging),
     )
 
 

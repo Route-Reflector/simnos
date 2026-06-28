@@ -1,5 +1,6 @@
 command: no page
 type: simnos
+disables_paging: true
 help: Disable pagination
 mode:
 - user

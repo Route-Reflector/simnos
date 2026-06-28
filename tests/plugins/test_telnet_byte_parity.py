@@ -85,6 +85,12 @@ def test_telnet_byte_parity_interactive_session():
     transitions, unknown command, exit."""
     with _running_telnet_host("cisco_ios") as port:
         script = [
+            # The telnetlib3 test client negotiates NAWS (window size), so page_rows()
+            # is set and `show vlan` (30 lines) would page at `--More--`. A real
+            # scraper disables paging first; doing so here reproduces the pre-paging
+            # wire byte-for-byte for every following step (#307 / P3-4, claude#4 —
+            # telnet was NOT assumed safe, it was measured to negotiate NAWS).
+            b"terminal length 0\r",  # disable paging (sticky) — faithful scraper behaviour
             b"show vlan\r",  # valid command, static table + prompt
             b"enable\r",  # mode user -> enable (prompt changes)
             b"\r",  # empty line: bare newline echo + prompt

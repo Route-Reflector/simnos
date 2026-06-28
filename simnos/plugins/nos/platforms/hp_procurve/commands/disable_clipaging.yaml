@@ -1,5 +1,6 @@
 command: disable clipaging
 type: simnos
+disables_paging: true
 help: Execute the command disable clipaging. This automatically generated.
 mode:
 - user

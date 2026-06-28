@@ -426,8 +426,6 @@ stub_help:
   - show vrrp brief
   - show vtp status
   - show wireless tag policy summary
-  - terminal length 0
-  - terminal width 511
   - terminal width 512
   - traceroute
   cisco_nxos:

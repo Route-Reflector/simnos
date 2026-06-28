@@ -108,6 +108,18 @@ class TestModelCommandAuthoring:
         with pytest.raises(ValidationError, match="pure reference"):
             ModelCommandAuthoring(command="x", alias="y", type="ntc")
 
+    def test_accepts_disables_paging_on_real_command(self):
+        # #307 / P3-4: a session-disable command flags itself; the loader carries
+        # it to ResolvedCommand and the shell flips a sticky session flag.
+        model = ModelCommandAuthoring(command="terminal length 0", type="simnos", disables_paging=True)
+        assert model.disables_paging is True
+
+    def test_rejects_alias_with_disables_paging(self):
+        # An alias is a pure reference and inherits the target's disables_paging via
+        # the loader's `replace`; authoring it on the alias row is rejected (#307).
+        with pytest.raises(ValidationError, match="pure reference"):
+            ModelCommandAuthoring(command="term len 0", alias="terminal length 0", disables_paging=True)
+
     def test_rejects_default_with_mode(self):
         with pytest.raises(ValidationError, match="mode-agnostic"):
             ModelCommandAuthoring(command="_default_", type="simnos", mode=["user"])
@@ -168,6 +180,28 @@ class TestModelPlatformMeta:
     def test_rejects_initial_mode_not_in_modes(self):
         with pytest.raises(ValidationError, match="initial_mode"):
             ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="enable")  # ty: ignore[invalid-argument-type]
+
+    def test_paging_more_prompt_default_and_override(self):
+        """`paging.more_prompt` is optional (Cisco-style default) and overridable (#307)."""
+        modes = {"user": {"prompt": ">"}}
+        default = ModelPlatformMeta(modes=modes, initial_mode="user")  # ty: ignore[invalid-argument-type]
+        assert default.paging is None  # omitted -> ResolvedPlatform applies the default
+        juniper = ModelPlatformMeta(modes=modes, initial_mode="user", paging={"more_prompt": "---(more)---"})  # ty: ignore[invalid-argument-type]
+        assert juniper.paging is not None and juniper.paging.more_prompt == "---(more)---"
+
+    @pytest.mark.parametrize(
+        ("bad", "match"),
+        [
+            ("", "must not be empty"),
+            ("もっと", "must be ASCII"),  # wide glyphs break the \b-based erase width
+            ("a\nb", "single line"),
+        ],
+    )
+    def test_paging_more_prompt_rejects_non_ascii_single_line(self, bad, match):
+        """`more_prompt` must be a non-empty single-line ASCII string so the pager's
+        `\\b`*N erase matches the displayed width (#307 / P3-4, codex#3)."""
+        with pytest.raises(ValidationError, match=match):
+            ModelPlatformMeta(modes={"user": {"prompt": ">"}}, initial_mode="user", paging={"more_prompt": bad})  # ty: ignore[invalid-argument-type]
 
 
 class TestCMDShellConfig:

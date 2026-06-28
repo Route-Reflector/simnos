@@ -1,5 +1,6 @@
 command: //environment more false
 type: simnos
+disables_paging: true
 help: Execute the command //environment more false. This automatically generated.
 mode:
 - user

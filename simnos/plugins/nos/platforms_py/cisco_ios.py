@@ -57,14 +57,10 @@ commands = {
         "help": "Output to print for unknown commands",
         "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
     },
-    "terminal width 511": {
-        "output": "",
-        "help": "Set terminal width to 511",
-        "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
-    },
-    "terminal length 0": {
-        "output": "",
-        "help": "Set terminal length to 0",
-        "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
-    },
+    # `terminal width 511` / `terminal length 0` are served by the A3 commands
+    # (commands/terminal_width_511.yaml / terminal_length_0.yaml), byte-identical
+    # to these empty-output stubs. They were dropped from this py module so the A3
+    # `terminal length 0` (carrying `disables_paging: true`, #307 / P3-4) is no
+    # longer shadowed by the py inflow (which overrides A3 in build_resolved_platform
+    # and cannot carry the flag — py-plugin paging is out of scope).
 }

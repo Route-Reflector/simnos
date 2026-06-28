@@ -91,6 +91,18 @@ class TelnetPushTransport:
     async def drain(self) -> None:
         await self._writer.drain()
 
+    def page_rows(self) -> int | None:
+        """NAWS-negotiated rows for paging, or None when NAWS was not negotiated (#307).
+
+        telnetlib3 reports ``rows`` as ``0`` (or None) until the client sends a
+        NAWS (window-size) negotiation, so a falsy value is normalized to None =
+        the gate is off and the driver never pages. Without this a non-negotiated
+        ``0`` would reach ``_resolve_rows`` and (via ``raw <= 0``) wrongly fall
+        back to ``page_default_rows``, firing the pager on a plain telnet client.
+        """
+        rows = self._writer.get_extra_info("rows")
+        return rows or None
+
 
 class TelnetServer(AsyncServerBase):
     """Telnet server plugin (telnetlib3) on the SimNOS-owned shared loop (§1 / §2).
@@ -116,6 +128,7 @@ class TelnetServer(AsyncServerBase):
         watchdog_interval: float = 1,
         render_config: "HostRenderConfig | None" = None,
         simnos: "SimNOS | None" = None,
+        page_default_rows: int = 24,
     ) -> None:
         super().__init__(
             shell,
@@ -130,6 +143,7 @@ class TelnetServer(AsyncServerBase):
             watchdog_interval=watchdog_interval,
             render_config=render_config,
             simnos=simnos,
+            page_default_rows=page_default_rows,
         )
         self.banner: str = banner
         if not _is_loopback(address):

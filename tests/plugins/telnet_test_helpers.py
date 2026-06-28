@@ -98,12 +98,19 @@ async def open_and_login(
     return reader, writer
 
 
-async def telnet_login_run(port: int, command: bytes, *, marker: bytes) -> bytes:
+async def telnet_login_run(
+    port: int, command: bytes, *, marker: bytes, disable_paging: bytes | None = b"terminal length 0\r"
+) -> bytes:
     """Log in and run one *command*, returning the response; assert-friendly helper.
 
     Used by the mixed-transport lifecycle test to confirm a Telnet host actually
     serves (not just that it starts/stops). Reads until *marker* (the expected
     prompt) appears or the wire idles.
+
+    telnetlib3 negotiates NAWS, so the server can page a long response at
+    ``--More--`` (#307 / P3-4); a real scraper disables paging first, so this helper
+    sends ``disable_paging`` (default ``terminal length 0``) after login. Pass
+    ``None`` to skip it (e.g. a platform without that command).
     """
     reader, writer = await telnetlib3.open_connection(_HOST, port, encoding=False, connect_minwait=_CONNECT_MINWAIT)
     try:
@@ -114,6 +121,10 @@ async def telnet_login_run(port: int, command: bytes, *, marker: bytes) -> bytes
         writer.write(TEST_PASSWORD.encode() + b"\r")
         await writer.drain()
         await _read_idle(reader)  # intro + prompt
+        if disable_paging is not None:
+            writer.write(disable_paging)
+            await writer.drain()
+            await _read_idle(reader)  # disable echo + prompt (paging now off, sticky)
         writer.write(command)
         await writer.drain()
         out = bytearray()

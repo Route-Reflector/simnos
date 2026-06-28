@@ -48,6 +48,13 @@ class PushShell(Protocol):
     intro: str | None
     prompt: str
     newline: str
+    # Paging surface the push driver reads to decide / render the `--More--` pager
+    # (#307 / P3-4): `paging_disabled` (sticky, a `disables_paging` command flips
+    # it), `more_prompt` (the platform's pager string), `page_default_rows` (the
+    # fallback page height from sys_config when the client reports no usable rows).
+    paging_disabled: bool
+    more_prompt: str
+    page_default_rows: int
 
     def dispatch(self, line: str) -> "DispatchResult": ...
 

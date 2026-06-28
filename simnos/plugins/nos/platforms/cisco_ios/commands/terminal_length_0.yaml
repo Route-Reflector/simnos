@@ -1,6 +1,7 @@
 command: terminal length 0
 type: simnos
-help: Execute the command terminal length 0. This automatically generated.
+disables_paging: true
+help: Set terminal length to 0
 mode:
 - user
 - enable

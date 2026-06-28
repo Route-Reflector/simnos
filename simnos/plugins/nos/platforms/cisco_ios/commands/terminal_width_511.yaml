@@ -1,6 +1,6 @@
 command: terminal width 511
 type: simnos
-help: Execute the command terminal width 511. This automatically generated.
+help: Set terminal width to 511
 mode:
 - user
 - enable

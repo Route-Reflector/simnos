@@ -1,5 +1,6 @@
 command: system shell session set more off
 type: simnos
+disables_paging: true
 help: It enters the machine-to-machine interface mode (mmi-mode)
 mode:
 - user

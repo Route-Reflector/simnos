@@ -8,3 +8,5 @@ modes:
 initial_mode: user
 netmiko_device_type: cisco_ios
 ntc_platform: cisco_ios
+paging:
+  more_prompt: " --More-- "
