@@ -344,8 +344,10 @@ async def _emit_paged(
     - Continuation keys are never echoed; any other key is ignored (no bell).
 
     The ``more_prompt`` erase is ``\\b``*N + ``" "``*N + ``\\b``*N with
-    N = ``len(more_prompt)``, assuming a single-line ASCII prompt (true for the
-    Cisco-style default; CJK display widths are a terminal-width follow-up).
+    N = ``len(more_prompt)``; this is correct because the ``ModelPlatformPaging``
+    schema enforces a single-line ASCII ``more_prompt`` (char count == byte count
+    == display columns). A wide/CJK prompt would need column-width math and is
+    rejected at load instead (a terminal-width follow-up).
     """
     more = shell.more_prompt.encode("utf-8")
     n = len(shell.more_prompt)
