@@ -144,7 +144,8 @@ class SharedLoop:
                     "retry stop() before starting again"
                 )
             self._start_locked()
-            return self._loop  # type: ignore[return-value]  # set by _start_locked
+            assert self._loop is not None  # noqa: S101 — _start_locked sets it (or raised)
+            return self._loop
 
     def _start_locked(self) -> None:
         """Start the loop thread + executor (caller holds the lock)."""
@@ -173,7 +174,7 @@ class SharedLoop:
                     loop.run_until_complete(loop.shutdown_asyncgens())
                     # `timeout` is a real 3.12+ parameter; ty's stdlib stub lags.
                     loop.run_until_complete(
-                        loop.shutdown_default_executor(timeout=SHUTDOWN_IO_TIMEOUT)  # type: ignore[unknown-argument]
+                        loop.shutdown_default_executor(timeout=SHUTDOWN_IO_TIMEOUT)  # ty: ignore[unknown-argument]
                     )
                 except Exception:
                     log.debug("shared loop cleanup error", exc_info=True)
@@ -194,7 +195,7 @@ class SharedLoop:
     # ------------------------------------------------------------------ submit
     def submit_coro(self, coro: Awaitable[_T]) -> "concurrent.futures.Future[_T]":
         """Schedule *coro* on the loop from a sync caller (run_coroutine_threadsafe)."""
-        return asyncio.run_coroutine_threadsafe(coro, self.loop)  # type: ignore[arg-type]
+        return asyncio.run_coroutine_threadsafe(coro, self.loop)  # ty: ignore[invalid-argument-type]
 
     def run_coro(self, coro: Awaitable[_T], timeout: float | None = None) -> _T:
         """Run *coro* on the loop and block for its result (sync facade)."""
@@ -218,7 +219,7 @@ class SharedLoop:
         already removed, and a stuck close must not block stopping other hosts.
         """
         with self._lock:
-            listener = self._listeners.pop(id(listener), None)  # type: ignore[assignment]
+            listener = self._listeners.pop(id(listener), None)  # ty: ignore[invalid-assignment]
         if listener is None:
             return  # already drained
         loop = self._loop

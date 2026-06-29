@@ -425,6 +425,7 @@ class TestSimNOS:
         }
         with SimNOS(inventory=inventory) as net:
             host: Host = next(iter(net.hosts.values()))
+            assert host.nos is not None and host.nos.device is not None  # ty narrowing (host.nos: None | Nos)
             assert host.nos.device.configurations == configurations
 
     def test_inventory_configuration_yaml(self):
@@ -438,6 +439,7 @@ class TestSimNOS:
             configurations = yaml.safe_load(data)
         with SimNOS(inventory="tests/assets/inventory_configuration.yaml") as net:
             host: Host = next(iter(net.hosts.values()))
+            assert host.nos is not None and host.nos.device is not None  # ty narrowing (host.nos: None | Nos)
             assert host.nos.device.configurations == configurations
 
     def test_simnos_start_stop_hosts(self):

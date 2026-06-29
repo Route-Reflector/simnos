@@ -279,7 +279,10 @@ class SimNOS:
                 **copy.deepcopy(self.inventory["default"]),
                 **copy.deepcopy(host_config),
             }
-            port: int | list[int] = params.pop("port")
+            # `params` is built from the raw inventory dict (Any-typed), but the
+            # inventory was validated by `ModelSimnosInventory`, so port is int |
+            # list[int] at runtime — ty cannot see that through the dict (ty 0.0.55).
+            port: int | list[int] = params.pop("port")  # ty: ignore[invalid-assignment]
             replicas: int | None = params.pop("replicas", None)
             self._check_ports_and_replicas(port, replicas)
             self._instantiate_host_object(host_name, port, replicas, params)

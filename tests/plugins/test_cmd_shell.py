@@ -540,7 +540,10 @@ class TestCmdShell(TestCase):
     def test_invoke_handler_dict_return_passthrough(self):
         """`_invoke_handler` passes a CommandResult dict through unchanged."""
         shell = CMDShell(**self.arguments)
-        result = shell._invoke_handler(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")
+        # ty infers the lambda's return as dict[str, str | bool], wider than the
+        # CommandHandler protocol's `str | CommandResult | None`; the literal IS a
+        # valid CommandResult shape, so suppress (test fixture, ty 0.0.55).
+        result = shell._invoke_handler(lambda device, **kwargs: {"output": "x", "exit": True}, "cmd")  # ty: ignore[invalid-argument-type]
         self.assertEqual(result, {"output": "x", "exit": True})
 
     def test_invoke_handler_receives_current_mode(self):

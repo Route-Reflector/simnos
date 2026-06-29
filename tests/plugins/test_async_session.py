@@ -21,7 +21,7 @@ from simnos.plugins.shell.cmd_shell import DispatchResult
 class _FakeShell:
     """PushShell stub: ``dispatch`` echoes the line, ``exit`` closes."""
 
-    intro = "Custom SSH Shell"
+    intro: str | None = "Custom SSH Shell"  # annotated to the invariant PushShell.intro type (ty 0.0.55)
     prompt = "device>"
     newline = "\r\n"
     # Paging surface (#307). Defaults keep the existing tests non-paged: a fake
@@ -52,7 +52,7 @@ class _FakeTransport:
     pin the driver's cross-chunk skip_lf handling (#307, phantom-Enter keystone).
     """
 
-    io_errors = (OSError,)
+    io_errors: tuple[type[BaseException], ...] = (OSError,)  # match invariant AsyncPushTransport.io_errors (ty 0.0.55)
     nul_resets_skip_lf = False
     name = "ssh"
 

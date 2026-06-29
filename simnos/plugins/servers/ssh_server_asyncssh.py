@@ -52,7 +52,10 @@ class AsyncSSHProcessTransport:
     session.
     """
 
-    io_errors = (OSError, EOFError, ConnectionError, asyncssh.Error)
+    # Explicit annotation matches the invariant `AsyncPushTransport.io_errors`
+    # protocol member type (`tuple[type[BaseException], ...]`); without it the
+    # inferred narrow tuple type fails ty's protocol-conformance check (ty 0.0.55).
+    io_errors: tuple[type[BaseException], ...] = (OSError, EOFError, ConnectionError, asyncssh.Error)
     nul_resets_skip_lf = False  # SSH has no CR NUL convention (RFC 854 is Telnet-only)
     name = "ssh"
 
@@ -290,7 +293,7 @@ class AsyncSshServer(AsyncServerBase):
         return self._acceptor  # SSHAcceptor satisfies the Listener protocol
 
     def _close_session(self, session: object) -> None:
-        session.close()  # type: ignore[attr-defined]  # session is an SSHServerProcess
+        session.close()  # ty: ignore[unresolved-attribute]  # session is an SSHServerProcess
 
     # ------------------------------------------------------------------ per-session
     async def _handle_process(self, process: "asyncssh.SSHServerProcess") -> None:
