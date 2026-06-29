@@ -73,8 +73,9 @@ class TelnetPushTransport:
 
     # ConnectionError is a subclass of OSError, so (OSError, EOFError) already
     # covers it; EOFError is listed because telnetlib3's binary reader can raise
-    # it on an abrupt peer close (not an OSError subclass).
-    io_errors = (OSError, EOFError)
+    # it on an abrupt peer close (not an OSError subclass). Explicit annotation
+    # matches the invariant `AsyncPushTransport.io_errors` protocol type (ty 0.0.55).
+    io_errors: tuple[type[BaseException], ...] = (OSError, EOFError)
     nul_resets_skip_lf = True  # RFC 854: CR NUL is a complete sequence
     name = "telnet"
 
@@ -171,7 +172,7 @@ class TelnetServer(AsyncServerBase):
         return self._acceptor
 
     def _close_session(self, session: object) -> None:
-        session.close()  # type: ignore[attr-defined]  # session is a telnetlib3 writer
+        session.close()  # ty: ignore[unresolved-attribute]  # session is a telnetlib3 writer
 
     # ------------------------------------------------------------------ per-session
     async def _handle_client(self, reader: "telnetlib3.TelnetReader", writer: "telnetlib3.TelnetWriter") -> None:
