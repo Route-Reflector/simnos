@@ -19,6 +19,17 @@
     "output": null,
     "variants": []
   },
+  "no page": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "show aaa authentication port-access interface all client-status": {
     "exit": false,
     "help": "execute the command \"show aaa authentication port-access interface all client-status\"",

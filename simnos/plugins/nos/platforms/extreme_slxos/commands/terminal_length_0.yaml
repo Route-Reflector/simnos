@@ -1,0 +1,6 @@
+command: terminal length 0
+type: simnos
+disables_paging: true
+help: disable paging
+mode:
+- user

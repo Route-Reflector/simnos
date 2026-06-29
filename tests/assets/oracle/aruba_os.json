@@ -9,6 +9,17 @@
     "output": null,
     "variants": []
   },
+  "no paging": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "show ap bss-table details": {
     "exit": false,
     "help": "execute the command \"show ap bss-table details\"",

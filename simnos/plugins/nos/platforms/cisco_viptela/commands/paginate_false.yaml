@@ -1,0 +1,7 @@
+command: paginate false
+type: simnos
+disables_paging: true
+help: disable paging
+mode:
+- user
+- enable

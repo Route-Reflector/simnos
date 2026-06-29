@@ -1,7 +1,6 @@
 command: enable clipaging
 type: simnos
-help: enters the mmi mode (machine-machine interface)
+help: enable paging
 mode:
 - user
-new_mode: user
 output: enable_clipaging.txt
