@@ -9,6 +9,17 @@
     ],
     "variants": []
   },
+  "config paging disable": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "enable": {
     "exit": false,
     "help": "enter enable mode",

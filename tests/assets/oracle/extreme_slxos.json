@@ -57,5 +57,15 @@
       "Ve 734                 10.224.8.137         ABC-PUBLIC-LEGACY                             administratively down     down"
     ],
     "variants": []
+  },
+  "terminal length 0": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
   }
 }

@@ -1069,5 +1069,16 @@
       "     Monitoring: Disabled"
     ],
     "variants": []
+  },
+  "skip-page-display": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
   }
 }

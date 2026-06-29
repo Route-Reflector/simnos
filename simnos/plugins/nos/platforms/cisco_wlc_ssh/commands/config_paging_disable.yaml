@@ -1,0 +1,7 @@
+command: config paging disable
+type: simnos
+disables_paging: true
+help: disable paging
+mode:
+- user
+- enable

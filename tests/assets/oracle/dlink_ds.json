@@ -15,6 +15,20 @@
     ],
     "variants": []
   },
+  "disable clipaging": {
+    "exit": false,
+    "help": "disable paging",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": [
+      "Command: disable clipaging",
+      "",
+      "Success."
+    ],
+    "variants": []
+  },
   "enable": {
     "exit": false,
     "help": "enter enable mode",
@@ -27,13 +41,13 @@
   },
   "enable clipaging": {
     "exit": false,
-    "help": "enters the mmi mode (machine-machine interface)",
+    "help": "enable paging",
     "modes": [
       "user"
     ],
-    "new_mode": "user",
+    "new_mode": null,
     "output": [
-      "Command: disable clipaging",
+      "Command: enable clipaging",
       "",
       "Success."
     ],
