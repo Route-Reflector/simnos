@@ -175,6 +175,12 @@ dev = [
     "netmiko",
     "requests",
     "mkdocstrings[crystal,python]",
+    # griffe 2.x split into griffe(umbrella)/griffelib/griffecli. mkdocstrings-python
+    # depends only on `griffelib` yet imports `from griffe import ...`, so the
+    # `griffe` umbrella (which provides the importable `griffe` module) must be
+    # pulled explicitly — without it `mkdocs build` fails with `ImportError: cannot
+    # import name 'Alias' from 'griffe'` (#docs build fix).
+    "griffe>=2.1.0",
     "mkdocs-material",
     "mkdocs-static-i18n",
     "pymdown-extensions",
