@@ -8,6 +8,7 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
+from simnos.plugins.nos import nos_plugins
 from simnos.plugins.shell.utils import (
     get_files_changed,
     get_files_lasttime_changed,
@@ -308,6 +309,22 @@ def test_platform_watch_roots_dual_source():
 def test_platform_watch_roots_unregistered_empty():
     """An unregistered platform (empty sources) yields no watch roots (graceful, #281 / D4)."""
     assert platform_watch_roots([]) == []
+
+
+def test_platform_watch_roots_real_tree_legacy_jinja_coverage():
+    """Smoke: the real huawei_smartax legacy jinja inputs stay covered (#281 / D4, codex#5).
+
+    huawei_smartax is the one shipped platform using the legacy
+    `configurations/<name>.yaml.j2` layout (plus `templates/<name>/`). Driving the
+    real registry entry through `platform_watch_roots` -> `get_files_under_roots`
+    catches a legacy-layout move the synthetic-path tests above would miss, since
+    those build paths rather than walk the tree.
+    """
+    files = set(get_files_under_roots(platform_watch_roots(nos_plugins["huawei_smartax"])))
+    assert any(os.path.basename(f) == "huawei_smartax.yaml.j2" for f in files)  # configurations/<name>.yaml.j2
+    assert any(
+        f.endswith(".j2") and os.path.basename(os.path.dirname(f)) == "huawei_smartax" for f in files
+    )  # templates/huawei_smartax/*.j2
 
 
 def test_get_files_under_roots_mixes_dir_file_and_skips_missing(tmp_path):

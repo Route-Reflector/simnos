@@ -265,7 +265,12 @@ class CMDShell:
         # hot-reload dev mode the shared snapshot is None (`build_shared_platform`
         # returns None), so every connection self-builds from the live shared
         # `nos` — done under the reload lock so a concurrent executor reload does
-        # not mutate `nos` mid-read (#281 / D6, gemini#1).
+        # not mutate `nos` mid-read (#281 / D6, gemini#1). `_build_shell` runs on
+        # the shared event-loop thread, so a new connection contending here with an
+        # in-flight reload briefly blocks the loop until the reload releases the
+        # lock — dev-only (production passes a non-None shared platform, skipping
+        # this branch entirely) and accepted as the cost of the no-mid-mutation
+        # guarantee (#281 / Risks, 1st code review claude#1).
         if resolved_platform is None:
             with self._reload_lock:
                 resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
@@ -532,12 +537,15 @@ class CMDShell:
 
     def precmd(self, line):
         """Method to return line before processing the command"""
-        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
-            # env on => `__init__` seeded the watcher state, so `_package_root` is
-            # non-None here (narrows the `str | None` for `get_files_changed`,
-            # 3rd round gemini#4). The diff runs against this shell's own snapshot
-            # (per-shell, #281 / D1), which is then swapped for the returned one.
-            assert self._package_root is not None  # noqa: S101 — env on guarantees __init__ seeded it
+        # Two-part gate (#281, 1st code review gemini#1/claude#2): the env var
+        # keeps the current "env off mid-session stops reloading" semantics, and
+        # `_package_root is not None` proves `__init__` actually seeded the watcher
+        # (env was on at construction). It also narrows `_package_root` to `str`
+        # for `get_files_changed` without an `assert` — so a late env toggle-on
+        # (no baseline seeded) or `python -O` degrades to a graceful no-op instead
+        # of a `TypeError` deep in `resolve_reload_targets`. The diff runs against
+        # this shell's own snapshot (per-shell, D1), then swaps in the returned one.
+        if os.environ.get("SIMNOS_RELOAD_COMMANDS") and self._package_root is not None:
             reload_targets, self._reload_snapshot = get_files_changed(
                 self._watch_roots, self._package_root, self._reload_snapshot
             )

@@ -15,6 +15,7 @@ tree is never mutated, so no xdist serialization is needed).
 import os
 import threading
 import time
+from unittest.mock import Mock
 
 import pytest
 
@@ -457,13 +458,22 @@ class TestA3HotReload:
 
         Pins the "本番無変更" core claim and guards against the env-gate / shadowing
         regression (2nd round claude#3): with `SIMNOS_RELOAD_COMMANDS` unset the
-        shell holds empty watch roots / snapshot and a None package root.
+        shell holds empty watch roots / snapshot and a None package root, AND the
+        watcher-build helpers are never called — so a future refactor that walks
+        unconditionally (then discards) is caught, not just the resulting state
+        (1st code review codex#4).
         """
         monkeypatch.delenv("SIMNOS_RELOAD_COMMANDS", raising=False)
+        watch_roots_spy = Mock(wraps=cmd_shell_module.platform_watch_roots)
+        under_roots_spy = Mock(wraps=cmd_shell_module.get_files_under_roots)
+        monkeypatch.setattr(cmd_shell_module, "platform_watch_roots", watch_roots_spy)
+        monkeypatch.setattr(cmd_shell_module, "get_files_under_roots", under_roots_spy)
         shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path))))
         assert shell._watch_roots == []
         assert shell._reload_snapshot == {}
         assert shell._package_root is None
+        watch_roots_spy.assert_not_called()  # no walk derivation in production
+        under_roots_spy.assert_not_called()
 
     def test_post_commit_rebuild_failure_rolls_back_resolved_platform(self, tmp_path, caplog):
         """A reload that loads but fails `_rebuild` restores `resolved_platform` (D3).
