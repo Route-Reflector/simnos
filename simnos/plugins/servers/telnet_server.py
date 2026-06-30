@@ -174,8 +174,10 @@ class TelnetServer(AsyncServerBase):
             connect_maxwait=_CONNECT_MAXWAIT,
         )
         # Read back the bound port so port=0 (ephemeral, #271) resolves to the real
-        # OS-assigned port. SIMNOS binds a single address, so `.sockets[0]` is the
-        # one listening socket. A fixed port reads back its own value (no-op).
+        # OS-assigned port. Done here on the loop thread (the create coroutine), so
+        # the start thread never touches the socket. SIMNOS binds a single address,
+        # so `.sockets[0]` is the one listening socket; a fixed port reads back its
+        # own value (no-op). `host.port` picks this up after start (Host.start / D4).
         # telnetlib3 is untyped; `.sockets` is the documented proxy on the
         # telnetlib3.server.Server wrapper (the Listener protocol omits it), so the
         # subscript is suppressed below.
