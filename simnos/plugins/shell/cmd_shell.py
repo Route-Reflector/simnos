@@ -285,7 +285,7 @@ class CMDShell:
             self._watch_roots = platform_watch_roots(nos_plugins.get(self.nos.name, []))
             self._reload_snapshot = get_files_lasttime_changed(get_files_under_roots(self._watch_roots))
             if not self._watch_roots:
-                log.debug("hot-reload: no watch roots for platform %r (registry 未登録?)", self.nos.name)
+                log.debug("hot-reload: no watch roots for platform %r (not in the registry?)", self.nos.name)
 
     @staticmethod
     def build_shared_platform(
