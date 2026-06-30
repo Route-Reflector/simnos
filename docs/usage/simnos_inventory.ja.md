@@ -152,6 +152,11 @@ network = SimNOS(inventory=inventory_data)
     衝突しうる並列テストなどで便利)。`network.start()` の後、実際のポートは
     `network.hosts["router1"].port` から読み戻し、クライアントの接続先に使います。
 
+    `port: 0` のホストと、OS の ephemeral レンジ (通常は高番ポート) 内の *明示*
+    ポートを混在させるのは避けてください。ephemeral ホストがその明示ポートを先に
+    割り当てられ、明示ホストのバインドが失敗しうるためです。明示ポートは ephemeral
+    レンジ外 (例: 6000 番台) にするか、全ホストを ephemeral にしてください。
+
 前と同様に、より多くのホストを作成したい場合は、`hosts` セクションに追加できます:
 
 ``` python

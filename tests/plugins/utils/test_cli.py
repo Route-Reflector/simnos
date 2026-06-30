@@ -154,6 +154,9 @@ class _FakeNet:
         self._stop_exc = stop_exc
         self.started = False
         self.stopped = False
+        # `_cmd_up` iterates `net.hosts` to report each host's real port (#271); an
+        # empty mapping makes that loop a no-op for these dispatch/lifecycle tests.
+        self.hosts = {}
 
     def start(self):
         self.started = True

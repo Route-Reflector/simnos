@@ -75,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Ad-hoc single-host platform (no inventory needed)",
     )
-    up.add_argument("-p", "--port", type=int, default=None, help="Ad-hoc listen port")
+    up.add_argument("-p", "--port", type=int, default=None, help="Ad-hoc listen port (0 = OS-assigned ephemeral, #271)")
     up.add_argument("-n", "--host-name", dest="host_name", type=_non_empty, default=None, help="Ad-hoc host name")
     up.add_argument("-u", "--username", default=None, help="Ad-hoc username (default: builtin)")
     up.add_argument("-w", "--password", default=None, help="Ad-hoc password (default: builtin)")

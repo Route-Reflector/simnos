@@ -155,6 +155,11 @@ network = SimNOS(inventory=inventory_data)
     the real port back from `network.hosts["router1"].port` and point your client at
     it.
 
+    Avoid mixing `port: 0` hosts with an *explicit* port that falls inside the OS
+    ephemeral range (typically high ports): an ephemeral host could be handed that
+    exact port first, making the explicit host fail to bind. Keep explicit ports
+    outside the ephemeral range (e.g. the 6000s) or make every host ephemeral.
+
 As before, in case that you want to create more hosts, you can add them to the `hosts` section:
 
 ``` python
