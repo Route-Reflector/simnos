@@ -16,6 +16,7 @@ sys_config tests in `tests/core/test_simnos.py::TestSysConfig` (core locality).
 import importlib
 import logging
 import os
+import re
 import sys
 
 import pytest
@@ -125,9 +126,9 @@ class TestBuildAdhocInventory:
         assert inv["hosts"]["cisco_ios"]["port"] == 7000
 
     def test_port_zero_not_coerced_to_default(self):
-        # `0` must survive as-is (not `0 or DEFAULT` → 6000) so the inventory
-        # model's Port field (ge=1) rejects it loudly during construction; the
-        # real-construction raise is pinned in TestAdhocLoudValidation (#267 / D2).
+        # `0` must survive as-is (not `0 or DEFAULT` → 6000) so that `-p 0` reaches
+        # the facade as an ephemeral request (OS-assigned port, #271); the
+        # ephemeral start + real-port report is pinned in TestAdhocPortReporting.
         inv = cli._build_adhoc_inventory(self._args(["up", "-d", "cisco_ios", "-p", "0"]))
         assert inv["hosts"]["cisco_ios"]["port"] == 0
 
@@ -290,21 +291,27 @@ class TestCmdUpReloadLifecycle:
         assert self._ENV not in os.environ  # inner finally restores even if stop raises
 
 
-class TestAdhocLoudValidation:
-    """The minimal ad-hoc dict still hits the facade's loud guards (#267 / Risks)."""
+class TestAdhocPortReporting:
+    """`-p 0` starts on an OS-assigned ephemeral port and _cmd_up reports it (#271 / M3)."""
 
-    def test_port_zero_rejected_at_real_construction(self):
-        # `--port 0` survives the builder (not coerced to 6000), then the
-        # inventory model's Port field (ge=1) rejects it during real SimNOS
-        # construction — the loud seam is pydantic, not _allocate_port_single,
-        # but the "never silently default" contract holds (codex#1 1st). Pin the
-        # error to the host's port/ge constraint so an unrelated future schema
-        # break does not pass this test (codex#2 2nd).
-        from pydantic import ValidationError
-
-        with pytest.raises(ValidationError) as exc:
+    @pytest.mark.timeout(30)
+    def test_port_zero_starts_ephemeral_and_reports_real_port(self, caplog, _no_sleep):
+        # `--port 0` is no longer rejected: it is an ephemeral request (#271). _cmd_up
+        # binds a real cisco_ios host on an OS-assigned port and logs it so an
+        # interactive user can find where to connect. `_no_sleep` turns the
+        # `while True` keep-alive into an immediate (suppressed) KeyboardInterrupt, so
+        # the call returns after one cycle and the server is stopped in the finally.
+        # Uses a real SimNOS (not _patch_simnos) so the bind + readback path runs
+        # end to end.
+        with caplog.at_level(logging.INFO):
             cli._cmd_up(cli.build_parser().parse_args(["up", "-d", "cisco_ios", "-p", "0"]))
-        assert any("port" in e["loc"] and e["type"] == "greater_than_equal" for e in exc.value.errors())
+        ports = [
+            int(m.group(1))
+            for record in caplog.records
+            if (m := re.search(r"listening on \S+:(\d+)", record.getMessage()))
+        ]
+        assert ports, "no 'listening on <addr>:<port>' report was logged"
+        assert all(port > 0 for port in ports), f"ephemeral port not resolved: {ports}"
 
 
 class TestListPlatforms:

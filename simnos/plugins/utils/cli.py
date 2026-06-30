@@ -95,10 +95,9 @@ def _build_adhoc_inventory(args) -> dict:
     floor を in-place merge するため、caller-owned object を渡してはいけない。不正な
     ``device_type`` は SimNOS 構築後 ``Host._validate`` → ``_check_if_platform_is_supported``
     → ``assert_platform_supported`` が loud に弾く。``port`` は ``is not None`` で判定
-    して明示 ``0`` を default に化けさせず保持し、inventory model の ``Port`` field
-    (``ge=1``) が ``SimNOS`` 構築時に loud に弾く (codex#1 1st: 拒否 seam は pydantic
-    検証で `_allocate_port_single` ではない、ただし「0 を silent に default 化しない」
-    契約は成立)。
+    して明示 ``-p 0`` を default に化けさせず保持する。``-p 0`` は ephemeral 起動
+    (OS 割当、#271) で、実 port は起動後に ``_cmd_up`` がログ報告する。``-p`` 省略時は
+    ``DEFAULT_PORT_START`` (6000) を使う。
     """
     port = args.port if args.port is not None else DEFAULT_PORT_START
     host = {"device_type": args.device_type, "port": port}
@@ -143,6 +142,13 @@ def _cmd_up(args) -> int:
         net = SimNOS(inventory=inventory, sys_config=args.sys_config)
         log.info("Initiating SimNOS")
         net.start()
+        # Report each host's real listening port. With ephemeral ports (`-p 0` or
+        # the default inventory, #271) the bound port is OS-assigned, so this is how
+        # an interactive user learns where to connect. `host.port` is resolved to the
+        # real port after start (Host.start / D4).
+        for name, host in net.hosts.items():
+            address = host.server_inventory["configuration"].get("address", "127.0.0.1")
+            log.info("host %s listening on %s:%d", name, address, host.port)
         with suppress(KeyboardInterrupt):
             while True:
                 time.sleep(1)

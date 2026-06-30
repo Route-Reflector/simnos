@@ -21,10 +21,11 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.nos import Nos
+from simnos.core.pydantic_models import EPHEMERAL_PORT
 import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
 from tests.assets.synthetic_py_only import PY_ONLY_DEFAULT, PY_ONLY_MARKER
-from tests.utils import creds_from_host, get_free_port, netmiko_device
+from tests.utils import creds_from_host, netmiko_device
 
 # The injection key mirrors the real registry, which keys a py-only module on
 # its filename stem. The markers are imported from the asset (single source);
@@ -113,7 +114,7 @@ def test_py_only_platform_overlay_optin_is_loud_at_start(register_py_only):
             "device": {
                 "username": "u",
                 "password": "p",
-                "port": get_free_port(),
+                "port": EPHEMERAL_PORT,
                 "device_type": register_py_only,
                 "overlay": {"override_commands": "all"},
             }

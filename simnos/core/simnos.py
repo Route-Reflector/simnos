@@ -10,7 +10,6 @@ import logging
 import os
 from pathlib import Path
 import platform
-import socket
 import threading
 import time
 
@@ -18,7 +17,7 @@ import yaml
 
 from simnos.core.host import Host
 from simnos.core.nos import Nos
-from simnos.core.pydantic_models import ModelSimnosInventory, ModelSysConfig
+from simnos.core.pydantic_models import EPHEMERAL_PORT, ModelSimnosInventory, ModelSysConfig
 from simnos.core.servers import join_threads_with_deadline
 from simnos.core.shared_loop import SharedLoop
 from simnos.core.timeouts import (
@@ -35,11 +34,15 @@ log = logging.getLogger(__name__)
 
 DEFAULT_PORT_START = 6000
 
+# Ports are EPHEMERAL_PORT (0): a no-arg `SimNOS()` binds OS-assigned ports so
+# parallel test workers never collide on a fixed port (#271, system B). The real
+# port lands on `host.port` after start. `DEFAULT_PORT_START` stays the CLI default
+# for `simnos up -d <dev>` (cli.py).
 default_inventory = {
     "default": {
         "username": "user",
         "password": "user",
-        "port": DEFAULT_PORT_START,
+        "port": EPHEMERAL_PORT,
         "server": {
             "plugin": "AsyncSshServer",
             "configuration": {
@@ -51,9 +54,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": DEFAULT_PORT_START, "device_type": "cisco_ios"},
-        "router_huawei_smartax": {"port": DEFAULT_PORT_START + 1, "device_type": "huawei_smartax"},
-        "router_arista_eos": {"port": DEFAULT_PORT_START + 2, "device_type": "arista_eos"},
+        "router_cisco_ios": {"port": EPHEMERAL_PORT, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": EPHEMERAL_PORT, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": EPHEMERAL_PORT, "device_type": "arista_eos"},
     },
 }
 
@@ -387,6 +390,12 @@ class SimNOS:
 
         :param port: integer - port to allocate
         """
+        if port == EPHEMERAL_PORT:
+            # OS assigns a unique real port at bind time (#271); skip the range
+            # check, the dedup check, and `allocated_ports` registration. Several
+            # hosts can all request port 0 (e.g. the default inventory) without
+            # colliding here, and the real ports are read back after start.
+            return
         if not (0 < port <= 65535):
             raise ValueError(f"Port {port} out of valid range (1-65535)")
         if port in self.allocated_ports:
@@ -592,15 +601,6 @@ class SimNOS:
             self.nos_plugins[nos_instance.name] = nos_instance
 
 
-def _get_free_port() -> int:
-    """
-    Method to get a free port for the SimNOS server.
-    """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
-        return s.getsockname()[1]
-
-
 def simnos(device_type: str | None = None, inventory: dict | str | None = None, return_instance: bool = False):
     """
     Decorator to run a test with SimNOS server.
@@ -616,7 +616,7 @@ def simnos(device_type: str | None = None, inventory: dict | str | None = None, 
                 "SimNOS": {
                     "username": "test",
                     "password": "test",
-                    "port": _get_free_port(),
+                    "port": EPHEMERAL_PORT,  # OS-assigned (#271); read back via net.hosts["SimNOS"].port
                     "device_type": device_type,
                 }
             }

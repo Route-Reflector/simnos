@@ -4,11 +4,11 @@ This module contains utility functions for the tests.
 
 import os
 import random
-import socket
 import string
 
 from simnos.core.host import Host
 from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta
+from simnos.core.pydantic_models import EPHEMERAL_PORT
 from simnos.plugins.nos import nos_plugins
 
 # Default credentials used to build single-host test inventories.
@@ -44,9 +44,12 @@ def build_inventory(
     """Build a single-host SimNOS inventory dict (test SSoT).
 
     Single-host only -- multi-host inventories are out of scope here.
-    A free port is allocated when ``port`` is not given.
+    Defaults to ``EPHEMERAL_PORT`` (0) when ``port`` is not given: the OS assigns a
+    free port at bind time (#271), eliminating the TOCTOU race the old
+    ``get_free_port`` helper carried. Read the real port back from
+    ``net.hosts[host_key].port`` after ``start()`` — the inventory dict keeps 0.
     """
-    port = port if port is not None else get_free_port()
+    port = port if port is not None else EPHEMERAL_PORT
     host = {"username": username, "password": password, "port": port, "device_type": device_type, **extra}
     return {"hosts": {host_key: host}}
 
@@ -77,19 +80,6 @@ def get_running_hosts(hosts: dict[str, Host]) -> dict[str, bool]:
     Get the running hosts in the network.
     """
     return {host_name: host.running for host_name, host in hosts.items()}
-
-
-def get_free_port():
-    """Return a free port.
-
-    Note: There is an inherent TOCTOU race between closing this socket
-    and the caller binding to the returned port.  This is acceptable
-    for test usage in controlled environments.
-    """
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-        s.bind(("", 0))
-        return s.getsockname()[1]
 
 
 def generate_random_string(length):

@@ -25,7 +25,6 @@ from tests.utils import (
     TEST_PASSWORD,
     TEST_USERNAME,
     build_inventory,
-    get_free_port,
     get_platforms_from_md,
     get_py_platforms,
     netmiko_device,
@@ -34,13 +33,14 @@ from tests.utils import (
 HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output formatting
 
 
-def _make_simnos(device_type, port):
-    """Create a SimNOS instance for a single device.
+def _make_simnos(device_type):
+    """Create a SimNOS instance for a single device on an ephemeral port (#271).
 
     `HOSTNAME` is kept as the host key because it doubles as the base_prompt
-    used in the output-formatting assertions below.
+    used in the output-formatting assertions below. The real bound port is read
+    back from `net.hosts[HOSTNAME].port` after `start()`.
     """
-    return SimNOS(inventory=build_inventory(device_type, host_key=HOSTNAME, port=port))
+    return SimNOS(inventory=build_inventory(device_type, host_key=HOSTNAME))
 
 
 def _device(device_type, port, **extra):
@@ -59,12 +59,11 @@ class TestNetmikoInitCompat:
         if device_type in INIT_UNKNOWN_CMD_ALLOWED:
             pytest.skip(f"{device_type}: {INIT_UNKNOWN_CMD_ALLOWED[device_type].reason}")
 
-        port = get_free_port()
         log_file = tmp_path / f"session_{device_type}.log"
-        net = _make_simnos(device_type, port)
+        net = _make_simnos(device_type)
         try:
             net.start()
-            device = _device(device_type, port, session_log=str(log_file))
+            device = _device(device_type, net.hosts[HOSTNAME].port, session_log=str(log_file))
             with ConnectHandler(**device):
                 pass
             session_output = log_file.read_text()
@@ -78,11 +77,10 @@ class TestNetmikoInitCompat:
     @pytest.mark.parametrize("device_type", get_platforms_from_md())
     def test_unknown_command_graceful(self, device_type):
         """Unknown commands should not crash the shell."""
-        port = get_free_port()
-        net = _make_simnos(device_type, port)
+        net = _make_simnos(device_type)
         try:
             net.start()
-            device = _device(device_type, port)
+            device = _device(device_type, net.hosts[HOSTNAME].port)
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(
                     "this_command_does_not_exist_12345",
@@ -325,12 +323,10 @@ class TestSendCommandResponse:
 
         cmd, expected_raw = result
         expected = expected_raw.format(base_prompt=HOSTNAME)
-        port = get_free_port()
-
-        net = _make_simnos(device_type, port)
+        net = _make_simnos(device_type)
         try:
             net.start()
-            device = _device(device_type, port)
+            device = _device(device_type, net.hosts[HOSTNAME].port)
             with ConnectHandler(**device) as conn:
                 output = conn.send_command(cmd, read_timeout=15)
                 assert isinstance(output, str)
@@ -367,11 +363,10 @@ class TestSendCommandResponse:
             "Every py platform must expose at least one str-returning callable."
         )
 
-        port = get_free_port()
-        net = _make_simnos(device_type, port)
+        net = _make_simnos(device_type)
         try:
             net.start()
-            device = _device(device_type, port)
+            device = _device(device_type, net.hosts[HOSTNAME].port)
             with ConnectHandler(**device) as conn:
 
                 def check(cmds: list[tuple[str, str]], phase: str) -> None:
@@ -504,11 +499,10 @@ class TestShutdownEOF:
     @pytest.mark.timeout(30)
     def test_shell_exits_cleanly_on_server_stop(self):
         """Shell should exit on EOF (dispatch close branch) when server stops, no thread leaks."""
-        port = get_free_port()
-        net = _make_simnos("cisco_ios", port)
+        net = _make_simnos("cisco_ios")
         try:
             net.start()
-            device = _device("cisco_ios", port)
+            device = _device("cisco_ios", net.hosts[HOSTNAME].port)
             with ConnectHandler(**device):
                 pass
         finally:
@@ -521,11 +515,10 @@ class TestShutdownEOF:
     @pytest.mark.timeout(30)
     def test_server_stop_while_connected(self):
         """Server stop during active connection should not hang."""
-        port = get_free_port()
-        net = _make_simnos("cisco_ios", port)
+        net = _make_simnos("cisco_ios")
         net.start()
         try:
-            device = _device("cisco_ios", port)
+            device = _device("cisco_ios", net.hosts[HOSTNAME].port)
             conn = ConnectHandler(**device)
             # Stop server while connection is still open
             net.stop()

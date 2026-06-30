@@ -14,7 +14,8 @@ from netmiko import ConnectHandler
 import pytest
 
 from simnos import SimNOS
-from tests.utils import TEST_PASSWORD, TEST_USERNAME, creds_from_host, get_free_port, netmiko_device
+from simnos.core.pydantic_models import EPHEMERAL_PORT
+from tests.utils import TEST_PASSWORD, TEST_USERNAME, creds_from_host, netmiko_device
 
 OVERLAY_MARKER = "OVERLAY-CAPTURE-cisco-ios-9999"
 
@@ -35,7 +36,7 @@ def _show_version_over_wire(data_dir: str, *, overlay: dict | None = None) -> st
     host_cfg = {
         "username": TEST_USERNAME,
         "password": TEST_PASSWORD,
-        "port": get_free_port(),
+        "port": EPHEMERAL_PORT,
         "device_type": "cisco_ios",
     }
     if overlay is not None:

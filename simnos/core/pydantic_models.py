@@ -25,6 +25,15 @@ from simnos.core.command_contract import CommandHandler
 # migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
 Port = Annotated[StrictInt, Field(ge=1, le=65535)]
 
+# 0 = OS-assigned ephemeral port (#271). The OS atomically reserves a free port
+# inside the `bind(("", 0))` syscall, so the TOCTOU window of "find a free port,
+# then bind it later" is structurally gone. The real port is read back after
+# start and stored on `host.port` (Host.start / D4). Applied to the single-port
+# host path only; the `replicas` port-range path keeps `Port` (ge=1) since a
+# range of ephemeral ports is meaningless.
+EPHEMERAL_PORT = 0
+EphemeralPort = Annotated[StrictInt, Field(ge=0, le=65535)]
+
 # Dynamic command output. The type annotation documents the G4 contract
 # (`CommandHandler` Protocol — signature and return shape, #241); pydantic
 # cannot derive a schema from a Protocol, so the attached schema keeps the
@@ -341,7 +350,7 @@ class ModelHost(BaseModel):
     name: StrictStr
     username: StrictStr
     password: StrictStr
-    port: Port
+    port: EphemeralPort  # 0 = OS-assigned ephemeral (#271); resolved to a real port at start
     device_type: StrictStr | None = None
 
 
@@ -514,7 +523,9 @@ class InventoryDefaultSection(BaseModel):
 
     username: StrictStr | None = None
     password: StrictStr | None = None
-    port: Port | list[Port] | None = None
+    # Single port accepts 0 (ephemeral, #271); the `replicas` list path keeps
+    # `Port` (ge=1) — an ephemeral port *range* is meaningless.
+    port: EphemeralPort | list[Port] | None = None
     configuration_file: StrictStr | None = None
     device_type: StrictStr | None = None
     server: AsyncSshServerPlugin | TelnetServerPlugin | None = None
@@ -549,10 +560,13 @@ class HostConfig(InventoryDefaultSection):
         Method to validate port value based on 'replicas' value.
         """
         port = values.get("port")
-        if "replicas" not in values and port:
+        # `is not None`, not truthy: port=0 is a valid value (ephemeral, #271), so
+        # `if port:` would wrongly skip both branches — letting `replicas` + port=0
+        # slip past the "port must be a list" check. `is not None` treats 0 as set.
+        if "replicas" not in values and port is not None:
             if not isinstance(port, int):
                 raise ValueError("If no host 'replicas' given, port must be an integer")
-        elif "replicas" in values and port and not isinstance(port, list):
+        elif "replicas" in values and port is not None and not isinstance(port, list):
             raise ValueError("If host 'replicas' given, port must be a list")
         return values
 
