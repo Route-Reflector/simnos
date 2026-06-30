@@ -303,8 +303,9 @@ This configuration will result in SIMNOS running 10 instances of hosts servers n
 
 !!! warning
     If host inventory data contains `replicas` parameter, `port` parameter must be a list
-    of two integers representing range to allocate ports from. If host does not contains
-    `replicas` parameter, `port` must be a positive integer from 1 - 65535 range.
+    of two integers from the 1 - 65535 range representing the range to allocate ports from.
+    If host does not contain `replicas`, `port` must be an integer in 0 - 65535, where `0`
+    means an OS-assigned ephemeral port (see the Ephemeral ports tip above).
 
 ## Generating SSH private key
 

@@ -8,6 +8,7 @@ import pytest
 
 from simnos.core.pydantic_models import (
     CMDShellConfig,
+    HostConfig,
     InventoryDefaultSection,
     ModelCommandAuthoring,
     ModelHost,
@@ -50,6 +51,17 @@ class TestPortRange:
         """A single out-of-range element fails the whole list (the list path keeps ge=1, #271)."""
         with pytest.raises(ValidationError, match="port"):
             InventoryDefaultSection(port=ports)
+
+    def test_host_config_rejects_replicas_with_scalar_zero_port(self):
+        """`replicas` + `port: 0` is rejected (port must be a list).
+
+        Guards the #271 `check_port_value` fix: the truthy check `if port:` treated
+        0 as unset and let `replicas` + port=0 slip past the "must be a list" branch.
+        The `port is not None` form pins the rejection here, so a regression back to
+        `if port:` is caught directly.
+        """
+        with pytest.raises(ValidationError, match="must be a list"):
+            HostConfig(replicas=2, port=0)
 
 
 class TestCommandHandlerField:
