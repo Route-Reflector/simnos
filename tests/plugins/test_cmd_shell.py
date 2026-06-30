@@ -752,7 +752,8 @@ class HotReloadTest(TestCase):
     @patch("simnos.plugins.shell.cmd_shell.get_files_changed")
     def test_hot_reload_activated_does_enter(self, mock_get_files_changed):
         """Test that if there are no changed files, nothing happens."""
-        mock_get_files_changed.return_value = []
+        # #281: get_files_changed is now pure, returning (targets, new_snapshot).
+        mock_get_files_changed.return_value = ([], {})
         shell = CMDShell(**self.arguments)
         shell.precmd("show clock")
         mock_get_files_changed.assert_called_once()
@@ -766,7 +767,8 @@ class HotReloadTest(TestCase):
         and the commands are updated correctly.
         """
         changed_module = "simnos.plugins.nos.platforms_py.cisco_ios"
-        mock_get_files_changed.return_value = [changed_module.replace(".", "/") + ".py"]
+        # #281: get_files_changed is now pure, returning (targets, new_snapshot).
+        mock_get_files_changed.return_value = ([changed_module.replace(".", "/") + ".py"], {})
         shell = CMDShell(**self.arguments)
         shell.precmd("show clock")
         module = importlib.import_module(changed_module)

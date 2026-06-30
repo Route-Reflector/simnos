@@ -9,6 +9,7 @@ import logging
 import os
 import random
 import string
+import threading
 import traceback
 from typing import TYPE_CHECKING, cast
 
@@ -18,8 +19,18 @@ from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput, ResolvedPlatform
-from simnos.plugins import nos
-from simnos.plugins.shell.utils import get_files_changed
+
+# `nos_pkg` is the package module (for `__path__`); the `__init__` arg `nos` is a
+# `Nos` instance that would shadow a plain `from simnos.plugins import nos`, so the
+# module is bound under a distinct name (#281 / D5, 2nd round gemini#1/claude#1).
+import simnos.plugins.nos as nos_pkg
+from simnos.plugins.nos import nos_plugins
+from simnos.plugins.shell.utils import (
+    get_files_changed,
+    get_files_lasttime_changed,
+    get_files_under_roots,
+    platform_watch_roots,
+)
 
 if TYPE_CHECKING:
     from simnos.core.host import HostRenderConfig
@@ -196,14 +207,9 @@ class CMDShell:
         resolved_platform=None,
         render_config=None,
         page_default_rows=24,
+        reload_lock=None,
     ):
         self.nos: Nos = nos
-        # Platform name captured at build time for the hot-reload ownership filter
-        # (#274 / D6). A later foreign py reload can overwrite live `nos.name`
-        # (`_from_module` commit phase), so the filter must compare against this
-        # frozen value, not `self.nos.name`, or a hijacked name would permanently
-        # skip this session's own A3 platform reload.
-        self._platform_name: str = nos.name
         self.intro = intro
         self.base_prompt = base_prompt
         self.newline = newline
@@ -242,15 +248,49 @@ class CMDShell:
         # connection (true non-determinism, the realism opt-in; D6). Seeded
         # selection uses `_stable_hash` instead, not this RNG.
         self._connection_rng = random.Random()  # noqa: S311 — variant pick, not cryptographic
+        # Per-host shared reload lock (#281 / D6): serializes the executor-thread
+        # `reload_commands` against both a concurrent reload (another session of
+        # this host) and this `__init__`'s self-build read below, all of which
+        # touch the host-shared `self.nos`. The server injects one lock per host
+        # (`Host.start` -> server kwarg); a direct construction / test gets a
+        # private fallback. Established BEFORE the self-build so the read is
+        # already protected.
+        self._reload_lock: threading.Lock = reload_lock or threading.Lock()
         # The merged platform is per-host invariant (base_prompt is the host name,
         # nos/inventory are shared), so the server normalizes it once at
         # Host.start and passes it to every connection's shell (#264 / Impact —
         # normalize once, fail at startup). When not supplied (tests / direct
         # construction) the shell builds its own. A malformed prompt template
-        # fails loudly here (the #172 lenient fallback is gone, #264 / D5).
+        # fails loudly here (the #172 lenient fallback is gone, #264 / D5). In
+        # hot-reload dev mode the shared snapshot is None (`build_shared_platform`
+        # returns None), so every connection self-builds from the live shared
+        # `nos` — done under the reload lock so a concurrent executor reload does
+        # not mutate `nos` mid-read (#281 / D6, gemini#1). `_build_shell` runs on
+        # the shared event-loop thread, so a new connection contending here with an
+        # in-flight reload briefly blocks the loop until the reload releases the
+        # lock — dev-only (production passes a non-None shared platform, skipping
+        # this branch entirely) and accepted as the cost of the no-mid-mutation
+        # guarantee (#281 / Risks, 1st code review claude#1).
         if resolved_platform is None:
-            resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
+            with self._reload_lock:
+                resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
         self._apply_platform(resolved_platform)
+        # Hot-reload watcher state (#281 / D1, D2, D5). Built ONLY in dev hot-reload
+        # mode so production (env off) does no walk and holds no snapshot — the
+        # per-shell baseline replaces the #274 process-global consume-once snapshot.
+        # `_watch_roots` is this platform's own subtree (per-platform watch, D2/D4),
+        # derived from the registry; `.get` degrades gracefully for a platform with
+        # no registry sources (e.g. a runtime-registered custom plugin). The baseline
+        # snapshot is seeded here so the first command can already reflect an edit.
+        self._watch_roots: list[str] = []
+        self._reload_snapshot: dict[str, float] = {}
+        self._package_root: str | None = None
+        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
+            self._package_root = nos_pkg.__path__[0]  # rollup root; module ref avoids the `nos` arg shadowing (D5)
+            self._watch_roots = platform_watch_roots(nos_plugins.get(self.nos.name, []))
+            self._reload_snapshot = get_files_lasttime_changed(get_files_under_roots(self._watch_roots))
+            if not self._watch_roots:
+                log.debug("hot-reload: no watch roots for platform %r (not in the registry?)", self.nos.name)
 
     @staticmethod
     def build_shared_platform(
@@ -459,39 +499,56 @@ class CMDShell:
         (#264 / D6 cache bypass). No-op for legacy yaml/py reloads.
 
         `reload_targets` are reload units (A3 platform dirs / `.py` modules), not
-        raw changed files (#274 / D1). A dir target for a *different* platform is
-        skipped (#274 / D6 ownership filter): the watcher sees the whole
-        `plugins/nos` tree, so without this a sibling platform's edit — or a
-        `git checkout` touching many platforms — would `_from_platform_dir`-replace
-        this session's `resolved_platform` and hijack it onto another NOS.
+        raw changed files (#274 / D1). Per-platform watch (#281 / D2) means a
+        session only ever sees its own platform's subtree, so `reload_targets`
+        cannot contain a sibling platform — the #274 ownership filter is gone as
+        unreachable dead code (#281 / D7).
+
+        Serialized by the per-host `_reload_lock` (#281 / D6): `self.nos` is shared
+        by every session of this host, and dispatch runs on a bounded executor, so
+        two sessions could otherwise reload concurrently and corrupt the shared
+        `nos` (or race this method against a new connection's self-build read in
+        `__init__`). The whole body — including `load_platform_dir.cache_clear()` —
+        is under the lock: clearing the cache outside it would let session B drop
+        the cache while session A is still populating from it, re-opening the stale
+        parse window the cache bypass closes (#281 / D6, claude#2/codex#2).
         """
-        load_platform_dir.cache_clear()
-        for target in reload_targets:
-            if os.path.isdir(target) and os.path.basename(target) != self._platform_name:
-                # Foreign A3 platform dir — not this session's platform. Skipping
-                # keeps a sibling edit / git checkout from hijacking the session.
-                continue
-            snapshot_commands = dict(self.nos.commands)
-            snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
-            try:
-                self.nos.from_file(target)
-                self._rebuild()
-            except Exception:
-                # Broad except, like the dispatch core's handler guard: any
-                # plugin error must not crash the session. Roll back the partial
-                # nos mutation so the broken file does not poison subsequent
-                # reloads, then log the traceback so a genuine plugin bug stays
-                # diagnosable.
-                self.nos.commands = snapshot_commands
-                for attr, value in snapshot_attrs.items():
-                    setattr(self.nos, attr, value)
-                log.error("shell '%s' failed to hot-reload %r\n%s", self.base_prompt, target, traceback.format_exc())
-                continue
+        with self._reload_lock:
+            load_platform_dir.cache_clear()
+            for target in reload_targets:
+                snapshot_commands = dict(self.nos.commands)
+                snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
+                try:
+                    self.nos.from_file(target)
+                    self._rebuild()
+                except Exception:
+                    # Broad except, like the dispatch core's handler guard: any
+                    # plugin error must not crash the session. Roll back the partial
+                    # nos mutation so the broken file does not poison subsequent
+                    # reloads, then log the traceback so a genuine plugin bug stays
+                    # diagnosable.
+                    self.nos.commands = snapshot_commands
+                    for attr, value in snapshot_attrs.items():
+                        setattr(self.nos, attr, value)
+                    log.error(
+                        "shell '%s' failed to hot-reload %r\n%s", self.base_prompt, target, traceback.format_exc()
+                    )
+                    continue
 
     def precmd(self, line):
         """Method to return line before processing the command"""
-        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
-            reload_targets = get_files_changed(nos.__path__[0])
+        # Two-part gate (#281, 1st code review gemini#1/claude#2): the env var
+        # keeps the current "env off mid-session stops reloading" semantics, and
+        # `_package_root is not None` proves `__init__` actually seeded the watcher
+        # (env was on at construction). It also narrows `_package_root` to `str`
+        # for `get_files_changed` without an `assert` — so a late env toggle-on
+        # (no baseline seeded) or `python -O` degrades to a graceful no-op instead
+        # of a `TypeError` deep in `resolve_reload_targets`. The diff runs against
+        # this shell's own snapshot (per-shell, D1), then swaps in the returned one.
+        if os.environ.get("SIMNOS_RELOAD_COMMANDS") and self._package_root is not None:
+            reload_targets, self._reload_snapshot = get_files_changed(
+                self._watch_roots, self._package_root, self._reload_snapshot
+            )
             if reload_targets:
                 log.debug("Reloading... Reload targets: %s", reload_targets)
                 self.reload_commands(reload_targets)

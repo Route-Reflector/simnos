@@ -82,6 +82,7 @@ class AsyncServerBase:
         render_config: "HostRenderConfig | None" = None,
         simnos: "SimNOS | None" = None,
         page_default_rows: int = 24,
+        reload_lock: "threading.Lock | None" = None,
     ) -> None:
         self.nos: Nos = nos
         self.nos_inventory_config: dict = nos_inventory_config
@@ -92,6 +93,10 @@ class AsyncServerBase:
         # `shell_configuration` (which is inventory-derived) so the environment-wide
         # sys_config value flows through a distinct, non-colliding path.
         self.page_default_rows: int = page_default_rows
+        # Per-host hot-reload lock (#281 / D6), threaded to every session's shell
+        # so concurrent dev hot-reloads serialize on the host-shared `nos`. None in
+        # direct/test construction -> each shell falls back to a private lock.
+        self._reload_lock: threading.Lock | None = reload_lock
         self._render_config: HostRenderConfig | None = render_config
         # Normalize the merged platform once at Host.start (per-host invariant,
         # surfaces malformed data at startup rather than on the first connection).
@@ -314,6 +319,7 @@ class AsyncServerBase:
             resolved_platform=self._shared_platform,
             render_config=self._render_config,
             page_default_rows=self.page_default_rows,
+            reload_lock=self._reload_lock,
             **self.shell_configuration,
         )
 

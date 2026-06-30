@@ -5,23 +5,23 @@ PR-1 covered the legacy adapter end of `_rebuild`; these pin the new A3 branch:
 shell merges the still-legacy inflows (BASIC, py-module commands, inventory)
 over the A3 statics with the right precedence and the A3 modes.
 
-`TestA3HotReload` pins the #274 dev hot-reload path on top: watcher rollup to a
-platform-dir target, the ownership filter, the `resolved_platform` rollback,
-and the mode-degrade contract — all against tmp platforms (the real tree is
-never mutated, so no xdist serialization is needed).
+`TestA3HotReload` pins the #274/#281 dev hot-reload path on top: per-platform
+watch rollup to a platform-dir target, per-shell snapshot isolation (multi-host /
+multi-session), the per-host reload lock (#281 / D6), the `resolved_platform`
+rollback, and the mode-degrade contract — all against tmp platforms (the real
+tree is never mutated, so no xdist serialization is needed).
 """
 
 import os
 import threading
 import time
-from types import SimpleNamespace
+from unittest.mock import Mock
 
 import pytest
 
 from simnos.core.host import HostRenderConfig
 from simnos.core.nos import Nos
 from simnos.plugins.shell import cmd_shell as cmd_shell_module
-from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.cmd_shell import CMDShell, build_resolved_platform
 
 
@@ -261,43 +261,60 @@ def _touch_future(path):
     os.utime(path, (future, future))
 
 
-class TestA3HotReload:
-    """Dev hot-reload over A3 platforms (#274).
+def _arista_platform(parent):
+    """A second minimal A3 platform (arista_eos) for the multi-host watch tests."""
+    root = parent / "arista_eos"
+    _write(root / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n')
+    _write(
+        root / "commands" / "show_version.yaml",
+        "command: show version\ntype: ntc\nmode: [user]\noutput: show_version.txt\n",
+    )
+    _write(root / "commands" / "show_version.txt", "Arista EOS\n")
+    return root
 
-    Covers the four designed behaviors: an A3 edit propagating through the real
-    `precmd` watch path (D1/D2), the post-commit `_rebuild` failure rolling back
-    `resolved_platform` (D3), the ownership filter with its build-time anchor
-    (D6), and the current-mode degrade on a reload that dropped the mode.
+
+def _enable_per_platform_watch(monkeypatch, watch_root, registry):
+    """Turn on hot-reload with a tmp-scoped per-platform watch (#281 / D2, D4).
+
+    Sets the env gate and points the two registry lookups `__init__` reads at the
+    tmp tree: `nos_plugins` (per-platform source list -> watch roots) and the
+    package `__path__` (the rollup `package_root`). Must run BEFORE the shell is
+    built, since #281 seeds the watcher baseline at `__init__` (D5).
     """
+    monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
+    monkeypatch.setattr(cmd_shell_module, "nos_plugins", registry)
+    monkeypatch.setattr(cmd_shell_module.nos_pkg, "__path__", [str(watch_root)])
 
-    @pytest.fixture(autouse=True)
-    def _reset_watcher(self):
-        # The watcher snapshot is module-global; reset around each test so a
-        # prior test's (or the real tree's) snapshot never leaks phantom
-        # changes/deletions into these tmp-root polls (#274 / D7).
-        shell_utils._files_lasttime_changed_old.clear()
-        shell_utils._watch_root = None
-        yield
-        shell_utils._files_lasttime_changed_old.clear()
-        shell_utils._watch_root = None
+
+class TestA3HotReload:
+    """Dev hot-reload over A3 platforms (#274 / #281).
+
+    Covers: an A3 edit / new-file propagating through the real `precmd` watch path
+    (per-platform watch, D1/D2), per-shell snapshot isolation across hosts and
+    sessions (#281 / D1), the per-host reload lock serializing concurrent reloads
+    and the `__init__` self-build read (#281 / D6), the env-off no-walk regression
+    (#281 / D2/D5), the post-commit `_rebuild` rollback (D3), and the current-mode
+    degrade on a reload that dropped the mode.
+
+    No watcher-reset fixture is needed: the snapshot is per-shell since #281, so a
+    tmp-root poll cannot leak into another test.
+    """
 
     def test_a3_edit_propagates_via_precmd(self, tmp_path, monkeypatch):
         """E2E: editing an A3 output file reaches the session through `precmd`.
 
-        Drives the real watch path (seed poll -> edit -> second poll), with the
-        watch root swapped to the tmp tree by replacing the `nos` module binding
-        in cmd_shell (safer than mutating the live package's `__path__`).
+        The watcher baseline is seeded at `__init__` (env on before construction),
+        so the first poll already detects the edit (#281 / D5 — no seed-only poll).
+        The watch root is the platform's own subtree via a tmp-scoped registry.
         """
         watch_root = tmp_path / "nos"
         platform_dir = _a3_platform(watch_root / "platforms")
+        _enable_per_platform_watch(monkeypatch, watch_root, {"cisco_ios": [str(platform_dir)]})
         shell = _shell_for(Nos(filename=str(platform_dir)))
-        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
-        monkeypatch.setattr(cmd_shell_module, "nos", SimpleNamespace(__path__=[str(watch_root)]))
-        shell.precmd("show clock")  # first poll: seed only
         target_txt = platform_dir / "commands" / "show_version.txt"
         _write(target_txt, "Cisco IOS Software, Version 16.0\n")
         _touch_future(target_txt)
-        shell.precmd("show clock")  # second poll: detects the edit, reloads the dir
+        shell.precmd("show clock")  # poll: detects the edit against the __init__ baseline, reloads the dir
         assert shell.commands["show version"].output.render("R1") == "Cisco IOS Software, Version 16.0\n"
 
     def test_a3_new_command_file_appears_via_precmd(self, tmp_path, monkeypatch):
@@ -309,18 +326,154 @@ class TestA3HotReload:
         """
         watch_root = tmp_path / "nos"
         platform_dir = _a3_platform(watch_root / "platforms")
+        _enable_per_platform_watch(monkeypatch, watch_root, {"cisco_ios": [str(platform_dir)]})
         shell = _shell_for(Nos(filename=str(platform_dir)))
-        monkeypatch.setenv("SIMNOS_RELOAD_COMMANDS", "1")
-        monkeypatch.setattr(cmd_shell_module, "nos", SimpleNamespace(__path__=[str(watch_root)]))
-        shell.precmd("show clock")  # first poll: seed only
         assert "show clock" not in shell.commands
         _write(
             platform_dir / "commands" / "show_clock.yaml",
             "command: show clock\ntype: simnos\nmode: [user]\noutput: show_clock.txt\n",
         )
         _write(platform_dir / "commands" / "show_clock.txt", "12:00:00 UTC\n")
-        shell.precmd("show clock")  # second poll: new files detected, dir reloaded
+        shell.precmd("show clock")  # poll: new files detected, dir reloaded
         assert shell.commands["show clock"].output.render("R1") == "12:00:00 UTC\n"
+
+    def test_multi_host_edit_only_reloads_owning_shell(self, tmp_path, monkeypatch):
+        """Per-platform watch: an edit is observed by its own shell, not consumed by another (#281 / D1, D2).
+
+        The #281 core fix. Two shells of different platforms share the tree; the
+        non-owning shell polls FIRST. With the old process-global consume-once
+        snapshot it would consume cisco's edit and the cisco shell would then see
+        nothing (cross-host discard). With per-platform watch + per-shell snapshot,
+        the arista shell never walks cisco's subtree, so the cisco shell still
+        observes the edit on its own poll.
+        """
+        watch_root = tmp_path / "nos"
+        cisco_dir = _a3_platform(watch_root / "platforms")
+        arista_dir = _arista_platform(watch_root / "platforms")
+        _enable_per_platform_watch(
+            monkeypatch, watch_root, {"cisco_ios": [str(cisco_dir)], "arista_eos": [str(arista_dir)]}
+        )
+        cisco_shell = _shell_for(Nos(filename=str(cisco_dir)))
+        arista_shell = _shell_for(Nos(filename=str(arista_dir)))
+        cisco_txt = cisco_dir / "commands" / "show_version.txt"
+        _write(cisco_txt, "Cisco IOS 99\n")
+        _touch_future(cisco_txt)
+        arista_shell.precmd("show clock")  # polls first; watches only its own subtree -> does not consume cisco's edit
+        assert arista_shell.commands["show version"].output.render("R1") == "Arista EOS\n"
+        cisco_shell.precmd("show clock")  # still observes the edit (not discarded by arista)
+        assert cisco_shell.commands["show version"].output.render("R1") == "Cisco IOS 99\n"
+
+    def test_multi_session_same_host_both_reload(self, tmp_path, monkeypatch):
+        """Two sessions of one host each reflect an edit independently (#281 / D1).
+
+        They share one `Nos` (as in production), but each shell owns its snapshot,
+        so the second session is not starved by the first consuming the change —
+        the multi-session staleness the old consume-once snapshot caused.
+        """
+        watch_root = tmp_path / "nos"
+        platform_dir = _a3_platform(watch_root / "platforms")
+        _enable_per_platform_watch(monkeypatch, watch_root, {"cisco_ios": [str(platform_dir)]})
+        nos_obj = Nos(filename=str(platform_dir))
+        shell1 = _shell_for(nos_obj)
+        shell2 = _shell_for(nos_obj)
+        txt = platform_dir / "commands" / "show_version.txt"
+        _write(txt, "Shared V2\n")
+        _touch_future(txt)
+        shell1.precmd("show clock")
+        assert shell1.commands["show version"].output.render("R1") == "Shared V2\n"
+        shell2.precmd("show clock")  # independent snapshot -> also reflects the edit
+        assert shell2.commands["show version"].output.render("R1") == "Shared V2\n"
+
+    def test_concurrent_reload_same_lock_no_corruption(self, tmp_path):
+        """Two sessions reloading concurrently under the shared host lock stay consistent (#281 / D6).
+
+        Injects ONE lock into both shells (as `Host.start` does per host) and
+        fires `reload_commands` from two threads at a barrier. Per-shell fallback
+        locks would not serialize the shared-`nos` mutation, so the explicit
+        single lock is what this pins; both shells must end consistent and the
+        shared nos uncorrupted.
+        """
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        lock = threading.Lock()
+        common = {"nos_inventory_config": {}, "base_prompt": "R1"}
+        shell1 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
+        shell2 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
+        _write(platform_dir / "commands" / "show_version.txt", "Concurrent\n")
+        barrier = threading.Barrier(2)
+        errors: list[BaseException] = []
+
+        def _reload(sh):
+            barrier.wait()
+            try:
+                sh.reload_commands([str(platform_dir)])
+            except BaseException as exc:  # surface any thread failure to the assert
+                errors.append(exc)
+
+        threads = [threading.Thread(target=_reload, args=(sh,)) for sh in (shell1, shell2)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
+        assert not errors
+        assert shell1.commands["show version"].output.render("R1") == "Concurrent\n"
+        assert shell2.commands["show version"].output.render("R1") == "Concurrent\n"
+        assert nos_obj.name == "cisco_ios"  # shared nos not corrupted by the concurrent reloads
+
+    def test_init_self_build_acquires_reload_lock(self, tmp_path):
+        """A new connection's self-build runs under the reload lock (#281 / D6, gemini#1).
+
+        When `resolved_platform` is None (hot-reload mode) the `__init__` builds
+        from the shared `nos`; that read must hold the per-host lock so a
+        concurrent executor reload cannot mutate `nos` mid-read. Holding the lock
+        in the main thread must therefore block a shell construction until release.
+        """
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        lock = threading.Lock()
+        built: list[CMDShell] = []
+
+        def _build():
+            built.append(
+                CMDShell(
+                    nos=nos_obj,
+                    nos_inventory_config={},
+                    base_prompt="R1",
+                    is_running=threading.Event(),
+                    reload_lock=lock,
+                )
+            )
+
+        with lock:
+            t = threading.Thread(target=_build)
+            t.start()
+            t.join(timeout=0.3)
+            blocked = not built  # self-build is waiting on the held lock
+        t.join(timeout=2)
+        assert blocked
+        assert built  # proceeds once the lock is released
+
+    def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
+        """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).
+
+        Pins the "本番無変更" core claim and guards against the env-gate / shadowing
+        regression (2nd round claude#3): with `SIMNOS_RELOAD_COMMANDS` unset the
+        shell holds empty watch roots / snapshot and a None package root, AND the
+        watcher-build helpers are never called — so a future refactor that walks
+        unconditionally (then discards) is caught, not just the resulting state
+        (1st code review codex#4).
+        """
+        monkeypatch.delenv("SIMNOS_RELOAD_COMMANDS", raising=False)
+        watch_roots_spy = Mock(wraps=cmd_shell_module.platform_watch_roots)
+        under_roots_spy = Mock(wraps=cmd_shell_module.get_files_under_roots)
+        monkeypatch.setattr(cmd_shell_module, "platform_watch_roots", watch_roots_spy)
+        monkeypatch.setattr(cmd_shell_module, "get_files_under_roots", under_roots_spy)
+        shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path))))
+        assert shell._watch_roots == []
+        assert shell._reload_snapshot == {}
+        assert shell._package_root is None
+        watch_roots_spy.assert_not_called()  # no walk derivation in production
+        under_roots_spy.assert_not_called()
 
     def test_post_commit_rebuild_failure_rolls_back_resolved_platform(self, tmp_path, caplog):
         """A reload that loads but fails `_rebuild` restores `resolved_platform` (D3).
@@ -351,36 +504,6 @@ class TestA3HotReload:
         assert len(caplog.records) == 1
         assert nos_obj.resolved_platform is old_platform  # rolled back, not the modeless parse
         assert shell.commands is old_commands  # live session untouched
-
-    def test_foreign_platform_dir_is_skipped(self, tmp_path):
-        """The ownership filter keeps a sibling platform's reload out (D6)."""
-        watch_root = tmp_path / "nos"
-        own_dir = _a3_platform(watch_root / "platforms")
-        foreign_dir = watch_root / "platforms" / "arista_eos"
-        _write(foreign_dir / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}%"\ninitial_mode: user\n')
-        _write(foreign_dir / "commands" / "default.yaml", "command: _default_\ntype: simnos\n")
-        nos_obj = Nos(filename=str(own_dir))
-        shell = _shell_for(nos_obj)
-        old_platform = nos_obj.resolved_platform
-        shell.reload_commands([str(foreign_dir)])
-        assert nos_obj.name == "cisco_ios"  # not hijacked
-        assert nos_obj.resolved_platform is old_platform
-
-    def test_ownership_anchor_survives_live_name_overwrite(self, tmp_path):
-        """The filter compares against the build-time anchor, not live `nos.name` (D6).
-
-        A foreign py reload can overwrite live `nos.name` (its commit phase sets
-        the module's NAME); if the filter read `nos.name` it would then skip
-        this session's own platform forever. The captured `_platform_name` is
-        immune to that overwrite.
-        """
-        platform_dir = _a3_platform(tmp_path)
-        nos_obj = Nos(filename=str(platform_dir))
-        shell = _shell_for(nos_obj)
-        nos_obj.name = "arista_eos"  # simulate the foreign-py NAME overwrite
-        _write(platform_dir / "commands" / "show_version.txt", "Reloaded fine\n")
-        shell.reload_commands([str(platform_dir)])
-        assert shell.commands["show version"].output.render("R1") == "Reloaded fine\n"  # not skipped
 
     def test_removed_mode_degrades_to_initial(self, tmp_path):
         """A reload that drops the current mode resets the session to initial_mode."""

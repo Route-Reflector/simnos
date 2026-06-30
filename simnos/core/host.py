@@ -7,6 +7,7 @@ It also validates the host object using pydantic.
 from dataclasses import dataclass
 import logging
 import os
+import threading
 from typing import TYPE_CHECKING
 
 from simnos.core.nos import Nos
@@ -147,6 +148,11 @@ class Host:
             # The async server plugins (AsyncSshServer + telnetlib3 TelnetServer)
             # reach the SimNOS-owned shared loop through this back reference.
             simnos=self.simnos,
+            # Per-host hot-reload lock (#281 / D6): one lock per host, threaded
+            # to every session's shell so concurrent dev hot-reloads (and a new
+            # connection's self-build) serialize on the host-shared `nos`. A
+            # no-op cost in production (env off = no reload, no self-build).
+            reload_lock=threading.Lock(),
             # Environment-wide pager page height (#307 / P3-4). sys_config always
             # materializes `paging.default_rows` (ModelPaging default 24), so the
             # `.get` chain is a defensive fallback only.
