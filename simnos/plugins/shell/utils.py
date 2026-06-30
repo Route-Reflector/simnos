@@ -28,6 +28,54 @@ def get_files_under_directory(directory):
     return files
 
 
+def platform_watch_roots(sources: list[str]) -> list[str]:
+    """Walk targets for one platform's `nos_plugins` source list (#281 / D4).
+
+    `sources` is the registry entry `nos_plugins[<platform>]`: an A3 platform dir
+    and/or a legacy `platforms_py/<name>.py` module. Each maps to its watch
+    target(s):
+
+    - an A3 dir            -> the dir itself (recursively walked)
+    - a legacy `<name>.py` -> the `.py` plus its jinja inputs
+      (`configurations/<name>.yaml.j2`, `templates/<name>/`), mirroring the
+      `_legacy_jinja_to_py` reverse map so editing a template reloads the module.
+
+    A dual-source platform (e.g. cisco_ios = A3 dir + py module) yields both,
+    preserving the prior whole-tree watcher's coverage. Existence is NOT checked
+    here — a jinja input does not exist for every legacy platform;
+    `get_files_under_roots` skips non-existent roots at walk time (#281 / Risks).
+    """
+    roots: list[str] = []
+    for source in sources:
+        if source.endswith(".py"):
+            base = os.path.dirname(source)
+            name = os.path.basename(source)[: -len(".py")]
+            roots.append(source)
+            roots.append(os.path.join(base, "configurations", f"{name}.yaml.j2"))
+            roots.append(os.path.join(base, "templates", name))
+        else:
+            roots.append(source)
+    return roots
+
+
+def get_files_under_roots(roots: list[str]) -> list[str]:
+    """Collect watched files across `roots` (dir walked / file as-is / missing skipped).
+
+    A root is a directory (recursively walked with `get_files_under_directory`'s
+    extension filter) or an individual file (a legacy py module / jinja input,
+    taken as-is when it exists). A non-existent root is silently skipped — the
+    dev watcher's normal state, since `platform_watch_roots` emits jinja paths
+    that only some platforms ship (#281 / D4, Risks).
+    """
+    files: list[str] = []
+    for root in roots:
+        if os.path.isdir(root):
+            files += get_files_under_directory(root)
+        elif os.path.isfile(root):
+            files.append(root)
+    return files
+
+
 def _get_mtime(file: str) -> float | None:
     """Return the file's st_mtime, or None if the file vanished.
 
@@ -150,50 +198,32 @@ def resolve_reload_targets(files: list[str], root: str) -> list[str]:
     return sorted(targets)
 
 
-# Module-level cache for get_files_changed. Previously stored as a
-# function attribute (get_files_changed.files_lasttime_changed_old),
-# which defeats static type analysis. Moved to module scope so ty can
-# track the type properly. `_watch_root` pairs the snapshot with the directory
-# it was taken under so a changed watch root re-seeds instead of reporting every
-# prior-root path as a deletion (#274 / D7).
-_files_lasttime_changed_old: dict[str, float] = {}
-_watch_root: str | None = None
+def get_files_changed(
+    watch_roots: list[str], package_root: str, snapshot: dict[str, float]
+) -> tuple[list[str], dict[str, float]]:
+    """Diff the watched files against `snapshot`; return (reload targets, new snapshot).
 
-
-def get_files_changed(directory: str) -> list[str]:
-    """Return the reload targets for files changed under `directory` (#274 / D1, D7).
-
-    First observation of a (new) watch root only seeds the snapshot and returns
-    no targets — a diff needs a prior baseline. Subsequent polls report new,
-    modified, and deleted paths, rolled up to reload targets by
-    `resolve_reload_targets`. Deletion matters for A3 (a removed `commands/*`
-    file is a command removal); the platform dir is still healthy so the rollup
+    Pure function (#281 / D3): no module-global state and no in-place mutation of
+    `snapshot`. The caller — the per-shell `precmd` — owns the snapshot dict and
+    swaps in the returned one, so each shell tracks its own platform subtree
+    independently (no consume-once sharing, the #281 fix). New, modified, and
+    deleted paths are rolled up to reload units by `resolve_reload_targets`
+    against `package_root` (the `plugins/nos` tree, so an A3 file still folds to
+    its platform dir, D8). Deletion matters for A3 (a removed `commands/*` file
+    is a command removal); the platform dir is still healthy so the rollup
     reloads it and the removal propagates.
 
-    Known dev-mode limitation: the snapshot is consume-once and shared by every
-    shell in the process. The first session to poll consumes a change, and the
-    ownership filter (#274 / D6) may then discard it — on a multi-host reload
-    server another platform's edit can be consumed-and-dropped before any
-    session of that platform observes it. Per-shell snapshots are the future
-    fix (pre-existing single-host assumption, 1st code review claude #2).
+    Unlike the #274 module-global watcher, there is no first-poll re-seed branch:
+    the per-shell baseline is seeded once at connection time (`__init__`, D5), so
+    every `precmd` poll diffs against that baseline and the first command can
+    already reflect an edit.
     """
-    global _files_lasttime_changed_old, _watch_root
-    files_under_directory = get_files_under_directory(directory)
-    # Re-seed (no diff) on the first poll of a watch root, so a stale
-    # prior-root snapshot does not surface every old path as a deletion. The
-    # root is the only seed key: an empty snapshot is a legitimate baseline
-    # (a root with no watched files yet), and treating it as "unseeded" would
-    # swallow the first file ever added to it (1st code review codex #2).
-    if _watch_root != directory:
-        _watch_root = directory
-        _files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
-        return []
-    files_changed: list[str] = []
-    files_changed += get_new_files(list(_files_lasttime_changed_old.keys()), files_under_directory)
-    files_changed += get_files_recently_modified(files_under_directory, _files_lasttime_changed_old)
-    # Deletion (D7): paths in the prior snapshot that are gone from this walk.
-    current = set(files_under_directory)
-    files_changed += [path for path in _files_lasttime_changed_old if path not in current]
-    targets = resolve_reload_targets(files_changed, directory)
-    _files_lasttime_changed_old = get_files_lasttime_changed(files_under_directory)
-    return targets
+    files = get_files_under_roots(watch_roots)
+    current = set(files)
+    changed: list[str] = []
+    changed += get_new_files(list(snapshot), files)
+    changed += get_files_recently_modified(files, snapshot)
+    # Deletion: paths in the prior snapshot that are gone from this walk.
+    changed += [path for path in snapshot if path not in current]
+    targets = resolve_reload_targets(changed, package_root)
+    return targets, get_files_lasttime_changed(files)

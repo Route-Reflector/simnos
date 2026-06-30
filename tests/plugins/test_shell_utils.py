@@ -8,15 +8,14 @@ import time
 from unittest import TestCase
 from unittest.mock import patch
 
-import pytest
-
-from simnos.plugins.shell import utils as shell_utils
 from simnos.plugins.shell.utils import (
     get_files_changed,
     get_files_lasttime_changed,
     get_files_recently_modified,
     get_files_under_directory,
+    get_files_under_roots,
     get_new_files,
+    platform_watch_roots,
     resolve_reload_targets,
 )
 
@@ -54,35 +53,12 @@ original_os_stat = os.stat
 
 
 class ShellUtilsTest(TestCase):
+    """Test class for the shell utils.
+
+    `get_files_changed` is a pure function since #281 (no module-global snapshot),
+    so these tests need no reset fixture: each call diffs an explicit caller-owned
+    snapshot against the current walk.
     """
-    Test class for the shell utils
-    """
-
-    def setUp(self):
-        """Reset the stateful get_files_changed cache before each test.
-
-        Other tests in the same pytest-xdist worker (e.g. the hot-reload
-        integration tests, which exercise `get_files_changed` via `precmd`
-        with the absolute `nos.__path__[0]`) may have primed the
-        module-level `_files_lasttime_changed_old` snapshot; without a
-        reset, the relative-path calls below would treat every file as
-        "new" and the first-call-returns-empty contract breaks. `_watch_root`
-        is reset too so the next call re-seeds rather than diffing against a
-        prior root's snapshot (#274 / D7).
-        """
-        shell_utils._files_lasttime_changed_old.clear()
-        shell_utils._watch_root = None
-
-    def tearDown(self):
-        """Avoid leaking the stateful cache to other tests.
-
-        Note: the previous implementation deleted the function attribute
-        `get_files_changed.files_lasttime_changed_old`, which silently
-        became a no-op when the cache moved to the module-level
-        `_files_lasttime_changed_old` (ty adoption, M-9).
-        """
-        shell_utils._files_lasttime_changed_old.clear()
-        shell_utils._watch_root = None
 
     def test_get_files_under_directory(self):
         """
@@ -157,27 +133,26 @@ class ShellUtilsTest(TestCase):
         self.assertNotIn(vanished, modified)
 
     def test_get_files_changed(self):
-        """
-        Test to check if we get the reload targets for files that changed.
+        """A changed file rolls up to its reload target against a caller snapshot.
 
-        `get_files_changed` now returns reload targets, not raw changed files
-        (#274 / D1): a changed A3 command file is rolled up to its platform dir,
-        a `.py` module stays itself. The first call only seeds the snapshot.
+        `get_files_changed` returns (reload targets, new snapshot) (#281 / D3): a
+        changed A3 command file is rolled up to its platform dir, a `.py` module
+        stays itself. The caller owns the baseline snapshot (seeded at connection
+        time), so the test seeds it explicitly, then diffs with RANDOM_FILE bumped.
         """
-        targets = get_files_changed("simnos/plugins/nos")
-        self.assertFalse(targets)  # first call: seed only, no diff
+        roots = ["simnos/plugins/nos"]
+        package_root = "simnos/plugins/nos"
+        snapshot = get_files_lasttime_changed(get_files_under_roots(roots))  # baseline (real mtimes)
         with patch("os.stat", side_effect=mock_os_stat):
-            targets = get_files_changed("simnos/plugins/nos")
+            targets, _new_snapshot = get_files_changed(roots, package_root, snapshot)
         # RANDOM_FILE is the only change, so the result is exactly its rollup target.
-        self.assertEqual(targets, resolve_reload_targets([RANDOM_FILE], "simnos/plugins/nos"))
+        self.assertEqual(targets, resolve_reload_targets([RANDOM_FILE], package_root))
 
     def test_get_files_changed_null(self):
-        """
-        Test to check if we don't get the files that have been changed
-        """
-        targets = get_files_changed("simnos/plugins/nos")
-        self.assertFalse(targets)
-        targets = get_files_changed("simnos/plugins/nos")
+        """No change against a freshly-seeded snapshot yields no reload targets."""
+        roots = ["simnos/plugins/nos"]
+        snapshot = get_files_lasttime_changed(get_files_under_roots(roots))
+        targets, _new_snapshot = get_files_changed(roots, "simnos/plugins/nos", snapshot)
         self.assertFalse(targets)
 
 
@@ -297,49 +272,82 @@ def test_resolve_targets_drops_deleted_platform_dir(tmp_path):
     assert resolve_reload_targets([ghost_yaml, ghost_j2], str(root)) == []
 
 
-@pytest.fixture
-def _clean_watcher():
-    """Reset the module-global watcher snapshot around a test (#274 / D7).
-
-    Same contract as `ShellUtilsTest.setUp/tearDown` and the autouse fixture in
-    `test_cmd_shell_a3.TestA3HotReload` — without it, another test's snapshot
-    (possibly for a different root) leaks phantom changes into this one.
-    """
-    shell_utils._files_lasttime_changed_old.clear()
-    shell_utils._watch_root = None
-    yield
-    shell_utils._files_lasttime_changed_old.clear()
-    shell_utils._watch_root = None
+# --- platform_watch_roots / get_files_under_roots (#281 / D4) ----------------
 
 
-def test_get_files_changed_root_change_reseeds(tmp_path, _clean_watcher):
-    """A changed watch root re-seeds instead of reporting all prior paths (#274 / D7)."""
-    root_a = _make_nos_tree(tmp_path / "a")
-    root_b = _make_nos_tree(tmp_path / "b")
-    assert get_files_changed(str(root_a)) == []  # seed A
-    assert get_files_changed(str(root_b)) == []  # root change -> re-seed, no phantom diff
+def test_platform_watch_roots_a3_dir():
+    """An A3 dir source maps to the dir itself (recursively walked)."""
+    a3_dir = os.path.join("x", "platforms", "cisco_ios")
+    assert platform_watch_roots([a3_dir]) == [a3_dir]
 
 
-def test_get_files_changed_detects_deletion(tmp_path, _clean_watcher):
-    """Deleting a command file rolls up to the (healthy) platform dir (#274 / D7)."""
+def test_platform_watch_roots_legacy_py():
+    """A legacy `<name>.py` maps to the `.py` plus its jinja inputs."""
+    py = os.path.join("x", "platforms_py", "foo.py")
+    base = os.path.join("x", "platforms_py")
+    assert platform_watch_roots([py]) == [
+        py,
+        os.path.join(base, "configurations", "foo.yaml.j2"),
+        os.path.join(base, "templates", "foo"),
+    ]
+
+
+def test_platform_watch_roots_dual_source():
+    """A dual-source platform (A3 dir + py) yields both, the py expanded to its jinja."""
+    a3_dir = os.path.join("x", "platforms", "cisco_ios")
+    py = os.path.join("x", "platforms_py", "cisco_ios.py")
+    base = os.path.join("x", "platforms_py")
+    assert platform_watch_roots([a3_dir, py]) == [
+        a3_dir,
+        py,
+        os.path.join(base, "configurations", "cisco_ios.yaml.j2"),
+        os.path.join(base, "templates", "cisco_ios"),
+    ]
+
+
+def test_platform_watch_roots_unregistered_empty():
+    """An unregistered platform (empty sources) yields no watch roots (graceful, #281 / D4)."""
+    assert platform_watch_roots([]) == []
+
+
+def test_get_files_under_roots_mixes_dir_file_and_skips_missing(tmp_path):
+    """A dir root is walked, a file root is taken as-is, a missing root is skipped (#281 / D4)."""
+    d = tmp_path / "dir"
+    d.mkdir()
+    (d / "a.yaml").write_text("x", encoding="utf-8")
+    mod = tmp_path / "mod.py"
+    mod.write_text("x", encoding="utf-8")
+    missing = str(tmp_path / "nope" / "x.yaml.j2")
+    files = set(get_files_under_roots([str(d), str(mod), missing]))
+    assert files == {str(d / "a.yaml"), str(mod)}
+
+
+# --- get_files_changed pure-function diffs (#281 / D3) -----------------------
+
+
+def test_get_files_changed_detects_deletion(tmp_path):
+    """Deleting a command file rolls up to the (healthy) platform dir (#281 / D3)."""
     root = _make_nos_tree(tmp_path)
     platform_dir = str(root / "platforms" / "cisco_ios")
-    assert get_files_changed(str(root)) == []  # seed
+    roots = [platform_dir]  # per-platform watch root (D2)
+    snapshot = get_files_lasttime_changed(get_files_under_roots(roots))  # baseline
     (root / "platforms" / "cisco_ios" / "commands" / "show.yaml").unlink()
-    assert get_files_changed(str(root)) == [platform_dir]
+    targets, _new_snapshot = get_files_changed(roots, str(root), snapshot)
+    assert targets == [platform_dir]
 
 
-def test_get_files_changed_empty_root_first_file_detected(tmp_path, _clean_watcher):
-    """A file added to an initially-empty root is detected, not swallowed by re-seed.
+def test_get_files_changed_new_file_detected(tmp_path):
+    """A file added after the baseline seed is detected as a new reload target (#281 / D3).
 
-    The seed condition keys on the watch root only: an empty snapshot is a
-    legitimate baseline (a root with no watched files yet). Keying on snapshot
-    emptiness would re-seed on the next poll and swallow the first file ever
-    added (1st code review codex #2, taken in at final-refactor).
+    Mirrors the connection-time seed (an initially-empty snapshot) followed by a
+    new `.py` plugin appearing — the per-shell baseline diffs it as new.
     """
     root = tmp_path / "nos"
-    (root / "platforms_py").mkdir(parents=True)
-    assert get_files_changed(str(root)) == []  # seed: empty but valid baseline
-    newplugin = root / "platforms_py" / "newplugin.py"
+    pyroot = root / "platforms_py"
+    pyroot.mkdir(parents=True)
+    roots = [str(pyroot)]
+    snapshot = get_files_lasttime_changed(get_files_under_roots(roots))  # empty but valid baseline
+    newplugin = pyroot / "newplugin.py"
     newplugin.write_text("NAME = 'x'\n", encoding="utf-8")
-    assert get_files_changed(str(root)) == [str(newplugin)]
+    targets, _new_snapshot = get_files_changed(roots, str(root), snapshot)
+    assert targets == [str(newplugin)]
