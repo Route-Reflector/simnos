@@ -292,6 +292,11 @@ class AsyncSshServer(AsyncServerBase):
             reuse_address=True,
             reuse_port=(sys.platform == "linux"),
         )
+        # Read back the bound port so port=0 (ephemeral, #271) resolves to the real
+        # OS-assigned port. Done here on the loop thread (the create coroutine), so
+        # the start thread never touches the socket. A fixed port reads back its own
+        # value (no-op). `host.port` picks this up after start (Host.start / D4).
+        self.port = self._acceptor.get_port()
         return self._acceptor  # SSHAcceptor satisfies the Listener protocol
 
     def _close_session(self, session: object) -> None:

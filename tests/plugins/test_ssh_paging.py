@@ -94,11 +94,11 @@ def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]], *, platform: 
 
 @contextmanager
 def _running_host(device_type: str):
-    inventory = build_inventory(device_type)
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory(device_type))
     net.start()
     try:
-        yield inventory["hosts"]["device"]["port"]
+        # Real OS-assigned port read back after start (#271).
+        yield net.hosts["device"].port
     finally:
         net.stop()
 

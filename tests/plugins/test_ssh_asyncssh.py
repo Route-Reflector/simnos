@@ -27,6 +27,7 @@ import paramiko
 import pytest
 
 from simnos import SimNOS
+from simnos.core.pydantic_models import EPHEMERAL_PORT
 from simnos.core.shared_loop import LoopState, SharedLoop
 from simnos.plugins.servers.async_server_base import AsyncServerBase
 from simnos.plugins.shell.cmd_shell import CMDShell
@@ -47,33 +48,28 @@ _STRESS_HOSTS = int(os.environ.get("SIMNOS_ASYNC_STRESS_HOSTS", "100"))
 _THREAD_CONVERGE_DEADLINE = 10
 
 
-def _free_ports(n: int) -> list[int]:
-    """Allocate *n* distinct free TCP ports (bound simultaneously, then released)."""
-    socks = []
-    try:
-        for _ in range(n):
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, True)
-            s.bind(("", 0))
-            socks.append(s)
-        return [s.getsockname()[1] for s in socks]
-    finally:
-        for s in socks:
-            s.close()
+def _multi_host_inventory(n: int, device_type: str = "cisco_ios") -> dict:
+    """Build an *n*-host single-platform inventory (hosts ``h0``..``h{n-1}``).
 
-
-def _multi_host_inventory(ports: list[int], device_type: str = "cisco_ios") -> dict:
-    """Build an N-host single-platform inventory keyed by port."""
+    Every host binds an ephemeral port (#271): the OS assigns a free port at bind
+    time, so there is no TOCTOU window for a parallel worker to steal. Read the real
+    ports back with ``_host_ports`` after ``start()``.
+    """
     hosts = {
         f"h{i}": {
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD,
-            "port": port,
+            "port": EPHEMERAL_PORT,
             "device_type": device_type,
         }
-        for i, port in enumerate(ports)
+        for i in range(n)
     }
     return {"hosts": hosts}
+
+
+def _host_ports(net: SimNOS, n: int) -> list[int]:
+    """The real OS-assigned ports of hosts ``h0``..``h{n-1}`` after start (#271)."""
+    return [net.hosts[f"h{i}"].port for i in range(n)]
 
 
 def _run_one_command(port: int, command: bytes, expect: bytes) -> bool:
@@ -124,10 +120,10 @@ def test_async_ssh_100_host_concurrent_no_failures():
     thread (executor convergence — the dispatch worker pool is released).
     """
     n = _STRESS_HOSTS
-    ports = _free_ports(n)
-    inventory = _multi_host_inventory(ports)
+    inventory = _multi_host_inventory(n)
     baseline = threading.active_count()
     with _running(inventory) as net:
+        ports = _host_ports(net, n)
         with ThreadPoolExecutor(max_workers=n) as pool:
             results = list(pool.map(lambda p: _run_one_command(p, b"show vlan\r", b"VLAN Name"), ports))
         assert all(results), f"{results.count(False)}/{n} concurrent sessions failed"
@@ -143,41 +139,42 @@ def test_async_ssh_100_host_concurrent_no_failures():
 
 def test_partial_stop_keeps_other_host_serving():
     """Stopping one async host leaves the loop up and the other host reachable (§1)."""
-    ports = _free_ports(2)
-    inventory = _multi_host_inventory(ports)
-    with _running(inventory) as net:
+    with _running(_multi_host_inventory(2)) as net:
+        # Capture the resolved ephemeral ports while both are up (stop() does not
+        # reset host.port, so h0's port stays readable after it is stopped).
+        h0_port, h1_port = _host_ports(net, 2)
         # Stop only h0; the shared loop must keep running for h1.
         net.stop(hosts=["h0"])
         assert net._shared_loop.state is LoopState.RUNNING
         assert net._shared_loop.refcount == 1
         # h1 still serves.
-        assert _run_one_command(ports[1], b"show vlan\r", b"VLAN Name")
+        assert _run_one_command(h1_port, b"show vlan\r", b"VLAN Name")
         # h0's port is free again (listener released) — a fresh connect is refused.
         with pytest.raises((ConnectionRefusedError, OSError)):
-            socket.create_connection((_HOST, ports[0]), timeout=2).close()
+            socket.create_connection((_HOST, h0_port), timeout=2).close()
 
 
 def test_restart_after_full_stop():
     """A host can be stopped and started again on the same SimNOS (restart, §1)."""
-    ports = _free_ports(1)
-    inventory = _multi_host_inventory(ports)
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=_multi_host_inventory(1))
     try:
         net.start()
-        assert _run_one_command(ports[0], b"show vlan\r", b"VLAN Name")
+        # The ephemeral port resolves on first start and stays fixed across
+        # stop→start (Host.stop does not reset host.port, #271 / D4).
+        (port,) = _host_ports(net, 1)
+        assert _run_one_command(port, b"show vlan\r", b"VLAN Name")
         net.stop()
         assert net._shared_loop.state is LoopState.STOPPED
         net.start()  # restart: loop lazily recreated
         assert net._shared_loop.state is LoopState.RUNNING
-        assert _run_one_command(ports[0], b"show vlan\r", b"VLAN Name")
+        assert _run_one_command(port, b"show vlan\r", b"VLAN Name")
     finally:
         net.stop()
 
 
 def test_double_stop_is_idempotent():
     """Calling stop twice must not raise and leaves the loop STOPPED (§1a)."""
-    ports = _free_ports(1)
-    with _running(_multi_host_inventory(ports)) as net:
+    with _running(_multi_host_inventory(1)) as net:
         net.stop()
         net.stop()  # second stop is a no-op
         assert net._shared_loop.state is LoopState.STOPPED
@@ -196,9 +193,8 @@ def test_start_failure_converges_with_no_leak(monkeypatch):
 
     monkeypatch.setattr(asyncssh, "create_server", _failing_create)
 
-    (port,) = _free_ports(1)
     baseline = threading.active_count()
-    net = SimNOS(inventory=_multi_host_inventory([port]))
+    net = SimNOS(inventory=_multi_host_inventory(1))
     try:
         with pytest.raises(OSError, match="simulated bind failure"):
             net.start()
@@ -237,8 +233,7 @@ def test_start_timeout_closes_late_acceptor(monkeypatch):
     monkeypatch.setattr("simnos.plugins.servers.async_server_base._CREATE_LISTENER_TIMEOUT", 0.3)
     monkeypatch.setattr(asyncssh, "create_server", _slow_create)
 
-    (port,) = _free_ports(1)
-    net = SimNOS(inventory=_multi_host_inventory([port]))
+    net = SimNOS(inventory=_multi_host_inventory(1))
     try:
         with pytest.raises(TimeoutError):
             net.start()
@@ -312,8 +307,8 @@ def test_stop_converges_with_inflight_slow_dispatch(monkeypatch):
 
     monkeypatch.setattr(CMDShell, "dispatch", slow_dispatch)
 
-    (port,) = _free_ports(1)
-    with _running(_multi_host_inventory([port])) as net:
+    with _running(_multi_host_inventory(1)) as net:
+        (port,) = _host_ports(net, 1)
         sock = socket.create_connection((_HOST, port), timeout=10)
         transport = paramiko.Transport(sock)
         try:
@@ -344,13 +339,14 @@ def _write_authorized_keys(tmp_path, key: paramiko.PKey) -> str:
     return str(path)
 
 
-def _host_with_authorized_keys(port: int, authorized_keys: str) -> dict:
+def _host_with_authorized_keys(authorized_keys: str) -> dict:
+    """Single host ``device`` on an ephemeral port (#271) with publickey auth configured."""
     return {
         "hosts": {
             "device": {
                 "username": TEST_USERNAME,
                 "password": TEST_PASSWORD,
-                "port": port,
+                "port": EPHEMERAL_PORT,
                 "device_type": "cisco_ios",
                 "server": {
                     "plugin": "AsyncSshServer",
@@ -363,10 +359,10 @@ def _host_with_authorized_keys(port: int, authorized_keys: str) -> dict:
 
 def test_publickey_auth_accepts_authorized_key(tmp_path):
     """An authorized public key authenticates (asyncssh validate_public_key)."""
-    (port,) = _free_ports(1)
     key = paramiko.RSAKey.generate(2048)
-    inventory = _host_with_authorized_keys(port, _write_authorized_keys(tmp_path, key))
-    with _running(inventory):
+    inventory = _host_with_authorized_keys(_write_authorized_keys(tmp_path, key))
+    with _running(inventory) as net:
+        port = net.hosts["device"].port
         sock = socket.create_connection((_HOST, port), timeout=10)
         transport = paramiko.Transport(sock)
         try:
@@ -399,16 +395,17 @@ def test_publickey_advertised_only_with_authorized_keys(tmp_path):
     into the auth-retry SERVICE_REQUEST-resend disconnect; password-first clients
     are unaffected either way.
     """
-    (no_keys_port, keys_port) = _free_ports(2)
     key = paramiko.RSAKey.generate(2048)
-    authed = _host_with_authorized_keys(keys_port, _write_authorized_keys(tmp_path, key))
+    authed = _host_with_authorized_keys(_write_authorized_keys(tmp_path, key))
 
-    with _running(_multi_host_inventory([no_keys_port])):
+    with _running(_multi_host_inventory(1)) as net:
+        (no_keys_port,) = _host_ports(net, 1)
         methods = _advertised_auth_methods(no_keys_port)
         assert "password" in methods
         assert "publickey" not in methods  # no keys -> not advertised
 
-    with _running(authed):
+    with _running(authed) as net:
+        keys_port = net.hosts["device"].port
         methods = _advertised_auth_methods(keys_port)
         assert "publickey" in methods  # keys configured -> advertised
 
@@ -420,19 +417,18 @@ def test_mixed_ssh_async_and_telnet():
     shared loop (refcount == 2, managed_threads == []), both serve, and a full stop
     returns the loop to STOPPED and the process to its thread baseline (§1).
     """
-    ssh_port, telnet_port = _free_ports(2)
     inventory = {
         "hosts": {
             "ssh": {
                 "username": TEST_USERNAME,
                 "password": TEST_PASSWORD,
-                "port": ssh_port,
+                "port": EPHEMERAL_PORT,
                 "device_type": "cisco_ios",
             },
             "telnet": {
                 "username": TEST_USERNAME,
                 "password": TEST_PASSWORD,
-                "port": telnet_port,
+                "port": EPHEMERAL_PORT,
                 "device_type": "cisco_ios",
                 "server": {"plugin": "TelnetServer", "configuration": {"address": "127.0.0.1"}},
             },
@@ -440,6 +436,8 @@ def test_mixed_ssh_async_and_telnet():
     }
     baseline = threading.active_count()
     with _running(inventory) as net:
+        ssh_port = net.hosts["ssh"].port
+        telnet_port = net.hosts["telnet"].port
         assert _run_one_command(ssh_port, b"show vlan\r", b"VLAN Name")
         # Telnet is async too now: both hosts are registered on the shared loop.
         telnet_out = asyncio.run(telnet_login_run(telnet_port, b"show vlan\r", marker=b"device>"))

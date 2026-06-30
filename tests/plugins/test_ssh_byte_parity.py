@@ -120,11 +120,12 @@ def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]], *, platform: 
 @contextmanager
 def _running_host(device_type: str):
     """Start a single-host SimNOS for *device_type* and yield its port; auto-stop."""
-    inventory = build_inventory(device_type)
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory(device_type))
     net.start()
     try:
-        yield inventory["hosts"]["device"]["port"]
+        # Read the real OS-assigned port back after start (#271): the inventory dict
+        # keeps the ephemeral sentinel 0.
+        yield net.hosts["device"].port
     finally:
         net.stop()
 

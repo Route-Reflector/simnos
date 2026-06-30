@@ -106,6 +106,9 @@ simnos up
 # Start a single host ad-hoc, without writing an inventory file:
 simnos up --device-type cisco_ios --port 6000
 
+# Start a single host on an OS-assigned ephemeral port (the real port is logged):
+simnos up --device-type cisco_ios --port 0
+
 # Start from an inventory file:
 simnos up -i path/to/inventory.yaml
 
@@ -118,6 +121,11 @@ simnos list-platforms
 built-in 3-host example starts. Ad-hoc credentials default to the built-in
 `user`/`user`; override them with `--username`/`--password`. The log level is set
 with `-l`/`--log-level` after the subcommand (e.g. `simnos up -l DEBUG`).
+
+`--port 0` (and the built-in example used by a bare `simnos up`) binds an
+OS-assigned **ephemeral port** instead of a fixed one — handy when the chosen port
+might already be taken. The real bound port is printed on startup
+(`host <name> listening on <addr>:<port>`), so you know where to connect.
 
 ## Python dictionary
 Although YAML is the easier way to provide inventory data to SIMNOS, using Python dictionary is more flexible and allows for more complex inventory data structures. As a matter of fact, python dictionaries are used internally by SIMNOS to handle the inventory data.
@@ -140,6 +148,17 @@ inventory_data = {
 
 network = SimNOS(inventory=inventory_data)
 ```
+
+!!! tip "Ephemeral ports"
+    Set `"port": 0` to let the OS assign a free port at bind time (useful for
+    parallel tests, where a fixed port can collide). After `network.start()`, read
+    the real port back from `network.hosts["router1"].port` and point your client at
+    it.
+
+    Avoid mixing `port: 0` hosts with an *explicit* port that falls inside the OS
+    ephemeral range (typically high ports): an ephemeral host could be handed that
+    exact port first, making the explicit host fail to bind. Keep explicit ports
+    outside the ephemeral range (e.g. the 6000s) or make every host ephemeral.
 
 As before, in case that you want to create more hosts, you can add them to the `hosts` section:
 
@@ -284,8 +303,9 @@ This configuration will result in SIMNOS running 10 instances of hosts servers n
 
 !!! warning
     If host inventory data contains `replicas` parameter, `port` parameter must be a list
-    of two integers representing range to allocate ports from. If host does not contains
-    `replicas` parameter, `port` must be a positive integer from 1 - 65535 range.
+    of two integers from the 1 - 65535 range representing the range to allocate ports from.
+    If host does not contain `replicas`, `port` must be an integer in 0 - 65535, where `0`
+    means an OS-assigned ephemeral port (see the Ephemeral ports tip above).
 
 ## Generating SSH private key
 
@@ -340,7 +360,7 @@ The following options can be used either in the `default` section or in the `hos
 | `username`    | :person:      | username of the device             | `username: admin`                               |
 | `password`    | :key:         | password of the device             | `password: admin`                               |
 | `device_type` | :station:     | network operating system used      | `device_type: cisco_ios`                        |
-| `port`        | :ship:        | port to connect to                 | `port: 6000`                                    |
+| `port`        | :ship:        | port to connect to (`0` = OS-assigned ephemeral, read back from `host.port`) | `port: 6000`                                    |
 | `replicas`    | :repeat:      | number of hosts to create          | `replicas: 10`                                  |
 | `server`      | :satellite:   | server configuration               | See section [Server options](#server-options)   |
 | `shell`       | :shell:       | shell configuration                | See section [Shell options](#shell-options)     |

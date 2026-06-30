@@ -105,6 +105,12 @@ class Host:
         instance (and orphaning the first one); the SimNOS-level
         orchestration already filters on ``host_running=False`` and never
         double-starts.
+
+        ``port=0`` (ephemeral, #271) is resolved to the OS-assigned real port on
+        the first ``start()`` and written back to ``self.port``. Since ``stop()``
+        does not reset ``self.port``, a later stop→start re-binds that resolved
+        port (not a fresh ephemeral one), keeping the host reachable across
+        restarts.
         """
         if self.running:
             log.debug("Host %s is already running; start() is a no-op", self.name)
@@ -175,6 +181,11 @@ class Host:
         # cannot mask the original error, and the reference/flag reset regardless.
         try:
             self.server.start()
+            # Read back the real bound port so an ephemeral request (port=0, #271)
+            # resolves to the OS-assigned port; a fixed port reads back its own value
+            # (no-op). Clients (netmiko etc.) connect to `host.port`, so this is the
+            # canonical source of the live port after start.
+            self.port = self.server.port
             self.running = True
         except BaseException:
             try:

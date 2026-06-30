@@ -47,11 +47,11 @@ def _make_server(**kwargs) -> TelnetServer:
 @contextmanager
 def _running_telnet_host(device_type: str = "cisco_ios"):
     """Start a single Telnet SimNOS host and yield its port; auto-stop."""
-    inventory = build_inventory(device_type, server=_TELNET_SERVER)
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory(device_type, server=_TELNET_SERVER))
     net.start()
     try:
-        yield inventory["hosts"]["device"]["port"]
+        # Real OS-assigned port read back after start (#271).
+        yield net.hosts["device"].port
     finally:
         net.stop()
 
@@ -192,12 +192,12 @@ def test_telnet_auth_failure_raw_surplus_delivers_message_and_fin():
 @pytest.mark.parametrize("device_type", ["cisco_ios"])
 def test_telnet_serves_after_restart(device_type):
     """A Telnet host survives stop→start on the shared loop (no EADDRINUSE)."""
-    inventory = build_inventory(device_type, server=_TELNET_SERVER)
-    port = inventory["hosts"]["device"]["port"]
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory(device_type, server=_TELNET_SERVER))
     net.start()
     net.stop()
     net.start()
+    # Real OS-assigned port read back after start (#271); stop→start keeps it fixed.
+    port = net.hosts["device"].port
     try:
         out = asyncio.run(telnet_login_run(port, b"show vlan\r", marker=b"device>"))
         assert b"VLAN Name" in out
@@ -217,10 +217,10 @@ def test_telnet_stop_drains_active_session():
     release = threading.Event()
     saw_eof = threading.Event()
 
-    inventory = build_inventory("cisco_ios", server=_TELNET_SERVER)
-    port = inventory["hosts"]["device"]["port"]
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory("cisco_ios", server=_TELNET_SERVER))
     net.start()
+    # Real OS-assigned port read back after start (#271).
+    port = net.hosts["device"].port
 
     def _client():
         async def _run():

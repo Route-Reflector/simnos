@@ -104,6 +104,9 @@ simnos up
 # インベントリファイルを書かずに単一ホストをアドホック起動:
 simnos up --device-type cisco_ios --port 6000
 
+# OS 割り当ての ephemeral ポートで単一ホストを起動 (実ポートはログに出力):
+simnos up --device-type cisco_ios --port 0
+
 # インベントリファイルから起動:
 simnos up -i path/to/inventory.yaml
 
@@ -116,6 +119,11 @@ simnos list-platforms
 3 ホストの例が起動します。アドホックの認証情報は組み込みの `user`/`user` が既定で、
 `--username`/`--password` で上書きできます。ログレベルはサブコマンドの後ろで
 `-l`/`--log-level` を指定します (例: `simnos up -l DEBUG`)。
+
+`--port 0` (および引数なしの `simnos up` が使う組み込みの例) は固定ポートではなく
+OS 割り当ての **ephemeral ポート** にバインドします (選んだポートが既に使用中かも
+しれない場合に便利)。実際にバインドされたポートは起動時に
+`host <name> listening on <addr>:<port>` として出力されるので、接続先が分かります。
 
 ## Python 辞書
 YAML はインベントリデータを SIMNOS に提供する最も簡単な方法ですが、Python 辞書はより柔軟で、より複雑なインベントリデータ構造を扱えます。実際のところ、Python 辞書は SIMNOS 内部でインベントリデータを処理するために使用されています。
@@ -138,6 +146,16 @@ inventory_data = {
 
 network = SimNOS(inventory=inventory_data)
 ```
+
+!!! tip "Ephemeral ポート"
+    `"port": 0` を指定すると、OS がバインド時に空きポートを割り当てます (固定ポートが
+    衝突しうる並列テストなどで便利)。`network.start()` の後、実際のポートは
+    `network.hosts["router1"].port` から読み戻し、クライアントの接続先に使います。
+
+    `port: 0` のホストと、OS の ephemeral レンジ (通常は高番ポート) 内の *明示*
+    ポートを混在させるのは避けてください。ephemeral ホストがその明示ポートを先に
+    割り当てられ、明示ホストのバインドが失敗しうるためです。明示ポートは ephemeral
+    レンジ外 (例: 6000 番台) にするか、全ホストを ephemeral にしてください。
 
 前と同様に、より多くのホストを作成したい場合は、`hosts` セクションに追加できます:
 
@@ -278,7 +296,7 @@ inventory_data = {
 この設定により、SIMNOS はポート 5001 から 5010 をそれぞれ使用して、`router0` から `router9` までの10個のホストサーバーインスタンスを実行します。これにより、同じ設定を使用するホストのセットを簡単に定義してセットアップをスケールアウトできます。
 
 !!! warning
-    ホストのインベントリデータに `replicas` パラメータが含まれる場合、`port` パラメータはポートを割り当てる範囲を表す2つの整数のリストでなければなりません。ホストに `replicas` パラメータが含まれない場合、`port` は 1〜65535 の範囲の正の整数でなければなりません。
+    ホストのインベントリデータに `replicas` パラメータが含まれる場合、`port` パラメータはポートを割り当てる範囲を表す 1〜65535 の 2 つの整数のリストでなければなりません。ホストに `replicas` パラメータが含まれない場合、`port` は 0〜65535 の整数で、`0` は OS 割り当ての ephemeral ポートを意味します (上記「Ephemeral ポート」tip を参照)。
 
 ## SSH 秘密鍵の生成
 
@@ -332,7 +350,7 @@ print(json.dumps(ModelSimnosInventory.model_json_schema(), indent=4))
 | `username`    | :person:      | デバイスのユーザー名                  | `username: admin`                               |
 | `password`    | :key:         | デバイスのパスワード                  | `password: admin`                               |
 | `device_type` | :station:     | 使用するネットワークオペレーティングシステム | `device_type: cisco_ios`                           |
-| `port`        | :ship:        | 接続するポート                       | `port: 6000`                                    |
+| `port`        | :ship:        | 接続するポート (`0` = OS 割り当ての ephemeral、`host.port` で読み戻し) | `port: 6000`                                    |
 | `replicas`    | :repeat:      | 作成するホスト数                     | `replicas: 10`                                  |
 | `server`      | :satellite:   | サーバー設定                         | [Server options](#server-options) セクションを参照     |
 | `shell`       | :shell:       | シェル設定                           | [Shell options](#shell-options) セクションを参照       |

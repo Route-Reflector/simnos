@@ -104,6 +104,9 @@ class TestSimNOS:
             expected = {**default_config, **expected_hosts[router_name]}
             assert host.username == expected["username"]
             assert host.password == expected["password"]
+            # The default inventory now uses EPHEMERAL_PORT (0, #271); this host is
+            # not started, so the ephemeral port is unresolved and both sides are 0.
+            # The real port only lands on host.port after start() (Host.start / D4).
             assert host.port == expected["port"]
             assert host.server_inventory["plugin"] == "AsyncSshServer"
             if _is_in_docker() and "WSL2" in platform.release():
@@ -295,14 +298,23 @@ class TestSimNOS:
 
     @pytest.mark.parametrize(
         "port",
-        [0, -1, 65536, 100000],
-        ids=["zero", "negative", "above_max", "far_above_max"],
+        [-1, 65536, 100000],
+        ids=["negative", "above_max", "far_above_max"],
     )
     def test_allocate_port_out_of_range(self, port):
-        """Test that _allocate_port_single rejects ports outside 1-65535."""
+        """Test that _allocate_port_single rejects ports outside 1-65535 (0 is ephemeral, #271)."""
         net = SimNOS()
         with pytest.raises(ValueError, match="out of valid range"):
             net._allocate_port_single(port)
+
+    def test_allocate_port_ephemeral_is_noop(self):
+        """port=0 (ephemeral, #271) is a no-op: no range error, no dedup error, and it is
+        never registered in ``allocated_ports`` — so several hosts can all request 0
+        (e.g. the default inventory's 3 hosts) without a spurious 'already in use'."""
+        net = SimNOS()
+        net._allocate_port_single(0)
+        net._allocate_port_single(0)  # second port=0 must not raise "already in use"
+        assert 0 not in net.allocated_ports
 
     def test_allocate_port_boundary_valid(self):
         """Test that port 1 and 65535 are accepted as valid boundary values."""

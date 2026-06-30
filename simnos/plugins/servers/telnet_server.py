@@ -162,9 +162,10 @@ class TelnetServer(AsyncServerBase):
     async def _create_listener(self) -> Listener:
         # Store on self before returning so _abort_failed_start can close it even
         # if start()'s result() already timed out (codex 1st#1). telnetlib3 returns
-        # an asyncio.Server (close() + wait_closed() = the Listener protocol);
-        # asyncio's create_server defaults reuse_address=True on POSIX, so stop→start
-        # does not hit EADDRINUSE (parity with the asyncssh reuse_address bind).
+        # a telnetlib3.server.Server (a wrapper holding the asyncio.Server in
+        # `._server` and proxying close()/wait_closed()/sockets = the Listener
+        # protocol); asyncio's create_server defaults reuse_address=True on POSIX, so
+        # stop→start does not hit EADDRINUSE (parity with the asyncssh reuse_address bind).
         self._acceptor = await telnetlib3.create_server(
             host=self.address,
             port=self.port,
@@ -172,6 +173,15 @@ class TelnetServer(AsyncServerBase):
             encoding=False,  # binary, byte-transparent → shared wire assembly
             connect_maxwait=_CONNECT_MAXWAIT,
         )
+        # Read back the bound port so port=0 (ephemeral, #271) resolves to the real
+        # OS-assigned port. Done here on the loop thread (the create coroutine), so
+        # the start thread never touches the socket. SIMNOS binds a single address,
+        # so `.sockets[0]` is the one listening socket; a fixed port reads back its
+        # own value (no-op). `host.port` picks this up after start (Host.start / D4).
+        # telnetlib3 is untyped; `.sockets` is the documented proxy on the
+        # telnetlib3.server.Server wrapper (the Listener protocol omits it), so the
+        # subscript is suppressed below.
+        self.port = self._acceptor.sockets[0].getsockname()[1]  # ty: ignore[not-subscriptable]
         return self._acceptor
 
     def _close_session(self, session: object) -> None:

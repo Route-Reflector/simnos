@@ -70,11 +70,11 @@ def _assert_or_record(name: str, steps: list[tuple[bytes, bytes]], *, platform: 
 @contextmanager
 def _running_telnet_host(device_type: str):
     """Start a single Telnet SimNOS host for *device_type* and yield its port."""
-    inventory = build_inventory(device_type, server=_TELNET_SERVER)
-    net = SimNOS(inventory=inventory)
+    net = SimNOS(inventory=build_inventory(device_type, server=_TELNET_SERVER))
     net.start()
     try:
-        yield inventory["hosts"]["device"]["port"]
+        # Real OS-assigned port read back after start (#271).
+        yield net.hosts["device"].port
     finally:
         net.stop()
 

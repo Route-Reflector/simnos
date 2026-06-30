@@ -24,7 +24,12 @@ class TestHost:
         shell = {"plugin": "shell_plugin", "configuration": {}}
         nos = {"plugin": "nos_plugin", "configuration": {}}
         net = Mock()
-        net.servers_plugins = {"server_plugin": Mock()}
+        server_plugin = Mock()
+        # Host.start reads back the server's real bound port into host.port (#271 / D4).
+        # Give the mock server a real int so host.port stays a plain int after start
+        # instead of a MagicMock.
+        server_plugin.return_value.port = 22
+        net.servers_plugins = {"server_plugin": server_plugin}
         net.shell_plugins = {"shell_plugin": Mock()}
         net.nos_plugins = {"nos_plugin": Mock()}
         with patch.object(Host, "_check_if_platform_is_supported") as mock_check_platform:
