@@ -5,15 +5,54 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 
 ## Unreleased
 
+<!-- At release, rename this heading to `## v3.0.0 - YYYY-MM-DD`. -->
+
+SIMNOS v3 is a clean rewrite of the SSH/Telnet core and the plugin data
+layout. The breaking changes are consolidated in the migration guide below;
+each links to its detailed entry further down.
+
+**Migration from v2**
+
+_Staying on v2 (migration window)_ — v2 is maintained as a migration window for
+critical / security fixes only. Pin to it until you are ready to move:
+
+- PyPI: `pip install "simnos<3"`
+- Docker: pin the major tag `simnos:2` (do not use `:latest`, which now tracks v3)
+- git: pin the `v2.4.0` tag or the `2.x` maintenance branch
+
+_Upgrading to v3_ — apply each change that affects you:
+
+| If you… | Do this |
+|---|---|
+| use `platform:` in an inventory | Rename the key to `device_type:` — there is no alias, `platform:` is rejected at load (`sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml`). See #266 |
+| configure the `ParamikoSshServer` plugin | Drop it — `AsyncSshServer` is the default SSH plugin; `ssh_key_file` / `ssh_banner` / `authorized_keys` carry over unchanged. See #297 |
+| run `simnos -i inventory.yaml` (or bare `simnos`) | Use the subcommand form: `simnos up -i inventory.yaml` (or `simnos up` for the default inventory). See #267 |
+| hardcode listen port `6000` / `6001` / `6002` | Read the real port from `net.hosts[<name>].port` after `start()` (the CLI logs it); default ports are now OS-assigned. See #271 |
+| set `ruler` / `completekey` in a shell `configuration` block | Remove them — they are rejected at load (`extra="forbid"`). See #303 |
+| rely on `paramiko` pulled in transitively | It is no longer a runtime dependency — depend on it explicitly if your own code imported it. See #297 |
+
+On-the-wire behaviour for scrapers (netmiko / scrapli / ansible) is unchanged
+and pinned by the byte-parity golden — no client-side changes are needed for
+automated tooling that only sends commands and reads output.
+
 **Breaking Changes**
 
 - Rename the inventory key `platform` to `device_type` (v3, #266). There is no compatibility alias: a v2 inventory using `platform:` is rejected at load. Migrate by rewriting the key (`sed -i 's/^\([[:space:]]*\)platform:/\1device_type:/' inventory.yaml`) or pin to v2 (`pip install "simnos<3"`, maintained as a migration window). A `device_type` accepts a platform's internal name, its `netmiko_device_type`, or its `ntc_platform` alias — all resolve to the same platform via the data-driven reverse index (#266)
 - Replace the SSH and Telnet server transports with asynchronous backends on a shared asyncio event loop: SSH now runs on `asyncssh` (was paramiko) and Telnet on `telnetlib3`, both driven by a single push-dispatch session loop (#297). The `ParamikoSshServer` plugin and its inventory configuration are removed — use `AsyncSshServer` (the default SSH plugin); existing `ssh_key_file` / `ssh_banner` / `authorized_keys` options carry over. The bundled DH-GEX moduli file and the paramiko GEX workaround are gone (asyncssh negotiates moduli itself), and `paramiko` is no longer a runtime dependency (retained as a dev dependency for the byte-parity / interop test clients)
+- Restructure the CLI around subcommands: `simnos up` starts server(s) and `simnos list-platforms` lists supported platforms (#267). The v2 flat form (`simnos -i inventory.yaml`, or a bare `simnos` for the default inventory) no longer parses — a subcommand is now required (`simnos up -i inventory.yaml`, or `simnos up` for the default inventory). `up` also gains an ad-hoc single-host mode (`-d/--device-type` with optional `-p/--port`, `-n/--host-name`, `-u/--username`, `-w/--password`) so a one-off platform launches without an inventory file. The `-l/--log-level` and `-r/--reload-commands` flags carry over as shared flags on every subcommand
+- Default listen ports are now OS-assigned (ephemeral) instead of the fixed `6000` / `6001` / `6002` (#271). A no-argument `SimNOS()` (the builtin default inventory) and any inventory host with `port: 0` bind a port chosen atomically by the OS at `bind()` time; read the real port back from `host.port` after `start()` (the CLI logs `host <name> listening on <addr>:<port>`). This removes the cross-worker port-collision flake seen on macOS CI (`OSError: Errno 48`). Callers and tests that hardcoded `6000` must read `net.hosts[<name>].port` instead. The replicas list path still requires explicit `ge=1` ports — ephemeral is single-host only
+- Remove the `ruler` and `completekey` shell-configuration knobs together with the `cmd.Cmd` base class they belonged to (#303). An inventory `configuration` block that still sets them is now rejected at load (`extra="forbid"`) — drop the keys. On-the-wire behaviour for scrapers (netmiko / scrapli / ansible) is unchanged and pinned by the byte-parity golden
 
 **Enhancements**
 
 - Introduce `sys_config.yaml`, a minimal environment-config file (`data_dir`, `variants_policy`) distinct from the topology inventory. Discovered via the `sys_config=` argument, the `SIMNOS_SYS_CONFIG` env var, `./sys_config.yaml`, or `~/.simnos/sys_config.yaml`; `SIMNOS_DATA_DIR` overrides `data_dir`. Establishes the setting precedence `CLI > env > inventory(host > default) > sys_config > builtin`. Both fields are reserved (no-op, warned at load) and wired up in #265 / #267 (#266)
 - Reserve the inventory fields `facts`, `overlay`, and `variants_policy` as the schema vessel for #265. They are validated but consumed by nobody yet; a set-but-inert value is surfaced with a `log.warning` rather than silently ignored (#266)
+- Migrate the plugin platform layout to the A3 directory format: a per-platform `platform.yaml` (modes + prompts) plus one file per command under `commands/*.yaml` with adjacent `.txt` / `.j2` output, replacing the monolithic per-platform YAML (#264). The `command` field is the single source of truth, and a build-time lint (`invoke lint-platform-data`) enforces the encoding / reference / extension conventions. Optional dynamic behaviour still lives in `platforms_py/<nos>.py`
+- Add data-driven facts rendering and per-command output variants (#287). A command's output can be authored as a `.j2` template with an adjacent sidecar `.json` of facts (validated loudly at build time), and a command may declare multiple `variants` selected by `variants_policy` (`int` / `random` with an optional seed), sharing a canonical output and written via a two-phase atomic swap
+- Add an interactive line editor to the SSH session: `?` context help (current-mode command list), Tab completion over the command tree, `↑` / `↓` history, `←` / `→` cursor movement and backspace, layered as a lightweight readline over the push-dispatch loop (#303). Editing sequences are emitted only on interactive keypress, so full-line input from scrapers is untouched and stays byte-parity-identical
+- Add real-device-style command abbreviation: a unique per-token prefix resolves to the full command, with `% Ambiguous command` on a tie and an incomplete-command message on a partial match (#305). Abbreviation is shared by the dispatch core (default-on) and by Tab completion
+- Add terminal paging (`--More--`) for long command output (#307). The page height follows the PTY / Telnet NAWS rows (falling back to `sys_config.paging.default_rows`, default 24); a `terminal length 0`-class command disables paging for the session (the `disables_paging` data flag), and non-interactive clients (netmiko at `height=1000`, scrapers) bypass the pager through a line-count gate that preserves byte parity. The `--More--` string is platform data (`platform.yaml` `paging.more_prompt`, Cisco default `" --More-- "`)
+- Scope the command hot-reload watcher (`SIMNOS_RELOAD_COMMANDS`) to per-shell snapshots and per-platform watches, serialising a shared reload under the host lock so it no longer races concurrent sessions (#281)
 
 ## v2.3.1
 
