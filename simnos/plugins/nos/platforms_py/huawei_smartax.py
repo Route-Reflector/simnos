@@ -99,6 +99,11 @@ commands = {
         "output": HuaweiSmartAX._return,
         "help": "return to user prompt",
         "prompt": ENABLE_PROMPT,
+        # The handler decides `new_mode` at dispatch time (conditional on
+        # current_mode), so the static command dict carries no `new_prompt`.
+        # Flag the transition statically so the netmiko sweep skips it (#115);
+        # #317 supersedes this once A3 authors handlers with a static new_mode.
+        "changes_prompt": True,
     },
     "scroll": {
         "output": None,
@@ -109,6 +114,9 @@ commands = {
         "output": HuaweiSmartAX.disable,
         "help": "exit exec prompt",
         "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
+        # Handler-decided transition (see `return` above) — flag it so the
+        # netmiko sweep skips it (#115).
+        "changes_prompt": True,
     },
     "display board": {
         "output": HuaweiSmartAX.make_display_board,

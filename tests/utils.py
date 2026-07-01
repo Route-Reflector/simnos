@@ -156,7 +156,18 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
             continue
         prompts = options["prompt"]
         new_prompt = options.get("new_prompt")
-        if new_prompt or "alias" in options or options.get("exit") or command in {"exit", "quit", "logout"}:
+        # `changes_prompt` flags a callable-output command whose transition
+        # (`new_mode`/`exit`) is decided at dispatch time and so is invisible to
+        # this static dict read — without it the sweep would run e.g. huawei's
+        # `return`/`disable` and hit a netmiko ReadTimeout (#115; #317 removes the
+        # need once A3 authors handlers with a static new_mode).
+        if (
+            new_prompt
+            or options.get("changes_prompt")
+            or "alias" in options
+            or options.get("exit")
+            or command in {"exit", "quit", "logout"}
+        ):
             continue
         if isinstance(prompts, str):
             prompts = [prompts]

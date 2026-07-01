@@ -45,10 +45,7 @@ SKIP_ENABLE: dict[str, Quirk] = {
 }
 
 # Python-plugin platforms whose "all commands" sweep is xfailed.
-XFAIL_PY_ALL_COMMANDS: dict[str, Quirk] = {
-    "huawei_smartax": Quirk(
-        "callable commands (return/disable) dynamically change the prompt, causing netmiko ReadTimeout",
-        None,
-        "2026-06-08",
-    ),
-}
+# huawei_smartax was xfailed here until #115: its callable `return`/`disable`
+# now carry a static `changes_prompt` flag so the netmiko sweep skips them
+# instead of running them into a ReadTimeout. No platform is currently quirked.
+XFAIL_PY_ALL_COMMANDS: dict[str, Quirk] = {}
