@@ -222,6 +222,18 @@ def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
     cmds.joinpath("goto.yaml").write_text(
         "command: goto enable\ntype: simnos\nmode: [user]\nnew_mode: enable\n", encoding="utf-8"
     )
+    # A partial `transitions` map: valid in user+enable but keyed on enable only,
+    # so in user mode `eff` is None and the command stays put (#317 P-1, claude#3).
+    cmds.joinpath("partial.yaml").write_text(
+        "command: partial\ntype: simnos\nmode: [user, enable]\ntransitions:\n  enable: {new_mode: user}\n",
+        encoding="utf-8",
+    )
+    # A command carrying BOTH a dynamic `handler:` output and a `transitions:`
+    # transition — the two channels are orthogonal (#317 P-1, claude#2).
+    cmds.joinpath("dyn.yaml").write_text(
+        f"command: dyn\ntype: simnos\nmode: [enable]\nhandler: {handler_ref}\ntransitions:\n  enable: {{new_mode: user}}\n",
+        encoding="utf-8",
+    )
     py = tmp_path / "synplat_handlers.py"
     py.write_text(
         "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
@@ -283,12 +295,36 @@ def test_p1_transitions_exit_and_new_mode(tmp_path):
     assert shell.current_mode == "enable"
 
 
-def test_p1_alias_mode_override_dispatch(tmp_path):
-    """The `goto enable` static new_mode still transitions (baseline, unchanged wire, #317 P-1)."""
+def test_p1_static_new_mode_dispatch(tmp_path):
+    """A plain static `new_mode` still transitions unchanged (baseline byte-parity, #317 P-1)."""
     shell = _synthetic_shell(tmp_path)
     body, close = shell._dispatch_general("goto enable")
     assert close is False
     assert shell.current_mode == "enable"
+
+
+def test_p1_partial_transitions_map_stays_when_mode_absent(tmp_path):
+    """A `transitions` map missing the current mode = no transition (#317 P-1, claude#3)."""
+    shell = _synthetic_shell(tmp_path)  # user mode; `partial` keys enable only
+    body, close = shell._dispatch_general("partial")
+    assert close is False
+    assert shell.current_mode == "user"  # stayed — no entry for user
+    # And in enable mode its one entry fires.
+    shell.current_mode = "enable"
+    shell.prompt = "R1#"
+    shell._dispatch_general("partial")
+    assert shell.current_mode == "user"
+
+
+def test_p1_handler_and_transitions_are_orthogonal(tmp_path):
+    """A command with both `handler:` and `transitions:` renders handler output AND transitions (#317 P-1, claude#2)."""
+    shell = _synthetic_shell(tmp_path)
+    shell.current_mode = "enable"  # `dyn` is enable-only
+    shell.prompt = "R1#"
+    body, close = shell._dispatch_general("dyn")
+    assert body == "hello from enable"  # handler output rendered
+    assert close is False
+    assert shell.current_mode == "user"  # transitions[enable] = new_mode user applied
 
 
 # pylint: disable=too-many-public-methods

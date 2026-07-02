@@ -185,7 +185,12 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
         for command, rc in resolved.commands.items():
             if command.startswith("_") and command.endswith("_"):
                 continue
-            if rc.new_mode or rc.exit or command in {"exit", "quit", "logout"}:
+            # `transitions` is the mode-conditional successor to `new_mode` /
+            # `exit` (#317 / P-1): a transitions command changes mode or closes
+            # the session at dispatch time just like the static forms, so the
+            # flat sweep must skip it too (else a future shipped A3 `transitions`
+            # command would be run into a mode change / ReadTimeout).
+            if rc.new_mode or rc.exit or rc.transitions or command in {"exit", "quit", "logout"}:
                 continue
             # Empty `modes` = valid in every mode (legacy prompt-omission
             # successor); a flat sweep reaches it from the initial mode.

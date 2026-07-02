@@ -2,6 +2,7 @@
 File to contain pydantic models for plugins input/output data validation
 """
 
+import keyword
 import os
 from typing import Annotated, Literal
 
@@ -240,7 +241,10 @@ class ModelCommandAuthoring(BaseModel):
         # A handler is a py identifier resolved against the platform's handler
         # namespace at merge time; reject a non-identifier here so a path /
         # dotted / spaced value fails at the authoring boundary, not at bind.
-        if value is not None and not value.isidentifier():
+        # A keyword (`class` / `def`) passes `isidentifier()` but can never name a
+        # real py function, so reject it here for a clear boundary error rather
+        # than a confusing "not found in namespace" at bind (1st round codex#5).
+        if value is not None and (not value.isidentifier() or keyword.iskeyword(value)):
             raise ValueError(f"handler {value!r} must be a valid Python identifier")
         return value
 

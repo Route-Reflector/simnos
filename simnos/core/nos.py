@@ -59,7 +59,10 @@ def _build_handler_namespace(module: types.ModuleType, device_classes: list[type
     """Collect the A3 ``handler:`` name -> callable namespace from a py module (#317 / P-1, 案D).
 
     An A3 command's ``handler: <name>`` is resolved against this namespace at
-    merge time. Two channels:
+    merge time. `device_classes` is the caller's already-validated list (0 or 1
+    entries — `_from_module` rejects >1 local `BaseDevice` subclass before
+    calling this), so the per-class loop is effectively single-class; it is
+    written as a loop only to no-op cleanly on the no-device case. Two channels:
 
     - **device-class methods**: walk the device class MRO, skipping ``BaseDevice``
       / ``object`` (so base utilities like ``render`` are never handlers), and
@@ -68,8 +71,9 @@ def _build_handler_namespace(module: types.ModuleType, device_classes: list[type
       collision). A ``classmethod`` is rejected loudly: its first arg binds to
       ``cls``, which breaks the `CommandHandler` contract (the shell passes the
       device as the first positional). Only a plain method or a ``staticmethod``
-      is a valid handler; a non-callable class attribute (constant / property) is
-      skipped, not misregistered.
+      is a valid handler; anything else on the class (a constant, a ``property``,
+      or a callable *instance* / functor) is skipped, not misregistered — only a
+      real function / staticmethod is a handler (gemini#1).
     - **module-level functions**: locally defined (``__module__ == module.__name__``,
       the `_find_device_classes` criterion) non-``_`` functions — `inspect.isfunction`
       excludes imported callables, classes and callable instances.
