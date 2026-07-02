@@ -109,7 +109,7 @@ def _lookup_mode(prompt_template: str, reverse_map: dict[str, str], *, where: st
     the two are equivalent for these templates (verified by the converter,
     `format_template_to_jinja`), so the lookup matches.
 
-    A malformed / unknown-field prompt (e.g. inventory data with
+    A malformed / unknown-field prompt (e.g. a py dict with
     ``{hostname}``) is validated through that same converter, so it fails with
     a context-tagged ``ValueError`` instead of a bare ``KeyError`` escaping
     from ``str.format`` — symmetric with the output loud boundary (1st round
