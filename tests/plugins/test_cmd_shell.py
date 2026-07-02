@@ -149,7 +149,7 @@ def test_no_do_shell_keeps_bang_fall_through():
 
 
 def _merged_platform(platform: str):
-    """Build the merged (BASIC < A3 < py) `ResolvedPlatform` for a packaged platform.
+    """Build the merged (BASIC < A3) `ResolvedPlatform` for a packaged platform.
 
     Runs the same `Nos -> build_resolved_platform` path a connection takes, but
     over the packaged registry entry (`nos_plugins[...]`) and without a server,
@@ -176,9 +176,12 @@ def _merged_platform(platform: str):
         ("arista_eos", "term width 0", False, {"user", "enable"}, ["Width set to 511 columns."]),
     ],
 )
-def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, paging, modes, body_lines):
-    """A3 `disables_paging` + modes + output reach the merged runtime, unshadowed by the py inflow (#320).
+def test_a3_paging_flag_and_output_reach_merged_runtime(platform, command, paging, modes, body_lines):
+    """A3 `disables_paging` + modes + output reach the merged runtime (#320).
 
+    Originally pinned against the py-inflow shadowing bug class; that inflow is
+    gone from the merge (#317 P-3, a leftover py dict is rejected loudly), so
+    these now pin the A3 data end to end against any future merge rework.
     `_render_response` joins body lines with the newline and absorbs trailing
     newlines (via `splitlines()`), so the projected `body_lines` are the wire
     lines a client sees — pinning the `.txt` bytes the py stubs used to serve.
@@ -277,6 +280,8 @@ def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
         "class SynDev(BaseDevice):\n"
         "    def make_greeting(self, device=None, *, base_prompt, current_mode, current_prompt, command):\n"
         '        return f"hello from {current_mode}"\n'
+        # A vestigial *empty* dict must not trip the P-3 "py dict authoring was
+        # removed" merge guard (only a non-empty one is an authoring attempt).
         "commands = {}\n",
         encoding="utf-8",
     )

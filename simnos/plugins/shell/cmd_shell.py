@@ -157,7 +157,7 @@ def build_resolved_platform(
         legacy = adapt_legacy_commands(
             nos.initial_prompt, nos.enable_prompt, nos.config_prompt, copy.deepcopy(nos.commands or {})
         )
-        commands: dict = dict(BASIC_COMMANDS)
+        commands: dict[str, ResolvedCommand] = dict(BASIC_COMMANDS)
         commands.update(legacy.commands)
         commands.update(_resolve_inventory_commands(inventory_commands, legacy.modes))
         return replace(legacy, commands=commands)

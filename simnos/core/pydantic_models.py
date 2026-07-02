@@ -87,10 +87,10 @@ class ModelNosAttributes(BaseModel):
     `device` / `configuration_file`, #244 / D8).
 
     Kept after the A3 migration removed the legacy yaml loader (#264 / PR-3):
-    `Nos.from_dict` / `validate` (inventory + constructor) and `_from_module`
-    (py plugin) still validate their boundary through this model. Slated for
-    removal when the inventory commands path is reworked in #266; until then
-    deleting it would break py-plugin / inventory loading (Decision 9).
+    `Nos.from_dict` / `validate` (constructor / dict plugins) and `_from_module`
+    (py plugin) still validate their boundary through this model. The inventory
+    commands inflow moved off it in #317 P-3 (`ModelInventoryCommand`); this
+    model goes away with the legacy base layer in P-4.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -444,9 +444,10 @@ class ModelInventoryCommand(BaseModel):
       jinja2 source (an inventory has no adjacent files to reference);
     - no `alias` — a cross-inflow alias (inventory aliasing an A3 command) has
       unresolved semantics and is out of scope (#317 P-3, 案E);
-    - no `type` / `source` / `variants` / `handler` / `disables_paging` —
-      session-local commands have no capture provenance, multi-capture data or
-      py handler namespace to draw from.
+    - no `type` / `source` / `variants` / `handler` — session-local commands
+      have no capture provenance, multi-capture data or py handler namespace to
+      draw from — and no `disables_paging`, which belongs to the audited
+      platform paging data (#307), not a per-host add-on.
     """
 
     model_config = ConfigDict(extra="forbid")
