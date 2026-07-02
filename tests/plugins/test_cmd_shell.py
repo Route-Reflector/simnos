@@ -19,8 +19,9 @@ import yaml
 
 from simnos.core.nos import Nos
 from simnos.core.simnos import SimNOS, simnos
+from simnos.plugins.nos import nos_plugins
 from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell, build_resolved_platform
-from tests.utils import build_inventory, set_attr
+from tests.utils import set_attr
 
 
 def _nos_from_yaml_asset(path: str = "tests/assets/yaml_nos.yaml") -> Nos:
@@ -145,45 +146,45 @@ def test_no_do_shell_keeps_bang_fall_through():
 
 
 def _merged_platform(platform: str):
-    """Build the merged (BASIC < A3 < py) `ResolvedPlatform` for a registered platform.
+    """Build the merged (BASIC < A3 < py) `ResolvedPlatform` for a packaged platform.
 
-    Mirrors what `Host.start` does (Nos over the registered plugin ->
-    `build_resolved_platform`) but without starting a server, so a data-level
-    merge assertion stays fast. No overlay / inventory layer (empty commands).
+    Runs the same `Nos -> build_resolved_platform` path a connection takes, but
+    over the packaged registry entry (`nos_plugins[...]`) and without a server,
+    so a data-level merge assertion stays fast. No overlay / inventory layer.
     """
-    net = SimNOS(inventory=build_inventory(platform))
-    plugin = net.nos_plugins.get(platform)
-    nos = plugin if isinstance(plugin, Nos) else Nos(filename=plugin)
-    return build_resolved_platform(nos, {})
+    return build_resolved_platform(Nos(filename=nos_plugins[platform]), {})
 
 
 @pytest.mark.parametrize(
-    ("platform", "command", "paging", "body_lines"),
+    ("platform", "command", "paging", "modes", "body_lines"),
     [
         # huawei `scroll` / arista `terminal length 0` carry `disables_paging:
         # true` only in their A3 command; the empty legacy py stubs used to
         # shadow them (py wins the merge and cannot carry the flag), so the P3-4
         # pager never disabled at runtime. #320 dropped the stubs so A3 wins.
-        ("huawei_smartax", "scroll", True, None),
-        ("arista_eos", "terminal length 0", True, ["Pagination disabled."]),
-        # The `term …` alias inherits the target's flag + body via the loader.
-        ("arista_eos", "term length 0", True, ["Pagination disabled."]),
+        ("huawei_smartax", "scroll", True, {"user", "enable"}, None),
+        ("arista_eos", "terminal length 0", True, {"user", "enable"}, ["Pagination disabled."]),
+        # The `term …` alias inherits the target's flag + modes + body via the loader.
+        ("arista_eos", "term length 0", True, {"user", "enable"}, ["Pagination disabled."]),
         # `terminal width 511` moved to A3 in the same sweep (its alias `term
         # width 0` would otherwise dangle); it carries no flag, so pin False to
         # guard against an over-broad disable.
-        ("arista_eos", "terminal width 511", False, ["Width set to 511 columns."]),
-        ("arista_eos", "term width 0", False, ["Width set to 511 columns."]),
+        ("arista_eos", "terminal width 511", False, {"user", "enable"}, ["Width set to 511 columns."]),
+        ("arista_eos", "term width 0", False, {"user", "enable"}, ["Width set to 511 columns."]),
     ],
 )
-def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, paging, body_lines):
-    """A3 `disables_paging` + output reach the merged runtime, unshadowed by the py inflow (#320).
+def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, paging, modes, body_lines):
+    """A3 `disables_paging` + modes + output reach the merged runtime, unshadowed by the py inflow (#320).
 
     `_render_response` joins body lines with the newline and absorbs trailing
     newlines (via `splitlines()`), so the projected `body_lines` are the wire
     lines a client sees — pinning the `.txt` bytes the py stubs used to serve.
+    The `modes` assert pins the mode constraint the py `prompt: [...]` used to
+    carry, so an A3 `mode:` narrowing (e.g. dropping `user`) fails here.
     """
     rc = _merged_platform(platform).commands[command]
     assert rc.disables_paging is paging
+    assert rc.modes == modes
     rendered = rc.output.render("x")
     assert (rendered.splitlines() if rendered is not None else None) == body_lines
 
