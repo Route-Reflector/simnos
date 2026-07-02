@@ -2,6 +2,7 @@
 File to contain pydantic models for plugins input/output data validation
 """
 
+import keyword
 import os
 from typing import Annotated, Literal
 
@@ -159,16 +160,45 @@ class ModelCommandVariant(BaseModel):
         return value
 
 
+class ModelTransition(BaseModel):
+    """One mode's entry in a command's `transitions` map (#317 / P-1).
+
+    Exactly one of `new_mode` / `exit` must be set: ``exit: true`` terminates the
+    session, ``new_mode: <mode>`` switches mode after the command runs. Both-set,
+    neither-set and ``exit: false`` are all rejected — an empty or ambiguous entry
+    is an authoring error, not a silent no-op. The mode name(s) (the map keys) and
+    each `new_mode` value are validated against the platform modes by the loader.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    new_mode: StrictStr | None = None
+    exit: StrictBool | None = None
+
+    @model_validator(mode="after")
+    def _exactly_one(self) -> "ModelTransition":
+        if self.exit is not None and not self.exit:
+            raise ValueError("transition `exit` must be true — omit it entirely for a `new_mode` transition")
+        if (self.new_mode is not None) == bool(self.exit):
+            raise ValueError("a transition entry must set exactly one of `new_mode` or `exit: true`")
+        return self
+
+
 class ModelCommandAuthoring(BaseModel):
     """A3 per-command authoring schema (#264 / D3).
 
     One file = one command; `command` is the SSoT key (Decision 1), the
     filename is non-semantic. Exactly one output channel may be set
-    (`output` / `output_template` / `variants`, and `variants` may not be the
-    empty list); all absent = no output. An `alias` is a pure reference: it may
-    carry only `command` + `help` (Decision 6). `_default_` is the unconditional
-    fallback, so authoring a `mode` / `new_mode` / `alias` on it is rejected — it
-    must stay mode-agnostic and must not inherit a target's modes (Decision 7).
+    (`output` / `output_template` / `variants` / `handler`, and `variants` may
+    not be the empty list); all absent = no output. `handler` names a py-defined
+    callable resolved at merge time (#317 / P-1). Transitions are either the
+    simple static `new_mode` / `exit`, or the mode-conditional `transitions` map
+    (exclusive with them). An `alias` is a reference: it may carry only
+    `command` + `help` + a `mode:` override (#317 / P-1); all other dispatch
+    fields are inherited from the target, not re-authored. `_default_` is the
+    unconditional fallback, so authoring a `mode` / `new_mode` / `transitions` /
+    `alias` on it is rejected — it must stay mode-agnostic and must not inherit a
+    target's modes (Decision 7).
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -183,6 +213,14 @@ class ModelCommandAuthoring(BaseModel):
     output: StrictStr | None = None
     output_template: StrictStr | None = None
     variants: list[ModelCommandVariant] | None = None
+    # Fourth (dynamic) output channel: the name of a py-defined handler callable
+    # (#317 / P-1). The loader records it as a `handler_ref`; the merge binds the
+    # actual callable from the platform's py handler namespace.
+    handler: StrictStr | None = None
+    # Mode-conditional transition map (#317 / P-1), exclusive with `new_mode` /
+    # `exit`. Keys are mode names the command is valid in; each entry decides the
+    # transition for that mode (see `ModelTransition`).
+    transitions: dict[StrictStr, ModelTransition] | None = None
     exit: StrictBool | None = None
     alias: StrictStr | None = None
     # Session-level "disable paging" flag (#307 / P3-4). Set on the real command
@@ -196,6 +234,19 @@ class ModelCommandAuthoring(BaseModel):
     @classmethod
     def _safe_output(cls, value: str | None) -> str | None:
         return _reject_unsafe_output_ref(value)
+
+    @field_validator("handler")
+    @classmethod
+    def _valid_handler(cls, value: str | None) -> str | None:
+        # A handler is a py identifier resolved against the platform's handler
+        # namespace at merge time; reject a non-identifier here so a path /
+        # dotted / spaced value fails at the authoring boundary, not at bind.
+        # A keyword (`class` / `def`) passes `isidentifier()` but can never name a
+        # real py function, so reject it here for a clear boundary error rather
+        # than a confusing "not found in namespace" at bind (1st round codex#5).
+        if value is not None and (not value.isidentifier() or keyword.iskeyword(value)):
+            raise ValueError(f"handler {value!r} must be a valid Python identifier")
+        return value
 
     @field_validator("mode")
     @classmethod
@@ -227,22 +278,26 @@ class ModelCommandAuthoring(BaseModel):
     @model_validator(mode="after")
     def _check_combination(self) -> "ModelCommandAuthoring":
         if self.alias is not None:
+            # An alias inherits every dispatch field from its target; it may
+            # re-author only `mode` (a mode-set override, #317 / P-1) alongside
+            # `command` + `help`. Everything else is forbidden.
             forbidden = {
                 "type": self.type,
                 "source": self.source,
-                "mode": self.mode,
                 "new_mode": self.new_mode,
                 "output": self.output,
                 "output_template": self.output_template,
                 "variants": self.variants,
+                "handler": self.handler,
+                "transitions": self.transitions,
                 "exit": self.exit,
                 "disables_paging": self.disables_paging,
             }
             present = sorted(k for k, v in forbidden.items() if v is not None)
             if present:
                 raise ValueError(
-                    f"command {self.command!r}: alias is a pure reference and cannot also set {present} "
-                    "(only `command` and `help` are allowed alongside `alias`) (#264 / Decision 6)"
+                    f"command {self.command!r}: alias cannot also set {present} "
+                    "(only `command`, `help` and a `mode:` override are allowed alongside `alias`) (#317 / P-1)"
                 )
         else:
             if self.type is None:
@@ -253,6 +308,7 @@ class ModelCommandAuthoring(BaseModel):
                     ("output", self.output),
                     ("output_template", self.output_template),
                     ("variants", self.variants),
+                    ("handler", self.handler),
                 )
                 if v is not None
             )
@@ -260,11 +316,23 @@ class ModelCommandAuthoring(BaseModel):
                 raise ValueError(
                     f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
                 )
+            # `transitions` is the mode-conditional alternative to the simple
+            # static `new_mode` / `exit`; setting both is ambiguous (#317 / P-1).
+            if self.transitions is not None:
+                conflict = sorted(
+                    name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None
+                )
+                if conflict:
+                    raise ValueError(
+                        f"command {self.command!r}: `transitions` is exclusive with {conflict} (#317 / P-1)"
+                    )
+                if not self.transitions:
+                    raise ValueError(f"command {self.command!r}: `transitions: {{}}` is empty — omit it (#317 / P-1)")
         if self.command == "_default_":
-            if self.mode is not None or self.new_mode is not None:
+            if self.mode is not None or self.new_mode is not None or self.transitions is not None:
                 raise ValueError(
-                    "command '_default_': `mode` / `new_mode` are rejected — the fallback is mode-agnostic "
-                    "(runtime never matches its mode, would be dead data) (#264 / Decision 7)"
+                    "command '_default_': `mode` / `new_mode` / `transitions` are rejected — the fallback is "
+                    "mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
                 )
             # An aliased `_default_` would inherit the target's modes/new_mode via
             # the loader's `replace(target, ...)`, splitting `_default_` semantics

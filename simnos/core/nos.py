@@ -4,13 +4,18 @@ Network Operating Systems (NOS). Base class to build NOS plugins instances to us
 
 import copy
 import importlib.util
+import inspect
 import logging
 import os
 import types
+from typing import TYPE_CHECKING
 
 from simnos.core.platform_loader import load_platform_dir
 from simnos.core.pydantic_models import ModelNosAttributes
 from simnos.core.resolved_command import ResolvedPlatform
+
+if TYPE_CHECKING:
+    from simnos.core.command_contract import CommandHandler
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +53,70 @@ def _find_device_classes(module: types.ModuleType) -> list[type]:
             and obj.__module__ == module.__name__
         )
     )
+
+
+def _build_handler_namespace(module: types.ModuleType, device_classes: list[type]) -> dict[str, "CommandHandler"]:
+    """Collect the A3 ``handler:`` name -> callable namespace from a py module (#317 / P-1, 案D).
+
+    An A3 command's ``handler: <name>`` is resolved against this namespace at
+    merge time. `device_classes` is the caller's already-validated list (0 or 1
+    entries — `_from_module` rejects >1 local `BaseDevice` subclass before
+    calling this), so the per-class loop is effectively single-class; it is
+    written as a loop only to no-op cleanly on the no-device case. Two channels:
+
+    - **device-class methods**: walk the device class MRO, skipping ``BaseDevice``
+      / ``object`` (so base utilities like ``render`` are never handlers), and
+      take each non-``_`` name defined on that class. A more-derived class's
+      override wins (normal Python method resolution — an MRO same-name is NOT a
+      collision). A ``classmethod`` is rejected loudly: its first arg binds to
+      ``cls``, which breaks the `CommandHandler` contract (the shell passes the
+      device as the first positional). Only a plain method or a ``staticmethod``
+      is a valid handler; anything else on the class (a constant, a ``property``,
+      or a callable *instance* / functor) is skipped, not misregistered — only a
+      real function / staticmethod is a handler (gemini#1).
+    - **module-level functions**: locally defined (``__module__ == module.__name__``,
+      the `_find_device_classes` criterion) non-``_`` functions — `inspect.isfunction`
+      excludes imported callables, classes and callable instances.
+
+    A name appearing in BOTH channels is a load-time error (no implicit
+    precedence — fail at startup). The caller assigns the result as a fresh dict
+    (rollback-safe under hot reload).
+    """
+    from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+
+    class_ns: dict[str, CommandHandler] = {}
+    for device_cls in device_classes:
+        for cls in device_cls.__mro__:
+            if cls in (BaseDevice, object):
+                continue
+            for name, raw in vars(cls).items():
+                # A more-derived class earlier in the MRO already claimed this
+                # name (override) — skip the base definition.
+                if name.startswith("_") or name in class_ns:
+                    continue
+                if isinstance(raw, classmethod):
+                    raise ValueError(
+                        f"handler {name!r} on {cls.__name__} is a classmethod; a command handler must take the "
+                        "device as its first argument (a plain method or staticmethod), not `cls`"
+                    )
+                if isinstance(raw, staticmethod) or inspect.isfunction(raw):
+                    # `getattr` on the leaf class resolves the descriptor (a
+                    # staticmethod unwraps to its plain function, a method to the
+                    # underlying function that takes the device as the first arg).
+                    class_ns[name] = getattr(device_cls, name)
+                # else: a non-callable class attribute is not a handler — skip it.
+    module_ns: dict[str, CommandHandler] = {
+        name: obj
+        for name, obj in vars(module).items()
+        if not name.startswith("_") and inspect.isfunction(obj) and obj.__module__ == module.__name__
+    }
+    collision = class_ns.keys() & module_ns.keys()
+    if collision:
+        raise ValueError(
+            f"handler name(s) {sorted(collision)} are defined both as a device-class method and a module-level "
+            "function; a handler name must be unambiguous (rename one)"
+        )
+    return {**class_ns, **module_ns}
 
 
 class Nos:
@@ -96,6 +165,11 @@ class Nos:
         self.enable_prompt: str | None = None
         self.config_prompt: str | None = None
         self.device = None
+        # A3 ``handler:`` namespace (#317 / P-1): name -> callable, populated by
+        # `_from_module` from the py plugin's device class + module-level
+        # functions. `build_resolved_platform` binds A3 handler refs against it.
+        # Rebuilt (fresh dict) on hot reload, so it is a `_NOS_RELOAD_ATTRS` member.
+        self.handlers: dict[str, CommandHandler] = {}
         self.configuration_file = configuration_file
         # A3 form (#264 / PR-2): an A3 platform dir loads straight into a
         # `ResolvedPlatform` (modes + resolved commands) here, instead of the
@@ -225,7 +299,11 @@ class Nos:
         is auto-detected as the module's single locally-defined `BaseDevice`
         subclass, if any (see `_find_device_classes` — the legacy
         ``DEVICE_NAME`` constant is ignored with a warning since #241).
-        See :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
+        The A3 ``handler:`` namespace (`self.handlers`) is also built here from
+        the device class methods + module-level functions (see
+        `_build_handler_namespace`) so an A3 platform's `handler:` refs bind at
+        merge time (#317 / P-1). See
+        :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
 
         :param filename: OS path string to Python .py file
         """
@@ -273,6 +351,11 @@ class Nos:
                 f"Module '{filename}' defines multiple BaseDevice subclasses "
                 f"({', '.join(sorted(c.__name__ for c in device_classes))}); expected exactly one"
             )
+        # Build the A3 handler namespace before mutating self (#317 / P-1): a
+        # classmethod handler / a class-vs-module name collision raises here, so
+        # a broken plugin never leaves partial state (same no-partial contract as
+        # the device-class / commands validation above).
+        new_handlers = _build_handler_namespace(module, device_classes)
         if hasattr(module, "DEVICE_NAME"):
             # G4 (#241) removed the DEVICE_NAME indirection; the device class
             # is auto-detected now. Nudge plugin authors to drop the leftover.
@@ -302,6 +385,11 @@ class Nos:
                 sorted(overridden),
             )
         self.commands.update(candidate_commands)
+        # Fresh dict (never in-place `.update`): `_NOS_RELOAD_ATTRS` snapshots
+        # `handlers` by reference for hot-reload rollback, so a mutable in-place
+        # update could not be rolled back. Cumulative later-wins across a
+        # multi-file load, mirroring `self.commands` (#317 / P-1, 案D).
+        self.handlers = {**self.handlers, **new_handlers}
         if self.name == "SimNOS":
             log.warning(
                 "Module '%s' does not define NAME; falling back to default 'SimNOS' "

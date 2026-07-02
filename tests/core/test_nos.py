@@ -6,6 +6,7 @@ This module can be found at simnos/core/nos.py
 import copy
 import logging
 import os
+import types
 
 from pydantic import ValidationError
 import pytest
@@ -547,6 +548,100 @@ def test_from_module_override_logs_debug(caplog):
     assert any("overrides 1 already-loaded command(s)" in msg and "show clock" in msg for msg in debug_msgs)
     # Full replacement: the module's callable output wins over the yaml str.
     assert callable(nos.commands["show clock"]["output"])
+
+
+class TestHandlerNamespace:
+    """`Nos._from_module` builds the A3 `handler:` namespace (#317 / P-1, 案D)."""
+
+    def test_collects_methods_and_module_functions(self, tmp_path):
+        py = _write_tmp_file(
+            tmp_path,
+            "handlers_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "h1"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            "class Dev(BaseDevice):\n"
+            "    def make_a(self, device=None, **kw):\n"
+            '        return "a"\n'
+            "    @staticmethod\n"
+            "    def make_b(device=None, **kw):\n"
+            '        return "b"\n'
+            "    def _private(self):\n"  # underscore -> excluded
+            '        return "x"\n'
+            "def make_c(device=None, **kw):\n"  # module-level function
+            '    return "c"\n'
+            "commands = {}\n",
+        )
+        nos = Nos()
+        nos.from_file(py)
+        # method + staticmethod + module-level function collected; `_private` excluded.
+        assert set(nos.handlers) == {"make_a", "make_b", "make_c"}
+
+    def test_rejects_classmethod_handler(self, tmp_path):
+        py = _write_tmp_file(
+            tmp_path,
+            "classmethod_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "hc"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            "class Dev(BaseDevice):\n"
+            "    @classmethod\n"
+            "    def make_a(cls, device=None, **kw):\n"
+            '        return "a"\n'
+            "commands = {}\n",
+        )
+        nos = Nos()
+        with pytest.raises(ValueError, match="classmethod"):
+            nos.from_file(py)
+
+    def test_rejects_class_module_name_collision(self, tmp_path):
+        py = _write_tmp_file(
+            tmp_path,
+            "collision_plugin.py",
+            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            'NAME = "hx"\n'
+            'INITIAL_PROMPT = "{base_prompt}>"\n'
+            "class Dev(BaseDevice):\n"
+            "    def make_a(self, device=None, **kw):\n"
+            '        return "method"\n'
+            "def make_a(device=None, **kw):\n"  # same name at module level -> loud
+            '    return "func"\n'
+            "commands = {}\n",
+        )
+        nos = Nos()
+        with pytest.raises(ValueError, match="unambiguous"):
+            nos.from_file(py)
+
+    def test_mro_override_and_inherited_base(self):
+        # The MRO walk (#317 / P-1) tested directly on `_build_handler_namespace`:
+        # `_from_module` allows only ONE local BaseDevice subclass, so a custom
+        # intermediate base is realistically an *imported* class (different
+        # `__module__`); here we build the class hierarchy in-process and hand it
+        # to the namespace builder. A derived override wins (normal method
+        # resolution, not a collision, 3rd round codex#3); a handler defined only
+        # on the intermediate base is still collected (gemini#1).
+        from simnos.core.nos import _build_handler_namespace
+        from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+
+        class Mid(BaseDevice):
+            def make_shared(self, device=None, **kw):
+                return "shared"
+
+            def make_a(self, device=None, **kw):
+                return "base"
+
+        class Dev(Mid):
+            def make_own(self, device=None, **kw):
+                return "own"
+
+            def make_a(self, device=None, **kw):  # override
+                return "derived"
+
+        module = types.ModuleType("m")  # no module-level functions
+        ns = _build_handler_namespace(module, [Dev])
+        assert {"make_shared", "make_a", "make_own"} == set(ns)
+        # Derived version wins (getattr on the leaf class resolves the override).
+        assert ns["make_a"](None, base_prompt="R1", current_mode="user", current_prompt="R1>", command="x") == "derived"
 
 
 def test_register_nos_plugin_directly():

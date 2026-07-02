@@ -181,6 +181,13 @@ class ResolvedOutput:
     text: str | None = None
     template: Template | None = None
     handler: "CommandHandler | None" = None
+    # For an A3-authored ``handler:`` command, the referenced handler name (an
+    # identifier). The loader records it here with ``handler=None``; the merge
+    # (`build_resolved_platform`) binds the actual callable from the platform's
+    # py handler namespace, so an unresolved ref fails loudly at start rather
+    # than being a silent no-output command (#317 / P-1, 案D). The legacy adapter
+    # sets ``handler`` directly and leaves this None.
+    handler_ref: str | None = None
     required_vars: frozenset[str] = frozenset()
     values: Mapping[str, Any] = field(default_factory=dict)
 
@@ -226,6 +233,22 @@ NO_OUTPUT = ResolvedOutput(kind="none")
 
 
 @dataclass(frozen=True)
+class Transition:
+    """One mode's transition decision in a command's `transitions` map (#317 / P-1).
+
+    Exactly one is meaningful (the A3 loader / schema enforce it): `exit` True
+    terminates the session; otherwise the command switches to `new_mode` (a
+    validated mode name), or stays put when `new_mode` is None. An `exit`
+    transition always carries ``new_mode=None``. This is the static, per-mode
+    successor to a handler deciding its own transition at dispatch time (#115):
+    the shell reads it from the schema instead of running the command.
+    """
+
+    new_mode: str | None = None
+    exit: bool = False
+
+
+@dataclass(frozen=True)
 class ResolvedCommand:
     """Normalized command, independent of the authoring form (#264 / D4).
 
@@ -262,12 +285,23 @@ class ResolvedCommand:
     type: str
     source: dict | None = None
     canonical_name: str = ""
+    # Mode-conditional transition map (#317 / P-1): mode name -> `Transition`.
+    # None (the common case) means the command uses the simple static
+    # `new_mode` / `exit` above. When set, `_dispatch_general` looks up the
+    # current mode and applies that entry's transition, falling back to
+    # `exit` / `new_mode` only for a mode absent from the map. The loader
+    # validates every key against the command's modes and every `new_mode`
+    # value against the platform modes, and the schema keeps it exclusive with
+    # the top-level `new_mode` / `exit`, so it never conflicts at runtime. An
+    # A3 alias built via ``dataclasses.replace`` inherits the target's map (the
+    # `mode:`-override alias path re-validates the inherited keys, #317 / P-1).
     # `disables_paging` marks a session-level "turn paging off" command (e.g.
     # `terminal length 0`, #307 / P3-4). The shell sets a sticky session flag when
     # such a command runs in-mode; the push driver then renders without the
     # `--More--` pager. An A3 alias built via ``dataclasses.replace(target, ...)``
     # inherits the target's value for free (alias authoring rows cannot set it).
     disables_paging: bool = False
+    transitions: Mapping[str, Transition] | None = None
 
     def __post_init__(self) -> None:
         # Backfill canonical_name to the command's own name when unset (empty
