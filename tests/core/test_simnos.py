@@ -382,7 +382,7 @@ class TestSimNOS:
         # be dropped on the way out or the registry-invariant tests (which
         # expect source-path lists, not Nos instances) see the leak.
         try:
-            net = SimNOS(inventory={"hosts": {}}, plugins=[str(SYNTHETIC_CUSTOM_A3_DIR)])
+            net = SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_A3_DIR])
             assert "synthetic_custom" in net.nos_plugins
             registered = net.nos_plugins["synthetic_custom"]
             assert registered.resolved_platform is not None
@@ -398,7 +398,7 @@ class TestSimNOS:
         the `Nos(filename=[a3_dir, handler_py])` route instead.
         """
         with pytest.raises(ValueError, match=r"is not an A3 platform dir"):
-            SimNOS(inventory={"hosts": {}}, plugins=[str(SYNTHETIC_CUSTOM_HANDLERS)])
+            SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_HANDLERS])
 
     def test_plugins_dict_rejected(self):
         """The dict plugin form (legacy `from_dict` inflow) is gone (#317 P-4)."""

@@ -278,14 +278,26 @@ class Nos:
         # file — dispatch on that before the extension check (#264 / D6).
         if os.path.isdir(filename):
             self._from_platform_dir(filename)
-            self.sources.append(filename)
+            self._record_source(filename)
             return
         if not self._is_file_ending_correct(filename):
             raise ValueError(f'Unsupported "{filename}" file extension. Supported: an A3 platform dir or a .py file')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
         self._from_module(filename)
-        self.sources.append(filename)
+        self._record_source(filename)
+
+    def _record_source(self, filename: str) -> None:
+        """Note a successfully loaded source path (diagnostics, see `sources`).
+
+        Deduplicated: hot reload re-runs `from_file` on the same target every
+        time it changes, and the diagnostic wants the source *set*, not a
+        reload history. Fresh list (never in-place `.append`): the hot-reload
+        rollback (`_NOS_RELOAD_ATTRS`) snapshots `sources` by reference — same
+        rollback-safety pattern as `handlers` (2nd round 🦊#1 / 🐳#1).
+        """
+        if filename not in self.sources:
+            self.sources = [*self.sources, filename]
 
     def _is_file_ending_correct(self, filename: str) -> bool:
         """

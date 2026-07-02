@@ -596,6 +596,31 @@ class TestA3HotReload:
         assert nos_obj.resolved_platform is old_platform  # rolled back, not the modeless parse
         assert shell.commands is old_commands  # live session untouched
 
+    def test_rebuild_failure_rolls_back_sources_of_new_target(self, tmp_path, caplog):
+        """A NEW target that loads but fails `_rebuild` does not linger in `nos.sources`.
+
+        `sources` feeds the A3-required error diagnostics, so a failed reload
+        must not leave the failing target listed as a loaded source — it is a
+        `_NOS_RELOAD_ATTRS` member and `_record_source` commits a fresh list so
+        the reference snapshot rolls it back (2nd round 🦊#1 / 🐳#1). The
+        same-target case is inert by dedup; this drives the new-target case:
+        platform B loads fine but the inventory `mode: [config]` no longer
+        validates against B's user-only modes.
+        """
+        platform_a = _a3_platform(tmp_path)
+        inventory = {"commands": {"conf cmd": {"output": "X", "mode": ["config"]}}}
+        nos_obj = Nos(filename=str(platform_a))
+        shell = _shell_for(nos_obj, inventory_config=inventory)
+        platform_b = tmp_path / "user_only"
+        _write(platform_b / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n')
+        _write(platform_b / "commands" / "default.yaml", "command: _default_\ntype: simnos\noutput: default.txt\n")
+        _write(platform_b / "commands" / "default.txt", "% unknown\n")
+        with caplog.at_level("ERROR", logger="simnos.plugins.shell.cmd_shell"):
+            shell.reload_commands([str(platform_b)])
+        assert len(caplog.records) == 1  # B loaded but _rebuild rejected the inventory mode
+        assert str(platform_b) not in nos_obj.sources  # rolled back, not lingering in diagnostics
+        assert nos_obj.sources == [str(platform_a)]
+
     def test_removed_mode_degrades_to_initial(self, tmp_path):
         """A reload that drops the current mode resets the session to initial_mode."""
         platform_dir = _a3_platform(tmp_path)

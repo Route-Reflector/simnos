@@ -586,6 +586,10 @@ class CMDShell:
         # `_from_module` rebuilds `handlers` as a fresh dict, so snapshotting the
         # reference here rolls back a failed hot reload cleanly (#317 / P-1).
         "handlers",
+        # `_record_source` builds `sources` as a fresh list for the same reason:
+        # a target that loads but fails `_rebuild` must not stay in the
+        # diagnostic source list (#317 / P-4, 2nd round 🦊#1 / 🐳#1).
+        "sources",
     )
 
     def reload_commands(self, reload_targets: list):

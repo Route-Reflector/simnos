@@ -280,6 +280,27 @@ class TestHandlerNamespace:
         # Derived version wins (getattr on the leaf class resolves the override).
         assert ns["make_a"](None, base_prompt="R1", current_mode="user", current_prompt="R1>", command="x") == "derived"
 
+    def test_sources_dedup_and_fresh_list(self, tmp_path):
+        """`sources` records each loaded path once, via a fresh list (#317 P-4).
+
+        Hot reload re-runs `from_file` on the same target per change, so the
+        diagnostic list must not grow into a reload history (2nd round 🐳#1);
+        and like `handlers`, the fresh-list commit is what makes the
+        `_NOS_RELOAD_ATTRS` reference snapshot rollback-safe (2nd round 🦊#1).
+        """
+        py = _write_tmp_file(tmp_path, "src_plugin.py", 'def make_a(device, **kw):\n    return "a"\n')
+        nos = Nos()
+        nos.from_file(py)
+        first = nos.sources
+        assert first == [py]
+        nos.from_file(py)  # hot-reload shape: same target again
+        assert nos.sources == [py]  # deduplicated, not a history
+        py_b = _write_tmp_file(tmp_path, "src_plugin_b.py", 'def make_b(device, **kw):\n    return "b"\n')
+        nos.from_file(py_b)
+        assert nos.sources == [py, py_b]
+        assert nos.sources is not first  # fresh list — the snapshotted one is untouched
+        assert first == [py]
+
     def test_handlers_accumulate_across_multi_file_load_as_fresh_dict(self, tmp_path):
         """A multi-file load merges handler namespaces later-wins, via a fresh dict.
 

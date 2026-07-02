@@ -124,7 +124,11 @@ def get_files_recently_modified(files: list[str], files_lasttime_changed_old: di
 def _legacy_jinja_to_py(filepath: str) -> str | None:
     """Map a legacy py-plugin `.j2` template to its `.py` module, or None.
 
-    Recognizes the two shipped legacy shapes only, by segment position:
+    "Legacy" here is the handler module's pre-A3 on-disk *layout*
+    (``configurations/`` / ``templates/`` jinja inputs next to the ``.py``),
+    which is still live — NOT the removed py-dict authoring channel
+    (#317 P-4). Recognizes the two shipped legacy shapes only, by segment
+    position:
 
     - ``<base>/configurations/<platform>.yaml.j2`` -> ``<base>/<platform>.py``
     - ``<base>/templates/<platform>/<cmd>.j2``     -> ``<base>/<platform>.py``
