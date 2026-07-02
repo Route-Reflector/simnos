@@ -1,0 +1,12 @@
+# The former `disable` handler: enable drops to user; in user mode the static
+# `new_mode: user` is a no-op transition, matching the handler's no-transition
+# branch byte-for-byte (#317 / P-2). The config branch was dead (config is not
+# an authored mode of this command).
+command: disable
+type: simnos
+help: exit exec prompt
+mode:
+- user
+- enable
+new_mode: user
+output: disable.txt

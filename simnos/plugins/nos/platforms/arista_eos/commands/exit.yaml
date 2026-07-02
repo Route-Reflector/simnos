@@ -1,0 +1,19 @@
+# Mode-conditional transition (#317 / P-1 `transitions:`): from user/enable the
+# session closes, from config it drops to enable (the former make_exit handler
+# branches, now static). The empty output reproduces the handler's `output: ""`
+# on the config branch; the exit branches close before rendering.
+command: exit
+type: simnos
+help: Leave Exec mode
+mode:
+- user
+- enable
+- config
+transitions:
+  user:
+    exit: true
+  enable:
+    exit: true
+  config:
+    new_mode: enable
+output: exit.txt

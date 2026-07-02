@@ -89,11 +89,9 @@ stub_help:
   - dir flash
   - show bgp evpn summary
   - show boot-config
-  - show clock
   - show environment cooling
   - show environment power
   - show environment temperature
-  - show hostname
   - show interfaces
   - show interfaces description
   - show interfaces status
@@ -107,7 +105,6 @@ stub_help:
   - show ip bgp detail
   - show ip bgp summary
   - show ip helper-address
-  - show ip interface brief
   - show ip mroute vrf all detail
   - show ip ospf database
   - show ip ospf interface brief
@@ -130,7 +127,6 @@ stub_help:
   - show processes top once
   - show reload cause
   - show snmp community
-  - show version
   - show vlan
   - show vrf
   aruba_aoscx:
@@ -305,7 +301,6 @@ stub_help:
   - show capability feature routing
   - show cdp neighbors
   - show cdp neighbors detail
-  - show clock
   - show controller t1
   - show crypto ipsec sa detail
   - show crypto pki certificates
@@ -416,7 +411,6 @@ stub_help:
   - show switch virtual
   - show tacacs
   - show users
-  - show version
   - show vlan
   - show vlan group
   - show vlans
@@ -749,7 +743,6 @@ stub_help:
   - terminal length 0
   - terminal width 511
   huawei_smartax:
-  - display board
   - display board serial-number
   - display cpu
   - display location

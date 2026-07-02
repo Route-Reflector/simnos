@@ -1,0 +1,2 @@
+command: configure terminal
+alias: conf t

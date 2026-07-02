@@ -1,5 +1,6 @@
 {
   "//environment more false": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command //environment more false. This automatically generated.",
     "modes": [
@@ -31,6 +32,7 @@
     "variants": []
   },
   "environment no more": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command environment no more. This automatically generated.",
     "modes": [

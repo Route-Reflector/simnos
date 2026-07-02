@@ -20,6 +20,7 @@
     "variants": []
   },
   "paginate false": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

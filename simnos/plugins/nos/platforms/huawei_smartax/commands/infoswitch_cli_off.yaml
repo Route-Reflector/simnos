@@ -1,0 +1,6 @@
+command: infoswitch cli OFF
+type: simnos
+help: turn off infoswitch cli
+mode:
+- user
+- enable

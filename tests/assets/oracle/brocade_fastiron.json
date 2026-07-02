@@ -1398,6 +1398,7 @@
     "variants": []
   },
   "skip-page-display": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

@@ -4306,6 +4306,7 @@
     "variants": []
   },
   "term len 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

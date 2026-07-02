@@ -1,6 +1,6 @@
 command: enable
 type: simnos
-help: enter enable mode
+help: Enable commands for a specified privilege level
 mode:
 - user
 new_mode: enable

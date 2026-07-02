@@ -1,7 +1,7 @@
 {
   "_default_": {
     "exit": false,
-    "help": "default output for unknown commands",
+    "help": "Output to print for unknown commands",
     "modes": null,
     "new_mode": null,
     "output": [
@@ -33,6 +33,36 @@
       "tmpfs           1.0G  218M  807M  22% /var/shmem",
       "/dev/sda1       3.3G  1.2G  2.2G  35% /mnt/flash"
     ],
+    "variants": []
+  },
+  "conf t": {
+    "exit": false,
+    "help": "Config mode",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": "config",
+    "output": null,
+    "variants": []
+  },
+  "config term": {
+    "exit": false,
+    "help": "",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": "config",
+    "output": null,
+    "variants": []
+  },
+  "configure terminal": {
+    "exit": false,
+    "help": "",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": "config",
+    "output": null,
     "variants": []
   },
   "dir": {
@@ -214,14 +244,78 @@
     ],
     "variants": []
   },
+  "do show ip int brief": {
+    "exit": false,
+    "help": "",
+    "modes": [
+      "config"
+    ],
+    "new_mode": null,
+    "output": [
+      "                                                                          Address",
+      "Interface       IP Address        Status       Protocol            MTU    Owner",
+      "--------------- ----------------- ------------ -------------- ----------- -------",
+      "Ethernet1       10.0.1.4/24       up           up                 9200",
+      "Loopback1       1.1.1.1/24        up           up                65535",
+      "Loopback2       2.2.2.2/24        up           up                65535",
+      "Loopback3       1.2.3.4/24        up           up                65535"
+    ],
+    "variants": []
+  },
   "enable": {
     "exit": false,
-    "help": "enter enable mode",
+    "help": "Enable commands for a specified privilege level",
     "modes": [
       "user"
     ],
     "new_mode": "enable",
     "output": null,
+    "variants": []
+  },
+  "end": {
+    "exit": false,
+    "help": "Leave config mode",
+    "modes": [
+      "config"
+    ],
+    "new_mode": "enable",
+    "output": [],
+    "variants": []
+  },
+  "exit": {
+    "exit": false,
+    "help": "Leave Exec mode",
+    "modes": [
+      "config",
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": [],
+    "transitions": {
+      "config": {
+        "exit": false,
+        "new_mode": "enable"
+      },
+      "enable": {
+        "exit": true,
+        "new_mode": null
+      },
+      "user": {
+        "exit": true,
+        "new_mode": null
+      }
+    },
+    "variants": []
+  },
+  "no logging console": {
+    "exit": false,
+    "help": "Set console logging parameters",
+    "modes": [
+      "config"
+    ],
+    "new_mode": null,
+    "output": [],
     "variants": []
   },
   "show bgp evpn summary": {
@@ -265,17 +359,13 @@
   },
   "show clock": {
     "exit": false,
-    "help": "execute the command \"show clock\"",
+    "help": "System time",
     "modes": [
       "enable",
       "user"
     ],
     "new_mode": null,
-    "output": [
-      "Mon Jan 14 18:42:49 2013",
-      "timezone is US/Central",
-      ""
-    ],
+    "output": "<<handler:make_show_clock>>",
     "variants": []
   },
   "show environment cooling": {
@@ -457,16 +547,14 @@
   },
   "show hostname": {
     "exit": false,
-    "help": "execute the command \"show hostname\"",
+    "help": "Show the system hostname",
     "modes": [
-      "enable",
-      "user"
+      "enable"
     ],
     "new_mode": null,
     "output": [
-      "eos-spine1#show hostname",
-      "Hostname: spine1",
-      "FQDN:     spine1.company.com"
+      "Hostname: {base_prompt}",
+      "FQDN:     {base_prompt}"
     ],
     "variants": []
   },
@@ -1077,22 +1165,41 @@
     ],
     "variants": []
   },
-  "show ip interface brief": {
+  "show ip int brief": {
     "exit": false,
-    "help": "execute the command \"show ip interface brief\"",
+    "help": "Condensed output",
     "modes": [
       "enable",
       "user"
     ],
     "new_mode": null,
     "output": [
-      "Interface              IP Address         Status     Protocol         MTU",
-      "Loopback0              1.1.1.1/32         up         up             65535",
-      "Management1            unassigned         down       down            1500",
-      "Vlan10                 unassigned         down       lowerlayerdown  1500",
-      "Ethernet5              10.0.0.1/24        up         up              1500",
-      "Port-Channel1          11.11.11.11/24     down       lowerlayerdown  1500",
-      ""
+      "                                                                          Address",
+      "Interface       IP Address        Status       Protocol            MTU    Owner",
+      "--------------- ----------------- ------------ -------------- ----------- -------",
+      "Ethernet1       10.0.1.4/24       up           up                 9200",
+      "Loopback1       1.1.1.1/24        up           up                65535",
+      "Loopback2       2.2.2.2/24        up           up                65535",
+      "Loopback3       1.2.3.4/24        up           up                65535"
+    ],
+    "variants": []
+  },
+  "show ip interface brief": {
+    "exit": false,
+    "help": "Condensed output",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": [
+      "                                                                          Address",
+      "Interface       IP Address        Status       Protocol            MTU    Owner",
+      "--------------- ----------------- ------------ -------------- ----------- -------",
+      "Ethernet1       10.0.1.4/24       up           up                 9200",
+      "Loopback1       1.1.1.1/24        up           up                65535",
+      "Loopback2       2.2.2.2/24        up           up                65535",
+      "Loopback3       1.2.3.4/24        up           up                65535"
     ],
     "variants": []
   },
@@ -2563,6 +2670,101 @@
     ],
     "variants": []
   },
+  "show running-config": {
+    "exit": false,
+    "help": "System running configuration",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": null,
+    "output": [
+      "! Command: show running-config",
+      "! device: oracle (cEOSLab, EOS-4.26.0F-21792469.4260F (engineering build))",
+      "!",
+      "transceiver qsfp default-mode 4x10G",
+      "!",
+      "service routing protocols model ribd",
+      "!",
+      "agent Bfd shutdown",
+      "agent PowerManager shutdown",
+      "agent LedPolicy shutdown",
+      "agent Thermostat shutdown",
+      "agent PowerFuse shutdown",
+      "agent StandbyCpld shutdown",
+      "agent LicenseManager shutdown",
+      "!",
+      "no logging console",
+      "logging host 1.1.1.1 514",
+      "logging host 1.2.3.4 514",
+      "logging host 1.2.3.5 514",
+      "logging host 1.2.3.6 514",
+      "logging host 2.2.2.2 514",
+      "logging host 4.3.2.1 514",
+      "logging host 5.5.5.5 514",
+      "logging host 7.7.7.7 514",
+      "logging host 9.9.9.9 514",
+      "!",
+      "logging level AAA informational",
+      "!",
+      "hostname oracle",
+      "!",
+      "ntp server 1.1.1.1",
+      "ntp server 1.1.1.2",
+      "ntp server 1.1.1.10",
+      "ntp server 1.1.1.11",
+      "ntp server 2.2.2.2",
+      "ntp server 2.2.2.3",
+      "ntp server 3.3.3.3",
+      "ntp server 3.3.3.4",
+      "ntp server 4.3.2.1",
+      "ntp server 6.6.6.6",
+      "ntp server 7.7.7.7",
+      "ntp server 7.7.7.8",
+      "!",
+      "snmp-server location \"North West Hall DC1\"",
+      "snmp-server local-interface Ethernet1",
+      "snmp-server host 1.2.3.4 version 2c test",
+      "snmp-server host 1.2.3.5 version 2c test",
+      "!",
+      "spanning-tree mode mstp",
+      "!",
+      "no aaa root",
+      "!",
+      "username nornir privilege 15 secret sha512 $6$EkriX8oB5g3Midq4$ErOpqzIWT7FxiW1IkSNQKS8gEqsn9HsbRVm8.Zw47y3Xm9a.GywP9zPF/avyTBBS8c5/ZSMMj/6BHL64KcW2I1",
+      "!",
+      "interface Ethernet1",
+      "   description Configured by NETCONF",
+      "   mtu 9200",
+      "   no switchport",
+      "   ip address 10.0.1.4/24",
+      "!",
+      "interface Loopback1",
+      "   ip address 1.1.1.1/24",
+      "!",
+      "interface Loopback2",
+      "   description Lopback2 for Customer 27123",
+      "   ip address 2.2.2.2/24",
+      "!",
+      "interface Loopback3",
+      "   description Customer #56924 service",
+      "   ip address 1.2.3.4/24",
+      "!",
+      "no ip routing",
+      "!",
+      "management api http-commands",
+      "   protocol http",
+      "   no shutdown",
+      "!",
+      "management api gnmi",
+      "   transport grpc default",
+      "!",
+      "management api netconf",
+      "   transport ssh def",
+      "!",
+      "end"
+    ],
+    "variants": []
+  },
   "show snmp community": {
     "exit": false,
     "help": "execute the command \"show snmp community\"",
@@ -2594,26 +2796,29 @@
   },
   "show version": {
     "exit": false,
-    "help": "execute the command \"show version\"",
+    "help": "Software and hardware versions",
     "modes": [
-      "enable",
-      "user"
+      "enable"
     ],
     "new_mode": null,
     "output": [
-      "Arista vEOS",
-      "Hardware version:    ",
-      "Serial number:       ",
-      "System MAC address:  2803.829a.1347",
+      "cEOSLab",
+      "Hardware version:",
+      "Serial number:",
+      "Hardware MAC address: 0242.0af6.c8a5",
+      "System MAC address: 0242.0af6.c8a5",
       "",
-      "Software image version: 4.14.7M",
-      "Architecture:           i386",
-      "Internal build version: 4.14.7M-2384414.4147M",
-      "Internal build ID:      92a53fad-f853-42a5-9f57-c3c4ea3c26b3",
+      "Software image version: 4.26.0F-21792469.4260F (engineering build)",
+      "Architecture: i686",
+      "Internal build version: 4.26.0F-21792469.4260F",
+      "Internal build ID: c5b41f65-54cd-44b1-b576-b5c48700ee19",
       "",
-      "Uptime:                 1 hour and 5 minutes",
-      "Total memory:           2028860 kB",
-      "Free memory:            301240 kB"
+      "cEOS tools version: 1.1",
+      "Kernel version: 3.10.0-1160.21.1.el7.x86_64",
+      "",
+      "Uptime: 0 weeks, 0 days, 0 hours and 8 minutes",
+      "Total memory: 4918832 kB",
+      "Free memory: 1816320 kB"
     ],
     "variants": []
   },
@@ -2657,6 +2862,7 @@
     "variants": []
   },
   "term length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "",
     "modes": [
@@ -2683,6 +2889,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "It disables the pagination",
     "modes": [

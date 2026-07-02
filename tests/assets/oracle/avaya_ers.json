@@ -42,6 +42,7 @@
     "variants": []
   },
   "no page": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command no page. This automatically generated.",
     "modes": [
@@ -1032,6 +1033,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "make the terminal full screen",
     "modes": [

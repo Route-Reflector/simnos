@@ -1,4 +1,4 @@
 command: _default_
 type: simnos
-help: default output for unknown commands
+help: Output to print for unknown commands
 output: default.txt

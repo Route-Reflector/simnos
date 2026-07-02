@@ -10,6 +10,7 @@
     "variants": []
   },
   "no paging": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

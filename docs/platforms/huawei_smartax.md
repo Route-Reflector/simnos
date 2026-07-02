@@ -7,23 +7,24 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### display board
+### disable
 
 **Output:**
 ```
-  -------------------------------------------------------------------------
-  SlotID  BoardName  Status          SubType0 SubType1    Online/Offline
-  -------------------------------------------------------------------------
-  0       A123ABCD   Normal                           
-  1     
-  2       A123ABCDE  Normal                           
-  3       A123ABCDE  Active_normal   CPCF             
-  4       A123ABCDE  Standby_failed  CPCF                 Offline  
-  5     
-  -------------------------------------------------------------------------
+
 ```
 
-**Help:** execute the command "display board"
+**Help:** exit exec prompt
+
+**Prompt:**
+- huawei_smartax>
+- huawei_smartax#
+
+### display board
+
+**Output:** (dynamic — py handler `make_display_board`)
+
+**Help:** display board information
 
 **Prompt:**
 - huawei_smartax>
@@ -2068,10 +2069,20 @@ Switch-Oriented Flow List
 
 **Output:** None
 
-**Help:** enter enable mode
+**Help:** enter exec prompt
 
 **Prompt:**
 - huawei_smartax>
+
+### infoswitch cli OFF
+
+**Output:** None
+
+**Help:** turn off infoswitch cli
+
+**Prompt:**
+- huawei_smartax>
+- huawei_smartax#
 
 ### ont add
 
@@ -2100,6 +2111,28 @@ Set ONT port(s) VLAN configuration, success: 1, failed: 0
 - huawei_smartax>
 - huawei_smartax#
 
+### quit
+
+**Output:** None
+
+**Help:** exit from device
+
+**Prompt:**
+- huawei_smartax>
+- huawei_smartax#
+
+### return
+
+**Output:**
+```
+
+```
+
+**Help:** return to user prompt
+
+**Prompt:**
+- huawei_smartax#
+
 ### scroll
 
 **Output:** None
@@ -2114,7 +2147,7 @@ Set ONT port(s) VLAN configuration, success: 1, failed: 0
 
 **Output:** None
 
-**Help:** undo the command completion mode (smart mode)
+**Help:** undo smart command
 
 **Prompt:**
 - huawei_smartax>

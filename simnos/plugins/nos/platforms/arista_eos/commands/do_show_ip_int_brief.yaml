@@ -1,0 +1,6 @@
+# Config-mode `do` prefix form: an alias whose mode set differs from its target
+# (user/enable) — the alias `mode:` override (#317 / P-1).
+command: do show ip int brief
+alias: show ip int brief
+mode:
+- config

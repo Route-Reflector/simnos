@@ -14,7 +14,7 @@ import traceback
 from typing import TYPE_CHECKING, cast
 
 from simnos.core.command_adapter import adapt_commands, adapt_legacy_commands, reverse_map_from_modes
-from simnos.core.command_contract import CommandHandler, CommandResult
+from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
 from simnos.core.platform_loader import load_platform_dir
@@ -203,8 +203,8 @@ class DispatchResult:
     explicitly:
 
     - ``body``: text the driver renders line-by-line with ``newline``, or
-      ``None`` for no output (empty line, EOF, a handler returning no
-      ``output``). The driver suppresses it when ``close`` is set — the legacy
+      ``None`` for no output (empty line, EOF, a handler returning None).
+      The driver suppresses it when ``close`` is set — the legacy
       ``default`` adapter never wrote a body on any close path.
     - ``prompt``: the prompt to show after this line (already reflects a mode
       transition applied during dispatch).
@@ -749,35 +749,27 @@ class CMDShell:
             help_msg.append(f"{k}{padding}{v}")
         return self.newline.join(help_msg)
 
-    def _apply_new_mode(self, mode_name: str, command: str) -> None:
-        """Transition to `mode_name`; an unknown name keeps the current mode.
+    def _apply_new_mode(self, mode_name: str) -> None:
+        """Transition to `mode_name` and render its prompt.
 
-        Static transitions (`ResolvedCommand.new_mode`) are validated at load,
-        so they always resolve. A handler-returned `new_mode` is runtime data,
-        so an unknown one is lenient: log and stay put (#264 / D5).
+        Every transition source (`new_mode` / `transitions`, from any inflow)
+        is validated against the platform modes at load time, so the lookup is
+        plain indexing — the former lenient branch existed only for
+        handler-returned modes, which the output-only handler contract removed
+        (#317 / P-2).
         """
-        mode = self.platform.modes.get(mode_name)
-        if mode is None:
-            log.error(
-                "shell '%s' command %r returned unknown mode %r; staying in %r",
-                self.base_prompt,
-                command,
-                mode_name,
-                self.current_mode,
-            )
-            return
+        mode = self.platform.modes[mode_name]
         self.current_mode = mode_name
         self.prompt = mode.render_prompt(self.base_prompt)
 
-    def _invoke_handler(self, handler: CommandHandler, command: str) -> CommandResult:
-        """Invoke a command handler and normalize its return to CommandResult.
+    def _invoke_handler(self, handler: CommandHandler, command: str) -> str | None:
+        """Invoke a command handler; its return is the body text (or None).
 
-        A plain str (or None) return is sugar for `{"output": <value>}`;
-        see `simnos.core.command_contract`. This is normalization, not
-        validation: a contract-breaking return (list / int / ...) is
-        wrapped and flows through the lenient output path like today —
-        contract violations are caught statically (Protocol) and by the
-        e2e callable sweep, not at runtime on the hot path.
+        Handlers are output-only (`simnos.core.command_contract`): transitions
+        and exit are static authoring data. A contract-breaking return (dict /
+        list / int / ...) is answered with `HANDLER_ERROR_OUTPUT` and a loud
+        log line — same shape as the crash boundary in the caller, so broken
+        plugin code never puts garbage on the wire (#317 / P-2).
         """
         ret = handler(
             self.nos.device,
@@ -786,11 +778,16 @@ class CMDShell:
             current_prompt=self.prompt,
             command=command,
         )
-        if isinstance(ret, dict):
-            return ret
-        # Declare the wrapped value as str | None for the type checker (it
-        # cannot narrow the TypedDict member out of the union by isinstance).
-        return {"output": cast("str | None", ret)}
+        if ret is not None and not isinstance(ret, str):
+            log.error(
+                "shell '%s' command %r handler returned %s (contract is str | None); answering %r",
+                self.base_prompt,
+                command,
+                type(ret).__name__,
+                HANDLER_ERROR_OUTPUT,
+            )
+            return HANDLER_ERROR_OUTPUT
+        return ret
 
     def _dispatch_general(self, line) -> tuple[str | None, bool]:
         """Resolve + invoke one general command; return ``(body, close)``.
@@ -800,16 +797,17 @@ class CMDShell:
         transition as a live-session side effect (§1a) but writes nothing — the
         caller renders `body`.
 
-        ``close`` is True for an exit command, a handler returning ``exit``, or
-        a server shutdown observed mid-dispatch. The legacy `default` adapter
-        suppressed the body on every one of those close paths, so callers MUST
-        NOT render `body` when `close` is set.
+        ``close`` is True for an exit command (the static ``exit`` flag or the
+        current mode's ``transitions`` entry) or a server shutdown observed
+        mid-dispatch. The legacy `default` adapter suppressed the body on every
+        one of those close paths, so callers MUST NOT render `body` when
+        `close` is set.
 
         The exception boundary is the `_invoke_handler` block only: resolution,
         the mode check and the transition never raise (an unknown command is a
-        plain dict miss, an unknown handler mode degrades inside
-        `_apply_new_mode`), so `HANDLER_ERROR_OUTPUT` structurally means "a
-        command handler crashed" and nothing else (#241 / #264).
+        plain dict miss; every transition is load-validated), so
+        `HANDLER_ERROR_OUTPUT` structurally means "a command handler crashed
+        or broke the str | None contract" and nothing else (#241 / #264 / #317).
         """
         log.debug("shell.dispatch '%s' running command '%s'", self.base_prompt, [line])
         cmd = self.commands.get(line)
@@ -883,20 +881,13 @@ class CMDShell:
             transition = None
         if output.kind == "handler" and output.handler is not None:
             try:
-                result = self._invoke_handler(output.handler, line)
+                body = self._invoke_handler(output.handler, line)
             except Exception:
                 # Same shape as the hot-reload guard (#232): full traceback
                 # to the log, the session survives, and the client gets a
                 # real-NOS-style one-liner instead of a Python traceback.
                 log.error("shell '%s' command %r handler crashed\n%s", self.base_prompt, line, traceback.format_exc())
-                result = {"output": HANDLER_ERROR_OUTPUT}
-            if result.get("exit"):
-                return None, True
-            # A handler transition applies only when the command has no static
-            # one (a static `new_mode` was the last write in the v2 order).
-            if transition is None:
-                transition = result.get("new_mode")
-            body = result.get("output")
+                body = HANDLER_ERROR_OUTPUT
         else:
             body = output.render(self.base_prompt)
         # Interpolate the typed line into an abbreviation diagnostic (#303 / P3-2),
@@ -910,7 +901,7 @@ class CMDShell:
         if abbrev_input is not None and body is not None and output.kind in ("literal", "template"):
             body = body.replace("{input}", abbrev_input)
         if transition is not None:
-            self._apply_new_mode(transition, line)
+            self._apply_new_mode(transition)
         # Server shutdown observed mid-dispatch: close without rendering the body
         # (the legacy `default` adapter returned True here before writing output).
         if not self.is_running.is_set():

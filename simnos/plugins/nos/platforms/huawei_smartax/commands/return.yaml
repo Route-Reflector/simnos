@@ -1,0 +1,10 @@
+# The former `_return` handler: only reachable from enable (its one authored
+# mode), where it answered `{"output": "", "new_mode": "enable"}` — a static
+# no-op transition with an empty body (#317 / P-2).
+command: return
+type: simnos
+help: return to user prompt
+mode:
+- enable
+new_mode: enable
+output: return.txt

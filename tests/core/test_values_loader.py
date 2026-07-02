@@ -173,48 +173,55 @@ class TestRoundTrip:
     re-parse, get the edited value back — without owning hardware at that version.
     """
 
-    def test_edit_version_reflects_in_reparse(self):
+    def test_edit_ipaddr_reflects_in_reparse(self):
+        """The demo pair is `show ip interface brief` (#287 `.j2`+sidecar).
+
+        `show version` carried the second demo sidecar until #317 P-2: its IOSv
+        capture was shadow-dead under the py inflow, so the migration replaced
+        it with the actually-served py wire (sidecar-less) and the round-trip
+        pin moved here.
+        """
         ntc = pytest.importorskip("ntc_templates.parse")
 
         plat = load_platform_dir(_CISCO_IOS)
-        out = plat.commands["show version"].output
+        out = plat.commands["show ip interface brief"].output
         assert out.kind == "template"
 
-        # Original render parses back to the shipped version.
+        # Original render parses back to the shipped second-row address.
         original = out.render("R1")
-        parsed = ntc.parse_output(platform="cisco_ios", command="show version", data=original)
-        assert parsed[0]["version"] == "15.8(3)M2"
+        parsed = ntc.parse_output(platform="cisco_ios", command="show ip interface brief", data=original)
+        assert parsed[1]["ip_address"] == "10.0.1.38"
 
         # Edit the sidecar value and re-render through the same template.
-        edited_values = dict(out.values)
-        edited_values["parsed"] = [{**out.values["parsed"][0], "version": "99.9(9)Z9"}]
+        edited_rows = [dict(row) for row in out.values["parsed"]]
+        edited_rows[1]["ipaddr"] = "192.0.2.99"
         edited = ResolvedOutput(
-            kind="template", template=out.template, required_vars=out.required_vars, values=edited_values
+            kind="template",
+            template=out.template,
+            required_vars=out.required_vars,
+            values={**dict(out.values), "parsed": edited_rows},
         )
-        reparsed = ntc.parse_output(platform="cisco_ios", command="show version", data=edited.render("R1"))
-        assert reparsed[0]["version"] == "99.9(9)Z9"
+        reparsed = ntc.parse_output(platform="cisco_ios", command="show ip interface brief", data=edited.render("R1"))
+        assert reparsed[1]["ip_address"] == "192.0.2.99"
 
 
 class TestDemoByteIdentical:
-    """The shipped cisco_ios `.j2`+sidecar demos must render byte-for-byte to the
-    original `.txt` they replaced (#287 / D3, R5). The golden fixtures under
-    tests/assets/cisco_ios_demo/ are the pre-conversion captures; a whitespace
-    regression in either `.j2` (e.g. a stray blank line from a `{% for %}` block,
-    or a changed column width in the ip-int-brief table) fails this pin
-    (1st round codex#4 / claude#1).
+    """The shipped cisco_ios `.j2`+sidecar demo must render byte-for-byte to the
+    original `.txt` it replaced (#287 / D3, R5). The golden fixture under
+    tests/assets/cisco_ios_demo/ is the pre-conversion capture; a whitespace
+    regression in the `.j2` (e.g. a stray blank line from a `{% for %}` block,
+    or a changed column width in the table) fails this pin (1st round
+    codex#4 / claude#1). The former `show version` demo pin ended with #317 P-2
+    (see TestRoundTrip); the served `show version` bytes are pinned by
+    tests/plugins/test_p2_migration_parity.py instead.
     """
 
-    @pytest.mark.parametrize(
-        ("command", "fixture"),
-        [
-            ("show version", "show_version.expected.txt"),
-            ("show ip interface brief", "show_ip_interface_brief.expected.txt"),
-        ],
-    )
-    def test_demo_renders_byte_identical(self, command, fixture):
-        expected = (_REPO / "tests/assets/cisco_ios_demo" / fixture).read_text(encoding="utf-8")
+    def test_demo_renders_byte_identical(self):
+        expected = (_REPO / "tests/assets/cisco_ios_demo" / "show_ip_interface_brief.expected.txt").read_text(
+            encoding="utf-8"
+        )
         plat = load_platform_dir(_CISCO_IOS)
-        out = plat.commands[command].output
+        out = plat.commands["show ip interface brief"].output
         assert out.kind == "template"
         assert out.render("R1") == expected
 

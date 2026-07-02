@@ -2228,6 +2228,7 @@
     "variants": []
   },
   "terminal datadump": {
+    "disables_paging": true,
     "exit": false,
     "help": "set terminal width to maximum",
     "modes": [

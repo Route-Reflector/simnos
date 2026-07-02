@@ -1530,6 +1530,7 @@
     "variants": []
   },
   "screen-length 0 temporary": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command screen-length 0 temporary. This automatically generated.",
     "modes": [

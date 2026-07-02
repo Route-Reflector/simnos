@@ -94,12 +94,18 @@ def test_full_commands_never_diverted_to_abbreviation():
         for name, cmd in list(shell.commands.items()):
             if name.startswith("_") and name.endswith("_"):
                 continue  # specials are not dispatched by name
-            shell.current_mode = next(iter(cmd.modes)) if cmd.modes else shell.platform.initial_mode
+            dispatch_mode = next(iter(cmd.modes)) if cmd.modes else shell.platform.initial_mode
+            shell.current_mode = dispatch_mode
             body, close = shell._dispatch_general(name)
             assert body != INCOMPLETE_DIAG, f"{platform}:{name!r} fell through to incomplete"
             assert not (body or "").startswith(AMBIGUOUS_PREFIX), f"{platform}:{name!r} fell through to ambiguous"
-            if cmd.exit:
-                assert close is True
+            # Effective close decision mirrors dispatch: the *pre-dispatch* mode's
+            # `transitions` entry wins over the static `exit` flag (#317 P-1;
+            # e.g. arista `exit` closes from user/enable but not from config —
+            # and dispatch may have transitioned `shell.current_mode` by now).
+            eff = cmd.transitions.get(dispatch_mode) if cmd.transitions else None
+            if eff.exit if eff is not None else cmd.exit:
+                assert close is True, f"{platform}:{name!r} did not close from {dispatch_mode!r}"
             elif cmd.output.kind in ("literal", "template") and not cmd.variants:
                 # exact-match output, unperturbed by the abbreviation machinery
                 assert body == cmd.output.render(shell.base_prompt)

@@ -1,0 +1,6 @@
+command: no logging console
+type: simnos
+help: Set console logging parameters
+mode:
+- config
+output: no_logging_console.txt

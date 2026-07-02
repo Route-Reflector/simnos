@@ -1,15 +1,14 @@
 """
-NOS module for Arista EOS
+NOS module for Arista EOS.
+
+Command authoring lives in the A3 platform dir (``platforms/arista_eos/``);
+this module only ships the device class whose methods back the A3
+``handler:`` commands (#317 / P-2).
 """
 
 import time
 
 from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
-
-NAME: str = "arista_eos"
-INITIAL_PROMPT: str = "{base_prompt}>"
-ENABLE_PROMPT: str = "{base_prompt}#"
-CONFIG_PROMPT: str = "{base_prompt}(config)#"
 
 
 class AristaEOS(BaseDevice):
@@ -20,103 +19,3 @@ class AristaEOS(BaseDevice):
     def make_show_clock(self, base_prompt, current_mode, current_prompt, command):
         """Return the current time."""
         return self.render("arista_eos/show_clock.j2", time=time.strftime("%a %b %d %H:%M:%S %Y"))
-
-    def make_exit(self, base_prompt, current_mode, current_prompt, command):
-        """Exit the current level of the CLI."""
-        if current_mode in ("user", "enable"):
-            return {"exit": True}
-        if current_mode == "config":
-            return {"output": "", "new_mode": "enable"}
-        raise RuntimeError(f"make_exit does not know how to handle '{current_mode}' mode")
-
-    def make_show_ip_int_br(self, base_prompt, current_mode, current_prompt, command):
-        """Return the IP interface brief output."""
-        return self.render("arista_eos/show_ip_int_br.j2", base_prompt=base_prompt)
-
-    def make_show_running_config(self, base_prompt, current_mode, current_prompt, command):
-        """Return the running configuration."""
-        return self.render("arista_eos/show_running-config.j2", base_prompt=base_prompt)
-
-    def make_show_version(self, base_prompt, current_mode, current_prompt, command):
-        """Return the system version."""
-        return self.render("arista_eos/show_version.j2", base_prompt=base_prompt)
-
-
-commands = {
-    "enable": {
-        "output": None,
-        "new_prompt": ENABLE_PROMPT,
-        "help": "Enable commands for a specified privilege level",
-        "prompt": INITIAL_PROMPT,
-    },
-    "show clock": {
-        "output": AristaEOS.make_show_clock,
-        "help": "System time",
-        "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
-    },
-    "show running-config": {
-        "output": AristaEOS.make_show_running_config,
-        "help": "System running configuration",
-        "prompt": ENABLE_PROMPT,
-    },
-    "show version": {
-        "output": AristaEOS.make_show_version,
-        "help": "Software and hardware versions",
-        "prompt": ENABLE_PROMPT,
-    },
-    "_default_": {
-        "output": "% Invalid input",
-        "help": "Output to print for unknown commands",
-        "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
-    },
-    # `terminal length 0` / `terminal width 511` (+ their `term …` aliases) are
-    # served by the A3 commands (commands/terminal_length_0.yaml /
-    # terminal_width_511.yaml + term_length_0.yaml / term_width_0.yaml), whose
-    # `.txt` bodies match these strings byte-for-byte. They were dropped from
-    # this py module so the A3 `terminal length 0` (carrying `disables_paging:
-    # true`, #307 / P3-4) is no longer shadowed by the py inflow (which overrides
-    # A3 in build_resolved_platform and cannot carry the flag). The aliases moved
-    # too: an alias resolves only within its own inflow, so leaving them here
-    # would dangle once the target is A3-only. See #320 / #308.
-    "show ip int brief": {
-        "output": AristaEOS.make_show_ip_int_br,
-        "help": "Condensed output",
-        "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
-    },
-    "show ip interface brief": {
-        "output": AristaEOS.make_show_ip_int_br,
-        "help": "Condensed output",
-        "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
-    },
-    "conf t": {
-        "prompt": ENABLE_PROMPT,
-        "output": None,
-        "new_prompt": CONFIG_PROMPT,
-        "help": "Config mode",
-    },
-    "config term": {"alias": "conf t"},
-    "configure terminal": {"alias": "conf t"},
-    "do show ip int brief": {"alias": "show ip int brief", "prompt": CONFIG_PROMPT},
-    "exit": {
-        "output": AristaEOS.make_exit,
-        "help": "Leave Exec mode",
-        "prompt": [INITIAL_PROMPT, ENABLE_PROMPT, CONFIG_PROMPT],
-    },
-    "show hostname": {
-        "output": """Hostname: {{base_prompt}}
-FQDN:     {{base_prompt}}""",
-        "help": "Show the system hostname",
-        "prompt": ENABLE_PROMPT,
-    },
-    "no logging console": {
-        "output": "",
-        "help": "Set console logging parameters",
-        "prompt": CONFIG_PROMPT,
-    },
-    "end": {
-        "output": "",
-        "help": "Leave config mode",
-        "new_prompt": ENABLE_PROMPT,
-        "prompt": CONFIG_PROMPT,
-    },
-}

@@ -1051,6 +1051,7 @@
     "variants": []
   },
   "skip-page-display": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command skip-page-display. This automatically generated.",
     "modes": [

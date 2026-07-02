@@ -281,14 +281,14 @@ Second, we have the dictionary of commands. This dictionary is a Python dictiona
 
 ### The callable contract
 
-The typed contract lives in `simnos.core.command_contract` (`CommandHandler`
-Protocol + `CommandResult` TypedDict) — import it for type annotations if you
-like; plain functions matching the shape work as-is.
+The typed contract lives in `simnos.core.command_contract` (the
+`CommandHandler` Protocol) — import it for type annotations if you like;
+plain functions matching the shape work as-is.
 
 The shell invokes a callable output as:
 
 ```python
-output(device, base_prompt=..., current_prompt=..., command=...)
+output(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
 ```
 
 where `device` is the instance of your `BaseDevice` subclass (or `None` for a
@@ -296,16 +296,17 @@ platform without a device class). Putting an unbound method like
 `TestModule.make_show_clock` in the commands dictionary satisfies this:
 `device` binds as `self`.
 
-A callable command can return:
+A callable command returns its **output only** (#317):
 
 - `str` - output string to display
 - `None` - no response
-- `dict` (`CommandResult`) - a dictionary with optional keys:
-    - `"output"` - string to display
-    - `"new_mode"` - name of the mode to transition to (e.g. `"enable"`); the
-      shell renders that mode's prompt. Branch on the `current_mode` argument,
-      not on the prompt string.
-    - `"exit"` - if `True`, close the shell session (output is not displayed)
+
+Mode transitions and session close are static authoring data (`new_mode` /
+`exit` / `transitions` on the command), not handler returns — the former
+dict-return `CommandResult` form was removed. A handler that still returns a
+dict (or anything but `str | None`) is answered with the fixed
+`% Internal error` line and an error log. Branch on the `current_mode`
+argument, not on the prompt string.
 
 Two rules that differ from yaml-static output:
 

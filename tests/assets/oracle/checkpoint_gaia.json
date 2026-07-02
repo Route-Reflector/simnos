@@ -34,6 +34,7 @@
     "variants": []
   },
   "set clienv rows 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "set the terminal width to full",
     "modes": [

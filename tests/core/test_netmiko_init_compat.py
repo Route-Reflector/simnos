@@ -20,6 +20,7 @@ import pytest
 from simnos import SimNOS
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
+from simnos.plugins.shell.cmd_shell import build_resolved_platform
 from tests._platform_quirks import INIT_UNKNOWN_CMD_ALLOWED
 from tests.utils import (
     TEST_PASSWORD,
@@ -211,89 +212,73 @@ def _get_callable_test_commands(
 def _classify_callable_commands(
     nos: Nos, device_type: str, base_prompt: str
 ) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
-    """Classify callable commands into the (initial, enable) sweep phases.
+    """Classify the merged view's handler commands into the (initial, enable) sweep phases.
 
-    Returns two lists of (cmd, expected): commands runnable at the
-    initial prompt and commands requiring enable mode. Eligible =
-    callable output that returns a str — dict-returning mode/exit
-    callables are unit-test scope at ANY prompt (config included) —
-    and is not in TIME_DEPENDENT_COMMANDS.
+    Returns two lists of (cmd, expected): commands runnable at the initial
+    prompt and commands requiring enable mode. Since #317 P-2 the dynamic
+    commands are the merged `ResolvedPlatform`'s ``kind == "handler"`` entries
+    (A3 ``handler:`` refs and custom legacy-dict callables both normalize
+    there), and handlers are output-only (`str | None`) — a command that also
+    carries a transition (`new_mode` / `exit` / `transitions`) is skipped like
+    the static sweep does (the flat sweep cannot run it safely).
 
-    A *str-returning* callable matching neither the initial nor the
-    enable prompt (e.g. config-mode-only) raises AssertionError instead
-    of being silently dropped: extend the sweep (config phase) or add a
-    dedicated exclusion set — do not reuse TIME_DEPENDENT_COMMANDS for
-    non-time reasons.
+    A handler command valid in neither user nor enable mode (e.g.
+    config-mode-only) raises AssertionError instead of being silently
+    dropped: extend the sweep (config phase) or add a dedicated exclusion
+    set — do not reuse TIME_DEPENDENT_COMMANDS for non-time reasons.
 
-    The expected value is computed by invoking the callable with the
-    same 4-arg contract as `CMDShell._invoke_handler` (device, base_prompt=,
-    current_prompt=, command=) and taken **verbatim** — the shell does
-    not apply `.format(base_prompt=...)` to callable output (#241 /
-    D-b: handlers receive base_prompt and format themselves), so the
-    oracle must not either. Alias entries have no `output` key of their
-    own, so they are skipped here; the alias target entry is swept
-    independently.
+    The expected value is computed by invoking the handler with the same
+    contract as `CMDShell._invoke_handler` and taken **verbatim** — the shell
+    does not apply `.format(base_prompt=...)` to handler output (#241 / D-b:
+    handlers receive base_prompt and format themselves), so the oracle must
+    not either. A None return has no content to verify and is skipped.
 
-    Note: classification itself invokes the callables (probe + expected),
-    so a state-mutating callable would advance device state here before
-    the e2e session runs — fine today (all make_* are read-only), but a
+    Note: classification itself invokes the handlers (expected), so a
+    state-mutating handler would advance device state here before the e2e
+    session runs — fine today (all make_* are read-only), but a
     sweep-eligibility redesign is needed if that ever changes.
     """
-    initial_prompt = nos.initial_prompt.format(base_prompt=base_prompt)
-    enable_prompt = (nos.enable_prompt or "").format(base_prompt=base_prompt)
-    # Rendered prompt -> canonical mode name, so callables get the `current_mode`
-    # their (now mode-based) branches need (#264): a dict-returning callable such
-    # as make_exit raises on an unknown mode, so the probe must pass a valid one.
-    mode_by_prompt = {initial_prompt: "user"}
-    if enable_prompt:
-        mode_by_prompt[enable_prompt] = "enable"
-    if nos.config_prompt:
-        mode_by_prompt[nos.config_prompt.format(base_prompt=base_prompt)] = "config"
+    merged = build_resolved_platform(nos, {})
+    prompt_of = {name: mode.render_prompt(base_prompt) for name, mode in merged.modes.items()}
 
     initial_cmds: list[tuple[str, str]] = []
     enable_cmds: list[tuple[str, str]] = []
     unclassified: list[str] = []
-    for cmd_name, cmd_data in nos.commands.items():
-        output = cmd_data.get("output")
-        if not callable(output) or (device_type, cmd_name) in TIME_DEPENDENT_COMMANDS:
+    for cmd_name, rc in merged.commands.items():
+        out = rc.output
+        if out.kind != "handler" or out.handler is None or (device_type, cmd_name) in TIME_DEPENDENT_COMMANDS:
             continue
-        prompts = cmd_data.get("prompt")
-        prompts = [prompts] if isinstance(prompts, str) else (prompts or [])
-        formatted = [p.format(base_prompt=base_prompt) for p in prompts]
-        if initial_prompt in formatted:
-            current_prompt, current_mode, bucket = initial_prompt, "user", initial_cmds
-        elif enable_prompt and enable_prompt in formatted:
-            current_prompt, current_mode, bucket = enable_prompt, "enable", enable_cmds
+        if rc.new_mode or rc.exit or rc.transitions:
+            continue  # transition commands are unit/parity-test scope (a flat sweep cannot run them)
+        # Empty `modes` = valid in every mode; sweep it from the initial prompt.
+        if not rc.modes or "user" in rc.modes:
+            current_mode, bucket = "user", initial_cmds
+        elif "enable" in rc.modes:
+            current_mode, bucket = "enable", enable_cmds
         else:
-            # Outside the sweep phases. Probe with the command's own
-            # declared prompt to apply the eligibility contract: a dict
-            # return means mode/exit logic (unit-test scope at any
-            # prompt); only a str return here is real e2e coverage loss.
-            probe_prompt = formatted[0] if formatted else initial_prompt
-            probe_mode = mode_by_prompt.get(probe_prompt, "user")
-            probe = output(
-                nos.device,
-                base_prompt=base_prompt,
-                current_mode=probe_mode,
-                current_prompt=probe_prompt,
-                command=cmd_name,
-            )
-            if isinstance(probe, str):
-                unclassified.append(cmd_name)
+            unclassified.append(cmd_name)
             continue
-        expected = output(
+        expected = out.handler(
             nos.device,
             base_prompt=base_prompt,
             current_mode=current_mode,
-            current_prompt=current_prompt,
+            current_prompt=prompt_of.get(current_mode, ""),
             command=cmd_name,
         )
-        if not isinstance(expected, str):
-            continue  # dict-returning mode/exit callables -> unit tests cover these
+        if expected is None:
+            continue  # a None return writes nothing -> no content to verify
+        # Anything else non-str is a broken str|None contract (#317 P-2) — fail
+        # here rather than silently dropping it as "nothing to verify", which
+        # would let a contract-violating handler shrink the sweep unnoticed
+        # (1st round codex#1).
+        assert isinstance(expected, str), (
+            f"{device_type}: handler command {cmd_name!r} returned {type(expected).__name__} "
+            "(contract is str | None) — fix the handler, do not exclude it here"
+        )
         bucket.append((cmd_name, expected))
 
     assert not unclassified, (
-        f"{device_type}: str-returning callable commands outside the initial/enable "
+        f"{device_type}: handler commands outside the initial/enable "
         f"sweep phases: {unclassified}. Extend the sweep (e.g. config phase) or add a "
         f"dedicated exclusion set with a reason — do not reuse TIME_DEPENDENT_COMMANDS."
     )
@@ -358,10 +343,18 @@ class TestSendCommandResponse:
         handshake race on slow CI runners).
         """
         initial_cmds, enable_cmds = _get_callable_test_commands(device_type)
-        assert initial_cmds or enable_cmds, (
-            f"No eligible callable command found for {device_type}. "
-            "Every py platform must expose at least one str-returning callable."
-        )
+        if not (initial_cmds or enable_cmds):
+            # Legitimate since #317 P-2 for platforms whose only dynamic
+            # commands are time-dependent (cisco/arista `show clock`): the
+            # formerly-callable statics are A3 data now, swept by the static
+            # tests. Guard the skip on an explicit denylist entry so an
+            # accidental full coverage shrink (helper regression dropping every
+            # handler) still fails instead of skipping.
+            assert any(platform == device_type for platform, _cmd in TIME_DEPENDENT_COMMANDS), (
+                f"No eligible handler command found for {device_type} and none are "
+                "time-dependent-excluded — the sweep lost its dynamic coverage."
+            )
+            pytest.skip(f"{device_type}: all dynamic outputs are time-dependent (format pinned by unit tests)")
 
         net = _make_simnos(device_type)
         try:
@@ -410,13 +403,13 @@ class TestClassifyCallableCommands:
             }
         )
 
-    def test_config_only_str_callable_fails_loudly(self):
-        """A str-returning callable outside the sweep phases is coverage loss."""
+    def test_config_only_handler_fails_loudly(self):
+        """A handler command outside the sweep phases is coverage loss."""
         nos = self._synthetic_nos(
             {
                 "weird": {
                     "output": lambda device, **kwargs: "static",
-                    "help": "config-only str callable",
+                    "help": "config-only handler",
                     "prompt": "{base_prompt}(config)#",
                 }
             }
@@ -424,20 +417,62 @@ class TestClassifyCallableCommands:
         with pytest.raises(AssertionError, match=r"outside the initial/enable\s+sweep phases: \['weird'\]"):
             _classify_callable_commands(nos, "synth", HOSTNAME)
 
-    def test_config_only_dict_callable_is_unit_scope(self):
-        """Dict-returning mode callables are excluded at ANY prompt, no fail."""
+    def test_transition_handler_command_is_unit_scope(self):
+        """A handler command carrying a static transition is excluded, no fail.
+
+        Transitions are static authoring data since #317 P-2 (handlers are
+        output-only); a flat sweep cannot run a mode-changing command, so it is
+        skipped like the static sweep skips `new_mode` commands.
+        """
         nos = self._synthetic_nos(
             {
                 "modey": {
-                    "output": lambda device, **kwargs: {"exit": True},
-                    "help": "config-only dict callable",
-                    "prompt": "{base_prompt}(config)#",
+                    "output": lambda device, **kwargs: "",
+                    "new_prompt": "{base_prompt}#",
+                    "help": "handler + static transition",
+                    "prompt": "{base_prompt}>",
                 }
             }
         )
         initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == []
         assert enable_cmds == []
+
+    def test_none_returning_handler_is_skipped(self):
+        """A None-returning handler writes nothing — no content to verify, no fail."""
+        nos = self._synthetic_nos(
+            {
+                "silent": {
+                    "output": lambda device, **kwargs: None,
+                    "help": "handler with no output",
+                    "prompt": "{base_prompt}>",
+                }
+            }
+        )
+        initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
+        assert initial_cmds == []
+        assert enable_cmds == []
+
+    def test_contract_breaking_handler_fails_loudly(self):
+        """A non-str|None return fails classification instead of shrinking the sweep.
+
+        Only None means "no content to verify"; a dict/list return is a broken
+        #317 P-2 handler contract, and silently dropping it would let a
+        contract-violating handler disappear from the e2e sweep (and, combined
+        with the denylist skip, potentially the whole platform) unnoticed
+        (1st round codex#1).
+        """
+        nos = self._synthetic_nos(
+            {
+                "broken": {
+                    "output": lambda device, **kwargs: {"output": "x"},
+                    "help": "dict-returning handler (removed contract)",
+                    "prompt": "{base_prompt}>",
+                }
+            }
+        )
+        with pytest.raises(AssertionError, match=r"returned dict \(contract is str \| None\)"):
+            _classify_callable_commands(nos, "synth", HOSTNAME)
 
     def test_denylist_is_platform_qualified(self):
         """Another platform's deterministic 'show clock' stays in the sweep."""
