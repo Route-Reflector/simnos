@@ -145,10 +145,13 @@ def build_resolved_platform(
     """
     a3 = nos.resolved_platform
     if a3 is None:
+        # A py-only Nos keeps the constructor-default name (`NAME` is no longer
+        # read), so name the loaded source paths too — the actionable pointer.
         raise ValueError(
-            f"platform {nos.name!r} has no A3 platform dir (resolved_platform is unset) — "
-            "py-only platforms were removed (#317 P-4); ship a `platforms/<name>/` dir "
-            "(platform.yaml + commands/) and keep the py module for the device class / handlers only"
+            f"platform {nos.name!r} has no A3 platform dir (resolved_platform is unset; "
+            f"loaded sources: {nos.sources or 'none'}) — py-only platforms were removed (#317 P-4); "
+            "ship a `platforms/<name>/` dir (platform.yaml + commands/) and keep the py module for "
+            "the device class / handlers only"
         )
     commands: dict[str, ResolvedCommand] = dict(BASIC_COMMANDS)
     commands.update(a3.commands)

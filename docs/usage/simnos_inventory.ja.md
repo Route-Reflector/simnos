@@ -43,7 +43,7 @@ default_inventory = {
     "default": {
         "username": "user",
         "password": "user",
-        "port": 6000,
+        "port": 0,  # OS 割り当て (ephemeral, #271)。実ポートは net.hosts[<name>].port から読み戻す
         "server": {
             "plugin": "AsyncSshServer",
             "configuration": {
@@ -55,9 +55,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "device_type": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "device_type": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "device_type": "arista_eos"},
+        "router_cisco_ios": {"port": 0, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": 0, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": 0, "device_type": "arista_eos"},
     }
 }
 ```

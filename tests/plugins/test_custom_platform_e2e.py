@@ -149,5 +149,8 @@ def test_py_only_platform_is_loud_at_start(register_custom, monkeypatch):
         }
     }
     net = SimNOS(inventory=inventory)
-    with pytest.raises(ValueError, match=r"has no A3 platform dir"):
+    # The message must carry the loaded source paths: a py-only Nos keeps the
+    # constructor-default name, so the path is the only actionable pointer to
+    # the offending plugin (1st round claude#4).
+    with pytest.raises(ValueError, match=r"has no A3 platform dir.*synthetic_custom_handlers\.py"):
         net.start()

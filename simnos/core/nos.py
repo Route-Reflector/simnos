@@ -146,6 +146,12 @@ class Nos:
         self.name = name
         self.auth: str | None = None
         self.device = None
+        # Every path handed to `from_file`, in load order — diagnostics only.
+        # A py-only Nos keeps the constructor-default name (the module's legacy
+        # ``NAME`` constant is no longer read, #317 P-4), so the A3-required
+        # error in `build_resolved_platform` names these sources to stay
+        # traceable to the offending plugin path.
+        self.sources: list[str] = []
         # A3 ``handler:`` namespace (#317 / P-1): name -> callable, populated by
         # `_from_module` from the py plugin's device class + module-level
         # functions. `build_resolved_platform` binds A3 handler refs against it.
@@ -200,14 +206,16 @@ class Nos:
         # so a broken plugin raises without leaving partial state behind (#232).
         # A leftover py `commands` dict is a removed authoring channel; ignoring
         # it silently would hide the author's intent, so it fails at load — the
-        # P-3 merge-time guard moved to this earlier boundary in P-4. An *empty*
-        # dict is a contentless vestige and stays ignored (same contract as P-3).
+        # P-3 merge-time guard moved to this earlier boundary in P-4. The check
+        # is truthiness, not type: any non-empty `commands` value is an
+        # authoring attempt, while a falsy one (an empty dict is the shipped
+        # vestige shape) is contentless and stays ignored (same contract as P-3).
         module_commands = getattr(module, "commands", None)
         if module_commands:
             raise ValueError(
-                f"Module '{filename}' defines a `commands` dict — py dict authoring was removed (#317); "
-                "author the commands in the platform's A3 `commands/` dir and keep the py module for the "
-                "device class / handlers only"
+                f"Module '{filename}' defines a non-empty `commands` attribute — py dict authoring was removed "
+                "(#317); author the commands in the platform's A3 `commands/` dir and keep the py module for "
+                "the device class / handlers only"
             )
         device_classes = _find_device_classes(module)
         if len(device_classes) > 1:
@@ -270,12 +278,14 @@ class Nos:
         # file — dispatch on that before the extension check (#264 / D6).
         if os.path.isdir(filename):
             self._from_platform_dir(filename)
+            self.sources.append(filename)
             return
         if not self._is_file_ending_correct(filename):
             raise ValueError(f'Unsupported "{filename}" file extension. Supported: an A3 platform dir or a .py file')
         if not os.path.isfile(filename):
             raise FileNotFoundError(filename)
         self._from_module(filename)
+        self.sources.append(filename)
 
     def _is_file_ending_correct(self, filename: str) -> bool:
         """
