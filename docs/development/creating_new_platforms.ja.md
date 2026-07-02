@@ -2,7 +2,7 @@
 SIMNOS は容易に拡張できるように設計されています。プラットフォームの静的なコマンドデータは **A3 プラットフォームディレクトリ**に置き、動的な挙動は任意の Python モジュールで追加します。両者は合成され、A3 dir が静的コマンドとモードを提供し、同名の Python モジュールがその上にハンドラ / デバイスクラスを重ねます (#264)。
 
 !!! tip
-    ホットリローダーは `simnos/plugins/nos` 内の **Python モジュール**が変更されたときにリロードします (`simnos up --reload-commands`)。A3 プラットフォームディレクトリのホットリロードは別の、保留中の機能です (#274)。現状 A3 の編集は次回サーバー起動時に反映されます。
+    ホットリローダー (`simnos up --reload-commands`) は各プラットフォーム自身のソース — A3 プラットフォームディレクトリ **と** Python モジュール — を watch し、ファイル変更時にそのプラットフォームをリロードします (#274 / #281)。`commands/*.yaml`、出力 `.txt` / `.j2`、モジュール `.py` の編集は、live セッションの次のコマンドから反映されます。
 
 ## A3 プラットフォームディレクトリ
 プラットフォームの静的コマンドデータを追加する方法です。各プラットフォームは `simnos/plugins/nos/platforms/<name>/` 配下のディレクトリで、以下を含みます:
@@ -55,10 +55,13 @@ output: show_version.txt       # 裸の .txt ファイル名、verbatim 読込 (
 
 - **`output`** は隣接する `.txt` ファイルを **verbatim** で参照 — `str.format` なし、brace エスケープなし。capture 中の literal な `{master:0}` はそのまま wire に届きます。
 - **`output_template`** は隣接する `.j2` ファイルを jinja2 で render (出力が `{{ base_prompt }}` を補間する必要がある場合のみ使用)。1 コマンドは `output` か `output_template` のどちらか一方のみ。
+- **`handler`** はプラットフォームの Python モジュール上の callable (device class の method またはモジュールレベル関数) を名前で参照し、dispatch 時に出力を計算します — 第 4 の排他 output channel (#317)。handler の戻り値は `str | None` (output のみ; 遷移は静的データ — 下記参照)。
 - **`new_mode`** はコマンド実行後に遷移するモード名 (旧 `new_prompt` の後継)。
+- **`transitions`** はモード条件付き遷移 map で、`new_mode` / `exit` と排他: key はコマンドの mode のいずれか、値は `{new_mode: <mode>}` または `{exit: true}` (#317)。例: arista_eos の `exit` は user/enable ではセッションを閉じ、config では enable に落ちます。
 - **`variants`** は multi-capture 契約: `{name, output}` エントリのリスト (`variant_1` が primary を mirror、`variant_2`.. が alternate)、各々が自身の `.txt` を指す。
-- **`alias`** はコマンドを別コマンドへの純粋な参照にします — 他の dispatch field は持ちません。
+- **`alias`** はコマンドを別コマンドへの純粋な参照にします。alias が再指定できる唯一の dispatch field は `mode:` です (例: arista_eos の `do show ip int brief` は target が user/enable なのに対し config 専用、#317) — それ以外はすべて継承。
 - **`exit`** はセッションを閉じるコマンドを表します。
+- **`disables_paging`** は `--More--` ページャーをそのセッション以降無効化するコマンドを表します (例: `terminal length 0`、#307)。
 - **`_default_`** はモード非依存の unknown-command フォールバック: プラットフォームの実機エラー文言を記述 (例: Cisco IOS は `% Invalid input detected at '^' marker.`; vendor ごとに違うので copy-paste 禁止)。`mode` は取りません。
 
 ### authoring 規約
@@ -80,4 +83,4 @@ yamllint の `quoted-strings` rule はプラットフォームデータディレ
 `sync_ntc_commands.py` は NTC Templates を A3 プラットフォームと比較し、まだ存在しないコマンドについて A3 take-in candidate ファイル (`commands/<stem>.yaml` + `.txt`、`source` ブロック付き `type: ntc`) を生成します — レビューして `platforms/<name>/` 配下にコピーしてください。新規プラットフォームの `platform.yaml` は手書きします (モード/auth は NTC fixture から導出できません)。
 
 ## Python モジュール
-この方法は静的な A3 データの上に (または代わりに) 動的な挙動を追加します: Python のフルパワーによるハンドラとデバイスクラス。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置されます。A3 プラットフォームと同名のモジュールはその上に merge されます (コマンド単位でモジュール側が勝ちます)。
+この方法は静的な A3 データの上に Python のフルパワーで動的な挙動を追加します。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置され、A3 プラットフォームと同名のモジュールが合成されます。同梱プラットフォームのパターン (#317): モジュールは `BaseDevice` subclass を定義し、その method (+ モジュールレベル関数) がプラットフォームの **handler namespace** になり、A3 コマンドが `handler:` で名前参照します — 未解決の参照はサーバ起動時に loud に fail します。callable のシグネチャと `str | None` 戻り値規則は [handler 契約](creating_nos_plugin.ja.md) を参照。(モジュールは A3 entry をコマンド単位で上書きする legacy `commands` dict を持つこともまだ可能ですが、この inflow は撤去予定です — #317。)

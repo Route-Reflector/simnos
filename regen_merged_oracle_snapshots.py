@@ -11,7 +11,7 @@ The original snapshots were frozen at the P-2 migration and byte-verified
 against the pre-migration merged view (py dict inflow still present): every
 projection axis except the expected handler->static conversions was equal, and
 the converted outputs were byte-compared against pre-migration renders frozen
-under ``tests/assets/p2_migration_wire/`` (see the P-2 worklog / PR). Until the
+under ``tests/assets/p2_migration_wire/`` (see the #317 P-2 PR). Until the
 legacy adapter and py inflow are removed (P-4), this gate is the last line
 of defense that P-3's merge rework does not drift the served view — the byte
 goldens only cover cisco_ios scenarios.

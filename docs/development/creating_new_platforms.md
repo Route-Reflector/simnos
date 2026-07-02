@@ -6,10 +6,11 @@ commands and modes, and a co-named Python module can add handlers / a device
 class on top (#264).
 
 !!! tip
-    A hot-reloader reloads **Python modules** when they change inside
-    `simnos/plugins/nos` (`simnos up --reload-commands`). Hot-reload of an A3
-    platform directory is a separate, deferred capability (#274); for now an A3
-    edit is picked up on the next server start.
+    A hot-reloader (`simnos up --reload-commands`) watches each platform's own
+    sources — the A3 platform directory **and** its Python module — and reloads
+    the platform when a file changes (#274 / #281). Editing a `commands/*.yaml`,
+    an output `.txt` / `.j2`, or the module `.py` propagates to the next command
+    of a live session.
 
 ## A3 platform directory
 This is the way to add a platform's static command data. Each platform is a
@@ -74,14 +75,26 @@ output: show_version.txt       # a bare .txt filename, read verbatim (literal)
 - **`output_template`** references an adjacent `.j2` file rendered with jinja2
   (use it only when the output must interpolate `{{ base_prompt }}`). A command
   may set `output` *or* `output_template`, never both.
+- **`handler`** names a callable on the platform's Python module (a device-class
+  method or module-level function) that computes the output at dispatch time —
+  the fourth, mutually exclusive output channel (#317). The handler returns
+  `str | None` (output only; transitions stay static data — see below).
 - **`new_mode`** names the mode to transition to after the command runs
   (the successor of the legacy `new_prompt`).
+- **`transitions`** is the mode-conditional transition map, exclusive with
+  `new_mode` / `exit`: each key is one of the command's modes, each value
+  `{new_mode: <mode>}` or `{exit: true}` (#317). E.g. arista_eos `exit` closes
+  the session from user/enable but drops config to enable.
 - **`variants`** is the multi-capture contract: a list of `{name, output}`
   entries (`variant_1` mirrors the primary, `variant_2`.. are alternates), each
   pointing at its own `.txt`.
-- **`alias`** makes the command a pure reference to another command — it carries
-  no other dispatch fields.
+- **`alias`** makes the command a pure reference to another command. The one
+  dispatch field an alias may re-author is `mode:` (e.g. arista_eos
+  `do show ip int brief` is config-only while its target is user/enable, #317);
+  everything else is inherited.
 - **`exit`** marks a session-closing command.
+- **`disables_paging`** marks a command that turns the `--More--` pager off for
+  the rest of the session (e.g. `terminal length 0`, #307).
 - **`_default_`** is the mode-agnostic unknown-command fallback: author the
   platform's real error wording (e.g. Cisco IOS `% Invalid input detected at
   '^' marker.`; vendor wording differs, do not copy-paste). It takes no `mode`.
@@ -123,7 +136,14 @@ A3 take-in candidate files (`commands/<stem>.yaml` + `.txt`, `type: ntc` with a
 (modes/auth are not derivable from NTC fixtures).
 
 ## Python modules
-This method adds dynamic behavior on top of (or instead of) the static A3 data:
-handlers and a device class with the full power of Python. The Python modules
-are located in the `simnos/plugins/nos/platforms_py` package; a module co-named
-with an A3 platform is merged over it (its commands win per-command).
+This method adds dynamic behavior on top of the static A3 data with the full
+power of Python. The Python modules are located in the
+`simnos/plugins/nos/platforms_py` package; a module co-named with an A3
+platform composes with it. The shipped pattern (#317): the module defines a
+`BaseDevice` subclass whose methods (plus module-level functions) form the
+platform's **handler namespace**, and A3 commands reference them by name via
+`handler:` — an unresolved reference fails loudly at server start. See the
+[handler contract](creating_nos_plugin.md) for the callable signature and the
+`str | None` return rule. (A module may still ship a legacy `commands` dict
+that overrides A3 entries per-command; that inflow is scheduled for removal —
+#317.)
