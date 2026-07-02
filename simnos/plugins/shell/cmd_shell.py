@@ -13,12 +13,23 @@ import threading
 import traceback
 from typing import TYPE_CHECKING, cast
 
-from simnos.core.command_adapter import adapt_commands, adapt_legacy_commands, reverse_map_from_modes
+from jinja2 import TemplateSyntaxError
+
+from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
-from simnos.core.platform_loader import load_platform_dir
-from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput, ResolvedPlatform
+from simnos.core.platform_loader import load_platform_dir, resolve_transitions
+from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
+from simnos.core.resolved_command import (
+    NO_OUTPUT,
+    ModeDef,
+    ResolvedCommand,
+    ResolvedOutput,
+    ResolvedPlatform,
+    compile_template,
+)
+from simnos.core.values_loader import validate_render_values
 
 # `nos_pkg` is the package module (for `__path__`); the `__init__` arg `nos` is a
 # `Nos` instance that would shadow a plain `from simnos.plugins import nos`, so the
@@ -56,36 +67,51 @@ def _stable_hash(seed: int, host: str, command: str) -> int:
     return int(digest, 16)
 
 
-# Special, always-present commands fed through the same legacy adapter as the
-# NOS data (#264 / D5). They carry no `prompt`, so the adapter resolves them to
-# an empty mode set = valid in every mode.
-BASIC_COMMANDS: dict = {
-    "exit": {"exit": True, "help": "Exit commands shell"},
-    "_default_": {
-        "output": "Unknown command",
-        "help": "Output to print for unknown commands",
-    },
+def _basic_command(name: str, *, output: str | None = None, help: str = "", exit: bool = False) -> ResolvedCommand:
+    """Build one native BASIC entry (#317 / P-3, 案F): literal output, all modes."""
+    return ResolvedCommand(
+        name=name,
+        modes=frozenset(),  # empty = valid in every mode
+        new_mode=None,
+        output=ResolvedOutput(kind="literal", text=output) if output is not None else NO_OUTPUT,
+        variants=(),
+        help=help,
+        exit=exit,
+        type="simnos",
+    )
+
+
+# Special, always-present commands, in native `ResolvedCommand` form (#317 / P-3,
+# 案F — the legacy-adapter round trip is gone). They sit under every other inflow
+# in the merge, so platform data / overlay / inventory can override them. Frozen
+# dataclasses: `build_resolved_platform` shares them without copying.
+BASIC_COMMANDS: dict[str, ResolvedCommand] = {
+    "exit": _basic_command("exit", help="Exit commands shell", exit=True),
+    "_default_": _basic_command(
+        "_default_",
+        output="Unknown command",
+        help="Output to print for unknown commands",
+    ),
     # Abbreviation diagnostics (#303 / P3-2). Overridable specials like
     # `_default_` — the default wording is Cisco IOS style (no captured oracle
     # exists, so it follows public IOS documentation; re-pin if a capture is
     # obtained), and huawei/junos can override it from platform data. The
-    # dispatcher fills a literal `{input}` placeholder with the typed line via
-    # `str.replace`. These entries flow through the legacy adapter
-    # (`format_template_to_jinja`), which treats `{...}` as a `str.format` field
-    # and rejects any field but `base_prompt`, so the placeholder is written
-    # **escaped** as `{{input}}` here: the adapter collapses it to a literal
-    # `{input}` (no template render), which `_dispatch_general` then substitutes.
-    # An override may carry `{input}` only as literal / A3 `.j2` text or via a
-    # handler (which formats itself from its `command` argument); a legacy
-    # py-module str.format template with a bare `{input}` fails loudly at load.
-    "_ambiguous_": {
-        "output": '% Ambiguous command:  "{{input}}"',
-        "help": "Output for an ambiguous command abbreviation",
-    },
-    "_incomplete_": {
-        "output": "% Incomplete command.",
-        "help": "Output for an incomplete command abbreviation",
-    },
+    # dispatcher fills the literal `{input}` placeholder with the typed line via
+    # `str.replace` — a plain single-brace literal now that the entry is born a
+    # `ResolvedOutput` (the `{{input}}` escape the legacy adapter's
+    # `str.format`-field detection forced is gone, #317 / P-3). An override may
+    # carry `{input}` as literal / A3 `.j2` text or via a handler (which formats
+    # itself from its `command` argument).
+    "_ambiguous_": _basic_command(
+        "_ambiguous_",
+        output='% Ambiguous command:  "{input}"',
+        help="Output for an ambiguous command abbreviation",
+    ),
+    "_incomplete_": _basic_command(
+        "_incomplete_",
+        output="% Incomplete command.",
+        help="Output for an incomplete command abbreviation",
+    ),
 }
 
 # Wire response when a command handler (callable output) crashes. Real NOSes
@@ -104,47 +130,54 @@ def build_resolved_platform(
     merge under one precedence — BASIC < NOS < overlay < inventory, later inflows
     winning:
 
-    - **legacy NOS** (`nos.resolved_platform is None`): the merged dict (BASIC +
-      NOS commands + inventory, all legacy form) goes through the legacy adapter,
-      which synthesizes the modes from the 3 scalar prompts. The user overlay is
-      A3-only (#286 / Decision 12), so it is not applied here.
+    - **legacy NOS** (`nos.resolved_platform is None`, py-only platforms — gone in
+      #317 P-4): the NOS command dict goes through the legacy adapter, which
+      synthesizes the modes from the 3 scalar prompts; the native BASIC entries
+      sit under it and the inventory commands are normalized against the
+      synthesized modes on top. The user overlay is A3-only (#286 / Decision 12),
+      so it is not applied here.
     - **A3 NOS** (`nos.resolved_platform` set): modes come from the A3 platform;
-      its resolved static commands sit between the still-legacy BASIC (below) and
-      the legacy py-module / inventory inflows (above, keeping the py-override
-      precedence). The legacy inflows are normalized with the A3 platform's
-      prompt->mode reverse map. The user overlay (#286), when the host opted in,
-      slots between the py inflow and inventory so a captured `.txt` overrides the
-      packaged output but a session-local inventory command still wins. Inventory /
-      py aliases resolve within their own inflow only; a cross-inflow alias (e.g.
-      inventory aliasing an A3 command) is out of scope until the inventory rework
-      (#266) — shipped data has none.
+      its resolved static commands sit over the native BASIC entries. The user
+      overlay (#286), when the host opted in, slots between the platform data and
+      inventory so a captured `.txt` overrides the packaged output but a
+      session-local inventory command still wins. A py `commands` dict alongside
+      an A3 dir is rejected loudly — that authoring channel was removed in #317
+      P-2, and silently ignoring a dict that still loads would hide it.
+
+    The inventory commands arrive in their A3-dialect authoring form
+    (`ModelInventoryCommand`, #317 / P-3) and are normalized here against the
+    platform's modes — mode names instead of the removed prompt-string reverse
+    mapping.
 
     Pure (no session state): the result is per-host invariant, so the server
     builds it once and shares it across connections.
     """
     a3 = nos.resolved_platform
     if a3 is None:
-        merged = {
-            **copy.deepcopy(BASIC_COMMANDS),
-            **copy.deepcopy(nos.commands or {}),
-            **copy.deepcopy(inventory_commands),
-        }
-        return adapt_legacy_commands(nos.initial_prompt, nos.enable_prompt, nos.config_prompt, merged)
-    reverse_map = reverse_map_from_modes(a3.modes)
-    commands: dict = {}
-    commands.update(adapt_commands(copy.deepcopy(BASIC_COMMANDS), reverse_map))
+        legacy = adapt_legacy_commands(
+            nos.initial_prompt, nos.enable_prompt, nos.config_prompt, copy.deepcopy(nos.commands or {})
+        )
+        commands: dict[str, ResolvedCommand] = dict(BASIC_COMMANDS)
+        commands.update(legacy.commands)
+        commands.update(_resolve_inventory_commands(inventory_commands, legacy.modes))
+        return replace(legacy, commands=commands)
+    if nos.commands:
+        raise ValueError(
+            f"platform {nos.name!r}: the py module defines a `commands` dict alongside the A3 platform dir — "
+            "py dict authoring was removed (#317 P-2); author the commands in the A3 `commands/` dir instead"
+        )
+    commands = dict(BASIC_COMMANDS)
     commands.update(a3.commands)
-    commands.update(adapt_commands(copy.deepcopy(nos.commands or {}), reverse_map))
     # User overlay (#286): a host opts in via inventory `overlay.override_commands`;
-    # the overlay dir was resolved + existence-checked by Host. Applied after py and
-    # before inventory (last-wins precedence, Decision 14).
+    # the overlay dir was resolved + existence-checked by Host. Applied before
+    # inventory (last-wins precedence, Decision 14).
     if render_config is not None and render_config.overlay_root and render_config.override_commands:
         overlay_commands = resolve_overlay(
             render_config.overlay_root, a3, override_commands=render_config.override_commands
         )
         log.debug("overlay overrides %d command(s): %s", len(overlay_commands), sorted(overlay_commands))
         commands.update(overlay_commands)
-    commands.update(adapt_commands(copy.deepcopy(inventory_commands), reverse_map))
+    commands.update(_resolve_inventory_commands(inventory_commands, a3.modes))
     # Bind any A3 `handler:` refs to the platform's py handler namespace now that
     # every inflow is merged (an overlay/inventory override may have replaced a
     # handler command with a literal, so bind the final state) (#317 / P-1).
@@ -161,6 +194,69 @@ def build_resolved_platform(
         # merged platform would silently fall back to the default `--More--` even
         # when the platform authored its own (#307 / P3-4).
         more_prompt=a3.more_prompt,
+    )
+
+
+def _resolve_inventory_commands(inventory_commands: dict, modes: dict[str, ModeDef]) -> dict[str, ResolvedCommand]:
+    """Normalize the inventory command inflow to `ResolvedCommand`s (#317 / P-3, 案E).
+
+    The entries arrive as raw mappings — the inventory file was schema-validated
+    at `SimNOS` load, but a direct ``CMDShell(nos_inventory_config=...)`` caller
+    bypasses that — so they are re-parsed through `NosPluginConfig` here: the
+    typed model is the one loud boundary for both paths (typed-model-first,
+    #287 / D6 K), and it owns the `_default_` special rule. Mode names are then
+    validated against the *actual* platform modes, which only the merge knows
+    (the A3 modes, or the legacy branch's synthesized user/enable/config).
+    """
+    if not inventory_commands:
+        return {}
+    parsed = NosPluginConfig(commands=inventory_commands).commands or {}
+    mode_names = frozenset(modes)
+    return {name: _resolve_inventory_command(name, model, mode_names) for name, model in parsed.items()}
+
+
+def _resolve_inventory_command(name: str, model: ModelInventoryCommand, mode_names: frozenset[str]) -> ResolvedCommand:
+    """Resolve one validated inventory entry (mirrors the A3 loader's `_resolve_command`)."""
+    where = f"inventory command {name!r}"
+    # `_default_` is the mode-agnostic fallback (its `mode` is schema-rejected);
+    # an omitted `mode` is likewise the empty set ("all modes", #264 / D5).
+    if model.mode is None:
+        cmd_modes: frozenset[str] = frozenset()
+    else:
+        unknown = [m for m in model.mode if m not in mode_names]
+        if unknown:
+            raise ValueError(f"{where}: mode(s) {unknown} not in platform modes {sorted(mode_names)}")
+        cmd_modes = frozenset(model.mode)
+    if model.new_mode is not None and model.new_mode not in mode_names:
+        raise ValueError(f"{where}: new_mode {model.new_mode!r} not in platform modes {sorted(mode_names)}")
+
+    if model.output is not None:
+        output = ResolvedOutput(kind="literal", text=model.output)
+    elif model.output_template is not None:
+        try:
+            template, required = compile_template(model.output_template)
+        except TemplateSyntaxError as e:
+            raise ValueError(f"{where}: output_template has a jinja2 syntax error: {e}") from e
+        output = ResolvedOutput(kind="template", template=template, required_vars=required)
+        # An inventory template has no sidecar values, so anything beyond
+        # `base_prompt` can never be satisfied — the shared build-time gate
+        # rejects it at start instead of a mid-session render crash (#287 / D5).
+        validate_render_values(output, name, source="inventory")
+    else:
+        output = NO_OUTPUT
+
+    return ResolvedCommand(
+        name=name,
+        modes=cmd_modes,
+        new_mode=model.new_mode,
+        output=output,
+        variants=(),
+        help=model.help or "",
+        exit=bool(model.exit),
+        # Session-local, user-authored — classified like an overlay-added
+        # command, not packaged data (#317 / P-3).
+        type="custom",
+        transitions=resolve_transitions(name, model.transitions, cmd_modes, mode_names, where="inventory command"),
     )
 
 
@@ -254,8 +350,9 @@ class CMDShell:
         self.page_default_rows: int = page_default_rows
         self._paging_disabled: bool = False
         # Inventory-defined commands are a third inflow alongside BASIC and the
-        # NOS data; kept in authoring form and normalized through the adapter on
-        # a hot-reload rebuild (#264 / D6).
+        # NOS data; kept in authoring form (A3 dialect, #317 / P-3) and
+        # re-normalized against the freshly loaded modes on a hot-reload rebuild
+        # (#264 / D6).
         self._inventory_commands: dict = nos_inventory_config.get("commands", {})
         # Per-host render config (overlay #286, variants_policy #287). Held so a
         # hot-reload `_rebuild` re-applies the overlay instead of dropping it
@@ -521,13 +618,14 @@ class CMDShell:
         must not kill the SSH session nor block reloading the remaining
         files — log and retry on the next change.
 
-        `from_file` commits to `self.nos` *before* the adapter validates it in
-        `_rebuild`, so a file that loads under the legacy schema but fails
-        normalization (e.g. a canonical-外 prompt) would leave broken commands
-        in `self.nos` and re-fail every later file in the batch. Snapshot the
-        mutated nos state and roll it back on failure to keep the per-file
-        contract; `_rebuild` itself is atomic, so live `self.commands` is never
-        touched by a failed reload (2nd round codex #1).
+        `from_file` commits to `self.nos` *before* the merge re-validates it in
+        `_rebuild`, so a platform that loads but fails normalization (e.g. an
+        inventory command whose `mode` the reloaded platform no longer
+        declares) would leave a broken platform in `self.nos` and re-fail every
+        later file in the batch. Snapshot the mutated nos state and roll it
+        back on failure to keep the per-file contract; `_rebuild` itself is
+        atomic, so live `self.commands` is never touched by a failed reload
+        (2nd round codex #1).
 
         The A3 platform parse is cached by `load_platform_dir`; drop that cache
         first so a reload re-reads the changed files instead of the stale parse

@@ -1,12 +1,13 @@
 """Legacy-form -> `ResolvedCommand` normalization core (#264 / P1-1 D6).
 
-This is the bridge that normalizes the surviving legacy command inflows —
-py-plugin command dicts and inventory commands (`nos.configuration.commands`) —
+This is the bridge that normalizes the last surviving legacy command inflow —
+the command dict of a py-only platform (no A3 dir, `adapt_legacy_commands`) —
 into `ResolvedPlatform` / `ResolvedCommand`, so the shell, tests and new
 consumers see one semantics regardless of authoring form. The monolithic
 ``platforms_yaml`` data form and its file loader were removed in v3 (#264 PR-3);
-this normalization core stays until the inventory commands path is reworked in
-#266 (Decision 9).
+the inventory commands inflow moved to the A3-dialect schema in #317 P-3 (it no
+longer passes through here); this normalization core itself is deleted with the
+legacy base layer in #317 P-4.
 
 The normalization faithfully replicates v2 render semantics — the fidelity the
 migration oracle (b') verified against the legacy yaml before it was deleted
@@ -49,10 +50,9 @@ def reverse_map_from_modes(modes: dict[str, ModeDef]) -> dict[str, str]:
     Keys are each mode prompt rendered at the internal sentinel base prompt;
     values are mode names. Two modes rendering to the same prompt string is an
     ambiguity the reverse lookup cannot resolve -> raises (measured 0 in
-    shipped data, guarded for future/external data). Shared by `synthesize_modes`
-    (legacy 3-prompt inflow) and the shell's A3 path, where the modes come from
-    a `ResolvedPlatform` but inventory/BASIC commands still arrive in legacy form
-    and need the same prompt->mode reverse lookup (#264 / D6).
+    shipped data, guarded for future/external data). Used by `synthesize_modes`
+    only since #317 P-3 — the BASIC / inventory inflows no longer arrive in
+    prompt-string form, so the shell's A3 path needs no reverse lookup.
     """
     reverse_map: dict[str, str] = {}
     for mode_name, mode in modes.items():
@@ -109,7 +109,7 @@ def _lookup_mode(prompt_template: str, reverse_map: dict[str, str], *, where: st
     the two are equivalent for these templates (verified by the converter,
     `format_template_to_jinja`), so the lookup matches.
 
-    A malformed / unknown-field prompt (e.g. inventory data with
+    A malformed / unknown-field prompt (e.g. a py dict with
     ``{hostname}``) is validated through that same converter, so it fails with
     a context-tagged ``ValueError`` instead of a bare ``KeyError`` escaping
     from ``str.format`` — symmetric with the output loud boundary (1st round
@@ -171,11 +171,11 @@ def _resolve_alias(name: str, entry: dict, commands: dict) -> dict | None:
 
 
 def adapt_commands(commands: dict, reverse_map: dict[str, str]) -> dict[str, ResolvedCommand]:
-    """Normalize a merged legacy command dict to `ResolvedCommand` objects.
+    """Normalize a legacy command dict to `ResolvedCommand` objects.
 
-    `commands` is the already-merged view (BASIC + nos + inventory), so alias
-    targets resolve within it. The prompt->mode reverse lookup uses
-    `reverse_map` from `synthesize_modes`.
+    `commands` is a py-only platform's dict (the one legacy inflow left since
+    #317 P-3), so alias targets resolve within it. The prompt->mode reverse
+    lookup uses `reverse_map` from `synthesize_modes`.
     """
     resolved: dict[str, ResolvedCommand] = {}
     for name, entry in commands.items():

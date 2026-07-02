@@ -12,9 +12,11 @@ from simnos.core.pydantic_models import (
     InventoryDefaultSection,
     ModelCommandAuthoring,
     ModelHost,
+    ModelInventoryCommand,
     ModelNosCommand,
     ModelPlatformMeta,
     ModelTransition,
+    NosPluginConfig,
 )
 
 
@@ -258,6 +260,104 @@ class TestModelCommandAuthoring:
                 type="simnos",
                 transitions={"user": {"exit": True}},  # ty: ignore[invalid-argument-type]
             )
+
+
+class TestModelInventoryCommand:
+    """Structural validation for the inventory command schema (#317 / P-3, 案E).
+
+    The inventory inflow speaks the A3 dialect (mode names / transitions /
+    inline output); the removed legacy fields (`prompt` / `new_prompt` /
+    `alias` / `output_variants`) must be rejected loudly, not silently
+    dropped — that is the breaking edge of P-3 (changelog migration row).
+    The `_default_` special rule lives on `NosPluginConfig` (which sees the
+    command names as mapping keys).
+    """
+
+    def test_minimal_command(self):
+        model = ModelInventoryCommand(output="hello", help="h", mode=["user"])
+        assert model.output == "hello"
+        assert model.mode == ["user"]
+
+    def test_all_fields_default_none(self):
+        model = ModelInventoryCommand()
+        assert model.output is None and model.output_template is None
+        assert model.mode is None and model.new_mode is None and model.transitions is None
+
+    @pytest.mark.parametrize(
+        "legacy_field",
+        [
+            {"prompt": "{base_prompt}>"},
+            {"new_prompt": "{base_prompt}#"},
+            {"alias": "show version"},
+            {"output_variants": ["alt"]},
+        ],
+        ids=["prompt", "new_prompt", "alias", "output_variants"],
+    )
+    def test_rejects_legacy_fields(self, legacy_field):
+        with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+            ModelInventoryCommand(**legacy_field)
+
+    def test_rejects_empty_mode_list(self):
+        with pytest.raises(ValidationError, match=r"mode: \[\] is rejected"):
+            ModelInventoryCommand(mode=[])
+
+    def test_rejects_two_output_channels(self):
+        with pytest.raises(ValidationError, match="at most one of"):
+            ModelInventoryCommand(output="text", output_template="{{ base_prompt }}")
+
+    def test_accepts_transitions_map(self):
+        model = ModelInventoryCommand(transitions={"user": {"exit": True}})  # ty: ignore[invalid-argument-type]
+        assert model.transitions is not None
+        assert model.transitions["user"].exit is True
+
+    def test_rejects_transitions_with_static_new_mode(self):
+        with pytest.raises(ValidationError, match="exclusive with"):
+            ModelInventoryCommand(
+                new_mode="enable",
+                transitions={"user": {"exit": True}},  # ty: ignore[invalid-argument-type]
+            )
+
+    def test_rejects_transitions_with_static_exit(self):
+        with pytest.raises(ValidationError, match="exclusive with"):
+            ModelInventoryCommand(
+                exit=True,
+                transitions={"user": {"exit": True}},  # ty: ignore[invalid-argument-type]
+            )
+
+    def test_rejects_empty_transitions(self):
+        with pytest.raises(ValidationError, match="is empty"):
+            ModelInventoryCommand(transitions={})
+
+
+class TestNosPluginConfigDefaultRules:
+    """`_default_` special rule on the inventory commands mapping (#317 / P-3).
+
+    A3-identical (2nd round claude#5): the fallback is mode-agnostic, so a
+    `mode` / `new_mode` / `transitions` on the `_default_` override is dead
+    data and rejected. The rule lives here (not on `ModelInventoryCommand`)
+    because the command name is the mapping key.
+    """
+
+    @pytest.mark.parametrize(
+        "default_entry",
+        [
+            {"mode": ["user"]},
+            {"new_mode": "enable"},
+            {"transitions": {"user": {"exit": True}}},
+        ],
+        ids=["mode", "new_mode", "transitions"],
+    )
+    def test_rejects_default_with_mode_or_transition(self, default_entry):
+        with pytest.raises(ValidationError, match="mode-agnostic"):
+            NosPluginConfig(commands={"_default_": {"output": "?", **default_entry}})  # ty: ignore[invalid-argument-type]
+
+    def test_accepts_plain_default_override(self):
+        config = NosPluginConfig(commands={"_default_": {"output": "% Unknown"}})  # ty: ignore[invalid-argument-type]
+        assert config.commands is not None
+        assert config.commands["_default_"].output == "% Unknown"
+
+    def test_accepts_none_commands(self):
+        assert NosPluginConfig().commands is None
 
 
 class TestModelTransition:

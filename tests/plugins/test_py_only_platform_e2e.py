@@ -4,8 +4,9 @@ Every shipped platform ships an A3 dir (`platforms/<p>/`), so the
 registry → shell → wire path for a platform that is ONLY a
 `platforms_py/<p>.py` module — no A3 dir — is otherwise unexercised end to end.
 That path is the legacy `build_resolved_platform` branch
-(`nos.resolved_platform is None` → `adapt_legacy_commands`), which #266's
-inventory/adapter rework could silently break.
+(`nos.resolved_platform is None` → `adapt_legacy_commands`), which the #317
+merge rework (P-3 rebuilt the BASIC/inventory layering around it, P-4 removes
+it outright) could silently break.
 
 A synthetic py-only platform (`tests/assets/synthetic_py_only.py`) is injected
 into the registry for the duration of one test, then driven over a real netmiko

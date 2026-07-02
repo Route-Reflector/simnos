@@ -87,10 +87,10 @@ class ModelNosAttributes(BaseModel):
     `device` / `configuration_file`, #244 / D8).
 
     Kept after the A3 migration removed the legacy yaml loader (#264 / PR-3):
-    `Nos.from_dict` / `validate` (inventory + constructor) and `_from_module`
-    (py plugin) still validate their boundary through this model. Slated for
-    removal when the inventory commands path is reworked in #266; until then
-    deleting it would break py-plugin / inventory loading (Decision 9).
+    `Nos.from_dict` / `validate` (constructor / dict plugins) and `_from_module`
+    (py plugin) still validate their boundary through this model. The inventory
+    commands inflow moved off it in #317 P-3 (`ModelInventoryCommand`); this
+    model goes away with the legacy base layer in P-4.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -427,12 +427,90 @@ class ModelHost(BaseModel):
 # ---------------------------------------------------------------------------------------
 
 
+class ModelInventoryCommand(BaseModel):
+    """One inventory-authored command (`nos.configuration.commands`, #317 / P-3 案E).
+
+    The inventory inflow speaks the same dialect as A3 authoring — mode *names*
+    (validated against the platform modes at merge time), `new_mode` / `exit` /
+    `transitions` for the session transition — instead of the removed legacy
+    prompt-string form (`prompt` / `new_prompt` / `alias` / `output_variants`,
+    all rejected loudly by ``extra="forbid"``). Differences from
+    :class:`ModelCommandAuthoring` are inherent to the carrier:
+
+    - the command name is the mapping *key* (no `command` field), so the
+      `_default_` special rule lives on :class:`NosPluginConfig` (which sees the
+      keys);
+    - `output` is the inline literal wire text and `output_template` the inline
+      jinja2 source (an inventory has no adjacent files to reference);
+    - no `alias` — a cross-inflow alias (inventory aliasing an A3 command) has
+      unresolved semantics and is out of scope (#317 P-3, 案E);
+    - no `type` / `source` / `variants` / `handler` — session-local commands
+      have no capture provenance, multi-capture data or py handler namespace to
+      draw from — and no `disables_paging`, which belongs to the audited
+      platform paging data (#307), not a per-host add-on.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    help: StrictStr | None = None
+    mode: list[StrictStr] | None = None
+    new_mode: StrictStr | None = None
+    transitions: dict[StrictStr, ModelTransition] | None = None
+    exit: StrictBool | None = None
+    output: StrictStr | None = None
+    output_template: StrictStr | None = None
+
+    @field_validator("mode")
+    @classmethod
+    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
+        # Same rule as A3 authoring: `[]` reads as "runnable in no mode", while
+        # "all modes" is expressed by omitting `mode` (#264 / Decision 7).
+        if value is not None and not value:
+            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
+        return value
+
+    @model_validator(mode="after")
+    def _check_combination(self) -> "ModelInventoryCommand":
+        if self.output is not None and self.output_template is not None:
+            raise ValueError("at most one of `output` / `output_template` allowed (#264 / Decision 6)")
+        # Same exclusivity as A3 authoring (#317 / P-1): `transitions` is the
+        # mode-conditional alternative to the simple static `new_mode` / `exit`.
+        if self.transitions is not None:
+            conflict = sorted(name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None)
+            if conflict:
+                raise ValueError(f"`transitions` is exclusive with {conflict} (#317 / P-1)")
+            if not self.transitions:
+                raise ValueError("`transitions: {}` is empty — omit it (#317 / P-1)")
+        return self
+
+
 class NosPluginConfig(BaseModel):
     """
     Pydantic model for NOS plugin configuration.
+
+    ``commands`` is the inventory command inflow in its A3-dialect form
+    (`ModelInventoryCommand`, #317 / P-3); the merge
+    (`build_resolved_platform`) validates the mode names against the platform
+    and normalizes each entry to a `ResolvedCommand`.
     """
 
-    commands: dict[StrictStr, ModelNosCommand] | None = None
+    commands: dict[StrictStr, ModelInventoryCommand] | None = None
+
+    @model_validator(mode="after")
+    def _check_default_rules(self) -> "NosPluginConfig":
+        # `_default_` special rule, A3-identical (#317 / P-3, 2nd round claude#5):
+        # the fallback is mode-agnostic, so a mode / transition on it would be
+        # dead data. Enforced here (not on `ModelInventoryCommand`) because the
+        # command name is this mapping's key, not a field of the entry.
+        default = (self.commands or {}).get("_default_")
+        if default is not None and (
+            default.mode is not None or default.new_mode is not None or default.transitions is not None
+        ):
+            raise ValueError(
+                "command '_default_': `mode` / `new_mode` / `transitions` are rejected — the fallback is "
+                "mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
+            )
+        return self
 
 
 class NosPlugin(BaseModel):

@@ -149,7 +149,7 @@ def test_no_do_shell_keeps_bang_fall_through():
 
 
 def _merged_platform(platform: str):
-    """Build the merged (BASIC < A3 < py) `ResolvedPlatform` for a packaged platform.
+    """Build the merged (BASIC < A3) `ResolvedPlatform` for a packaged platform.
 
     Runs the same `Nos -> build_resolved_platform` path a connection takes, but
     over the packaged registry entry (`nos_plugins[...]`) and without a server,
@@ -176,9 +176,12 @@ def _merged_platform(platform: str):
         ("arista_eos", "term width 0", False, {"user", "enable"}, ["Width set to 511 columns."]),
     ],
 )
-def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, paging, modes, body_lines):
-    """A3 `disables_paging` + modes + output reach the merged runtime, unshadowed by the py inflow (#320).
+def test_a3_paging_flag_and_output_reach_merged_runtime(platform, command, paging, modes, body_lines):
+    """A3 `disables_paging` + modes + output reach the merged runtime (#320).
 
+    Originally pinned against the py-inflow shadowing bug class; that inflow is
+    gone from the merge (#317 P-3, a leftover py dict is rejected loudly), so
+    these now pin the A3 data end to end against any future merge rework.
     `_render_response` joins body lines with the newline and absorbs trailing
     newlines (via `splitlines()`), so the projected `body_lines` are the wire
     lines a client sees — pinning the `.txt` bytes the py stubs used to serve.
@@ -190,6 +193,39 @@ def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, pa
     assert rc.modes == modes
     rendered = rc.output.render("x")
     assert (rendered.splitlines() if rendered is not None else None) == body_lines
+
+
+# --- #317 P-3: native BASIC_COMMANDS (案F) ---
+
+
+def test_basic_commands_are_native_resolved_commands():
+    """BASIC_COMMANDS are frozen `ResolvedCommand` constants, valid in every mode (#317 P-3).
+
+    Being born resolved (no legacy-adapter round trip) they can be shared into
+    every merge without copying; empty `modes` keeps them reachable everywhere,
+    and platform data / overlay / inventory still override them by key.
+    """
+    basic = cmd_shell_module.BASIC_COMMANDS
+    assert set(basic) == {"exit", "_default_", "_ambiguous_", "_incomplete_"}
+    for name, rc in basic.items():
+        assert rc.name == name
+        assert rc.modes == frozenset()  # valid in every mode
+        assert rc.new_mode is None and rc.transitions is None
+    assert basic["exit"].exit is True
+    assert basic["_default_"].output.render("R1") == "Unknown command"
+
+
+def test_basic_ambiguous_placeholder_is_plain_literal():
+    """The `_ambiguous_` placeholder is a plain single-brace `{input}` literal (#317 P-3).
+
+    The `{{input}}` escape existed only for the legacy adapter's
+    `str.format`-field detection; native literal text carries the placeholder
+    dispatch actually substitutes (`str.replace`), so a reintroduced escape
+    would reach the wire as `{{input}}` garbage — pinned here.
+    """
+    out = cmd_shell_module.BASIC_COMMANDS["_ambiguous_"].output
+    assert out.kind == "literal"
+    assert out.text == '% Ambiguous command:  "{input}"'
 
 
 # --- #317 P-1: A3 handler channel + transitions (synthetic asset e2e) ---
@@ -244,6 +280,8 @@ def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
         "class SynDev(BaseDevice):\n"
         "    def make_greeting(self, device=None, *, base_prompt, current_mode, current_prompt, command):\n"
         '        return f"hello from {current_mode}"\n'
+        # A vestigial *empty* dict must not trip the P-3 "py dict authoring was
+        # removed" merge guard (only a non-empty one is an authoring attempt).
         "commands = {}\n",
         encoding="utf-8",
     )
@@ -618,12 +656,13 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, "form ok")
 
-    def test_inventory_commands_resolve_through_adapter_and_dispatch(self):
-        """Inventory-defined commands are normalized through the adapter too.
+    def test_inventory_commands_resolve_on_legacy_branch_and_dispatch(self):
+        """Inventory commands (A3 dialect, #317 P-3) work on the legacy branch too.
 
         Pins the third commands inflow (#264 / D6): `nos_inventory_config
-        ["commands"]` is merged and adapted at shell (re)build like the BASIC
-        and NOS inflows, so its prompt resolves to a mode set and dispatches.
+        ["commands"]` is normalized at shell (re)build against the *synthesized*
+        modes (user/enable/config) of a py-only platform, so a `mode: [user]`
+        entry resolves and dispatches exactly as on the A3 branch.
         """
         self.arguments["is_running"].set()
         self.arguments["nos_inventory_config"] = {
@@ -631,17 +670,28 @@ class TestCmdShell(TestCase):
                 "inv cmd": {
                     "output": "inventory ok",
                     "help": "inventory-defined",
-                    "prompt": "{base_prompt}>",
+                    "mode": ["user"],
                 },
             },
         }
         shell = CMDShell(**self.arguments)
-        # The inventory command is normalized through the adapter like any
-        # inflow: its "{base_prompt}>" prompt resolves to the user mode.
         self.assertEqual(shell.commands["inv cmd"].modes, frozenset({"user"}))
         body, close = shell._dispatch_general("inv cmd")
         self.assertFalse(close)
         self.assertEqual(body, "inventory ok")
+
+    def test_inventory_commands_unknown_mode_is_loud_on_legacy_branch(self):
+        """A mode outside the synthesized user/enable/config rejects at build (#317 P-3).
+
+        The loud negative pins in `TestInventoryNormalization` all run over an
+        A3 platform; this covers the legacy branch's wing of the shared
+        normalizer against its synthesized mode set (1st round claude#3).
+        """
+        self.arguments["nos_inventory_config"] = {
+            "commands": {"x": {"output": "t", "mode": ["oper"]}},
+        }
+        with self.assertRaisesRegex(ValueError, "mode\\(s\\) \\['oper'\\] not in platform modes"):
+            CMDShell(**self.arguments)
 
     def test_dispatch_command_not_matching_prompt(self):
         """A command not valid in the current mode answers with `_default_`."""

@@ -139,8 +139,9 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
 
     Transition (`new_mode` / `new_prompt`) and exit commands are skipped in both
     (they change the prompt or close the session, so a flat sweep cannot run them
-    safely); legacy aliases are skipped on the dict side. A name defined by both
-    inflows (py overriding an A3 static) is de-duplicated.
+    safely); legacy aliases are skipped on the dict side. The two inflows are
+    mutually exclusive since #317 P-3 (an A3 platform with a py `commands` dict
+    is rejected at merge), so the bucket dedup below is belt-and-braces only.
 
     The A3 sweep buckets only the canonical user/enable/config modes; a command
     valid in any other mode is asserted-out loudly rather than silently dropped

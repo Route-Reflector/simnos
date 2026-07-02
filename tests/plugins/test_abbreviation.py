@@ -29,14 +29,13 @@ from simnos.plugins.shell.cmd_shell import CMDShell
 from tests.plugins.test_async_session import _FakeTransport
 from tests.plugins.test_ssh_line_editor import _feed
 
-# The packaged Cisco-style defaults (BASIC_COMMANDS), after the adapter collapses
-# the escaped ``{{input}}`` to a literal ``{input}`` and dispatch substitutes it.
+# The packaged Cisco-style defaults (BASIC_COMMANDS): native literal text whose
+# ``{input}`` placeholder dispatch substitutes with the typed line (#317 / P-3).
 AMBIGUOUS_PREFIX = '% Ambiguous command:  "'
 INCOMPLETE_DIAG = "% Incomplete command."
 
-# A small, representative cross-platform sweep: A3-only (cisco_ios), A3 + legacy
-# py overrides (arista_eos), and two more NOS families, so the special-command
-# invariants are not pinned on cisco_ios alone.
+# A small, representative cross-platform sweep across NOS families, so the
+# special-command invariants are not pinned on cisco_ios alone.
 SWEEP_PLATFORMS = ["cisco_ios", "arista_eos", "huawei_smartax", "juniper_junos"]
 
 

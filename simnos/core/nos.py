@@ -174,9 +174,10 @@ class Nos:
         # A3 form (#264 / PR-2): an A3 platform dir loads straight into a
         # `ResolvedPlatform` (modes + resolved commands) here, instead of the
         # legacy `self.commands` dict + scalar prompts. None until an A3 dir is
-        # loaded; the shell branches on it (D4, D6). A py module loaded *after*
-        # an A3 dir still populates `self.commands` (its dynamic handlers), which
-        # the shell merges over the A3 statics — the legacy py-override precedence.
+        # loaded; the shell branches on it (D4, D6). A py module loaded alongside
+        # an A3 dir supplies only the device class + `handlers` — a leftover
+        # `commands` dict would still land in `self.commands`, which the merge
+        # rejects loudly (that authoring channel was removed, #317 P-2/P-3).
         self.resolved_platform: ResolvedPlatform | None = None
         if isinstance(filename, str):
             self.from_file(filename)
@@ -225,8 +226,9 @@ class Nos:
         """
         Method to build NOS from dictionary data.
 
-        The per-command schema follows :class:`simnos.core.pydantic_models.ModelNosCommand`;
-        a live Python plugin example is :mod:`simnos.plugins.nos.platforms_py.cisco_ios`.
+        The per-command schema follows :class:`simnos.core.pydantic_models.ModelNosCommand`
+        (the legacy py-only form — the shipped platforms moved their authoring to A3
+        dirs in #317 P-2; this inflow goes away with the legacy base layer in P-4).
 
         Minimal sample::
 

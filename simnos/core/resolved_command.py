@@ -2,10 +2,11 @@
 
 The shell, docs gen and tests consume one normalized representation —
 `ResolvedCommand` / `ResolvedOutput` — regardless of the authoring inflow
-(A3 ``commands/*.yaml``, py-plugin dicts, or inventory commands). The A3 loader
-(:mod:`simnos.core.platform_loader`) produces these dataclasses directly; the
-adapter (:mod:`simnos.core.command_adapter`) normalizes the remaining legacy
-dict inflows (py-plugin / inventory) into the same form.
+(A3 ``commands/*.yaml``, inventory commands, or py-only plugin dicts). The A3
+loader (:mod:`simnos.core.platform_loader`) produces these dataclasses
+directly, and so does the merge for the inventory inflow (A3-dialect schema,
+#317 P-3); the adapter (:mod:`simnos.core.command_adapter`) normalizes the one
+legacy dict inflow left — a py-only platform's dict — into the same form.
 
 The representation is a frozen dataclass, not a pydantic model: every load
 path validates at its boundary, so runtime re-validation is unnecessary and

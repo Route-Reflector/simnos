@@ -23,7 +23,7 @@ import os
 from jinja2 import TemplateSyntaxError
 import yaml
 
-from simnos.core.pydantic_models import ModelCommandAuthoring, ModelPlatformMeta
+from simnos.core.pydantic_models import ModelCommandAuthoring, ModelPlatformMeta, ModelTransition
 from simnos.core.resolved_command import (
     NO_OUTPUT,
     ModeDef,
@@ -263,12 +263,17 @@ def _resolve_command(
         type=model.type or "simnos",
         source=model.source,
         disables_paging=bool(model.disables_paging),
-        transitions=_resolve_transitions(model, cmd_modes, mode_names),
+        transitions=resolve_transitions(model.command, model.transitions, cmd_modes, mode_names),
     )
 
 
-def _resolve_transitions(
-    model: ModelCommandAuthoring, cmd_modes: frozenset[str], mode_names: frozenset[str]
+def resolve_transitions(
+    command: str,
+    transitions: dict[str, ModelTransition] | None,
+    cmd_modes: frozenset[str],
+    mode_names: frozenset[str],
+    *,
+    where: str = "command",
 ) -> dict[str, Transition] | None:
     """Validate + build a command's mode-conditional transition map (#317 / P-1).
 
@@ -277,23 +282,27 @@ def _resolve_transitions(
     (dead entry, an authoring error). Each `new_mode` value must be a real
     platform mode, the same loud boundary the static `new_mode` uses. Returns
     None when the command authored no `transitions` (the common case).
+
+    Shared with the merge's inventory-command normalization (#317 / P-3), which
+    speaks the same `transitions` dialect against the merged platform's modes;
+    `where` tags the error with the calling inflow.
     """
-    if model.transitions is None:
+    if transitions is None:
         return None
     # Empty `cmd_modes` means "all modes" (mode omitted / `_default_`); the schema
     # already forbids `transitions` on `_default_`, so a command reaching here with
     # empty modes is a genuine all-modes command whose keys may be any platform mode.
     effective_modes = cmd_modes or mode_names
     resolved: dict[str, Transition] = {}
-    for key, mt in model.transitions.items():
+    for key, mt in transitions.items():
         if key not in effective_modes:
             raise ValueError(
-                f"command {model.command!r}: transitions key {key!r} is not one of the command's modes "
+                f"{where} {command!r}: transitions key {key!r} is not one of the command's modes "
                 f"{sorted(effective_modes)} — it would never fire (dead entry)"
             )
         if mt.new_mode is not None and mt.new_mode not in mode_names:
             raise ValueError(
-                f"command {model.command!r}: transitions[{key!r}].new_mode {mt.new_mode!r} "
+                f"{where} {command!r}: transitions[{key!r}].new_mode {mt.new_mode!r} "
                 f"not in platform modes {sorted(mode_names)}"
             )
         resolved[key] = Transition(new_mode=mt.new_mode, exit=bool(mt.exit))
