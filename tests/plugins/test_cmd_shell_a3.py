@@ -174,7 +174,7 @@ class TestShellA3Path:
         good_commands = shell.commands
         good_prompt = shell.prompt
         shell._inventory_commands = {"bad": {"output": "x", "mode": ["no_such_mode"]}}
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="not in platform modes"):
             shell._rebuild()
         assert shell.commands is good_commands  # unchanged reference
         assert shell.prompt == good_prompt
@@ -242,6 +242,12 @@ class TestInventoryNormalization:
         # Same dead-entry rule as the A3 loader (shared `resolve_transitions`).
         with pytest.raises(ValueError, match="inventory command 'x': transitions key 'enable'"):
             self._merge(tmp_path, {"x": {"mode": ["user"], "transitions": {"enable": {"exit": True}}}})
+
+    def test_transitions_value_unknown_new_mode_is_loud(self, tmp_path):
+        # The transitions *value* side: a `new_mode` target outside the platform
+        # modes rejects with the inventory-tagged wording (1st round gemini#1).
+        with pytest.raises(ValueError, match=r"inventory command 'x': transitions\['user'\]\.new_mode 'oper'"):
+            self._merge(tmp_path, {"x": {"mode": ["user"], "transitions": {"user": {"new_mode": "oper"}}}})
 
     def test_exit_command_closes_session_via_dispatch(self, tmp_path):
         nos = Nos(filename=str(_a3_platform(tmp_path)))

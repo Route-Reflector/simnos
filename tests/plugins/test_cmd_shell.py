@@ -680,6 +680,19 @@ class TestCmdShell(TestCase):
         self.assertFalse(close)
         self.assertEqual(body, "inventory ok")
 
+    def test_inventory_commands_unknown_mode_is_loud_on_legacy_branch(self):
+        """A mode outside the synthesized user/enable/config rejects at build (#317 P-3).
+
+        The loud negative pins in `TestInventoryNormalization` all run over an
+        A3 platform; this covers the legacy branch's wing of the shared
+        normalizer against its synthesized mode set (1st round claude#3).
+        """
+        self.arguments["nos_inventory_config"] = {
+            "commands": {"x": {"output": "t", "mode": ["oper"]}},
+        }
+        with self.assertRaisesRegex(ValueError, "mode\\(s\\) \\['oper'\\] not in platform modes"):
+            CMDShell(**self.arguments)
+
     def test_dispatch_command_not_matching_prompt(self):
         """A command not valid in the current mode answers with `_default_`."""
         self.arguments["is_running"].set()
