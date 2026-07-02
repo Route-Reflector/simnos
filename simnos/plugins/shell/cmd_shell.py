@@ -3,7 +3,7 @@ Custom shell class to interact with NOS.
 """
 
 import copy
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import hashlib
 import logging
 import os
@@ -145,6 +145,10 @@ def build_resolved_platform(
         log.debug("overlay overrides %d command(s): %s", len(overlay_commands), sorted(overlay_commands))
         commands.update(overlay_commands)
     commands.update(adapt_commands(copy.deepcopy(inventory_commands), reverse_map))
+    # Bind any A3 `handler:` refs to the platform's py handler namespace now that
+    # every inflow is merged (an overlay/inventory override may have replaced a
+    # handler command with a literal, so bind the final state) (#317 / P-1).
+    _bind_handler_refs(commands, nos.handlers)
     # Carry `auth` so the merged platform mirrors the A3 source — auth is consumed
     # via `nos.auth`, but dropping it would re-introduce the silent-dead-end
     # asymmetry the auth wiring fixed (2nd round codex/claude #3).
@@ -158,6 +162,34 @@ def build_resolved_platform(
         # when the platform authored its own (#307 / P3-4).
         more_prompt=a3.more_prompt,
     )
+
+
+def _bind_handler_refs(commands: dict[str, ResolvedCommand], handlers: dict[str, CommandHandler]) -> None:
+    """Bind A3 ``handler:`` refs to callables from the py handler namespace (#317 / P-1).
+
+    An A3-authored handler command carries ``output.kind == "handler"`` with
+    ``handler=None`` and a ``handler_ref`` name; the py module that ships the
+    platform's device class exposes the actual callables (`nos.handlers`). Resolve
+    each ref here — at the merge boundary, once — and replace the command with a
+    bound copy. In-place on the fresh merge dict: each `ResolvedCommand` is frozen,
+    so binding means ``replace`` on the command and its output.
+
+    An unresolved ref is loud (a `ValueError` surfacing at ``Host.start`` /
+    ``build_shared_platform``): "fail at startup", never a silent no-output
+    command. The legacy adapter sets ``handler`` directly (no ``handler_ref``), so
+    those commands are already bound and skipped.
+    """
+    for name, cmd in commands.items():
+        out = cmd.output
+        if out.kind == "handler" and out.handler is None and out.handler_ref is not None:
+            handler = handlers.get(out.handler_ref)
+            if handler is None:
+                raise ValueError(
+                    f"command {name!r}: handler {out.handler_ref!r} is not defined in the platform's py handler "
+                    f"namespace (available: {sorted(handlers)}) — a `handler:` command needs a py module that "
+                    "defines it (#317 / P-1)"
+                )
+            commands[name] = replace(cmd, output=replace(out, handler=handler))
 
 
 @dataclass(frozen=True)
@@ -475,6 +507,9 @@ class CMDShell:
         "auth",
         "device",
         "resolved_platform",
+        # `_from_module` rebuilds `handlers` as a fresh dict, so snapshotting the
+        # reference here rolls back a failed hot reload cleanly (#317 / P-1).
+        "handlers",
     )
 
     def reload_commands(self, reload_targets: list):
@@ -796,8 +831,20 @@ class CMDShell:
                     cmd = special
                     abbrev_input = line  # set only when the special was actually swapped in
         if cmd is not None and self._in_current_mode(cmd):
-            if cmd.exit:
+            # Transition decision (#317 / P-1): the mode-conditional `transitions`
+            # map wins for the current mode, else the simple static `exit` /
+            # `new_mode`. An `exit` (from either channel) suppresses the body, so
+            # decide it before rendering. `transitions` is None for every command
+            # that uses the simple form, so this is a no-op for them.
+            eff = cmd.transitions.get(self.current_mode) if cmd.transitions else None
+            if eff is not None:
+                if eff.exit:
+                    return None, True
+                transition = eff.new_mode
+            elif cmd.exit:
                 return None, True
+            else:
+                transition = cmd.new_mode
             # Sticky paging disable (#307 / P3-4): set only here — abbreviation is
             # already resolved (so `term len 0` works too) and the `_in_current_mode`
             # gate has passed (so a mode-mismatched command that falls through to
@@ -816,7 +863,6 @@ class CMDShell:
             # reaching a sibling's variant output. `cmd.name` (dispatch identity)
             # keys the lookup so a legacy alias returns its own output.
             output = self._variant_outputs.get(cmd.name, cmd.output) if cmd.variants else cmd.output
-            transition = cmd.new_mode
         else:
             if cmd is not None:
                 log.warning(

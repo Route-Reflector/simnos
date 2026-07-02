@@ -164,6 +164,120 @@ class TestLoadHappyPath:
         assert platform.commands["show version"].canonical_name == "show version"
 
 
+class TestHandlerChannel:
+    """A3 `handler:` channel (#317 / P-1): loader records a `handler_ref`, no bind."""
+
+    def test_handler_channel_records_ref_unbound(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "clock.yaml", "command: show clock\ntype: simnos\nmode: [enable]\nhandler: make_show_clock\n")
+        cmd = load_platform_dir(str(root)).commands["show clock"]
+        assert cmd.output.kind == "handler"
+        assert cmd.output.handler is None  # loader stays pure; bind is at merge time
+        assert cmd.output.handler_ref == "make_show_clock"
+        assert cmd.modes == frozenset({"enable"})
+
+
+class TestTransitions:
+    """A3 `transitions:` mode-conditional map (#317 / P-1)."""
+
+    def test_transitions_build_per_mode(self, tmp_path):
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(
+            commands,
+            "exit.yaml",
+            "command: exit\ntype: simnos\nmode: [user, enable]\ntransitions:\n"
+            "  user: {exit: true}\n  enable: {new_mode: user}\n",
+        )
+        cmd = load_platform_dir(str(root)).commands["exit"]
+        assert cmd.transitions is not None
+        assert cmd.transitions["user"].exit is True
+        assert cmd.transitions["user"].new_mode is None
+        assert cmd.transitions["enable"].exit is False
+        assert cmd.transitions["enable"].new_mode == "user"
+
+    def test_no_transitions_is_none(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "a.yaml", "command: x\ntype: ntc\n")
+        assert load_platform_dir(str(root)).commands["x"].transitions is None
+
+    def test_transitions_key_outside_command_modes_rejected(self, tmp_path):
+        # A key for a mode the command does not run in would never fire (dead entry).
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(
+            commands,
+            "a.yaml",
+            "command: x\ntype: simnos\nmode: [user]\ntransitions:\n  enable: {exit: true}\n",
+        )
+        with pytest.raises(ValueError, match="never fire"):
+            load_platform_dir(str(root))
+
+    def test_transitions_unknown_new_mode_rejected(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(
+            commands,
+            "a.yaml",
+            "command: x\ntype: simnos\nmode: [user]\ntransitions:\n  user: {new_mode: bogus}\n",
+        )
+        with pytest.raises(ValueError, match="not in platform modes"):
+            load_platform_dir(str(root))
+
+    def test_transitions_all_modes_command_allows_any_platform_mode_key(self, tmp_path):
+        # `mode` omitted = all modes; a key for any platform mode is then valid.
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(commands, "a.yaml", "command: x\ntype: simnos\ntransitions:\n  enable: {exit: true}\n")
+        cmd = load_platform_dir(str(root)).commands["x"]
+        assert cmd.modes == frozenset()  # all modes
+        assert cmd.transitions is not None
+        assert cmd.transitions["enable"].exit is True
+
+
+class TestAliasModeOverride:
+    """A3 alias `mode:` override (#317 / P-1)."""
+
+    def test_alias_mode_override_narrows_modes(self, tmp_path):
+        root, commands = _platform(
+            tmp_path,
+            modes={
+                "user": "{{ base_prompt }}>",
+                "enable": "{{ base_prompt }}#",
+                "config": "{{ base_prompt }}(config)#",
+            },
+        )
+        _cmd(
+            commands,
+            "show.yaml",
+            "command: show ip\ntype: ntc\nmode: [user, enable]\noutput: s.txt\n",
+            output_files={"s.txt": "IP\n"},
+        )
+        # `do show ip` runs only in config (arista `do show ip int brief` shape).
+        _cmd(commands, "do.yaml", "command: do show ip\nalias: show ip\nmode: [config]\n")
+        alias = load_platform_dir(str(root)).commands["do show ip"]
+        assert alias.modes == frozenset({"config"})  # overridden, not the target's user/enable
+        assert alias.output.render("R1") == "IP\n"  # dispatch still inherited
+        assert alias.canonical_name == "show ip"
+
+    def test_alias_mode_override_unknown_mode_rejected(self, tmp_path):
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "s.yaml", "command: show ip\ntype: ntc\noutput: s.txt\n", output_files={"s.txt": "IP\n"})
+        _cmd(commands, "do.yaml", "command: do show ip\nalias: show ip\nmode: [bogus]\n")
+        with pytest.raises(ValueError, match="not in platform modes"):
+            load_platform_dir(str(root))
+
+    def test_alias_mode_override_drops_inherited_transition_key_rejected(self, tmp_path):
+        # A `mode:` override that narrows away a mode the inherited `transitions`
+        # map keys on would leave a dead transition entry — loud (#317 / P-1).
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(
+            commands,
+            "t.yaml",
+            "command: toggle\ntype: simnos\nmode: [user, enable]\ntransitions:\n"
+            "  user: {exit: true}\n  enable: {new_mode: user}\n",
+        )
+        _cmd(commands, "alias.yaml", "command: tog\nalias: toggle\nmode: [user]\n")
+        with pytest.raises(ValueError, match="drops.*transition mode"):
+            load_platform_dir(str(root))
+
+
 class TestLoadRejections:
     def test_duplicate_command(self, tmp_path):
         root, commands = _platform(tmp_path)

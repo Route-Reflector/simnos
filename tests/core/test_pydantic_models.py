@@ -14,6 +14,7 @@ from simnos.core.pydantic_models import (
     ModelHost,
     ModelNosCommand,
     ModelPlatformMeta,
+    ModelTransition,
 )
 
 
@@ -116,12 +117,29 @@ class TestModelCommandAuthoring:
             ModelCommandAuthoring(command="x", output="a.txt")
 
     def test_rejects_alias_with_dispatch_fields(self):
-        with pytest.raises(ValidationError, match="pure reference"):
+        with pytest.raises(ValidationError, match="alias cannot also set"):
             ModelCommandAuthoring(command="x", alias="y", output="a.txt")
 
     def test_rejects_alias_with_type(self):
-        with pytest.raises(ValidationError, match="pure reference"):
+        with pytest.raises(ValidationError, match="alias cannot also set"):
             ModelCommandAuthoring(command="x", alias="y", type="ntc")
+
+    def test_accepts_alias_with_mode_override(self):
+        # #317 / P-1: `mode:` is the one dispatch field an alias may re-author —
+        # a mode-set override (e.g. arista `do show ip int brief`, config-only).
+        model = ModelCommandAuthoring(command="do show x", alias="show x", mode=["config"])
+        assert model.alias == "show x"
+        assert model.mode == ["config"]
+
+    def test_rejects_alias_with_handler(self):
+        with pytest.raises(ValidationError, match="alias cannot also set"):
+            ModelCommandAuthoring(command="x", alias="y", handler="make_x")
+
+    def test_rejects_alias_with_transitions(self):
+        with pytest.raises(ValidationError, match="alias cannot also set"):
+            # pydantic coerces the nested dict into ModelTransition at runtime; ty
+            # only sees the dict literal (same pattern as the variants test above).
+            ModelCommandAuthoring(command="x", alias="y", transitions={"user": {"exit": True}})  # ty: ignore[invalid-argument-type]
 
     def test_accepts_disables_paging_on_real_command(self):
         # #307 / P3-4: a session-disable command flags itself; the loader carries
@@ -130,9 +148,9 @@ class TestModelCommandAuthoring:
         assert model.disables_paging is True
 
     def test_rejects_alias_with_disables_paging(self):
-        # An alias is a pure reference and inherits the target's disables_paging via
-        # the loader's `replace`; authoring it on the alias row is rejected (#307).
-        with pytest.raises(ValidationError, match="pure reference"):
+        # An alias inherits the target's disables_paging via the loader's `replace`;
+        # authoring it on the alias row is rejected (#307).
+        with pytest.raises(ValidationError, match="alias cannot also set"):
             ModelCommandAuthoring(command="term len 0", alias="terminal length 0", disables_paging=True)
 
     def test_rejects_default_with_mode(self):
@@ -177,6 +195,85 @@ class TestModelCommandAuthoring:
     def test_rejects_bad_type_literal(self):
         with pytest.raises(ValidationError):
             ModelCommandAuthoring(command="x", type="bogus")  # ty: ignore[invalid-argument-type]
+
+    # --- handler channel (#317 / P-1) ---
+
+    def test_accepts_handler_channel(self):
+        model = ModelCommandAuthoring(command="show clock", type="simnos", handler="make_show_clock")
+        assert model.handler == "make_show_clock"
+
+    def test_rejects_non_identifier_handler(self):
+        with pytest.raises(ValidationError, match="valid Python identifier"):
+            ModelCommandAuthoring(command="x", type="simnos", handler="make.show clock")
+
+    def test_rejects_handler_with_other_output_channel(self):
+        with pytest.raises(ValidationError, match="at most one output channel"):
+            ModelCommandAuthoring(command="x", type="simnos", handler="h", output="a.txt")
+
+    # --- transitions map (#317 / P-1) ---
+
+    def test_accepts_transitions_map(self):
+        model = ModelCommandAuthoring(
+            command="exit",
+            type="simnos",
+            mode=["user", "config"],
+            transitions={"user": {"exit": True}, "config": {"new_mode": "enable"}},  # ty: ignore[invalid-argument-type]
+        )
+        assert model.transitions is not None
+        assert model.transitions["user"].exit is True
+        assert model.transitions["config"].new_mode == "enable"
+
+    def test_rejects_transitions_with_static_new_mode(self):
+        with pytest.raises(ValidationError, match="`transitions` is exclusive"):
+            ModelCommandAuthoring(
+                command="x",
+                type="simnos",
+                new_mode="enable",
+                transitions={"user": {"exit": True}},  # ty: ignore[invalid-argument-type]
+            )
+
+    def test_rejects_transitions_with_static_exit(self):
+        with pytest.raises(ValidationError, match="`transitions` is exclusive"):
+            ModelCommandAuthoring(
+                command="x",
+                type="simnos",
+                exit=True,
+                transitions={"user": {"new_mode": "enable"}},  # ty: ignore[invalid-argument-type]
+            )
+
+    def test_rejects_empty_transitions(self):
+        with pytest.raises(ValidationError, match="is empty"):
+            ModelCommandAuthoring(command="x", type="simnos", transitions={})
+
+    def test_rejects_default_with_transitions(self):
+        with pytest.raises(ValidationError, match="mode-agnostic"):
+            ModelCommandAuthoring(
+                command="_default_",
+                type="simnos",
+                transitions={"user": {"exit": True}},  # ty: ignore[invalid-argument-type]
+            )
+
+
+class TestModelTransition:
+    """One `transitions` map entry — exactly one of new_mode / exit (#317 / P-1)."""
+
+    def test_accepts_exit(self):
+        assert ModelTransition(exit=True).exit is True
+
+    def test_accepts_new_mode(self):
+        assert ModelTransition(new_mode="enable").new_mode == "enable"
+
+    def test_rejects_both(self):
+        with pytest.raises(ValidationError, match="exactly one"):
+            ModelTransition(new_mode="enable", exit=True)
+
+    def test_rejects_neither(self):
+        with pytest.raises(ValidationError, match="exactly one"):
+            ModelTransition()
+
+    def test_rejects_exit_false(self):
+        with pytest.raises(ValidationError, match="`exit` must be true"):
+            ModelTransition(exit=False)
 
 
 class TestModelPlatformMeta:

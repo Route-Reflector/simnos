@@ -30,6 +30,7 @@ from simnos.core.resolved_command import (
     ResolvedCommand,
     ResolvedOutput,
     ResolvedPlatform,
+    Transition,
     compile_template,
 )
 from simnos.core.values_loader import load_values, validate_render_values
@@ -139,7 +140,28 @@ def _resolve_commands(
             # An alias carries the target's dispatch fields but keeps its own
             # help (usually blank) — same as the legacy adapter and v2 do_help
             # (#264 / D6, Decision 6).
-            resolved[name] = replace(target, name=model.command, help=model.help or "")
+            aliased = replace(target, name=model.command, help=model.help or "")
+            # A `mode:` override lets an alias run in a different mode set than
+            # its target (e.g. arista `do show ip int brief`: target is
+            # user/enable, the alias is config-only) — the one dispatch field an
+            # alias may re-author (#317 / P-1). Validate the names and re-check
+            # any inherited `transitions` against the narrowed modes.
+            if model.mode is not None:
+                unknown = [m for m in model.mode if m not in mode_names]
+                if unknown:
+                    raise ValueError(
+                        f"command {model.command!r}: mode(s) {unknown} not in platform modes {sorted(mode_names)}"
+                    )
+                new_modes = frozenset(model.mode)
+                if aliased.transitions is not None:
+                    stray = sorted(k for k in aliased.transitions if k not in new_modes)
+                    if stray:
+                        raise ValueError(
+                            f"command {model.command!r}: alias `mode:` override to {sorted(new_modes)} drops "
+                            f"transition mode(s) {stray} inherited from target {model.alias!r} (dead entry)"
+                        )
+                aliased = replace(aliased, modes=new_modes)
+            resolved[name] = aliased
     return resolved
 
 
@@ -219,6 +241,12 @@ def _resolve_command(
             command_name=model.command,
         )
         variants = ()
+    elif model.handler is not None:
+        # The handler callable is bound at merge time from the platform's py
+        # handler namespace (#317 / P-1, 案D); the loader stays pure and only
+        # records the reference name (schema-validated as an identifier).
+        output = ResolvedOutput(kind="handler", handler_ref=model.handler)
+        variants = ()
     else:
         output = NO_OUTPUT
         variants = ()
@@ -235,7 +263,41 @@ def _resolve_command(
         type=model.type or "simnos",
         source=model.source,
         disables_paging=bool(model.disables_paging),
+        transitions=_resolve_transitions(model, cmd_modes, mode_names),
     )
+
+
+def _resolve_transitions(
+    model: ModelCommandAuthoring, cmd_modes: frozenset[str], mode_names: frozenset[str]
+) -> dict[str, Transition] | None:
+    """Validate + build a command's mode-conditional transition map (#317 / P-1).
+
+    Each key must be one of the command's own modes (`cmd_modes`, or every
+    platform mode when `mode` was omitted) — a key outside them would never fire
+    (dead entry, an authoring error). Each `new_mode` value must be a real
+    platform mode, the same loud boundary the static `new_mode` uses. Returns
+    None when the command authored no `transitions` (the common case).
+    """
+    if model.transitions is None:
+        return None
+    # Empty `cmd_modes` means "all modes" (mode omitted / `_default_`); the schema
+    # already forbids `transitions` on `_default_`, so a command reaching here with
+    # empty modes is a genuine all-modes command whose keys may be any platform mode.
+    effective_modes = cmd_modes or mode_names
+    resolved: dict[str, Transition] = {}
+    for key, mt in model.transitions.items():
+        if key not in effective_modes:
+            raise ValueError(
+                f"command {model.command!r}: transitions key {key!r} is not one of the command's modes "
+                f"{sorted(effective_modes)} — it would never fire (dead entry)"
+            )
+        if mt.new_mode is not None and mt.new_mode not in mode_names:
+            raise ValueError(
+                f"command {model.command!r}: transitions[{key!r}].new_mode {mt.new_mode!r} "
+                f"not in platform modes {sorted(mode_names)}"
+            )
+        resolved[key] = Transition(new_mode=mt.new_mode, exit=bool(mt.exit))
+    return resolved
 
 
 def _resolve_output_file(

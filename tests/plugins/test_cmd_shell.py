@@ -189,6 +189,108 @@ def test_a3_paging_flag_and_output_survive_py_inflow_merge(platform, command, pa
     assert (rendered.splitlines() if rendered is not None else None) == body_lines
 
 
+# --- #317 P-1: A3 handler channel + transitions (synthetic asset e2e) ---
+
+
+def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
+    """Build a synthetic A3 dir + handler py exercising the P-1 channels (#317).
+
+    The A3 platform authors a `handler:` command (dynamic output), a `transitions:`
+    command (mode-conditional exit / new_mode), and an alias with a `mode:`
+    override; the py module ships the device class + the referenced handler. Returns
+    ``(a3_dir, py_file)`` for ``Nos(filename=[...])``.
+    """
+    root = tmp_path / "synplat"
+    (root / "commands").mkdir(parents=True)
+    (root / "platform.yaml").write_text(
+        "modes:\n"
+        '  user: {prompt: "{{ base_prompt }}>"}\n'
+        '  enable: {prompt: "{{ base_prompt }}#"}\n'
+        '  config: {prompt: "{{ base_prompt }}(config)#"}\n'
+        "initial_mode: user\n",
+        encoding="utf-8",
+    )
+    cmds = root / "commands"
+    cmds.joinpath("greet.yaml").write_text(
+        f"command: greet\ntype: simnos\nmode: [user, enable]\nhandler: {handler_ref}\n", encoding="utf-8"
+    )
+    cmds.joinpath("leave.yaml").write_text(
+        "command: leave\ntype: simnos\nmode: [user, enable, config]\ntransitions:\n"
+        "  user: {exit: true}\n  enable: {exit: true}\n  config: {new_mode: enable}\n",
+        encoding="utf-8",
+    )
+    cmds.joinpath("goto.yaml").write_text(
+        "command: goto enable\ntype: simnos\nmode: [user]\nnew_mode: enable\n", encoding="utf-8"
+    )
+    py = tmp_path / "synplat_handlers.py"
+    py.write_text(
+        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+        "class SynDev(BaseDevice):\n"
+        "    def make_greeting(self, device=None, *, base_prompt, current_mode, current_prompt, command):\n"
+        '        return f"hello from {current_mode}"\n'
+        "commands = {}\n",
+        encoding="utf-8",
+    )
+    return str(root), str(py)
+
+
+def test_p1_handler_ref_binds_at_merge(tmp_path):
+    """An A3 `handler:` ref is bound to the py callable at `build_resolved_platform` (#317 P-1)."""
+    a3_dir, py = _synthetic_a3_handler_platform(tmp_path)
+    nos = Nos(filename=[a3_dir, py])
+    platform = build_resolved_platform(nos, {})
+    greet = platform.commands["greet"]
+    assert greet.output.kind == "handler"
+    assert greet.output.handler is not None  # bound
+    assert greet.output.handler_ref == "make_greeting"
+
+
+def test_p1_unresolved_handler_ref_is_loud(tmp_path):
+    """A `handler:` ref with no matching py callable fails loudly at merge (#317 P-1)."""
+    a3_dir, py = _synthetic_a3_handler_platform(tmp_path, handler_ref="does_not_exist")
+    nos = Nos(filename=[a3_dir, py])
+    with pytest.raises(ValueError, match="not defined in the platform's py handler namespace"):
+        build_resolved_platform(nos, {})
+
+
+def _synthetic_shell(tmp_path):
+    a3_dir, py = _synthetic_a3_handler_platform(tmp_path)
+    nos = Nos(filename=[a3_dir, py])
+    running = threading.Event()
+    running.set()  # unset would make `_dispatch_general` treat every line as a shutdown close
+    return CMDShell(nos=nos, nos_inventory_config={}, base_prompt="R1", is_running=running)
+
+
+def test_p1_bound_handler_dispatches(tmp_path):
+    """The merge-bound handler produces dynamic output through `_dispatch_general` (#317 P-1)."""
+    shell = _synthetic_shell(tmp_path)  # starts in `user`
+    body, close = shell._dispatch_general("greet")
+    assert body == "hello from user"
+    assert close is False
+
+
+def test_p1_transitions_exit_and_new_mode(tmp_path):
+    """A `transitions` map drives a per-mode exit / new_mode in dispatch (#317 P-1)."""
+    shell = _synthetic_shell(tmp_path)
+    # user mode: transitions[user] = exit -> session closes, no body.
+    body, close = shell._dispatch_general("leave")
+    assert close is True
+    assert body is None
+    # config mode: transitions[config] = new_mode enable (no exit).
+    shell.current_mode = "config"
+    body, close = shell._dispatch_general("leave")
+    assert close is False
+    assert shell.current_mode == "enable"
+
+
+def test_p1_alias_mode_override_dispatch(tmp_path):
+    """The `goto enable` static new_mode still transitions (baseline, unchanged wire, #317 P-1)."""
+    shell = _synthetic_shell(tmp_path)
+    body, close = shell._dispatch_general("goto enable")
+    assert close is False
+    assert shell.current_mode == "enable"
+
+
 # pylint: disable=too-many-public-methods
 class TestCmdShell(TestCase):
     """Test the CmdShell class."""
