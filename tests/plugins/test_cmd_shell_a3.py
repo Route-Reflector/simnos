@@ -1,9 +1,10 @@
 """Integration tests for the A3 platform path through Nos -> CMDShell (#264 / PR-2).
 
-PR-1 covered the legacy adapter end of `_rebuild`; these pin the new A3 branch:
+PR-1 covered the legacy adapter end of `_rebuild`; these pin the A3 branch:
 `Nos._from_platform_dir` loads a platform dir into `resolved_platform`, and the
-shell merges the still-legacy inflows (BASIC, py-module commands, inventory)
-over the A3 statics with the right precedence and the A3 modes.
+shell layers the native BASIC entries, the overlay and the inventory commands
+(A3-dialect form, #317 / P-3) around the A3 statics with the right precedence
+and the A3 modes.
 
 `TestA3HotReload` pins the #274/#281 dev hot-reload path on top: per-platform
 watch rollup to a platform-dir target, per-shell snapshot isolation (multi-host /
@@ -120,20 +121,22 @@ class TestShellA3Path:
         shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path))))
         assert shell.commands["exit"].exit is True
 
-    def test_py_module_command_overrides_a3_static(self, tmp_path):
-        # Simulate a py module loaded after the A3 dir: it fills nos.commands
-        # with a dynamic handler that overrides the A3 static `show version`.
+    def test_py_module_commands_dict_alongside_a3_is_loud(self, tmp_path):
+        """A py `commands` dict next to an A3 dir fails the merge, not silently (#317 / P-3).
+
+        The py dict inflow was removed from the merge (P-2 moved the shipped
+        dicts into the A3 dirs); a module that still defines one would
+        otherwise load fine and be silently ignored — the "loads but never
+        merges" window the design's fail-at-startup principle forbids.
+        """
         nos = Nos(filename=str(_a3_platform(tmp_path)))
-        handler = lambda **kwargs: "dynamic"  # noqa: E731 — minimal handler stand-in
-        nos.commands = {"show version": {"output": handler, "help": "dyn", "prompt": "{base_prompt}#"}}
-        shell = _shell_for(nos)
-        cmd = shell.commands["show version"]
-        assert cmd.output.kind == "handler"  # py handler won over the A3 literal
-        assert cmd.modes == frozenset({"enable"})  # reverse-mapped via A3 modes
+        nos.commands = {"show version": {"output": "shadow", "help": "dyn", "prompt": "{base_prompt}#"}}
+        with pytest.raises(ValueError, match="py dict authoring was removed"):
+            build_resolved_platform(nos, {})
 
     def test_inventory_command_merges_over_a3(self, tmp_path):
         nos = Nos(filename=str(_a3_platform(tmp_path)))
-        inventory = {"commands": {"show inventory": {"output": "INV", "help": "inv", "prompt": "{base_prompt}>"}}}
+        inventory = {"commands": {"show inventory": {"output": "INV", "help": "inv", "mode": ["user"]}}}
         shell = _shell_for(nos, inventory_config=inventory)
         assert shell.commands["show inventory"].output.render("R1") == "INV"
         assert shell.commands["show inventory"].modes == frozenset({"user"})
@@ -164,23 +167,103 @@ class TestShellA3Path:
         assert CMDShell.build_shared_platform(nos, {}) is not None
 
     def test_a3_rebuild_is_atomic_on_broken_inflow(self, tmp_path):
-        # A broken legacy inflow (canonical-外 prompt the A3 reverse map cannot
-        # resolve) must raise without leaving self.* half-updated — same atomic
+        # A broken inventory inflow (a mode name the platform does not declare)
+        # must raise without leaving self.* half-updated — same atomic
         # contract the legacy path keeps (#264 / claude #7, D5).
         shell = _shell_for(Nos(filename=str(_a3_platform(tmp_path))))
         good_commands = shell.commands
         good_prompt = shell.prompt
-        shell._inventory_commands = {"bad": {"output": "x", "prompt": "{base_prompt}@@unmappable"}}
+        shell._inventory_commands = {"bad": {"output": "x", "mode": ["no_such_mode"]}}
         with pytest.raises(ValueError):
             shell._rebuild()
         assert shell.commands is good_commands  # unchanged reference
         assert shell.prompt == good_prompt
 
 
+class TestInventoryNormalization:
+    """Inventory commands normalize to `ResolvedCommand` at the merge (#317 / P-3, 案E).
+
+    The entries speak the A3 dialect — mode *names* validated against the
+    platform modes, `new_mode` / `exit` / `transitions` for the session
+    transition, inline `output` (literal) / `output_template` (jinja2 source).
+    Every violation is loud at build (= `Host.start`), never a mid-session
+    surprise (fail-at-startup, #264 / D5).
+    """
+
+    def _merge(self, tmp_path, commands):
+        return build_resolved_platform(Nos(filename=str(_a3_platform(tmp_path))), commands)
+
+    def test_output_template_renders_base_prompt(self, tmp_path):
+        platform = self._merge(tmp_path, {"whoami": {"output_template": "host is {{ base_prompt }}"}})
+        cmd = platform.commands["whoami"]
+        assert cmd.output.kind == "template"
+        assert cmd.output.render("R1") == "host is R1"
+        assert cmd.modes == frozenset()  # mode omitted = all modes
+        assert cmd.type == "custom"  # session-local, like an overlay-added command
+
+    def test_output_template_with_unsatisfiable_var_is_loud(self, tmp_path):
+        # An inventory template has no sidecar values: anything beyond
+        # base_prompt can never render, so the build rejects it (#287 / D5 gate).
+        with pytest.raises(ValueError, match="needs render var"):
+            self._merge(tmp_path, {"bad": {"output_template": "{{ nonexistent_fact }}"}})
+
+    def test_output_template_syntax_error_is_loud(self, tmp_path):
+        with pytest.raises(ValueError, match="jinja2 syntax error"):
+            self._merge(tmp_path, {"bad": {"output_template": "{% broken"}})
+
+    def test_no_output_channel_is_none_kind(self, tmp_path):
+        platform = self._merge(tmp_path, {"noop": {"help": "writes nothing"}})
+        assert platform.commands["noop"].output.kind == "none"
+
+    def test_unknown_mode_is_loud(self, tmp_path):
+        with pytest.raises(ValueError, match=r"inventory command 'x': mode\(s\) \['oper'\]"):
+            self._merge(tmp_path, {"x": {"output": "t", "mode": ["oper"]}})
+
+    def test_unknown_new_mode_is_loud(self, tmp_path):
+        with pytest.raises(ValueError, match="new_mode 'oper' not in platform modes"):
+            self._merge(tmp_path, {"x": {"output": "t", "new_mode": "oper"}})
+
+    def test_transitions_map_normalizes_and_validates(self, tmp_path):
+        platform = self._merge(
+            tmp_path,
+            {
+                "leave": {
+                    "mode": ["user", "config"],
+                    "transitions": {"user": {"exit": True}, "config": {"new_mode": "enable"}},
+                }
+            },
+        )
+        transitions = platform.commands["leave"].transitions
+        assert transitions is not None
+        assert transitions["user"].exit is True
+        assert transitions["config"].new_mode == "enable"
+
+    def test_transitions_key_outside_modes_is_loud(self, tmp_path):
+        # Same dead-entry rule as the A3 loader (shared `resolve_transitions`).
+        with pytest.raises(ValueError, match="inventory command 'x': transitions key 'enable'"):
+            self._merge(tmp_path, {"x": {"mode": ["user"], "transitions": {"enable": {"exit": True}}}})
+
+    def test_exit_command_closes_session_via_dispatch(self, tmp_path):
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        inventory = {"commands": {"logout": {"exit": True, "mode": ["user"]}}}
+        shell = _shell_for(nos, inventory_config=inventory)
+        _body, close = shell._dispatch_general("logout")
+        assert close is True
+
+    def test_default_override_replaces_basic_fallback(self, tmp_path):
+        # `_default_` override stays mode-agnostic (schema rejects a mode on it)
+        # and replaces the BASIC entry wholesale.
+        nos = Nos(filename=str(_a3_platform(tmp_path)))
+        platform = build_resolved_platform(nos, {"_default_": {"output": "% Bad command"}})
+        default = platform.commands["_default_"]
+        assert default.modes == frozenset()
+        assert default.output.render("R1") == "% Bad command"
+
+
 class TestOverlayMerge:
     """User overlay layer in `build_resolved_platform` (#286 / Decision 14).
 
-    The overlay slots between the py inflow and inventory: a captured `.txt`
+    The overlay slots between the A3 statics and inventory: a captured `.txt`
     overrides the packaged A3 output, but a session-local inventory command still
     wins. No render_config / no opt-in leaves the merge unchanged (regression).
     """
@@ -205,21 +288,9 @@ class TestOverlayMerge:
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY\n"})
         render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
-        inventory = {"show version": {"output": "INVENTORY", "help": "inv", "prompt": "{base_prompt}#"}}
+        inventory = {"show version": {"output": "INVENTORY", "help": "inv", "mode": ["enable"]}}
         platform = build_resolved_platform(nos, inventory, render_config)
         assert platform.commands["show version"].output.render("R1") == "INVENTORY"
-
-    def test_overlay_overrides_py_command(self, tmp_path):
-        # The py inflow sits below the overlay (a3 < py < overlay < inventory): an
-        # overlay output wins over a py-module handler for the same command. Pins
-        # the `commands.update` order so a future reorder is caught.
-        nos = Nos(filename=str(_a3_platform(tmp_path)))
-        handler = lambda **kwargs: "dynamic"  # noqa: E731 — minimal handler stand-in
-        nos.commands = {"show version": {"output": handler, "help": "dyn", "prompt": "{base_prompt}#"}}
-        overlay_root = self._overlay(tmp_path, {"show_version.txt": "OVERLAY over py\n"})
-        render_config = HostRenderConfig(overlay_root=overlay_root, override_commands="all")
-        platform = build_resolved_platform(nos, {}, render_config)
-        assert platform.commands["show version"].output.render("R1") == "OVERLAY over py\n"
 
     def test_overlay_adds_new_command(self, tmp_path):
         nos = Nos(filename=str(_a3_platform(tmp_path)))
@@ -480,19 +551,19 @@ class TestA3HotReload:
 
         The broken-yaml case fails *before* `_from_platform_dir` assigns, so it
         cannot pin the D3 attr; this is the post-commit path — the platform
-        loses a mode that a legacy inflow's prompt still maps to, so `from_file`
-        succeeds and `_rebuild`'s `adapt_commands` raises. Without
+        loses a mode an inventory command still names, so `from_file` succeeds
+        and `_rebuild`'s inventory normalization raises. Without
         `resolved_platform` in `_NOS_RELOAD_ATTRS` the modeless platform would
         survive the rollback and poison every later rebuild.
         """
         platform_dir = _a3_platform(tmp_path)
-        inventory = {"commands": {"conf cmd": {"output": "X", "prompt": "{base_prompt}(config)#"}}}
+        inventory = {"commands": {"conf cmd": {"output": "X", "mode": ["config"]}}}
         nos_obj = Nos(filename=str(platform_dir))
         shell = _shell_for(nos_obj, inventory_config=inventory)
         old_platform = nos_obj.resolved_platform
         old_commands = shell.commands
         # Drop the config mode: load still succeeds (no A3 command references
-        # it), but the inventory prompt above no longer reverse-maps.
+        # it), but the inventory `mode: [config]` above no longer validates.
         _write(
             platform_dir / "platform.yaml",
             'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\n'
