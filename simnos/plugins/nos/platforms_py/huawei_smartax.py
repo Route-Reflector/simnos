@@ -105,11 +105,11 @@ commands = {
         # #317 supersedes this once A3 authors handlers with a static new_mode.
         "changes_prompt": True,
     },
-    "scroll": {
-        "output": None,
-        "help": "set scroll",
-        "prompt": [INITIAL_PROMPT, ENABLE_PROMPT],
-    },
+    # `scroll` is served by the A3 command (commands/scroll.yaml), byte-identical
+    # to this empty-output stub. It was dropped from this py module so the A3
+    # `scroll` (carrying `disables_paging: true`, #307 / P3-4) is no longer
+    # shadowed by the py inflow (which overrides A3 in build_resolved_platform and
+    # cannot carry the flag — py-plugin paging is out of scope). See #320 / #308.
     "disable": {
         "output": HuaweiSmartAX.disable,
         "help": "exit exec prompt",

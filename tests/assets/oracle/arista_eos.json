@@ -2656,6 +2656,32 @@
     ],
     "variants": []
   },
+  "term length 0": {
+    "exit": false,
+    "help": "",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": [
+      "Pagination disabled."
+    ],
+    "variants": []
+  },
+  "term width 0": {
+    "exit": false,
+    "help": "",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": [
+      "Width set to 511 columns."
+    ],
+    "variants": []
+  },
   "terminal length 0": {
     "exit": false,
     "help": "It disables the pagination",
@@ -2665,7 +2691,7 @@
     ],
     "new_mode": null,
     "output": [
-      "Pagination disabled"
+      "Pagination disabled."
     ],
     "variants": []
   },
@@ -2678,7 +2704,7 @@
     ],
     "new_mode": null,
     "output": [
-      "Width set to 511"
+      "Width set to 511 columns."
     ],
     "variants": []
   }

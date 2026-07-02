@@ -69,20 +69,15 @@ commands = {
         "help": "Output to print for unknown commands",
         "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
     },
-    "terminal width 511": {
-        "output": "Width set to 511 columns.",
-        "help": "Configure the terminal width to 511",
-        "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
-    },
-    "term width 0": {
-        "alias": "terminal width 511",
-    },
-    "terminal length 0": {
-        "output": "Pagination disabled.",
-        "help": "Configure the pagination length to 0",
-        "prompt": [ENABLE_PROMPT, INITIAL_PROMPT],
-    },
-    "term length 0": {"alias": "terminal length 0"},
+    # `terminal length 0` / `terminal width 511` (+ their `term …` aliases) are
+    # served by the A3 commands (commands/terminal_length_0.yaml /
+    # terminal_width_511.yaml + term_length_0.yaml / term_width_0.yaml), whose
+    # `.txt` bodies match these strings byte-for-byte. They were dropped from
+    # this py module so the A3 `terminal length 0` (carrying `disables_paging:
+    # true`, #307 / P3-4) is no longer shadowed by the py inflow (which overrides
+    # A3 in build_resolved_platform and cannot carry the flag). The aliases moved
+    # too: an alias resolves only within its own inflow, so leaving them here
+    # would dangle once the target is A3-only. See #320 / #308.
     "show ip int brief": {
         "output": AristaEOS.make_show_ip_int_br,
         "help": "Condensed output",

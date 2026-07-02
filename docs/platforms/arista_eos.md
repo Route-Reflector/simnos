@@ -2490,7 +2490,7 @@ Maximum number of vrfs allowed: 1023
 
 **Output:**
 ```
-Pagination disabled
+Pagination disabled.
 ```
 
 **Help:** It disables the pagination
@@ -2503,10 +2503,36 @@ Pagination disabled
 
 **Output:**
 ```
-Width set to 511
+Width set to 511 columns.
 ```
 
 **Help:** set the terminal width to maximum
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
+### term length 0
+
+**Output:**
+```
+Pagination disabled.
+```
+
+**Help:** 
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
+### term width 0
+
+**Output:**
+```
+Width set to 511 columns.
+```
+
+**Help:** 
 
 **Prompt:**
 - arista_eos>
