@@ -59,6 +59,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

@@ -31,6 +31,7 @@
     "variants": []
   },
   "set cli screen-length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command set cli screen-length 0. This automatically generated.",
     "modes": [

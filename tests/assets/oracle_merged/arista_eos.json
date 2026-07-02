@@ -2882,6 +2882,7 @@
     "variants": []
   },
   "term length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "",
     "modes": [
@@ -2908,6 +2909,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "It disables the pagination",
     "modes": [

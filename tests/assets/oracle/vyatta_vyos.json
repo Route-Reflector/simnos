@@ -20,6 +20,7 @@
     "variants": []
   },
   "set terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "set the terminal to max width",
     "modes": [

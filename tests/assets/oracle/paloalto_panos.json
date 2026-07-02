@@ -102,6 +102,7 @@
     "variants": []
   },
   "set cli pager off": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

@@ -29,6 +29,7 @@ _v3 へ上げる場合_ — 該当する変更をそれぞれ適用してくだ�
 | `simnos -i inventory.yaml` (または素の `simnos`) で起動している | サブコマンド形式を使う: `simnos up -i inventory.yaml` (default inventory なら `simnos up`)。#267 参照 |
 | リッスンポート `6000` / `6001` / `6002` をハードコードしている | `start()` 後に `net.hosts[<name>].port` から実ポートを読む (CLI もログ出力します)。既定ポートは OS 割り当てになりました。#271 参照 |
 | シェルの `configuration` ブロックで `ruler` / `completekey` を設定している | 削除する — ロード時に拒否されます (`extra="forbid"`)。#303 参照 |
+| カスタムコマンド handler から dict (`{"output", "new_mode", "exit"}`) を返している | `str` (または `None`) のみを返し、遷移はコマンド側に静的に書く (`new_prompt`、または A3 の `new_mode` / `exit` / `transitions`) — dict 返しは `% Internal error` 応答になります。#317 参照 |
 | `paramiko` を推移的依存として当てにしている | ランタイム依存ではなくなりました — 自前コードで import していたなら明示的に依存を追加してください。#297 参照 |
 
 scraper (netmiko / scrapli / ansible) から見た wire 上の挙動は不変で、byte-parity
@@ -42,6 +43,7 @@ golden で固定されています — コマンドを送って出力を読む�
 - CLI をサブコマンド方式に再構成: `simnos up` でサーバを起動し、`simnos list-platforms` で対応プラットフォームを一覧します (#267)。v2 のフラット形式 (`simnos -i inventory.yaml`、または default inventory 用の素の `simnos`) はもうパースされません — サブコマンドが必須になりました (`simnos up -i inventory.yaml`、または default inventory 用の `simnos up`)。`up` にはアドホックな単一ホストモード (`-d/--device-type` に加えて任意で `-p/--port`、`-n/--host-name`、`-u/--username`、`-w/--password`) も追加され、インベントリファイルなしで単発のプラットフォームを起動できます。`-l/--log-level` と `-r/--reload-commands` は各サブコマンド共通のフラグとして引き継がれます
 - 既定のリッスンポートを、固定値 `6000` / `6001` / `6002` から OS 割り当て (ephemeral) に変更 (#271)。引数なしの `SimNOS()` (組み込み default inventory) と `port: 0` を指定したインベントリホストは、`bind()` 時に OS がアトミックに選んだポートにバインドします。実ポートは `start()` 後に `host.port` から読み戻してください (CLI は `host <name> listening on <addr>:<port>` をログ出力します)。これにより macOS CI で見られたワーカー間のポート衝突フレーク (`OSError: Errno 48`) が解消します。`6000` をハードコードしていた呼び出し側やテストは、代わりに `net.hosts[<name>].port` を読む必要があります。replicas リスト経路は依然として明示的な `ge=1` ポートを要求します — ephemeral は単一ホスト専用です
 - `ruler` / `completekey` シェル設定ノブを、それが属していた `cmd.Cmd` 基底クラスとともに削除 (#303)。これらを設定するインベントリ `configuration` ブロックはロード時に拒否されます (`extra="forbid"`) — キーを削除してください。scraper (netmiko / scrapli / ansible) から見た wire 上の挙動は不変で、byte-parity golden で固定されています
+- コマンド handler の戻り値契約を `str | None` に縮小 (#317)。dict 返し形式 (`CommandResult` の `output` / `new_mode` / `exit`) は削除されました: dict を返し続けるカスタム py plugin handler には wire 上で固定の `% Internal error` 行 + サーバ ERROR ログが返り、遷移も発火しません。mode 遷移とセッション終了は静的に書いてください — `new_prompt` (legacy dict 形式) または `new_mode` / `exit` / `transitions` (A3 yaml)。同変更で同梱の cisco_ios / arista_eos / huawei_smartax はコマンド authoring を py `commands` dict から A3 platform dir へ移送済みです (py module は device class + 動的 output handler のみ)。副作用として、per-host `overlay` entry はコマンドの実配信 mode 集合を継承するようになりました (例: cisco_ios `show version` の overlay は enable mode が必要 — 実 wire と一致)
 
 **機能強化**
 

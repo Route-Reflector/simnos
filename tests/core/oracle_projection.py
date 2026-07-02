@@ -76,4 +76,9 @@ def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
             projection[name]["transitions"] = {
                 mode: {"new_mode": t.new_mode, "exit": t.exit} for mode, t in sorted(rc.transitions.items())
             }
+        if rc.disables_paging:
+            # The #320 bug class was exactly this flag being shadowed out of the
+            # merged view, so the oracle must see it (1st round claude#2).
+            # True-only emit, same rationale as `transitions` above.
+            projection[name]["disables_paging"] = True
     return projection

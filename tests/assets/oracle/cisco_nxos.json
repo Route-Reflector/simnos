@@ -9050,6 +9050,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "set the terminal width to maximum",
     "modes": [

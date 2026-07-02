@@ -188,6 +188,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal length 0. This automatically generated.",
     "modes": [

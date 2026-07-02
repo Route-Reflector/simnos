@@ -21,6 +21,7 @@
     "variants": []
   },
   "disable clipaging": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command disable clipaging. This automatically generated.",
     "modes": [

@@ -314,6 +314,7 @@
     "variants": []
   },
   "terminal datadump": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal datadump. This automatically generated.",
     "modes": [

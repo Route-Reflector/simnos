@@ -16,6 +16,7 @@
     "variants": []
   },
   "disable clipaging": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging",
     "modes": [

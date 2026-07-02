@@ -1,6 +1,9 @@
 # A real command, not an alias of `show ip interface brief`: both spellings were
 # real in the py module, and alias-izing one would drop it from the canonical-only
 # abbreviation candidate space (#303 P3-2), changing e.g. `sh ip i b` ambiguity.
+# The lint's 1-yaml:1-output rule forbids sharing one output file, so
+# show_ip_int_brief.txt MUST stay byte-identical to show_ip_interface_brief.txt
+# (pinned by tests/plugins/test_p2_migration_parity.py while it lives).
 command: show ip int brief
 type: simnos
 help: Condensed output

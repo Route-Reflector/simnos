@@ -265,8 +265,16 @@ def _classify_callable_commands(
             current_prompt=prompt_of.get(current_mode, ""),
             command=cmd_name,
         )
-        if not isinstance(expected, str):
+        if expected is None:
             continue  # a None return writes nothing -> no content to verify
+        # Anything else non-str is a broken str|None contract (#317 P-2) — fail
+        # here rather than silently dropping it as "nothing to verify", which
+        # would let a contract-violating handler shrink the sweep unnoticed
+        # (1st round codex#1).
+        assert isinstance(expected, str), (
+            f"{device_type}: handler command {cmd_name!r} returned {type(expected).__name__} "
+            "(contract is str | None) — fix the handler, do not exclude it here"
+        )
         bucket.append((cmd_name, expected))
 
     assert not unclassified, (
@@ -444,6 +452,27 @@ class TestClassifyCallableCommands:
         initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == []
         assert enable_cmds == []
+
+    def test_contract_breaking_handler_fails_loudly(self):
+        """A non-str|None return fails classification instead of shrinking the sweep.
+
+        Only None means "no content to verify"; a dict/list return is a broken
+        #317 P-2 handler contract, and silently dropping it would let a
+        contract-violating handler disappear from the e2e sweep (and, combined
+        with the denylist skip, potentially the whole platform) unnoticed
+        (1st round codex#1).
+        """
+        nos = self._synthetic_nos(
+            {
+                "broken": {
+                    "output": lambda device, **kwargs: {"output": "x"},
+                    "help": "dict-returning handler (removed contract)",
+                    "prompt": "{base_prompt}>",
+                }
+            }
+        )
+        with pytest.raises(AssertionError, match=r"returned dict \(contract is str \| None\)"):
+            _classify_callable_commands(nos, "synth", HOSTNAME)
 
     def test_denylist_is_platform_qualified(self):
         """Another platform's deterministic 'show clock' stays in the sweep."""

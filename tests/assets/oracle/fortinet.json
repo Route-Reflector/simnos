@@ -1307,6 +1307,7 @@
     "variants": []
   },
   "set output standard": {
+    "disables_paging": true,
     "exit": false,
     "help": "set output to standard mode",
     "modes": [

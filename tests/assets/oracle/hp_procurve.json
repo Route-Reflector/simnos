@@ -21,6 +21,7 @@
     "variants": []
   },
   "disable clipaging": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command disable clipaging. This automatically generated.",
     "modes": [
@@ -53,6 +54,7 @@
     "variants": []
   },
   "no page": {
+    "disables_paging": true,
     "exit": false,
     "help": "Disable pagination",
     "modes": [
@@ -64,6 +66,7 @@
     "variants": []
   },
   "screen-length 0 temporary": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command screen-length 0 temporary. This automatically generated.",
     "modes": [
@@ -75,6 +78,7 @@
     "variants": []
   },
   "screen-length disable": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command screen-length disable. This automatically generated.",
     "modes": [
@@ -1107,6 +1111,7 @@
     ]
   },
   "terminal datadump": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal datadump. This automatically generated.",
     "modes": [
@@ -1118,6 +1123,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal length 0. This automatically generated.",
     "modes": [

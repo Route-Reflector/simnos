@@ -42,6 +42,9 @@ SNAPSHOT_DIR = os.path.join("tests", "assets", "oracle_merged")
 # The platforms under the merged-view gate: the three whose py `commands` dict
 # P-2 migrated to A3. Other platforms have no py inflow, so their merged view
 # is BASIC + the A3 loader view already pinned by the per-platform A3 oracle.
+# TODO(#317 P-4): remove this gate (script + test_merged_oracle.py + snapshots)
+# once the legacy adapter / py inflow are gone and the comparison target no
+# longer exists — grep marker so the removal PR cannot miss it.
 MERGED_ORACLE_PLATFORMS = ("arista_eos", "cisco_ios", "huawei_smartax")
 
 

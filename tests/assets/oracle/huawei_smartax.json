@@ -4138,6 +4138,7 @@
     "variants": []
   },
   "scroll": {
+    "disables_paging": true,
     "exit": false,
     "help": "disables the paging so the output is complete always",
     "modes": [

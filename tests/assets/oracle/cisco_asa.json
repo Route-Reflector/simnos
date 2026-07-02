@@ -2264,6 +2264,7 @@
     "variants": []
   },
   "terminal pager 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal pager 0. This automatically generated.",
     "modes": [

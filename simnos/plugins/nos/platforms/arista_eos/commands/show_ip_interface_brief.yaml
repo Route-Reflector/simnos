@@ -1,3 +1,6 @@
+# `show ip int brief` is a second REAL command with the same output (see the
+# rationale in show_ip_int_brief.yaml); keep show_ip_interface_brief.txt and
+# show_ip_int_brief.txt byte-identical when editing either.
 command: show ip interface brief
 type: simnos
 help: Condensed output

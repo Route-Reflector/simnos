@@ -200,6 +200,7 @@
     "variants": []
   },
   "terminal datadump": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging (Dell 34xx)",
     "modes": [
@@ -211,6 +212,7 @@
     "variants": []
   },
   "terminal length 0": {
+    "disables_paging": true,
     "exit": false,
     "help": "disable paging (Dell 7xxx)",
     "modes": [

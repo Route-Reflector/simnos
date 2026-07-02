@@ -42,6 +42,7 @@
     "variants": []
   },
   "terminal more disable": {
+    "disables_paging": true,
     "exit": false,
     "help": "Execute the command terminal more disable. This automatically generated.",
     "modes": [
