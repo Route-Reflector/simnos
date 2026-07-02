@@ -11,9 +11,6 @@ running shell via hot reload.
 
 from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
-NAME = "broken_module"
-INITIAL_PROMPT = "{base_prompt}$"
-
 
 class DeviceA(BaseDevice):
     """First local device class — one too many together with DeviceB."""
@@ -21,6 +18,3 @@ class DeviceA(BaseDevice):
 
 class DeviceB(BaseDevice):
     """Second local device class — triggers the multiple-subclass ValueError."""
-
-
-commands = {"polluting command": {"output": "x", "help": "x"}}

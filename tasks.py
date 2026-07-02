@@ -213,6 +213,48 @@ def check_platform_data_device_type_collisions(platforms_dir: str = PLATFORMS_A3
     return violations
 
 
+def check_platform_data_py_modules(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Cross-check the A3 platforms against their py handler modules (#317 P-4).
+
+    Two gating rules, both about the ``handler:`` channel's binding contract
+    (a `handler:` ref binds against the co-named ``platforms_py/<name>.py``
+    module's namespace at merge time — `build_resolved_platform`):
+
+    1. **orphan py module**: a ``platforms_py/<name>.py`` with no
+       ``platforms/<name>/`` A3 dir can never be registered (the registry
+       warns and skips it since #317 P-4) — flag it at authoring time.
+    2. **unbindable handler ref**: a command yaml carrying ``handler:`` on a
+       platform that ships no py module would fail at every ``Host.start``;
+       flag it here so the author sees it before running a server. (Whether the
+       named callable exists inside the module is the runtime bind's job — this
+       lint is stdlib-only and does not import plugin code.)
+
+    Returns a list of human-readable violation strings (empty = clean).
+    """
+    py_dir = os.path.join(os.path.dirname(platforms_dir.rstrip("/")), "platforms_py")
+    py_modules = {
+        os.path.basename(p)[: -len(".py")]
+        for p in glob.glob(os.path.join(py_dir, "*.py"))
+        if os.path.basename(p) != "__init__.py"
+    }
+    a3_platforms = set(list_a3_platform_names(platforms_dir))
+    violations = [
+        f"platforms_py/{name}.py: no matching A3 platform dir (platforms/{name}/) — "
+        "py-only platforms were removed (#317 P-4); the registry will not register it"
+        for name in sorted(py_modules - a3_platforms)
+    ]
+    for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
+        if platform in py_modules:
+            continue
+        violations.extend(
+            f"{platform}/commands/{os.path.basename(command_yaml)}: `handler: {data['handler']}` but the platform "
+            f"ships no platforms_py/{platform}.py module — the ref can never bind at Host.start"
+            for command_yaml, data in _iter_command_yamls(commands_dir)
+            if isinstance(data.get("handler"), str)
+        )
+    return violations
+
+
 def _variant_output_refs(command_data: dict) -> list[str]:
     """The output file each variant references (str-typed entries only)."""
     return [
@@ -389,7 +431,9 @@ def lint_platform_data(context):
     `check_platform_data`) + the authoring baseline ratchet (`_default_`
     presence / stub help / heritage wording, see
     `check_platform_data_ratchet`) + device_type alias collisions across
-    platforms (#266, see `check_platform_data_device_type_collisions`).
+    platforms (#266, see `check_platform_data_device_type_collisions`)
+    + py-module cross-checks (orphan ``platforms_py`` module / unbindable
+    ``handler:`` ref, #317 P-4, see `check_platform_data_py_modules`).
     Warning-tier (printed, non-blocking):
     filename convention + ``type: ntc`` provenance (see
     `check_platform_data_warnings`).
@@ -407,7 +451,12 @@ def lint_platform_data(context):
     if warnings:
         print(f"({len(warnings)} warning(s) — informational, not blocking)")
 
-    violations = check_platform_data() + check_platform_data_ratchet() + check_platform_data_device_type_collisions()
+    violations = (
+        check_platform_data()
+        + check_platform_data_ratchet()
+        + check_platform_data_device_type_collisions()
+        + check_platform_data_py_modules()
+    )
     for violation in violations:
         print(violation)
     if violations:

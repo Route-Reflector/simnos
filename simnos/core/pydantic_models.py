@@ -10,7 +10,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    GetPydanticSchema,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
@@ -18,9 +17,6 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from pydantic_core import core_schema
-
-from simnos.core.command_contract import CommandHandler
 
 # Valid TCP port. Restores the range constraint lost in the pydantic v1 -> v2
 # migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
@@ -34,74 +30,6 @@ Port = Annotated[StrictInt, Field(ge=1, le=65535)]
 # range of ephemeral ports is meaningless.
 EPHEMERAL_PORT = 0
 EphemeralPort = Annotated[StrictInt, Field(ge=0, le=65535)]
-
-# Dynamic command output. The type annotation documents the G4 contract
-# (`CommandHandler` Protocol — signature and return shape, #241); pydantic
-# cannot derive a schema from a Protocol, so the attached schema keeps the
-# runtime validation at "is callable", identical to the bare `Callable`
-# this replaces. Signature/return conformance is checked statically and by
-# the e2e callable sweep, not here.
-CommandHandlerField = Annotated[
-    CommandHandler,
-    GetPydanticSchema(lambda tp, handler: core_schema.callable_schema()),
-]
-
-# ---------------------------------------------------------------------------------------
-# NOS plugin commands model
-# ---------------------------------------------------------------------------------------
-
-
-class ModelNosCommand(BaseModel):
-    """
-    Pydantic model for NOS command attributes.
-
-    Unknown fields are rejected loudly (`extra="forbid"`, #244 / D5) so a
-    typo'd field (`outptu`) fails the pre-commit validation instead of
-    being dropped silently. Safe because every load path validates a
-    merged view before commit and `Nos.validate()` passes schema fields
-    only (#244 / D8).
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    output: StrictStr | CommandHandlerField | None = None
-    exit: StrictBool | None = None
-    help: StrictStr | None = None
-    prompt: StrictStr | list[StrictStr] | None = None
-    new_prompt: StrictStr | None = None
-    alias: StrictStr | None = None
-    # Data-only field: alternate captures of the same command's output
-    # (16 platform yamls, #234). Not consumed by the runtime — declared
-    # so `extra="forbid"` keeps accepting the existing data while still
-    # rejecting typos.
-    output_variants: list[StrictStr] | None = None
-
-
-class ModelNosAttributes(BaseModel):
-    """
-    Pydantic model for NOS attributes.
-
-    `extra="forbid"` (#244 / D5) restores symmetry with the inventory
-    models below; safe only because `Nos.validate()` extracts schema
-    fields explicitly (never `**self.__dict__`, which also carries
-    `device` / `configuration_file`, #244 / D8).
-
-    Kept after the A3 migration removed the legacy yaml loader (#264 / PR-3):
-    `Nos.from_dict` / `validate` (constructor / dict plugins) and `_from_module`
-    (py plugin) still validate their boundary through this model. The inventory
-    commands inflow moved off it in #317 P-3 (`ModelInventoryCommand`); this
-    model goes away with the legacy base layer in P-4.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    commands: dict[StrictStr, ModelNosCommand]
-    name: StrictStr
-    initial_prompt: StrictStr
-    auth: StrictStr | None = None
-    enable_prompt: StrictStr | None = None
-    config_prompt: StrictStr | None = None
-
 
 # ---------------------------------------------------------------------------------------
 # A3 authoring schema (#264 / P1-1 D2, D3) — the new per-platform on-disk form
@@ -246,7 +174,7 @@ class ModelCommandAuthoring(BaseModel):
     def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
         # An explicit empty list reads as "runnable in no mode"; "all modes" is
         # expressed by omitting `mode`. Reject `[]` so the two never blur
-        # (Decision 7, symmetric with the legacy adapter's `prompt: []` reject).
+        # (#264 / Decision 7).
         if value is not None and not value:
             raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
         return value
@@ -328,9 +256,9 @@ class ModelCommandAuthoring(BaseModel):
                     "mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
                 )
             # An aliased `_default_` would inherit the target's modes/new_mode via
-            # the loader's `replace(target, ...)`, splitting `_default_` semantics
-            # from the legacy adapter (which forces empty modes). Reject so the
-            # fallback can never become mode-bearing through the alias backdoor
+            # the loader's `replace(target, ...)`, making the fallback
+            # mode-bearing. Reject so `_default_` can never lose its
+            # empty-modes semantics through the alias backdoor
             # (1st round claude #6).
             if self.alias is not None:
                 raise ValueError(

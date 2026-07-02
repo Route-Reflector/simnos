@@ -1,0 +1,6 @@
+---
+command: show clock
+type: custom
+help: Display the system clock
+mode: [user, enable]
+output: show_clock.txt

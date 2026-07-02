@@ -1,0 +1,6 @@
+---
+command: show version
+type: custom
+help: System hardware and software status
+mode: [enable]
+output_template: show_version.j2

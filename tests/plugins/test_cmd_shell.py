@@ -1,5 +1,11 @@
 """
 Module to test the cmd_shell plugin.
+
+The fixture platform is the synthetic external custom asset
+(``tests/assets/synthetic_custom/`` + ``synthetic_custom_handlers.py``) — the
+same A3 dir + handler py shape every platform has since #317 P-4 (the legacy
+py-dict / ``from_dict`` vehicles this module used to build shells from are
+gone with the legacy base layer).
 """
 
 import cmd
@@ -12,7 +18,6 @@ from unittest.mock import Mock, patch
 
 from netmiko import ConnectHandler
 import pytest
-import yaml
 
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import EPHEMERAL_PORT
@@ -26,25 +31,20 @@ import simnos.plugins.shell.cmd_shell as cmd_shell_module
 from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell, build_resolved_platform
 from tests.utils import set_attr
 
+_ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets"))
+SYNTHETIC_A3_DIR = os.path.join(_ASSETS, "synthetic_custom")
+SYNTHETIC_HANDLERS = os.path.join(_ASSETS, "synthetic_custom_handlers.py")
 
-def _nos_from_yaml_asset(path: str = "tests/assets/yaml_nos.yaml") -> Nos:
-    """Build a Nos from a yaml *asset* via the surviving ``from_dict`` path.
 
-    The legacy ``from_file(.yaml)`` loader was removed in v3 (#264); this test
-    vehicle keeps the shared fixture data but loads it through ``from_dict`` (the
-    inventory/constructor inflow), which the legacy shell still consumes.
-    """
-    with open(path, encoding="utf-8") as fh:
-        data = yaml.safe_load(fh)
-    nos = Nos()
-    nos.from_dict(data)
-    return nos
+def _nos_from_synthetic_asset() -> Nos:
+    """Build a Nos from the committed synthetic custom platform (A3 dir + handler py)."""
+    return Nos(filename=[SYNTHETIC_A3_DIR, SYNTHETIC_HANDLERS])
 
 
 def make_cmd_shell_args() -> dict:
     """Build the CMDShell constructor kwargs shared across cmd_shell tests (SSoT)."""
     return {
-        "nos": _nos_from_yaml_asset(),
+        "nos": _nos_from_synthetic_asset(),
         "nos_inventory_config": {},
         "base_prompt": "test",
         "is_running": threading.Event(),
@@ -180,8 +180,8 @@ def test_a3_paging_flag_and_output_reach_merged_runtime(platform, command, pagin
     """A3 `disables_paging` + modes + output reach the merged runtime (#320).
 
     Originally pinned against the py-inflow shadowing bug class; that inflow is
-    gone from the merge (#317 P-3, a leftover py dict is rejected loudly), so
-    these now pin the A3 data end to end against any future merge rework.
+    gone (#317 P-3/P-4, a py `commands` dict is rejected at load), so these now
+    pin the A3 data end to end against any future merge rework.
     `_render_response` joins body lines with the newline and absorbs trailing
     newlines (via `splitlines()`), so the projected `body_lines` are the wire
     lines a client sees — pinning the `.txt` bytes the py stubs used to serve.
@@ -280,8 +280,9 @@ def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
         "class SynDev(BaseDevice):\n"
         "    def make_greeting(self, device=None, *, base_prompt, current_mode, current_prompt, command):\n"
         '        return f"hello from {current_mode}"\n'
-        # A vestigial *empty* dict must not trip the P-3 "py dict authoring was
-        # removed" merge guard (only a non-empty one is an authoring attempt).
+        # A vestigial *empty* dict must not trip the "py dict authoring was
+        # removed" load guard (only a non-empty one is an authoring attempt;
+        # merge-time in P-3, moved to `_from_module` in P-4).
         "commands = {}\n",
         encoding="utf-8",
     )
@@ -369,6 +370,79 @@ def test_p1_handler_and_transitions_are_orthogonal(tmp_path):
     assert shell.current_mode == "user"  # transitions[enable] = new_mode user applied
 
 
+# --- #317 P-4: py module `commands` dict rejected at load ---
+
+
+def test_py_module_commands_dict_is_loud_at_load(tmp_path):
+    """A py module defining a non-empty `commands` dict fails `from_file` (#317 P-4).
+
+    P-3 rejected the dict at the merge (`nos.commands` was still an attribute);
+    P-4 removed the attribute, so the guard moved to the load boundary — the
+    "loads but never merges" silent-ignore window stays closed either way.
+    """
+    py = tmp_path / "dict_author.py"
+    py.write_text('commands = {"show x": {"output": "x"}}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="py dict authoring was removed"):
+        Nos(filename=str(py))
+
+
+def _handler_dispatch_platform(tmp_path):
+    """A tmp A3 dir + handler py covering the handler dispatch contract cases.
+
+    Successor of the legacy dict-built `_make_callable_shell` platforms: each
+    command routes to a named handler function exercising one branch of the
+    `str | None` contract (#317 P-2) or the crash boundary (#241 / D4). The
+    `known` command is enable-only static output for the mode-mismatch case,
+    and `_default_` itself is a `handler:` command (dynamic fallback).
+    """
+    root = tmp_path / "handlerplat"
+    cmds = root / "commands"
+    cmds.mkdir(parents=True)
+    (root / "platform.yaml").write_text(
+        "modes:\n"
+        '  user: {prompt: "{{ base_prompt }}>"}\n'
+        '  enable: {prompt: "{{ base_prompt }}#"}\n'
+        "initial_mode: user\n",
+        encoding="utf-8",
+    )
+    table = {
+        "cmd str": ("ret_str", None),
+        "cmd brace": ("ret_brace", None),
+        "cmd dict": ("ret_dict", None),
+        "cmd crash": ("crash", None),
+        "cmd transition": ("ret_empty", "enable"),
+    }
+    for name, (handler, new_mode) in table.items():
+        body = f"command: {name}\ntype: simnos\nmode: [user]\nhandler: {handler}\n"
+        if new_mode:
+            body += f"new_mode: {new_mode}\n"
+        cmds.joinpath(name.replace(" ", "_") + ".yaml").write_text(body, encoding="utf-8")
+    cmds.joinpath("known.yaml").write_text(
+        "command: known\ntype: simnos\nmode: [enable]\noutput: known.txt\n", encoding="utf-8"
+    )
+    cmds.joinpath("known.txt").write_text("static\n", encoding="utf-8")
+    cmds.joinpath("default.yaml").write_text(
+        "command: _default_\ntype: simnos\nhandler: dyn_default\n", encoding="utf-8"
+    )
+    py = tmp_path / "handlerplat_handlers.py"
+    py.write_text(
+        "def ret_str(device, **kwargs):\n"
+        '    return "dynamic body"\n'
+        "def ret_brace(device, **kwargs):\n"
+        '    return "literal {brace} stays"\n'
+        "def ret_dict(device, **kwargs):\n"
+        '    return {"output": "", "new_mode": "enable"}\n'
+        "def ret_empty(device, **kwargs):\n"
+        '    return ""\n'
+        "def crash(device, **kwargs):\n"
+        '    raise RuntimeError("boom-for-log")\n'
+        "def dyn_default(device, **kwargs):\n"
+        "    return f\"dynamic unknown: {kwargs['command']}\"\n",
+        encoding="utf-8",
+    )
+    return str(root), str(py)
+
+
 # pylint: disable=too-many-public-methods
 class TestCmdShell(TestCase):
     """Test the CmdShell class."""
@@ -387,41 +461,23 @@ class TestCmdShell(TestCase):
         """Test the init method raises an error if nos_inventory_config is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=_nos_from_yaml_asset())  # ty: ignore[missing-argument]
+            CMDShell(nos=_nos_from_synthetic_asset())  # ty: ignore[missing-argument]
 
     def test_init_error_if_base_prompt_not_provided(self):
         """Test the init method raises an error if base_prompt is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
-            CMDShell(nos=_nos_from_yaml_asset(), nos_inventory_config={})  # ty: ignore[missing-argument]
+            CMDShell(nos=_nos_from_synthetic_asset(), nos_inventory_config={})  # ty: ignore[missing-argument]
 
     def test_init_error_if_is_running_not_provided(self):
         """Test the init method raises an error if is_running is not provided."""
         with self.assertRaises(TypeError):
             # pylint: disable=no-value-for-parameter
             CMDShell(  # ty: ignore[missing-argument]
-                nos=_nos_from_yaml_asset(),
+                nos=_nos_from_synthetic_asset(),
                 nos_inventory_config={},
                 base_prompt="test",
             )
-
-    def test_init_broken_initial_prompt_is_loud(self):
-        """A malformed initial_prompt template now fails loudly at construction.
-
-        Inverts the old #172 lenient fallback: prompt templates are load-time
-        validated (#264 / D5), so a broken one (`{base_prompt.foo}>` — an
-        unsupported attribute access) raises in the adapter via `_rebuild`
-        instead of degrading to a raw-template prompt.
-        """
-        self.arguments["nos"] = Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt.foo}>",
-                "commands": {"_default_": {"output": "% Unknown", "help": "default"}},
-            }
-        )
-        with self.assertRaises(ValueError):
-            CMDShell(**self.arguments)
 
     def test_dispatch_blank_line_no_output(self):
         """A blank line dispatches to no output and does not close (was test_emptyline).
@@ -470,20 +526,24 @@ class TestCmdShell(TestCase):
 
         `do_help` was removed in #303 P3-3; `dispatch` calls `_help_body`
         directly when the parsed command is `help` (a leading `?` or `help`).
+        Listing order is the merged-dict insertion order: the BASIC `exit`
+        first, then the A3 commands (loader order: real commands by file stem,
+        aliases resolved last).
         """
         shell = CMDShell(**self.arguments)
         expected_output: list[str] = [
             "exit                Exit commands shell",
             "enable              enter exec prompt",
-            "sh clock            ",
             "show clock          Display the system clock",
-            "terminal width 511  Set terminal width to 511",
+            "show marker         dynamic handler marker command",
             "terminal length 0   Set terminal length to 0",
+            "terminal width 511  Set terminal width to 511",
+            "sh clock            ",
         ]
         self.assertEqual(shell._help_body(), "\r\n".join(expected_output))
 
     def test_help_body_alias_hidden_outside_target_modes(self):
-        """`_help_body` lists a prompt-less alias only in its target modes (#264 / claude #2).
+        """`_help_body` lists an alias only in its target modes (#264 / claude #2).
 
         Intentional refinement over v2 (which listed prompt-less aliases in
         every mode via the raw unmerged entry): `sh clock` aliases `show clock`
@@ -498,9 +558,9 @@ class TestCmdShell(TestCase):
     def test__in_current_mode_empty_modes_always_visible(self):
         """A command with no declared modes is valid in every mode (#264 / D5).
 
-        Successor of the old `_check_prompt(None) -> True`: a command whose
-        authoring omitted `prompt` resolves to an empty mode set, which the
-        engine treats as "valid everywhere" (BASIC `exit` is such a command).
+        A command whose authoring omitted `mode` resolves to an empty mode set,
+        which the engine treats as "valid everywhere" (BASIC `exit` is such a
+        command).
         """
         shell = CMDShell(**self.arguments)
         self.assertEqual(shell.commands["exit"].modes, frozenset())
@@ -511,8 +571,7 @@ class TestCmdShell(TestCase):
     def test__in_current_mode_membership(self):
         """A command is visible only in the modes it declares (#264 / D5).
 
-        Replaces the `_check_prompt` string-match unit: `show clock`
-        (authored for the user/enable prompts) is visible in those modes and
+        `show clock` (authored for user/enable) is visible in those modes and
         hidden in config.
         """
         shell = CMDShell(**self.arguments)  # current_mode == "user"
@@ -527,7 +586,7 @@ class TestCmdShell(TestCase):
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         body, close = shell._dispatch_general("show clock")
-        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022")
+        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022\n")
         self.assertFalse(close)
 
     def test_dispatch_general_command_with_alias(self):
@@ -535,201 +594,83 @@ class TestCmdShell(TestCase):
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         body, close = shell._dispatch_general("sh clock")
-        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022")
+        self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022\n")
         self.assertFalse(close)
 
-    def test_dispatch_general_command_is_function(self):
-        """A callable-output command returns its computed body (was default)."""
+    def test_dispatch_general_command_is_handler(self):
+        """A bound-handler command returns its computed body (was default)."""
         self.arguments["is_running"].set()
-        self.arguments["nos"] = Nos(filename="tests/assets/module.py")
         shell = CMDShell(**self.arguments)
-        body, close = shell._dispatch_general("show clock")
-        self.assertEqual(body, time.ctime())
+        body, close = shell._dispatch_general("show marker")
+        self.assertEqual(body, "SYNTHETIC-CUSTOM-MARKER")
         self.assertFalse(close)
 
-    def _make_callable_shell(self, output_callable, *, new_prompt=None):
-        """Build a shell whose 'cmd' command output is `output_callable`.
+    def _make_handler_shell(self, tmp_path):
+        """Build a shell over the handler-dispatch tmp platform.
 
         Consumer-side pins for the handler dispatch branch of
         `_dispatch_general`: the str / None returns, the crash boundary (D4)
-        and the str|None contract violation. Handlers are output-only since
-        #317 P-2 (the dict-return `CommandResult` form is gone) — a transition
-        rides the command's own static `new_prompt`, exercised via the
-        `new_prompt` kwarg. The synthetic platform declares all three
-        canonical modes like the real ones (#264 / D5).
+        and the str|None contract violation (#317 P-2 — the dict-return
+        `CommandResult` form is gone; a transition rides the command's own
+        static `new_mode`).
         """
+        a3_dir, py = _handler_dispatch_platform(tmp_path)
         self.arguments["is_running"].set()
-        cmd: dict = {
-            "output": output_callable,
-            "help": "callable output",
-            "prompt": "{base_prompt}>",
-        }
-        if new_prompt is not None:
-            cmd["new_prompt"] = new_prompt
-        self.arguments["nos"] = Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt}>",
-                "enable_prompt": "{base_prompt}#",
-                "config_prompt": "{base_prompt}(config)#",
-                "commands": {
-                    "cmd": cmd,
-                    "_default_": {"output": "% Unknown", "help": "default"},
-                },
-            }
-        )
-        shell = CMDShell(**self.arguments)
-        return shell
+        self.arguments["nos"] = Nos(filename=[a3_dir, py])
+        return CMDShell(**self.arguments)
 
-    def test_dispatch_callable_with_static_new_mode_transitions(self):
+    def test_dispatch_handler_with_static_new_mode_transitions(self):
         """A handler command's static new_mode transitions the shell (#317 P-2).
 
         The former dict-return `new_mode` is gone; the transition is the
         command's own static data and applies alongside the handler body.
         """
-        shell = self._make_callable_shell(lambda device, **kwargs: "", new_prompt="{base_prompt}#")
-        body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(shell.current_mode, "enable")
-        self.assertEqual(shell.prompt, "test#")
-        self.assertEqual(body, "")
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            body, close = shell._dispatch_general("cmd transition")
+            self.assertFalse(close)
+            self.assertEqual(shell.current_mode, "enable")
+            self.assertEqual(shell.prompt, "test#")
+            self.assertEqual(body, "")
 
-    def test_dispatch_callable_str_output(self):
+    def test_dispatch_handler_str_output(self):
         """A str-returning handler's body is served, prompt unchanged."""
-        shell = self._make_callable_shell(lambda device, **kwargs: "dynamic body")
-        body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(shell.prompt, "test>")
-        self.assertEqual(body, "dynamic body")
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            body, close = shell._dispatch_general("cmd str")
+            self.assertFalse(close)
+            self.assertEqual(shell.prompt, "test>")
+            self.assertEqual(body, "dynamic body")
 
-    def test_dispatch_callable_dict_return_is_contract_violation(self):
+    def test_dispatch_handler_dict_return_is_contract_violation(self):
         """A dict-returning handler answers HANDLER_ERROR_OUTPUT (#317 P-2).
 
         The `CommandResult` dict form was removed with the legacy py-dict
         authoring; a plugin still returning one must fail loud in the log and
         real-NOS-style on the wire — with no transition side effect.
         """
-        shell = self._make_callable_shell(lambda device, **kwargs: {"output": "", "new_mode": "enable"})
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, HANDLER_ERROR_OUTPUT)
-        self.assertEqual(shell.current_mode, "user")  # the dict's new_mode is dead
-        self.assertTrue(any("contract is str | None" in msg for msg in captured.output))
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+                body, close = shell._dispatch_general("cmd dict")
+            self.assertFalse(close)
+            self.assertEqual(body, HANDLER_ERROR_OUTPUT)
+            self.assertEqual(shell.current_mode, "user")  # the dict's new_mode is dead
+            self.assertTrue(any("contract is str | None" in msg for msg in captured.output))
 
-    def _make_prompt_form_shell(self, prompt_value):
-        """Build a shell whose 'cmd' command uses the given `prompt` authoring form.
-
-        Both a bare str and a list are valid authoring sugar for `prompt`;
-        these pins guard that the two forms resolve to the same mode set and
-        dispatch identically through the adapter (#264 / D6).
-        """
-        self.arguments["is_running"].set()
-        self.arguments["nos"] = Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt}>",
-                "enable_prompt": "{base_prompt}#",
-                "commands": {
-                    "cmd": {
-                        "output": "form ok",
-                        "help": "prompt-form pin",
-                        "prompt": prompt_value,
-                    },
-                },
-            }
-        )
-        shell = CMDShell(**self.arguments)
-        return shell
-
-    def test_dispatch_prompt_str_authoring_dispatches(self):
-        """A bare-str `prompt` resolves to the current mode and dispatches."""
-        shell = self._make_prompt_form_shell("{base_prompt}>")
-        body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, "form ok")
-
-    def test_dispatch_prompt_list_authoring_dispatches(self):
-        """A list `prompt` resolves to a mode set including the current mode."""
-        shell = self._make_prompt_form_shell(["{base_prompt}>", "{base_prompt}#"])
-        body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, "form ok")
-
-    def test_inventory_commands_resolve_on_legacy_branch_and_dispatch(self):
-        """Inventory commands (A3 dialect, #317 P-3) work on the legacy branch too.
-
-        Pins the third commands inflow (#264 / D6): `nos_inventory_config
-        ["commands"]` is normalized at shell (re)build against the *synthesized*
-        modes (user/enable/config) of a py-only platform, so a `mode: [user]`
-        entry resolves and dispatches exactly as on the A3 branch.
-        """
-        self.arguments["is_running"].set()
-        self.arguments["nos_inventory_config"] = {
-            "commands": {
-                "inv cmd": {
-                    "output": "inventory ok",
-                    "help": "inventory-defined",
-                    "mode": ["user"],
-                },
-            },
-        }
-        shell = CMDShell(**self.arguments)
-        self.assertEqual(shell.commands["inv cmd"].modes, frozenset({"user"}))
-        body, close = shell._dispatch_general("inv cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, "inventory ok")
-
-    def test_inventory_commands_unknown_mode_is_loud_on_legacy_branch(self):
-        """A mode outside the synthesized user/enable/config rejects at build (#317 P-3).
-
-        The loud negative pins in `TestInventoryNormalization` all run over an
-        A3 platform; this covers the legacy branch's wing of the shared
-        normalizer against its synthesized mode set (1st round claude#3).
-        """
-        self.arguments["nos_inventory_config"] = {
-            "commands": {"x": {"output": "t", "mode": ["oper"]}},
-        }
-        with self.assertRaisesRegex(ValueError, "mode\\(s\\) \\['oper'\\] not in platform modes"):
-            CMDShell(**self.arguments)
-
-    def test_dispatch_command_not_matching_prompt(self):
+    def test_dispatch_command_not_matching_mode(self):
         """A command not valid in the current mode answers with `_default_`."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         body, _close = shell._dispatch_general("show version")
-        self.assertEqual(body, "% Invalid input detected at '^' marker.")
+        self.assertEqual(body, "% Invalid input detected at '^' marker.\n")
 
     def test_dispatch_command_incorrect(self):
         """An unknown command answers with the `_default_` output."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
         body, _close = shell._dispatch_general("test")
-        self.assertEqual(body, "% Invalid input detected at '^' marker.")
-
-    def test_dispatch_alias_target_missing_falls_back_default(self):
-        """An alias whose target command is gone degrades to `_default_`.
-
-        The adapter drops a broken alias at load (logged), so it never reaches
-        `self.commands`; typing it is then an unknown command answered with the
-        `_default_` output, never a handler-crash response (#264 / D6).
-        """
-        self.arguments["is_running"].set()
-        with self.assertLogs("simnos.core.command_adapter", level="WARNING"):
-            self.arguments["nos"] = Nos(
-                dict_args={
-                    "name": "synth",
-                    "initial_prompt": "{base_prompt}>",
-                    "commands": {
-                        "broken alias": {"alias": "no such target"},
-                        "_default_": {"output": "% Invalid input", "help": "default"},
-                    },
-                }
-            )
-            shell = CMDShell(**self.arguments)
-        self.assertNotIn("broken alias", shell.commands)
-        body, _close = shell._dispatch_general("broken alias")
-        self.assertEqual(body, "% Invalid input")
+        self.assertEqual(body, "% Invalid input detected at '^' marker.\n")
 
     def test_invoke_handler_str_return_passthrough(self):
         """`_invoke_handler` returns a str body verbatim (#317 P-2 output-only contract)."""
@@ -767,83 +708,31 @@ class TestCmdShell(TestCase):
         shell._invoke_handler(handler, "cmd")
         self.assertEqual(seen["current_mode"], shell.current_mode)
 
-    def _make_callable_default_shell(self):
-        """Build a shell whose `_default_` output is a callable.
+    def test_dispatch_handler_default_invoked_on_unknown_command(self):
+        """An unknown command invokes a `handler:` `_default_` (#241).
 
-        No shipped plugin has a callable `_default_` (yaml cannot express
-        one; the py plugins use strings), but the Python API
-        (`SimNOS(inventory=dict)`) can reach it — these pins fix the #241
-        unification: both the unknown-command and the mode-mismatch fallback
-        invoke the callable through `_invoke_handler`.
+        No shipped platform has a dynamic `_default_`, but the A3 `handler:`
+        channel can author one — these pins fix the #241 unification: both the
+        unknown-command and the mode-mismatch fallback invoke it through
+        `_invoke_handler`.
         """
-        self.arguments["is_running"].set()
-        self.arguments["nos"] = Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt}>",
-                "enable_prompt": "{base_prompt}#",
-                "commands": {
-                    "known": {
-                        "output": "static",
-                        "help": "enable-mode only",
-                        "prompt": "{base_prompt}#",
-                    },
-                    "_default_": {
-                        "output": lambda device, **kwargs: f"dynamic unknown: {kwargs['command']}",
-                        "help": "callable default",
-                    },
-                },
-            }
-        )
-        shell = CMDShell(**self.arguments)
-        return shell
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            body, close = shell._dispatch_general("nope")
+            self.assertFalse(close)
+            self.assertEqual(body, "dynamic unknown: nope")
 
-    def test_dispatch_callable_default_invoked_on_unknown_command(self):
-        """An unknown command invokes a callable `_default_` (#241)."""
-        shell = self._make_callable_default_shell()
-        body, close = shell._dispatch_general("nope")
-        self.assertFalse(close)
-        self.assertEqual(body, "dynamic unknown: nope")
-
-    def test_dispatch_callable_default_invoked_on_mode_mismatch(self):
-        """A mode mismatch invokes a callable `_default_` (#241 / #264).
+    def test_dispatch_handler_default_invoked_on_mode_mismatch(self):
+        """A mode mismatch invokes a `handler:` `_default_` (#241 / #264).
 
         `known` is enable-only; typed in user mode it misses, and the fallback
-        invokes the callable `_default_` through `_invoke_handler`.
+        invokes the dynamic `_default_` through `_invoke_handler`.
         """
-        shell = self._make_callable_default_shell()
-        body, close = shell._dispatch_general("known")  # valid only in enable, current mode is user
-        self.assertFalse(close)
-        self.assertEqual(body, "dynamic unknown: known")
-
-    def test_dispatch_callable_default_dict_return_is_contract_violation(self):
-        """A dict-returning callable `_default_` hits the same loud contract (#317 P-2).
-
-        Pins that the unification is complete: a callable `_default_` flows
-        through `_invoke_handler` like any handler, so the removed
-        `CommandResult` form is answered with HANDLER_ERROR_OUTPUT here too
-        (and its `new_mode` is dead — the `_default_` answer never transitions).
-        """
-        self.arguments["is_running"].set()
-        self.arguments["nos"] = Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt}>",
-                "enable_prompt": "{base_prompt}#",
-                "commands": {
-                    "_default_": {
-                        "output": lambda device, **kwargs: {"output": "locked out", "new_mode": "enable"},
-                        "help": "dict-returning callable default",
-                    },
-                },
-            }
-        )
-        shell = CMDShell(**self.arguments)
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            body, close = shell._dispatch_general("nope")
-        self.assertFalse(close)
-        self.assertEqual(shell.current_mode, "user")
-        self.assertEqual(body, HANDLER_ERROR_OUTPUT)
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            body, close = shell._dispatch_general("known")  # valid only in enable, current mode is user
+            self.assertFalse(close)
+            self.assertEqual(body, "dynamic unknown: known")
 
     def test_dispatch_handler_crash_writes_fixed_error_line(self):
         """A crashing handler answers with HANDLER_ERROR_OUTPUT only.
@@ -853,15 +742,12 @@ class TestCmdShell(TestCase):
         Netmiko-side parsers chew on stack frames and leaked internal
         paths. The wire now gets the fixed one-liner; the session stays up.
         """
-
-        def crash(device, **kwargs):
-            raise RuntimeError("boom")
-
-        shell = self._make_callable_shell(crash)
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, HANDLER_ERROR_OUTPUT)
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
+                body, close = shell._dispatch_general("cmd crash")
+            self.assertFalse(close)
+            self.assertEqual(body, HANDLER_ERROR_OUTPUT)
 
     def test_dispatch_handler_crash_logs_full_traceback(self):
         """A crashing handler's traceback goes to the server log.
@@ -871,39 +757,35 @@ class TestCmdShell(TestCase):
         full `traceback.format_exc()` including the original exception,
         same shape as the hot-reload guard (#232).
         """
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+                shell._dispatch_general("cmd crash")
+            self.assertEqual(len(captured.output), 1)
+            self.assertIn("handler crashed", captured.output[0])
+            self.assertIn("RuntimeError: boom-for-log", captured.output[0])
+            self.assertIn("Traceback", captured.output[0])
 
-        def crash(device, **kwargs):
-            raise RuntimeError("boom-for-log")
-
-        shell = self._make_callable_shell(crash)
-        # `_dispatch_general` returns (body, close) without writing, so no
-        # writeline mock is needed; this test only asserts on the log.
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell._dispatch_general("cmd")
-        self.assertEqual(len(captured.output), 1)
-        self.assertIn("handler crashed", captured.output[0])
-        self.assertIn("RuntimeError: boom-for-log", captured.output[0])
-        self.assertIn("Traceback", captured.output[0])
-
-    def test_dispatch_callable_str_output_passed_through_unformatted(self):
-        """Callable str output is written verbatim (#241 / D-b).
+    def test_dispatch_handler_str_output_passed_through_unformatted(self):
+        """Handler str output is written verbatim (#241 / D-b).
 
         Handlers render themselves, so literal braces in a handler's output
         (e.g. JSON-ish device output) reach the wire untouched, with no
         render step and no error log.
         """
-        shell = self._make_callable_shell(lambda device, **kwargs: "literal {brace} stays")
-        with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-            body, close = shell._dispatch_general("cmd")
-        self.assertFalse(close)
-        self.assertEqual(body, "literal {brace} stays")
+        with tempfile_dir() as tmp_path:
+            shell = self._make_handler_shell(tmp_path)
+            with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
+                body, close = shell._dispatch_general("cmd brace")
+            self.assertFalse(close)
+            self.assertEqual(body, "literal {brace} stays")
 
     def test_dispatch_command_transitions_mode(self):
         """A command with a new_mode transitions the shell and re-renders the prompt.
 
-        `enable` (yaml_nos) declares new_mode=enable; dispatching it from the
-        initial user mode moves current_mode to enable and the prompt to
-        "test#" (the enable prompt rendered at base_prompt "test").
+        `enable` (synthetic_custom) declares new_mode=enable; dispatching it
+        from the initial user mode moves current_mode to enable and the prompt
+        to "test#" (the enable prompt rendered at base_prompt "test").
         """
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
@@ -971,10 +853,24 @@ class HotReloadTest(TestCase):
         module = importlib.import_module(changed_module)
         mock_from_file.assert_called_once()
         mock_from_file.assert_called_once_with(module.__name__.replace(".", "/") + ".py")
-        # The rebuild kept serving the shell's own (yaml-asset) commands — the
-        # shipped module carries no `commands` dict to cross-check since #317 P-2.
+        # The rebuild kept serving the shell's own (synthetic-asset) commands —
+        # a handler module carries no command data to cross-check (#317 P-2/P-4).
         assert "show clock" in shell.commands
         assert "show version" in shell.commands
+
+    def _tmp_healthy_platform(self, tmp_path) -> str:
+        """A loadable tmp A3 dir whose reload proves 'the healthy file applied'."""
+        root = tmp_path / "healthy_platform"
+        cmds = root / "commands"
+        cmds.mkdir(parents=True)
+        (root / "platform.yaml").write_text(
+            'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n', encoding="utf-8"
+        )
+        cmds.joinpath("healthy.yaml").write_text(
+            "command: healthy\ntype: simnos\nmode: [user]\noutput: healthy.txt\n", encoding="utf-8"
+        )
+        cmds.joinpath("healthy.txt").write_text("ok\n", encoding="utf-8")
+        return str(root)
 
     def test_reload_commands_broken_file_logs_and_continues(self):
         """One broken file does not kill the session nor block the rest.
@@ -982,41 +878,19 @@ class HotReloadTest(TestCase):
         Pins the per-file lenient guard in `reload_commands` (#232): a
         half-written or malformed plugin file observed by hot reload used
         to raise out of `precmd` and crash the whole shell thread. Now the
-        broken file is logged and skipped while remaining files reload.
+        broken file is logged and skipped while remaining files reload —
+        proven by the healthy tmp platform's command landing in the shell.
         """
-        shell = CMDShell(**self.arguments)
-        set_attr(shell.nos, "from_file", Mock(side_effect=[ValueError("boom"), None]))
-        set_attr(shell.nos, "commands", {"healthy": {"output": "ok"}})
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands(["broken.yaml", "healthy.yaml"])
-        self.assertEqual(len(captured.output), 1)
-        self.assertIn("broken.yaml", captured.output[0])
-        self.assertIn("healthy", shell.commands)
-
-    def test_reload_commands_adapter_failure_rolls_back_and_unblocks_rest(self):
-        """A file that loads but fails normalization is rolled back from nos (#264 / codex #1).
-
-        `from_file` commits to `self.nos` before `_rebuild` validates via the
-        adapter, so a canonical-外 prompt that passes the legacy schema but
-        fails normalization would, without rollback, persist in `nos.commands`
-        and re-fail every later file in the batch. The per-file rollback must
-        drop it so a following healthy file still applies.
-        """
-        shell = CMDShell(**self.arguments)
-
-        def fake_from_file(filename):
-            if filename == "bad.yaml":
-                # passes pydantic, fails the adapter (no mode renders to this)
-                shell.nos.commands["bad cmd"] = {"output": "x", "prompt": "{base_prompt}ALIEN>"}
-            else:
-                shell.nos.commands["good cmd"] = {"output": "ok", "prompt": "{base_prompt}>"}
-
-        set_attr(shell.nos, "from_file", Mock(side_effect=fake_from_file))
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands(["bad.yaml", "good.yaml"])
-        self.assertEqual(len(captured.output), 1)  # only the bad file
-        self.assertNotIn("bad cmd", shell.nos.commands)  # rolled back, not poisoning the batch
-        self.assertIn("good cmd", shell.commands)  # the healthy file still applied
+        with tempfile_dir() as tmp_path:
+            shell = CMDShell(**self.arguments)
+            healthy = self._tmp_healthy_platform(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+                # A `.yaml` file is not a loadable reload unit (`from_file` rejects
+                # the extension) — a stand-in for any per-file load failure.
+                shell.reload_commands(["broken.yaml", healthy])
+            self.assertEqual(len(captured.output), 1)
+            self.assertIn("broken.yaml", captured.output[0])
+            self.assertIn("healthy", shell.commands)
 
     def test_reload_commands_broken_file_last_still_applies_rest(self):
         """The per-file guard is order-independent: broken file last.
@@ -1025,33 +899,52 @@ class HotReloadTest(TestCase):
         (broken first): the healthy file's commands are applied before the
         broken file raises, and the error is still logged.
         """
-        shell = CMDShell(**self.arguments)
-        set_attr(shell.nos, "from_file", Mock(side_effect=[None, ValueError("boom")]))
-        set_attr(shell.nos, "commands", {"healthy": {"output": "ok"}})
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands(["healthy.yaml", "broken.yaml"])
-        self.assertEqual(len(captured.output), 1)
-        self.assertIn("broken.yaml", captured.output[0])
-        self.assertIn("healthy", shell.commands)
+        with tempfile_dir() as tmp_path:
+            shell = CMDShell(**self.arguments)
+            healthy = self._tmp_healthy_platform(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+                shell.reload_commands([healthy, "broken.yaml"])
+            self.assertEqual(len(captured.output), 1)
+            self.assertIn("broken.yaml", captured.output[0])
+            self.assertIn("healthy", shell.commands)
 
-    def test_reload_commands_broken_py_plugin_does_not_leak_commands(self):
-        """A broken py plugin skipped by the guard never reaches the shell.
+    def test_reload_commands_broken_py_plugin_is_contained(self):
+        """A broken py module skipped by the guard never corrupts the shell.
 
-        Pins the #232 cross-review hole: `_from_module` used to commit
-        attrs/commands before the device-class validation, so a broken py
-        plugin polluted `nos.commands` even though the per-file guard
-        skipped it — and the next successful reload then leaked the broken
-        plugin's commands into the shell via `commands.update(nos.commands)`.
-        The broken asset raises the #241/D5 multiple-subclass ValueError;
-        like the pre-#241 DEVICE_NAME AttributeError it fires in the build
-        phase, before any commit, so the leak check is equivalent.
+        Pins the #232 cross-review hole shape on the P-4 surface: the broken
+        asset raises the #241/D5 multiple-subclass ValueError in
+        `_from_module`'s build phase, before any commit, so the running
+        shell keeps its platform and a following healthy reload still applies.
         """
-        shell = CMDShell(**self.arguments)
-        with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-            shell.reload_commands(["tests/assets/broken_multi_device_module.py", "tests/assets/module.py"])
-        self.assertEqual(len(captured.output), 1)
-        self.assertNotIn("polluting command", shell.commands)  # broken plugin never leaks
-        self.assertIn("show version", shell.commands)  # healthy reload still applied
+        with tempfile_dir() as tmp_path:
+            shell = CMDShell(**self.arguments)
+            healthy = self._tmp_healthy_platform(tmp_path)
+            with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
+                shell.reload_commands(["tests/assets/broken_multi_device_module.py", healthy])
+            self.assertEqual(len(captured.output), 1)
+            self.assertIn("broken_multi_device_module.py", captured.output[0])
+            self.assertIn("healthy", shell.commands)  # healthy reload still applied
+
+
+def tempfile_dir():
+    """A `tmp_path`-like context manager for the unittest-style classes.
+
+    The `TestCase` classes cannot take pytest fixtures; this provides the same
+    auto-cleaned temp dir for the helpers that build tmp A3 platforms.
+    """
+    import pathlib
+    import tempfile
+
+    class _Ctx:
+        def __enter__(self):
+            self._tmp = tempfile.TemporaryDirectory()
+            return pathlib.Path(self._tmp.name)
+
+        def __exit__(self, *exc):
+            self._tmp.cleanup()
+            return False
+
+    return _Ctx()
 
 
 def _synthetic_reload_platform(watch_root) -> str:
@@ -1061,7 +954,7 @@ def _synthetic_reload_platform(watch_root) -> str:
     (`resolve_reload_targets` against the patched package root) folds an edited
     `commands/*.j2` to this platform dir. The `_default_` answers netmiko's
     session-preparation commands (`terminal length 0` etc.), same as the
-    synthetic py-only e2e.
+    custom-platform e2e.
     """
     platform_dir = watch_root / "platforms" / "synth_reload"
     cmds = platform_dir / "commands"
@@ -1094,8 +987,8 @@ def test_hot_reload_integration_a3_edit(tmp_path, monkeypatch):
     """
     watch_root = tmp_path / "nos"
     platform_dir = _synthetic_reload_platform(watch_root)
-    # Register like the py-only e2e (global registry via setitem, restored on
-    # teardown) + point the watcher's rollup root at the tmp tree.
+    # Register like the custom-platform e2e (global registry via setitem, restored
+    # on teardown) + point the watcher's rollup root at the tmp tree.
     monkeypatch.setitem(nos_plugins, "synth_reload", [platform_dir])
     monkeypatch.setattr(
         nos_registry, "available_platforms", tuple(sorted((*nos_registry.available_platforms, "synth_reload")))

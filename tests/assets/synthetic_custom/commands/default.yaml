@@ -1,0 +1,5 @@
+---
+command: _default_
+type: custom
+help: Output to print for unknown commands
+output: default.txt

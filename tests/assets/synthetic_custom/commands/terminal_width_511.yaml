@@ -1,0 +1,5 @@
+---
+command: terminal width 511
+type: custom
+help: Set terminal width to 511
+output: terminal_width_511.txt

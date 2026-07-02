@@ -1,0 +1,5 @@
+---
+command: terminal length 0
+type: custom
+help: Set terminal length to 0
+output: terminal_length_0.txt

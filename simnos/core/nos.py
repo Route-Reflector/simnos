@@ -2,7 +2,6 @@
 Network Operating Systems (NOS). Base class to build NOS plugins instances to use with SIMNOS.
 """
 
-import copy
 import importlib.util
 import inspect
 import logging
@@ -11,7 +10,6 @@ import types
 from typing import TYPE_CHECKING
 
 from simnos.core.platform_loader import load_platform_dir
-from simnos.core.pydantic_models import ModelNosAttributes
 from simnos.core.resolved_command import ResolvedPlatform
 
 if TYPE_CHECKING:
@@ -122,48 +120,31 @@ def _build_handler_namespace(module: types.ModuleType, device_classes: list[type
 class Nos:
     """
     Base class to build NOS plugins instances to use with SIMNOS.
-    """
 
-    # Mapping of module-level UPPERCASE constants in a Python plugin file
-    # to the corresponding lowercase attribute on the Nos instance.
-    # Used by `_from_module` to sync module constants into self.
-    _MODULE_ATTR_MAP: dict[str, str] = {
-        "NAME": "name",
-        "INITIAL_PROMPT": "initial_prompt",
-        "AUTH": "auth",
-        "ENABLE_PROMPT": "enable_prompt",
-        "CONFIG_PROMPT": "config_prompt",
-    }
+    Since #317 P-4 the only command authoring form is the A3 platform dir
+    (``platforms/<name>/`` -> `resolved_platform`); a py module supplies the
+    device class + the ``handler:`` namespace only. The legacy py dict form
+    (``commands`` / scalar prompts / ``from_dict``) was removed.
+    """
 
     def __init__(
         self,
         name: str = "SimNOS",
-        commands: dict | None = None,
-        initial_prompt: str = "SimNOS>",
         filename: str | list[str] | None = None,
         configuration_file: str | None = None,
-        dict_args: dict | None = None,
     ) -> None:
         """
         Method to instantiate Nos Instance
 
-        :param name: NOS plugin name
-        :param commands: dictionary of NOS commands
-        :param initial_prompt: NOS initial prompt
+        :param name: NOS plugin name (an A3 platform dir load overwrites it
+            with the directory basename)
+        :param filename: path(s) to load — an A3 platform dir and/or a ``.py``
+            module (see `from_file`)
+        :param configuration_file: device configuration file, overrides the
+            module's ``DEFAULT_CONFIGURATION``
         """
         self.name = name
-        # Constructor-passed commands are an inflow like any other: keep
-        # the caller's dict untouched and normalize the runtime copy
-        # (#244 / D3). A non-dict value is passed through for the trailing
-        # `validate()` to reject with the usual ValidationError.
-        commands = commands or {}
-        if isinstance(commands, dict):
-            commands = self.normalize_command_prompts(copy.deepcopy(commands))
-        self.commands = commands
-        self.initial_prompt = initial_prompt
         self.auth: str | None = None
-        self.enable_prompt: str | None = None
-        self.config_prompt: str | None = None
         self.device = None
         # A3 ``handler:`` namespace (#317 / P-1): name -> callable, populated by
         # `_from_module` from the py plugin's device class + module-level
@@ -172,139 +153,33 @@ class Nos:
         self.handlers: dict[str, CommandHandler] = {}
         self.configuration_file = configuration_file
         # A3 form (#264 / PR-2): an A3 platform dir loads straight into a
-        # `ResolvedPlatform` (modes + resolved commands) here, instead of the
-        # legacy `self.commands` dict + scalar prompts. None until an A3 dir is
-        # loaded; the shell branches on it (D4, D6). A py module loaded alongside
-        # an A3 dir supplies only the device class + `handlers` — a leftover
-        # `commands` dict would still land in `self.commands`, which the merge
-        # rejects loudly (that authoring channel was removed, #317 P-2/P-3).
+        # `ResolvedPlatform` (modes + resolved commands). None until an A3 dir is
+        # loaded; the merge (`build_resolved_platform`) rejects a Nos that never
+        # loaded one — the A3 dir is the required authoring form (#317 P-4).
         self.resolved_platform: ResolvedPlatform | None = None
         if isinstance(filename, str):
             self.from_file(filename)
         elif isinstance(filename, list):
             for file in filename:
                 self.from_file(file)
-        elif dict_args:
-            self.from_dict(dict_args)
-
-        self.validate()
-
-    def validate(self) -> None:
-        """
-        Method to validate NOS attributes: commands, name,
-        initial prompt - using Pydantic models,
-        raises ValidationError on failure.
-
-        Only the schema fields are passed (explicitly extracted via
-        `ModelNosAttributes.model_fields`) — `self.__dict__` also holds
-        non-schema runtime state (`device`, `configuration_file`) that
-        must never reach the model (#244 / D8).
-        """
-        ModelNosAttributes(**{field: getattr(self, field) for field in ModelNosAttributes.model_fields})
-        log.debug("%s NOS attributes validation succeeded", self.name)
-
-    @staticmethod
-    def normalize_command_prompts(commands: dict) -> dict:
-        """Normalize each command's `prompt` to `list[str] | None`.
-
-        Called on a deepcopied candidate (never on caller-owned dicts or
-        module-level `commands` constants). Authoring accepts both a bare
-        str (sugar) and a list; runtime consumers see lists only, so
-        read-side isinstance branches are unnecessary (#244 / P-12c).
-        """
-        for cmd in commands.values():
-            if not isinstance(cmd, dict):
-                # Malformed value — left for the ModelNosAttributes
-                # validation to reject (one error surface, not two).
-                continue
-            prompt = cmd.get("prompt")
-            if isinstance(prompt, str):
-                cmd["prompt"] = [prompt]
-        return commands
-
-    def from_dict(self, data: dict) -> None:
-        """
-        Method to build NOS from dictionary data.
-
-        The per-command schema follows :class:`simnos.core.pydantic_models.ModelNosCommand`
-        (the legacy py-only form — the shipped platforms moved their authoring to A3
-        dirs in #317 P-2; this inflow goes away with the legacy base layer in P-4).
-
-        Minimal sample::
-
-            nos_plugin_dict = {
-                "name": "MySimNOSPlugin",
-                "initial_prompt": "{base_prompt}>",
-                "commands": {
-                    "show clock": {"output": "12:00:00", "help": "Show clock"},
-                },
-            }
-
-        :param data: NOS dictionary
-        :raises ValueError: if the 'commands' value is not a mapping, or
-            if `data` holds a top-level key outside the
-            `ModelNosAttributes` schema (a typo like `enable_promt` used
-            to be dropped silently, #244 / D8)
-        :raises pydantic.ValidationError: if the merged result would not
-            satisfy `ModelNosAttributes` — validated before any attribute
-            is committed, so malformed data never leaves partial state
-            behind (same no-partial-state contract as `_from_module`,
-            #232); this also covers the hot-reload path, which calls
-            `from_file` directly and never reaches `__init__`'s trailing
-            `validate()` (#244 / D8)
-        """
-        unknown = data.keys() - ModelNosAttributes.model_fields.keys()
-        if unknown:
-            raise ValueError(f"NOS data has unknown top-level field(s): {sorted(unknown)}")
-        commands = data.get("commands", {})
-        if not isinstance(commands, dict):
-            raise ValueError(f"NOS data 'commands' must be a mapping (got {type(commands).__name__})")
-        # Normalize a deepcopied candidate — never the caller's dict, which
-        # stays in its original authoring form (#244 / D3).
-        candidate = self.normalize_command_prompts(copy.deepcopy(commands))
-        # Validate the exact post-commit state (a merged view, not `data`
-        # alone): commands merge cumulatively across multi-file loads and
-        # scalars keep their current value when absent from `data`.
-        merged_name = data.get("name", self.name)
-        merged_initial_prompt = data.get("initial_prompt", self.initial_prompt)
-        merged_auth = data.get("auth", self.auth)
-        merged_enable_prompt = data.get("enable_prompt", self.enable_prompt)
-        merged_config_prompt = data.get("config_prompt", self.config_prompt)
-        ModelNosAttributes(
-            name=merged_name,
-            initial_prompt=merged_initial_prompt,
-            auth=merged_auth,
-            enable_prompt=merged_enable_prompt,
-            config_prompt=merged_config_prompt,
-            commands={**self.commands, **candidate},
-        )
-        # Commit phase — mirrors the validated merged view (normalized
-        # candidate included), so the validated state and the committed
-        # state cannot drift apart.
-        self.name = merged_name
-        self.commands.update(candidate)
-        self.initial_prompt = merged_initial_prompt
-        self.auth = merged_auth
-        self.enable_prompt = merged_enable_prompt
-        self.config_prompt = merged_config_prompt
 
     def _from_module(self, filename: str) -> None:
         """
-        Method to import NOS data from python file or python module.
+        Method to import NOS behavior from a python file or python module.
 
         Loads from the .py file using the recipe:
         https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
 
-        The module is expected to define module-level constants (``NAME``,
-        ``INITIAL_PROMPT``, optional ``ENABLE_PROMPT`` / ``CONFIG_PROMPT`` /
-        ``DEFAULT_CONFIGURATION``) and a ``commands`` dict; the device class
+        The module supplies dynamic behavior only (#317 P-4): the device class
         is auto-detected as the module's single locally-defined `BaseDevice`
-        subclass, if any (see `_find_device_classes` — the legacy
-        ``DEVICE_NAME`` constant is ignored with a warning since #241).
-        The A3 ``handler:`` namespace (`self.handlers`) is also built here from
-        the device class methods + module-level functions (see
-        `_build_handler_namespace`) so an A3 platform's `handler:` refs bind at
-        merge time (#317 / P-1). See
+        subclass, if any (see `_find_device_classes`), and the A3 ``handler:``
+        namespace (`self.handlers`) is built from the device class methods +
+        module-level functions (see `_build_handler_namespace`) so an A3
+        platform's `handler:` refs bind at merge time (#317 / P-1). An optional
+        ``DEFAULT_CONFIGURATION`` constant points at the device configuration
+        file. A legacy ``commands`` dict is rejected loudly — that authoring
+        channel was removed (#317 P-2/P-4); other legacy constants (``NAME``,
+        the prompt templates) are simply no longer read. See
         :mod:`simnos.plugins.nos.platforms_py.cisco_ios` for a live example.
 
         :param filename: OS path string to Python .py file
@@ -322,31 +197,18 @@ class Nos:
         except Exception as e:
             raise RuntimeError(f"Failed to load NOS plugin '{filename}': {e}") from e
         # Build/validate everything that can still fail BEFORE mutating self,
-        # so a broken plugin raises without leaving partial state behind
-        # (#232 cross-review: attrs/commands used to be committed before the
-        # device-class validation, so the hot-reload per-file guard skipped
-        # the file but a later `commands.update(nos.commands)` leaked the
-        # broken plugin's commands into the running shell).
-        module_commands = getattr(module, "commands", {})
-        if not isinstance(module_commands, dict):
-            raise ValueError(f"Module '{filename}' 'commands' must be a mapping (got {type(module_commands).__name__})")
-        # Normalize a deepcopied candidate — never the module-level
-        # `commands` constant, which stays in its authoring form (#244 /
-        # D3; deepcopy treats callables as atomic, so handler identity is
-        # preserved).
-        candidate_commands = self.normalize_command_prompts(copy.deepcopy(module_commands))
-        # Validate the exact post-commit state before committing, mirroring
-        # `from_dict`'s merged view (#244 / D8) — this also covers hot
-        # reload, which calls `from_file` directly. No top-level key check
-        # here: unrelated module-level names are legitimate in a py plugin
-        # (only `_MODULE_ATTR_MAP` constants are mapped).
-        ModelNosAttributes(
-            **{
-                self_attr: getattr(module, module_attr, getattr(self, self_attr))
-                for module_attr, self_attr in self._MODULE_ATTR_MAP.items()
-            },
-            commands={**self.commands, **candidate_commands},
-        )
+        # so a broken plugin raises without leaving partial state behind (#232).
+        # A leftover py `commands` dict is a removed authoring channel; ignoring
+        # it silently would hide the author's intent, so it fails at load — the
+        # P-3 merge-time guard moved to this earlier boundary in P-4. An *empty*
+        # dict is a contentless vestige and stays ignored (same contract as P-3).
+        module_commands = getattr(module, "commands", None)
+        if module_commands:
+            raise ValueError(
+                f"Module '{filename}' defines a `commands` dict — py dict authoring was removed (#317); "
+                "author the commands in the platform's A3 `commands/` dir and keep the py module for the "
+                "device class / handlers only"
+            )
         device_classes = _find_device_classes(module)
         if len(device_classes) > 1:
             raise ValueError(
@@ -356,15 +218,8 @@ class Nos:
         # Build the A3 handler namespace before mutating self (#317 / P-1): a
         # classmethod handler / a class-vs-module name collision raises here, so
         # a broken plugin never leaves partial state (same no-partial contract as
-        # the device-class / commands validation above).
+        # the device-class validation above).
         new_handlers = _build_handler_namespace(module, device_classes)
-        if hasattr(module, "DEVICE_NAME"):
-            # G4 (#241) removed the DEVICE_NAME indirection; the device class
-            # is auto-detected now. Nudge plugin authors to drop the leftover.
-            log.warning(
-                "Module '%s' still defines DEVICE_NAME; it is deprecated and ignored (auto-detection is used)",
-                filename,
-            )
         device = None
         if device_classes:
             configuration_file = self.configuration_file or getattr(module, "DEFAULT_CONFIGURATION", None)
@@ -372,32 +227,11 @@ class Nos:
         else:
             log.warning("Module '%s' defines no BaseDevice subclass; no device will be set from this module", filename)
         # Commit phase — nothing below is expected to raise.
-        for module_attr, self_attr in self._MODULE_ATTR_MAP.items():
-            setattr(self, self_attr, getattr(module, module_attr, getattr(self, self_attr)))
-        # P-7 (#241): a py module replaces same-named already-loaded
-        # commands wholesale (typically yaml-defined ones, but multi-file
-        # py loads count too; per-command full replacement, no deep
-        # merge) — make the implicit precedence observable for authors.
-        overridden = self.commands.keys() & candidate_commands.keys()
-        if overridden:
-            log.debug(
-                "module '%s' overrides %d already-loaded command(s): %s",
-                filename,
-                len(overridden),
-                sorted(overridden),
-            )
-        self.commands.update(candidate_commands)
         # Fresh dict (never in-place `.update`): `_NOS_RELOAD_ATTRS` snapshots
         # `handlers` by reference for hot-reload rollback, so a mutable in-place
         # update could not be rolled back. Cumulative later-wins across a
-        # multi-file load, mirroring `self.commands` (#317 / P-1, 案D).
+        # multi-file load (#317 / P-1, 案D).
         self.handlers = {**self.handlers, **new_handlers}
-        if self.name == "SimNOS":
-            log.warning(
-                "Module '%s' does not define NAME; falling back to default 'SimNOS' "
-                "(plugin will be registered under that key)",
-                filename,
-            )
         if device_classes:
             # Only a detected class updates the device — a no-device module
             # keeps whatever a previously loaded file set (same "existing
@@ -408,11 +242,9 @@ class Nos:
     def _from_platform_dir(self, path: str) -> None:
         """Load an A3 platform directory into `self.resolved_platform` (#264 / D6).
 
-        Unlike the legacy `_from_module` path, this does not
-        populate `self.commands` / the scalar prompts — the A3 form normalizes
-        straight to a `ResolvedPlatform`. The platform name is the directory
-        name (D1); a py module loaded after this dir still fills `self.commands`
-        with its dynamic handlers, which the shell merges over the A3 statics.
+        The A3 form normalizes straight to a `ResolvedPlatform`. The platform
+        name is the directory name (D1); a py module loaded after this dir
+        supplies the device class + `handlers` on top.
 
         :param path: directory holding ``platform.yaml`` + ``commands/``
         :raises ValueError: on any A3 schema / reference / render violation
@@ -432,7 +264,7 @@ class Nos:
         :param filename: OS path string to an A3 platform dir (``platform.yaml``
             + ``commands/``), or a `.py` file with a NOS device class / dynamic
             handlers. The legacy monolithic ``.yaml/.yml`` platform form was
-            removed in v3 (#264); static command data now lives in the A3 dir.
+            removed in v3 (#264); static command data lives in the A3 dir.
         """
         # An A3 platform is a directory (holds platform.yaml + commands/), not a
         # file — dispatch on that before the extension check (#264 / D6).

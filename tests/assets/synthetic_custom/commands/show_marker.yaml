@@ -1,0 +1,6 @@
+---
+command: show marker
+type: custom
+help: dynamic handler marker command
+mode: [user, enable]
+handler: make_show_marker

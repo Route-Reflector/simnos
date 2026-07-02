@@ -205,10 +205,10 @@ class Host:
         must be reachable: ``sys_config.data_dir`` must be configured and
         ``<data_dir>/<plugin_key>/`` must exist. An explicit opt-in that cannot be
         satisfied is a loud error, never a silent fall-back to packaged output
-        (design Decision 10a) — including opting in on a legacy / py-only platform,
-        whose merge path drops the overlay layer (`build_resolved_platform`), so a
-        non-A3 platform with overlay set must fail here rather than silently serve
-        the packaged output (Decision 12, J4). ``plugin_key`` is the registry key
+        (design Decision 10a) — including opting in on a platform with no A3
+        command data (a runtime-registered py-only custom), which the merge
+        rejects anyway (#317 P-4); failing here first keeps the error focused on
+        the unsatisfiable overlay opt-in (Decision 12, J4). ``plugin_key`` is the registry key
         (already passed through ``resolve_device_type`` in ``start()``), not the raw
         inventory ``device_type`` — aliasing platforms and the ``nos.plugin`` path
         would otherwise point the dir at the wrong (or no) name (Decision 3).
@@ -221,8 +221,8 @@ class Host:
         # The A3-only rationale lives in the docstring above.
         if self.nos is not None and self.nos.resolved_platform is None:
             raise ValueError(
-                f"Host {self.name}: overlay.override_commands is set but platform {plugin_key!r} is "
-                "legacy / py-only (no A3 command data); overlays apply to A3 platforms only."
+                f"Host {self.name}: overlay.override_commands is set but platform {plugin_key!r} has "
+                "no A3 command data (py-only); overlays apply to A3 platforms only."
             )
         data_dir = self.simnos.sys_config.get("data_dir")
         if not data_dir:

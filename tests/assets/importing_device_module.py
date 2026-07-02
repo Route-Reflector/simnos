@@ -13,12 +13,6 @@ from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 from simnos.plugins.nos.platforms_py.arista_eos import AristaEOS  # noqa: F401 — import mixin on purpose
 from simnos.plugins.nos.platforms_py.cisco_ios import CiscoIOS  # noqa: F401 — import mixin on purpose
 
-NAME = "importing_module"
-INITIAL_PROMPT = "{base_prompt}>"
-
 
 class LocalDevice(BaseDevice):
     """The single locally-defined device class — the one to detect."""
-
-
-commands = {"noop": {"output": "ok", "help": "noop"}}

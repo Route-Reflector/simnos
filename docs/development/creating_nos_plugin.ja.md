@@ -1,387 +1,185 @@
-NOS プラグインを作成し、サーバーを起動する前に SIMNOS インスタンスに登録できます。
+# NOS プラグインの作成
 
-NOS プラグインを作成する方法はいくつかあります:
+NOS プラグインは、インベントリホストの `device_type` / `nos.plugin` が解決する
+先です: コマンドデータと (任意で) 動的な挙動を持ちます。v3 (#317) 以降、authoring
+形式は **1 つだけ** です:
 
-1. [YAML ファイルから NOS プラグインを作成する](creating_nos_plugin.md#create-a-nos-plugin-from-a-yaml-file)
-2. [Python ファイルから NOS プラグインを作成する](creating_nos_plugin.md#create-a-nos-plugin-from-a-python-file)
-3. [Nos クラスから NOS プラグインを作成する](creating_nos_plugin.md#create-a-nos-plugin-from-the-nos-class)
+- **A3 プラットフォームディレクトリ** — `platform.yaml` (modes + メタデータ) と、
+  コマンド 1 個につき 1 つの `commands/<stem>.yaml` (隣接する `.txt` / `.j2` 出力)。
+  これが必須部分で、A3 dir を持たないプラットフォームはコマンドを配信できません。
+- 任意の **Python handler モジュール** — `BaseDevice` subclass (+ モジュールレベル
+  関数) で、その method を A3 の `handler:` フィールドがサーバ起動時にバインドします。
+  py モジュールの役割はこれだけで、**コマンドは一切 author しません** (legacy の
+  `commands` dict、`NAME` / `INITIAL_PROMPT` / `ENABLE_PROMPT` / `CONFIG_PROMPT`
+  定数、`Nos.from_dict` は #317 で削除されました)。
 
-上記の方法のいずれかが他より優れているというわけではなく、それぞれに適したユースケースがあります。ただし、作成がシンプルで柔軟性が低いものから、より複雑で柔軟性が高いものの順にリストされています。
+A3 authoring の完全なリファレンス (ファイルレイアウト、`platform.yaml`、コマンド
+フィールド、lint 規約) は
+[新しいプラットフォームの追加](creating_new_platforms.ja.md) にあります。この
+ページはプラグイン固有の 2 トピック — SIMNOS パッケージの**外**でプラットフォーム
+を用意する方法と、**handler 契約** — を扱います。
 
-NOS プラグインでは以下の属性を定義できます:
+## 外部カスタムプラットフォーム
 
-- `name` - インベントリで使用するプラグインの参照名
-- `initial_prompt` - 表示されるシェルプロンプトの定義または変更に使用
-- `enable_prompt` - `enable` モードへの移行に使用（任意）
-- `config_prompt` - `config` モードへの移行に使用（任意）
-- `commands` - この NOS プラグインが出力を返すことができるコマンドの辞書
+プラットフォームは SIMNOS パッケージツリーの中に置く必要はありません。同じ A3
+dir をディスク上の任意の場所に author します:
 
-## 初期 NOS シェルプロンプト
-初期 NOS シェルプロンプトは、シェル起動時にユーザーに表示されるインジケーターです。
-中括弧 `{}` 内で定義されている場合、`base_prompt` フォーマッターを使用してインベントリからホスト名を参照できます。
-
-例えば、初期プロンプトが `{base_prompt}>` に設定されている場合、フォーマットメソッドを適用した後の最終プロンプトは、インベントリのホスト `R1` に対して `R1>` となります。
-
-## NOS コマンド
-コマンドは、コマンド文字列をキーとし、出力やヘルプ、正しく呼び出すために必要なプロンプトなどのコマンドの詳細を含む別の辞書を値とする辞書です。
-
-Python コマンド辞書のサンプル内容:
-
-```{ .python .annotate }
-commands = {
-    "enable": {
-        "output": None, # (6)
-        "new_prompt": "{base_prompt}#", # (2)
-        "help": "enter exec prompt", # (5)
-        "prompt": "{base_prompt}>", # (10)
-    },
-    "show clock": {
-        "output": MyDevice.make_show_clock, # (9)
-        "help": "Display the system clock",
-        "prompt": ["{base_prompt}>", "{base_prompt}#"], # (3)
-    },
-    "show running-config": {
-        "output": """ # (4)
-service timestamps debug datetime msec
-service timestamps log datetime msec
-no service password-encryption
-!
-hostname {base_prompt} # (12)
-!
-boot-start-marker
-boot-end-marker
-        """,
-        "help": "Current operating configuration",
-        "prompt": "{base_prompt}#",
-    },
-    "show version": {
-        "output": """
-Version: 0.1.0
-{base_prompt} uptime is 1 day, 17 hours, 32 minutes
-Uptime for this control processor is 1 day, 17 hours, 33 minutes
-
-Configuration register is 0x2102
-        """,
-        "help": "System hardware and software status",
-        "prompt": "{base_prompt}#",
-    },
-    "_default_": { # (11)
-        "output": "% Invalid input detected at '^' marker.",
-        "help": "Output to print for unknown commands",
-    },
-    "terminal width 511": {
-        "output": "", # (8)
-        "help": "Set terminal width to 511"
-    },
-    "terminal length 0": {
-        "output": "",
-        "help": "Set terminal length to 0"
-    },
-    "exit": {"exit": True, "help": "Exit commands shell"} # (7)
-}
+```
+my_platform/
+  platform.yaml
+  commands/
+    show_version.yaml
+    show_version.txt
+    show_marker.yaml      # handler: make_show_marker
+    default.yaml          # _default_
+    default.txt
+my_platform_handlers.py   # 任意: device class + handler callable
 ```
 
-1. コマンド出力を生成するカスタム関数
-2. コマンド出力が返された後に表示する新しいプロンプト
-3. このコマンドが有効な現在のプロンプトのリスト（コマンドのスコープ）
-4. 複数行のコマンド出力
-5. シェルで `?` または `help` が入力された場合に表示されるヘルプメッセージ
-6. コマンド出力として `None` を返すとレスポンスは生成されない
-7. `exit: true` を設定するとシェルが閉じる
-8. 空の出力を返すと改行文字のみを含むレスポンスが生成される
-9. 出力は関数などの呼び出し可能なオブジェクトを参照でき、シェルプラグインによって実行されてレスポンス内容が生成される
-10. このコマンドが有効な唯一のプロンプト
-11. 未定義コマンドに使用されるデフォルトのレスポンス内容
-12. 返される static な文字列出力には `base_prompt` フォーマッターを含めることができる。callable の出力は handler 自身が format する ([callable 契約](#callable-契約) 参照)
+### 静的データのみ (handler 無し)
 
-コマンド辞書がサポートする属性:
-
-| Attribute       | Emoji                            | Description                                               |
-| -------------- | ---------------------------------| --------------------------------------------------------- |
-| `output`       | :octicons-command-palette-16:    | レスポンスで返すコマンド出力                  |
-| `help`         | :material-help-box:              | コマンドのヘルプメッセージ内容                              |
-| `prompt`       | :simple-powershell:              | このコマンドが有効なインジケーターまたはインジケーターのリスト |
-| `new_prompt`   | :simple-nushell:                | コマンド出力が返された後に表示する新しいプロンプト   |
-| `alias`        | :material-drama-masks:              | 呼び出し可能な関数としてのコマンド出力                      |
-| `exit`         | :material-exit-run:                 | true の場合、シェルセッションを終了する                     |
-
-
-コマンド辞書の `output` 属性の値は以下の型が使用できます:
-
-- `string` - レスポンスで返す1行以上の文字列。`base_prompt` フォーマッターを含めることができます。
-- `None` - レスポンスは返されません
-- `callable` - 呼び出し可能なオブジェクトで、シェルプラグインによって実行されてレスポンス内容が生成されます。その出力はシェル側では format **されません** ([callable 契約](#callable-契約) 参照)
-
-`exit` 属性:
-
-- `true` - シェルセッションを終了します
-
-`prompt` と `new_prompt` 属性に関する補足事項。
-
-`prompt` はこのコマンドが現在のプロンプトのコンテキストで有効かどうかを示すフィルターとして機能します。現在のプロンプトの値がコマンドのプロンプトと等しくない場合、レスポンス出力は `_default_` コマンドの出力値（通常はエラーメッセージ）から取得されます。
-
-`new_prompt` は単純に、コマンド出力がユーザーに返された後、現在のプロンプト値を `new_prompt` の値に設定すべきであることを示します。
-
-## Create a NOS plugin from a YAML file
-
-以下のサンプル内容で `path/to/my_nos.yaml` に YAML ファイルを作成します:
-
-```yaml
-name: MySimNOSPlugin
-
-initial_prompt: "{base_prompt}>"
-
-commands:
-  enable:
-    output: null
-    new_prompt: "{base_prompt}#"
-    help: enter exec prompt
-    prompt: "{base_prompt}>"
-  show clock:
-    output: "*21:01:33.000 AET 01 01 01 2022"
-    help: "Display the system clock"
-    prompt: ["{base_prompt}#"]
-  show running-config:
-    output: |
-      service timestamps debug datetime msec
-      service timestamps log datetime msec
-      no service password-encryption
-      !
-      hostname {base_prompt}
-      !
-      boot-start-marker
-      boot-end-marker
-    help: "Current operating configuration"
-    prompt: "{base_prompt}#"
-  show version:
-    output: |
-      Version: 0.1.0
-      {base_prompt} uptime is 1 day, 17 hours, 32 minutes
-      Uptime for this control processor is 1 day, 17 hours, 33 minutes
-
-      Configuration register is 0x2102
-    help: System hardware and software status
-    prompt: "{base_prompt}#"
-  _default_:
-    output: "% Invalid input detected at '^' marker."
-    help: "Output to print for unknown commands"
-  terminal width 511: {"output": "", "help": "Set terminal width to 511"}
-  terminal length 0: {"output": "", "help": "Set terminal length to 0"}
-```
-
-この YAML ファイルを使用して、以下のように NOS プラグインを登録できます:
+インベントリホストからディレクトリを直接指します:
 
 ```yaml
 hosts:
     R1:
         username: user
         password: user
-        port: 6000
+        port: 0
         nos:
-            plugin: path/to/my_nos.yaml
+            plugin: path/to/my_platform
 ```
-
-素早くテストするには、ターミナルで以下のコマンドを実行してください:
 
 ```bash
 simnos up -i path/to/inventory.yaml
 ```
 
-## Create a NOS plugin from a Python file
-
-Python モジュールから作成された NOS プラグインは、インタラクティブ性を可能にする SIMNOS の主要な強みの一つです。コマンドの考え方は、出力が事前定義された出力ではなく、コマンドの出力を返す関数を定義できることです。これにより、コマンドの出力を動的にでき、時間、日付、ホストなどに応じて変化させることができます。Python NOS モジュールを開発する場合は、このセクションを注意深く読む価値があります。
-
-以下のコードはテスト中に使用する Python モジュールですが、完全に機能します（Netmiko ではオブジェクトはジェネリックです）:
+Python では、ディレクトリパスを登録します (str の plugin は A3 platform dir
+限定 — `.py` パスと dict 形式は拒否されます):
 
 ```python
-"""
-This is a testing module
-"""
+from simnos import SimNOS
 
-import time
+net = SimNOS(inventory=inventory, plugins=["path/to/my_platform"])
+```
+
+### 動的 handler 付きプラットフォーム
+
+`handler:` コマンドは A3 dir と一緒に handler モジュールをロードする必要が
+あるため、`Nos` を自分で組み立ててインスタンスを登録します。プラットフォーム名は
+A3 ディレクトリの basename で、インベントリはその名前で参照します:
+
+```python
+from simnos import Nos, SimNOS
+
+nos = Nos(filename=["path/to/my_platform", "path/to/my_platform_handlers.py"])
+
+inventory = {
+    "hosts": {
+        "R1": {
+            "username": "user",
+            "password": "user",
+            "port": 0,
+            "nos": {"plugin": "my_platform"},
+        },
+    }
+}
+
+net = SimNOS(inventory=inventory, plugins=[nos])
+net.start()
+```
+
+未解決の `handler:` 参照 (モジュールに該当 callable が無い) は `start()` で loud
+に fail します — 出力の無いコマンドとして黙って動くことはありません。
+
+## Python handler モジュール
+
+モジュールはローカル定義の `BaseDevice` subclass を最大 1 つ定義し、それは
+**自動検出** されます (他の device class の import は問題ありません。ローカル
+定義の subclass のみが対象で、2 つ以上は loud な `ValueError` です)。その
+非アンダースコア method と、ローカル定義のモジュールレベル関数が、プラット
+フォームの **handler namespace** になり、A3 コマンドが名前で参照します:
+
+```yaml
+# commands/show_marker.yaml
+command: show marker
+type: custom
+help: dynamic marker command
+mode: [user, enable]
+handler: make_show_marker
+```
+
+```python
+"""my_platform_handlers.py"""
 
 from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
-NAME: str = "test_module"
-INITIAL_PROMPT = "{base_prompt}>"
-ENABLE_PROMPT = "{base_prompt}#"
-CONFIG_PROMPT = "{base_prompt}(config)#"
-
-DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
+DEFAULT_CONFIGURATION = "path/to/configurations/my_platform.yaml.j2"  # 任意
 
 
-# noqa: ARG002
-class TestModule(BaseDevice):
-    """
-    Class that keeps track of the state of the TestModule device.
-    """
+class MyPlatform(BaseDevice):
+    """handler 間で共有する device 状態を保持する。"""
 
-    def make_show_clock(self, base_prompt, current_prompt, command):
-        """Return the current time."""
-        return str(time.ctime())
-
-    def make_show_version(self, base_prompt, current_prompt, command):
-        """Return the system version."""
-        return "TestModule version 1.0"
-
-
-commands = {
-    "enable": {
-        "output": None,
-        "new_prompt": "{base_prompt}#",
-        "help": "enter exec prompt",
-        "prompt": INITIAL_PROMPT,
-    },
-    "show clock": {
-        "output": TestModule.make_show_clock,
-        "help": "show current time",
-        "prompt": ["{base_prompt}#", "{base_prompt}>"],
-    },
-    "show version": {
-        "output": TestModule.make_show_version,
-        "help": "show system version",
-        "prompt": "{base_prompt}#",
-    },
-}
+    def make_show_marker(self, base_prompt, current_mode, current_prompt, command):
+        return f"marker from {current_mode}"
 ```
 
-分解して説明しましょう。SIMNOS はモジュールを動的にロードできますが、モジュールには特定の構造が必要です。一方では、いくつかの定数（NAME、INITIAL_PROMPT、任意で ENABLE_PROMPT / CONFIG_PROMPT）が必要で、他方ではコマンドの辞書、最後に BaseDevice を継承するクラスが必要です。これは SIMNOS がモジュールをロードするために必須です。
+device-class method とモジュールレベル関数の両方に同名が定義されている場合は
+ロード時エラーです (暗黙の優先順位はありません)。`classmethod` は handler に
+できません (第 1 引数が device でなく `cls` にバインドされるため)。
 
-まず、NAME、INITIAL_PROMPT、ENABLE_PROMPT（任意）、CONFIG_PROMPT（任意）の属性があります。これらの属性は SIMNOS が NOS プラグインを登録するために必要です。NAME はプラグインの名前、INITIAL_PROMPT は初期シェルインジケーター、ENABLE_PROMPT は enable モードのシェルインジケーター、CONFIG_PROMPT は config モードのシェルインジケーターです。
+class インスタンスはホストのセッション間で共有されるため、handler は状態を保持
+できます (例: device の IP を変更するコマンドを作れば、以降のコマンドはその変更を
+反映できます)。`BaseDevice` は `self.configurations` (任意の
+`DEFAULT_CONFIGURATION` が指す YAML / Jinja2
+[configuration](../usage/configurations.ja.md) ファイルからロード。
+`Nos(configuration_file=...)` が上書き) と、
+`simnos/plugins/nos/platforms_py/templates/` 配下の Jinja2 テンプレートを render
+する `render(template, **kwargs)` ヘルパを提供します。
 
-device class は**自動検出**されます: SIMNOS は*モジュール内で定義された*
-`BaseDevice` subclass を 1 つだけ採用します。他の device class を import する
-こと (helper device / 型注釈用 import) は問題ありません — ローカル定義の
-subclass だけがカウントされます。同一モジュール内に 2 つ以上定義すると load 時に
-loud な `ValueError` になります。旧 `DEVICE_NAME` 定数 (#241 以前) は deprecation
-warning 付きで無視されます — 古い plugin からは削除してください。
+## callable 契約
 
-!!! note
-    platform が yaml と Python module の両方を持つ場合、module は後から
-    ロードされ、**ロード済みの同名 command** (典型的には yaml 由来) を
-    **command 単位で全置換**します (`help` / `prompt` / `output` の deep
-    merge はしません)。override は debug level で log されるため、module が
-    どの command を上書きしたか確認できます。
+型付きの契約は `simnos.core.command_contract` (`CommandHandler` Protocol) に
+あります — 型注釈に使いたければ import してください。形が合っていれば素の関数で
+そのまま動きます。
 
-次に、コマンドの辞書があります。この辞書は NOS プラグインが出力を返すことができるコマンドを含む Python 辞書です。各コマンドは "output"、"help"、"prompt" の属性を持つ辞書です。出力は文字列、`None`、またはレスポンス内容を生成する callable にできます。ヘルプは `?` または `help` コマンドが入力された場合にユーザーに表示されるヘルプです。プロンプトはコマンドが有効なシェルインジケーターです。
-
-### callable 契約
-
-型付きの契約は `simnos.core.command_contract` (`CommandHandler` Protocol)
-にあります — 型注釈に使いたい場合は import してください。
-形が合っていれば普通の関数のままでも動作します。
-
-シェルは callable output を次の形で起動します:
+シェルは handler を次のように呼び出します:
 
 ```python
-output(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
+handler(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
 ```
 
-`device` はあなたの `BaseDevice` subclass のインスタンスです (device class を
-持たない platform では `None`)。commands 辞書に `TestModule.make_show_clock`
-のような unbound method を置けばこの契約を満たします: `device` が `self` に
-bind されます。
+`device` はあなたの `BaseDevice` subclass のインスタンス (device class の無い
+プラットフォームでは `None`) です。device-class method は自然にこの形を満たします:
+`device` が `self` にバインドされます。`command` はユーザーが打った文字通りの行です
+(`sh ver` のような省略形は展開されずに渡ります)。
 
-callable コマンドが返すのは **output のみ** です (#317):
+handler は **出力のみ** を返します (#317):
 
 - `str` - 表示する出力文字列
-- `None` - レスポンスなし
+- `None` - 応答なし
 
-mode 遷移とセッション終了は static な authoring データ (コマンド側の
-`new_mode` / `exit` / `transitions`) であり、handler の戻り値ではありません —
-かつての dict 戻り値 (`CommandResult`) 形式は撤去されました。dict (や
-`str | None` 以外) を返す handler には固定の `% Internal error` 行が返り、
-エラーログが残ります。分岐は prompt 文字列ではなく引数 `current_mode` で
-行ってください。
+mode 遷移とセッション終了は静的な authoring データ (コマンドの `new_mode` /
+`exit` / `transitions`) であり、handler の戻り値ではありません — 旧 dict 返し
+(`CommandResult`) 形式は削除されました。dict (や `str | None` 以外) を返し続ける
+handler には固定の `% Internal error` 行が応答され、エラーログが残ります。prompt
+文字列ではなく `current_mode` 引数で分岐してください。
 
-yaml static な output と異なるルールが 2 つあります:
+静的な出力ファイルと異なるルールが 2 つあります:
 
-- **format は自分で行う。** シェルは callable output に `{base_prompt}` format を
-  適用**しません** — handler は `base_prompt` を引数で受け取り自分で文字列を
-  render します。device 出力に literal な brace が含まれていても escape 不要です。
-- **raise してもよい。**「起きてはならない」状態 (想定外の prompt 等) では例外を
-  投げて構いません: シェルは full traceback を server log に記録し、client には
-  固定の `% Internal error` 1 行を返します — traceback が wire に出ることは
-  ありません。
+- **自分でフォーマットする。** シェルは handler 出力を render しません — handler は
+  `base_prompt` を引数として受け取り、自分で文字列を組み立てます。device 出力中の
+  リテラルの中括弧はエスケープ不要です。
+- **raise してよい** のは「起きてはならない」状態のとき: シェルはサーバ側で full
+  traceback をログし、クライアントには固定の `% Internal error` 行を返します —
+  traceback が wire に届くことはありません。
 
-最後に、BaseDevice を継承するクラスがあります。このクラスは SIMNOS がモジュールを正しくロードするために必要です。内部的には、`self.configurations` 属性でモジュールを初期化します。モジュールが optional な `DEFAULT_CONFIGURATION` 属性 (YAML/Jinja2 形式の[設定](../usage/configurations.md)ファイルのパス) を定義していれば、そのファイルが辞書として `self.configurations` にロードされます。未定義の場合は `self.configurations` は空 dict になります (バンドル plugin の中ではこの hook を実際に使っているのは `HuaweiSmartAX` のみです)。また、`simnos/plugins/nos/platforms_py/templates/` ディレクトリ内の Jinja2 テンプレートをレンダリングできる `render(self, template: str, **kwargs) -> str` メソッドも含まれています。これらの属性を持つクラスにすることで、モジュールの標準化に役立ちます。同時に、個別の関数ではなくクラスにすることで、コマンド間で変数を共有したり、デバイスの状態を変更することもできます。例えば、デバイスの IP を変更するコマンドを作成した場合、クラス内のデバイスの状態を変更し、残りのコマンドがこの変更を考慮して新しい IP で文字列を返すようにできます。
+## v2 プラグインの移行
 
-もちろん、独自のコマンドとロジックで独自の Python モジュールを作成することもできます。正しい構造を持ち、正しくロードできることを確認してください。SIMNOS インベントリで指定すれば、SIMNOS がロードとコマンドの登録を行います。
-
-上記のコードを確認するために、以前と同様にインベントリの YAML を作成できます:
-```yaml
-hosts:
-    R1:
-        username: user
-        password: user
-        port: 6000
-        nos:
-            plugin: path/to/my_nos.py
-```
-
-素早くテストするには、ターミナルで以下のコマンドを実行してください:
-```bash
-simnos up -i path/to/inventory.yaml
-```
-
-## Create a NOS plugin from the Nos class
-!!! warning
-    Nos クラスを直接使用して NOS プラグインを開発することはメンテナンスが複雑になるため推奨されません。代わりに Python モジュールの使用を推奨します。
-
-SIMNOS パッケージには、NOS プラグインを作成して SIMNOS インスタンスに登録するために使用できる基底クラス Nos が付属しています。結局のところ、以前と同じことを行いましたが、自分で作成する代わりに SIMNOS に任せていたのです。
-
-インスタンス化時に必要な属性を指定して Nos クラスを使用したカスタム NOS プラグインを定義するサンプルコード:
-
-```python
-from simnos import SimNOS, Nos
-
-nos = Nos(
-    name="MySimNOSPlugin",
-    initial_prompt="{base_prompt}>",
-    commands={
-        "terminal length 0": {"output": "", "help": "Set terminal length to 0", "prompt": "{base_prompt}>"},
-        "show clock": {"output": "MySimNOSPlugin system time is 00:00:00", "help": "Display the system clock", "prompt": "{base_prompt}>"},
-    },
-)
-
-inventory = {
-    "hosts": {
-        "router42": {
-            "port": 6005,
-            "nos": {"plugin": "MySimNOSPlugin"},
-        },
-    }
-}
-
-net = SimNOS(inventory)
-
-net.register_nos_plugin(plugin=nos)
-
-net.start()
-
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    net.stop()
-```
-
-この例では、必要な属性を持つ Nos オブジェクトが作成され、SimNOS のインスタンスに登録されます。
-
-さらに、Nos クラスの `from_dict` メソッドと `from_file` メソッドを使用して Nos の属性を指定できます。例えば、[Python ファイルから NOS プラグインを作成する](creating_nos_plugin.md#create-a-nos-plugin-from-a-python-file)セクションと同等の結果を得るには、以下のコードを使用できます:
-
-```python
-nos = Nos(filename="path/to/my_nos.py")
-
-inventory = {
-    "hosts": {
-        "router42": {
-            "port": 6005,
-            "nos": {"plugin": "MySimNOSPlugin"},
-        },
-    }
-}
-```
-
-!!! note
-    2つのコマンドが同じ名前に一致する場合、最後にロードされたコマンドが使用されます。
+v2 時代の py プラグイン (モジュールの `commands` dict + prompt 定数) はもう
+ロードできません: `commands` dict はロード時に拒否され、定数は読まれません。
+dict の各エントリを A3 の `commands/<stem>.yaml` に移し (`prompt:` → `mode:`
+名、`new_prompt:` → `new_mode:`、出力テキスト → 隣接 `.txt` / `.j2`)、modes を
+`platform.yaml` に宣言し、モジュールには device class + handler callable だけを
+残してください — [changelog の移行表](../changelog.ja.md) と
+[新しいプラットフォームの追加](creating_new_platforms.ja.md) を参照。

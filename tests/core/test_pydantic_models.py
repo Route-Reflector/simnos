@@ -13,7 +13,6 @@ from simnos.core.pydantic_models import (
     ModelCommandAuthoring,
     ModelHost,
     ModelInventoryCommand,
-    ModelNosCommand,
     ModelPlatformMeta,
     ModelTransition,
     NosPluginConfig,
@@ -65,29 +64,6 @@ class TestPortRange:
         """
         with pytest.raises(ValidationError, match="must be a list"):
             HostConfig(replicas=2, port=0)
-
-
-class TestCommandHandlerField:
-    """Pins for the `output` field's CommandHandlerField annotation (#241).
-
-    `CommandHandlerField = Annotated[CommandHandler, GetPydanticSchema(
-    callable_schema)]` exists to keep the runtime validation at "is
-    callable" — identical to the bare `Callable` it replaced — while the
-    annotation documents the G4 contract. These pins fix that equivalence
-    directly so a future change to the schema hook (e.g. attempting
-    signature validation) is a conscious decision, not a drive-by.
-    """
-
-    def test_output_accepts_callable(self):
-        """A callable output passes validation and survives round-trip."""
-        handler = lambda device, **kwargs: "body"  # noqa: E731 — minimal contract-shaped stand-in
-        model = ModelNosCommand(output=handler)
-        assert model.output is handler
-
-    def test_output_rejects_non_callable_non_str(self):
-        """A non-callable, non-str output (int) is rejected."""
-        with pytest.raises(ValidationError, match="output"):
-            ModelNosCommand(output=42)  # ty: ignore[invalid-argument-type]
 
 
 class TestModelCommandAuthoring:
@@ -387,7 +363,7 @@ class TestModelPlatformMeta:
 
     def test_minimal_platform(self):
         # pydantic coerces the nested dict into ModelModeDef at runtime; ty only
-        # sees the dict literal, hence the ignore (same pattern as ModelNosCommand above).
+        # sees the dict literal, hence the ignore (pydantic-vs-ty seam).
         model = ModelPlatformMeta(modes={"user": {"prompt": "{{ base_prompt }}>"}}, initial_mode="user")  # ty: ignore[invalid-argument-type]
         assert model.initial_mode == "user"
 

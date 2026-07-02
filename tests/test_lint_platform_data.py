@@ -12,6 +12,7 @@ actually fails — without these a bug in the lint logic would read as
 from tasks import (
     check_platform_data,
     check_platform_data_device_type_collisions,
+    check_platform_data_py_modules,
     check_platform_data_ratchet,
     check_platform_data_warnings,
     is_stub_help,
@@ -357,3 +358,58 @@ class TestDeviceTypeCollisions:
         (d / "platform.yaml").write_text("- just\n- a\n- list\n", encoding="utf-8")
         violations = check_platform_data_device_type_collisions(str(tmp_path))
         assert any("listy/platform.yaml" in v and "not a mapping" in v for v in violations)
+
+
+class TestPyModules:
+    """#317 P-4: py handler modules cross-checked against the A3 platforms.
+
+    Layout mirrors the package tree: `<root>/platforms/<name>/` (A3 dirs) next
+    to `<root>/platforms_py/<name>.py` (handler modules); the check derives the
+    py dir as the platforms dir's sibling.
+    """
+
+    @staticmethod
+    def _tree(tmp_path):
+        platforms = tmp_path / "platforms"
+        platforms.mkdir()
+        (tmp_path / "platforms_py").mkdir()
+        return platforms
+
+    @staticmethod
+    def _a3(platforms, name, *, command_yaml=None):
+        commands = platforms / name / "commands"
+        commands.mkdir(parents=True)
+        (platforms / name / "platform.yaml").write_text(
+            'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n', encoding="utf-8"
+        )
+        if command_yaml is not None:
+            (commands / "cmd.yaml").write_text(command_yaml, encoding="utf-8")
+
+    def test_matched_module_and_handler_pass(self, tmp_path):
+        platforms = self._tree(tmp_path)
+        self._a3(platforms, "p_a", command_yaml="command: show x\ntype: simnos\nhandler: make_x\n")
+        (tmp_path / "platforms_py" / "p_a.py").write_text("# handlers\n", encoding="utf-8")
+        assert check_platform_data_py_modules(str(platforms)) == []
+
+    def test_orphan_py_module_flagged(self, tmp_path):
+        platforms = self._tree(tmp_path)
+        self._a3(platforms, "p_a")
+        (tmp_path / "platforms_py" / "ghost.py").write_text("# no A3 dir\n", encoding="utf-8")
+        violations = check_platform_data_py_modules(str(platforms))
+        assert any("platforms_py/ghost.py" in v and "no matching A3 platform dir" in v for v in violations)
+
+    def test_init_py_is_not_an_orphan(self, tmp_path):
+        platforms = self._tree(tmp_path)
+        (tmp_path / "platforms_py" / "__init__.py").write_text("", encoding="utf-8")
+        assert check_platform_data_py_modules(str(platforms)) == []
+
+    def test_handler_ref_without_py_module_flagged(self, tmp_path):
+        platforms = self._tree(tmp_path)
+        self._a3(platforms, "p_a", command_yaml="command: show x\ntype: simnos\nhandler: make_x\n")
+        violations = check_platform_data_py_modules(str(platforms))
+        assert any("handler: make_x" in v and "no platforms_py/p_a.py" in v for v in violations)
+
+    def test_static_only_platform_without_py_module_passes(self, tmp_path):
+        platforms = self._tree(tmp_path)
+        self._a3(platforms, "p_a", command_yaml="command: show x\ntype: simnos\n")
+        assert check_platform_data_py_modules(str(platforms)) == []

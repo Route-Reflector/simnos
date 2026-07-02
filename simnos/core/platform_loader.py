@@ -1,12 +1,11 @@
 """A3 platform directory loader (#264 / P1-1 D6).
 
-Reads the new on-disk form — ``platforms/<nos>/platform.yaml`` +
+Reads the on-disk form — ``platforms/<nos>/platform.yaml`` +
 ``commands/*.yaml`` + adjacent output files — validates it through the
 authoring pydantic models (:mod:`simnos.core.pydantic_models`), and produces a
-:class:`~simnos.core.resolved_command.ResolvedPlatform` directly (no legacy
-intermediate, unlike :mod:`simnos.core.command_adapter`). The shell, docs gen
-and tests then consume the one runtime representation regardless of which form
-the data was authored in (D4).
+:class:`~simnos.core.resolved_command.ResolvedPlatform` directly. The shell,
+docs gen and tests then consume the one runtime representation regardless of
+which form the data was authored in (D4).
 
 All load-time validation that needs the filesystem or jinja2 lives here:
 output-file existence, ``.j2`` syntax, mode-name existence, and prompt-template

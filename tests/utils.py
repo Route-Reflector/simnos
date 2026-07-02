@@ -126,73 +126,48 @@ def get_py_platforms() -> list[str]:
 def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
     """Collect a host's per-mode runnable commands for a netmiko sweep.
 
-    Returns ``(initial, enable, config)`` command-name lists. Two inflows are
-    merged so the sweep stays comprehensive after the A3 migration (#264):
+    Returns ``(initial, enable, config)`` command-name lists, bucketed from the
+    platform's A3 command data (`nos.resolved_platform`, the only command
+    inflow since #317 P-4) by each command's resolved `modes` (empty = all
+    modes, reachable from the initial mode). Aliases are already resolved into
+    their target's dispatch fields by the loader, so they sweep as ordinary
+    commands here (no alias concept survives in `ResolvedCommand`).
 
-    - **legacy dict commands** (`nos.commands`): custom py-module dicts (shipped
-      platforms are A3-only since #317 P-2). Bucketed by prompt-string equality.
-    - **A3 static commands** (`nos.resolved_platform`): every migrated platform's
-      command data. Bucketed by the command's resolved `modes` (empty = all
-      modes, reachable from the initial mode). Aliases are already resolved into
-      their target's dispatch fields by the loader, so they sweep as ordinary
-      commands here (no alias concept survives in `ResolvedCommand`).
+    Transition (`new_mode` / `transitions`) and exit commands are skipped
+    (they change the prompt or close the session, so a flat sweep cannot run
+    them safely).
 
-    Transition (`new_mode` / `new_prompt`) and exit commands are skipped in both
-    (they change the prompt or close the session, so a flat sweep cannot run them
-    safely); legacy aliases are skipped on the dict side. The two inflows are
-    mutually exclusive since #317 P-3 (an A3 platform with a py `commands` dict
-    is rejected at merge), so the bucket dedup below is belt-and-braces only.
-
-    The A3 sweep buckets only the canonical user/enable/config modes; a command
+    The sweep buckets only the canonical user/enable/config modes; a command
     valid in any other mode is asserted-out loudly rather than silently dropped
     from the sweep (the PR-2 "sweep silently shrank" regression, 1st round claude #5).
     """
     initial_commands, enable_commands, config_commands = [], [], []
     nos = host.nos
     assert nos is not None
-    for command, options in nos.commands.items():
+    resolved = nos.resolved_platform
+    assert resolved is not None, f"{nos.name}: no A3 platform data (resolved_platform is None)"
+    buckets = {"user": initial_commands, "enable": enable_commands, "config": config_commands}
+    for command, rc in resolved.commands.items():
         if command.startswith("_") and command.endswith("_"):
             continue
-        if "prompt" not in options:
+        # `transitions` is the mode-conditional successor to `new_mode` /
+        # `exit` (#317 / P-1): a transitions command changes mode or closes
+        # the session at dispatch time just like the static forms, so the
+        # flat sweep must skip it too (e.g. arista_eos `exit`, whose user /
+        # enable entries close the session — P-2 migrated it to `transitions`).
+        if rc.new_mode or rc.exit or rc.transitions or command in {"exit", "quit", "logout"}:
             continue
-        prompts = options["prompt"]
-        new_prompt = options.get("new_prompt")
-        if new_prompt or "alias" in options or options.get("exit") or command in {"exit", "quit", "logout"}:
-            continue
-        if isinstance(prompts, str):
-            prompts = [prompts]
-        for prompt in prompts:
-            if prompt == nos.initial_prompt:
-                initial_commands.append(command)
-            elif nos.enable_prompt and prompt == nos.enable_prompt:
-                enable_commands.append(command)
-            elif nos.config_prompt and prompt == nos.config_prompt:
-                config_commands.append(command)
-
-    resolved = nos.resolved_platform
-    if resolved is not None:
-        buckets = {"user": initial_commands, "enable": enable_commands, "config": config_commands}
-        for command, rc in resolved.commands.items():
-            if command.startswith("_") and command.endswith("_"):
-                continue
-            # `transitions` is the mode-conditional successor to `new_mode` /
-            # `exit` (#317 / P-1): a transitions command changes mode or closes
-            # the session at dispatch time just like the static forms, so the
-            # flat sweep must skip it too (e.g. arista_eos `exit`, whose user /
-            # enable entries close the session — P-2 migrated it to `transitions`).
-            if rc.new_mode or rc.exit or rc.transitions or command in {"exit", "quit", "logout"}:
-                continue
-            # Empty `modes` = valid in every mode (legacy prompt-omission
-            # successor); a flat sweep reaches it from the initial mode.
-            modes = rc.modes or {resolved.initial_mode}
-            unknown = modes - buckets.keys()
-            assert not unknown, (
-                f"{nos.name}: command {command!r} is valid in non-canonical mode(s) {sorted(unknown)} "
-                f"outside the netmiko sweep buckets {sorted(buckets)}; extend get_host_commands"
-            )
-            for mode_name, bucket in buckets.items():
-                if mode_name in modes and command not in bucket:
-                    bucket.append(command)
+        # Empty `modes` = valid in every mode; a flat sweep reaches it from the
+        # initial mode.
+        modes = rc.modes or {resolved.initial_mode}
+        unknown = modes - buckets.keys()
+        assert not unknown, (
+            f"{nos.name}: command {command!r} is valid in non-canonical mode(s) {sorted(unknown)} "
+            f"outside the netmiko sweep buckets {sorted(buckets)}; extend get_host_commands"
+        )
+        for mode_name, bucket in buckets.items():
+            if mode_name in modes:
+                bucket.append(command)
     return initial_commands, enable_commands, config_commands
 
 

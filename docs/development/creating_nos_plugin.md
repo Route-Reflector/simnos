@@ -1,302 +1,160 @@
-You can create NOS plugins and register them with a SIMNOS instance before
-starting the servers.
+# Creating a NOS plugin
 
-There are several ways to create a NOS plugin:
+A NOS plugin is what an inventory host's `device_type` / `nos.plugin` resolves
+to: the command data plus (optionally) dynamic behavior. Since v3 (#317) there
+is exactly **one authoring form**:
 
-1. [Create a NOS plugin from a YAML file](creating_nos_plugin.md#create-nos-plugin-from-a-yaml-file)
-2. [Create a NOS plugin from a Python file](creating_nos_plugin.md#create-nos-plugin-from-a-python-file)
-3. [Create a NOS plugin from the Nos class](creating_nos_plugin.md#create-nos-plugin-from-the-nos-class)
+- an **A3 platform directory** — `platform.yaml` (modes + metadata) and one
+  `commands/<stem>.yaml` per command with adjacent `.txt` / `.j2` output.
+  This is the required part; a platform with no A3 dir cannot serve commands.
+- an optional **Python handler module** — a `BaseDevice` subclass (plus
+  module-level functions) whose methods the A3 `handler:` field binds to at
+  server start. This is the only job the py module has: it authors **no
+  commands** (the legacy `commands` dict, `NAME` / `INITIAL_PROMPT` /
+  `ENABLE_PROMPT` / `CONFIG_PROMPT` constants and `Nos.from_dict` were removed
+  in #317).
 
-None of the above ways is better than the other, all have their own use cases. But
-they are listed in an order of more simple to create/less flexible to more
-involved/more flexible.
+The full A3 authoring reference (file layout, `platform.yaml`, per-command
+fields, lint conventions) lives in
+[Adding new platforms](creating_new_platforms.md). This page covers the two
+plugin-specific topics: shipping a platform **outside** the SIMNOS package,
+and the **handler contract**.
 
-NOS plugins can have these attributes defined:
+## An external custom platform
 
-- `name` - reference name of the plugin to use in the inventory
-- `initial_prompt` - used to define or alter the shell prompt that is displayed
-- `enable_prompt` - used to enter the `enable` mode (optional)
-- `config_prompt` - used to enter the `config` mode (optional)
-- `commands` - dictionary of commands that this NOS plugin is capable of returning output
+A platform does not have to live inside the SIMNOS package tree. Author the
+same A3 dir anywhere on disk:
 
-## Initial NOS shell prompt
-The initial NOS shell prompt is the indicator that is shown to the user when the shell is started.
-In case it is defined within curly braces `{}` you can use the `base_prompt` formatter to
-reference the host name from the inventory.
-
-For example, if the initial prompt is set to `{base_prompt}>`, after applying the format method,
-the final prompt will be `R1>` for the host `R1` in the inventory.
-
-## NOS commands
-Commands are a dictionary indexed by a command string with a value that is another dictionary
-containing details of the command like the output, help of this or the prompts needed for it
-to be called correctly.
-
-Sample content of the Python commands dictionary:
-
-```{ .python .annotate }
-commands = {
-    "enable": {
-        "output": None, # (6)
-        "new_prompt": "{base_prompt}#", # (2)
-        "help": "enter exec prompt", # (5)
-        "prompt": "{base_prompt}>", # (10)
-    },
-    "show clock": {
-        "output": MyDevice.make_show_clock, # (9)
-        "help": "Display the system clock",
-        "prompt": ["{base_prompt}>", "{base_prompt}#"], # (3)
-    },
-    "show running-config": {
-        "output": """ # (4)
-service timestamps debug datetime msec
-service timestamps log datetime msec
-no service password-encryption
-!
-hostname {base_prompt} # (12)
-!
-boot-start-marker
-boot-end-marker
-        """,
-        "help": "Current operating configuration",
-        "prompt": "{base_prompt}#",
-    },
-    "show version": {
-        "output": """
-Version: 0.1.0
-{base_prompt} uptime is 1 day, 17 hours, 32 minutes
-Uptime for this control processor is 1 day, 17 hours, 33 minutes
-
-Configuration register is 0x2102
-        """,
-        "help": "System hardware and software status",
-        "prompt": "{base_prompt}#",
-    },
-    "_default_": { # (11)
-        "output": "% Invalid input detected at '^' marker.",
-        "help": "Output to print for unknown commands",
-    },
-    "terminal width 511": {
-        "output": "", # (8)
-        "help": "Set terminal width to 511"
-    },
-    "terminal length 0": {
-        "output": "",
-        "help": "Set terminal length to 0"
-    },
-    "exit": {"exit": True, "help": "Exit commands shell"} # (7)
-}
+```
+my_platform/
+  platform.yaml
+  commands/
+    show_version.yaml
+    show_version.txt
+    show_marker.yaml      # handler: make_show_marker
+    default.yaml          # _default_
+    default.txt
+my_platform_handlers.py   # optional: device class + handler callables
 ```
 
-1. Custom function to produce the command output
-2. New prompt to show after the command output is returned
-3. List of current prompts where this command is valid, i.e., the scope of the command
-4. Multi-line command output
-5. Help message to show for this command if `?` or `help` is entered in the shell
-6. Returning `None` as command output will not produce a response
-7. Setting `exit: true` will close the shell
-8. Returning an empty output with produce a response containing only newline characters
-9. The output can refer to a callable object, like a function, that will be executed by the shell plugin to produce the response content
-10. The only prompt where this command is valid
-11. Default response content used for undefined commands
-12. A returned static string output can contain the `base_prompt` formatter; callable output formats itself (see [The callable contract](#the-callable-contract))
+### Static-only platform (no handlers)
 
-Attributes supported by the commands dictionary:
-
-| Attribute       | Emoji                            | Description                                               |
-| -------------- | ---------------------------------| --------------------------------------------------------- |
-| `output`       | :octicons-command-palette-16:    | Command output to return in the response                  |
-| `help`         | :material-help-box:              | Command help message content                              |
-| `prompt`       | :simple-powershell:              | Indicator or list of indicators where this command is valid |
-| `new_prompt`   | :simple-nushell:                | New prompt to show after the command output is returned   |
-| `alias`        | :material-drama-masks:              | Command output as a callable function                      |
-| `exit`         | :material-exit-run:                 | If true, close the shell session                           |
-
-
-The value of the `output` attribute of the commands dictionary can be of these types:
-
-- `string` - string of one or more lines to return in the response, that string
-   can contain the `base_prompt` formatter.
-- `None` - no response is returned
-- `callable` - a callable object that will be executed to produce the response
-   content; its output is **not** formatted by the shell (see
-   [The callable contract](#the-callable-contract))
-
-The `exit` attribute:
-
-- `true` - will close the shell session
-
-Some notes about the `prompt` and `new_prompt` attributes.
-
-`prompt` serves as a filter indicating if this command is valid in the current context of the prompt,
-so that if the current value of the prompt is not equal to the command prompt,
-the response output is obtained from the output value of the `_default_` command, which usually
-contains an error message.
-
-`new_prompt` simply indicates that after the command output is returned to the user,
-the current prompt value should be set to the `new_prompt` value.
-
-## Create a NOS plugin from a YAML file
-
-Create a YAML file with this sample content in `path/to/my_nos.yaml`:
-
-```yaml
-name: MySimNOSPlugin
-
-initial_prompt: "{base_prompt}>"
-
-commands:
-  enable:
-    output: null
-    new_prompt: "{base_prompt}#"
-    help: enter exec prompt
-    prompt: "{base_prompt}>"
-  show clock:
-    output: "*21:01:33.000 AET 01 01 01 2022"
-    help: "Display the system clock"
-    prompt: ["{base_prompt}#"]
-  show running-config:
-    output: |
-      service timestamps debug datetime msec
-      service timestamps log datetime msec
-      no service password-encryption
-      !
-      hostname {base_prompt}
-      !
-      boot-start-marker
-      boot-end-marker
-    help: "Current operating configuration"
-    prompt: "{base_prompt}#"
-  show version:
-    output: |
-      Version: 0.1.0
-      {base_prompt} uptime is 1 day, 17 hours, 32 minutes
-      Uptime for this control processor is 1 day, 17 hours, 33 minutes
-
-      Configuration register is 0x2102
-    help: System hardware and software status
-    prompt: "{base_prompt}#"
-  _default_:
-    output: "% Invalid input detected at '^' marker."
-    help: "Output to print for unknown commands"
-  terminal width 511: {"output": "", "help": "Set terminal width to 511"}
-  terminal length 0: {"output": "", "help": "Set terminal length to 0"}
-```
-
-With this YAML file, you can register a NOS plugin like this:
+Point the inventory host directly at the directory:
 
 ```yaml
 hosts:
     R1:
         username: user
         password: user
-        port: 6000
+        port: 0
         nos:
-            plugin: path/to/my_nos.yaml
+            plugin: path/to/my_platform
 ```
-
-And to quickly test it, you can run this command in the terminal:
 
 ```bash
 simnos up -i path/to/inventory.yaml
 ```
 
-## Create a NOS plugin from a Python file
-
-NOS plugins created from Python modules are one of the main strengths of SIMNOS as they allow for interactivity. The idea of the commands is that the output of these instead of being a predefined output, you can define a function that returns the output of the command. This allows the output of the command to be dynamic and can change depending on the time, day, host, etc. If you are developing a Python NOS module, then it is worth reading this section carefully.
-
-The following code is a Python module that we use during tests, but it is fully functional (in Netmiko the object is generic):
+Equivalently in Python, register the directory path (a str plugin must be an
+A3 platform dir — `.py` paths and dict plugins are rejected):
 
 ```python
-"""
-This is a testing module
-"""
+from simnos import SimNOS
 
-import time
+net = SimNOS(inventory=inventory, plugins=["path/to/my_platform"])
+```
+
+### Platform with dynamic handlers
+
+A `handler:` command needs the handler module loaded alongside the A3 dir, so
+build the `Nos` yourself and register the instance. The platform name is the
+A3 directory's basename; the inventory references it by that name:
+
+```python
+from simnos import Nos, SimNOS
+
+nos = Nos(filename=["path/to/my_platform", "path/to/my_platform_handlers.py"])
+
+inventory = {
+    "hosts": {
+        "R1": {
+            "username": "user",
+            "password": "user",
+            "port": 0,
+            "nos": {"plugin": "my_platform"},
+        },
+    }
+}
+
+net = SimNOS(inventory=inventory, plugins=[nos])
+net.start()
+```
+
+An unresolved `handler:` reference (no such callable in the module) fails
+loudly at `start()` — never a silently output-less command.
+
+## The Python handler module
+
+The module defines at most one locally-defined `BaseDevice` subclass — it is
+**auto-detected** (importing other device classes is fine; only locally
+defined subclasses count, and two or more is a loud `ValueError`). Its
+non-underscore methods, plus locally-defined module-level functions, form the
+platform's **handler namespace**; an A3 command references one by name:
+
+```yaml
+# commands/show_marker.yaml
+command: show marker
+type: custom
+help: dynamic marker command
+mode: [user, enable]
+handler: make_show_marker
+```
+
+```python
+"""my_platform_handlers.py"""
 
 from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
 
-NAME: str = "test_module"
-INITIAL_PROMPT = "{base_prompt}>"
-ENABLE_PROMPT = "{base_prompt}#"
-CONFIG_PROMPT = "{base_prompt}(config)#"
-
-DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
+DEFAULT_CONFIGURATION = "path/to/configurations/my_platform.yaml.j2"  # optional
 
 
-# noqa: ARG002
-class TestModule(BaseDevice):
-    """
-    Class that keeps track of the state of the TestModule device.
-    """
+class MyPlatform(BaseDevice):
+    """Holds per-device state shared between handlers."""
 
-    def make_show_clock(self, base_prompt, current_prompt, command):
-        """Return the current time."""
-        return str(time.ctime())
-
-    def make_show_version(self, base_prompt, current_prompt, command):
-        """Return the system version."""
-        return "TestModule version 1.0"
-
-
-commands = {
-    "enable": {
-        "output": None,
-        "new_prompt": "{base_prompt}#",
-        "help": "enter exec prompt",
-        "prompt": INITIAL_PROMPT,
-    },
-    "show clock": {
-        "output": TestModule.make_show_clock,
-        "help": "show current time",
-        "prompt": ["{base_prompt}#", "{base_prompt}>"],
-    },
-    "show version": {
-        "output": TestModule.make_show_version,
-        "help": "show system version",
-        "prompt": "{base_prompt}#",
-    },
-}
+    def make_show_marker(self, base_prompt, current_mode, current_prompt, command):
+        return f"marker from {current_mode}"
 ```
 
-Let's break it down. SIMNOS allows loading modules dynamically, but it needs the module to have a certain structure. On one hand, it must have some constants (NAME, INITIAL_PROMPT, and optionally ENABLE_PROMPT / CONFIG_PROMPT), on the other hand, a dictionary of commands, and lastly a class that inherits from BaseDevice. This is mandatory for SIMNOS to be able to load the module.
+A name defined both as a device-class method and a module-level function is a
+load-time error (no implicit precedence). A `classmethod` cannot be a handler
+(its first argument binds to `cls`, not the device).
 
-First, we have the attributes NAME, INITIAL_PROMPT, ENABLE_PROMPT (optional), and CONFIG_PROMPT (optional). These attributes are necessary for SIMNOS to register the NOS plugin. NAME is the name of the plugin, INITIAL_PROMPT is the initial shell indicator, ENABLE_PROMPT is the shell indicator for the enable mode, and CONFIG_PROMPT is the shell indicator for the config mode.
+The class instance is shared across a host's sessions, so handlers can keep
+state (e.g. a command that changes the device's IP; later commands see the
+change). `BaseDevice` provides `self.configurations` (loaded from the optional
+`DEFAULT_CONFIGURATION` YAML / Jinja2 [configuration](../usage/configurations.md)
+file; `Nos(configuration_file=...)` overrides it) and a
+`render(template, **kwargs)` helper for Jinja2 templates under
+`simnos/plugins/nos/platforms_py/templates/`.
 
-The device class is **auto-detected**: SIMNOS picks the single `BaseDevice`
-subclass *defined in the module itself*. Importing other device classes
-(helper devices, type-annotation imports) is fine — only locally defined
-subclasses count. Defining two or more local subclasses is a loud
-`ValueError` at load time. The legacy `DEVICE_NAME` constant (pre-#241) is
-ignored with a deprecation warning — delete it from older plugins.
-
-!!! note
-    When a platform has both a yaml file and a Python module, the module is
-    loaded second and **replaces same-named already-loaded commands
-    wholesale** (typically yaml-defined ones; per-command full replacement —
-    no deep merge of `help` / `prompt` / `output`). The override is logged
-    at debug level so you can see which commands the module shadows.
-
-Second, we have the dictionary of commands. This dictionary is a Python dictionary that contains the commands that the NOS plugin is capable of returning the output. Each command is a dictionary with the following attributes: "output", "help", and "prompt". The output can be a string, `None`, or a callable that produces the response content. The help is the help that will be shown to the user if the `?` or `help` command is entered. The prompt is the shell indicator in which the command is valid.
-
-### The callable contract
+## The callable contract
 
 The typed contract lives in `simnos.core.command_contract` (the
 `CommandHandler` Protocol) — import it for type annotations if you like;
 plain functions matching the shape work as-is.
 
-The shell invokes a callable output as:
+The shell invokes a handler as:
 
 ```python
-output(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
+handler(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
 ```
 
 where `device` is the instance of your `BaseDevice` subclass (or `None` for a
-platform without a device class). Putting an unbound method like
-`TestModule.make_show_clock` in the commands dictionary satisfies this:
-`device` binds as `self`.
+platform without a device class). A device-class method satisfies this
+naturally: `device` binds as `self`. `command` is the literal line the user
+typed (an abbreviation like `sh ver` arrives unexpanded).
 
-A callable command returns its **output only** (#317):
+A handler returns its **output only** (#317):
 
 - `str` - output string to display
 - `None` - no response
@@ -308,99 +166,22 @@ dict (or anything but `str | None`) is answered with the fixed
 `% Internal error` line and an error log. Branch on the `current_mode`
 argument, not on the prompt string.
 
-Two rules that differ from yaml-static output:
+Two rules that differ from static output files:
 
-- **Format yourself.** The shell does *not* apply `{base_prompt}` formatting
-  to callable output — handlers receive `base_prompt` as an argument and
-  render their own strings. Literal braces in device output need no escaping.
+- **Format yourself.** The shell does *not* render handler output — handlers
+  receive `base_prompt` as an argument and build their own strings. Literal
+  braces in device output need no escaping.
 - **Raising is allowed** for "should never happen" states: the shell logs the
   full traceback server-side and answers the client with the fixed
   `% Internal error` line — no traceback ever reaches the wire.
 
-Lastly, we have a class that inherits from BaseDevice. This class is necessary for SIMNOS to be able to load the module correctly. Internally, it initializes the module with an attribute `self.configurations`. If the module defines an optional `DEFAULT_CONFIGURATION` attribute pointing to a YAML/Jinja2 [configuration](../usage/configurations.md) file, that file is loaded into `self.configurations` as a dictionary; otherwise `self.configurations` is an empty dict (only the bundled `HuaweiSmartAX` plugin currently uses this hook). It also includes a method `render(self, template: str, **kwargs) -> str` that allows rendering a Jinja2 template under the `simnos/plugins/nos/platforms_py/templates/` directory. Having this class with these attributes helps to standardize the modules. At the same time, having it in a class instead of separate functions allows you to share variables between commands or even modify the state of the device. For example, if I create a command to modify the IP of the device, I can modify the state of the device in the class and have the rest of the commands take this change into account, returning the string with the new IP.
+## Migrating a v2 plugin
 
-Obviously, you can also create your own Python module with your own commands and logic. Just make sure it has the correct structure and can be loaded correctly. You have to indicate it in the SIMNOS inventory and SIMNOS will take care of loading it and registering the commands.
-
-To be able to check the above code, we can create a YAML with the inventory as we have done before:
-```yaml
-hosts:
-    R1:
-        username: user
-        password: user
-        port: 6000
-        nos:
-            plugin: path/to/my_nos.py
-```
-
-And to test it quickly, you can run the following command in the terminal:
-```bash
-simnos up -i path/to/inventory.yaml
-```
-
-## Create a NOS plugin from the Nos class
-!!! warning
-    It is discouraged to develop NOS plugins using the Nos class directly as it is more complicated to maintain. Instead, it is recommended to use the Python module.
-
-The SIMNOS package comes with the base class Nos that can be used to create
-NOS plugins to register them with a SIMNOS instance. After all, we have previously done the same but instead of creating it ourselves, we have let SIMNOS do it for us.
-
-Sample core to define a custom NOS plugin using
-the Nos class by supplying the required attributes during instantiation:
-
-```python
-from simnos import SimNOS, Nos
-
-nos = Nos(
-    name="MySimNOSPlugin",
-    initial_prompt="{base_prompt}>",
-    commands={
-        "terminal length 0": {"output": "", "help": "Set terminal length to 0", "prompt": "{base_prompt}>"},
-        "show clock": {"output": "MySimNOSPlugin system time is 00:00:00", "help": "Display the system clock", "prompt": "{base_prompt}>"},
-    },
-)
-
-inventory = {
-    "hosts": {
-        "router42": {
-            "port": 6005,
-            "nos": {"plugin": "MySimNOSPlugin"},
-        },
-    }
-}
-
-net = SimNOS(inventory)
-
-net.register_nos_plugin(plugin=nos)
-
-net.start()
-
-try:
-    while True:
-        pass
-except KeyboardInterrupt:
-    net.stop()
-```
-
-In this example, an object Nos is created with the required attributes and registered with
-an instance of SimNOS.
-
-Additionally, the methods `from_dict` and `from_file` of the Nos class
-can be used to supply Nos attributes. For example, you can get equivalent results to
-[Create a NOS plugin from a Python file](creating_nos_plugin.md#create-nos-plugin-from-a-python-file)
-section using this code:
-
-```python
-nos = Nos(filename="path/to/my_nos.py")
-
-inventory = {
-    "hosts": {
-        "router42": {
-            "port": 6005,
-            "nos": {"plugin": "MySimNOSPlugin"},
-        },
-    }
-}
-```
-
-!!! note
-    If two commands match the same name, the last command loaded will be used.
+A v2-era py plugin (module `commands` dict + prompt constants) no longer
+loads: the `commands` dict is rejected at load, and the constants are simply
+not read. Move each dict entry into an A3 `commands/<stem>.yaml`
+(`prompt:` → `mode:` names, `new_prompt:` → `new_mode:`, output text →
+adjacent `.txt` / `.j2`), declare the modes in `platform.yaml`, and keep only
+the device class + handler callables in the module — see the
+[changelog migration table](../changelog.md) and
+[Adding new platforms](creating_new_platforms.md).

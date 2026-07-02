@@ -4,7 +4,6 @@ as a testing tool for Netmiko.
 """
 
 import random
-import re
 import sys
 import threading
 from typing import cast
@@ -131,7 +130,29 @@ class TestNetmiko:
         net.stop()
 
     @pytest.mark.timeout(30)
-    def test_testing_module(self):
+    def test_external_a3_dir_via_inventory_plugin_path(self, tmp_path):
+        """An out-of-tree A3 platform dir served via `nos: {plugin: <path>}`.
+
+        The inventory path route (no registry entry) used to point at a py
+        module; since #317 P-4 a bare path can only be an A3 platform dir (a
+        static-only external platform — one needing `handler:` callables is
+        registered as a `Nos(filename=[dir, py])` instance instead, see
+        tests/plugins/test_custom_platform_e2e.py).
+        """
+        plat = tmp_path / "external_static"
+        cmds = plat / "commands"
+        cmds.mkdir(parents=True)
+        (plat / "platform.yaml").write_text(
+            'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n', encoding="utf-8"
+        )
+        cmds.joinpath("show_clock.yaml").write_text(
+            "command: show clock\ntype: custom\nmode: [user]\noutput: show_clock.txt\n", encoding="utf-8"
+        )
+        cmds.joinpath("show_clock.txt").write_text("*21:01:33.000 AET 01 01 01 2022\n", encoding="utf-8")
+        cmds.joinpath("default.yaml").write_text(
+            "command: _default_\ntype: custom\noutput: default.txt\n", encoding="utf-8"
+        )
+        cmds.joinpath("default.txt").write_text("% Unknown command\n", encoding="utf-8")
         inventory: dict = {
             "hosts": {
                 "R1": {
@@ -139,7 +160,7 @@ class TestNetmiko:
                     "password": "user",
                     "port": EPHEMERAL_PORT,
                     "nos": {
-                        "plugin": "tests/assets/module.py",
+                        "plugin": str(plat),
                     },
                 }
             }
@@ -155,4 +176,4 @@ class TestNetmiko:
             with ConnectHandler(**credentials) as conn:
                 output = conn.send_command("show clock")
                 assert isinstance(output, str)
-                assert re.match(r"^\w{3} \w{3}\s{1,2}\d{1,2} \d{2}:\d{2}:\d{2} \d{4}$", output)
+                assert output.strip() == "*21:01:33.000 AET 01 01 01 2022"

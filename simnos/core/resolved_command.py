@@ -1,30 +1,20 @@
 """Runtime command representation (#264 / P1-1 D4).
 
 The shell, docs gen and tests consume one normalized representation —
-`ResolvedCommand` / `ResolvedOutput` — regardless of the authoring inflow
-(A3 ``commands/*.yaml``, inventory commands, or py-only plugin dicts). The A3
-loader (:mod:`simnos.core.platform_loader`) produces these dataclasses
+`ResolvedCommand` / `ResolvedOutput` — regardless of the authoring inflow.
+The A3 loader (:mod:`simnos.core.platform_loader`) produces these dataclasses
 directly, and so does the merge for the inventory inflow (A3-dialect schema,
-#317 P-3); the adapter (:mod:`simnos.core.command_adapter`) normalizes the one
-legacy dict inflow left — a py-only platform's dict — into the same form.
+#317 P-3); the legacy py-dict adapter, the last other inflow, was removed in
+#317 P-4.
 
 The representation is a frozen dataclass, not a pydantic model: every load
 path validates at its boundary, so runtime re-validation is unnecessary and
 a dataclass can hold a compiled ``jinja2.Template`` / a handler callable
 directly (#264 / D4).
-
-This module also owns the ``str.format`` -> jinja2 conversion the legacy
-adapter relies on: v2 rendered yaml/py output and prompt templates with
-``str.format(base_prompt=...)``, while the new runtime renders templates with
-jinja2 (``StrictUndefined``). The converter (`format_template_to_jinja`)
-makes the two equivalent for the brace-escape and ``{base_prompt}`` cases the
-legacy data actually uses (#264 / D6, D8).
 """
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
-import re
-import string
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
@@ -44,16 +34,12 @@ KNOWN_RENDER_VARS: frozenset[str] = frozenset({"base_prompt"})
 # undefined fact loud at render time instead of rendering an empty string
 # (#264 / D5, Decision 7). No trim/lstrip: output whitespace is significant.
 # `keep_trailing_newline` keeps the final newline jinja2 would otherwise strip
-# — inert for legacy-adapter inflow (its converted source always ends in
-# ``{% endraw %}`` / ``{{ base_prompt }}``, never a bare newline), but needed
-# for the hand-written ``.j2`` templates A3 authoring introduces in PR-2.
+# — needed for the hand-written ``.j2`` templates of A3 authoring (#264 PR-2).
 _TEMPLATE_ENV = Environment(
     undefined=StrictUndefined,
     autoescape=False,  # noqa: S701 — output is CLI text, not HTML
     keep_trailing_newline=True,
 )
-
-_FORMATTER = string.Formatter()
 
 
 def _deep_freeze(value: Any) -> Any:
@@ -73,84 +59,6 @@ def _deep_freeze(value: Any) -> Any:
     if isinstance(value, (list, tuple)):
         return tuple(_deep_freeze(v) for v in value)
     return value
-
-
-# A `{% endraw %}` tag (jinja2 tolerates whitespace and the +/- trim markers)
-# is the only sequence that can break out of a `{% raw %}` wrapping. Match just
-# that, not the bare word "endraw" — real CLI output can legitimately contain
-# the word without the surrounding delimiters (1st round codex #2 / claude #4a).
-_ENDRAW_DELIMITER = re.compile(r"\{%[-+]?\s*endraw\b")
-
-
-def _jinja_raw(literal: str) -> str:
-    """Wrap a literal run so jinja2 emits it verbatim.
-
-    A literal run may contain ``{``/``}`` (router output, JSON, brace art)
-    that jinja2 would otherwise read as ``{{`` / ``{%`` delimiters.
-    ``{% raw %}`` disables jinja2 parsing inside; the only sequence that
-    could break out is a literal ``{% endraw %}``, which never appears in
-    NOS CLI output — guarded loudly just in case (#264 / D6, D8). The caller
-    passes the full concatenated run so this guard sees a ``{% endraw %}``
-    even when ``{{`` split it across formatter segments.
-    """
-    if _ENDRAW_DELIMITER.search(literal):
-        raise ValueError(f"output literal contains a jinja2 raw-block delimiter, cannot convert: {literal!r}")
-    return "{% raw %}" + literal + "{% endraw %}"
-
-
-def format_template_to_jinja(template: str) -> tuple[str, bool]:
-    """Convert a ``str.format`` template to equivalent jinja2 source.
-
-    Returns ``(jinja_source, has_base_prompt)``. The conversion is exact for
-    the constructs legacy SIMNOS data uses: ``{{`` / ``}}`` brace escapes and
-    the lone ``{base_prompt}`` field. Any other field (``{0}`` / ``{}`` /
-    ``{other}``), a format spec (``{base_prompt:>10}``), a conversion
-    (``{base_prompt!r}``) or an unbalanced brace raises ``ValueError`` — the
-    loud-fail boundary that replaces v2's silent ``str.format`` fallback for
-    such templates (#264 / D6 item 3, #162). Packaged data is verified clean
-    (0 format failures) by the migration oracle.
-
-    `string.Formatter.parse` already unescapes ``{{`` -> ``{`` in the literal
-    segments it yields, so a template with no field round-trips to its
-    unescaped literal text.
-
-    Consecutive literal segments are concatenated before being wrapped in one
-    ``{% raw %}`` block: ``{{`` splits a literal run in two (the ``{`` lands at
-    the end of one segment, the rest in the next), so wrapping per-segment
-    could leave a ``{% endraw %}`` straddling the boundary that the per-segment
-    guard cannot see. Joining first means the guard inspects the full literal.
-    """
-    parts: list[str] = []
-    has_field = False
-    literal_run: list[str] = []
-
-    def flush_literal() -> None:
-        if literal_run:
-            parts.append(_jinja_raw("".join(literal_run)))
-            literal_run.clear()
-
-    try:
-        segments = list(_FORMATTER.parse(template))
-    except ValueError as e:
-        # Unbalanced brace (e.g. "value is {broken"): str.format would raise
-        # the same way. Loud per D6 item 3.
-        raise ValueError(f"malformed format template {template!r}: {e}") from e
-    for literal_text, field_name, format_spec, conversion in segments:
-        if literal_text:
-            literal_run.append(literal_text)
-        if field_name is None:
-            continue
-        flush_literal()  # a field ends the current literal run
-        if field_name != "base_prompt" or format_spec or conversion:
-            raise ValueError(
-                f"unsupported format field in template {template!r}: "
-                f"field={field_name!r} spec={format_spec!r} conversion={conversion!r} "
-                "(only a bare {base_prompt} is supported)"
-            )
-        has_field = True
-        parts.append("{{ base_prompt }}")
-    flush_literal()
-    return "".join(parts), has_field
 
 
 def compile_template(jinja_source: str) -> tuple[Template, frozenset[str]]:
@@ -186,8 +94,7 @@ class ResolvedOutput:
     # identifier). The loader records it here with ``handler=None``; the merge
     # (`build_resolved_platform`) binds the actual callable from the platform's
     # py handler namespace, so an unresolved ref fails loudly at start rather
-    # than being a silent no-output command (#317 / P-1, 案D). The legacy adapter
-    # sets ``handler`` directly and leaves this None.
+    # than being a silent no-output command (#317 / P-1, 案D).
     handler_ref: str | None = None
     required_vars: frozenset[str] = frozenset()
     values: Mapping[str, Any] = field(default_factory=dict)
@@ -218,8 +125,8 @@ class ResolvedOutput:
         None here, so a None return is not by itself "write nothing").
 
         `values` (sidecar-json facts, #287) are splatted alongside
-        ``base_prompt`` for ``template`` kind; they are empty for the legacy
-        ``base_prompt``-only templates and ignored by literal/handler kinds, so
+        ``base_prompt`` for ``template`` kind; they are empty for a plain
+        ``base_prompt``-only template and ignored by literal/handler kinds, so
         those paths render exactly as before (#287 / D2).
         """
         if self.kind == "literal":
@@ -254,17 +161,15 @@ class ResolvedCommand:
     """Normalized command, independent of the authoring form (#264 / D4).
 
     `modes` is the set of mode names the command is valid in; an empty set
-    means "valid in every mode" (the successor of legacy ``prompt`` omission,
-    used by ``_default_`` and unconditional commands). `new_mode` is the mode
-    to transition to after running, or None for no transition.
+    means "valid in every mode" (used by ``_default_`` and unconditional
+    commands). `new_mode` is the mode to transition to after running, or None
+    for no transition.
 
     `output` is always the served/primary capture (the only one the runtime
     sends). `variants` is the canonical contract for multi-capture commands:
     empty for a single-output command, otherwise the full ordered capture list
     with ``variants[0]`` mirroring `output` as the primary (``variant_1``) and
-    the alternates following (``variant_2`` ..). This is the one semantics all
-    inflows normalize to — the legacy adapter rebuilds it from v2's separate
-    ``output`` / ``output_variants`` (#264 / D3, D7).
+    the alternates following (``variant_2`` ..) (#264 / D3, D7).
 
     `canonical_name` is the name of the command this one resolves to: its own
     `name` for a real command, or the alias *target*'s name for an alias. The
@@ -272,8 +177,8 @@ class ResolvedCommand:
     shares one chosen state (#287 / D6 — without this, an alias would pick its
     own variant and the box would appear to "transform" between aliases). It
     defaults to `name`; `__post_init__` backfills it so real commands and the
-    A3 ``dataclasses.replace`` alias path inherit it for free, while the legacy
-    adapter passes the target name explicitly (#287, codex#1 4th/5th).
+    A3 ``dataclasses.replace`` alias path inherit it for free (#287, codex#1
+    4th/5th).
     """
 
     name: str
@@ -340,8 +245,7 @@ class ResolvedPlatform:
     `auth` carries the platform's ``auth`` setting (e.g. ``"none"`` to disable
     SSH auth, as dell_powerconnect uses); the A3 loader populates it from
     ``platform.yaml`` so `Nos._from_platform_dir` can wire ``nos.auth`` —
-    without it the field would be a silent dead end (1st round claude #2). The
-    legacy adapter leaves it None (legacy NOS keeps `auth` on the Nos directly).
+    without it the field would be a silent dead end (1st round claude #2).
     """
 
     modes: dict[str, ModeDef]
@@ -351,6 +255,5 @@ class ResolvedPlatform:
     # The platform's ``--More--`` pager prompt (#307 / P3-4), authored in
     # ``platform.yaml`` under ``paging.more_prompt`` (Cisco ``" --More-- "`` /
     # Juniper ``"---(more)---"`` / Huawei ``"---- More ----"``). The shell exposes
-    # it to the push driver; the default mirrors Cisco IOS. The legacy adapter
-    # leaves the default (legacy NOS have no A3 ``platform.yaml``).
+    # it to the push driver; the default mirrors Cisco IOS.
     more_prompt: str = " --More-- "

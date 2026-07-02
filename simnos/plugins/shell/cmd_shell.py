@@ -2,7 +2,6 @@
 Custom shell class to interact with NOS.
 """
 
-import copy
 from dataclasses import dataclass, replace
 import hashlib
 import logging
@@ -15,7 +14,6 @@ from typing import TYPE_CHECKING, cast
 
 from jinja2 import TemplateSyntaxError
 
-from simnos.core.command_adapter import adapt_legacy_commands
 from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
@@ -127,46 +125,32 @@ def build_resolved_platform(
     """Merge the command inflows into one `ResolvedPlatform` (#264 / D6).
 
     The shell consumes one representation regardless of authoring form. Inflows
-    merge under one precedence — BASIC < NOS < overlay < inventory, later inflows
-    winning:
+    merge under one precedence — BASIC < platform data < overlay < inventory,
+    later inflows winning. The platform's modes and static commands come from
+    its A3 dir (`nos.resolved_platform`); they sit over the native BASIC
+    entries. The user overlay (#286), when the host opted in, slots between the
+    platform data and inventory so a captured `.txt` overrides the packaged
+    output but a session-local inventory command still wins.
 
-    - **legacy NOS** (`nos.resolved_platform is None`, py-only platforms — gone in
-      #317 P-4): the NOS command dict goes through the legacy adapter, which
-      synthesizes the modes from the 3 scalar prompts; the native BASIC entries
-      sit under it and the inventory commands are normalized against the
-      synthesized modes on top. The user overlay is A3-only (#286 / Decision 12),
-      so it is not applied here.
-    - **A3 NOS** (`nos.resolved_platform` set): modes come from the A3 platform;
-      its resolved static commands sit over the native BASIC entries. The user
-      overlay (#286), when the host opted in, slots between the platform data and
-      inventory so a captured `.txt` overrides the packaged output but a
-      session-local inventory command still wins. A py `commands` dict alongside
-      an A3 dir is rejected loudly — that authoring channel was removed in #317
-      P-2, and silently ignoring a dict that still loads would hide it.
+    An A3 platform dir is required (#317 P-4 — the legacy py-dict adapter is
+    gone): a `Nos` that never loaded one is rejected loudly here, which
+    surfaces at `Host.start` via `build_shared_platform` (fail at startup).
 
     The inventory commands arrive in their A3-dialect authoring form
     (`ModelInventoryCommand`, #317 / P-3) and are normalized here against the
-    platform's modes — mode names instead of the removed prompt-string reverse
-    mapping.
+    platform's modes.
 
     Pure (no session state): the result is per-host invariant, so the server
     builds it once and shares it across connections.
     """
     a3 = nos.resolved_platform
     if a3 is None:
-        legacy = adapt_legacy_commands(
-            nos.initial_prompt, nos.enable_prompt, nos.config_prompt, copy.deepcopy(nos.commands or {})
-        )
-        commands: dict[str, ResolvedCommand] = dict(BASIC_COMMANDS)
-        commands.update(legacy.commands)
-        commands.update(_resolve_inventory_commands(inventory_commands, legacy.modes))
-        return replace(legacy, commands=commands)
-    if nos.commands:
         raise ValueError(
-            f"platform {nos.name!r}: the py module defines a `commands` dict alongside the A3 platform dir — "
-            "py dict authoring was removed (#317 P-2); author the commands in the A3 `commands/` dir instead"
+            f"platform {nos.name!r} has no A3 platform dir (resolved_platform is unset) — "
+            "py-only platforms were removed (#317 P-4); ship a `platforms/<name>/` dir "
+            "(platform.yaml + commands/) and keep the py module for the device class / handlers only"
         )
-    commands = dict(BASIC_COMMANDS)
+    commands: dict[str, ResolvedCommand] = dict(BASIC_COMMANDS)
     commands.update(a3.commands)
     # User overlay (#286): a host opts in via inventory `overlay.override_commands`;
     # the overlay dir was resolved + existence-checked by Host. Applied before
@@ -205,8 +189,7 @@ def _resolve_inventory_commands(inventory_commands: dict, modes: dict[str, ModeD
     bypasses that — so they are re-parsed through `NosPluginConfig` here: the
     typed model is the one loud boundary for both paths (typed-model-first,
     #287 / D6 K), and it owns the `_default_` special rule. Mode names are then
-    validated against the *actual* platform modes, which only the merge knows
-    (the A3 modes, or the legacy branch's synthesized user/enable/config).
+    validated against the *actual* platform modes, which only the merge knows.
     """
     if not inventory_commands:
         return {}
@@ -272,8 +255,7 @@ def _bind_handler_refs(commands: dict[str, ResolvedCommand], handlers: dict[str,
 
     An unresolved ref is loud (a `ValueError` surfacing at ``Host.start`` /
     ``build_shared_platform``): "fail at startup", never a silent no-output
-    command. The legacy adapter sets ``handler`` directly (no ``handler_ref``), so
-    those commands are already bound and skipped.
+    command.
     """
     for name, cmd in commands.items():
         out = cmd.output
@@ -365,8 +347,7 @@ class CMDShell:
         #  - `_variant_indices`: canonical_name -> chosen index, fixed for the
         #    whole session (shared by every alias of a command).
         #  - `_variant_outputs`: cmd.name -> ResolvedOutput, rebuilt each apply
-        #    against the latest commands (dispatch identity; a legacy alias may
-        #    override its own output_variants, codex#1 6th).
+        #    against the latest commands (dispatch identity).
         #  - `_variants_policy` / `_host_name`: the policy + stable host id used
         #    to decide an index (host id, not base_prompt — D6 E).
         self._variant_indices: dict[str, int] = {}
@@ -532,13 +513,11 @@ class CMDShell:
           a new variant-bearing canonical that appears on a hot reload is decided
           lazily, and a canonical that vanished is pruned.
         - **outputs** are keyed on `cmd.name` (dispatch identity) and rebuilt from
-          the latest `commands`, so a legacy alias overriding its own
-          `output_variants` keeps its own output while still sharing the
-          canonical's chosen index (codex#1 6th).
+          the latest `commands` (codex#1 6th).
         - every command sharing a `canonical_name` must expose the same variant
           pool length, else the shared index is ambiguous — loud (codex#1 6th).
-          A3 aliases (`replace`) always match; only legacy `output_variants`
-          overrides can diverge.
+          A3 aliases inherit the target's pool via the loader's `replace`, so
+          shipped data always matches; the check is a defensive guard.
         - an inherited **explicit int** index that a hot reload pushed out of
           range (the pool shrank below `select`) is loud, not silently wrapped —
           the same loud-on-out-of-range contract a fresh connect enforces, so the
@@ -598,9 +577,6 @@ class CMDShell:
     # that loads but fails to normalize can be rolled back (2nd round codex #1).
     _NOS_RELOAD_ATTRS = (
         "name",
-        "initial_prompt",
-        "enable_prompt",
-        "config_prompt",
         "auth",
         "device",
         "resolved_platform",
@@ -629,7 +605,7 @@ class CMDShell:
 
         The A3 platform parse is cached by `load_platform_dir`; drop that cache
         first so a reload re-reads the changed files instead of the stale parse
-        (#264 / D6 cache bypass). No-op for legacy yaml/py reloads.
+        (#264 / D6 cache bypass). No-op for py module reloads.
 
         `reload_targets` are reload units (A3 platform dirs / `.py` modules), not
         raw changed files (#274 / D1). Per-platform watch (#281 / D2) means a
@@ -649,7 +625,6 @@ class CMDShell:
         with self._reload_lock:
             load_platform_dir.cache_clear()
             for target in reload_targets:
-                snapshot_commands = dict(self.nos.commands)
                 snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
                 try:
                     self.nos.from_file(target)
@@ -660,7 +635,6 @@ class CMDShell:
                     # nos mutation so the broken file does not poison subsequent
                     # reloads, then log the traceback so a genuine plugin bug stays
                     # diagnosable.
-                    self.nos.commands = snapshot_commands
                     for attr, value in snapshot_attrs.items():
                         setattr(self.nos, attr, value)
                     log.error(
@@ -957,7 +931,7 @@ class CMDShell:
             # guard `.get(cmd.name, cmd.output)` is fine — but the guard makes the
             # intent explicit and prevents an overlay-stripped command from ever
             # reaching a sibling's variant output. `cmd.name` (dispatch identity)
-            # keys the lookup so a legacy alias returns its own output.
+            # keys the lookup; aliases share the canonical's chosen index.
             output = self._variant_outputs.get(cmd.name, cmd.output) if cmd.variants else cmd.output
         else:
             if cmd is not None:

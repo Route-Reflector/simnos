@@ -4,12 +4,13 @@ This module is the point of entry for all NOS plugins.
 It gets the names and filenames to load the NOS plugins
 later whenever needed (lazy loading).
 Registration order (#264 / D6): A3 platform dirs (``platforms/<name>/``) are
-registered first; finally Python modules append and override or extend any
-existing entries for the same platform. The legacy monolithic
+registered first; Python modules then append to their platform's existing
+entry. An A3 dir is required (#317 P-4) — a py module with no co-named A3 dir
+is warned about and not registered. The legacy monolithic
 ``platforms_yaml/<name>.yaml`` form was removed in v3 (#264 PR-3).
 
-With .py modules we can have functionality, while the A3 dir carries the
-static command data.
+With .py modules we can have functionality (the device class + the A3
+``handler:`` namespace), while the A3 dir carries the static command data.
 
 ``available_platforms`` is the public derived view of this registry —
 ``simnos.core.nos.available_platforms`` re-exports it for backward
@@ -49,10 +50,15 @@ if os.path.isdir(platforms_directory_a3):
             nos_plugins[entry] = [dirpath]
             _a3_platform_dirs[entry] = dirpath
 
-# load NOS from python modules updating the NOS.
+# Load the python handler modules, appending each to its platform's existing
+# A3 entry (registration order: A3 dir first, py module last).
 # The glob is non-recursive on purpose: authoring templates (BaseDevice in
 # `platforms_py/_templates/`) live in a subpackage and never surface as
 # platforms (#239 — previously a filename filter excluded base_template.py).
+# A py module with no co-named A3 dir is NOT registered (#317 P-4): py-only
+# platforms are gone (the merge requires A3 command data), and registering one
+# would only defer the failure to `Host.start` — warn at import instead, so the
+# orphan is visible the moment the registry is built.
 platforms_directory_py: str = os.path.join(current_directory, "platforms_py")
 py_files = glob.glob(os.path.join(platforms_directory_py, "*.py"))
 py_files = [file for file in py_files if os.path.basename(file) != "__init__.py"]
@@ -61,7 +67,12 @@ for file in py_files:
     if platform_name in nos_plugins:
         nos_plugins[platform_name].append(file)
     else:
-        nos_plugins[platform_name] = [file]
+        log.warning(
+            "platforms_py/%s.py has no matching A3 platform dir (platforms/%s/); not registered — "
+            "an A3 dir is required since #317 P-4 (the py module supplies handlers only)",
+            platform_name,
+            platform_name,
+        )
 
 # Single source of truth for "supported platform" — derived from `nos_plugins`
 # so that adding an A3 dir under platforms/ or a .py file under platforms_py/ is

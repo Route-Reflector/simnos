@@ -22,7 +22,13 @@ import threading
 import pytest
 
 from simnos.core.nos import Nos
-from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
+from simnos.core.resolved_command import (
+    ModeDef,
+    ResolvedCommand,
+    ResolvedOutput,
+    ResolvedPlatform,
+    compile_template,
+)
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers.async_session import _complete, _LineEditor
 from simnos.plugins.shell.cmd_shell import CMDShell
@@ -51,23 +57,29 @@ def _shell(name: str) -> CMDShell:
     )
 
 
-def _legacy_shell(commands: dict) -> CMDShell:
-    """A legacy (3-prompt) shell built from an in-memory command dict."""
-    nos = Nos()
-    nos.from_dict(
-        {
-            "name": "synthetic",
-            "initial_prompt": "{base_prompt}>",
-            "enable_prompt": "{base_prompt}#",
-            "config_prompt": "{base_prompt}(config)#",
-            "commands": commands,
-        }
-    )
+def _inventory_shell(commands: dict) -> CMDShell:
+    """A shell over an in-memory 3-mode platform, commands via the inventory inflow.
+
+    Successor of the removed `from_dict` vehicle (#317 P-4): the platform is a
+    bare `ResolvedPlatform` (modes only) and the test's commands ride the
+    inventory inflow's A3 dialect (`mode:` names, inline verbatim `output`),
+    normalized by the same merge every host uses.
+    """
+    modes = {
+        name: ModeDef(name=name, prompt_template=compile_template(tpl)[0])
+        for name, tpl in {
+            "user": "{{ base_prompt }}>",
+            "enable": "{{ base_prompt }}#",
+            "config": "{{ base_prompt }}(config)#",
+        }.items()
+    }
+    nos = Nos(name="synthetic")
+    nos.resolved_platform = ResolvedPlatform(modes=modes, initial_mode="user", commands={})
     is_running = threading.Event()
     is_running.set()
     return CMDShell(
         nos=nos,
-        nos_inventory_config={},
+        nos_inventory_config={"commands": commands},
         base_prompt="device",
         is_running=is_running,
     )
@@ -232,13 +244,14 @@ def test_completion_is_canonical_only_cisco():
 
 # --------------------------------------------------------------- 7. overridable specials + handler
 def test_specials_overridable_literal():
-    shell = _legacy_shell(
+    shell = _inventory_shell(
         {
-            "clear counters": {"output": "cleared", "prompt": "{base_prompt}#"},
-            "clock set": {"output": "set", "prompt": "{base_prompt}#"},
-            "show version": {"output": "v1", "prompt": "{base_prompt}#"},
-            # literal override carrying the placeholder (escaped for the adapter)
-            "_ambiguous_": {"output": "AMB <{{input}}>", "help": ""},
+            "clear counters": {"output": "cleared", "mode": ["enable"]},
+            "clock set": {"output": "set", "mode": ["enable"]},
+            "show version": {"output": "v1", "mode": ["enable"]},
+            # literal override carrying the plain single-brace placeholder
+            # (native since #317 P-3 — no adapter escape needed)
+            "_ambiguous_": {"output": "AMB <{input}>", "help": ""},
             "_incomplete_": {"output": "INC!", "help": ""},
         }
     )
@@ -254,10 +267,10 @@ def test_special_handler_override_is_none_safe_and_no_double_substitution():
     pipeline (the cmd-swap, not a render-only helper), so `render()` returning
     None for a handler does not crash, and a literal `{input}` the handler emits
     itself is NOT re-substituted (handler formats from its own `command` arg)."""
-    shell = _legacy_shell(
+    shell = _inventory_shell(
         {
-            "clear counters": {"output": "cleared", "prompt": "{base_prompt}#"},
-            "clock set": {"output": "set", "prompt": "{base_prompt}#"},
+            "clear counters": {"output": "cleared", "mode": ["enable"]},
+            "clock set": {"output": "set", "mode": ["enable"]},
         }
     )
     shell.current_mode = "enable"
@@ -280,10 +293,10 @@ def test_special_handler_override_is_none_safe_and_no_double_substitution():
 def test_special_none_kind_override_does_not_crash():
     """A none-kind (empty) `_ambiguous_` override yields no body and never the
     `None.replace` crash the render-only helper would have hit."""
-    shell = _legacy_shell(
+    shell = _inventory_shell(
         {
-            "clear counters": {"output": "cleared", "prompt": "{base_prompt}#"},
-            "clock set": {"output": "set", "prompt": "{base_prompt}#"},
+            "clear counters": {"output": "cleared", "mode": ["enable"]},
+            "clock set": {"output": "set", "mode": ["enable"]},
         }
     )
     shell.current_mode = "enable"
@@ -350,7 +363,7 @@ def test_abbreviation_handler_receives_typed_line():
     its `command`, consistent with exact dispatch (the handler always sees the
     literal typed line; the wire echo shows what the user typed). Pinned so the
     contract is intentional rather than incidental (codex 1st#4)."""
-    shell = _legacy_shell({"show version": {"output": "v", "prompt": "{base_prompt}#"}})
+    shell = _inventory_shell({"show version": {"output": "v", "mode": ["enable"]}})
     shell.current_mode = "enable"
     seen = []
 
