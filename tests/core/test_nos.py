@@ -1,32 +1,25 @@
 """
 Test module for simnos.core.nos module.
 This module can be found at simnos/core/nos.py
+
+Since #317 P-4 `Nos` carries no legacy command surface (``commands`` dict /
+scalar prompts / ``from_dict``): a py module supplies the device class + the
+A3 ``handler:`` namespace only, and command data comes from the A3 platform
+dir (covered by tests/plugins/test_cmd_shell_a3.py). These tests pin the py
+module load path (`_from_module`) and the file dispatch (`from_file`).
 """
 
-import copy
 import logging
 import os
 import types
 
-from pydantic import ValidationError
 import pytest
 import yaml
 
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
-from tests.assets import module
 
 _NOS_LOGGER = "simnos.core.nos"
-
-
-def _normalized_commands(commands: dict) -> dict:
-    """Expected runtime form of authored commands (#244 / D3).
-
-    Every load path normalizes `prompt` str -> [str] on a deepcopied
-    candidate, so equality assertions against authored dicts compare
-    through this helper.
-    """
-    return Nos.normalize_command_prompts(copy.deepcopy(commands))
 
 
 def _write_tmp_file(tmp_path, name: str, content: str) -> str:
@@ -39,57 +32,15 @@ def _write_tmp_file(tmp_path, name: str, content: str) -> str:
     return str(tmp_file)
 
 
-def _assert_module_static_commands_loaded(nos: Nos) -> None:
-    """The test module's non-callable-output commands landed in ``nos``, normalized.
-
-    Callable outputs are excluded from both sides (functions don't compare by
-    value); the remaining static commands must match exactly (a dict `==` gives
-    a readable diff and also catches stray/extra commands).
-    """
-    expected = _normalized_commands(module.commands)
-    expected_static = {name: cmd for name, cmd in expected.items() if not callable(cmd["output"])}
-    actual_static = {name: cmd for name, cmd in nos.commands.items() if not callable(cmd["output"])}
-    assert actual_static == expected_static
-
-
-def _nos_log_messages(caplog, level: int) -> list[str]:
-    """Messages logged to the nos logger at ``level`` or above.
-
-    Filtering by logger name + level keeps the assertLogs-style scope (the old
-    `assertLogs(_NOS_LOGGER, level=...)` only saw that logger's records).
-    """
-    return [r.getMessage() for r in caplog.records if r.name == _NOS_LOGGER and r.levelno >= level]
-
-
-@pytest.fixture(scope="module")
-def commands() -> dict:
-    """Authored commands loaded once from the shared yaml fixture.
-
-    Read-only across tests: `Nos` normalizes on a deepcopied candidate, so
-    callers never mutate this shared dict.
-    """
-    with open("tests/assets/yaml_nos.yaml", encoding="utf-8") as yml_file:
-        return yaml.safe_load(yml_file)["commands"]
-
-
 def test_init_without_arguments():
     """
     Test that the init method works when no arguments are provided.
     """
     nos = Nos()
     assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert nos.commands == {}
-
-
-def test_init_with_arguments(commands):
-    """
-    Test that the init method works when arguments are provided.
-    """
-    nos = Nos(name="MySimNOS", initial_prompt="MySimNOS>", commands=commands)
-    assert nos.name == "MySimNOS"
-    assert nos.initial_prompt == "MySimNOS>"
-    assert nos.commands == _normalized_commands(commands)
+    assert nos.device is None
+    assert nos.handlers == {}
+    assert nos.resolved_platform is None
 
 
 def test_init_with_argument_name():
@@ -98,241 +49,6 @@ def test_init_with_argument_name():
     """
     nos = Nos(name="MySimNOS")
     assert nos.name == "MySimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert nos.commands == {}
-
-
-def test_init_with_argument_initial_prompt():
-    """
-    Test that the init method works when
-    the initial_prompt argument is provided.
-    """
-    nos = Nos(initial_prompt="MySimNOS>")
-    assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "MySimNOS>"
-    assert nos.commands == {}
-
-
-def test_init_with_argument_commands(commands):
-    """
-    Test that the init method works when the commands argument is provided.
-    """
-    nos = Nos(commands=commands)
-    assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert nos.commands == _normalized_commands(commands)
-
-
-def test_validate():
-    """
-    Test that the validate raises a ValidationError
-    when the NOS attributes are invalid.
-    """
-    with pytest.raises(ValidationError, match=r"commands"):
-        nos = Nos(commands="invalid_commands")  # ty: ignore[invalid-argument-type]
-        nos.validate()
-
-
-def test_from_dict_correct(commands):
-    """
-    Test that the from_dict method works when the data is correct.
-    """
-    nos = Nos()
-    nos.from_dict(
-        {
-            "name": "MySimNOS",
-            "initial_prompt": "MySimNOS>",
-            "commands": commands,
-        }
-    )
-    assert nos.name == "MySimNOS"
-    assert nos.initial_prompt == "MySimNOS>"
-    assert nos.commands == _normalized_commands(commands)
-
-
-@pytest.mark.parametrize(
-    "override, match",
-    [
-        pytest.param({"name": 123}, r"\bname\b", id="name"),
-        pytest.param({"initial_prompt": 123}, r"initial_prompt", id="initial_prompt"),
-        pytest.param({"commands": "invalid_commands"}, r"commands", id="commands"),
-    ],
-)
-def test_init_rejects_invalid_field(commands, override, match):
-    """Nos() raises ValidationError when a single field has the wrong type.
-
-    Each case keeps the other two fields valid (name/initial_prompt str,
-    commands from the shared fixture) so the rejection is attributable to the
-    overridden field alone.
-    """
-    kwargs: dict = {"name": "MySimNOS", "initial_prompt": "MySimNOS>", "commands": commands}
-    kwargs.update(override)
-    with pytest.raises(ValidationError, match=match):
-        Nos(**kwargs)
-
-
-@pytest.mark.parametrize(
-    "data, expected_name, expected_prompt",
-    [
-        pytest.param({"name": "MySimNOS"}, "MySimNOS", "SimNOS>", id="only_name"),
-        pytest.param({"initial_prompt": "MySimNOS>"}, "SimNOS", "MySimNOS>", id="only_initial_prompt"),
-        pytest.param({}, "SimNOS", "SimNOS>", id="no_data"),
-    ],
-)
-def test_from_dict_partial_keeps_command_defaults(data, expected_name, expected_prompt):
-    """from_dict with partial data keeps defaults for the omitted fields.
-
-    Covers the name-only / initial_prompt-only / no-data cases; commands stays
-    empty in all three. (`commands`-only is pinned separately because its
-    expected value is the normalized fixture, not `{}`.)
-    """
-    nos = Nos()
-    nos.from_dict(data)
-    assert nos.name == expected_name
-    assert nos.initial_prompt == expected_prompt
-    assert nos.commands == {}
-
-
-def test_from_dict_only_commands(commands):
-    """
-    Test that the from_dict method works
-    when only the commands are provided.
-    """
-    nos = Nos()
-    nos.from_dict({"commands": commands})
-    assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert nos.commands == _normalized_commands(commands)
-
-
-def test_from_dict_unknown_top_level_key_raises():
-    """A typo'd top-level key is rejected loudly, nothing is committed.
-
-    Pins the D8 (#244) flip of the old lenient contract: `enable_promt`
-    used to be dropped silently by the targeted `data.get()` reads.
-    The allowed key set is `ModelNosAttributes.model_fields` (SSoT),
-    and the check runs before any attribute commit (no-partial-state,
-    #232).
-    """
-    nos = Nos()
-    with pytest.raises(ValueError, match=r"unknown top-level field\(s\): \['enable_promt'\]"):
-        nos.from_dict({"name": "polluted", "enable_promt": "{base_prompt}#"})
-    assert nos.name == "SimNOS"
-
-
-def test_from_dict_schema_invalid_leaves_nos_untouched():
-    """A schema-invalid dict raises ValidationError before any commit.
-
-    Pins the D8 (#244) merged-view validation on the `from_dict` path
-    (inventory commands + the constructor): a command with e.g. an int
-    `output` must raise before `name` / `commands` are committed, so
-    malformed data never leaves partial state behind.
-    """
-    nos = Nos()
-    with pytest.raises(ValidationError, match=r"output"):
-        nos.from_dict({"name": "polluted", "commands": {"cmd": {"output": 123, "help": "int output"}}})
-    assert nos.name == "SimNOS"
-    assert nos.commands == {}
-
-
-def test_from_dict_unknown_command_field_raises():
-    """A typo'd command field fails validation before any commit.
-
-    Pins the D5 (#244) flip of the old lenient contract:
-    `ModelNosCommand` is `extra="forbid"` now, so a typo'd field
-    (`outptu`) raises ValidationError out of the pre-commit merged-view
-    validation instead of being silently accepted.
-    """
-    nos = Nos()
-    with pytest.raises(ValidationError, match=r"outptu"):
-        nos.from_dict(
-            {
-                "name": "polluted",
-                "commands": {"cmd": {"output": "x", "help": "x", "outptu": "typo"}},
-            }
-        )
-    assert nos.name == "SimNOS"
-    assert nos.commands == {}
-
-
-def test_from_dict_accepts_output_variants():
-    """`output_variants` is a declared data-only field, not a typo.
-
-    Pins the D5 (#244) declaration: 16 platform yamls carry alternate
-    captures under this key (#234) and must keep loading under
-    `extra="forbid"`.
-    """
-    nos = Nos(
-        dict_args={
-            "name": "synth",
-            "initial_prompt": "{base_prompt}>",
-            "commands": {
-                "cmd": {
-                    "output": "primary",
-                    "help": "x",
-                    "output_variants": ["alternate capture"],
-                },
-            },
-        }
-    )
-    assert nos.commands["cmd"]["output_variants"] == ["alternate capture"]
-
-
-def test_from_dict_does_not_mutate_caller_dict():
-    """Caller-owned data must stay untouched by a load (#244 / D3).
-
-    `from_dict` normalizes `prompt` str -> [str] on a deepcopied
-    candidate, so the caller's dict (and, symmetrically, a py plugin's
-    module-level `commands` constant) keeps its original authoring
-    form — an accidental switch to in-place normalization turns into
-    a test failure here.
-    """
-    caller_commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}
-    nos = Nos()
-    nos.from_dict({"name": "synth", "commands": caller_commands})
-    assert caller_commands["cmd"]["prompt"] == "{base_prompt}>"
-    assert isinstance(caller_commands["cmd"]["prompt"], str)
-
-
-def test_from_dict_normalizes_str_prompt_to_list():
-    """A bare-str `prompt` authoring form lands as a list at runtime.
-
-    Pins the load-path normalization (#244 / D3): authoring keeps the
-    str/list sugar, runtime consumers (cmd_shell dispatch + mismatch
-    log) see lists only — the read-side isinstance branches are gone.
-    """
-    nos = Nos()
-    nos.from_dict(
-        {
-            "name": "synth",
-            "commands": {
-                "str form": {"output": "x", "help": "x", "prompt": "{base_prompt}>"},
-                "list form": {"output": "x", "help": "x", "prompt": ["{base_prompt}>"]},
-                "no prompt": {"output": "x", "help": "x"},
-            },
-        }
-    )
-    assert nos.commands["str form"]["prompt"] == ["{base_prompt}>"]
-    assert nos.commands["list form"]["prompt"] == ["{base_prompt}>"]
-    assert "prompt" not in nos.commands["no prompt"]
-
-
-def test_from_module_normalizes_str_prompt_to_list(tmp_path):
-    """The py-plugin path normalizes prompts the same way as from_dict.
-
-    Same #244 / D3 pin for `_from_module`, which commits through its
-    own deepcopied candidate (module-level `commands` constants keep
-    their authoring form).
-    """
-    plugin = _write_tmp_file(
-        tmp_path,
-        "str_prompt_module.py",
-        'NAME = "str_prompt"\nINITIAL_PROMPT = "{base_prompt}>"\n'
-        'commands = {"cmd": {"output": "x", "help": "x", "prompt": "{base_prompt}>"}}\n',
-    )
-    nos = Nos()
-    nos.from_file(plugin)
-    assert nos.commands["cmd"]["prompt"] == ["{base_prompt}>"]
 
 
 @pytest.mark.parametrize("ext", [".yaml", ".yml"])
@@ -348,31 +64,20 @@ def test_from_file_rejects_legacy_yaml(ext):
         Nos().from_file(f"tests/assets/whatever{ext}")
 
 
-def test_from_dict_non_mapping_commands_leaves_nos_untouched():
-    """A non-mapping 'commands' value raises before any mutation.
-
-    Pins the validate-before-commit ordering of `from_dict` (#232):
-    `name` used to be committed before `commands.update` raised on a
-    malformed value, leaving partial state behind — the same hole
-    `_from_module` had with DEVICE_NAME.
-    """
-    nos = Nos()
-    with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
-        nos.from_dict({"name": "polluted", "commands": "not-a-mapping"})
-    assert nos.name == "SimNOS"
-    assert nos.commands == {}
-
-
 def test_from_py_file():
     """
     Test that the from_file method works with .py.
+
+    The module supplies dynamic behavior only (#317 P-4): the device class is
+    auto-detected and its non-`_` methods join the `handler:` namespace. The
+    name stays at the constructor default — only an A3 dir load renames a Nos.
     """
     nos = Nos()
     nos.from_file("tests/assets/module.py")
-    assert nos.name == "test_module"
-    assert nos.initial_prompt == "{base_prompt}>"
+    assert nos.name == "SimNOS"
+    assert nos.device is not None
     assert nos.device.__class__.__name__ == "TestModule"
-    _assert_module_static_commands_loaded(nos)
+    assert {"make_show_clock", "make_show_version"} <= set(nos.handlers)
 
 
 def test_from_file_incorrect_py_file():
@@ -385,47 +90,43 @@ def test_from_file_incorrect_py_file():
         nos.from_file("tests/assets/incorrect_file.py")
 
 
-def test_from_module():
-    """
-    Test that the from_module method works.
-    """
-    nos = Nos()
-    # pylint: disable=protected-access
-    nos._from_module("tests/assets/module.py")
-    assert nos.name == "test_module"
-    assert nos.initial_prompt == "{base_prompt}>"
-    _assert_module_static_commands_loaded(nos)
+def test_from_module_commands_dict_is_rejected(tmp_path):
+    """A module-level non-empty `commands` dict fails the load loudly (#317 P-4).
 
-
-def test_from_module_incorrect_file():
+    The py dict authoring channel is gone; silently ignoring a leftover dict
+    would hide the author's intent (the "loads but never merges" window), so
+    `_from_module` rejects it at the load boundary — the successor of the P-3
+    merge-time guard. Nothing is committed (no-partial-state, #232).
     """
-    Test that the from_module method raises a
-    FileNotFoundError when the file is incorrect.
-    """
-    with pytest.raises(FileNotFoundError, match=r"incorrect_file\.py"):
-        nos = Nos()
-        # pylint: disable=protected-access
-        nos._from_module("tests/assets/incorrect_file.py")
-
-
-def test_from_module_non_mapping_commands_leaves_nos_untouched(tmp_path):
-    """A plugin whose `commands` is not a mapping raises before mutation.
-
-    Pins the `commands` type validation in `_from_module` (#232 cross
-    review 2nd round): symmetric with `from_dict`, a malformed
-    `commands` value raises ValueError without committing attrs first.
-    """
-    bad_py = _write_tmp_file(
+    dict_py = _write_tmp_file(
         tmp_path,
-        "bad_commands_plugin.py",
-        'NAME = "polluted"\nINITIAL_PROMPT = "{base_prompt}$"\ncommands = "not-a-mapping"\n',
+        "dict_author_plugin.py",
+        'commands = {"show x": {"output": "x", "help": "x"}}\n',
     )
     nos = Nos()
-    with pytest.raises(ValueError, match=r"'commands' must be a mapping \(got str\)"):
-        nos.from_file(bad_py)
-    assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert nos.commands == {}
+    with pytest.raises(ValueError, match="py dict authoring was removed"):
+        nos.from_file(dict_py)
+    assert nos.device is None
+    assert nos.handlers == {}
+
+
+def test_from_module_empty_commands_dict_is_ignored(tmp_path):
+    """A vestigial *empty* `commands = {}` is contentless and stays ignored.
+
+    Same contract as the P-3 merge guard: only a non-empty dict is an
+    authoring attempt; an empty leftover must not brick the plugin.
+    """
+    empty_py = _write_tmp_file(
+        tmp_path,
+        "empty_commands_plugin.py",
+        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+        "class Dev(BaseDevice):\n"
+        '    """Single local device class."""\n'
+        "commands = {}\n",
+    )
+    nos = Nos()
+    nos.from_file(empty_py)
+    assert nos.device.__class__.__name__ == "Dev"
 
 
 def test_from_module_multiple_device_classes_leaves_nos_untouched():
@@ -433,18 +134,16 @@ def test_from_module_multiple_device_classes_leaves_nos_untouched():
 
     Pins the build-before-commit ordering of `_from_module` (#232 cross
     review, failure mode swapped in #241/D5): the multiple-subclass
-    ValueError fires in the build phase like the pre-#241 DEVICE_NAME
-    AttributeError did, so a broken plugin raises out of `from_file`
-    without polluting `nos.commands` / `nos.name` behind the caller's
-    back.
+    ValueError fires in the build phase, so a broken plugin raises out of
+    `from_file` without polluting `nos.device` / `nos.handlers` behind the
+    caller's back.
     """
     nos = Nos()
     with pytest.raises(ValueError, match=r"multiple BaseDevice subclasses \(DeviceA, DeviceB\)"):
         nos.from_file("tests/assets/broken_multi_device_module.py")
     assert nos.name == "SimNOS"
-    assert nos.initial_prompt == "SimNOS>"
-    assert "polluting command" not in nos.commands
     assert nos.device is None
+    assert nos.handlers == {}
 
 
 def test_from_module_local_class_alias_is_not_a_second_subclass(tmp_path):
@@ -459,12 +158,9 @@ def test_from_module_local_class_alias_is_not_a_second_subclass(tmp_path):
         tmp_path,
         "alias_device_plugin.py",
         "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
-        'NAME = "alias_plugin"\n'
-        'INITIAL_PROMPT = "{base_prompt}>"\n'
         "class LocalDevice(BaseDevice):\n"
         '    """The single local device class."""\n'
-        "Device = LocalDevice\n"
-        "commands = {}\n",
+        "Device = LocalDevice\n",
     )
     nos = Nos()
     nos.from_file(alias_py)
@@ -483,33 +179,6 @@ def test_from_module_imported_subclass_not_detected():
     assert nos.device.__class__.__name__ == "LocalDevice"
 
 
-def test_from_module_device_name_leftover_warns_and_is_ignored(tmp_path, caplog):
-    """A leftover DEVICE_NAME constant warns; detection still works.
-
-    Pins the #241/D5 migration warning: DEVICE_NAME is deprecated and
-    ignored — the device comes from auto-detection, and the author is
-    nudged to delete the constant.
-    """
-    legacy_py = _write_tmp_file(
-        tmp_path,
-        "legacy_device_name_plugin.py",
-        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
-        'NAME = "legacy"\n'
-        'INITIAL_PROMPT = "{base_prompt}>"\n'
-        'DEVICE_NAME = "LegacyDevice"\n'
-        "class LegacyDevice(BaseDevice):\n"
-        '    """Local device class, auto-detected regardless of DEVICE_NAME."""\n'
-        "commands = {}\n",
-    )
-    nos = Nos()
-    caplog.clear()
-    with caplog.at_level(logging.WARNING, logger=_NOS_LOGGER):
-        nos.from_file(legacy_py)
-    warnings = _nos_log_messages(caplog, logging.WARNING)
-    assert any("DEVICE_NAME" in msg and "deprecated and ignored" in msg for msg in warnings)
-    assert nos.device.__class__.__name__ == "LegacyDevice"
-
-
 def test_from_module_no_device_class_keeps_existing_device(tmp_path):
     """A no-device module does not clear a previously set device.
 
@@ -522,32 +191,9 @@ def test_from_module_no_device_class_keeps_existing_device(tmp_path):
     nos.from_file("tests/assets/module.py")
     device_before = nos.device
     assert device_before is not None
-    no_device_py = _write_tmp_file(
-        tmp_path,
-        "no_device_plugin.py",
-        'NAME = "no_device"\nINITIAL_PROMPT = "{base_prompt}>"\ncommands = {}\n',
-    )
+    no_device_py = _write_tmp_file(tmp_path, "no_device_plugin.py", "# no BaseDevice subclass here\n")
     nos.from_file(no_device_py)
     assert nos.device is device_before
-
-
-def test_from_module_override_logs_debug(caplog):
-    """A py module overriding already-loaded commands logs at debug (#241 / P-7).
-
-    Pins the observable yaml-vs-py precedence: same-named commands
-    are replaced wholesale (per-command full replacement, no deep
-    merge) and the override is logged so a plugin author can see
-    which already-loaded commands the py module shadows.
-    """
-    nos = Nos()
-    nos.from_dict({"commands": {"show clock": {"output": "from yaml", "help": "static"}}})
-    caplog.clear()
-    with caplog.at_level(logging.DEBUG, logger=_NOS_LOGGER):
-        nos.from_file("tests/assets/module.py")
-    debug_msgs = _nos_log_messages(caplog, logging.DEBUG)
-    assert any("overrides 1 already-loaded command(s)" in msg and "show clock" in msg for msg in debug_msgs)
-    # Full replacement: the module's callable output wins over the yaml str.
-    assert callable(nos.commands["show clock"]["output"])
 
 
 class TestHandlerNamespace:
@@ -558,8 +204,6 @@ class TestHandlerNamespace:
             tmp_path,
             "handlers_plugin.py",
             "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
-            'NAME = "h1"\n'
-            'INITIAL_PROMPT = "{base_prompt}>"\n'
             "class Dev(BaseDevice):\n"
             "    def make_a(self, device=None, **kw):\n"
             '        return "a"\n'
@@ -569,8 +213,7 @@ class TestHandlerNamespace:
             "    def _private(self):\n"  # underscore -> excluded
             '        return "x"\n'
             "def make_c(device=None, **kw):\n"  # module-level function
-            '    return "c"\n'
-            "commands = {}\n",
+            '    return "c"\n',
         )
         nos = Nos()
         nos.from_file(py)
@@ -582,13 +225,10 @@ class TestHandlerNamespace:
             tmp_path,
             "classmethod_plugin.py",
             "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
-            'NAME = "hc"\n'
-            'INITIAL_PROMPT = "{base_prompt}>"\n'
             "class Dev(BaseDevice):\n"
             "    @classmethod\n"
             "    def make_a(cls, device=None, **kw):\n"
-            '        return "a"\n'
-            "commands = {}\n",
+            '        return "a"\n',
         )
         nos = Nos()
         with pytest.raises(ValueError, match="classmethod"):
@@ -599,14 +239,11 @@ class TestHandlerNamespace:
             tmp_path,
             "collision_plugin.py",
             "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
-            'NAME = "hx"\n'
-            'INITIAL_PROMPT = "{base_prompt}>"\n'
             "class Dev(BaseDevice):\n"
             "    def make_a(self, device=None, **kw):\n"
             '        return "method"\n'
             "def make_a(device=None, **kw):\n"  # same name at module level -> loud
-            '    return "func"\n'
-            "commands = {}\n",
+            '    return "func"\n',
         )
         nos = Nos()
         with pytest.raises(ValueError, match="unambiguous"):
@@ -643,108 +280,61 @@ class TestHandlerNamespace:
         # Derived version wins (getattr on the leaf class resolves the override).
         assert ns["make_a"](None, base_prompt="R1", current_mode="user", current_prompt="R1>", command="x") == "derived"
 
+    def test_sources_dedup_and_fresh_list(self, tmp_path):
+        """`sources` records each loaded path once, via a fresh list (#317 P-4).
 
-def test_register_nos_plugin_directly():
-    """
-    Test that we can register a nos model directly.
-    """
-    commands = {
-        "terminal width 511": {"output": "", "help": "Set terminal width to 511"},
-        "terminal length 0": {"output": "", "help": "Set terminal length to 0"},
-        "show clock": {"output": "MySimNOSPlugin system time is 00:00:00"},
-    }
-    nos = Nos(
-        name="MySimNOSPlugin",
-        initial_prompt="{base_prompt}>",
-        commands=commands,
-    )
+        Hot reload re-runs `from_file` on the same target per change, so the
+        diagnostic list must not grow into a reload history (2nd round 🐳#1);
+        and like `handlers`, the fresh-list commit is what makes the
+        `_NOS_RELOAD_ATTRS` reference snapshot rollback-safe (2nd round 🦊#1).
+        """
+        py = _write_tmp_file(tmp_path, "src_plugin.py", 'def make_a(device, **kw):\n    return "a"\n')
+        nos = Nos()
+        nos.from_file(py)
+        first = nos.sources
+        assert first == [py]
+        nos.from_file(py)  # hot-reload shape: same target again
+        assert nos.sources == [py]  # deduplicated, not a history
+        py_b = _write_tmp_file(tmp_path, "src_plugin_b.py", 'def make_b(device, **kw):\n    return "b"\n')
+        nos.from_file(py_b)
+        assert nos.sources == [py, py_b]
+        assert nos.sources is not first  # fresh list — the snapshotted one is untouched
+        assert first == [py]
 
-    assert nos.name == "MySimNOSPlugin"
-    assert nos.initial_prompt == "{base_prompt}>"
-    assert nos.commands == commands
+    def test_handlers_accumulate_across_multi_file_load_as_fresh_dict(self, tmp_path):
+        """A multi-file load merges handler namespaces later-wins, via a fresh dict.
 
-
-def test_register_nos_plugin_from_dict():
-    """
-    Test that we can register a nos model from a dict.
-    """
-    nos_dict: dict = {
-        "name": "MySimNOSPlugin",
-        "initial_prompt": "{base_prompt}>",
-        "commands": {
-            "terminal width 511": {
-                "output": "",
-                "help": "Set terminal width to 511",
-            },
-            "terminal length 0": {"output": "", "help": "Set terminal length to 0"},
-            "show clock": {"output": "MySimNOSPlugin system time is 00:00:00"},
-        },
-    }
-
-    nos = Nos(**nos_dict)
-
-    assert nos_dict["name"] == nos.name
-    assert nos_dict["initial_prompt"] == nos.initial_prompt
-    assert nos_dict["commands"] == nos.commands
+        The fresh-dict commit is what makes the `_NOS_RELOAD_ATTRS` reference
+        snapshot rollback-safe under hot reload (#317 / P-1) — an in-place
+        `.update` would mutate the snapshotted dict.
+        """
+        py_a = _write_tmp_file(tmp_path, "a_plugin.py", 'def make_a(device, **kw):\n    return "a"\n')
+        py_b = _write_tmp_file(tmp_path, "b_plugin.py", 'def make_b(device, **kw):\n    return "b"\n')
+        nos = Nos()
+        nos.from_file(py_a)
+        first = nos.handlers
+        nos.from_file(py_b)
+        assert set(nos.handlers) == {"make_a", "make_b"}
+        assert nos.handlers is not first  # fresh dict, not in-place update
+        assert set(first) == {"make_a"}  # the snapshotted dict is untouched
 
 
-def test_register_nos_plugin_incorrect_commands():
-    """
-    Test that we can register a nos model from a dict.
-    """
-    with pytest.raises(ValidationError, match=r"output"):
-        Nos(
-            name="MySimNOSPlugin",
-            initial_prompt="{base_prompt}>",
-            commands={
-                "show clock": {"output": 37},
-            },
-        )
+def test_registry_data_source_is_a3_dir_plus_optional_py_module():
+    """Every registry entry is an A3 platform dir, optionally + a co-named py module.
 
-
-def test_register_nos_plugin_incorrect_name():
-    """
-    Test that we can register a nos model from a dict.
-    """
-    with pytest.raises(ValidationError, match=r"\bname\b"):
-        Nos(
-            name=123,  # ty: ignore[invalid-argument-type]
-            initial_prompt="{base_prompt}>",
-            commands={
-                "show clock": {"output": ""},
-            },
-        )
-
-
-def test_register_nos_plugin_incorrect_output():
-    """
-    Test that we can register a nos model from a dict.
-    """
-    with pytest.raises(ValidationError, match=r"output"):
-        Nos(commands={"show clock": {"output": 42}})
-
-
-def test_registry_data_source_is_a3_dir_and_or_py_module():
-    """Every registry entry is an A3 platform dir and/or a co-named py module.
-
-    The legacy ``platforms_yaml/<p>.yaml`` data source was removed in v3 (#264);
-    a platform's static command data lives in an A3 ``platforms/<p>/`` directory,
-    its dynamic behavior in a ``platforms_py/<p>.py`` module, and a platform may
-    have either or both (a py-only platform registers as ``[<p>.py]`` — the
-    registry's ``not in nos_plugins`` branch). When both are present the A3 dir
-    is registered first and the py module is appended last so it wins the
-    per-command precedence (#264 / D6).
+    The legacy ``platforms_yaml/<p>.yaml`` data source was removed in v3 (#264)
+    and the py-only registration branch in #317 P-4: a platform's static
+    command data lives in an A3 ``platforms/<p>/`` directory (always the first
+    entry), and a ``platforms_py/<p>.py`` handler module may be appended last.
     """
     # pylint: disable=duplicate-code
     for filenames in nos_plugins.values():
         for filename in filenames:
             assert isinstance(filename, str)
         assert 1 <= len(filenames) <= 2
-        # Each entry is an A3 platform dir or a .py module; a 2-entry list is
-        # always [A3 dir, py module] in that order.
-        assert all(os.path.isdir(f) or f.endswith(".py") for f in filenames)
+        # The first entry is always the A3 dir; a py module can only append.
+        assert os.path.isdir(filenames[0])
         if len(filenames) == 2:
-            assert os.path.isdir(filenames[0])
             assert filenames[1].endswith(".py")
 
 
@@ -759,3 +349,19 @@ def test_configuration_file_is_loaded():
     assert nos.configuration_file == configuration_file
     assert nos.device is not None
     assert nos.device.configurations == yaml.safe_load(data)
+
+
+def test_from_module_no_device_class_warns(tmp_path, caplog):
+    """A module without a BaseDevice subclass loads with a warning, not an error.
+
+    A handler module normally ships a device class; a bare module-functions-only
+    one is legal (module-level handlers) but the missing device is worth a nudge.
+    """
+    py = _write_tmp_file(tmp_path, "bare_functions_plugin.py", 'def make_x(device, **kw):\n    return "x"\n')
+    nos = Nos()
+    caplog.clear()
+    with caplog.at_level(logging.WARNING, logger=_NOS_LOGGER):
+        nos.from_file(py)
+    assert any("defines no BaseDevice subclass" in r.getMessage() for r in caplog.records)
+    assert nos.device is None
+    assert set(nos.handlers) == {"make_x"}

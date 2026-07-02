@@ -2,8 +2,7 @@
 
 Pins the `_normalize_configurations` contract on both load paths
 (yaml / j2): an empty configuration file means "no configuration"
-(`{}`), a non-mapping one is a loud authoring error — symmetric with
-the `Nos.from_dict` non-mapping guard (#232).
+(`{}`), a non-mapping one is a loud authoring error (#232).
 """
 
 import os

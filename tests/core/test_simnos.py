@@ -22,7 +22,13 @@ from simnos.core.pydantic_models import ModelOverlay, ModelSysConfig
 from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
 from simnos.plugins.nos import nos_plugins, resolve_device_type
-from tests.utils import get_platforms_from_md, get_running_hosts, set_attr
+from tests.utils import (
+    SYNTHETIC_CUSTOM_A3_DIR,
+    SYNTHETIC_CUSTOM_HANDLERS,
+    get_platforms_from_md,
+    get_running_hosts,
+    set_attr,
+)
 
 
 class _Step(NamedTuple):
@@ -363,6 +369,41 @@ class TestSimNOS:
         inventory = {"hosts": {"R1": {"platform": "cisco_ios"}}}
         with pytest.raises(ValueError, match=r"Extra inputs are not permitted"):
             SimNOS(inventory=inventory)
+
+    def test_plugins_str_a3_dir_registers_under_basename(self):
+        """A str plugin (A3 platform dir path) registers under the dir basename (#317 P-4).
+
+        The route `creating_nos_plugin.md` documents for an external
+        static-only platform: `SimNOS(plugins=["path/to/dir"])` builds a Nos
+        from the dir and keys it by the platform name (= dir basename), so an
+        inventory `nos: {plugin: <basename>}` resolves to it.
+        """
+        # `SimNOS.nos_plugins` IS the module-global registry, so the entry must
+        # be dropped on the way out or the registry-invariant tests (which
+        # expect source-path lists, not Nos instances) see the leak.
+        try:
+            net = SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_A3_DIR])
+            assert "synthetic_custom" in net.nos_plugins
+            registered = net.nos_plugins["synthetic_custom"]
+            assert registered.resolved_platform is not None
+            assert "show clock" in registered.resolved_platform.commands
+        finally:
+            nos_plugins.pop("synthetic_custom", None)
+
+    def test_plugins_str_py_path_rejected(self):
+        """A str plugin pointing at a `.py` file (or any non-dir) is loud (#317 P-4).
+
+        A py module alone cannot author commands, so the py-path escape hatch
+        the dict/py plugin forms provided is gone — the caller is pointed at
+        the `Nos(filename=[a3_dir, handler_py])` route instead.
+        """
+        with pytest.raises(ValueError, match=r"is not an A3 platform dir"):
+            SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_HANDLERS])
+
+    def test_plugins_dict_rejected(self):
+        """The dict plugin form (legacy `from_dict` inflow) is gone (#317 P-4)."""
+        with pytest.raises(TypeError, match=r"supported str \(A3 platform dir\) or Nos"):
+            SimNOS(inventory={"hosts": {}}, plugins=[{"name": "legacy", "commands": {}}])
 
     def test_device_type_netmiko_alias_resolves(self):
         """A netmiko-canonical `device_type` resolves to its internal platform (#266 / D2).

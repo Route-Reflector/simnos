@@ -4,9 +4,8 @@ Device-class unit tests for the arista_eos Python plugin (T-14 / #230).
 Producer-side pins for the remaining dynamic handler (`make_show_clock`). The
 formerly callable statics (`show version` / `show running-config` /
 `show ip int brief`) and the dict-returning `make_exit` migrated to A3 static
-data (#317 P-2): content pins moved onto the A3 render, and the per-mode exit
-branches are pinned as static `transitions` in
-tests/plugins/test_p2_migration_parity.py.
+data (#317 P-2): content pins moved onto the A3 render below (the migration's
+byte-level parity fixtures retired with the legacy inflow, #317 P-4).
 """
 
 import os
@@ -63,3 +62,20 @@ def test_show_ip_int_brief_content(platform, command):
     assert "Interface" in out
     assert "Ethernet1" in out
     assert "{" not in out
+
+
+def test_show_ip_int_brief_txt_pair_stays_byte_identical():
+    """The two int-brief spellings' `.txt` files are byte-for-byte identical.
+
+    Both are REAL commands (alias-izing one would change the #303 P3-2
+    canonical-only abbreviation space) and the lint's 1-yaml:1-output rule
+    forbids sharing one output file, so the duplicated captures carry a
+    cross-sync comment in both yamls. This is the permanent identity gate the
+    retired P-2 migration fixtures used to provide (#317 P-4) — an edit to one
+    file without the other fails here.
+    """
+    commands_dir = os.path.join(PLATFORMS_DIR, "arista_eos", "commands")
+    with open(os.path.join(commands_dir, "show_ip_int_brief.txt"), "rb") as short_file:
+        short = short_file.read()
+    with open(os.path.join(commands_dir, "show_ip_interface_brief.txt"), "rb") as long_file:
+        assert short == long_file.read()

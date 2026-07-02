@@ -5,8 +5,8 @@ Producer-side pins for the remaining dynamic handler (`make_show_clock`,
 invoked with the same contract as `CMDShell._invoke_handler`). The formerly
 callable statics (`show version` / `show running-config`) migrated to A3
 `output_template` files (#317 P-2); their content pins moved onto the A3
-render (byte parity vs the old handlers is pinned separately in
-tests/plugins/test_p2_migration_parity.py).
+render (the migration's byte-level parity fixtures retired with the
+legacy inflow, #317 P-4).
 """
 
 import os

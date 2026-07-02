@@ -1,0 +1,6 @@
+---
+command: enable
+type: custom
+help: enter exec prompt
+mode: [user]
+new_mode: enable

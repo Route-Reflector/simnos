@@ -43,7 +43,7 @@ default_inventory = {
     "default": {
         "username": "user",
         "password": "user",
-        "port": 6000,
+        "port": 0,  # OS 割り当て (ephemeral, #271)。実ポートは net.hosts[<name>].port から読み戻す
         "server": {
             "plugin": "AsyncSshServer",
             "configuration": {
@@ -55,9 +55,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "device_type": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "device_type": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "device_type": "arista_eos"},
+        "router_cisco_ios": {"port": 0, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": 0, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": 0, "device_type": "arista_eos"},
     }
 }
 ```
@@ -416,8 +416,59 @@ server:
 | オプション                 | 絵文字                     | 説明                                  | 例                                                                       |
 | ------------------------- | ------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
 | `plugin`                  | :electric_plug:           | 使用する NOS プラグイン                 | `plugin: cisco_ios`                                                     |
-| `configuration`           | :gear:                    | NOS 設定                              | 設定はプラグインに完全に依存します                                           |
+| `configuration`           | :gear:                    | NOS 設定                              | 下の [インベントリ定義コマンド](#インベントリ定義コマンド) を参照              |
 
+### インベントリ定義コマンド
+
+`nos.configuration.commands` は、プラットフォームデータに触れずに **1 ホストだけ**
+にコマンドを追加 (または上書き) します — 同梱プラットフォームに無いセッション
+ローカルのスタブに便利です。エントリは A3 コマンドファイルと同じ方言 (#317) で
+書きます: mode *名*、静的遷移、inline の出力。
+
+```yaml
+hosts:
+    R1:
+        username: user
+        password: user
+        port: 0
+        device_type: cisco_ios
+        nos:
+            configuration:
+                commands:
+                    show inventory:
+                        help: session-local inventory stub
+                        mode: [user, enable]          # 省略 = 全 mode で有効
+                        output: |                     # verbatim literal (render なし)
+                            NAME: "Chassis", DESCR: "Lab router"
+                    whoami:
+                        output_template: "you are on {{ base_prompt }}"  # jinja2
+                    leave lab:
+                        mode: [user, config]
+                        transitions:                  # mode 別の遷移 map
+                            user: {exit: true}
+                            config: {new_mode: enable}
+```
+
+フィールドのメモ:
+
+- **`mode`** — コマンドが有効なプラットフォーム mode 名のリスト。省略で全 mode。
+  名前は `start()` 時にプラットフォームの modes に対して検証されるため、typo は
+  セッション中でなく起動時に失敗します。
+- **`output`** (inline の verbatim literal) / **`output_template`** (inline の
+  jinja2 ソース、使えるのは `{{ base_prompt }}` のみ) — 高々どちらか 1 つ。両方
+  省略で「何も出力しない」コマンドになります。
+- **`new_mode`** / **`exit: true`** / **`transitions`** — A3 コマンドファイルと
+  同じ静的遷移 channel (`transitions` は他 2 つと排他)。
+- **`help`** — `?` 一覧に出るテキスト。
+- `_default_` は上書き可能です (mode-agnostic のまま — `mode` / 遷移の指定は
+  拒否されます)。
+- ここでは使えないもの: `alias`、`variants`、`handler` (これらはプラットフォーム
+  データの概念です。A3 dir 側で author してください)。
+
+インベントリコマンドは merge の最上位 (platform data < overlay < inventory) に
+乗るため、同名エントリはこのホストに限って勝ちます。legacy の prompt 文字列
+field (`prompt:` / `new_prompt:`) は削除されました — [changelog の移行表](../changelog.ja.md)
+を参照。
 
 ## カスタムコマンドオーバーレイ（データレイヤリング）
 

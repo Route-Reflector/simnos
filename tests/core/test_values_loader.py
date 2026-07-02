@@ -212,8 +212,8 @@ class TestDemoByteIdentical:
     regression in the `.j2` (e.g. a stray blank line from a `{% for %}` block,
     or a changed column width in the table) fails this pin (1st round
     codex#4 / claude#1). The former `show version` demo pin ended with #317 P-2
-    (see TestRoundTrip); the served `show version` bytes are pinned by
-    tests/plugins/test_p2_migration_parity.py instead.
+    (see TestRoundTrip); the served `show version` bytes are pinned by the
+    per-platform A3 oracle snapshot (tests/core/test_migration_oracle_a3.py).
     """
 
     def test_demo_renders_byte_identical(self):

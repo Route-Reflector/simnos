@@ -10,7 +10,6 @@ from pydantic import (
     BaseModel,
     ConfigDict,
     Field,
-    GetPydanticSchema,
     IPvAnyAddress,
     StrictBool,
     StrictInt,
@@ -18,9 +17,6 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from pydantic_core import core_schema
-
-from simnos.core.command_contract import CommandHandler
 
 # Valid TCP port. Restores the range constraint lost in the pydantic v1 -> v2
 # migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
@@ -34,74 +30,6 @@ Port = Annotated[StrictInt, Field(ge=1, le=65535)]
 # range of ephemeral ports is meaningless.
 EPHEMERAL_PORT = 0
 EphemeralPort = Annotated[StrictInt, Field(ge=0, le=65535)]
-
-# Dynamic command output. The type annotation documents the G4 contract
-# (`CommandHandler` Protocol — signature and return shape, #241); pydantic
-# cannot derive a schema from a Protocol, so the attached schema keeps the
-# runtime validation at "is callable", identical to the bare `Callable`
-# this replaces. Signature/return conformance is checked statically and by
-# the e2e callable sweep, not here.
-CommandHandlerField = Annotated[
-    CommandHandler,
-    GetPydanticSchema(lambda tp, handler: core_schema.callable_schema()),
-]
-
-# ---------------------------------------------------------------------------------------
-# NOS plugin commands model
-# ---------------------------------------------------------------------------------------
-
-
-class ModelNosCommand(BaseModel):
-    """
-    Pydantic model for NOS command attributes.
-
-    Unknown fields are rejected loudly (`extra="forbid"`, #244 / D5) so a
-    typo'd field (`outptu`) fails the pre-commit validation instead of
-    being dropped silently. Safe because every load path validates a
-    merged view before commit and `Nos.validate()` passes schema fields
-    only (#244 / D8).
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    output: StrictStr | CommandHandlerField | None = None
-    exit: StrictBool | None = None
-    help: StrictStr | None = None
-    prompt: StrictStr | list[StrictStr] | None = None
-    new_prompt: StrictStr | None = None
-    alias: StrictStr | None = None
-    # Data-only field: alternate captures of the same command's output
-    # (16 platform yamls, #234). Not consumed by the runtime — declared
-    # so `extra="forbid"` keeps accepting the existing data while still
-    # rejecting typos.
-    output_variants: list[StrictStr] | None = None
-
-
-class ModelNosAttributes(BaseModel):
-    """
-    Pydantic model for NOS attributes.
-
-    `extra="forbid"` (#244 / D5) restores symmetry with the inventory
-    models below; safe only because `Nos.validate()` extracts schema
-    fields explicitly (never `**self.__dict__`, which also carries
-    `device` / `configuration_file`, #244 / D8).
-
-    Kept after the A3 migration removed the legacy yaml loader (#264 / PR-3):
-    `Nos.from_dict` / `validate` (constructor / dict plugins) and `_from_module`
-    (py plugin) still validate their boundary through this model. The inventory
-    commands inflow moved off it in #317 P-3 (`ModelInventoryCommand`); this
-    model goes away with the legacy base layer in P-4.
-    """
-
-    model_config = ConfigDict(extra="forbid")
-
-    commands: dict[StrictStr, ModelNosCommand]
-    name: StrictStr
-    initial_prompt: StrictStr
-    auth: StrictStr | None = None
-    enable_prompt: StrictStr | None = None
-    config_prompt: StrictStr | None = None
-
 
 # ---------------------------------------------------------------------------------------
 # A3 authoring schema (#264 / P1-1 D2, D3) — the new per-platform on-disk form
@@ -151,6 +79,39 @@ class ModelCommandVariant(BaseModel):
         # the side-effect and return the value unchanged.
         _reject_unsafe_output_ref(value)
         return value
+
+
+def _reject_empty_mode_list(value: list[str] | None) -> list[str] | None:
+    """Shared `mode:` field rule for the A3 and inventory command schemas.
+
+    An explicit empty list reads as "runnable in no mode"; "all modes" is
+    expressed by omitting `mode`. Reject `[]` so the two never blur
+    (#264 / Decision 7). One definition so the dialects (and the message)
+    cannot drift (#317 P-3/P-4).
+    """
+    if value is not None and not value:
+        raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
+    return value
+
+
+def _check_transitions_combination(
+    transitions: dict | None, new_mode: str | None, exit_flag: bool | None, *, prefix: str = ""
+) -> None:
+    """Shared `transitions:` combination rule for the A3 and inventory schemas.
+
+    `transitions` is the mode-conditional alternative to the simple static
+    `new_mode` / `exit` — setting both is ambiguous, and an empty map is an
+    authoring error, not a silent no-op (#317 / P-1). One definition so the
+    dialects (and the messages) cannot drift (#317 P-3/P-4); `prefix` carries
+    the command label where the schema knows it.
+    """
+    if transitions is None:
+        return
+    conflict = sorted(name for name, v in (("new_mode", new_mode), ("exit", exit_flag)) if v is not None)
+    if conflict:
+        raise ValueError(f"{prefix}`transitions` is exclusive with {conflict} (#317 / P-1)")
+    if not transitions:
+        raise ValueError(f"{prefix}`transitions: {{}}` is empty — omit it (#317 / P-1)")
 
 
 class ModelTransition(BaseModel):
@@ -241,15 +202,7 @@ class ModelCommandAuthoring(BaseModel):
             raise ValueError(f"handler {value!r} must be a valid Python identifier")
         return value
 
-    @field_validator("mode")
-    @classmethod
-    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
-        # An explicit empty list reads as "runnable in no mode"; "all modes" is
-        # expressed by omitting `mode`. Reject `[]` so the two never blur
-        # (Decision 7, symmetric with the legacy adapter's `prompt: []` reject).
-        if value is not None and not value:
-            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
-        return value
+    _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
 
     @field_validator("variants")
     @classmethod
@@ -309,18 +262,9 @@ class ModelCommandAuthoring(BaseModel):
                 raise ValueError(
                     f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
                 )
-            # `transitions` is the mode-conditional alternative to the simple
-            # static `new_mode` / `exit`; setting both is ambiguous (#317 / P-1).
-            if self.transitions is not None:
-                conflict = sorted(
-                    name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None
-                )
-                if conflict:
-                    raise ValueError(
-                        f"command {self.command!r}: `transitions` is exclusive with {conflict} (#317 / P-1)"
-                    )
-                if not self.transitions:
-                    raise ValueError(f"command {self.command!r}: `transitions: {{}}` is empty — omit it (#317 / P-1)")
+            _check_transitions_combination(
+                self.transitions, self.new_mode, self.exit, prefix=f"command {self.command!r}: "
+            )
         if self.command == "_default_":
             if self.mode is not None or self.new_mode is not None or self.transitions is not None:
                 raise ValueError(
@@ -328,9 +272,9 @@ class ModelCommandAuthoring(BaseModel):
                     "mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
                 )
             # An aliased `_default_` would inherit the target's modes/new_mode via
-            # the loader's `replace(target, ...)`, splitting `_default_` semantics
-            # from the legacy adapter (which forces empty modes). Reject so the
-            # fallback can never become mode-bearing through the alias backdoor
+            # the loader's `replace(target, ...)`, making the fallback
+            # mode-bearing. Reject so `_default_` can never lose its
+            # empty-modes semantics through the alias backdoor
             # (1st round claude #6).
             if self.alias is not None:
                 raise ValueError(
@@ -460,27 +404,14 @@ class ModelInventoryCommand(BaseModel):
     output: StrictStr | None = None
     output_template: StrictStr | None = None
 
-    @field_validator("mode")
-    @classmethod
-    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
-        # Same rule as A3 authoring: `[]` reads as "runnable in no mode", while
-        # "all modes" is expressed by omitting `mode` (#264 / Decision 7).
-        if value is not None and not value:
-            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
-        return value
+    _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
 
     @model_validator(mode="after")
     def _check_combination(self) -> "ModelInventoryCommand":
         if self.output is not None and self.output_template is not None:
             raise ValueError("at most one of `output` / `output_template` allowed (#264 / Decision 6)")
-        # Same exclusivity as A3 authoring (#317 / P-1): `transitions` is the
-        # mode-conditional alternative to the simple static `new_mode` / `exit`.
-        if self.transitions is not None:
-            conflict = sorted(name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None)
-            if conflict:
-                raise ValueError(f"`transitions` is exclusive with {conflict} (#317 / P-1)")
-            if not self.transitions:
-                raise ValueError("`transitions: {}` is empty — omit it (#317 / P-1)")
+        # The command name is the mapping key, not a field — no prefix to carry.
+        _check_transitions_combination(self.transitions, self.new_mode, self.exit)
         return self
 
 

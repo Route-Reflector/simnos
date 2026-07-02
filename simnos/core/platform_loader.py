@@ -1,12 +1,11 @@
 """A3 platform directory loader (#264 / P1-1 D6).
 
-Reads the new on-disk form — ``platforms/<nos>/platform.yaml`` +
+Reads the on-disk form — ``platforms/<nos>/platform.yaml`` +
 ``commands/*.yaml`` + adjacent output files — validates it through the
 authoring pydantic models (:mod:`simnos.core.pydantic_models`), and produces a
-:class:`~simnos.core.resolved_command.ResolvedPlatform` directly (no legacy
-intermediate, unlike :mod:`simnos.core.command_adapter`). The shell, docs gen
-and tests then consume the one runtime representation regardless of which form
-the data was authored in (D4).
+:class:`~simnos.core.resolved_command.ResolvedPlatform` directly. The shell,
+docs gen and tests then consume the one runtime representation regardless of
+which form the data was authored in (D4).
 
 All load-time validation that needs the filesystem or jinja2 lives here:
 output-file existence, ``.j2`` syntax, mode-name existence, and prompt-template
@@ -147,12 +146,7 @@ def _resolve_commands(
             # alias may re-author (#317 / P-1). Validate the names and re-check
             # any inherited `transitions` against the narrowed modes.
             if model.mode is not None:
-                unknown = [m for m in model.mode if m not in mode_names]
-                if unknown:
-                    raise ValueError(
-                        f"command {model.command!r}: mode(s) {unknown} not in platform modes {sorted(mode_names)}"
-                    )
-                new_modes = frozenset(model.mode)
+                new_modes = resolve_modes(model.command, model.mode, mode_names)
                 if aliased.transitions is not None:
                     stray = sorted(k for k in aliased.transitions if k not in new_modes)
                     if stray:
@@ -191,16 +185,7 @@ def _resolve_command(
     filepath: str,
 ) -> ResolvedCommand:
     """Resolve one validated authoring model to a `ResolvedCommand`."""
-    # `_default_` is the mode-agnostic fallback; the schema already forbids a
-    # `mode` on it, so its mode set is empty (= every mode). An omitted `mode`
-    # is likewise the empty set ("all modes", #264 / D5).
-    if model.command == "_default_" or model.mode is None:
-        cmd_modes: frozenset[str] = frozenset()
-    else:
-        unknown = [m for m in model.mode if m not in mode_names]
-        if unknown:
-            raise ValueError(f"command {model.command!r}: mode(s) {unknown} not in platform modes {sorted(mode_names)}")
-        cmd_modes = frozenset(model.mode)
+    cmd_modes = resolve_modes(model.command, model.mode, mode_names)
 
     if model.new_mode is not None and model.new_mode not in mode_names:
         raise ValueError(
@@ -265,6 +250,31 @@ def _resolve_command(
         disables_paging=bool(model.disables_paging),
         transitions=resolve_transitions(model.command, model.transitions, cmd_modes, mode_names),
     )
+
+
+def resolve_modes(
+    command: str,
+    mode: list[str] | None,
+    mode_names: frozenset[str],
+    *,
+    where: str = "command",
+) -> frozenset[str]:
+    """Validate a command's ``mode:`` list against the platform modes.
+
+    ``None`` resolves to the empty set — "valid in every mode" (an omitted
+    ``mode``, and ``_default_``, whose ``mode`` the schema forbids so it always
+    arrives as None; #264 / D5). Shared by the loader (real commands + the
+    alias ``mode:`` override) and the merge's inventory-command normalization
+    (#317 / P-3) — the inflows speak one dialect, so the mode check is one
+    loud boundary; ``where`` tags the error with the calling inflow (mirrors
+    `resolve_transitions`).
+    """
+    if mode is None:
+        return frozenset()
+    unknown = [m for m in mode if m not in mode_names]
+    if unknown:
+        raise ValueError(f"{where} {command!r}: mode(s) {unknown} not in platform modes {sorted(mode_names)}")
+    return frozenset(mode)
 
 
 def resolve_transitions(

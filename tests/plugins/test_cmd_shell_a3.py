@@ -1,10 +1,10 @@
 """Integration tests for the A3 platform path through Nos -> CMDShell (#264 / PR-2).
 
-PR-1 covered the legacy adapter end of `_rebuild`; these pin the A3 branch:
 `Nos._from_platform_dir` loads a platform dir into `resolved_platform`, and the
 shell layers the native BASIC entries, the overlay and the inventory commands
 (A3-dialect form, #317 / P-3) around the A3 statics with the right precedence
-and the A3 modes.
+and the A3 modes (the only merge path since #317 P-4 removed the legacy
+adapter).
 
 `TestA3HotReload` pins the #274/#281 dev hot-reload path on top: per-platform
 watch rollup to a platform-dir target, per-shell snapshot isolation (multi-host /
@@ -74,10 +74,13 @@ class TestNosFromPlatformDir:
         assert nos.resolved_platform.initial_mode == "user"
         assert "show version" in nos.resolved_platform.commands
 
-    def test_legacy_commands_stay_empty(self, tmp_path):
-        # The A3 path does not populate the legacy command dict / scalar prompts.
+    def test_legacy_command_surface_is_gone(self, tmp_path):
+        # The legacy authoring surface (`commands` dict / scalar prompts /
+        # `from_dict`) was removed outright in #317 P-4 — pin its absence so a
+        # reintroduction is a conscious decision, not a rebase leftover.
         nos = Nos(filename=str(_a3_platform(tmp_path)))
-        assert nos.commands == {}
+        for attr in ("commands", "initial_prompt", "enable_prompt", "config_prompt", "from_dict"):
+            assert not hasattr(nos, attr)
 
     def test_auth_is_wired_from_platform_meta(self, tmp_path):
         # `auth` has live SSH behavior, so it must reach nos.auth, not be a dead
@@ -122,17 +125,22 @@ class TestShellA3Path:
         assert shell.commands["exit"].exit is True
 
     def test_py_module_commands_dict_alongside_a3_is_loud(self, tmp_path):
-        """A py `commands` dict next to an A3 dir fails the merge, not silently (#317 / P-3).
+        """A py `commands` dict next to an A3 dir fails the load, not silently (#317 / P-3, P-4).
 
-        The py dict inflow was removed from the merge (P-2 moved the shipped
-        dicts into the A3 dirs); a module that still defines one would
-        otherwise load fine and be silently ignored — the "loads but never
-        merges" window the design's fail-at-startup principle forbids.
+        The py dict inflow was removed (P-2 moved the shipped dicts into the A3
+        dirs); a module that still defines one would otherwise load fine and be
+        silently ignored — the "loads but never merges" window the design's
+        fail-at-startup principle forbids. P-3 rejected it at the merge; P-4
+        removed `Nos.commands` outright, so the guard now fires in
+        `_from_module` on the multi-file load itself.
         """
-        nos = Nos(filename=str(_a3_platform(tmp_path)))
-        nos.commands = {"show version": {"output": "shadow", "help": "dyn", "prompt": "{base_prompt}#"}}
+        py = tmp_path / "shadow_author.py"
+        py.write_text(
+            'commands = {"show version": {"output": "shadow", "help": "dyn"}}\n',
+            encoding="utf-8",
+        )
         with pytest.raises(ValueError, match="py dict authoring was removed"):
-            build_resolved_platform(nos, {})
+            Nos(filename=[str(_a3_platform(tmp_path)), str(py)])
 
     def test_inventory_command_merges_over_a3(self, tmp_path):
         nos = Nos(filename=str(_a3_platform(tmp_path)))
@@ -587,6 +595,31 @@ class TestA3HotReload:
         assert len(caplog.records) == 1
         assert nos_obj.resolved_platform is old_platform  # rolled back, not the modeless parse
         assert shell.commands is old_commands  # live session untouched
+
+    def test_rebuild_failure_rolls_back_sources_of_new_target(self, tmp_path, caplog):
+        """A NEW target that loads but fails `_rebuild` does not linger in `nos.sources`.
+
+        `sources` feeds the A3-required error diagnostics, so a failed reload
+        must not leave the failing target listed as a loaded source — it is a
+        `_NOS_RELOAD_ATTRS` member and `_record_source` commits a fresh list so
+        the reference snapshot rolls it back (2nd round 🦊#1 / 🐳#1). The
+        same-target case is inert by dedup; this drives the new-target case:
+        platform B loads fine but the inventory `mode: [config]` no longer
+        validates against B's user-only modes.
+        """
+        platform_a = _a3_platform(tmp_path)
+        inventory = {"commands": {"conf cmd": {"output": "X", "mode": ["config"]}}}
+        nos_obj = Nos(filename=str(platform_a))
+        shell = _shell_for(nos_obj, inventory_config=inventory)
+        platform_b = tmp_path / "user_only"
+        _write(platform_b / "platform.yaml", 'modes:\n  user:\n    prompt: "{{ base_prompt }}>"\ninitial_mode: user\n')
+        _write(platform_b / "commands" / "default.yaml", "command: _default_\ntype: simnos\noutput: default.txt\n")
+        _write(platform_b / "commands" / "default.txt", "% unknown\n")
+        with caplog.at_level("ERROR", logger="simnos.plugins.shell.cmd_shell"):
+            shell.reload_commands([str(platform_b)])
+        assert len(caplog.records) == 1  # B loaded but _rebuild rejected the inventory mode
+        assert str(platform_b) not in nos_obj.sources  # rolled back, not lingering in diagnostics
+        assert nos_obj.sources == [str(platform_a)]
 
     def test_removed_mode_degrades_to_initial(self, tmp_path):
         """A reload that drops the current mode resets the session to initial_mode."""

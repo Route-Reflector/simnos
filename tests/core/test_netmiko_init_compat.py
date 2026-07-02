@@ -11,6 +11,7 @@ Verifies that:
 """
 
 import contextlib
+import dataclasses
 import sys
 import threading
 
@@ -19,6 +20,7 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.nos import Nos
+from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.shell.cmd_shell import build_resolved_platform
 from tests._platform_quirks import INIT_UNKNOWN_CMD_ALLOWED
@@ -26,6 +28,7 @@ from tests.utils import (
     TEST_PASSWORD,
     TEST_USERNAME,
     build_inventory,
+    build_synthetic_platform,
     get_platforms_from_md,
     get_py_platforms,
     netmiko_device,
@@ -96,70 +99,26 @@ class TestNetmikoInitCompat:
 
 
 def _get_test_command(device_type: str) -> tuple[str, str] | None:
-    """Pick one command from the Nos-loaded definition for testing.
+    """Pick a testable command from the platform's resolved A3 commands.
 
     Selection priority:
-    1. First non-empty string output without curly braces
-    2. First non-empty string output with curly braces (fallback)
+    1. First non-empty literal output without curly braces
+    2. First non-empty literal output with curly braces (fallback)
 
     Outputs with curly braces are deprioritized because they may contain
-    format placeholders ({base_prompt}) or platform-specific markers
-    ({master:0} on Juniper) that interfere with netmiko prompt detection.
+    platform-specific markers ({master:0} on Juniper) that interfere with
+    netmiko prompt detection; the no-brace path also makes the caller's
+    `.format(base_prompt=...)` a no-op on the literal text.
 
-    Excludes: special commands (_default_ etc.), alias, new_prompt,
-    exit flag, callable output, and prompt-mode-changing commands.
+    Excludes: special commands (_default_ etc.), handler/template output,
+    exit / transition commands, and commands outside the initial mode.
     """
     if device_type not in nos_plugins:
         return None
 
     nos = Nos(filename=nos_plugins[device_type])
-    if nos.resolved_platform is not None:
-        return _get_test_command_a3(nos)
-    fallback = None
-
-    for cmd_name, cmd_data in nos.commands.items():
-        if cmd_name.startswith("_") and cmd_name.endswith("_"):
-            continue
-        if cmd_name in ("enable", "exit", "quit", "logout", "ex"):
-            continue
-        if "alias" in cmd_data or "new_prompt" in cmd_data:
-            continue
-        if cmd_data.get("exit"):
-            continue
-
-        output = cmd_data.get("output")
-        if not isinstance(output, str) or not output.strip():
-            continue
-
-        prompt = cmd_data.get("prompt")
-        if prompt is None:
-            continue
-        prompts = [prompt] if isinstance(prompt, str) else prompt
-        if nos.initial_prompt not in prompts:
-            continue
-
-        # Prefer output without curly braces
-        if "{" not in output:
-            return (cmd_name, output)
-        if fallback is None:
-            fallback = (cmd_name, output)
-
-    return fallback
-
-
-def _get_test_command_a3(nos: Nos) -> tuple[str, str] | None:
-    """Pick a testable command from an A3 platform's resolved commands (#264 / PR-2).
-
-    A3 platforms expose static commands as a `ResolvedPlatform`, not the legacy
-    `nos.commands` dict. We select a literal-output command valid in the initial
-    mode that the py module does NOT override (an override would serve a handler
-    / different body, not this literal). Returns the literal text, which the
-    caller compares to the wire output (the no-brace path makes the caller's
-    `.format(base_prompt=...)` a no-op).
-    """
     platform = nos.resolved_platform
-    assert platform is not None  # caller guards this
-    py_overrides = set(nos.commands)  # a co-loaded py module wins over A3 statics
+    assert platform is not None, f"{device_type}: no A3 platform data (#317 P-4)"
     initial = platform.initial_mode
     fallback = None
 
@@ -168,7 +127,7 @@ def _get_test_command_a3(nos: Nos) -> tuple[str, str] | None:
             continue
         if cmd_name in ("enable", "exit", "quit", "logout", "ex"):
             continue
-        if cmd_name in py_overrides or rc.new_mode or rc.exit:
+        if rc.new_mode or rc.exit:
             continue
         if rc.output.kind != "literal" or not rc.output.text or not rc.output.text.strip():
             continue
@@ -391,29 +350,42 @@ class TestClassifyCallableCommands:
     """
 
     @staticmethod
-    def _synthetic_nos(commands: dict) -> Nos:
-        """Build a minimal Nos with the standard 3-mode prompt set."""
-        return Nos(
-            dict_args={
-                "name": "synth",
-                "initial_prompt": "{base_prompt}>",
-                "enable_prompt": "{base_prompt}#",
-                "config_prompt": "{base_prompt}(config)#",
-                "commands": commands,
+    def _synthetic_nos(commands: dict[str, "ResolvedCommand"]) -> Nos:
+        """Build a minimal Nos over an in-memory 3-mode `ResolvedPlatform`.
+
+        Successor of the removed `dict_args` vehicle (#317 P-4): the handler
+        commands are constructed natively, the same shape the A3 loader + merge
+        bind produces.
+        """
+        platform = build_synthetic_platform(
+            {
+                "user": "{{ base_prompt }}>",
+                "enable": "{{ base_prompt }}#",
+                "config": "{{ base_prompt }}(config)#",
             }
+        )
+        nos = Nos(name="synth")
+        nos.resolved_platform = dataclasses.replace(platform, commands=commands)
+        return nos
+
+    @staticmethod
+    def _handler_cmd(name: str, handler, *, modes: tuple[str, ...], new_mode: str | None = None) -> "ResolvedCommand":
+        """One bound-handler `ResolvedCommand` (the post-merge dispatch shape)."""
+        return ResolvedCommand(
+            name=name,
+            modes=frozenset(modes),
+            new_mode=new_mode,
+            output=ResolvedOutput(kind="handler", handler=handler),
+            variants=(),
+            help="",
+            exit=False,
+            type="custom",
         )
 
     def test_config_only_handler_fails_loudly(self):
         """A handler command outside the sweep phases is coverage loss."""
-        nos = self._synthetic_nos(
-            {
-                "weird": {
-                    "output": lambda device, **kwargs: "static",
-                    "help": "config-only handler",
-                    "prompt": "{base_prompt}(config)#",
-                }
-            }
-        )
+        weird = self._handler_cmd("weird", lambda device, **kwargs: "static", modes=("config",))
+        nos = self._synthetic_nos({"weird": weird})
         with pytest.raises(AssertionError, match=r"outside the initial/enable\s+sweep phases: \['weird'\]"):
             _classify_callable_commands(nos, "synth", HOSTNAME)
 
@@ -424,32 +396,19 @@ class TestClassifyCallableCommands:
         output-only); a flat sweep cannot run a mode-changing command, so it is
         skipped like the static sweep skips `new_mode` commands.
         """
-        nos = self._synthetic_nos(
-            {
-                "modey": {
-                    "output": lambda device, **kwargs: "",
-                    "new_prompt": "{base_prompt}#",
-                    "help": "handler + static transition",
-                    "prompt": "{base_prompt}>",
-                }
-            }
+        modey = self._handler_cmd("modey", lambda device, **kwargs: "", modes=("user",), new_mode="enable")
+        initial_cmds, enable_cmds = _classify_callable_commands(
+            self._synthetic_nos({"modey": modey}), "synth", HOSTNAME
         )
-        initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == []
         assert enable_cmds == []
 
     def test_none_returning_handler_is_skipped(self):
         """A None-returning handler writes nothing — no content to verify, no fail."""
-        nos = self._synthetic_nos(
-            {
-                "silent": {
-                    "output": lambda device, **kwargs: None,
-                    "help": "handler with no output",
-                    "prompt": "{base_prompt}>",
-                }
-            }
+        silent = self._handler_cmd("silent", lambda device, **kwargs: None, modes=("user",))
+        initial_cmds, enable_cmds = _classify_callable_commands(
+            self._synthetic_nos({"silent": silent}), "synth", HOSTNAME
         )
-        initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == []
         assert enable_cmds == []
 
@@ -462,62 +421,41 @@ class TestClassifyCallableCommands:
         with the denylist skip, potentially the whole platform) unnoticed
         (1st round codex#1).
         """
-        nos = self._synthetic_nos(
-            {
-                "broken": {
-                    "output": lambda device, **kwargs: {"output": "x"},
-                    "help": "dict-returning handler (removed contract)",
-                    "prompt": "{base_prompt}>",
-                }
-            }
-        )
+        broken = self._handler_cmd("broken", lambda device, **kwargs: {"output": "x"}, modes=("user",))
+        nos = self._synthetic_nos({"broken": broken})
         with pytest.raises(AssertionError, match=r"returned dict \(contract is str \| None\)"):
             _classify_callable_commands(nos, "synth", HOSTNAME)
 
     def test_denylist_is_platform_qualified(self):
         """Another platform's deterministic 'show clock' stays in the sweep."""
-        nos = self._synthetic_nos(
-            {
-                "show clock": {
-                    "output": lambda device, **kwargs: "deterministic",
-                    "help": "deterministic clock on a synthetic platform",
-                    "prompt": "{base_prompt}>",
-                }
-            }
+        clock = self._handler_cmd("show clock", lambda device, **kwargs: "deterministic", modes=("user",))
+        initial_cmds, enable_cmds = _classify_callable_commands(
+            self._synthetic_nos({"show clock": clock}), "synth", HOSTNAME
         )
-        initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
         assert initial_cmds == [("show clock", "deterministic")]
         assert enable_cmds == []
 
     def test_bucketing_and_expected_verbatim(self):
-        """initial / enable / dual-prompt (-> initial) bucketing + verbatim oracle.
+        """initial / enable / dual-mode (-> initial) bucketing + verbatim oracle.
 
         The `{base_prompt}` placeholder in 'enable only' stays **unsubstituted**
-        in the expected value: the shell does not format callable output
+        in the expected value: the shell does not format handler output
         (#241 / D-b), so the sweep oracle must take the return verbatim —
         this pin replaces the pre-#241 one that expected the `.format` step.
         """
         nos = self._synthetic_nos(
             {
-                "init only": {
-                    "output": lambda device, **kwargs: "from init",
-                    "help": "initial-prompt only",
-                    "prompt": "{base_prompt}>",
-                },
-                "enable only": {
-                    "output": lambda device, **kwargs: "hostname {base_prompt}",
-                    "help": "enable-prompt only, with literal placeholder",
-                    "prompt": "{base_prompt}#",
-                },
-                "dual prompt": {
-                    "output": lambda device, **kwargs: "from dual",
-                    "help": "both prompts -> initial bucket wins",
-                    "prompt": ["{base_prompt}#", "{base_prompt}>"],
-                },
+                "init only": self._handler_cmd("init only", lambda device, **kwargs: "from init", modes=("user",)),
+                "enable only": self._handler_cmd(
+                    "enable only", lambda device, **kwargs: "hostname {base_prompt}", modes=("enable",)
+                ),
+                "dual mode": self._handler_cmd(
+                    "dual mode", lambda device, **kwargs: "from dual", modes=("user", "enable")
+                ),
             }
         )
         initial_cmds, enable_cmds = _classify_callable_commands(nos, "synth", HOSTNAME)
-        assert initial_cmds == [("init only", "from init"), ("dual prompt", "from dual")]
+        assert initial_cmds == [("init only", "from init"), ("dual mode", "from dual")]
         assert enable_cmds == [("enable only", "hostname {base_prompt}")]
 
 

@@ -9,12 +9,12 @@ through this one function, so the snapshot and the test can never drift apart.
 ``migrate_platform_yaml.py``, removed once every platform was migrated — git
 history + design D7 hold the conversion record.)
 
-The merged-view oracle (#317 P-2: ``regen_merged_oracle_snapshots.py`` +
-``test_merged_oracle.py``) projects through the same function, so a handler
-projects to its *name* (bound ``__qualname__``, or the unbound A3
+A handler projects to its *name* (bound ``__qualname__``, or the unbound A3
 ``handler_ref``) rather than an anonymous sentinel — handler identity is part
-of the migration contract. ``transitions`` (#317 P-1) is emitted only when the
-command authored one, so the pre-#317 snapshots stay byte-stable.
+of the migration contract (the P-2 merged-view oracle that motivated this
+retired with the legacy inflow, #317 P-4). ``transitions`` (#317 P-1) is
+emitted only when the command authored one, so the pre-#317 snapshots stay
+byte-stable.
 
 The projection captures the client-observable behavior: rendered output as
 ``splitlines()`` (wire-equivalent — the driver's ``_render_response`` joins each

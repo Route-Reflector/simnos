@@ -139,11 +139,16 @@ A3 take-in candidate files (`commands/<stem>.yaml` + `.txt`, `type: ntc` with a
 This method adds dynamic behavior on top of the static A3 data with the full
 power of Python. The Python modules are located in the
 `simnos/plugins/nos/platforms_py` package; a module co-named with an A3
-platform composes with it. The shipped pattern (#317): the module defines a
+platform composes with it. The pattern (#317): the module defines a
 `BaseDevice` subclass whose methods (plus module-level functions) form the
 platform's **handler namespace**, and A3 commands reference them by name via
 `handler:` — an unresolved reference fails loudly at server start. See the
 [handler contract](creating_nos_plugin.md) for the callable signature and the
-`str | None` return rule. (A module may still ship a legacy `commands` dict
-that overrides A3 entries per-command; that inflow is scheduled for removal —
-#317.)
+`str | None` return rule.
+
+The module authors **no commands**: a legacy `commands` dict is rejected at
+load (#317), and the old `NAME` / prompt constants are no longer read. The A3
+dir is also required — a `platforms_py/<name>.py` with no co-named
+`platforms/<name>/` dir is not registered (the registry warns at import, and
+the data lint flags both the orphan module and a `handler:` command on a
+platform that ships no module).

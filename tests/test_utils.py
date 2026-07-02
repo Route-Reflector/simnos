@@ -32,10 +32,9 @@ class TestGetHostCommandsA3Transitions:
             initial_mode="user",
             commands=commands,
         )
-        # `get_host_commands` walks the legacy `nos.commands` dict first, then the
-        # A3 `resolved_platform`; give the fake nos an empty legacy dict so only
-        # the A3 branch contributes.
-        nos = SimpleNamespace(name="t", commands={}, resolved_platform=platform)
+        # `get_host_commands` reads the A3 `resolved_platform` only — the legacy
+        # `nos.commands` walk is gone (#317 P-4).
+        nos = SimpleNamespace(name="t", resolved_platform=platform)
         return cast(Host, SimpleNamespace(nos=nos))
 
     def test_transitions_command_is_skipped(self):

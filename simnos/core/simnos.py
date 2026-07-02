@@ -586,18 +586,26 @@ class SimNOS:
         """
         Method to register NOS plugins with SimNOS object, all plugins
         must be registered before calling start method.
+
+        A plugin is a ready `Nos` instance or a str path to an A3 platform dir
+        (``platform.yaml`` + ``commands/``). The dict form and a bare ``.py``
+        path were removed with the legacy py-dict authoring (#317 P-4) — a py
+        module alone cannot author commands; hand a handler module to `Nos`
+        yourself (``Nos(filename=[a3_dir, handler_py])``) and register the
+        instance.
         """
         for plugin in self.plugins:
             if isinstance(plugin, Nos):
                 nos_instance = plugin
+            elif isinstance(plugin, str):
+                if not os.path.isdir(plugin):
+                    raise ValueError(
+                        f"NOS plugin path {plugin!r} is not an A3 platform dir — a str plugin must point at a "
+                        "directory holding platform.yaml + commands/ (py-only / dict plugins were removed, #317 P-4)"
+                    )
+                nos_instance = Nos(filename=plugin)
             else:
-                nos_instance = Nos()
-                if isinstance(plugin, dict):
-                    nos_instance.from_dict(plugin)
-                elif isinstance(plugin, str):
-                    nos_instance.from_file(plugin)
-                else:
-                    raise TypeError(f"Unsupported NOS type {type(plugin)}, supported str, dict or Nos")
+                raise TypeError(f"Unsupported NOS type {type(plugin)}, supported str (A3 platform dir) or Nos")
             self.nos_plugins[nos_instance.name] = nos_instance
 
 

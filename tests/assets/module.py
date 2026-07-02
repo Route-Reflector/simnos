@@ -1,15 +1,14 @@
 """
-This is a testing module
+This is a testing handler module (device class + DEFAULT_CONFIGURATION only).
+
+Since #317 P-4 a py module supplies dynamic behavior only — the device class
+(whose methods form the A3 ``handler:`` namespace) and an optional
+``DEFAULT_CONFIGURATION`` constant. It authors no commands.
 """
 
 import time
 
 from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
-
-NAME: str = "test_module"
-INITIAL_PROMPT = "{base_prompt}>"
-ENABLE_PROMPT = "{base_prompt}#"
-CONFIG_PROMPT = "{base_prompt}(config)#"
 
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 
@@ -27,23 +26,3 @@ class TestModule(BaseDevice):
     def make_show_version(self, base_prompt, current_mode, current_prompt, command):
         """Return the system version."""
         return "TestModule version 1.0"
-
-
-commands = {
-    "enable": {
-        "output": None,
-        "new_prompt": "{base_prompt}#",
-        "help": "enter exec prompt",
-        "prompt": INITIAL_PROMPT,
-    },
-    "show clock": {
-        "output": TestModule.make_show_clock,
-        "help": "show current time",
-        "prompt": ["{base_prompt}#", "{base_prompt}>"],
-    },
-    "show version": {
-        "output": TestModule.make_show_version,
-        "help": "show system version",
-        "prompt": "{base_prompt}#",
-    },
-}

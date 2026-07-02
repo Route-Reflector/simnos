@@ -45,7 +45,7 @@ default_inventory = {
     "default": {
         "username": "user",
         "password": "user",
-        "port": 6000,
+        "port": 0,  # OS-assigned (ephemeral, #271); read back via net.hosts[<name>].port
         "server": {
             "plugin": "AsyncSshServer",
             "configuration": {
@@ -57,9 +57,9 @@ default_inventory = {
         "nos": {"plugin": "cisco_ios", "configuration": {}},
     },
     "hosts": {
-        "router_cisco_ios": {"port": 6000, "device_type": "cisco_ios"},
-        "router_huawei_smartax": {"port": 6001, "device_type": "huawei_smartax"},
-        "router_arista_eos": {"port": 6002, "device_type": "arista_eos"},
+        "router_cisco_ios": {"port": 0, "device_type": "cisco_ios"},
+        "router_huawei_smartax": {"port": 0, "device_type": "huawei_smartax"},
+        "router_arista_eos": {"port": 0, "device_type": "arista_eos"},
     }
 }
 ```
@@ -426,8 +426,60 @@ server:
 | Option                    | Emoji                     | Description                           | E.g.                                                                    |
 | ------------------------- | ------------------------- | ------------------------------------- | ----------------------------------------------------------------------- |
 | `plugin`                  | :electric_plug:           | NOS plugin to use                     | `plugin: cisco_ios`                                                     |
-| `configuration`           | :gear:                    | NOS configuration                     | The configuration entirely rely on the plugin                           |
+| `configuration`           | :gear:                    | NOS configuration                     | See [Inventory-defined commands](#inventory-defined-commands) below     |
 
+### Inventory-defined commands
+
+`nos.configuration.commands` adds (or overrides) commands for **one host**,
+without touching the platform data — handy for a session-local stub the
+packaged platform does not ship. Entries speak the same dialect as the A3
+command files (#317): mode *names*, static transitions, and an inline output.
+
+```yaml
+hosts:
+    R1:
+        username: user
+        password: user
+        port: 0
+        device_type: cisco_ios
+        nos:
+            configuration:
+                commands:
+                    show inventory:
+                        help: session-local inventory stub
+                        mode: [user, enable]          # omit = valid in every mode
+                        output: |                     # verbatim literal (no render)
+                            NAME: "Chassis", DESCR: "Lab router"
+                    whoami:
+                        output_template: "you are on {{ base_prompt }}"  # jinja2
+                    leave lab:
+                        mode: [user, config]
+                        transitions:                  # per-mode transition map
+                            user: {exit: true}
+                            config: {new_mode: enable}
+```
+
+Field notes:
+
+- **`mode`** — list of platform mode names the command is valid in; omit for
+  all modes. Names are validated against the platform's modes at `start()`,
+  so a typo fails at startup, not mid-session.
+- **`output`** (inline verbatim literal) / **`output_template`** (inline
+  jinja2 source, `{{ base_prompt }}` only) — at most one; omit both for a
+  command that writes nothing.
+- **`new_mode`** / **`exit: true`** / **`transitions`** — the same static
+  transition channels as A3 command files (`transitions` is exclusive with
+  the other two).
+- **`help`** — the `?` listing text.
+- `_default_` may be overridden (it stays mode-agnostic — `mode` /
+  transitions on it are rejected).
+- Not supported here: `alias`, `variants`, `handler` (those are platform-data
+  concepts; author them in the A3 dir).
+
+Inventory commands sit on top of the merge (platform data < overlay <
+inventory), so a same-named entry wins for this host only. The legacy
+prompt-string fields (`prompt:` / `new_prompt:`) were removed — see the
+[changelog migration table](../changelog.md).
 
 ## Custom command overlay (data layering)
 

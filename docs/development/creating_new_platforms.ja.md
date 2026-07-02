@@ -83,4 +83,6 @@ yamllint の `quoted-strings` rule はプラットフォームデータディレ
 `sync_ntc_commands.py` は NTC Templates を A3 プラットフォームと比較し、まだ存在しないコマンドについて A3 take-in candidate ファイル (`commands/<stem>.yaml` + `.txt`、`source` ブロック付き `type: ntc`) を生成します — レビューして `platforms/<name>/` 配下にコピーしてください。新規プラットフォームの `platform.yaml` は手書きします (モード/auth は NTC fixture から導出できません)。
 
 ## Python モジュール
-この方法は静的な A3 データの上に Python のフルパワーで動的な挙動を追加します。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置され、A3 プラットフォームと同名のモジュールが合成されます。同梱プラットフォームのパターン (#317): モジュールは `BaseDevice` subclass を定義し、その method (+ モジュールレベル関数) がプラットフォームの **handler namespace** になり、A3 コマンドが `handler:` で名前参照します — 未解決の参照はサーバ起動時に loud に fail します。callable のシグネチャと `str | None` 戻り値規則は [handler 契約](creating_nos_plugin.ja.md) を参照。(モジュールは A3 entry をコマンド単位で上書きする legacy `commands` dict を持つこともまだ可能ですが、この inflow は撤去予定です — #317。)
+この方法は静的な A3 データの上に Python のフルパワーで動的な挙動を追加します。Python モジュールは `simnos/plugins/nos/platforms_py` パッケージに配置され、A3 プラットフォームと同名のモジュールが合成されます。パターン (#317): モジュールは `BaseDevice` subclass を定義し、その method (+ モジュールレベル関数) がプラットフォームの **handler namespace** になり、A3 コマンドが `handler:` で名前参照します — 未解決の参照はサーバ起動時に loud に fail します。callable のシグネチャと `str | None` 戻り値規則は [handler 契約](creating_nos_plugin.ja.md) を参照。
+
+モジュールは**コマンドを一切 author しません**: legacy の `commands` dict はロード時に拒否され (#317)、旧 `NAME` / prompt 定数はもう読まれません。A3 dir も必須です — 同名の `platforms/<name>/` dir を持たない `platforms_py/<name>.py` は登録されず (registry が import 時に警告)、data lint も orphan モジュールと「py モジュール無しプラットフォームの `handler:` コマンド」の両方を検出します。

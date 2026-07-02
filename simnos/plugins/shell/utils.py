@@ -32,17 +32,17 @@ def platform_watch_roots(sources: list[str]) -> list[str]:
     """Walk targets for one platform's `nos_plugins` source list (#281 / D4).
 
     `sources` is the registry entry `nos_plugins[<platform>]`: an A3 platform dir
-    and/or a legacy `platforms_py/<name>.py` module. Each maps to its watch
+    and/or a `platforms_py/<name>.py` handler module. Each maps to its watch
     target(s):
 
-    - an A3 dir            -> the dir itself (recursively walked)
-    - a legacy `<name>.py` -> the `.py` plus its jinja inputs
+    - an A3 dir     -> the dir itself (recursively walked)
+    - a `<name>.py` -> the `.py` plus its jinja inputs
       (`configurations/<name>.yaml.j2`, `templates/<name>/`), mirroring the
       `_legacy_jinja_to_py` reverse map so editing a template reloads the module.
 
     A dual-source platform (e.g. cisco_ios = A3 dir + py module) yields both,
     preserving the prior whole-tree watcher's coverage. Existence is NOT checked
-    here — a jinja input does not exist for every legacy platform;
+    here — a jinja input does not exist for every py platform;
     `get_files_under_roots` skips non-existent roots at walk time (#281 / Risks).
     """
     roots: list[str] = []
@@ -62,7 +62,7 @@ def get_files_under_roots(roots: list[str]) -> list[str]:
     """Collect watched files across `roots` (dir walked / file as-is / missing skipped).
 
     A root is a directory (recursively walked with `get_files_under_directory`'s
-    extension filter) or an individual file (a legacy py module / jinja input,
+    extension filter) or an individual file (a py module / jinja input,
     taken as-is when it exists). A non-existent root is silently skipped — the
     dev watcher's normal state, since `platform_watch_roots` emits jinja paths
     that only some platforms ship (#281 / D4, Risks).
@@ -124,7 +124,11 @@ def get_files_recently_modified(files: list[str], files_lasttime_changed_old: di
 def _legacy_jinja_to_py(filepath: str) -> str | None:
     """Map a legacy py-plugin `.j2` template to its `.py` module, or None.
 
-    Recognizes the two shipped legacy shapes only, by segment position:
+    "Legacy" here is the handler module's pre-A3 on-disk *layout*
+    (``configurations/`` / ``templates/`` jinja inputs next to the ``.py``),
+    which is still live — NOT the removed py-dict authoring channel
+    (#317 P-4). Recognizes the two shipped legacy shapes only, by segment
+    position:
 
     - ``<base>/configurations/<platform>.yaml.j2`` -> ``<base>/<platform>.py``
     - ``<base>/templates/<platform>/<cmd>.j2``     -> ``<base>/<platform>.py``

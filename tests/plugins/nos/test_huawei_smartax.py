@@ -5,7 +5,8 @@ Producer-side pins for the remaining dynamic handler: `make_display_board`
 table structure, the `_add_whitespaces` alignment helper, and the
 DEFAULT_CONFIGURATION (yaml.j2) wiring. The former dict-returning mode
 callables (`_return` / `disable` / `quit`) migrated to static A3 transition
-data (#317 P-2), pinned in tests/plugins/test_p2_migration_parity.py.
+data (#317 P-2; the migration's parity fixtures retired with the legacy
+inflow, #317 P-4).
 """
 
 import pytest
