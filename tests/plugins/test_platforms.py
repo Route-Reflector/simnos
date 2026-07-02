@@ -111,7 +111,8 @@ class TestPlatforms:
         (#317 P-2).
         """
         nos = Nos(filename=nos_plugins[platform])
-        resolved = load_platform_dir(os.path.join(PLATFORMS_DIR, platform))
+        resolved = nos.resolved_platform  # the A3 dir, loaded by the same registry wiring
+        assert resolved is not None
         refs = {
             rc.output.handler_ref
             for rc in resolved.commands.values()

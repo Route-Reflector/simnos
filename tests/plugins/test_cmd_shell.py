@@ -17,7 +17,12 @@ import yaml
 from simnos.core.nos import Nos
 from simnos.core.pydantic_models import EPHEMERAL_PORT
 from simnos.core.simnos import SimNOS
+
+# The module itself is imported too (as `cmd_shell_module` / `nos_registry`) so the
+# hot-reload e2e can monkeypatch the watcher's registry + package-root lookups.
+import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
+import simnos.plugins.shell.cmd_shell as cmd_shell_module
 from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell, build_resolved_platform
 from tests.utils import set_attr
 
@@ -1037,9 +1042,6 @@ def test_hot_reload_integration_a3_edit(tmp_path, monkeypatch):
     window. The tmp platform keeps the end-to-end chain (watcher poll -> rollup
     -> `from_file(dir)` -> rebuild -> wire) with zero shared-tree mutation.
     """
-    import simnos.plugins.nos as nos_registry
-    import simnos.plugins.shell.cmd_shell as cmd_shell_module
-
     watch_root = tmp_path / "nos"
     platform_dir = _synthetic_reload_platform(watch_root)
     # Register like the py-only e2e (global registry via setitem, restored on

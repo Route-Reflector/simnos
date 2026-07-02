@@ -26,6 +26,7 @@ oracle then owns the surface); until then they are the migration's direct
 byte evidence.
 """
 
+import functools
 import os
 
 import pytest
@@ -38,15 +39,11 @@ from simnos.plugins.shell.cmd_shell import build_resolved_platform
 
 FIXTURE_DIR = os.path.join("tests", "assets", "p2_migration_wire")
 
-_merged_cache: dict[str, ResolvedPlatform] = {}
 
-
+@functools.cache
 def _merged(platform: str) -> ResolvedPlatform:
     """The served merged view (Host.start wiring), one build per platform."""
-    if platform not in _merged_cache:
-        nos = Nos(filename=nos_plugins[platform])
-        _merged_cache[platform] = build_resolved_platform(nos, {})
-    return _merged_cache[platform]
+    return build_resolved_platform(Nos(filename=nos_plugins[platform]), {})
 
 
 class TestStaticOutputParity:
