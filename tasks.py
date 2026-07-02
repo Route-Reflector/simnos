@@ -231,7 +231,7 @@ def check_platform_data_py_modules(platforms_dir: str = PLATFORMS_A3_DIR) -> lis
 
     Returns a list of human-readable violation strings (empty = clean).
     """
-    py_dir = os.path.join(os.path.dirname(platforms_dir.rstrip("/")), "platforms_py")
+    py_dir = os.path.join(os.path.dirname(os.path.normpath(platforms_dir)), "platforms_py")
     py_modules = {
         os.path.basename(p)[: -len(".py")]
         for p in glob.glob(os.path.join(py_dir, "*.py"))

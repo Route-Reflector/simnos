@@ -9,11 +9,34 @@ import string
 from simnos.core.host import Host
 from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta
 from simnos.core.pydantic_models import EPHEMERAL_PORT
+from simnos.core.resolved_command import ModeDef, ResolvedPlatform, compile_template
 from simnos.plugins.nos import nos_plugins
 
 # Default credentials used to build single-host test inventories.
 TEST_USERNAME = "test_user"
 TEST_PASSWORD = "test_password"
+
+# The committed synthetic external custom platform (A3 dir + handler py,
+# #317 P-4) — the shared fixture platform of the cmd_shell tests and the
+# custom-platform e2e. One spelling of the paths so the consumers cannot drift.
+ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "assets"))
+SYNTHETIC_CUSTOM_A3_DIR = os.path.join(ASSETS_DIR, "synthetic_custom")
+SYNTHETIC_CUSTOM_HANDLERS = os.path.join(ASSETS_DIR, "synthetic_custom_handlers.py")
+
+
+def build_synthetic_platform(mode_prompts: dict[str, str], *, initial_mode: str = "user") -> ResolvedPlatform:
+    """An in-memory `ResolvedPlatform` (modes only) for synthetic-shell tests.
+
+    Successor of the removed ``from_dict`` / ``dict_args`` test vehicles
+    (#317 P-4): assign it to ``nos.resolved_platform`` and feed commands
+    through the inventory inflow, or hand a native `ResolvedCommand` dict to
+    `dataclasses.replace`. ``mode_prompts`` maps mode name -> jinja2 prompt
+    source (e.g. ``{"user": "{{ base_prompt }}>"}``).
+    """
+    modes = {
+        name: ModeDef(name=name, prompt_template=compile_template(source)[0]) for name, source in mode_prompts.items()
+    }
+    return ResolvedPlatform(modes=modes, initial_mode=initial_mode, commands={})
 
 
 def netmiko_device_type_of(device_type: str) -> str:

@@ -26,16 +26,15 @@ from simnos.core.pydantic_models import EPHEMERAL_PORT
 import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
 from tests.assets.synthetic_custom_handlers import SYNTHETIC_DEFAULT, SYNTHETIC_MARKER
-from tests.utils import creds_from_host, netmiko_device
+from tests.utils import SYNTHETIC_CUSTOM_A3_DIR, SYNTHETIC_CUSTOM_HANDLERS, creds_from_host, netmiko_device
 
 # The injection key mirrors the real registry, which keys a platform on its A3
 # dir basename. The markers are imported from the handler module (single
 # source); their wire-delivered values are still asserted independently over
 # the channel.
 CUSTOM_NAME = "synthetic_custom"
-_ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets"))
-CUSTOM_A3_DIR = os.path.join(_ASSETS, "synthetic_custom")
-CUSTOM_HANDLERS = os.path.join(_ASSETS, "synthetic_custom_handlers.py")
+CUSTOM_A3_DIR = SYNTHETIC_CUSTOM_A3_DIR
+CUSTOM_HANDLERS = SYNTHETIC_CUSTOM_HANDLERS
 
 
 @pytest.fixture

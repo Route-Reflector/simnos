@@ -11,6 +11,7 @@ Verifies that:
 """
 
 import contextlib
+import dataclasses
 import sys
 import threading
 
@@ -19,13 +20,7 @@ import pytest
 
 from simnos import SimNOS
 from simnos.core.nos import Nos
-from simnos.core.resolved_command import (
-    ModeDef,
-    ResolvedCommand,
-    ResolvedOutput,
-    ResolvedPlatform,
-    compile_template,
-)
+from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.shell.cmd_shell import build_resolved_platform
 from tests._platform_quirks import INIT_UNKNOWN_CMD_ALLOWED
@@ -33,6 +28,7 @@ from tests.utils import (
     TEST_PASSWORD,
     TEST_USERNAME,
     build_inventory,
+    build_synthetic_platform,
     get_platforms_from_md,
     get_py_platforms,
     netmiko_device,
@@ -353,26 +349,23 @@ class TestClassifyCallableCommands:
     shrinkage in the sweep.
     """
 
-    _SYNTH_MODE_PROMPTS = {
-        "user": "{{ base_prompt }}>",
-        "enable": "{{ base_prompt }}#",
-        "config": "{{ base_prompt }}(config)#",
-    }
-
-    @classmethod
-    def _synthetic_nos(cls, commands: dict[str, "ResolvedCommand"]) -> Nos:
+    @staticmethod
+    def _synthetic_nos(commands: dict[str, "ResolvedCommand"]) -> Nos:
         """Build a minimal Nos over an in-memory 3-mode `ResolvedPlatform`.
 
         Successor of the removed `dict_args` vehicle (#317 P-4): the handler
         commands are constructed natively, the same shape the A3 loader + merge
         bind produces.
         """
-        modes = {
-            name: ModeDef(name=name, prompt_template=compile_template(tpl)[0])
-            for name, tpl in cls._SYNTH_MODE_PROMPTS.items()
-        }
+        platform = build_synthetic_platform(
+            {
+                "user": "{{ base_prompt }}>",
+                "enable": "{{ base_prompt }}#",
+                "config": "{{ base_prompt }}(config)#",
+            }
+        )
         nos = Nos(name="synth")
-        nos.resolved_platform = ResolvedPlatform(modes=modes, initial_mode="user", commands=commands)
+        nos.resolved_platform = dataclasses.replace(platform, commands=commands)
         return nos
 
     @staticmethod

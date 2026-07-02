@@ -22,18 +22,13 @@ import threading
 import pytest
 
 from simnos.core.nos import Nos
-from simnos.core.resolved_command import (
-    ModeDef,
-    ResolvedCommand,
-    ResolvedOutput,
-    ResolvedPlatform,
-    compile_template,
-)
+from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
 from simnos.plugins.nos import nos_plugins
 from simnos.plugins.servers.async_session import _complete, _LineEditor
 from simnos.plugins.shell.cmd_shell import CMDShell
 from tests.plugins.test_async_session import _FakeTransport
 from tests.plugins.test_ssh_line_editor import _feed
+from tests.utils import build_synthetic_platform
 
 # The packaged Cisco-style defaults (BASIC_COMMANDS): native literal text whose
 # ``{input}`` placeholder dispatch substitutes with the typed line (#317 / P-3).
@@ -65,16 +60,14 @@ def _inventory_shell(commands: dict) -> CMDShell:
     inventory inflow's A3 dialect (`mode:` names, inline verbatim `output`),
     normalized by the same merge every host uses.
     """
-    modes = {
-        name: ModeDef(name=name, prompt_template=compile_template(tpl)[0])
-        for name, tpl in {
+    nos = Nos(name="synthetic")
+    nos.resolved_platform = build_synthetic_platform(
+        {
             "user": "{{ base_prompt }}>",
             "enable": "{{ base_prompt }}#",
             "config": "{{ base_prompt }}(config)#",
-        }.items()
-    }
-    nos = Nos(name="synthetic")
-    nos.resolved_platform = ResolvedPlatform(modes=modes, initial_mode="user", commands={})
+        }
+    )
     is_running = threading.Event()
     is_running.set()
     return CMDShell(

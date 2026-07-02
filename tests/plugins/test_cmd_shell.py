@@ -9,8 +9,11 @@ gone with the legacy base layer).
 """
 
 import cmd
+import contextlib
 import importlib
 import os
+import pathlib
+import tempfile
 import threading
 import time
 from unittest import TestCase
@@ -29,16 +32,12 @@ import simnos.plugins.nos as nos_registry
 from simnos.plugins.nos import nos_plugins
 import simnos.plugins.shell.cmd_shell as cmd_shell_module
 from simnos.plugins.shell.cmd_shell import HANDLER_ERROR_OUTPUT, CMDShell, build_resolved_platform
-from tests.utils import set_attr
-
-_ASSETS = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "assets"))
-SYNTHETIC_A3_DIR = os.path.join(_ASSETS, "synthetic_custom")
-SYNTHETIC_HANDLERS = os.path.join(_ASSETS, "synthetic_custom_handlers.py")
+from tests.utils import SYNTHETIC_CUSTOM_A3_DIR, SYNTHETIC_CUSTOM_HANDLERS, set_attr
 
 
 def _nos_from_synthetic_asset() -> Nos:
     """Build a Nos from the committed synthetic custom platform (A3 dir + handler py)."""
-    return Nos(filename=[SYNTHETIC_A3_DIR, SYNTHETIC_HANDLERS])
+    return Nos(filename=[SYNTHETIC_CUSTOM_A3_DIR, SYNTHETIC_CUSTOM_HANDLERS])
 
 
 def make_cmd_shell_args() -> dict:
@@ -384,6 +383,17 @@ def test_py_module_commands_dict_is_loud_at_load(tmp_path):
     py.write_text('commands = {"show x": {"output": "x"}}\n', encoding="utf-8")
     with pytest.raises(ValueError, match="py dict authoring was removed"):
         Nos(filename=str(py))
+
+
+@contextlib.contextmanager
+def tempfile_dir():
+    """A `tmp_path`-like context manager for the unittest-style classes.
+
+    The `TestCase` classes cannot take pytest fixtures; this provides the same
+    auto-cleaned temp dir for the helpers that build tmp A3 platforms.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        yield pathlib.Path(tmp)
 
 
 def _handler_dispatch_platform(tmp_path):
@@ -924,27 +934,6 @@ class HotReloadTest(TestCase):
             self.assertEqual(len(captured.output), 1)
             self.assertIn("broken_multi_device_module.py", captured.output[0])
             self.assertIn("healthy", shell.commands)  # healthy reload still applied
-
-
-def tempfile_dir():
-    """A `tmp_path`-like context manager for the unittest-style classes.
-
-    The `TestCase` classes cannot take pytest fixtures; this provides the same
-    auto-cleaned temp dir for the helpers that build tmp A3 platforms.
-    """
-    import pathlib
-    import tempfile
-
-    class _Ctx:
-        def __enter__(self):
-            self._tmp = tempfile.TemporaryDirectory()
-            return pathlib.Path(self._tmp.name)
-
-        def __exit__(self, *exc):
-            self._tmp.cleanup()
-            return False
-
-    return _Ctx()
 
 
 def _synthetic_reload_platform(watch_root) -> str:
