@@ -45,7 +45,7 @@ SKIP_ENABLE: dict[str, Quirk] = {
 }
 
 # Python-plugin platforms whose "all commands" sweep is xfailed.
-# huawei_smartax was xfailed here until #115: its callable `return`/`disable`
-# now carry a static `changes_prompt` flag so the netmiko sweep skips them
-# instead of running them into a ReadTimeout. No platform is currently quirked.
+# huawei_smartax was xfailed here until #115 (then via a `changes_prompt`
+# marker); since #317 P-2 its transitions are static A3 data (`new_mode` /
+# `exit`), which the sweep skips natively. No platform is currently quirked.
 XFAIL_PY_ALL_COMMANDS: dict[str, Quirk] = {}

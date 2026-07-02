@@ -47,6 +47,10 @@ def _show_version_over_wire(data_dir: str, *, overlay: dict | None = None) -> st
         host = net.hosts["device"]
         device = netmiko_device("cisco_ios", creds_from_host(host))
         with ConnectHandler(**device) as conn:
+            # `show version` is enable-only (its overlay entry inherits the A3
+            # mode set — since #317 P-2 that is the py module's former
+            # enable-only constraint, no longer the stale wider A3 one).
+            conn.enable()
             # send_command's default (no textfsm/genie) returns str; the stub's
             # union covers the parse modes this test does not use.
             return cast(str, conn.send_command("show version"))

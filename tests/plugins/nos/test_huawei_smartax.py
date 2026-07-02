@@ -1,19 +1,18 @@
 """
 Device-class unit tests for the huawei_smartax Python plugin (T-14 / #230).
 
-This platform's e2e all-commands test is xfail'd (mode-changing
-callables cause netmiko ReadTimeout), so these unit tests are its only
-content-level verification. Producer-side pins: `make_display_board`
-table structure, the per-prompt branches of the dict-returning mode
-callables (`_return` / `disable` / `quit`), the `_add_whitespaces`
-alignment helper, and the DEFAULT_CONFIGURATION (yaml.j2) wiring.
+Producer-side pins for the remaining dynamic handler: `make_display_board`
+table structure, the `_add_whitespaces` alignment helper, and the
+DEFAULT_CONFIGURATION (yaml.j2) wiring. The former dict-returning mode
+callables (`_return` / `disable` / `quit`) migrated to static A3 transition
+data (#317 P-2), pinned in tests/plugins/test_p2_migration_parity.py.
 """
 
 import pytest
 
 from simnos.core.nos import Nos
 from simnos.plugins.nos import nos_plugins
-from tests.plugins.nos.device_helpers import call_command
+from tests.plugins.nos.device_helpers import call_handler
 
 
 @pytest.fixture(scope="module")
@@ -34,7 +33,7 @@ def test_default_configuration_provides_boards(nos):
 
 
 def test_display_board_table_structure(nos):
-    out = call_command(nos, "display board", "user")
+    out = call_handler(nos, "make_display_board", "display board", "user")
     lines = out.splitlines()
     header_lines = [line for line in lines if "SlotID" in line]
     assert len(header_lines) == 1
@@ -48,33 +47,6 @@ def test_display_board_table_structure(nos):
     slot_col = header.index("SlotID")
     assert all(len(row) == len(header) for row in data_rows)
     assert all(row[slot_col].isdigit() for row in data_rows)
-
-
-class TestModeCallables:
-    """Pin the per-mode branches of the dict-returning mode callables (#264).
-
-    The branches dispatch on `current_mode`: `_return` keeps user but sends
-    enable/config to enable; `disable` drops enable/config to user and is a
-    no-op (no transition) in user mode.
-    """
-
-    def test_return_from_user_mode(self, nos):
-        assert call_command(nos, "return", "user") == {"output": "", "new_mode": "user"}
-
-    def test_return_from_enable_mode(self, nos):
-        assert call_command(nos, "return", "enable") == {"output": "", "new_mode": "enable"}
-
-    def test_return_from_config_mode(self, nos):
-        assert call_command(nos, "return", "config") == {"output": "", "new_mode": "enable"}
-
-    def test_disable_from_enable_mode(self, nos):
-        assert call_command(nos, "disable", "enable") == {"output": "", "new_mode": "user"}
-
-    def test_disable_from_user_mode_no_transition(self, nos):
-        assert call_command(nos, "disable", "user") == {"output": ""}
-
-    def test_quit_exits(self, nos):
-        assert call_command(nos, "quit", "user") == {"exit": True}
 
 
 class TestAddWhitespaces:

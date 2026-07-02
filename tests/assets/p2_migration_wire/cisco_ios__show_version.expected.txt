@@ -19,7 +19,7 @@ software.
 
 
 ROM: IOS-XE ROMMON
-{{base_prompt}} uptime is 1 day, 17 hours, 32 minutes
+R1 uptime is 1 day, 17 hours, 32 minutes
 Uptime for this control processor is 1 day, 17 hours, 33 minutes
 System returned to ROM by reload
 System image file is "bootflash:packages.conf"

@@ -129,8 +129,8 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
     Returns ``(initial, enable, config)`` command-name lists. Two inflows are
     merged so the sweep stays comprehensive after the A3 migration (#264):
 
-    - **legacy dict commands** (`nos.commands`): py-module dynamic handlers (and,
-      pre-#264, the old yaml statics). Bucketed by prompt-string equality.
+    - **legacy dict commands** (`nos.commands`): custom py-module dicts (shipped
+      platforms are A3-only since #317 P-2). Bucketed by prompt-string equality.
     - **A3 static commands** (`nos.resolved_platform`): every migrated platform's
       command data. Bucketed by the command's resolved `modes` (empty = all
       modes, reachable from the initial mode). Aliases are already resolved into
@@ -156,18 +156,7 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
             continue
         prompts = options["prompt"]
         new_prompt = options.get("new_prompt")
-        # `changes_prompt` flags a callable-output command whose transition
-        # (`new_mode`/`exit`) is decided at dispatch time and so is invisible to
-        # this static dict read — without it the sweep would run e.g. huawei's
-        # `return`/`disable` and hit a netmiko ReadTimeout (#115; #317 removes the
-        # need once A3 authors handlers with a static new_mode).
-        if (
-            new_prompt
-            or options.get("changes_prompt")
-            or "alias" in options
-            or options.get("exit")
-            or command in {"exit", "quit", "logout"}
-        ):
+        if new_prompt or "alias" in options or options.get("exit") or command in {"exit", "quit", "logout"}:
             continue
         if isinstance(prompts, str):
             prompts = [prompts]
@@ -188,8 +177,8 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
             # `transitions` is the mode-conditional successor to `new_mode` /
             # `exit` (#317 / P-1): a transitions command changes mode or closes
             # the session at dispatch time just like the static forms, so the
-            # flat sweep must skip it too (else a future shipped A3 `transitions`
-            # command would be run into a mode change / ReadTimeout).
+            # flat sweep must skip it too (e.g. arista_eos `exit`, whose user /
+            # enable entries close the session — P-2 migrated it to `transitions`).
             if rc.new_mode or rc.exit or rc.transitions or command in {"exit", "quit", "logout"}:
                 continue
             # Empty `modes` = valid in every mode (legacy prompt-omission

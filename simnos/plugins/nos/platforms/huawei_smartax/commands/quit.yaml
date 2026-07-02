@@ -1,0 +1,7 @@
+command: quit
+type: simnos
+help: exit from device
+mode:
+- user
+- enable
+exit: true

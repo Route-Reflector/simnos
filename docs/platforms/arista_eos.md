@@ -33,6 +33,15 @@ tmpfs           1.0G  218M  807M  22% /var/shmem
 - arista_eos>
 - arista_eos#
 
+### conf t
+
+**Output:** None
+
+**Help:** Config mode
+
+**Prompt:**
+- arista_eos#
+
 ### _default_
 
 **Output:**
@@ -40,7 +49,7 @@ tmpfs           1.0G  218M  807M  22% /var/shmem
 % Invalid input
 ```
 
-**Help:** default output for unknown commands
+**Help:** Output to print for unknown commands
 
 **Prompt:**
 
@@ -92,10 +101,48 @@ Directory of flash:/
 
 **Output:** None
 
-**Help:** enter enable mode
+**Help:** Enable commands for a specified privilege level
 
 **Prompt:**
 - arista_eos>
+
+### end
+
+**Output:**
+```
+
+```
+
+**Help:** Leave config mode
+
+**Prompt:**
+- arista_eos(config)#
+
+### exit
+
+**Output:**
+```
+
+```
+
+**Help:** Leave Exec mode
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+- arista_eos(config)#
+
+### no logging console
+
+**Output:**
+```
+
+```
+
+**Help:** Set console logging parameters
+
+**Prompt:**
+- arista_eos(config)#
 
 ### show bgp evpn summary
 
@@ -138,13 +185,9 @@ Aboot password (encrypted): $1$ap1QMbmz$DTqsFYeauuMSa7/Qxbi2l1
 
 ### show clock
 
-**Output:**
-```
-Mon Jan 14 18:42:49 2013
-timezone is US/Central
-```
+**Output:** (dynamic — py handler `make_show_clock`)
 
-**Help:** execute the command "show clock"
+**Help:** System time
 
 **Prompt:**
 - arista_eos>
@@ -292,15 +335,13 @@ Sensor  Description                             (C)         (C)    (C)       (C)
 
 **Output:**
 ```
-eos-spine1#show hostname
-Hostname: spine1
-FQDN:     spine1.company.com
+Hostname: {base_prompt}
+FQDN:     {base_prompt}
 ```
 
-**Help:** execute the command "show hostname"
+**Help:** Show the system hostname
 
 **Prompt:**
-- arista_eos>
 - arista_eos#
 
 ### show interfaces
@@ -910,19 +951,39 @@ Interface: Vlan2
 - arista_eos>
 - arista_eos#
 
+### show ip int brief
+
+**Output:**
+```
+                                                                          Address
+Interface       IP Address        Status       Protocol            MTU    Owner
+--------------- ----------------- ------------ -------------- ----------- -------
+Ethernet1       10.0.1.4/24       up           up                 9200
+Loopback1       1.1.1.1/24        up           up                65535
+Loopback2       2.2.2.2/24        up           up                65535
+Loopback3       1.2.3.4/24        up           up                65535
+```
+
+**Help:** Condensed output
+
+**Prompt:**
+- arista_eos>
+- arista_eos#
+
 ### show ip interface brief
 
 **Output:**
 ```
-Interface              IP Address         Status     Protocol         MTU
-Loopback0              1.1.1.1/32         up         up             65535
-Management1            unassigned         down       down            1500
-Vlan10                 unassigned         down       lowerlayerdown  1500
-Ethernet5              10.0.0.1/24        up         up              1500
-Port-Channel1          11.11.11.11/24     down       lowerlayerdown  1500
+                                                                          Address
+Interface       IP Address        Status       Protocol            MTU    Owner
+--------------- ----------------- ------------ -------------- ----------- -------
+Ethernet1       10.0.1.4/24       up           up                 9200
+Loopback1       1.1.1.1/24        up           up                65535
+Loopback2       2.2.2.2/24        up           up                65535
+Loopback3       1.2.3.4/24        up           up                65535
 ```
 
-**Help:** execute the command "show ip interface brief"
+**Help:** Condensed output
 
 **Prompt:**
 - arista_eos>
@@ -2394,6 +2455,101 @@ None available.
 - arista_eos>
 - arista_eos#
 
+### show running-config
+
+**Output:**
+```
+! Command: show running-config
+! device: arista_eos (cEOSLab, EOS-4.26.0F-21792469.4260F (engineering build))
+!
+transceiver qsfp default-mode 4x10G
+!
+service routing protocols model ribd
+!
+agent Bfd shutdown
+agent PowerManager shutdown
+agent LedPolicy shutdown
+agent Thermostat shutdown
+agent PowerFuse shutdown
+agent StandbyCpld shutdown
+agent LicenseManager shutdown
+!
+no logging console
+logging host 1.1.1.1 514
+logging host 1.2.3.4 514
+logging host 1.2.3.5 514
+logging host 1.2.3.6 514
+logging host 2.2.2.2 514
+logging host 4.3.2.1 514
+logging host 5.5.5.5 514
+logging host 7.7.7.7 514
+logging host 9.9.9.9 514
+!
+logging level AAA informational
+!
+hostname arista_eos
+!
+ntp server 1.1.1.1
+ntp server 1.1.1.2
+ntp server 1.1.1.10
+ntp server 1.1.1.11
+ntp server 2.2.2.2
+ntp server 2.2.2.3
+ntp server 3.3.3.3
+ntp server 3.3.3.4
+ntp server 4.3.2.1
+ntp server 6.6.6.6
+ntp server 7.7.7.7
+ntp server 7.7.7.8
+!
+snmp-server location "North West Hall DC1"
+snmp-server local-interface Ethernet1
+snmp-server host 1.2.3.4 version 2c test
+snmp-server host 1.2.3.5 version 2c test
+!
+spanning-tree mode mstp
+!
+no aaa root
+!
+username nornir privilege 15 secret sha512 $6$EkriX8oB5g3Midq4$ErOpqzIWT7FxiW1IkSNQKS8gEqsn9HsbRVm8.Zw47y3Xm9a.GywP9zPF/avyTBBS8c5/ZSMMj/6BHL64KcW2I1
+!
+interface Ethernet1
+   description Configured by NETCONF
+   mtu 9200
+   no switchport
+   ip address 10.0.1.4/24
+!
+interface Loopback1
+   ip address 1.1.1.1/24
+!
+interface Loopback2
+   description Lopback2 for Customer 27123
+   ip address 2.2.2.2/24
+!
+interface Loopback3
+   description Customer #56924 service
+   ip address 1.2.3.4/24
+!
+no ip routing
+!
+management api http-commands
+   protocol http
+   no shutdown
+!
+management api gnmi
+   transport grpc default
+!
+management api netconf
+   transport ssh def
+!
+end
+```
+
+**Help:** System running configuration
+
+**Prompt:**
+- arista_eos#
+
 ### show snmp community
 
 **Output:**
@@ -2427,25 +2583,28 @@ Community access: read-only
 
 **Output:**
 ```
-Arista vEOS
-Hardware version:    
-Serial number:       
-System MAC address:  2803.829a.1347
+cEOSLab
+Hardware version:
+Serial number:
+Hardware MAC address: 0242.0af6.c8a5
+System MAC address: 0242.0af6.c8a5
 
-Software image version: 4.14.7M
-Architecture:           i386
-Internal build version: 4.14.7M-2384414.4147M
-Internal build ID:      92a53fad-f853-42a5-9f57-c3c4ea3c26b3
+Software image version: 4.26.0F-21792469.4260F (engineering build)
+Architecture: i686
+Internal build version: 4.26.0F-21792469.4260F
+Internal build ID: c5b41f65-54cd-44b1-b576-b5c48700ee19
 
-Uptime:                 1 hour and 5 minutes
-Total memory:           2028860 kB
-Free memory:            301240 kB
+cEOS tools version: 1.1
+Kernel version: 3.10.0-1160.21.1.el7.x86_64
+
+Uptime: 0 weeks, 0 days, 0 hours and 8 minutes
+Total memory: 4918832 kB
+Free memory: 1816320 kB
 ```
 
-**Help:** execute the command "show version"
+**Help:** Software and hardware versions
 
 **Prompt:**
-- arista_eos>
 - arista_eos#
 
 ### show vlan
@@ -2511,6 +2670,42 @@ Width set to 511 columns.
 **Prompt:**
 - arista_eos>
 - arista_eos#
+
+### config term
+
+**Output:** None
+
+**Help:** 
+
+**Prompt:**
+- arista_eos#
+
+### configure terminal
+
+**Output:** None
+
+**Help:** 
+
+**Prompt:**
+- arista_eos#
+
+### do show ip int brief
+
+**Output:**
+```
+                                                                          Address
+Interface       IP Address        Status       Protocol            MTU    Owner
+--------------- ----------------- ------------ -------------- ----------- -------
+Ethernet1       10.0.1.4/24       up           up                 9200
+Loopback1       1.1.1.1/24        up           up                65535
+Loopback2       2.2.2.2/24        up           up                65535
+Loopback3       1.2.3.4/24        up           up                65535
+```
+
+**Help:** 
+
+**Prompt:**
+- arista_eos(config)#
 
 ### term length 0
 

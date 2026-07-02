@@ -1,7 +1,6 @@
 command: show version
 type: simnos
-help: execute the command "show version"
+help: Software and hardware versions
 mode:
-- user
 - enable
 output: show_version.txt

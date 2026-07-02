@@ -1,7 +1,7 @@
 command: display board
 type: simnos
-help: execute the command "display board"
+help: display board information
 mode:
 - user
 - enable
-output: display_board.txt
+handler: make_display_board

@@ -566,9 +566,9 @@ def gen_docs_platform_commands(ctx):
     Reads each A3 platform through the runtime loader (#264 / D9) instead of the
     legacy ``platforms_yaml`` + ``str.format`` path: literal output is emitted
     verbatim, template output is rendered with the platform name as the device
-    ``base_prompt`` (matching the old build-time substitution). Only the A3
-    static surface is documented — py-module dynamic handlers were never in the
-    docs (the old generator read yaml only), so the coverage is unchanged.
+    ``base_prompt`` (matching the old build-time substitution), and a
+    ``handler:`` command (dispatch-time py output, #317 P-2) is documented as
+    dynamic with its handler name.
     """
     # Lazy import: keep `invoke --list` / lint-only tasks free of the pydantic /
     # jinja2 load cost unless this task actually runs (same paradigm as
@@ -589,6 +589,11 @@ def gen_docs_platform_commands(ctx):
                 platforms_file.write(f"### {command}\n\n")
                 if rc.output.kind == "none":
                     platforms_file.write("**Output:** None\n\n")
+                elif rc.output.kind == "handler":
+                    # A `handler:` command's output is computed at dispatch time
+                    # by the platform's py module (#317 P-2) — there is nothing
+                    # static to render, so document the dynamic source instead.
+                    platforms_file.write(f"**Output:** (dynamic — py handler `{rc.output.handler_ref}`)\n\n")
                 else:
                     # `base_prompt` = platform name (the old build-time choice);
                     # strip the file-convention trailing newline for display.

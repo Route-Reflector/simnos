@@ -274,7 +274,7 @@ class TestAliasModeOverride:
             "  user: {exit: true}\n  enable: {new_mode: user}\n",
         )
         _cmd(commands, "alias.yaml", "command: tog\nalias: toggle\nmode: [user]\n")
-        with pytest.raises(ValueError, match="drops.*transition mode"):
+        with pytest.raises(ValueError, match=r"drops.*transition mode"):
             load_platform_dir(str(root))
 
 

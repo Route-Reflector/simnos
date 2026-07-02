@@ -1,0 +1,7 @@
+command: end
+type: simnos
+help: Leave config mode
+mode:
+- config
+new_mode: enable
+output: end.txt

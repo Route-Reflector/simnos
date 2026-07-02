@@ -1,6 +1,6 @@
 command: enable
 type: simnos
-help: enter enable mode
+help: enter exec prompt
 mode:
 - user
 new_mode: enable

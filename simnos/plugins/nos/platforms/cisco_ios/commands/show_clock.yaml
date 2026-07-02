@@ -1,7 +1,7 @@
 command: show clock
 type: simnos
-help: execute the command "show clock"
+help: Display the system clock
 mode:
 - user
 - enable
-output: show_clock.txt
+handler: make_show_clock

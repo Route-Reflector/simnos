@@ -1,6 +1,6 @@
 command: show ip interface brief
 type: simnos
-help: execute the command "show ip interface brief"
+help: Condensed output
 mode:
 - user
 - enable

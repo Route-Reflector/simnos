@@ -75,13 +75,6 @@ class ModelNosCommand(BaseModel):
     # so `extra="forbid"` keeps accepting the existing data while still
     # rejecting typos.
     output_variants: list[StrictStr] | None = None
-    # Test-facing marker for a callable-output command whose transition
-    # (`new_mode`/`exit`) is decided at dispatch time and so cannot be read
-    # from this static schema. The netmiko sweep (`tests/utils.get_host_commands`)
-    # skips such commands instead of running them into a ReadTimeout (#115).
-    # Not consumed by the runtime; declared so `extra="forbid"` accepts it.
-    # #317 supersedes it once A3 authors handlers with a static new_mode.
-    changes_prompt: StrictBool | None = None
 
 
 class ModelNosAttributes(BaseModel):

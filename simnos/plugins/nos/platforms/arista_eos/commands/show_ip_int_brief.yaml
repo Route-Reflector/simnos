@@ -1,0 +1,10 @@
+# A real command, not an alias of `show ip interface brief`: both spellings were
+# real in the py module, and alias-izing one would drop it from the canonical-only
+# abbreviation candidate space (#303 P3-2), changing e.g. `sh ip i b` ambiguity.
+command: show ip int brief
+type: simnos
+help: Condensed output
+mode:
+- user
+- enable
+output: show_ip_int_brief.txt

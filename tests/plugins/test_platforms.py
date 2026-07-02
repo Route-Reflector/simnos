@@ -7,14 +7,13 @@ in the yaml and python files.
 from importlib import import_module
 import os
 import re
-import types
 from typing import Any
 
 from netmiko import ConnectHandler
 import pytest
 
 from a3_paths import PLATFORMS_DIR
-from simnos.core.nos import _find_device_classes
+from simnos.core.nos import Nos, _find_device_classes
 from simnos.core.platform_loader import load_platform_dir
 from simnos.plugins.nos import nos_plugins
 from tests._platform_quirks import SKIP_ENABLE, XFAIL_PY_ALL_COMMANDS
@@ -77,8 +76,12 @@ class TestPlatforms:
 
     @pytest.mark.parametrize("platform", get_py_platforms())
     def test_platforms_py_has_correct_format(self, platform: str):
-        """
-        It checks if the platform python file can be imported correctly.
+        """The shipped py module is handler-only (#317 P-2): device class, no authoring.
+
+        Command authoring (the `commands` dict + `NAME` / `*_PROMPT` scalars)
+        moved to the A3 platform dir; a py module that re-grows them would
+        silently shadow the A3 data again (the #320 bug class), so their
+        absence is pinned here.
         """
         try:
             module = import_module(f"simnos.plugins.nos.platforms_py.{platform}")
@@ -86,8 +89,10 @@ class TestPlatforms:
             pytest.fail(f"Failed to import platform module for {platform}")
 
         assert module.__name__ == f"simnos.plugins.nos.platforms_py.{platform}"
-        assert hasattr(module, "commands")
-        assert hasattr(module, "INITIAL_PROMPT")
+        for authoring_attr in ("commands", "NAME", "INITIAL_PROMPT", "ENABLE_PROMPT", "CONFIG_PROMPT"):
+            assert not hasattr(module, authoring_attr), (
+                f"{platform}: py module defines {authoring_attr!r}; authoring belongs in the A3 dir (#317 P-2)"
+            )
         # #241/D5 contract: exactly one locally-defined BaseDevice subclass,
         # detected by the same criterion `Nos._from_module` uses (the
         # `__module__` guard holds under package import too — both sides of
@@ -97,41 +102,24 @@ class TestPlatforms:
         assert not hasattr(module, "DEVICE_NAME")
 
     @pytest.mark.parametrize("platform", get_py_platforms())
-    def test_platforms_py_commands_has_correct_format(self, platform: str):
-        """
-        It checks if the platform has the commands correctly set.
-        At least all the commands need to have the following with any conflict:
-        - output
-        - help
-        - prompt
-        """
-        try:
-            module = import_module(f"simnos.plugins.nos.platforms_py.{platform}")
-        except ImportError:
-            pytest.fail(f"Failed to import platform module for {platform}")
+    def test_platforms_py_handlers_are_referenced(self, platform: str):
+        """Every A3 `handler:` ref resolves and every shipped handler is used.
 
-        # Same detection criterion as `Nos._from_module` (#241/D5); the
-        # exactly-one contract is pinned in test_platforms_py_has_correct_format.
-        module_class = _find_device_classes(module)[0]
-
-        for value in module.commands.values():
-            if "alias" in value:
-                continue
-            exceptions: list[str] = [module.INITIAL_PROMPT]
-            if hasattr(module, "ENABLE_PROMPT"):
-                exceptions.append(module.ENABLE_PROMPT)
-            if hasattr(module, "CONFIG_PROMPT"):
-                exceptions.append(module.CONFIG_PROMPT)
-            assert "output" in value or "exit" in value
-            if "output" in value:
-                if callable(value["output"]):
-                    assert isinstance(value["output"], types.FunctionType)
-                    assert value["output"].__name__ in dir(module_class)
-                else:
-                    assert not has_single_curly_brackets(value["output"], exceptions)
-            assert "help" in value
-            assert not has_single_curly_brackets(value["help"], exceptions)
-            assert "prompt" in value
+        The forward direction re-pins the merge-time bind (`_bind_handler_refs`
+        is loud on a miss); the reverse direction catches a dead handler left
+        behind on the device class after its command was dropped or renamed
+        (#317 P-2).
+        """
+        nos = Nos(filename=nos_plugins[platform])
+        resolved = load_platform_dir(os.path.join(PLATFORMS_DIR, platform))
+        refs = {
+            rc.output.handler_ref
+            for rc in resolved.commands.values()
+            if rc.output.kind == "handler" and rc.output.handler_ref
+        }
+        assert refs <= set(nos.handlers), f"{platform}: unresolved handler ref(s) {sorted(refs - set(nos.handlers))}"
+        unused = set(nos.handlers) - refs
+        assert not unused, f"{platform}: handler(s) {sorted(unused)} are referenced by no A3 command"
 
     @pytest.mark.timeout(600)
     @pytest.mark.parametrize("platform", get_non_py_platforms())

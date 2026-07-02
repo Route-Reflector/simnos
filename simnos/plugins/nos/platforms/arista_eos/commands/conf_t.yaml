@@ -1,0 +1,6 @@
+command: conf t
+type: simnos
+help: Config mode
+mode:
+- enable
+new_mode: config

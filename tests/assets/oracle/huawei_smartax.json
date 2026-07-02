@@ -1,24 +1,24 @@
 {
+  "disable": {
+    "exit": false,
+    "help": "exit exec prompt",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": "user",
+    "output": [],
+    "variants": []
+  },
   "display board": {
     "exit": false,
-    "help": "execute the command \"display board\"",
+    "help": "display board information",
     "modes": [
       "enable",
       "user"
     ],
     "new_mode": null,
-    "output": [
-      "  -------------------------------------------------------------------------",
-      "  SlotID  BoardName  Status          SubType0 SubType1    Online/Offline",
-      "  -------------------------------------------------------------------------",
-      "  0       A123ABCD   Normal                           ",
-      "  1     ",
-      "  2       A123ABCDE  Normal                           ",
-      "  3       A123ABCDE  Active_normal   CPCF             ",
-      "  4       A123ABCDE  Standby_failed  CPCF                 Offline  ",
-      "  5     ",
-      "  -------------------------------------------------------------------------"
-    ],
+    "output": "<<handler:make_display_board>>",
     "variants": []
   },
   "display board serial-number": {
@@ -4070,11 +4070,22 @@
   },
   "enable": {
     "exit": false,
-    "help": "enter enable mode",
+    "help": "enter exec prompt",
     "modes": [
       "user"
     ],
     "new_mode": "enable",
+    "output": null,
+    "variants": []
+  },
+  "infoswitch cli OFF": {
+    "exit": false,
+    "help": "turn off infoswitch cli",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
     "output": null,
     "variants": []
   },
@@ -4105,6 +4116,27 @@
     ],
     "variants": []
   },
+  "quit": {
+    "exit": true,
+    "help": "exit from device",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "return": {
+    "exit": false,
+    "help": "return to user prompt",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": "enable",
+    "output": [],
+    "variants": []
+  },
   "scroll": {
     "exit": false,
     "help": "disables the paging so the output is complete always",
@@ -4118,7 +4150,7 @@
   },
   "undo smart": {
     "exit": false,
-    "help": "undo the command completion mode (smart mode)",
+    "help": "undo smart command",
     "modes": [
       "enable",
       "user"

@@ -267,14 +267,14 @@ warning 付きで無視されます — 古い plugin からは削除してく�
 
 ### callable 契約
 
-型付きの契約は `simnos.core.command_contract` (`CommandHandler` Protocol +
-`CommandResult` TypedDict) にあります — 型注釈に使いたい場合は import してください。
+型付きの契約は `simnos.core.command_contract` (`CommandHandler` Protocol)
+にあります — 型注釈に使いたい場合は import してください。
 形が合っていれば普通の関数のままでも動作します。
 
 シェルは callable output を次の形で起動します:
 
 ```python
-output(device, base_prompt=..., current_prompt=..., command=...)
+output(device, base_prompt=..., current_mode=..., current_prompt=..., command=...)
 ```
 
 `device` はあなたの `BaseDevice` subclass のインスタンスです (device class を
@@ -282,15 +282,17 @@ output(device, base_prompt=..., current_prompt=..., command=...)
 のような unbound method を置けばこの契約を満たします: `device` が `self` に
 bind されます。
 
-callable コマンドは以下の値を返せます:
+callable コマンドが返すのは **output のみ** です (#317):
 
 - `str` - 表示する出力文字列
 - `None` - レスポンスなし
-- `dict` (`CommandResult`) - 以下のオプションキーを持つ辞書:
-    - `"output"` - 表示する文字列
-    - `"new_mode"` - 遷移先の mode 名（例: `"enable"`）。シェルがその mode の
-      prompt を render します。prompt 文字列ではなく引数 `current_mode` で分岐します。
-    - `"exit"` - `True` の場合、シェルセッションを終了（output は表示されない）
+
+mode 遷移とセッション終了は static な authoring データ (コマンド側の
+`new_mode` / `exit` / `transitions`) であり、handler の戻り値ではありません —
+かつての dict 戻り値 (`CommandResult`) 形式は撤去されました。dict (や
+`str | None` 以外) を返す handler には固定の `% Internal error` 行が返り、
+エラーログが残ります。分岐は prompt 文字列ではなく引数 `current_mode` で
+行ってください。
 
 yaml static な output と異なるルールが 2 つあります:
 

@@ -1,0 +1,6 @@
+command: show running-config
+type: simnos
+help: System running configuration
+mode:
+- enable
+output_template: show_running-config.j2
