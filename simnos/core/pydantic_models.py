@@ -81,6 +81,39 @@ class ModelCommandVariant(BaseModel):
         return value
 
 
+def _reject_empty_mode_list(value: list[str] | None) -> list[str] | None:
+    """Shared `mode:` field rule for the A3 and inventory command schemas.
+
+    An explicit empty list reads as "runnable in no mode"; "all modes" is
+    expressed by omitting `mode`. Reject `[]` so the two never blur
+    (#264 / Decision 7). One definition so the dialects (and the message)
+    cannot drift (#317 P-3/P-4).
+    """
+    if value is not None and not value:
+        raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
+    return value
+
+
+def _check_transitions_combination(
+    transitions: dict | None, new_mode: str | None, exit_flag: bool | None, *, prefix: str = ""
+) -> None:
+    """Shared `transitions:` combination rule for the A3 and inventory schemas.
+
+    `transitions` is the mode-conditional alternative to the simple static
+    `new_mode` / `exit` — setting both is ambiguous, and an empty map is an
+    authoring error, not a silent no-op (#317 / P-1). One definition so the
+    dialects (and the messages) cannot drift (#317 P-3/P-4); `prefix` carries
+    the command label where the schema knows it.
+    """
+    if transitions is None:
+        return
+    conflict = sorted(name for name, v in (("new_mode", new_mode), ("exit", exit_flag)) if v is not None)
+    if conflict:
+        raise ValueError(f"{prefix}`transitions` is exclusive with {conflict} (#317 / P-1)")
+    if not transitions:
+        raise ValueError(f"{prefix}`transitions: {{}}` is empty — omit it (#317 / P-1)")
+
+
 class ModelTransition(BaseModel):
     """One mode's entry in a command's `transitions` map (#317 / P-1).
 
@@ -169,15 +202,7 @@ class ModelCommandAuthoring(BaseModel):
             raise ValueError(f"handler {value!r} must be a valid Python identifier")
         return value
 
-    @field_validator("mode")
-    @classmethod
-    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
-        # An explicit empty list reads as "runnable in no mode"; "all modes" is
-        # expressed by omitting `mode`. Reject `[]` so the two never blur
-        # (#264 / Decision 7).
-        if value is not None and not value:
-            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
-        return value
+    _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
 
     @field_validator("variants")
     @classmethod
@@ -237,18 +262,9 @@ class ModelCommandAuthoring(BaseModel):
                 raise ValueError(
                     f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
                 )
-            # `transitions` is the mode-conditional alternative to the simple
-            # static `new_mode` / `exit`; setting both is ambiguous (#317 / P-1).
-            if self.transitions is not None:
-                conflict = sorted(
-                    name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None
-                )
-                if conflict:
-                    raise ValueError(
-                        f"command {self.command!r}: `transitions` is exclusive with {conflict} (#317 / P-1)"
-                    )
-                if not self.transitions:
-                    raise ValueError(f"command {self.command!r}: `transitions: {{}}` is empty — omit it (#317 / P-1)")
+            _check_transitions_combination(
+                self.transitions, self.new_mode, self.exit, prefix=f"command {self.command!r}: "
+            )
         if self.command == "_default_":
             if self.mode is not None or self.new_mode is not None or self.transitions is not None:
                 raise ValueError(
@@ -388,27 +404,14 @@ class ModelInventoryCommand(BaseModel):
     output: StrictStr | None = None
     output_template: StrictStr | None = None
 
-    @field_validator("mode")
-    @classmethod
-    def _reject_empty_mode(cls, value: list[str] | None) -> list[str] | None:
-        # Same rule as A3 authoring: `[]` reads as "runnable in no mode", while
-        # "all modes" is expressed by omitting `mode` (#264 / Decision 7).
-        if value is not None and not value:
-            raise ValueError("mode: [] is rejected — omit `mode` to mean all modes (#264 / Decision 7)")
-        return value
+    _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
 
     @model_validator(mode="after")
     def _check_combination(self) -> "ModelInventoryCommand":
         if self.output is not None and self.output_template is not None:
             raise ValueError("at most one of `output` / `output_template` allowed (#264 / Decision 6)")
-        # Same exclusivity as A3 authoring (#317 / P-1): `transitions` is the
-        # mode-conditional alternative to the simple static `new_mode` / `exit`.
-        if self.transitions is not None:
-            conflict = sorted(name for name, v in (("new_mode", self.new_mode), ("exit", self.exit)) if v is not None)
-            if conflict:
-                raise ValueError(f"`transitions` is exclusive with {conflict} (#317 / P-1)")
-            if not self.transitions:
-                raise ValueError("`transitions: {}` is empty — omit it (#317 / P-1)")
+        # The command name is the mapping key, not a field — no prefix to carry.
+        _check_transitions_combination(self.transitions, self.new_mode, self.exit)
         return self
 
 

@@ -17,7 +17,7 @@ from jinja2 import TemplateSyntaxError
 from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
-from simnos.core.platform_loader import load_platform_dir, resolve_transitions
+from simnos.core.platform_loader import load_platform_dir, resolve_modes, resolve_transitions
 from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
 from simnos.core.resolved_command import (
     NO_OUTPUT,
@@ -204,15 +204,7 @@ def _resolve_inventory_commands(inventory_commands: dict, modes: dict[str, ModeD
 def _resolve_inventory_command(name: str, model: ModelInventoryCommand, mode_names: frozenset[str]) -> ResolvedCommand:
     """Resolve one validated inventory entry (mirrors the A3 loader's `_resolve_command`)."""
     where = f"inventory command {name!r}"
-    # `_default_` is the mode-agnostic fallback (its `mode` is schema-rejected);
-    # an omitted `mode` is likewise the empty set ("all modes", #264 / D5).
-    if model.mode is None:
-        cmd_modes: frozenset[str] = frozenset()
-    else:
-        unknown = [m for m in model.mode if m not in mode_names]
-        if unknown:
-            raise ValueError(f"{where}: mode(s) {unknown} not in platform modes {sorted(mode_names)}")
-        cmd_modes = frozenset(model.mode)
+    cmd_modes = resolve_modes(name, model.mode, mode_names, where="inventory command")
     if model.new_mode is not None and model.new_mode not in mode_names:
         raise ValueError(f"{where}: new_mode {model.new_mode!r} not in platform modes {sorted(mode_names)}")
 
