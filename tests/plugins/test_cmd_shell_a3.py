@@ -253,6 +253,12 @@ class TestInventoryNormalization:
         nos = Nos(filename=str(_a3_platform(tmp_path)))
         inventory = {"commands": {"logout": {"exit": True, "mode": ["user"]}}}
         shell = _shell_for(nos, inventory_config=inventory)
+        # With `is_running` unset, dispatch closes on *every* line (the server
+        # shutdown branch) and the pin would be a false green — set it, and
+        # prove with a non-exit control line that only `exit: true` closes.
+        shell.is_running.set()
+        _body, close = shell._dispatch_general("no such command")
+        assert close is False
         _body, close = shell._dispatch_general("logout")
         assert close is True
 
