@@ -23,7 +23,10 @@ cannot supply on its own:
 
 These pins may be dropped when P-4 removes the legacy inflow (the merged
 oracle then owns the surface); until then they are the migration's direct
-byte evidence.
+byte evidence. TODO(#317 P-4): when dropping, decide the fate of the arista
+``show_ip_int_brief.txt`` / ``show_ip_interface_brief.txt`` byte-identity
+guarantee currently riding on these fixtures — keep a small permanent identity
+test or accept comment-only sync (see the cross-sync notes in both yamls).
 """
 
 import functools

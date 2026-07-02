@@ -19,7 +19,9 @@ command authored one, so the pre-#317 snapshots stay byte-stable.
 The projection captures the client-observable behavior: rendered output as
 ``splitlines()`` (wire-equivalent — the driver's ``_render_response`` joins each
 body line with ``newline``, absorbing trailing newlines),
-the modes a command is visible in, the transition target(s), exit / help, and the
+the modes a command is visible in, the transition target(s), exit / help,
+``disables_paging`` (True-only emit — the #320 bug class was this flag being
+shadowed out of the merged view), and the
 full multi-capture variant list (each variant's name + rendered body, not just
 the count — so a variant-body conversion error is caught, not only a missing
 variant; PR-3 oracle hardening). For ``_default_`` (the mode-agnostic fallback)
