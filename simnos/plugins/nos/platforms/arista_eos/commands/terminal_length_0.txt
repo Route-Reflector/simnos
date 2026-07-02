@@ -1,1 +1,1 @@
-Pagination disabled
+Pagination disabled.
