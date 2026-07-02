@@ -206,6 +206,12 @@ class TestModelCommandAuthoring:
         with pytest.raises(ValidationError, match="valid Python identifier"):
             ModelCommandAuthoring(command="x", type="simnos", handler="make.show clock")
 
+    def test_rejects_keyword_handler(self):
+        # A keyword passes `str.isidentifier()` but can never name a real py
+        # function, so it is rejected at the authoring boundary (#317 P-1, codex#5).
+        with pytest.raises(ValidationError, match="valid Python identifier"):
+            ModelCommandAuthoring(command="x", type="simnos", handler="class")
+
     def test_rejects_handler_with_other_output_channel(self):
         with pytest.raises(ValidationError, match="at most one output channel"):
             ModelCommandAuthoring(command="x", type="simnos", handler="h", output="a.txt")
