@@ -1,2 +1,0 @@
-Hostname: {base_prompt}
-FQDN:     {base_prompt}

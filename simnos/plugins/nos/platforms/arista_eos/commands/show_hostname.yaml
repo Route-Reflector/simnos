@@ -3,4 +3,4 @@ type: simnos
 help: Show the system hostname
 mode:
 - enable
-output: show_hostname.txt
+output_template: show_hostname.j2

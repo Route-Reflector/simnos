@@ -46,6 +46,12 @@ def test_show_version_content(platform):
     assert "Cisco IOS XE Software" in out
     assert f"{BASE_PROMPT} uptime is" in out  # {{base_prompt}} resolved
     assert "{" not in out  # no unresolved placeholder survives rendering
+    # #328: the two long lines real IOS-XE emits as one must stay unbroken — no
+    # `\` line-continuation artifact (NTC raw carries zero). Assert each line is
+    # whole, not just that `\` is absent.
+    assert "\\" not in out
+    assert "Cisco IOS Software [Amsterdam], Virtual XE Software (X86_64_LINUX_IOSD-UNIVERSALK9-M)" in out
+    assert "cisco CSR1000V (VXE) processor (revision VXE) with 715705K/3075K bytes of memory." in out
 
 
 def test_show_running_config_content(platform):

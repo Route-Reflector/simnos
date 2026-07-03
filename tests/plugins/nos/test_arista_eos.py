@@ -49,6 +49,20 @@ def test_show_version_content(platform):
     assert "cEOSLab" in out
 
 
+def test_show_hostname_content(platform):
+    """`show hostname` renders the per-host name, not a literal `{base_prompt}`.
+
+    Regression pin for #328: P-2 (#317) moved the FakeNOS str.format literal
+    into a `.txt` (literal channel = no render), leaking the raw `{base_prompt}`
+    token to the wire. It is now a `.j2` so each host reports its own name, with
+    the NTC-canonical `Hostname: <name>` / `FQDN: <name>.company.com` shape.
+    """
+    out = platform.commands["show hostname"].output.render(BASE_PROMPT)
+    assert f"Hostname: {BASE_PROMPT}" in out
+    assert f"FQDN:     {BASE_PROMPT}.company.com" in out
+    assert "{" not in out  # no unresolved placeholder survives rendering
+
+
 def test_show_running_config_content(platform):
     out = platform.commands["show running-config"].output.render(BASE_PROMPT)
     assert f"hostname {BASE_PROMPT}" in out  # {{base_prompt}} resolved
