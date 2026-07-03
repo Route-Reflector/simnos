@@ -553,8 +553,8 @@
     ],
     "new_mode": null,
     "output": [
-      "Hostname: {base_prompt}",
-      "FQDN:     {base_prompt}"
+      "Hostname: oracle",
+      "FQDN:     oracle.company.com"
     ],
     "variants": []
   },
