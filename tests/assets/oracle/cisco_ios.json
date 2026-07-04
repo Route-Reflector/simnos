@@ -69,11 +69,38 @@
   },
   "exit": {
     "exit": false,
-    "help": "exit current configuration sub-mode (from config mode returns to enable)",
+    "help": "Exit from the EXEC or configuration mode",
     "modes": [
-      "config"
+      "config",
+      "enable",
+      "user"
     ],
-    "new_mode": "enable",
+    "new_mode": null,
+    "output": null,
+    "transitions": {
+      "config": {
+        "exit": false,
+        "new_mode": "enable"
+      },
+      "enable": {
+        "exit": true,
+        "new_mode": null
+      },
+      "user": {
+        "exit": true,
+        "new_mode": null
+      }
+    },
+    "variants": []
+  },
+  "logout": {
+    "exit": true,
+    "help": "Exit from the EXEC",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
     "output": null,
     "variants": []
   },

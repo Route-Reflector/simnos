@@ -118,11 +118,11 @@ def test_full_commands_never_diverted_to_abbreviation():
 # --------------------------------------------------------------- 2. negative fixture
 # `(platform, mode, input, reason)` — inputs that must stay `_default_`, NOT be
 # coerced into a command / ambiguous / incomplete by abbreviation. Seeded from
-# the cisco_ios byte-parity golden's unknown-command steps (`no such command`,
-# `exit` out-of-mode) plus a few clearly-foreign tokens.
+# the cisco_ios byte-parity golden's unknown-command step (`no such command`)
+# plus a few clearly-foreign tokens. (`exit` is no longer here: since #327 it is
+# a real all-modes close command, not an out-of-mode `_default_` fall-through.)
 NEGATIVE_FIXTURE = [
     ("cisco_ios", "enable", "no such command", "golden step 8 unknown -> _default_"),
-    ("cisco_ios", "enable", "exit", "golden step 12: exit is config-only -> _default_"),
     ("cisco_ios", "enable", "zzz", "foreign single token"),
     ("cisco_ios", "enable", "frobnicate the widget", "foreign multi token"),
     ("arista_eos", "enable", "configure t", "alias long-form abbreviation is not canonical -> _default_"),

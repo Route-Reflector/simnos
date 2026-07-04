@@ -31,8 +31,8 @@
     "variants": []
   },
   "logout": {
-    "exit": false,
-    "help": "Execute the command logout. This automatically generated.",
+    "exit": true,
+    "help": "Logout of the CLI session",
     "modes": [
       "enable",
       "user"

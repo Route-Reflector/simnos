@@ -1,0 +1,9 @@
+# Real IOS `logout` closes the session from user/enable EXEC (it is not offered
+# inside a config mode). Static `exit: true` like huawei_smartax `quit` (#327).
+command: logout
+type: simnos
+help: Exit from the EXEC
+mode:
+- user
+- enable
+exit: true

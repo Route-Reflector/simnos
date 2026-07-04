@@ -1,6 +1,21 @@
+# Mode-conditional transition (#327, arista_eos pattern): real IOS `exit` closes
+# the session from user/enable EXEC and drops one level (config -> enable) from a
+# config mode. The former config-only `new_mode: enable` shadowed the all-modes
+# BASIC `exit`, so user/enable `exit` fell through to `_default_` (`% Invalid
+# input`) and could not close the session. No `output:` field -> NO_OUTPUT: the
+# config branch returns to enable with no body (faithful IOS), and the user/enable
+# branches close before rendering.
 command: exit
 type: simnos
-help: exit current configuration sub-mode (from config mode returns to enable)
+help: Exit from the EXEC or configuration mode
 mode:
+- user
+- enable
 - config
-new_mode: enable
+transitions:
+  user:
+    exit: true
+  enable:
+    exit: true
+  config:
+    new_mode: enable
