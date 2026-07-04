@@ -147,10 +147,19 @@ def test_unknown_input_stays_default(platform, mode, line, reason):
 # (a frozenset, order not guaranteed), so it cannot deterministically cover every
 # branch of a multi-mode `transitions` command; and avaya_ers is outside
 # SWEEP_PLATFORMS entirely. These pin each branch explicitly, replacing the removed
-# `exit -> _default_` negative pin with the positive close behaviour it became:
+# `exit -> _default_` negative pin with the positive close behaviour it became.
+#
+# Tier 1 (#332, cisco_ios / avaya_ers):
 #   - cisco_ios `exit` closes from user/enable EXEC but steps config -> enable
 #     (the shadowing bug's fix — config must NOT close the session)
 #   - cisco_ios / avaya_ers `logout` closes from every EXEC mode it declares
+#
+# Tier 2 (#327, reachable-config platforms — the only 3 that can enter config):
+#   - cisco_asa `exit` = cisco_ios pattern (user/enable close, config -> enable);
+#     `logout` closes from user/enable (ASA real command)
+#   - brocade_fastiron `exit` = FastIron step-down (user closes, enable -> user,
+#     config -> enable), so enable/config exits do NOT close the session
+#   - hp_comware `quit` closes from user-view but steps config (system-view) -> user
 CLOSE_FIXTURE = [
     ("cisco_ios", "exit", "user", True, None),
     ("cisco_ios", "exit", "enable", True, None),
@@ -159,6 +168,27 @@ CLOSE_FIXTURE = [
     ("cisco_ios", "logout", "enable", True, None),
     ("avaya_ers", "logout", "user", True, None),
     ("avaya_ers", "logout", "enable", True, None),
+    # Tier 2 — cisco_asa (cisco_ios-same exit + real ASA logout)
+    ("cisco_asa", "exit", "user", True, None),
+    ("cisco_asa", "exit", "enable", True, None),
+    ("cisco_asa", "exit", "config", False, "enable"),
+    ("cisco_asa", "logout", "user", True, None),
+    ("cisco_asa", "logout", "enable", True, None),
+    # Tier 2 — brocade_fastiron (step-down: only user EXEC exit closes;
+    # `end` jumps config -> enable, a non-close descent like `exit`@config)
+    ("brocade_fastiron", "exit", "user", True, None),
+    ("brocade_fastiron", "exit", "enable", False, "user"),
+    ("brocade_fastiron", "exit", "config", False, "enable"),
+    ("brocade_fastiron", "end", "config", False, "enable"),
+    # Tier 2 — hp_comware (quit: user-view logs out, system-view steps up).
+    # `exit` is NOT a Comware command, so it falls through to the BASIC all-modes
+    # close even from system-view (config) — the one residual config-exit close this
+    # Tier does not fix. Pinned here to make that accepted trade-off explicit and
+    # regression-visible (the faithful ideal is `_default_`; deferred to #334/Tier 3,
+    # which needs a mode-restriction no-op override — see design Risks).
+    ("hp_comware", "quit", "user", True, None),
+    ("hp_comware", "quit", "config", False, "user"),
+    ("hp_comware", "exit", "config", True, None),
 ]
 
 

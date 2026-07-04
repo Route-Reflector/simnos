@@ -74,6 +74,32 @@
     "output": null,
     "variants": []
   },
+  "exit": {
+    "exit": false,
+    "help": "Exit from the current mode",
+    "modes": [
+      "config",
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "transitions": {
+      "config": {
+        "exit": false,
+        "new_mode": "enable"
+      },
+      "enable": {
+        "exit": true,
+        "new_mode": null
+      },
+      "user": {
+        "exit": true,
+        "new_mode": null
+      }
+    },
+    "variants": []
+  },
   "login": {
     "exit": false,
     "help": "It enters the terminal",
@@ -81,6 +107,17 @@
       "user"
     ],
     "new_mode": "enable",
+    "output": null,
+    "variants": []
+  },
+  "logout": {
+    "exit": true,
+    "help": "Exit from the EXEC",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
     "output": null,
     "variants": []
   },

@@ -1,7 +1,15 @@
+# Real HP Comware `quit`: from user-view it logs out; from system-view it steps up
+# one level to user-view (#327 Tier 2). `return` jumps straight to user-view from
+# any view (already authored). `exit` is not a Comware command -> left to the BASIC
+# all-modes close safety net. No `output:` field -> NO_OUTPUT.
 command: quit
 type: simnos
-help: exit the terminal (user view only; from system view use `return` to go back
-  to user view)
+help: Exit the current view (user-view logs out; system-view returns to user-view)
 mode:
 - user
-exit: true
+- config
+transitions:
+  user:
+    exit: true
+  config:
+    new_mode: user

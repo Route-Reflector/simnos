@@ -1,0 +1,9 @@
+# Real ASA `logout` closes the session from user/privileged EXEC (it is not offered
+# inside a config mode). Static `exit: true` like cisco_ios `logout` (#327 Tier 2).
+command: logout
+type: simnos
+help: Exit from the EXEC
+mode:
+- user
+- enable
+exit: true

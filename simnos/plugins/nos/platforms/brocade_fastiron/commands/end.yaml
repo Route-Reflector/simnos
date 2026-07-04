@@ -1,0 +1,9 @@
+# FastIron `end` jumps straight from config back to privileged EXEC (#327 Tier 2).
+# Command exists per netmiko RuckusFastironBase (exit_config_mode default `end`). No
+# `output:` field -> NO_OUTPUT: the prompt returns to enable with no body.
+command: end
+type: simnos
+help: End configuration mode and return to privileged EXEC
+mode:
+- config
+new_mode: enable

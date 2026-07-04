@@ -30,6 +30,42 @@
     "output": null,
     "variants": []
   },
+  "end": {
+    "exit": false,
+    "help": "End configuration mode and return to privileged EXEC",
+    "modes": [
+      "config"
+    ],
+    "new_mode": "enable",
+    "output": null,
+    "variants": []
+  },
+  "exit": {
+    "exit": false,
+    "help": "Exit the current CLI level",
+    "modes": [
+      "config",
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "transitions": {
+      "config": {
+        "exit": false,
+        "new_mode": "enable"
+      },
+      "enable": {
+        "exit": false,
+        "new_mode": "user"
+      },
+      "user": {
+        "exit": true,
+        "new_mode": null
+      }
+    },
+    "variants": []
+  },
   "show arp": {
     "exit": false,
     "help": "execute the command \"show arp\"",
