@@ -240,6 +240,9 @@ def test_byte_parity_session_close_command():
     echoes + the newline echo, then the server closes (no body, no prompt). Since
     #327 Tier 3 removed the redundant standalone `ex` stub, this now exercises the
     abbreviation path; the wire is byte-identical (`ex\\r` -> `ex\\r\\n` -> close).
+    (The exact-match close path itself is pinned at unit level by
+    `test_abbreviation.test_session_close_authoring`, so this wire pin is free to
+    ride the abbreviation route without losing close-over-wire coverage.)
     """
     with _running_host("alcatel_aos") as port:
         transport, channel = _open_shell_channel(port)
