@@ -27,6 +27,16 @@
 **Prompt:**
 - cisco_viptela>
 
+### paginate false
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- cisco_viptela>
+- cisco_viptela#
+
 ### show arp
 
 **Output:**

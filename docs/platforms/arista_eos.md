@@ -335,8 +335,8 @@ Sensor  Description                             (C)         (C)    (C)       (C)
 
 **Output:**
 ```
-Hostname: {base_prompt}
-FQDN:     {base_prompt}
+Hostname: arista_eos
+FQDN:     arista_eos.company.com
 ```
 
 **Help:** Show the system hostname

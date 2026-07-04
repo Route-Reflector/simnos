@@ -24,6 +24,20 @@ telnet              upload
 
 **Prompt:**
 
+### disable clipaging
+
+**Output:**
+```
+Command: disable clipaging
+
+Success.
+```
+
+**Help:** disable paging
+
+**Prompt:**
+- dlink_ds#
+
 ### enable
 
 **Output:** None
@@ -37,12 +51,12 @@ telnet              upload
 
 **Output:**
 ```
-Command: disable clipaging
+Command: enable clipaging
 
 Success.
 ```
 
-**Help:** enters the mmi mode (machine-machine interface)
+**Help:** enable paging
 
 **Prompt:**
 - dlink_ds#

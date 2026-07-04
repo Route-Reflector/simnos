@@ -16,6 +16,16 @@
 **Prompt:**
 - aruba_os>
 
+### no paging
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- aruba_os>
+- aruba_os#
+
 ### show ap bss-table details
 
 **Output:**
