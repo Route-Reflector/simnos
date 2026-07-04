@@ -4,7 +4,8 @@
 # BASIC `exit`, so user/enable `exit` fell through to `_default_` (`% Invalid
 # input`) and could not close the session. No `output:` field -> NO_OUTPUT: the
 # config branch returns to enable with no body (faithful IOS), and the user/enable
-# branches close before rendering.
+# branches close before rendering. (arista_eos expresses the same empty config
+# body with an empty `exit.txt`; NO_OUTPUT is the field-less equivalent.)
 command: exit
 type: simnos
 help: Exit from the EXEC or configuration mode
