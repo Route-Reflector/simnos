@@ -1,6 +1,10 @@
+# Real ERS `logout` ends the CLI session. The auto-generated stub declared the
+# modes but no transition, so it did nothing (a no-close stub); `exit: true` makes
+# it close like the BASIC `exit` fallback / `ex` (#327).
 command: logout
 type: simnos
-help: Execute the command logout. This automatically generated.
+help: Logout of the CLI session
 mode:
 - user
 - enable
+exit: true

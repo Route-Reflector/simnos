@@ -117,12 +117,15 @@ def test_full_commands_never_diverted_to_abbreviation():
 
 # --------------------------------------------------------------- 2. negative fixture
 # `(platform, mode, input, reason)` — inputs that must stay `_default_`, NOT be
-# coerced into a command / ambiguous / incomplete by abbreviation. Seeded from
-# the cisco_ios byte-parity golden's unknown-command steps (`no such command`,
-# `exit` out-of-mode) plus a few clearly-foreign tokens.
+# coerced into a command / ambiguous / incomplete by abbreviation. Three kinds:
+# the golden's unknown-command step (`no such command`), clearly-foreign tokens,
+# and real-but-out-of-mode commands (`logout` from config, which real IOS rejects).
+# (`exit` from enable is no longer here: since #327 it is a real all-modes close
+# command, not an out-of-mode `_default_` fall-through — its close is now pinned
+# positively in CLOSE_FIXTURE below.)
 NEGATIVE_FIXTURE = [
     ("cisco_ios", "enable", "no such command", "golden step 8 unknown -> _default_"),
-    ("cisco_ios", "enable", "exit", "golden step 12: exit is config-only -> _default_"),
+    ("cisco_ios", "config", "logout", "logout is EXEC-only -> _default_ from config (#327)"),
     ("cisco_ios", "enable", "zzz", "foreign single token"),
     ("cisco_ios", "enable", "frobnicate the widget", "foreign multi token"),
     ("arista_eos", "enable", "configure t", "alias long-form abbreviation is not canonical -> _default_"),
@@ -137,6 +140,38 @@ def test_unknown_input_stays_default(platform, mode, line, reason):
     expected = shell.commands["_default_"].output.render(shell.base_prompt)
     body, _close = shell._dispatch_general(line)
     assert body == expected, reason
+
+
+# ``(platform, command, mode, closes, new_mode)`` — session-close authoring pins
+# (#327). The sweep above dispatches each command from only `next(iter(cmd.modes))`
+# (a frozenset, order not guaranteed), so it cannot deterministically cover every
+# branch of a multi-mode `transitions` command; and avaya_ers is outside
+# SWEEP_PLATFORMS entirely. These pin each branch explicitly, replacing the removed
+# `exit -> _default_` negative pin with the positive close behaviour it became:
+#   - cisco_ios `exit` closes from user/enable EXEC but steps config -> enable
+#     (the shadowing bug's fix — config must NOT close the session)
+#   - cisco_ios / avaya_ers `logout` closes from every EXEC mode it declares
+CLOSE_FIXTURE = [
+    ("cisco_ios", "exit", "user", True, None),
+    ("cisco_ios", "exit", "enable", True, None),
+    ("cisco_ios", "exit", "config", False, "enable"),
+    ("cisco_ios", "logout", "user", True, None),
+    ("cisco_ios", "logout", "enable", True, None),
+    ("avaya_ers", "logout", "user", True, None),
+    ("avaya_ers", "logout", "enable", True, None),
+]
+
+
+@pytest.mark.parametrize(("platform", "command", "mode", "closes", "new_mode"), CLOSE_FIXTURE)
+def test_session_close_authoring(platform, command, mode, closes, new_mode):
+    shell = _shell(platform)
+    shell.current_mode = mode
+    body, close = shell._dispatch_general(command)
+    assert close is closes, f"{platform}:{command}@{mode} close={close}, expected {closes}"
+    if closes:
+        assert body is None  # close suppresses the body before rendering
+    else:
+        assert shell.current_mode == new_mode  # stepped up one level, not closed
 
 
 # --------------------------------------------------------------- 3. abbreviation positive (cisco_ios)

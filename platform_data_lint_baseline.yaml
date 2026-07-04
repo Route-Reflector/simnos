@@ -157,7 +157,6 @@ stub_help:
   - show version
   - show vlan
   avaya_ers:
-  - logout
   - no page
   - show interface name
   - show logging config
