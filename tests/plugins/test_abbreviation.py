@@ -174,13 +174,21 @@ CLOSE_FIXTURE = [
     ("cisco_asa", "exit", "config", False, "enable"),
     ("cisco_asa", "logout", "user", True, None),
     ("cisco_asa", "logout", "enable", True, None),
-    # Tier 2 — brocade_fastiron (step-down: only user EXEC exit closes)
+    # Tier 2 — brocade_fastiron (step-down: only user EXEC exit closes;
+    # `end` jumps config -> enable, a non-close descent like `exit`@config)
     ("brocade_fastiron", "exit", "user", True, None),
     ("brocade_fastiron", "exit", "enable", False, "user"),
     ("brocade_fastiron", "exit", "config", False, "enable"),
-    # Tier 2 — hp_comware (quit: user-view logs out, system-view steps up)
+    ("brocade_fastiron", "end", "config", False, "enable"),
+    # Tier 2 — hp_comware (quit: user-view logs out, system-view steps up).
+    # `exit` is NOT a Comware command, so it falls through to the BASIC all-modes
+    # close even from system-view (config) — the one residual config-exit close this
+    # Tier does not fix. Pinned here to make that accepted trade-off explicit and
+    # regression-visible (the faithful ideal is `_default_`; deferred to #334/Tier 3,
+    # which needs a mode-restriction no-op override — see design Risks).
     ("hp_comware", "quit", "user", True, None),
     ("hp_comware", "quit", "config", False, "user"),
+    ("hp_comware", "exit", "config", True, None),
 ]
 
 
