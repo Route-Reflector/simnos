@@ -232,12 +232,14 @@ def test_byte_parity_eof_on_disconnect(cisco_ios_port):
 
 
 def test_byte_parity_session_close_command():
-    """Pin the wire for a real session-closing command (exit:true), #297 codex#2.
+    """Pin the wire for a real session-closing command, #297 codex#2.
 
-    cisco_ios's `exit` is shadowed by an A3 config-mode command, so the
-    interactive golden never exercises a `DispatchResult.close` over the wire.
-    alcatel_aos `ex` is `exit: true` in user mode, so it drives the close path:
-    char echoes + the newline echo, then the server closes (no body, no prompt).
+    A minimal, dedicated close-over-wire pin: typing `ex` on alcatel_aos closes
+    the session. alcatel_aos declares no `exit`/`ex` command of its own, so `ex`
+    abbreviation-resolves to the all-modes BASIC `exit` (exit:true) — the char
+    echoes + the newline echo, then the server closes (no body, no prompt). Since
+    #327 Tier 3 removed the redundant standalone `ex` stub, this now exercises the
+    abbreviation path; the wire is byte-identical (`ex\\r` -> `ex\\r\\n` -> close).
     """
     with _running_host("alcatel_aos") as port:
         transport, channel = _open_shell_channel(port)

@@ -110,11 +110,12 @@ def test_telnet_byte_parity_interactive_session():
 
 
 def test_telnet_byte_parity_session_close_command():
-    """Pin the Telnet wire for a real session-closing command (exit: true).
+    """Pin the Telnet wire for a real session-closing command.
 
-    alcatel_aos ``ex`` is ``exit: true`` in user mode, so it drives the close
-    path: char echoes + the newline echo, then the server closes (no body, no
-    prompt) — same as the SSH session_close golden but over Telnet.
+    Typing ``ex`` on alcatel_aos abbreviation-resolves to the all-modes BASIC
+    ``exit`` (#327 Tier 3 removed the standalone ``ex`` stub): char echoes + the
+    newline echo, then the server closes (no body, no prompt) — same as the SSH
+    session_close golden but over Telnet.
     """
     with _running_telnet_host("alcatel_aos") as port:
         steps = asyncio.run(capture_telnet_transcript(port, [b"ex\r"]))

@@ -16,16 +16,6 @@
     ],
     "variants": []
   },
-  "ex": {
-    "exit": true,
-    "help": "exit the terminal",
-    "modes": [
-      "user"
-    ],
-    "new_mode": null,
-    "output": null,
-    "variants": []
-  },
   "request license info": {
     "exit": false,
     "help": "execute the command \"request license info\"",
