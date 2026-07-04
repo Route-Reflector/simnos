@@ -44,17 +44,6 @@
     "output": null,
     "variants": []
   },
-  "ex": {
-    "exit": true,
-    "help": "exit the terminal",
-    "modes": [
-      "enable",
-      "user"
-    ],
-    "new_mode": null,
-    "output": null,
-    "variants": []
-  },
   "show access-lists": {
     "exit": false,
     "help": "execute the command \"show access-lists\"",
