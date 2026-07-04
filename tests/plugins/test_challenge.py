@@ -123,6 +123,14 @@ class TestChallengeSchema:
                 challenge=_OK_CHALLENGE,
             )
 
+    def test_challenge_exclusive_with_disables_paging(self):
+        # A firing challenge returns before the sticky-paging flag would be set,
+        # so authoring both would silently drop the disable (1st round claude#3).
+        with pytest.raises(ValidationError, match="exclusive"):
+            _cmd(
+                command="enable-admin", type="simnos", mode=["user"], disables_paging=True, challenge=_OK_CHALLENGE
+            )
+
     def test_challenge_composes_with_output(self):
         # A non-firing mode uses `output` — the alcatel_sros per-mode response (案D).
         m = _cmd(
@@ -185,6 +193,21 @@ class TestChallengeLoader:
         ch = load_platform_dir(p).commands["enable-admin"].challenge
         assert ch is not None
         assert ch.modes == frozenset({"user", "enable"})
+
+    def test_all_modes_command_challenge_expands_to_platform_modes(self, tmp_path):
+        # Command-level `mode:` omitted (all-modes, empty cmd_modes) + challenge.mode
+        # omitted → the challenge fires in every platform mode, not the empty set (the
+        # `cmd_modes or mode_names` expansion, mirroring resolve_transitions). Without
+        # it `current_mode in modes` would always be False = a silent non-fire (design
+        # anti-silent-bug, codex 1st#4).
+        p = _platform(
+            tmp_path,
+            "command: sudo -s\ntype: simnos\n"  # no `mode:` → all-modes command
+            'challenge:\n  kind: password\n  prompt: "Password: "\n  auth: secret\n  success:\n    exit: true\n',
+        )
+        ch = load_platform_dir(p).commands["sudo -s"].challenge
+        assert ch is not None
+        assert ch.modes == frozenset({"user", "enable"})  # full platform mode set
 
     def test_challenge_mode_not_subset_is_loud(self, tmp_path):
         p = _platform(

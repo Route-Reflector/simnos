@@ -319,9 +319,19 @@ class ModelCommandAuthoring(BaseModel):
             # it cannot ride the dynamic `handler` / `variants` channels — those
             # decide output at dispatch time (#338 / Decision 8). It DOES compose
             # with `output` / `output_template` (the response for a non-firing mode).
+            # `disables_paging` is also exclusive: a firing challenge returns before
+            # `_dispatch_general` sets the sticky-paging flag, so authoring both would
+            # silently drop the disable (anti-silent-bug) — and enable/sudo never turn
+            # paging off, so the pair is meaningless (1st round claude#3).
             if self.challenge is not None:
                 conflict = sorted(
-                    name for name, v in (("handler", self.handler), ("variants", self.variants)) if v is not None
+                    name
+                    for name, v in (
+                        ("handler", self.handler),
+                        ("variants", self.variants),
+                        ("disables_paging", self.disables_paging or None),
+                    )
+                    if v is not None
                 )
                 if conflict:
                     raise ValueError(

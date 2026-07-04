@@ -12,6 +12,7 @@ import asyncio
 
 from simnos.core.resolved_command import ResolvedChallenge, ResolvedOutput, Transition
 from simnos.plugins.servers.async_session import (
+    _read_challenge_line,
     _resolve_rows,
     async_interactive_login,
     run_async_push_session,
@@ -505,6 +506,39 @@ def test_challenge_answer_not_in_editor_history():
     out = _drive_challenge(_FakeTransport([b"enable\r", _SEKRET + b"\r", b"\x1b[A"]), _ChallengeShell(), editing=True)
     assert _SEKRET not in out  # never on the wire, including the history redraw
     assert out.endswith(b"enable")  # Up replayed the launching command
+
+
+def test_read_challenge_line_echo_on_echoes_chars_and_backspace():
+    """`_read_challenge_line(echo=True)` (the Phase 3 confirm path): regular chars
+    echo raw, backspace emits `\\b \\b`, and the terminating CR is NOT echoed (the
+    held-echo principle). Phase 1 only reaches echo=False (password), so this pins
+    the echo-on byte behaviour now for the Phase 3 confirm reuse (claude 1st#2)."""
+    transport = _FakeTransport([])  # only its `send` + flags are used; read_byte is injected
+    data = b"yeXX\x08\x08s\r"  # 'y','e', typo 'XX', two backspaces, 's', CR -> "yes"
+    stream = iter(data[i : i + 1] for i in range(len(data)))
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, next_skip_lf = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered == "yes"
+    assert next_skip_lf is True  # terminated on CR
+    # chars echoed raw, each backspace erased with `\b \b`, CR not echoed.
+    assert bytes(transport.out) == b"yeXX\b \b\b \bs"
+
+
+def test_read_challenge_line_eof_returns_sentinel():
+    """EOF mid-answer returns `(None, skip_lf)` — the sentinel the driver turns into
+    a no-render session end (echo-on path, symmetric with the echo-off driver test)."""
+    transport = _FakeTransport([])
+    stream = iter([b"a", b"b"])  # no terminator, then EOF
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, _skip = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered is None
+    assert bytes(transport.out) == b"ab"  # the two chars echoed before EOF
 
 
 def test_challenge_no_complete_callable_closes():
