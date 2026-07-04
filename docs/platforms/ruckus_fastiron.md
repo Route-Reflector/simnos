@@ -1077,3 +1077,13 @@ PORT-VLAN 4085, Name Session-VLAN, Priority level0, Off
 - ruckus_fastiron>
 - ruckus_fastiron#
 
+### skip-page-display
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- ruckus_fastiron>
+- ruckus_fastiron#
+

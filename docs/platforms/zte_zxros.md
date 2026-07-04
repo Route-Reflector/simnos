@@ -869,3 +869,13 @@ Uptime is N/A
 - zte_zxros>
 - zte_zxros#
 
+### terminal length 0
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- zte_zxros>
+- zte_zxros#
+

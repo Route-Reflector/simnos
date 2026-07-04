@@ -27,6 +27,16 @@
 **Prompt:**
 - aruba_aoscx>
 
+### no page
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- aruba_aoscx>
+- aruba_aoscx#
+
 ### show aaa authentication port-access interface all client-status
 
 **Output:**

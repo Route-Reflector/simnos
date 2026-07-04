@@ -67,3 +67,12 @@ Ve 734                 10.224.8.137         ABC-PUBLIC-LEGACY                   
 **Prompt:**
 - extreme_slxos#
 
+### terminal length 0
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- extreme_slxos#
+

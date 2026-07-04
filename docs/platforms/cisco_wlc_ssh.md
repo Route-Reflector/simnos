@@ -7,6 +7,16 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### config paging disable
+
+**Output:** None
+
+**Help:** disable paging
+
+**Prompt:**
+- cisco_wlc_ssh>
+- cisco_wlc_ssh#
+
 ### _default_
 
 **Output:**
