@@ -230,10 +230,11 @@ class ModelCommandAuthoring(BaseModel):
     # the loader's `replace`, see `_check_combination`).
     disables_paging: StrictBool | None = None
     # Post-command interactive sub-prompt (#338 / §1). Exclusive with the dynamic
-    # `handler` / `variants` channels (no cross use case), but composes with
-    # `output` / `output_template` (the ordinary output for a mode the challenge
-    # does not fire in). Forbidden on an alias (it inherits the target's value via
-    # the loader's `replace`), see `_check_combination`.
+    # `handler` / `variants` channels and with `disables_paging` (no cross use
+    # case, and a firing challenge would silently drop the paging disable), but
+    # composes with `output` / `output_template` (the ordinary output for a mode
+    # the challenge does not fire in). Forbidden on an alias (it inherits the
+    # target's value via the loader's `replace`), see `_check_combination`.
     challenge: ModelChallenge | None = None
 
     @field_validator("output", "output_template")

@@ -127,9 +127,7 @@ class TestChallengeSchema:
         # A firing challenge returns before the sticky-paging flag would be set,
         # so authoring both would silently drop the disable (1st round claude#3).
         with pytest.raises(ValidationError, match="exclusive"):
-            _cmd(
-                command="enable-admin", type="simnos", mode=["user"], disables_paging=True, challenge=_OK_CHALLENGE
-            )
+            _cmd(command="enable-admin", type="simnos", mode=["user"], disables_paging=True, challenge=_OK_CHALLENGE)
 
     def test_challenge_composes_with_output(self):
         # A non-firing mode uses `output` — the alcatel_sros per-mode response (案D).
