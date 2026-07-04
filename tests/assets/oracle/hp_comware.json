@@ -971,13 +971,24 @@
     "variants": []
   },
   "quit": {
-    "exit": true,
-    "help": "exit the terminal (user view only; from system view use `return` to go back to user view)",
+    "exit": false,
+    "help": "Exit the current view (user-view logs out; system-view returns to user-view)",
     "modes": [
+      "config",
       "user"
     ],
     "new_mode": null,
     "output": null,
+    "transitions": {
+      "config": {
+        "exit": false,
+        "new_mode": "user"
+      },
+      "user": {
+        "exit": true,
+        "new_mode": null
+      }
+    },
     "variants": []
   },
   "return": {

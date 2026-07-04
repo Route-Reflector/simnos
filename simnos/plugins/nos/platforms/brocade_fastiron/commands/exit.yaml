@@ -1,0 +1,20 @@
+# Mode-conditional transition (#327 Tier 2): real FastIron `exit` steps back one
+# level each time — config -> privileged EXEC (enable), enable -> user EXEC, and
+# user EXEC exit ends the session. transitions expresses the full step-down; this
+# overrides the all-modes BASIC exit. No `output:` field -> NO_OUTPUT (each step
+# returns with no body, faithful to FastIron; the user branch closes before
+# rendering).
+command: exit
+type: simnos
+help: Exit the current CLI level
+mode:
+- user
+- enable
+- config
+transitions:
+  user:
+    exit: true
+  enable:
+    new_mode: user
+  config:
+    new_mode: enable

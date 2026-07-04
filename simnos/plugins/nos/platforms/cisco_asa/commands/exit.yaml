@@ -1,0 +1,18 @@
+# Mode-conditional transition (#327 Tier 2, cisco_ios Tier 1 pattern): ASA `exit`
+# logs out from user/privileged EXEC and steps config -> enable. Overrides the
+# all-modes BASIC exit. No `output:` field -> NO_OUTPUT: the config branch returns
+# to enable with no body, and the user/enable branches close before rendering.
+command: exit
+type: simnos
+help: Exit from the current mode
+mode:
+- user
+- enable
+- config
+transitions:
+  user:
+    exit: true
+  enable:
+    exit: true
+  config:
+    new_mode: enable
