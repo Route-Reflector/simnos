@@ -117,10 +117,12 @@ def test_full_commands_never_diverted_to_abbreviation():
 
 # --------------------------------------------------------------- 2. negative fixture
 # `(platform, mode, input, reason)` — inputs that must stay `_default_`, NOT be
-# coerced into a command / ambiguous / incomplete by abbreviation. Seeded from
-# the cisco_ios byte-parity golden's unknown-command step (`no such command`)
-# plus a few clearly-foreign tokens. (`exit` is no longer here: since #327 it is
-# a real all-modes close command, not an out-of-mode `_default_` fall-through.)
+# coerced into a command / ambiguous / incomplete by abbreviation. Three kinds:
+# the golden's unknown-command step (`no such command`), clearly-foreign tokens,
+# and real-but-out-of-mode commands (`logout` from config, which real IOS rejects).
+# (`exit` from enable is no longer here: since #327 it is a real all-modes close
+# command, not an out-of-mode `_default_` fall-through — its close is now pinned
+# positively in CLOSE_FIXTURE below.)
 NEGATIVE_FIXTURE = [
     ("cisco_ios", "enable", "no such command", "golden step 8 unknown -> _default_"),
     ("cisco_ios", "config", "logout", "logout is EXEC-only -> _default_ from config (#327)"),
