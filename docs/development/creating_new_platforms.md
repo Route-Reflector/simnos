@@ -95,9 +95,47 @@ output: show_version.txt       # a bare .txt filename, read verbatim (literal)
 - **`exit`** marks a session-closing command.
 - **`disables_paging`** marks a command that turns the `--More--` pager off for
   the rest of the session (e.g. `terminal length 0`, #307).
+- **`challenge`** makes the command ask for a password after it runs (enable
+  secret / `sudo -s`, #338) — see [Interactive challenges](#interactive-challenges).
 - **`_default_`** is the mode-agnostic unknown-command fallback: author the
   platform's real error wording (e.g. Cisco IOS `% Invalid input detected at
   '^' marker.`; vendor wording differs, do not copy-paste). It takes no `mode`.
+
+### Interactive challenges
+
+A `challenge:` block turns a command into a two-step interaction: it prints a
+sub-prompt, reads one answer line, and only then transitions — the shape of an
+enable secret (`enable-admin`, `enable 15`, `administrator`) or `sudo -s`
+(#338). Phase 1 supports `kind: password` (the answer is verified against the
+host credentials and never echoed); `confirm` (y/n) lands in a later phase.
+
+```yaml
+command: sudo -s
+type: simnos
+mode: [user]
+challenge:
+  kind: password
+  prompt: "[sudo] password for {{ username }}: "  # single line; base_prompt / username only
+  auth: password          # `password` = host password; `secret` = host secret (falls back to password)
+  success:
+    new_mode: enable      # applied only on a correct answer (or `exit: true`)
+  failure_output: "Sorry, try again."  # body on a wrong / empty answer; the prompt stays put
+```
+
+- The answer is checked **once** — a wrong or empty answer prints
+  `failure_output` and stays in the current mode (no retry loop). This matches
+  what netmiko's `enable()` expects (a re-prompt would hang its read).
+- Set the host's `secret` in inventory (same name as netmiko's `secret` arg) for
+  `auth: secret`; unset, it falls back to the host `password` so the simulator
+  works out of the box.
+- **`mode`** inside `challenge:` scopes which modes fire it (default: every mode
+  the command is valid in). A mode that does **not** fire the challenge answers
+  the command's ordinary `output` instead — this is how a command responds
+  differently per mode (e.g. `enable-admin` challenges in user mode but prints
+  "already in admin mode" once enabled) without a separate command.
+- `challenge` composes with `output` / `output_template` (the non-firing-mode
+  response) but not with `handler` / `variants`, and an alias inherits its
+  target's challenge rather than re-authoring it.
 
 ### Authoring conventions
 

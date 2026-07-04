@@ -318,7 +318,7 @@ def _synthetic_shell(tmp_path):
 def test_p1_bound_handler_dispatches(tmp_path):
     """The merge-bound handler produces dynamic output through `_dispatch_general` (#317 P-1)."""
     shell = _synthetic_shell(tmp_path)  # starts in `user`
-    body, close = shell._dispatch_general("greet")
+    body, close, _challenge = shell._dispatch_general("greet")
     assert body == "hello from user"
     assert close is False
 
@@ -327,12 +327,12 @@ def test_p1_transitions_exit_and_new_mode(tmp_path):
     """A `transitions` map drives a per-mode exit / new_mode in dispatch (#317 P-1)."""
     shell = _synthetic_shell(tmp_path)
     # user mode: transitions[user] = exit -> session closes, no body.
-    body, close = shell._dispatch_general("leave")
+    body, close, _challenge = shell._dispatch_general("leave")
     assert close is True
     assert body is None
     # config mode: transitions[config] = new_mode enable (no exit).
     shell.current_mode = "config"
-    body, close = shell._dispatch_general("leave")
+    body, close, _challenge = shell._dispatch_general("leave")
     assert close is False
     assert shell.current_mode == "enable"
 
@@ -340,7 +340,7 @@ def test_p1_transitions_exit_and_new_mode(tmp_path):
 def test_p1_static_new_mode_dispatch(tmp_path):
     """A plain static `new_mode` still transitions unchanged (baseline byte-parity, #317 P-1)."""
     shell = _synthetic_shell(tmp_path)
-    _body, close = shell._dispatch_general("goto enable")
+    _body, close, _challenge = shell._dispatch_general("goto enable")
     assert close is False
     assert shell.current_mode == "enable"
 
@@ -348,7 +348,7 @@ def test_p1_static_new_mode_dispatch(tmp_path):
 def test_p1_partial_transitions_map_stays_when_mode_absent(tmp_path):
     """A `transitions` map missing the current mode = no transition (#317 P-1, claude#3)."""
     shell = _synthetic_shell(tmp_path)  # user mode; `partial` keys enable only
-    _body, close = shell._dispatch_general("partial")
+    _body, close, _challenge = shell._dispatch_general("partial")
     assert close is False
     assert shell.current_mode == "user"  # stayed — no entry for user
     # And in enable mode its one entry fires.
@@ -363,7 +363,7 @@ def test_p1_handler_and_transitions_are_orthogonal(tmp_path):
     shell = _synthetic_shell(tmp_path)
     shell.current_mode = "enable"  # `dyn` is enable-only
     shell.prompt = "R1#"
-    body, close = shell._dispatch_general("dyn")
+    body, close, _challenge = shell._dispatch_general("dyn")
     assert body == "hello from enable"  # handler output rendered
     assert close is False
     assert shell.current_mode == "user"  # transitions[enable] = new_mode user applied
@@ -595,7 +595,7 @@ class TestCmdShell(TestCase):
         """A known command returns its rendered body and does not close (was default)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        body, close = shell._dispatch_general("show clock")
+        body, close, _challenge = shell._dispatch_general("show clock")
         self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022\n")
         self.assertFalse(close)
 
@@ -603,7 +603,7 @@ class TestCmdShell(TestCase):
         """An alias resolves to the same body as its target (was default)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        body, close = shell._dispatch_general("sh clock")
+        body, close, _challenge = shell._dispatch_general("sh clock")
         self.assertEqual(body, "*21:01:33.000 AET 01 01 01 2022\n")
         self.assertFalse(close)
 
@@ -611,7 +611,7 @@ class TestCmdShell(TestCase):
         """A bound-handler command returns its computed body (was default)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        body, close = shell._dispatch_general("show marker")
+        body, close, _challenge = shell._dispatch_general("show marker")
         self.assertEqual(body, "SYNTHETIC-CUSTOM-MARKER")
         self.assertFalse(close)
 
@@ -637,7 +637,7 @@ class TestCmdShell(TestCase):
         """
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
-            body, close = shell._dispatch_general("cmd transition")
+            body, close, _challenge = shell._dispatch_general("cmd transition")
             self.assertFalse(close)
             self.assertEqual(shell.current_mode, "enable")
             self.assertEqual(shell.prompt, "test#")
@@ -647,7 +647,7 @@ class TestCmdShell(TestCase):
         """A str-returning handler's body is served, prompt unchanged."""
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
-            body, close = shell._dispatch_general("cmd str")
+            body, close, _challenge = shell._dispatch_general("cmd str")
             self.assertFalse(close)
             self.assertEqual(shell.prompt, "test>")
             self.assertEqual(body, "dynamic body")
@@ -662,7 +662,7 @@ class TestCmdShell(TestCase):
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
             with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR") as captured:
-                body, close = shell._dispatch_general("cmd dict")
+                body, close, _challenge = shell._dispatch_general("cmd dict")
             self.assertFalse(close)
             self.assertEqual(body, HANDLER_ERROR_OUTPUT)
             self.assertEqual(shell.current_mode, "user")  # the dict's new_mode is dead
@@ -672,14 +672,14 @@ class TestCmdShell(TestCase):
         """A command not valid in the current mode answers with `_default_`."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        body, _close = shell._dispatch_general("show version")
+        body, _close, _challenge = shell._dispatch_general("show version")
         self.assertEqual(body, "% Invalid input detected at '^' marker.\n")
 
     def test_dispatch_command_incorrect(self):
         """An unknown command answers with the `_default_` output."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        body, _close = shell._dispatch_general("test")
+        body, _close, _challenge = shell._dispatch_general("test")
         self.assertEqual(body, "% Invalid input detected at '^' marker.\n")
 
     def test_invoke_handler_str_return_passthrough(self):
@@ -728,7 +728,7 @@ class TestCmdShell(TestCase):
         """
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
-            body, close = shell._dispatch_general("nope")
+            body, close, _challenge = shell._dispatch_general("nope")
             self.assertFalse(close)
             self.assertEqual(body, "dynamic unknown: nope")
 
@@ -740,7 +740,7 @@ class TestCmdShell(TestCase):
         """
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
-            body, close = shell._dispatch_general("known")  # valid only in enable, current mode is user
+            body, close, _challenge = shell._dispatch_general("known")  # valid only in enable, current mode is user
             self.assertFalse(close)
             self.assertEqual(body, "dynamic unknown: known")
 
@@ -755,7 +755,7 @@ class TestCmdShell(TestCase):
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
             with self.assertLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-                body, close = shell._dispatch_general("cmd crash")
+                body, close, _challenge = shell._dispatch_general("cmd crash")
             self.assertFalse(close)
             self.assertEqual(body, HANDLER_ERROR_OUTPUT)
 
@@ -786,7 +786,7 @@ class TestCmdShell(TestCase):
         with tempfile_dir() as tmp_path:
             shell = self._make_handler_shell(tmp_path)
             with self.assertNoLogs("simnos.plugins.shell.cmd_shell", level="ERROR"):
-                body, close = shell._dispatch_general("cmd brace")
+                body, close, _challenge = shell._dispatch_general("cmd brace")
             self.assertFalse(close)
             self.assertEqual(body, "literal {brace} stays")
 
@@ -807,7 +807,7 @@ class TestCmdShell(TestCase):
         """An exit command closes the session (was default returning True)."""
         self.arguments["is_running"].set()
         shell = CMDShell(**self.arguments)
-        _body, close = shell._dispatch_general("exit")
+        _body, close, _challenge = shell._dispatch_general("exit")
         self.assertTrue(close)
 
     def test_dispatch_eof_closes_session(self):

@@ -62,7 +62,30 @@ output: show_version.txt       # 裸の .txt ファイル名、verbatim 読込 (
 - **`alias`** はコマンドを別コマンドへの純粋な参照にします。alias が再指定できる唯一の dispatch field は `mode:` です (例: arista_eos の `do show ip int brief` は target が user/enable なのに対し config 専用、#317) — それ以外はすべて継承。
 - **`exit`** はセッションを閉じるコマンドを表します。
 - **`disables_paging`** は `--More--` ページャーをそのセッション以降無効化するコマンドを表します (例: `terminal length 0`、#307)。
+- **`challenge`** はコマンド実行後にパスワードを求める (enable secret / `sudo -s`、#338) — [対話 challenge](#対話-challenge) を参照。
 - **`_default_`** はモード非依存の unknown-command フォールバック: プラットフォームの実機エラー文言を記述 (例: Cisco IOS は `% Invalid input detected at '^' marker.`; vendor ごとに違うので copy-paste 禁止)。`mode` は取りません。
+
+### 対話 challenge
+
+`challenge:` block はコマンドを 2 段の対話にします: sub-prompt を表示し、応答行を 1 行読み、そのあとで遷移します — enable secret (`enable-admin` / `enable 15` / `administrator`) や `sudo -s` の形 (#338)。Phase 1 は `kind: password` に対応 (応答は host の資格情報で検証され、wire には一切 echo されません); `confirm` (y/n) は後の Phase です。
+
+```yaml
+command: sudo -s
+type: simnos
+mode: [user]
+challenge:
+  kind: password
+  prompt: "[sudo] password for {{ username }}: "  # 1 行; 使える変数は base_prompt / username のみ
+  auth: password          # `password` = host password; `secret` = host secret (未設定なら password に fallback)
+  success:
+    new_mode: enable      # 正解時のみ適用 (または `exit: true`)
+  failure_output: "Sorry, try again."  # 不正解 / 空応答時の body; prompt はそのまま
+```
+
+- 応答は **1 回だけ** 検証されます — 不正解 / 空応答は `failure_output` を表示して現在のモードに留まります (retry ループ無し)。これは netmiko の `enable()` の期待 (再 prompt するとその read が hang する) と整合します。
+- `auth: secret` を使う場合は inventory の host に `secret` (netmiko の `secret` 引数と同名) を設定します; 未設定なら host `password` に fallback するので、シミュレータは out-of-box で動きます。
+- `challenge:` 内の **`mode`** はどのモードで発火するかを絞ります (既定: コマンドが有効な全モード)。発火しないモードでは、代わりにコマンド通常の `output` を返します — これがモードごとに応答を変える方法です (例: `enable-admin` は user モードで challenge、enable 済なら "already in admin mode" を表示) — 別コマンドを作らずに実現できます。
+- `challenge` は `output` / `output_template` (非発火モードの応答) とは共存しますが `handler` / `variants` とは排他で、alias は target の challenge を継承します (再 authoring 不可)。
 
 ### authoring 規約
 

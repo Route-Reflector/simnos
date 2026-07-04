@@ -59,6 +59,20 @@ def _project_output(out: ResolvedOutput):
     return body.splitlines() if body is not None else None
 
 
+def _project_challenge_prompt(out: ResolvedOutput):
+    """Render a challenge prompt for the projection (#338).
+
+    Like `_project_output` but supplies the `username` a challenge prompt may
+    reference (`_project_output`'s `render(base_prompt)` would hit a
+    StrictUndefined). A fixed sentinel username keeps the projection stable.
+    """
+    if out.kind == "literal":
+        return out.text
+    if out.kind == "template" and out.template is not None:
+        return out.template.render(base_prompt=FIXED_BASE_PROMPT, username="user")
+    return None
+
+
 def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
     """Project resolved commands into a JSON-serializable comparison shape."""
     projection: dict[str, dict] = {}
@@ -83,4 +97,19 @@ def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
             # merged view, so the oracle must see it (1st round claude#2).
             # True-only emit, same rationale as `transitions` above.
             projection[name]["disables_paging"] = True
+        if rc.challenge is not None:
+            # The post-command interactive sub-prompt (#338). Emitted only when
+            # authored (like `transitions` / `disables_paging`), so pre-#338
+            # snapshots need no re-baseline. Captures the client-observable
+            # contract: the rendered prompt, firing modes, auth source, the held
+            # success transition and the failure body.
+            ch = rc.challenge
+            projection[name]["challenge"] = {
+                "kind": ch.kind,
+                "prompt": _project_challenge_prompt(ch.prompt),
+                "modes": sorted(ch.modes),
+                "auth": ch.auth,
+                "success": {"new_mode": ch.success.new_mode, "exit": ch.success.exit},
+                "failure_output": ch.failure_output,
+            }
     return projection

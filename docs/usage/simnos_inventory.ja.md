@@ -75,6 +75,10 @@ default:
 
 この場合、ユーザー名 `user`、パスワード `user`、ポート `6000` の `router0` という名前のホストが作成されます。プラットフォームは `cisco_ios` になります。より多くのホストを作成したい場合は、`hosts` セクションに追加できます:
 
+!!! note "`secret` (enable secret / sudo password)"
+    host (または `default` セクション) には `secret` も設定できます — enable コマンドがパスワードを要求するプラットフォーム (`challenge: {auth: secret}` コマンド、#338) の enable secret / sudo パスワードです。netmiko の `ConnectHandler` の `secret` 引数と同名です。未設定の場合、challenge は host `password` に fallback するので、多くの inventory では設定不要です。
+
+
 ``` yaml
 hosts:
     router1:

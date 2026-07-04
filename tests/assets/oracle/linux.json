@@ -444,16 +444,6 @@
     ],
     "variants": []
   },
-  "enable": {
-    "exit": false,
-    "help": "enter enable mode",
-    "modes": [
-      "user"
-    ],
-    "new_mode": "enable",
-    "output": null,
-    "variants": []
-  },
   "ip address show": {
     "exit": false,
     "help": "execute the command \"ip address show\"",
@@ -1387,6 +1377,29 @@
       "      VMID NAME                 STATUS     MEM(MB)    BOOTDISK(GB) PID       ",
       "       100 Screen-Sun-AAAAAAA   running    1111              11.00 1111111   "
     ],
+    "variants": []
+  },
+  "sudo -s": {
+    "challenge": {
+      "auth": "password",
+      "failure_output": "Sorry, try again.",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "[sudo] password for user: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
+    "exit": false,
+    "help": "run a shell as root",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
     "variants": []
   },
   "top": {

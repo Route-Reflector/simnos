@@ -69,7 +69,7 @@ def _served(shell, line="show test"):
     `default` was removed in #303 P3-3; `_dispatch_general` returns the body the
     shell would have written (variant outputs here are single-line).
     """
-    body, _close = shell._dispatch_general(line)
+    body, _close, _challenge = shell._dispatch_general(line)
     return body or ""
 
 

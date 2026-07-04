@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from simnos.core.shared_loop import SharedLoop
     from simnos.core.simnos import SimNOS
     from simnos.plugins.servers.async_session import AsyncPushTransport
-    from simnos.plugins.shell.cmd_shell import DispatchResult
+    from simnos.plugins.shell.cmd_shell import DispatchResult, PendingChallenge
 
 log = logging.getLogger(__name__)
 
@@ -75,6 +75,7 @@ class AsyncServerBase:
         username: str,
         password: str,
         *,
+        secret: str | None = None,
         shell_configuration: dict | None = None,
         address: str = "127.0.0.1",
         timeout: int = 1,
@@ -104,6 +105,10 @@ class AsyncServerBase:
         self._shared_platform = build_shared(nos, self.nos_inventory_config, render_config) if build_shared else None
         self.username: str = username
         self.password: str = password
+        # enable-secret / sudo password for `challenge: {auth: secret}` commands
+        # (#338), threaded to every session's shell in `_build_shell`. None → the
+        # challenge falls back to `password` (案F).
+        self.secret: str | None = secret
         self.address: str = address
         self.port: int = port
         # timeout / watchdog_interval are inert on the async path (shutdown is
@@ -320,6 +325,13 @@ class AsyncServerBase:
             render_config=self._render_config,
             page_default_rows=self.page_default_rows,
             reload_lock=self._reload_lock,
+            # Credentials for `challenge:` commands (#338): username renders the
+            # sub-prompt, password/secret are the expected answers. Kept off
+            # `shell_configuration` (inventory CMDShellConfig, forbid-validated) as
+            # an explicit path, like `page_default_rows`.
+            username=self.username,
+            password=self.password,
+            secret=self.secret,
             **self.shell_configuration,
         )
 
@@ -344,6 +356,24 @@ class AsyncServerBase:
 
         return dispatch
 
+    def _make_complete(self, client_shell) -> "Callable[[PendingChallenge, str], Awaitable[DispatchResult]]":
+        """Build the async challenge-completion closure (#338 / §4).
+
+        Sibling of `_make_dispatch`: `shell.complete_challenge` verifies a
+        challenge answer (mode transition / body), so it runs on the same bounded
+        executor as `dispatch` (§2a). The driver calls it after reading the answer
+        line for a `PendingChallenge`.
+        """
+        shared_loop = self._shared_loop
+        assert shared_loop is not None  # noqa: S101 — set in start() before any session
+        loop = shared_loop.loop
+        executor = shared_loop.executor
+
+        async def complete(pending: "PendingChallenge", entered: str) -> "DispatchResult":
+            return await loop.run_in_executor(executor, client_shell.complete_challenge, pending, entered)
+
+        return complete
+
     #: Enable in-band line editing (cursor / history / backspace / Tab) for this
     #: transport's sessions (#303 P3-1). SSH overrides to True; Telnet stays False
     #: (editing is SSH-only — Telnet keeps the plain push driver). Editing fires
@@ -359,7 +389,10 @@ class AsyncServerBase:
         """
         client_shell = self._build_shell()
         dispatch = self._make_dispatch(client_shell)
-        await run_async_push_session(transport, client_shell, dispatch, initial_skip_lf=skip_lf, editing=self._editing)
+        complete = self._make_complete(client_shell)
+        await run_async_push_session(
+            transport, client_shell, dispatch, complete=complete, initial_skip_lf=skip_lf, editing=self._editing
+        )
 
     # ------------------------------------------------------------------ hooks
     async def _create_listener(self) -> Listener:

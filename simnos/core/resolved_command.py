@@ -30,6 +30,14 @@ if TYPE_CHECKING:
 # never a "missing var" (#264 / D4, 2nd round gemini #4).
 KNOWN_RENDER_VARS: frozenset[str] = frozenset({"base_prompt"})
 
+# The render variables a challenge prompt (#338) may reference. A superset of
+# `KNOWN_RENDER_VARS` by `username` — a sub-prompt like `[sudo] password for
+# {{ username }}: ` needs the connected user's name. Kept separate from the
+# output render vars so the normal-output allow-set (`KNOWN_RENDER_VARS`) is not
+# widened: `username` is supplied by the shell only on the challenge path, never
+# as a sidecar-json fact (#338 / §2, 1st round codex#6 / claude#4).
+CHALLENGE_RENDER_VARS: frozenset[str] = frozenset({"base_prompt", "username"})
+
 # Jinja2 environment for output/prompt templates. `StrictUndefined` makes an
 # undefined fact loud at render time instead of rendering an empty string
 # (#264 / D5, Decision 7). No trim/lstrip: output whitespace is significant.
@@ -71,6 +79,19 @@ def compile_template(jinja_source: str) -> tuple[Template, frozenset[str]]:
     """
     required = jinja_meta.find_undeclared_variables(_TEMPLATE_ENV.parse(jinja_source))
     return _TEMPLATE_ENV.from_string(jinja_source), frozenset(required) - KNOWN_RENDER_VARS
+
+
+def compile_challenge_prompt(jinja_source: str) -> tuple[Template, frozenset[str]]:
+    """Compile a challenge prompt template and extract its unknown variables (#338).
+
+    Like `compile_template`, but strips `CHALLENGE_RENDER_VARS` (base_prompt +
+    username) instead of `KNOWN_RENDER_VARS`: the returned set is any variable a
+    challenge prompt references beyond those two, which the loader rejects loudly
+    (a challenge prompt has no sidecar to supply extra facts). Kept separate so
+    the normal-output compile path never treats `username` as a satisfiable var.
+    """
+    required = jinja_meta.find_undeclared_variables(_TEMPLATE_ENV.parse(jinja_source))
+    return _TEMPLATE_ENV.from_string(jinja_source), frozenset(required) - CHALLENGE_RENDER_VARS
 
 
 @dataclass(frozen=True)
@@ -157,6 +178,39 @@ class Transition:
 
 
 @dataclass(frozen=True)
+class ResolvedChallenge:
+    """A command's post-dispatch interactive sub-prompt (#338 / §2).
+
+    Phase 1 models `kind == "password"` only: the command holds its transition
+    until the client answers a password prompt, then `complete_challenge`
+    verifies the answer and applies `success` (or answers `failure_output`). The
+    confirm kind (y/n / free-line) is a Phase 3 addition.
+
+    - `prompt` is a `ResolvedOutput` (literal, or a template rendered with
+      `base_prompt` + `username`) — the shell renders it at fire time.
+    - `modes` is the loader-normalized set of modes the challenge fires in: the
+      authored `challenge.mode` when given, else the command's effective modes
+      (an all-modes command expands to the platform's full mode set, mirroring
+      `resolve_transitions`' `cmd_modes or mode_names`). A non-firing mode uses
+      the command's ordinary `output` path, which is how a per-mode response
+      (alcatel_sros `enable-admin`) is expressed without generalizing per-mode
+      output (#338 / 案D).
+    - `auth` picks the expected value: `"secret"` → `host.secret` (falling back
+      to `host.password` when unset, #338 / 案F), `"password"` → `host.password`.
+    - `success` is the transition applied on a correct answer (reusing
+      `Transition` — `new_mode` or `exit`); `failure_output` is the body on a
+      wrong / empty answer (the prompt stays put, a single attempt — #338 / C1).
+    """
+
+    kind: str
+    prompt: ResolvedOutput
+    modes: frozenset[str]
+    auth: str
+    success: Transition
+    failure_output: str | None = None
+
+
+@dataclass(frozen=True)
 class ResolvedCommand:
     """Normalized command, independent of the authoring form (#264 / D4).
 
@@ -208,6 +262,13 @@ class ResolvedCommand:
     # inherits the target's value for free (alias authoring rows cannot set it).
     disables_paging: bool = False
     transitions: Mapping[str, Transition] | None = None
+    # Post-dispatch interactive sub-prompt (#338 / §2). None for the common case
+    # (no challenge). When set, `_dispatch_general` holds the transition and
+    # returns a `PendingChallenge` for the modes in `challenge.modes`; other modes
+    # fall through to the ordinary output path. An A3 alias built via
+    # ``dataclasses.replace`` inherits the target's challenge for free (alias rows
+    # cannot author it).
+    challenge: "ResolvedChallenge | None" = None
 
     def __post_init__(self) -> None:
         # Backfill canonical_name to the command's own name when unset (empty

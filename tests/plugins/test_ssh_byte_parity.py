@@ -231,6 +231,35 @@ def test_byte_parity_eof_on_disconnect(cisco_ios_port):
     _assert_or_record("eof_on_disconnect", steps)
 
 
+def test_byte_parity_challenge_session():
+    """Pin the interactive challenge wire (#338): `sudo -s` on linux fires a password
+    sub-prompt, the answer is NOT echoed, a wrong answer replays the failure body with
+    the user prompt, and a correct one reaches root (`device#`).
+
+    This is a NEW golden (linux has no prior transcript), recorded from the current
+    wire — not a re-record of a frozen baseline. The password answer is `TEST_PASSWORD`
+    (the challenge is `auth: password`, so sudo asks for the login password).
+    """
+    with _running_host("linux") as port:
+        transport, channel = _open_shell_channel(port)
+        steps: list[tuple[bytes, bytes]] = []
+        try:
+            steps.append((b"", _drain(channel)))  # intro + user prompt (device$)
+            script = [
+                b"sudo -s\r",  # challenge fires: "[sudo] password for test_user: "
+                b"wrongpw\r",  # wrong answer -> failure body + user prompt (answer not echoed)
+                b"sudo -s\r",  # re-fire (single-attempt: each fire is one prompt)
+                TEST_PASSWORD.encode() + b"\r",  # correct -> root prompt device#
+            ]
+            for chunk in script:
+                channel.sendall(chunk)
+                steps.append((chunk, _drain(channel)))
+        finally:
+            channel.close()
+            transport.close()
+    _assert_or_record("challenge_session", steps, platform="linux")
+
+
 def test_byte_parity_session_close_command():
     """Pin the wire for a real session-closing command, #297 codex#2.
 
