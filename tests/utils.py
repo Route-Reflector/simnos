@@ -88,15 +88,17 @@ def netmiko_device(device_type: str, creds: dict, **extra) -> dict:
 
     ``secret`` is the enable/sudo credential netmiko sends when driving a
     `challenge:` command's password sub-prompt (#338). It mirrors the server's
-    案F resolution: an explicit ``host.secret`` when set, else the login password
-    (the fallback the server also uses for `auth: secret` when no secret is
-    configured). ``**extra`` merges additional kwargs such as ``session_log``.
+    案F resolution: an explicit ``host.secret`` when set (``is not None``, so an
+    empty secret is honoured verbatim), else the login password (the fallback the
+    server also uses for `auth: secret` when no secret is configured).
+    ``**extra`` merges additional kwargs such as ``session_log``.
     """
+    secret = creds.get("secret")
     return {
         "host": "localhost",
         "username": creds["username"],
         "password": creds["password"],
-        "secret": creds.get("secret") or creds["password"],
+        "secret": secret if secret is not None else creds["password"],
         "port": creds["port"],
         "device_type": netmiko_device_type_of(device_type),
         **extra,
