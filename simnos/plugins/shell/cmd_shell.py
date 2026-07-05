@@ -943,7 +943,7 @@ class CMDShell:
         if spec.kind == "password":
             # The loader guarantees `success` on a password challenge (and a
             # non-None `on` on a confirm below); assert to narrow the unions.
-            assert spec.success is not None
+            assert spec.success is not None  # noqa: S101 — loader guarantees success on a password challenge
             expected = self._secret if (spec.auth == "secret" and self._secret is not None) else self._password
             if expected is None:
                 log.warning(
@@ -965,7 +965,7 @@ class CMDShell:
             # `on` miss → `default` (may be None) → a plain cancel: the prompt
             # returns unchanged, no body. The schema forbids `output` with
             # `exit`, so a closing action never carries a body.
-            assert spec.on is not None
+            assert spec.on is not None  # noqa: S101 — loader guarantees a non-empty `on` on a confirm challenge
             action = spec.on.get(entered, spec.default)
             if action is not None:
                 if action.exit:
