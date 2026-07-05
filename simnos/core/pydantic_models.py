@@ -138,6 +138,52 @@ class ModelTransition(BaseModel):
         return self
 
 
+class ModelChallenge(BaseModel):
+    """A3 `challenge:` block — a post-command interactive sub-prompt (#338 / §1).
+
+    Phase 1 supports ``kind: password`` only: the command holds its transition
+    until the client answers a password prompt. The confirm kind (``on`` /
+    ``default``) is a Phase 3 addition and is deliberately absent from the schema
+    for now — an unusable vocabulary is not published early, so ``extra="forbid"``
+    rejects those keys loudly until Phase 3 adds them.
+
+    - ``prompt`` is the (single-line) sub-prompt text, jinja2-capable with
+      ``base_prompt`` / ``username`` (loader dry-renders it at build time).
+    - ``mode`` scopes which modes fire the challenge (omitted = the command's
+      every mode); a non-firing mode uses the command's ordinary output (#338 /
+      案D). The loader checks the names against the command's modes.
+    - ``auth`` picks the expected value (``secret`` falls back to the host
+      password when unset, #338 / 案F); ``success`` is the transition on a
+      correct answer; ``failure_output`` the body on a wrong / empty one.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["password"]
+    prompt: StrictStr
+    mode: list[StrictStr] | None = None
+    auth: Literal["secret", "password"]
+    success: ModelTransition
+    failure_output: StrictStr | None = None
+
+    _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
+
+    @field_validator("prompt")
+    @classmethod
+    def _single_line(cls, value: str) -> str:
+        # A sub-prompt is a single in-line token (like `more_prompt`): a newline
+        # would split the wire the netmiko `pattern="ssword"` wait reads, and a
+        # NUL is stripped by the tap normalizer, so reject both at the authoring
+        # boundary rather than corrupting the challenge wire at runtime (#338 /
+        # §1, 1st round codex#6). A template's rendered result is re-checked by
+        # the loader dry-render.
+        if "\n" in value or "\r" in value:
+            raise ValueError("challenge `prompt` must be a single line (no CR/LF)")
+        if "\x00" in value:
+            raise ValueError("challenge `prompt` must not contain a NUL byte")
+        return value
+
+
 class ModelCommandAuthoring(BaseModel):
     """A3 per-command authoring schema (#264 / D3).
 
@@ -183,6 +229,13 @@ class ModelCommandAuthoring(BaseModel):
     # `--More--` pager. Forbidden on an alias (it inherits the target's value via
     # the loader's `replace`, see `_check_combination`).
     disables_paging: StrictBool | None = None
+    # Post-command interactive sub-prompt (#338 / §1). Exclusive with the dynamic
+    # `handler` / `variants` channels and with `disables_paging` (no cross use
+    # case, and a firing challenge would silently drop the paging disable), but
+    # composes with `output` / `output_template` (the ordinary output for a mode
+    # the challenge does not fire in). Forbidden on an alias (it inherits the
+    # target's value via the loader's `replace`), see `_check_combination`.
+    challenge: ModelChallenge | None = None
 
     @field_validator("output", "output_template")
     @classmethod
@@ -238,6 +291,7 @@ class ModelCommandAuthoring(BaseModel):
                 "transitions": self.transitions,
                 "exit": self.exit,
                 "disables_paging": self.disables_paging,
+                "challenge": self.challenge,
             }
             present = sorted(k for k, v in forbidden.items() if v is not None)
             if present:
@@ -262,14 +316,41 @@ class ModelCommandAuthoring(BaseModel):
                 raise ValueError(
                     f"command {self.command!r}: at most one output channel allowed, got {channels} (#264 / Decision 6)"
                 )
+            # A challenge holds the transition and produces its own body/prompt, so
+            # it cannot ride the dynamic `handler` / `variants` channels — those
+            # decide output at dispatch time (#338 / Decision 8). It DOES compose
+            # with `output` / `output_template` (the response for a non-firing mode).
+            # `disables_paging` is also exclusive: a firing challenge returns before
+            # `_dispatch_general` sets the sticky-paging flag, so authoring both would
+            # silently drop the disable (anti-silent-bug) — and enable/sudo never turn
+            # paging off, so the pair is meaningless (1st round claude#3).
+            if self.challenge is not None:
+                conflict = sorted(
+                    name
+                    for name, v in (
+                        ("handler", self.handler),
+                        ("variants", self.variants),
+                        ("disables_paging", self.disables_paging or None),
+                    )
+                    if v is not None
+                )
+                if conflict:
+                    raise ValueError(
+                        f"command {self.command!r}: `challenge` is exclusive with {conflict} (#338 / Decision 8)"
+                    )
             _check_transitions_combination(
                 self.transitions, self.new_mode, self.exit, prefix=f"command {self.command!r}: "
             )
         if self.command == "_default_":
-            if self.mode is not None or self.new_mode is not None or self.transitions is not None:
+            if (
+                self.mode is not None
+                or self.new_mode is not None
+                or self.transitions is not None
+                or self.challenge is not None
+            ):
                 raise ValueError(
-                    "command '_default_': `mode` / `new_mode` / `transitions` are rejected — the fallback is "
-                    "mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
+                    "command '_default_': `mode` / `new_mode` / `transitions` / `challenge` are rejected — the "
+                    "fallback is mode-agnostic (runtime never matches its mode, would be dead data) (#264 / Decision 7)"
                 )
             # An aliased `_default_` would inherit the target's modes/new_mode via
             # the loader's `replace(target, ...)`, making the fallback
@@ -364,6 +445,10 @@ class ModelHost(BaseModel):
     password: StrictStr
     port: EphemeralPort  # 0 = OS-assigned ephemeral (#271); resolved to a real port at start
     device_type: StrictStr | None = None
+    # enable-secret / sudo password for a `challenge: {auth: secret}` command
+    # (#338). Same name as netmiko's `secret` ConnectHandler arg. Unset → the
+    # challenge falls back to `password` (案F, out-of-box simulator behaviour).
+    secret: StrictStr | None = None
 
 
 # ---------------------------------------------------------------------------------------
@@ -600,6 +685,10 @@ class InventoryDefaultSection(BaseModel):
 
     username: StrictStr | None = None
     password: StrictStr | None = None
+    # enable-secret / sudo password for `challenge: {auth: secret}` commands
+    # (#338); same name as netmiko's `secret`. Inherited by hosts via `HostConfig`;
+    # unset → the challenge falls back to `password` (案F).
+    secret: StrictStr | None = None
     # Single port accepts 0 (ephemeral, #271); the `replicas` list path keeps
     # `Port` (ge=1) — an ephemeral port *range* is meaningless.
     port: EphemeralPort | list[Port] | None = None

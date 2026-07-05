@@ -29,7 +29,7 @@ from simnos.plugins.servers.tap_bridge import _assemble_wire, _render_intro, _re
 
 if TYPE_CHECKING:
     from simnos.plugins.servers.tap_bridge import PushShell
-    from simnos.plugins.shell.cmd_shell import DispatchResult
+    from simnos.plugins.shell.cmd_shell import DispatchResult, PendingChallenge
 
 log = logging.getLogger(__name__)
 
@@ -400,11 +400,105 @@ async def _emit_paged(
     return skip_lf
 
 
+# --------------------------------------------------------------------- challenge (#338)
+async def _read_challenge_line(
+    transport: AsyncPushTransport,
+    read_byte: "Callable[[], Awaitable[bytes | None]]",
+    skip_lf: bool,
+    *,
+    echo: bool,
+) -> tuple[str | None, bool]:
+    """Read one challenge answer line from the shared byte source (#338 / §4).
+
+    Mirrors the main loop's terminator / NUL / skip_lf handling but never runs the
+    line editor: an answer must not enter history nor Tab-complete, and a password
+    (``echo=False``) must never reach the wire. Escape sequences (arrow keys) are
+    swallowed so they cannot land in the answer. The terminating CR/LF is NOT
+    echoed — the held ``\\r\\n`` of the following ``_render_response`` supplies the
+    answer line's newline (the main-loop held-echo principle), so exactly one
+    ``\\r\\n`` reaches the wire per Enter. Returns ``(answer, next_skip_lf)``, or
+    ``(None, skip_lf)`` on an EOF (peer gone mid-challenge).
+    """
+    buf = bytearray()
+    esc = bytearray()
+    while True:
+        byte = await read_byte()
+        if byte is None:
+            return None, skip_lf  # EOF mid-challenge
+        # Swallow an escape sequence (cursor / history keys) so it neither lands in
+        # the answer buffer nor echoes — mirrors the main loop's ESC handling.
+        if byte == b"\x1b":
+            esc = bytearray(b"\x1b")
+            continue
+        if esc:
+            if len(esc) == 1 and byte not in (b"[", b"O"):
+                esc.clear()  # lone ESC: reprocess this byte on the normal path below
+            elif b"\x20" <= byte <= b"\x7e":
+                esc += byte
+                if _parse_escape(bytes(esc)) == "incomplete" and len(esc) < _MAX_ESC_LEN:
+                    continue  # still collecting
+                esc.clear()
+                continue  # escape consumed (applied / discarded / maxlen-dropped)
+            else:
+                esc.clear()  # control byte mid-CSI: reprocess this byte below
+        # Drop NUL (Telnet CR NUL resets the pending skip_lf; SSH preserves it).
+        if byte == b"\x00":
+            if transport.nul_resets_skip_lf:
+                skip_lf = False
+            continue
+        # Consume the LF (or Telnet NUL, above) half of a preceding CR.
+        if skip_lf:
+            skip_lf = False
+            if byte == b"\n":
+                continue
+        if byte in (b"\r", b"\n"):
+            # No terminator echo: the following `_render_response` held `\r\n` is it.
+            return buf.decode("utf-8", errors="replace"), byte == b"\r"
+        if byte in (b"\x08", b"\x7f"):
+            if buf:
+                del buf[-1:]
+                if echo:
+                    transport.send(b"\b \b")  # erase one echoed char (confirm only)
+            continue
+        buf += byte
+        if echo:
+            transport.send(byte)
+
+
+async def _run_challenge(
+    transport: AsyncPushTransport,
+    complete: "Callable[[PendingChallenge, str], Awaitable[DispatchResult]]",
+    pending: "PendingChallenge",
+    read_byte: "Callable[[], Awaitable[bytes | None]]",
+    skip_lf: bool,
+) -> tuple["DispatchResult | None", bool]:
+    """Run one challenge sub-prompt: prompt -> read answer -> complete (#338 / §4).
+
+    Driver sub-phase, sibling of ``_emit_paged``: it pulls from the SAME
+    ``read_byte`` source so an answer pipelined into the launching command's recv
+    chunk is not lost. Sends the held ``\\r\\n`` (the launching command's Enter
+    echo) + the challenge prompt through ``_assemble_wire`` — the LF->CRLF / NUL
+    normalization boundary every wire write crosses — reads the answer (echo per
+    ``pending.echo``), and hands it to ``complete`` (the bounded-executor
+    ``complete_challenge``). Returns ``(result, next_skip_lf)``; on an EOF
+    mid-challenge returns ``(None, skip_lf)`` so the main loop ends the session
+    WITHOUT rendering — a synthesized close result would leak a stray ``\\r\\n``
+    through ``_render_response``'s close path.
+    """
+    transport.send(_assemble_wire(["\r\n", pending.prompt_text]))
+    await transport.drain()
+    entered, skip_lf = await _read_challenge_line(transport, read_byte, skip_lf, echo=pending.echo)
+    if entered is None:
+        return None, skip_lf  # EOF mid-challenge: send nothing, end the session
+    return await complete(pending, entered), skip_lf
+
+
 async def run_async_push_session(
     transport: AsyncPushTransport,
     shell: "PushShell",
     dispatch: Callable[[str], Awaitable["DispatchResult"]],
     *,
+    complete: "Callable[[PendingChallenge, str], Awaitable[DispatchResult]] | None" = None,
     initial_skip_lf: bool = False,
     editing: bool = False,
 ) -> None:
@@ -428,6 +522,12 @@ async def run_async_push_session(
     so a slow client never produces a write timeout to retry; a real write failure
     surfaces as an ``io_errors`` raise and is treated as a disconnect for both echo
     and response.
+
+    ``complete`` completes an interactive challenge (#338): when a dispatched
+    line returns ``result.challenge``, the driver runs ``_run_challenge`` (prompt +
+    answer read) then renders ``complete``'s result instead. It is the
+    bounded-executor ``complete_challenge`` closure; None (test fakes with no
+    challenge data) closes the session loudly if a challenge ever fires.
 
     ``initial_skip_lf`` consumes a trailing LF/NUL left by a preceding channel
     login (auth_none).
@@ -529,6 +629,23 @@ async def run_async_push_session(
                 # session (gemini#2).
                 line = editor.take_line().decode("utf-8", errors="replace")
                 result = await dispatch(line)
+                # Interactive challenge (#338 / §4): a `challenge:` command holds
+                # its transition and returns a `PendingChallenge`. Run the sub-prompt
+                # (prompt + answer read from the SAME `read_byte`) then render
+                # `complete`'s result instead. An EOF mid-challenge returns None —
+                # end the session without rendering (no stray `\r\n`). This is BEFORE
+                # the paging gate so `complete`'s (short) result flows through it
+                # normally; `skip_lf` carries the answer line's CR half out.
+                if result.challenge is not None:
+                    if complete is None:
+                        log.error(
+                            "async_session [%s] challenge fired but no complete callable is wired; closing",
+                            transport.name,
+                        )
+                        return
+                    result, skip_lf = await _run_challenge(transport, complete, result.challenge, read_byte, skip_lf)
+                    if result is None:
+                        return  # EOF mid-challenge: peer gone, send nothing
                 # Line-count gate (#307 / P3-4, keystone): paging is off (no pty /
                 # NAWS, or a `disables_paging` command ran), a close / no-body
                 # result, or a body that fits → the byte-identical `_render_response`

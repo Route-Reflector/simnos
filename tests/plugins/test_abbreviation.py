@@ -100,7 +100,7 @@ def test_full_commands_never_diverted_to_abbreviation():
                 continue  # specials are not dispatched by name
             dispatch_mode = next(iter(cmd.modes)) if cmd.modes else shell.platform.initial_mode
             shell.current_mode = dispatch_mode
-            body, close = shell._dispatch_general(name)
+            body, close, _challenge = shell._dispatch_general(name)
             assert body != INCOMPLETE_DIAG, f"{platform}:{name!r} fell through to incomplete"
             assert not (body or "").startswith(AMBIGUOUS_PREFIX), f"{platform}:{name!r} fell through to ambiguous"
             # Effective close decision mirrors dispatch: the *pre-dispatch* mode's
@@ -138,7 +138,7 @@ def test_unknown_input_stays_default(platform, mode, line, reason):
     shell = _shell(platform)
     shell.current_mode = mode
     expected = shell.commands["_default_"].output.render(shell.base_prompt)
-    body, _close = shell._dispatch_general(line)
+    body, _close, _challenge = shell._dispatch_general(line)
     assert body == expected, reason
 
 
@@ -196,7 +196,7 @@ CLOSE_FIXTURE = [
 def test_session_close_authoring(platform, command, mode, closes, new_mode):
     shell = _shell(platform)
     shell.current_mode = mode
-    body, close = shell._dispatch_general(command)
+    body, close, _challenge = shell._dispatch_general(command)
     assert close is closes, f"{platform}:{command}@{mode} close={close}, expected {closes}"
     if closes:
         assert body is None  # close suppresses the body before rendering
@@ -224,14 +224,14 @@ def test_abbreviation_resolution_cisco(line, expect):
 def test_abbreviation_dispatches_expected_output_cisco():
     shell = _enable(_shell("cisco_ios"))
     # `sh ip int br` resolves to the same body as the full command.
-    abbrev, _ = shell._dispatch_general("sh ip int br")
-    full, _ = shell._dispatch_general("show ip interface brief")
+    abbrev, _, _challenge = shell._dispatch_general("sh ip int br")
+    full, _, _challenge = shell._dispatch_general("show ip interface brief")
     assert abbrev == full
     # ambiguous / incomplete render the (input-interpolated) diagnostics.
-    amb, amb_close = shell._dispatch_general("s i i b")
+    amb, amb_close, _challenge = shell._dispatch_general("s i i b")
     assert amb == '% Ambiguous command:  "s i i b"'
     assert amb_close is False
-    inc, inc_close = shell._dispatch_general("sh ip")
+    inc, inc_close, _challenge = shell._dispatch_general("sh ip")
     assert inc == INCOMPLETE_DIAG
     assert inc_close is False
 
@@ -265,8 +265,8 @@ def test_multi_space_full_command_resolves_cisco():
     than v2's `_default_`, and outside the byte-parity contract (the input was
     not an exact match)."""
     shell = _enable(_shell("cisco_ios"))
-    spaced, _ = shell._dispatch_general("show  version")
-    full, _ = shell._dispatch_general("show version")
+    spaced, _, _challenge = shell._dispatch_general("show  version")
+    full, _, _challenge = shell._dispatch_general("show version")
     assert spaced == full
 
 
@@ -314,9 +314,9 @@ def test_specials_overridable_literal():
         }
     )
     shell.current_mode = "enable"
-    amb, _ = shell._dispatch_general("cl")  # clear vs clock -> ambiguous
+    amb, _, _challenge = shell._dispatch_general("cl")  # clear vs clock -> ambiguous
     assert amb == "AMB <cl>"  # custom wording + {input} interpolation
-    inc, _ = shell._dispatch_general("show")  # strict prefix of "show version"
+    inc, _, _challenge = shell._dispatch_general("show")  # strict prefix of "show version"
     assert inc == "INC!"
 
 
@@ -343,7 +343,7 @@ def test_special_handler_override_is_none_safe_and_no_double_substitution():
             shell.commands["_ambiguous_"], output=ResolvedOutput(kind="handler", handler=handler)
         ),
     }
-    body, close = shell._dispatch_general("cl")  # ambiguous -> handler special
+    body, close, _challenge = shell._dispatch_general("cl")  # ambiguous -> handler special
     assert body == "H:cl {input}"  # handler ran, {input} left intact (no double sub)
     assert close is False
 
@@ -362,7 +362,7 @@ def test_special_none_kind_override_does_not_crash():
         **shell.commands,
         "_ambiguous_": dataclasses.replace(shell.commands["_ambiguous_"], output=ResolvedOutput(kind="none")),
     }
-    body, close = shell._dispatch_general("cl")
+    body, close, _challenge = shell._dispatch_general("cl")
     assert body is None
     assert close is False
 
@@ -387,7 +387,7 @@ def test_abbreviation_through_dispatch_general_core():
     test_ssh_line_editor), but the resolution itself is path-independent
     (cmd.Cmd `default` adapter removed in #303 P3-3)."""
     shell = _enable(_shell("cisco_ios"))
-    body, close = shell._dispatch_general("sh ver")
+    body, close, _challenge = shell._dispatch_general("sh ver")
     assert close is False
     assert body is not None
     assert "Cisco IOS" in body
@@ -435,6 +435,6 @@ def test_abbreviation_handler_receives_typed_line():
             shell.commands["show version"], output=ResolvedOutput(kind="handler", handler=handler)
         ),
     }
-    body, _ = shell._dispatch_general("sh ver")  # abbreviation -> handler command
+    body, _, _challenge = shell._dispatch_general("sh ver")  # abbreviation -> handler command
     assert body == "ok"
     assert seen == ["sh ver"]  # the typed abbreviation, not the canonical "show version"

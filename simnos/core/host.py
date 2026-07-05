@@ -60,6 +60,7 @@ class Host:
         simnos: "SimNOS",
         device_type: str | None = None,
         configuration_file: str | None = None,
+        secret: str | None = None,
         facts: dict | None = None,
         overlay: dict | None = None,
         variants_policy: dict | None = None,
@@ -70,6 +71,10 @@ class Host:
         self.nos_inventory: dict = nos
         self.username: str = username
         self.password: str = password
+        # enable-secret / sudo password for `challenge: {auth: secret}` commands
+        # (#338); threaded to the server plugin in `start()`. None → fall back to
+        # `password` (案F).
+        self.secret: str | None = secret
         self.port: int = port
         self.simnos = simnos  # SimNOS object
         self.shell_inventory["configuration"].setdefault("base_prompt", self.name)
@@ -150,6 +155,7 @@ class Host:
             port=self.port,
             username=self.username,
             password=self.password,
+            secret=self.secret,
             render_config=render_config,
             # The async server plugins (AsyncSshServer + telnetlib3 TelnetServer)
             # reach the SimNOS-owned shared loop through this back reference.

@@ -10,12 +10,14 @@ malformed UTF-8 / login skip_lf).
 
 import asyncio
 
+from simnos.core.resolved_command import ResolvedChallenge, ResolvedOutput, Transition
 from simnos.plugins.servers.async_session import (
+    _read_challenge_line,
     _resolve_rows,
     async_interactive_login,
     run_async_push_session,
 )
-from simnos.plugins.shell.cmd_shell import DispatchResult
+from simnos.plugins.shell.cmd_shell import DispatchResult, PendingChallenge
 
 
 class _FakeShell:
@@ -402,3 +404,151 @@ def test_paging_disabled_flag_skips_pager():
     out = _drive(_FakeTransport([b"show\r"], rows=3), shell)
     assert out == b"Custom SSH Shell\r\ndevice>show\r\nL1\r\nL2\r\nL3\r\nL4\r\nL5\r\ndevice>"
     assert _MORE not in out
+
+
+# ---------------------------------------------------------------- challenge (#338)
+_SEKRET = b"sekret"  # the password the fake challenge accepts; must never appear echoed
+
+
+def _password_pending() -> PendingChallenge:
+    """A fired password challenge: prompt `Password: `, echo off, success -> enable."""
+    spec = ResolvedChallenge(
+        kind="password",
+        prompt=ResolvedOutput(kind="literal", text="Password: "),
+        modes=frozenset({"user"}),
+        auth="password",
+        success=Transition(new_mode="enable"),
+        failure_output="Bad password",
+    )
+    return PendingChallenge(spec=spec, command="enable", prompt_text="Password: ", echo=False)
+
+
+class _ChallengeShell(_FakeShell):
+    """dispatch('enable') fires a password challenge; `complete_challenge` accepts `sekret`."""
+
+    prompt = "device>"
+    _enable_prompt = "device#"
+
+    def dispatch(self, line: str) -> DispatchResult:
+        if line == "enable":
+            return DispatchResult(
+                body=None, prompt=self.prompt, close=False, mode="user", challenge=_password_pending()
+            )
+        return super().dispatch(line)
+
+    def complete_challenge(self, pending: PendingChallenge, entered: str) -> DispatchResult:
+        if entered == "sekret":
+            return DispatchResult(body=None, prompt=self._enable_prompt, close=False, mode="enable")
+        return DispatchResult(body=pending.spec.failure_output, prompt=self.prompt, close=False, mode="user")
+
+
+def _drive_challenge(transport: _FakeTransport, shell: _ChallengeShell, **kwargs) -> bytes:
+    async def _dispatch(line: str):
+        return shell.dispatch(line)
+
+    async def _complete(pending: PendingChallenge, entered: str):
+        return shell.complete_challenge(pending, entered)
+
+    asyncio.run(run_async_push_session(transport, shell, _dispatch, complete=_complete, **kwargs))
+    return bytes(transport.out)
+
+
+def test_challenge_password_success_wire():
+    """A correct password: the held `\\r\\n` + prompt, the answer NOT echoed, then the
+    single held-echo newline + the new (enable) prompt — exactly one `\\r\\n` per Enter."""
+    out = _drive_challenge(_FakeTransport([b"enable\r", _SEKRET + b"\r"]), _ChallengeShell())
+    assert out == b"Custom SSH Shell\r\ndevice>enable\r\nPassword: \r\ndevice#"
+    assert _SEKRET not in out  # echo off: the password never reaches the wire
+
+
+def test_challenge_password_wrong_wire():
+    """A wrong password: the failure body + the original prompt, answer not echoed."""
+    out = _drive_challenge(_FakeTransport([b"enable\r", b"nope\r"]), _ChallengeShell())
+    assert out == b"Custom SSH Shell\r\ndevice>enable\r\nPassword: \r\nBad password\r\ndevice>"
+    assert b"nope" not in out
+
+
+def test_challenge_eof_mid_challenge_sends_nothing():
+    """EOF while waiting for the answer ends the session after the prompt, with no
+    render (a synthesized close would leak a stray `\\r\\n`) — the sentinel-None path."""
+    out = _drive_challenge(_FakeTransport([b"enable\r"]), _ChallengeShell())
+    assert out == b"Custom SSH Shell\r\ndevice>enable\r\nPassword: "  # prompt sent, then EOF, nothing more
+
+
+def test_challenge_backspace_edits_answer_off_echo():
+    """Backspace edits the answer buffer with no echo (echo off), so a typo-corrected
+    password still verifies and no byte of it reaches the wire."""
+    # Type "sekXX", backspace twice, then "ret" -> "sekret".
+    out = _drive_challenge(_FakeTransport([b"enable\r", b"sekXX\x08\x08ret\r"]), _ChallengeShell())
+    assert out.endswith(b"\r\ndevice#")  # verified -> enable prompt
+    assert b"sek" not in out and b"XX" not in out  # nothing of the answer echoed
+
+
+def test_challenge_escape_sequence_discarded_from_answer():
+    """An arrow-key escape mid-answer is swallowed, not injected into the password."""
+    # "sek" + left-arrow (ESC [ D) + "ret" -> "sekret" (escape discarded).
+    out = _drive_challenge(_FakeTransport([b"enable\r", b"sek\x1b[Dret\r"]), _ChallengeShell())
+    assert out.endswith(b"\r\ndevice#")  # escape did not corrupt the answer
+
+
+def test_challenge_skip_lf_carry_cross_chunk():
+    """The launching command's CR-LF split across chunks: the LF half is consumed by
+    the answer reader (carried skip_lf), not mistaken for part of the password."""
+    out = _drive_challenge(_FakeTransport([b"enable\r", b"\n", _SEKRET + b"\r"]), _ChallengeShell())
+    assert out == b"Custom SSH Shell\r\ndevice>enable\r\nPassword: \r\ndevice#"
+
+
+def test_challenge_answer_not_in_editor_history():
+    """The answer is read outside the line editor, so Up after the challenge replays
+    the launching command, never the password (history non-leak, editing on)."""
+    # enable\r (enters editor history) -> sekret\r (read by _read_challenge_line, NOT
+    # the editor) -> Up arrow (ESC [ A): the editor replays "enable", not the password.
+    out = _drive_challenge(_FakeTransport([b"enable\r", _SEKRET + b"\r", b"\x1b[A"]), _ChallengeShell(), editing=True)
+    assert _SEKRET not in out  # never on the wire, including the history redraw
+    assert out.endswith(b"enable")  # Up replayed the launching command
+
+
+def test_read_challenge_line_echo_on_echoes_chars_and_backspace():
+    """`_read_challenge_line(echo=True)` (the Phase 3 confirm path): regular chars
+    echo raw, backspace emits `\\b \\b`, and the terminating CR is NOT echoed (the
+    held-echo principle). Phase 1 only reaches echo=False (password), so this pins
+    the echo-on byte behaviour now for the Phase 3 confirm reuse (claude 1st#2)."""
+    transport = _FakeTransport([])  # only its `send` + flags are used; read_byte is injected
+    data = b"yeXX\x08\x08s\r"  # 'y','e', typo 'XX', two backspaces, 's', CR -> "yes"
+    stream = iter(data[i : i + 1] for i in range(len(data)))
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, next_skip_lf = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered == "yes"
+    assert next_skip_lf is True  # terminated on CR
+    # chars echoed raw, each backspace erased with `\b \b`, CR not echoed.
+    assert bytes(transport.out) == b"yeXX\b \b\b \bs"
+
+
+def test_read_challenge_line_eof_returns_sentinel():
+    """EOF mid-answer returns `(None, skip_lf)` — the sentinel the driver turns into
+    a no-render session end (echo-on path, symmetric with the echo-off driver test)."""
+    transport = _FakeTransport([])
+    stream = iter([b"a", b"b"])  # no terminator, then EOF
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, _skip = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered is None
+    assert bytes(transport.out) == b"ab"  # the two chars echoed before EOF
+
+
+def test_challenge_no_complete_callable_closes():
+    """A challenge with no `complete` wired (a bare test fake) closes the session
+    loudly rather than crashing the driver."""
+
+    async def _dispatch(line: str):
+        return _ChallengeShell().dispatch(line)
+
+    transport = _FakeTransport([b"enable\r", _SEKRET + b"\r"])
+    asyncio.run(run_async_push_session(transport, _ChallengeShell(), _dispatch))  # complete=None
+    out = bytes(transport.out)
+    assert out == b"Custom SSH Shell\r\ndevice>enable"  # fired, no complete -> returned before the prompt

@@ -22,6 +22,7 @@ from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
 from simnos.core.resolved_command import (
     NO_OUTPUT,
     ModeDef,
+    ResolvedChallenge,
     ResolvedCommand,
     ResolvedOutput,
     ResolvedPlatform,
@@ -289,6 +290,30 @@ class DispatchResult:
     prompt: str
     close: bool
     mode: str
+    # Post-dispatch interactive sub-prompt to run before this result is rendered
+    # (#338 / §3). None on every ordinary line; set only when a `challenge:`
+    # command fired in a firing mode, in which case `body` is None / `close` is
+    # False and the push driver runs the challenge sub-phase (`_run_challenge`)
+    # then renders the `complete_challenge` result instead of this one.
+    challenge: "PendingChallenge | None" = None
+
+
+@dataclass(frozen=True)
+class PendingChallenge:
+    """A fired challenge the push driver must complete before rendering (#338 / §3).
+
+    Stateless hand-off: the shell returns this on `DispatchResult.challenge`, the
+    driver reads the password line (echo per `echo`) and calls back into
+    `shell.complete_challenge(pending, entered)`. Holding the render-time
+    `ResolvedChallenge` (frozen) fixes the wire prompt for this session, and
+    `command` (the canonical name) lets `complete_challenge` name the command in a
+    creds-unwired diagnostic (the entered value is never logged, R5).
+    """
+
+    spec: ResolvedChallenge
+    command: str
+    prompt_text: str
+    echo: bool
 
 
 class CMDShell:
@@ -313,12 +338,23 @@ class CMDShell:
         render_config=None,
         page_default_rows=24,
         reload_lock=None,
+        username=None,
+        password=None,
+        secret=None,
     ):
         self.nos: Nos = nos
         self.intro = intro
         self.base_prompt = base_prompt
         self.newline = newline
         self.is_running = is_running
+        # Credentials for a `challenge:` command (#338). `username` renders a
+        # sub-prompt like `[sudo] password for {{ username }}: `; `password` /
+        # `secret` are the expected challenge answers (`auth: secret` falls back to
+        # `password` when `secret` is None, 案F). All default to None for a direct
+        # construction / legacy test that never exercises a challenge command.
+        self._username: str | None = username
+        self._password: str | None = password
+        self._secret: str | None = secret
         # Paging (#307 / P3-4). `page_default_rows` is the fallback page height
         # (sys_config.paging.default_rows, wired through the server); `more_prompt`
         # is installed from the resolved platform in `_apply_platform`. The push
@@ -860,8 +896,70 @@ class CMDShell:
             return HANDLER_ERROR_OUTPUT
         return ret
 
-    def _dispatch_general(self, line) -> tuple[str | None, bool]:
-        """Resolve + invoke one general command; return ``(body, close)``.
+    def _render_challenge_prompt(self, challenge: ResolvedChallenge) -> str:
+        """Render a challenge sub-prompt for this session (#338 / §2).
+
+        A literal prompt is returned verbatim; a template is rendered with
+        `base_prompt` + `username`. `username` unwired (direct construction) is
+        replaced by an empty string with a loud warning, so "None" is never baked
+        into the wire (the render-side half of the creds-unwired defense; the
+        `complete_challenge` guard is the other half, 2nd round claude#7).
+        """
+        out = challenge.prompt
+        if out.kind == "template" and out.template is not None:
+            username = self._username
+            if username is None:
+                log.warning(
+                    "shell '%s' challenge prompt references username but none is wired; using empty string",
+                    self.base_prompt,
+                )
+                username = ""
+            return out.template.render(base_prompt=self.base_prompt, username=username)
+        return out.text or ""
+
+    def complete_challenge(self, pending: "PendingChallenge", entered: str) -> DispatchResult:
+        """Verify a challenge answer and return the resulting `DispatchResult` (#338 / §3).
+
+        The second dispatch stage: the driver read the answer line and calls this
+        (on the bounded executor, like `dispatch`). Stateless — the driver carries
+        `pending`, so a mid-challenge disconnect needs no shell-side cleanup.
+
+        A correct answer applies `success` (mode transition or close); a wrong /
+        empty one answers `failure_output` with the prompt unchanged (a single
+        attempt, #338 / C1). The expected value is `secret` (falling back to
+        `password`, 案F) or `password`; if neither is wired (a direct construction
+        that reached a challenge command) the answer fails with a loud warning
+        rather than silently always-failing (1st round claude#5). The entered
+        value is never logged (R5). The tail `is_running` check mirrors
+        `_dispatch_general`, so both dispatch stages share one close contract
+        (1st round claude#6).
+        """
+        spec = pending.spec
+        body, close = None, False
+        if spec.kind == "password":
+            expected = self._secret if (spec.auth == "secret" and self._secret is not None) else self._password
+            if expected is None:
+                log.warning(
+                    "shell '%s' challenge for %r has no credentials wired; failing", self.base_prompt, pending.command
+                )
+                body = spec.failure_output
+            elif entered == expected:
+                # `success` is a load-validated `Transition` (exactly one of
+                # exit / new_mode), so exit False implies new_mode is set — the
+                # `is not None` narrows it for the type checker, mirroring
+                # `_dispatch_general`'s transition application.
+                if spec.success.exit:
+                    close = True
+                elif spec.success.new_mode is not None:
+                    self._apply_new_mode(spec.success.new_mode)
+            else:
+                body = spec.failure_output
+        if not self.is_running.is_set():
+            close = True
+        return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)
+
+    def _dispatch_general(self, line) -> tuple[str | None, bool, "PendingChallenge | None"]:
+        """Resolve + invoke one general command; return ``(body, close, challenge)``.
 
         The I/O-independent heart of dispatch, called by the push `dispatch`
         core (#297, SSH; both transports since #303 P3-3). Applies a mode
@@ -873,6 +971,12 @@ class CMDShell:
         mid-dispatch. The legacy `default` adapter suppressed the body on every
         one of those close paths, so callers MUST NOT render `body` when
         `close` is set.
+
+        ``challenge`` is a `PendingChallenge` when the command declared a
+        `challenge:` and the current mode is a firing mode (#338 / §3): the
+        transition is held, ``body`` is None and ``close`` False, and the driver
+        runs the sub-prompt then renders `complete_challenge`'s result. It is None
+        on every ordinary line.
 
         The exception boundary is the `_invoke_handler` block only: resolution,
         the mode check and the transition never raise (an unknown command is a
@@ -900,6 +1004,22 @@ class CMDShell:
                     cmd = special
                     abbrev_input = line  # set only when the special was actually swapped in
         if cmd is not None and self._in_current_mode(cmd):
+            # Interactive challenge (#338 / §3): a `challenge:` command in a firing
+            # mode holds its transition and hands the driver a `PendingChallenge`
+            # (body-less, no close). Decided BEFORE the transition below, so the
+            # command-level `new_mode` / `transitions` are the successor for a
+            # NON-firing mode only (`challenge.success` is the sole transition
+            # source in a firing mode — alcatel_sros `enable-admin` uses this to
+            # answer differently per mode without per-mode output).
+            if cmd.challenge is not None and self.current_mode in cmd.challenge.modes:
+                prompt_text = self._render_challenge_prompt(cmd.challenge)
+                pending = PendingChallenge(
+                    spec=cmd.challenge,
+                    command=cmd.canonical_name,
+                    prompt_text=prompt_text,
+                    echo=cmd.challenge.kind != "password",
+                )
+                return None, False, pending
             # Transition decision (#317 / P-1): the mode-conditional `transitions`
             # map wins for the current mode, else the simple static `exit` /
             # `new_mode`. An `exit` (from either channel) suppresses the body, so
@@ -908,10 +1028,10 @@ class CMDShell:
             eff = cmd.transitions.get(self.current_mode) if cmd.transitions else None
             if eff is not None:
                 if eff.exit:
-                    return None, True
+                    return None, True, None
                 transition = eff.new_mode
             elif cmd.exit:
-                return None, True
+                return None, True, None
             else:
                 transition = cmd.new_mode
             # Sticky paging disable (#307 / P3-4): set only here — abbreviation is
@@ -976,8 +1096,8 @@ class CMDShell:
         # Server shutdown observed mid-dispatch: close without rendering the body
         # (the legacy `default` adapter returned True here before writing output).
         if not self.is_running.is_set():
-            return body, True
-        return body, False
+            return body, True, None
+        return body, False, None
 
     def _parseline(self, line: str) -> tuple[str | None, str | None, str]:
         """Lex one line into ``(command, arg, line)``, replacing cmd.Cmd.parseline (#303 P3-3).
@@ -1018,6 +1138,10 @@ class CMDShell:
         """
         line = self.precmd(line)
         cmd_name, _arg, parsed = self._parseline(line)
+        # Only the general path can fire a challenge; the blank / EOF / help
+        # branches keep the 2-tuple form, so `challenge` defaults to None here and
+        # only the `_dispatch_general` unpack widens to three (#338 / §3).
+        challenge = None
         if not parsed:
             body, close = None, False  # blank line: no output
         elif cmd_name == "EOF":
@@ -1025,9 +1149,9 @@ class CMDShell:
         elif cmd_name == "help":
             body, close = self._help_body(), False  # leading `?` / `help`: current-mode listing
         else:
-            body, close = self._dispatch_general(parsed)  # general command path
+            body, close, challenge = self._dispatch_general(parsed)  # general command path
         # postcmd gets the post-precmd line (pre-parseline) — not the
         # parseline-transformed `parsed` (e.g. "?" -> "help ") — so a postcmd
         # override sees the line as typed on both transports (#297, claude#1).
         close = bool(self.postcmd(close, line))
-        return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)
+        return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode, challenge=challenge)

@@ -265,9 +265,9 @@ class TestInventoryNormalization:
         # shutdown branch) and the pin would be a false green — set it, and
         # prove with a non-exit control line that only `exit: true` closes.
         shell.is_running.set()
-        _body, close = shell._dispatch_general("no such command")
+        _body, close, _challenge = shell._dispatch_general("no such command")
         assert close is False
-        _body, close = shell._dispatch_general("logout")
+        _body, close, _challenge = shell._dispatch_general("logout")
         assert close is True
 
     def test_default_override_replaces_basic_fallback(self, tmp_path):

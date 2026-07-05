@@ -22,14 +22,17 @@ import os
 from jinja2 import TemplateSyntaxError
 import yaml
 
-from simnos.core.pydantic_models import ModelCommandAuthoring, ModelPlatformMeta, ModelTransition
+from simnos.core.pydantic_models import ModelChallenge, ModelCommandAuthoring, ModelPlatformMeta, ModelTransition
 from simnos.core.resolved_command import (
+    CHALLENGE_RENDER_VARS,
     NO_OUTPUT,
     ModeDef,
+    ResolvedChallenge,
     ResolvedCommand,
     ResolvedOutput,
     ResolvedPlatform,
     Transition,
+    compile_challenge_prompt,
     compile_template,
 )
 from simnos.core.values_loader import load_values, validate_render_values
@@ -236,6 +239,12 @@ def _resolve_command(
         output = NO_OUTPUT
         variants = ()
 
+    challenge = (
+        _resolve_challenge(model.challenge, cmd_modes, mode_names, model.command)
+        if model.challenge is not None
+        else None
+    )
+
     return ResolvedCommand(
         name=model.command,
         modes=cmd_modes,
@@ -249,6 +258,83 @@ def _resolve_command(
         source=model.source,
         disables_paging=bool(model.disables_paging),
         transitions=resolve_transitions(model.command, model.transitions, cmd_modes, mode_names),
+        challenge=challenge,
+    )
+
+
+# Non-empty sentinel for the challenge-prompt dry-render (mirrors
+# `values_loader._DRY_SENTINEL`): a value both `base_prompt` and `username` take
+# so a template referencing either renders without an undefined at build time.
+_CHALLENGE_DRY_SENTINEL = "x"
+
+
+def _resolve_challenge_prompt(source: str, command_name: str) -> ResolvedOutput:
+    """Compile + build-time validate a challenge prompt into a `ResolvedOutput` (#338 / §2).
+
+    A challenge prompt may reference `base_prompt` / `username` (only). Unknown
+    variables, a jinja syntax error, a render failure, or a rendered result that
+    spans multiple lines all fail loudly here (fail at startup, #287-style) rather
+    than at connect time. A prompt with no jinja markers is stored verbatim as a
+    literal (no runtime render); anything else is a template the shell renders
+    with `base_prompt` + `username`.
+    """
+    try:
+        template, unknown = compile_challenge_prompt(source)
+    except TemplateSyntaxError as e:
+        raise ValueError(f"command {command_name!r}: challenge prompt has a jinja2 syntax error: {e}") from e
+    if unknown:
+        raise ValueError(
+            f"command {command_name!r}: challenge prompt uses unknown variable(s) {sorted(unknown)}; "
+            f"only {sorted(CHALLENGE_RENDER_VARS)} are allowed"
+        )
+    try:
+        rendered = template.render(base_prompt=_CHALLENGE_DRY_SENTINEL, username=_CHALLENGE_DRY_SENTINEL)
+    except Exception as e:
+        raise ValueError(f"command {command_name!r}: challenge prompt failed dry-render: {e}") from e
+    if "\n" in rendered or "\r" in rendered:
+        raise ValueError(f"command {command_name!r}: challenge prompt renders to multiple lines; keep it single-line")
+    if "{{" not in source and "{%" not in source and "{#" not in source:
+        return ResolvedOutput(kind="literal", text=source)
+    return ResolvedOutput(kind="template", template=template, required_vars=frozenset())
+
+
+def _resolve_challenge(
+    model: ModelChallenge, cmd_modes: frozenset[str], mode_names: frozenset[str], command_name: str
+) -> ResolvedChallenge:
+    """Resolve a validated `challenge:` block to a `ResolvedChallenge` (#338 / §2).
+
+    `challenge.mode` is normalized to the effective firing set: the authored
+    modes (checked ⊆ the command's own modes), or the command's effective modes
+    when omitted — an all-modes command (empty `cmd_modes`) expands to the full
+    platform mode set, the same `cmd_modes or mode_names` rule `resolve_transitions`
+    uses, so a runtime `current_mode in modes` check never silently misses.
+    `success.new_mode` is validated against the platform modes, the same loud
+    boundary the static `new_mode` uses.
+    """
+    effective_cmd_modes = cmd_modes or mode_names
+    if model.mode is not None:
+        unknown = sorted(m for m in model.mode if m not in effective_cmd_modes)
+        if unknown:
+            raise ValueError(
+                f"command {command_name!r}: challenge.mode {unknown} not in the command's modes "
+                f"{sorted(effective_cmd_modes)}"
+            )
+        challenge_modes = frozenset(model.mode)
+    else:
+        challenge_modes = effective_cmd_modes
+    st = model.success
+    if st.new_mode is not None and st.new_mode not in mode_names:
+        raise ValueError(
+            f"command {command_name!r}: challenge.success.new_mode {st.new_mode!r} not in platform modes "
+            f"{sorted(mode_names)}"
+        )
+    return ResolvedChallenge(
+        kind=model.kind,
+        prompt=_resolve_challenge_prompt(model.prompt, command_name),
+        modes=challenge_modes,
+        auth=model.auth,
+        success=Transition(new_mode=st.new_mode, exit=bool(st.exit)),
+        failure_output=model.failure_output,
     )
 
 

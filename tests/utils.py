@@ -178,7 +178,10 @@ def get_host_commands(host: Host) -> tuple[list[str], list[str], list[str]]:
         # the session at dispatch time just like the static forms, so the
         # flat sweep must skip it too (e.g. arista_eos `exit`, whose user /
         # enable entries close the session — P-2 migrated it to `transitions`).
-        if rc.new_mode or rc.exit or rc.transitions or command in {"exit", "quit", "logout"}:
+        # A `challenge:` command (#338) waits for interactive input (a password
+        # prompt) and then transitions, so a non-interactive `send_command` sweep
+        # would hang on it — skip it too (the netmiko enable() path exercises it).
+        if rc.new_mode or rc.exit or rc.transitions or rc.challenge or command in {"exit", "quit", "logout"}:
             continue
         # Empty `modes` = valid in every mode; a flat sweep reaches it from the
         # initial mode.

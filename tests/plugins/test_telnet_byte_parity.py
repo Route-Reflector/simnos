@@ -28,7 +28,7 @@ import pytest
 
 from simnos import SimNOS
 from tests.plugins.telnet_test_helpers import capture_telnet_transcript
-from tests.utils import build_inventory
+from tests.utils import TEST_PASSWORD, build_inventory
 
 # Where the frozen golden transcripts live (one subdir per platform, one file per scenario).
 _GOLDEN_BASE = Path(__file__).parent.parent / "assets" / "golden_transcripts"
@@ -107,6 +107,25 @@ def test_telnet_byte_parity_interactive_session():
         ]
         steps = asyncio.run(capture_telnet_transcript(port, script))
     _assert_or_record("interactive_session", steps)
+
+
+def test_telnet_byte_parity_challenge_session():
+    """Pin the interactive challenge wire over Telnet (#338): after the in-band login,
+    `sudo -s` on linux fires a password sub-prompt (answer not echoed), a wrong answer
+    replays the failure body, a correct one reaches root — the same challenge sub-phase
+    the SSH golden pins, driven through the shared push session over Telnet.
+
+    A NEW golden (linux has no prior Telnet transcript), recorded from the current wire.
+    """
+    with _running_telnet_host("linux") as port:
+        script = [
+            b"sudo -s\r",  # challenge fires: password sub-prompt
+            b"wrongpw\r",  # wrong -> failure body + user prompt
+            b"sudo -s\r",  # re-fire
+            TEST_PASSWORD.encode() + b"\r",  # correct -> root prompt
+        ]
+        steps = asyncio.run(capture_telnet_transcript(port, script))
+    _assert_or_record("challenge_session", steps, platform="linux")
 
 
 def test_telnet_byte_parity_session_close_command():

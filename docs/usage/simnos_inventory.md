@@ -77,6 +77,14 @@ default:
 
 In this case, it will create a host named `router0` with the username `user`, password `user`, and port `6000`. The platform will be `cisco_ios`. If you want to create more hosts, you can add them to the `hosts` section:
 
+!!! note "`secret` (enable secret / sudo password)"
+    A host (or the `default` section) may also carry a `secret` — the enable
+    secret or sudo password for a platform whose enable command asks for one
+    (a `challenge: {auth: secret}` command, #338). It is the same name as
+    netmiko's `secret` `ConnectHandler` argument. Unset, a challenge falls back
+    to the host `password`, so most inventories need not set it.
+
+
 ``` yaml
 hosts:
     router1:
