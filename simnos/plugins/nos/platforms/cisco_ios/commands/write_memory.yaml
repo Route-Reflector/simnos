@@ -1,0 +1,9 @@
+command: write memory
+type: simnos
+help: Save the running configuration to startup-config
+mode:
+- enable
+# NOT a challenge: real IOS `write memory` is the non-interactive save (the
+# `copy running-config startup-config` without the filename prompt), so it emits
+# `[OK]` straight away — modelled as a plain literal, not a confirm (#338 Phase 3).
+output: write_memory.txt

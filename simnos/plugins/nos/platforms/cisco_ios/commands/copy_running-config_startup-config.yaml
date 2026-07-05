@@ -1,0 +1,13 @@
+command: copy running-config startup-config
+type: simnos
+help: Save the running configuration to startup-config
+mode:
+- enable
+challenge:
+  kind: confirm
+  # Free-line prompt: Enter accepts the default filename, any typed name also
+  # builds — both answer the same `[OK]`. `output` is an inline literal body.
+  prompt: "Destination filename [startup-config]? "
+  "on":
+    "": {output: "Building configuration...\n[OK]"}
+  default: {output: "Building configuration...\n[OK]"}

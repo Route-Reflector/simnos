@@ -30,7 +30,7 @@ projection but is always None, since the fallback never transitions
 (Decision 3 / D5).
 """
 
-from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
+from simnos.core.resolved_command import ConfirmAction, ResolvedCommand, ResolvedOutput
 
 # Fixed device prompt for the projection (any value with distinct canonical
 # renders works — Decision 3 "固定 base_prompt").
@@ -101,15 +101,34 @@ def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
             # The post-command interactive sub-prompt (#338). Emitted only when
             # authored (like `transitions` / `disables_paging`), so pre-#338
             # snapshots need no re-baseline. Captures the client-observable
-            # contract: the rendered prompt, firing modes, auth source, the held
-            # success transition and the failure body.
+            # contract: the rendered prompt, firing modes, and each kind's
+            # decision fields — password's auth/success/failure_output, or
+            # confirm's on/default actions (#338 Phase 3). The entered value /
+            # host secret are never projected (R5).
             ch = rc.challenge
-            projection[name]["challenge"] = {
+            entry: dict = {
                 "kind": ch.kind,
                 "prompt": _project_challenge_prompt(ch.prompt),
                 "modes": sorted(ch.modes),
-                "auth": ch.auth,
-                "success": {"new_mode": ch.success.new_mode, "exit": ch.success.exit},
-                "failure_output": ch.failure_output,
             }
+            if ch.kind == "password":
+                assert ch.success is not None  # loader guarantees success on a password challenge
+                entry["auth"] = ch.auth
+                entry["success"] = {"new_mode": ch.success.new_mode, "exit": ch.success.exit}
+                entry["failure_output"] = ch.failure_output
+            else:  # confirm
+                assert ch.on is not None  # loader guarantees a non-None `on` on a confirm challenge
+                entry["on"] = {key: _project_confirm_action(a) for key, a in sorted(ch.on.items())}
+                entry["default"] = _project_confirm_action(ch.default) if ch.default is not None else None
+            projection[name]["challenge"] = entry
     return projection
+
+
+def _project_confirm_action(action: ConfirmAction) -> dict:
+    """Project one resolved `ConfirmAction` (a confirm `on:` entry / `default:`).
+
+    `output` is kept as a raw string (not `splitlines()`), matching the sibling
+    challenge body `failure_output` above — the `_project_output` list form is for
+    the separate `ResolvedOutput` channel (1st round gemini#1 declined).
+    """
+    return {"new_mode": action.new_mode, "exit": action.exit, "output": action.output}

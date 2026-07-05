@@ -91,7 +91,7 @@ class TestChallengeSchema:
         assert m.challenge is not None
         assert m.challenge.kind == "password"
         assert m.challenge.auth == "password"
-        assert m.challenge.success.new_mode == "enable"
+        assert m.challenge.success is not None and m.challenge.success.new_mode == "enable"
 
     def test_prompt_must_be_single_line(self):
         with pytest.raises(ValidationError, match="single line"):
@@ -101,14 +101,63 @@ class TestChallengeSchema:
         with pytest.raises(ValidationError, match="NUL"):
             _chal(kind="password", prompt="pw\x00: ", auth="password", success={"new_mode": "enable"})
 
-    def test_kind_confirm_not_yet_allowed(self):
-        # Phase 3 vocabulary is not published early (kind is `Literal["password"]`).
-        with pytest.raises(ValidationError):
-            _chal(kind="confirm", prompt="[confirm]", auth="password", success={"new_mode": "enable"})
-
     def test_auth_and_success_required(self):
         with pytest.raises(ValidationError):
             _chal(kind="password", prompt="Password: ")  # no auth / success
+
+    def test_valid_confirm_challenge_parses(self):
+        m = _chal(
+            kind="confirm",
+            prompt="Proceed? [confirm]",
+            on={"": {"exit": True}, "n": {}},
+            default={},
+        )
+        assert m.kind == "confirm"
+        assert m.on is not None
+        assert m.on[""].exit is True
+        assert m.on["n"].new_mode is None and m.on["n"].exit is None  # cancel
+
+    def test_confirm_requires_on(self):
+        with pytest.raises(ValidationError, match="non-empty `on:`"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]")
+
+    def test_confirm_empty_on_rejected(self):
+        with pytest.raises(ValidationError, match="non-empty `on:`"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={})
+
+    def test_confirm_forbids_password_fields(self):
+        with pytest.raises(ValidationError, match="password-only"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"exit": True}}, auth="secret")
+
+    def test_password_forbids_confirm_fields(self):
+        with pytest.raises(ValidationError, match="confirm-only"):
+            _chal(
+                kind="password",
+                prompt="Password: ",
+                auth="password",
+                success={"new_mode": "enable"},
+                on={"": {"exit": True}},
+            )
+
+    def test_confirm_action_exit_with_output_rejected(self):
+        # A closing session sends no body (the existing close contract, gemini#1).
+        with pytest.raises(ValidationError, match="cannot set `output`"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"exit": True, "output": "bye"}})
+
+    def test_confirm_action_exit_false_rejected(self):
+        with pytest.raises(ValidationError, match="`exit` must be true"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"exit": False}})
+
+    def test_confirm_action_new_mode_and_exit_rejected(self):
+        with pytest.raises(ValidationError, match="at most one"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"new_mode": "enable", "exit": True}})
+
+    @pytest.mark.parametrize("bad_key", ["y\n", "y\r", "y\x00", "\x1b[A", "a\x7f", "a\x08"])
+    def test_confirm_on_key_with_control_char_rejected(self, bad_key):
+        # An `on:` key holding a byte the line reader never leaves in the answer
+        # (CR/LF/NUL terminators/drops, ESC/BS/DEL editing) is a dead entry.
+        with pytest.raises(ValidationError, match="control bytes"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={bad_key: {"exit": True}})
 
     def test_challenge_exclusive_with_handler(self):
         with pytest.raises(ValidationError, match="exclusive"):
@@ -168,7 +217,7 @@ class TestChallengeLoader:
         assert ch.kind == "password"
         assert ch.auth == "password"
         assert ch.modes == frozenset({"user"})
-        assert ch.success.new_mode == "enable"
+        assert ch.success is not None and ch.success.new_mode == "enable"
         assert ch.failure_output == "nope"
         assert ch.prompt.kind == "template"  # references `username`
 
@@ -227,6 +276,46 @@ class TestChallengeLoader:
         with pytest.raises(ValueError, match="new_mode"):
             load_platform_dir(p)
 
+    def test_resolves_confirm_actions(self, tmp_path):
+        p = _platform(
+            tmp_path,
+            "command: reload\ntype: simnos\nmode: [enable]\n"
+            'challenge:\n  kind: confirm\n  prompt: "Proceed? [confirm]"\n'
+            '  "on":\n    "": {exit: true}\n    "n": {}\n'
+            '  default: {output: "[OK]"}\n',
+        )
+        ch = load_platform_dir(p).commands["reload"].challenge
+        assert ch is not None
+        assert ch.kind == "confirm"
+        assert ch.auth is None and ch.success is None  # password-only fields absent
+        assert ch.on is not None
+        assert ch.on[""].exit is True and ch.on[""].output is None
+        assert ch.on["n"].exit is False and ch.on["n"].new_mode is None  # cancel
+        assert ch.default is not None and ch.default.output == "[OK]"
+
+    def test_confirm_on_action_new_mode_absent_is_loud(self, tmp_path):
+        # The error names the offending slot (`on['y']`) so a multi-entry confirm
+        # points the author at the right action (1st claude#5 / 2nd codex#3).
+        p = _platform(
+            tmp_path,
+            "command: reload\ntype: simnos\nmode: [enable]\n"
+            'challenge:\n  kind: confirm\n  prompt: "Proceed? [confirm]"\n'
+            '  "on":\n    "y": {new_mode: nope}\n',
+        )
+        with pytest.raises(ValueError, match=r"on\['y'\].*new_mode 'nope'"):
+            load_platform_dir(p)
+
+    def test_confirm_default_action_new_mode_absent_is_loud(self, tmp_path):
+        # The `default:` slot is validated + named the same way as an `on:` entry.
+        p = _platform(
+            tmp_path,
+            "command: reload\ntype: simnos\nmode: [enable]\n"
+            'challenge:\n  kind: confirm\n  prompt: "Proceed? [confirm]"\n'
+            '  "on":\n    "": {}\n  default: {new_mode: nope}\n',
+        )
+        with pytest.raises(ValueError, match=r"default new_mode 'nope'"):
+            load_platform_dir(p)
+
     def test_unknown_render_var_is_loud(self, tmp_path):
         p = _platform(
             tmp_path,
@@ -243,6 +332,31 @@ _PW_CMD = (
     "command: sudo -s\ntype: simnos\nmode: [user]\n"
     'challenge:\n  kind: password\n  prompt: "[sudo] password for {{ username }}: "\n'
     "  auth: password\n  success:\n    new_mode: enable\n  failure_output: Sorry, try again.\n"
+)
+
+# A confirm challenge that closes on Enter / `y`, cancels on `n` / anything else
+# (the `reload [confirm]` shape); fires in user mode to keep the unit test simple.
+_CONFIRM_CLOSE_CMD = (
+    "command: reload\ntype: simnos\nmode: [user]\n"
+    'challenge:\n  kind: confirm\n  prompt: "Proceed with reload? [confirm]"\n'
+    '  "on":\n    "": {exit: true}\n    "y": {exit: true}\n    "n": {}\n  default: {}\n'
+)
+
+# A free-line confirm that emits an `[OK]` body and stays put (the `copy running-config
+# startup-config` shape: Enter or any typed filename both build).
+_CONFIRM_OUTPUT_CMD = (
+    "command: save\ntype: simnos\nmode: [user]\n"
+    'challenge:\n  kind: confirm\n  prompt: "Destination filename [startup-config]? "\n'
+    '  "on":\n    "": {output: "[OK]"}\n  default: {output: "[OK]"}\n'
+)
+
+# A confirm whose actions transition mode (`new_mode`) — one bare, one also with a
+# body — and which authors NO `default:`, so an unknown answer falls through to a
+# plain cancel (the `on` miss + `default is None` path, not a cancel action).
+_CONFIRM_MODE_CMD = (
+    "command: switchmode\ntype: simnos\nmode: [user]\n"
+    'challenge:\n  kind: confirm\n  prompt: "Enter mode? "\n'
+    '  "on":\n    "e": {new_mode: enable}\n    "b": {new_mode: enable, output: "[OK]"}\n'
 )
 
 
@@ -350,6 +464,83 @@ class TestChallengeDispatch:
         with caplog.at_level("DEBUG"):
             shell.complete_challenge(pending, "s3cr3t-marker")
         assert "s3cr3t-marker" not in caplog.text
+
+
+class TestConfirmChallenge:
+    """`kind: confirm` dispatch — echoed answer looked up in `on` / `default` (#338 Phase 3)."""
+
+    def test_confirm_fires_with_echo(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_CLOSE_CMD))
+        r = shell.dispatch("reload")
+        assert r.challenge is not None
+        assert r.body is None and r.close is False
+        assert r.challenge.prompt_text == "Proceed with reload? [confirm]"
+        assert r.challenge.echo is True  # confirm: echoed (unlike password)
+        assert r.challenge.command == "reload"
+
+    def test_confirm_close_on_enter(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_CLOSE_CMD))
+        pending = _fire(shell, "reload")
+        r = shell.complete_challenge(pending, "")  # bare Enter confirms
+        assert r.close is True and r.body is None
+
+    def test_confirm_close_on_y(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_CLOSE_CMD))
+        pending = _fire(shell, "reload")
+        assert shell.complete_challenge(pending, "y").close is True
+
+    def test_confirm_cancel_on_n(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_CLOSE_CMD))
+        pending = _fire(shell, "reload")
+        r = shell.complete_challenge(pending, "n")  # explicit cancel: no close, no body, prompt intact
+        assert r.close is False and r.body is None and r.mode == "user" and r.prompt == "dev$"
+
+    def test_confirm_default_cancels_unknown_answer(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_CLOSE_CMD))
+        pending = _fire(shell, "reload")
+        r = shell.complete_challenge(pending, "maybe")  # not in `on` → default {} → cancel
+        assert r.close is False and r.body is None
+
+    def test_confirm_output_body_on_enter(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_OUTPUT_CMD))
+        pending = _fire(shell, "save")
+        r = shell.complete_challenge(pending, "")  # accept default filename
+        assert r.body == "[OK]" and r.close is False and r.mode == "user"
+
+    def test_confirm_default_output_on_typed_filename(self, tmp_path):
+        shell = _shell(_platform(tmp_path, _CONFIRM_OUTPUT_CMD))
+        pending = _fire(shell, "save")
+        r = shell.complete_challenge(pending, "myfile")  # any filename → default → build
+        assert r.body == "[OK]"
+
+    def test_confirm_is_running_clear_closes(self, tmp_path):
+        # Same shutdown observation as password (both stages share one close contract).
+        shell = _shell(_platform(tmp_path, _CONFIRM_OUTPUT_CMD))
+        pending = _fire(shell, "save")
+        shell.is_running.clear()
+        assert shell.complete_challenge(pending, "").close is True
+
+    def test_confirm_new_mode_transitions(self, tmp_path):
+        # A confirm action can transition mode (the `elif action.new_mode` branch).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "e")
+        assert r.mode == "enable" and r.prompt == "dev#" and r.body is None and r.close is False
+
+    def test_confirm_new_mode_with_output(self, tmp_path):
+        # `new_mode` + `output` compose (the relaxation over a plain transition).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "b")
+        assert r.mode == "enable" and r.body == "[OK]" and r.close is False
+
+    def test_confirm_no_default_cancels_unknown(self, tmp_path):
+        # `on` miss + no `default:` authored → `action is None` → a plain cancel
+        # (distinct from a `default: {}` cancel action; both stay put).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "zzz")
+        assert r.close is False and r.body is None and r.mode == "user" and r.prompt == "dev$"
 
 
 # --------------------------------------------------------------------- creds wiring

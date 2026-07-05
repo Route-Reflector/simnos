@@ -1,0 +1,14 @@
+command: reload
+type: simnos
+help: Halt and perform a cold restart
+mode:
+- enable
+challenge:
+  kind: confirm
+  prompt: "Proceed with reload? [confirm]"
+  # `on` is quoted: bare `on:` is a YAML 1.1 boolean key (parses as True).
+  "on":
+    "": {exit: true}     # bare Enter confirms → session ends (reboot ≈ close)
+    "y": {exit: true}
+    "n": {}              # cancel: prompt returns unchanged, no body
+  default: {}            # any other key cancels

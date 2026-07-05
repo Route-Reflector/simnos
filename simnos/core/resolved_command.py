@@ -178,13 +178,37 @@ class Transition:
 
 
 @dataclass(frozen=True)
+class ConfirmAction:
+    """A resolved confirm-challenge action — one `on:` entry or `default:` (#338 / §3).
+
+    Picked by looking the answer line up in `ResolvedChallenge.on`. `exit` True
+    closes the session; else `new_mode` (a validated mode name) transitions, or
+    None stays put. `output` is an inline `[OK]`-style body sent after the action
+    (None = no body). Neither transition set + no output = a plain cancel (the
+    ``n`` of a confirm). The schema forbids `output` together with `exit`.
+    """
+
+    new_mode: str | None = None
+    exit: bool = False
+    output: str | None = None
+
+
+@dataclass(frozen=True)
 class ResolvedChallenge:
     """A command's post-dispatch interactive sub-prompt (#338 / §2).
 
-    Phase 1 models `kind == "password"` only: the command holds its transition
-    until the client answers a password prompt, then `complete_challenge`
-    verifies the answer and applies `success` (or answers `failure_output`). The
-    confirm kind (y/n / free-line) is a Phase 3 addition.
+    Two kinds:
+
+    - `kind == "password"` — the command holds its transition until the client
+      answers a password prompt; `complete_challenge` verifies it and applies
+      `success` (or answers `failure_output`). `auth` picks the expected value:
+      `"secret"` → `host.secret` (falling back to `host.password` when unset,
+      #338 / 案F), `"password"` → `host.password`. `success` is the transition on
+      a correct answer (reusing `Transition`), `failure_output` the body on a
+      wrong / empty one (the prompt stays put, a single attempt — #338 / C1).
+    - `kind == "confirm"` — the answer line is looked up in `on` (falling back to
+      `default`, else a cancel) to pick a `ConfirmAction`. `auth` / `success` /
+      `failure_output` are None here; `on` / `default` are None on password.
 
     - `prompt` is a `ResolvedOutput` (literal, or a template rendered with
       `base_prompt` + `username`) — the shell renders it at fire time.
@@ -195,19 +219,18 @@ class ResolvedChallenge:
       the command's ordinary `output` path, which is how a per-mode response
       (alcatel_sros `enable-admin`) is expressed without generalizing per-mode
       output (#338 / 案D).
-    - `auth` picks the expected value: `"secret"` → `host.secret` (falling back
-      to `host.password` when unset, #338 / 案F), `"password"` → `host.password`.
-    - `success` is the transition applied on a correct answer (reusing
-      `Transition` — `new_mode` or `exit`); `failure_output` is the body on a
-      wrong / empty answer (the prompt stays put, a single attempt — #338 / C1).
     """
 
     kind: str
     prompt: ResolvedOutput
     modes: frozenset[str]
-    auth: str
-    success: Transition
+    auth: str | None = None
+    success: Transition | None = None
     failure_output: str | None = None
+    # `Mapping` (read-only) to match the sibling `ResolvedCommand.transitions`
+    # convention for a frozen dataclass map field (1st round claude#4).
+    on: Mapping[str, ConfirmAction] | None = None
+    default: ConfirmAction | None = None
 
 
 @dataclass(frozen=True)

@@ -138,33 +138,73 @@ class ModelTransition(BaseModel):
         return self
 
 
+class ModelConfirmAction(BaseModel):
+    """One entry in a confirm challenge's `on:` map (or its `default:`) (#338 / §1, Phase 3).
+
+    A relaxation of `ModelTransition`: unlike a transition, an action may set
+    *neither* `new_mode` nor `exit` — that is a cancel (a no-op, the prompt
+    returns unchanged, e.g. the ``n`` of a ``reload`` confirm). It may also carry
+    an `output` literal body — the ``[OK]`` a ``copy running-config
+    startup-config`` prints on save. `exit: true` forbids `output` (a closing
+    session sends no body — the existing close contract, 1st round gemini#1);
+    `exit: false` is rejected like a transition's, and `new_mode` + `exit` are
+    mutually exclusive. `output` is an inline literal (unlike the command-level
+    `output`, which references an adjacent file).
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    new_mode: StrictStr | None = None
+    exit: StrictBool | None = None
+    output: StrictStr | None = None
+
+    @model_validator(mode="after")
+    def _check(self) -> "ModelConfirmAction":
+        if self.exit is not None and not self.exit:
+            raise ValueError("confirm action `exit` must be true — omit it entirely for a cancel or `new_mode` action")
+        if self.new_mode is not None and self.exit:
+            raise ValueError("a confirm action sets at most one of `new_mode` or `exit: true`")
+        if self.exit and self.output is not None:
+            raise ValueError("a confirm action with `exit: true` cannot set `output` (a closing session sends no body)")
+        return self
+
+
 class ModelChallenge(BaseModel):
     """A3 `challenge:` block — a post-command interactive sub-prompt (#338 / §1).
 
-    Phase 1 supports ``kind: password`` only: the command holds its transition
-    until the client answers a password prompt. The confirm kind (``on`` /
-    ``default``) is a Phase 3 addition and is deliberately absent from the schema
-    for now — an unusable vocabulary is not published early, so ``extra="forbid"``
-    rejects those keys loudly until Phase 3 adds them.
+    Two kinds:
+
+    - ``kind: password`` — the command holds its transition until the client
+      answers a (non-echoed) password prompt. ``auth`` picks the expected value
+      (``secret`` falls back to the host password when unset, #338 / 案F),
+      ``success`` is the transition on a correct answer, ``failure_output`` the
+      body on a wrong / empty one (a single attempt, #338 / C1).
+    - ``kind: confirm`` — the command asks a (echoed) yes/no or free-line prompt
+      (``reload`` ``[confirm]``, ``copy run start`` ``Destination filename?``);
+      the answer line is looked up in ``on:`` (falling back to ``default:``) to
+      pick a `ModelConfirmAction` — a transition, a cancel, and/or an ``[OK]``
+      body. ``on`` is required (non-empty); ``auth`` / ``success`` /
+      ``failure_output`` are password-only and rejected here.
 
     - ``prompt`` is the (single-line) sub-prompt text, jinja2-capable with
       ``base_prompt`` / ``username`` (loader dry-renders it at build time).
     - ``mode`` scopes which modes fire the challenge (omitted = the command's
       every mode); a non-firing mode uses the command's ordinary output (#338 /
       案D). The loader checks the names against the command's modes.
-    - ``auth`` picks the expected value (``secret`` falls back to the host
-      password when unset, #338 / 案F); ``success`` is the transition on a
-      correct answer; ``failure_output`` the body on a wrong / empty one.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    kind: Literal["password"]
+    kind: Literal["password", "confirm"]
     prompt: StrictStr
     mode: list[StrictStr] | None = None
-    auth: Literal["secret", "password"]
-    success: ModelTransition
+    # --- password kind (required there, forbidden on confirm) ---
+    auth: Literal["secret", "password"] | None = None
+    success: ModelTransition | None = None
     failure_output: StrictStr | None = None
+    # --- confirm kind (`on` required there, all three forbidden on password) ---
+    on: dict[StrictStr, ModelConfirmAction] | None = None
+    default: ModelConfirmAction | None = None
 
     _reject_empty_mode = field_validator("mode")(_reject_empty_mode_list)
 
@@ -182,6 +222,41 @@ class ModelChallenge(BaseModel):
         if "\x00" in value:
             raise ValueError("challenge `prompt` must not contain a NUL byte")
         return value
+
+    @model_validator(mode="after")
+    def _check_kind(self) -> "ModelChallenge":
+        if self.kind == "password":
+            missing = sorted(n for n, v in (("auth", self.auth), ("success", self.success)) if v is None)
+            if missing:
+                raise ValueError(f"challenge `kind: password` requires {missing}")
+            present = sorted(n for n, v in (("on", self.on), ("default", self.default)) if v is not None)
+            if present:
+                raise ValueError(f"challenge `kind: password` cannot set {present} (confirm-only)")
+        else:  # confirm
+            if not self.on:
+                raise ValueError("challenge `kind: confirm` requires a non-empty `on:` map")
+            # An `on:` key can only match a byte the driver leaves in an answer
+            # line. `_read_challenge_line` terminates on CR/LF, drops NUL, and
+            # swallows ESC sequences / BS / DEL (line editing) — a key holding any
+            # of those never fires, so reject it loudly like `transitions`' dead-key
+            # check rather than silently never matching (1st round claude#3, widened
+            # to the driver's full unreachable set 2nd round claude#2). Other control
+            # bytes (e.g. TAB) do reach the buffer, so they stay allowed.
+            unreachable = "\r\n\x00\x1b\x08\x7f"  # CR / LF / NUL / ESC / BS / DEL
+            dead = sorted(k for k in self.on if any(c in k for c in unreachable))
+            if dead:
+                raise ValueError(
+                    f"challenge `on:` keys must not contain control bytes CR/LF/NUL/ESC/BS/DEL; "
+                    f"{dead!r} could never match a read answer line"
+                )
+            present = sorted(
+                n
+                for n, v in (("auth", self.auth), ("success", self.success), ("failure_output", self.failure_output))
+                if v is not None
+            )
+            if present:
+                raise ValueError(f"challenge `kind: confirm` cannot set {present} (password-only)")
+        return self
 
 
 class ModelCommandAuthoring(BaseModel):

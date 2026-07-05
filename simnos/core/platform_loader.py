@@ -22,10 +22,17 @@ import os
 from jinja2 import TemplateSyntaxError
 import yaml
 
-from simnos.core.pydantic_models import ModelChallenge, ModelCommandAuthoring, ModelPlatformMeta, ModelTransition
+from simnos.core.pydantic_models import (
+    ModelChallenge,
+    ModelCommandAuthoring,
+    ModelConfirmAction,
+    ModelPlatformMeta,
+    ModelTransition,
+)
 from simnos.core.resolved_command import (
     CHALLENGE_RENDER_VARS,
     NO_OUTPUT,
+    ConfirmAction,
     ModeDef,
     ResolvedChallenge,
     ResolvedCommand,
@@ -181,6 +188,18 @@ def _follow_alias(
         current = authored[current][0].alias
 
 
+def _require_platform_mode(new_mode: str | None, mode_names: frozenset[str], label: str) -> None:
+    """Raise the shared loud check if `new_mode` is set but not a platform mode.
+
+    `label` is the fully-formed message head (e.g. ``command 'x': challenge.success.new_mode 'y'``);
+    only the common ``not in platform modes {..}`` tail is factored, so each transition
+    source (static `new_mode`, `transitions` map, challenge `success` / confirm action)
+    keeps its own wording.
+    """
+    if new_mode is not None and new_mode not in mode_names:
+        raise ValueError(f"{label} not in platform modes {sorted(mode_names)}")
+
+
 def _resolve_command(
     model: ModelCommandAuthoring,
     mode_names: frozenset[str],
@@ -190,10 +209,7 @@ def _resolve_command(
     """Resolve one validated authoring model to a `ResolvedCommand`."""
     cmd_modes = resolve_modes(model.command, model.mode, mode_names)
 
-    if model.new_mode is not None and model.new_mode not in mode_names:
-        raise ValueError(
-            f"command {model.command!r}: new_mode {model.new_mode!r} not in platform modes {sorted(mode_names)}"
-        )
+    _require_platform_mode(model.new_mode, mode_names, f"command {model.command!r}: new_mode {model.new_mode!r}")
 
     if model.variants is not None:
         variants = tuple(
@@ -307,9 +323,9 @@ def _resolve_challenge(
     modes (checked ⊆ the command's own modes), or the command's effective modes
     when omitted — an all-modes command (empty `cmd_modes`) expands to the full
     platform mode set, the same `cmd_modes or mode_names` rule `resolve_transitions`
-    uses, so a runtime `current_mode in modes` check never silently misses.
-    `success.new_mode` is validated against the platform modes, the same loud
-    boundary the static `new_mode` uses.
+    uses, so a runtime `current_mode in modes` check never silently misses. Every
+    `new_mode` (password `success` or confirm action) is validated against the
+    platform modes, the same loud boundary the static `new_mode` uses.
     """
     effective_cmd_modes = cmd_modes or mode_names
     if model.mode is not None:
@@ -322,20 +338,57 @@ def _resolve_challenge(
         challenge_modes = frozenset(model.mode)
     else:
         challenge_modes = effective_cmd_modes
-    st = model.success
-    if st.new_mode is not None and st.new_mode not in mode_names:
-        raise ValueError(
-            f"command {command_name!r}: challenge.success.new_mode {st.new_mode!r} not in platform modes "
-            f"{sorted(mode_names)}"
+    prompt = _resolve_challenge_prompt(model.prompt, command_name)
+    if model.kind == "password":
+        # The kind-specific validator guarantees `success` here (and `on` below);
+        # assert to narrow the `... | None` unions for the type checker.
+        st = model.success
+        assert st is not None  # noqa: S101 — password kind: the validator guarantees `success`
+        _require_platform_mode(
+            st.new_mode, mode_names, f"command {command_name!r}: challenge.success.new_mode {st.new_mode!r}"
         )
+        return ResolvedChallenge(
+            kind=model.kind,
+            prompt=prompt,
+            modes=challenge_modes,
+            auth=model.auth,
+            success=Transition(new_mode=st.new_mode, exit=bool(st.exit)),
+            failure_output=model.failure_output,
+        )
+    # confirm: resolve every `on` entry (and `default`) to a ConfirmAction.
+    assert model.on is not None  # noqa: S101 — confirm kind: the validator guarantees a non-empty `on`
     return ResolvedChallenge(
         kind=model.kind,
-        prompt=_resolve_challenge_prompt(model.prompt, command_name),
+        prompt=prompt,
         modes=challenge_modes,
-        auth=model.auth,
-        success=Transition(new_mode=st.new_mode, exit=bool(st.exit)),
-        failure_output=model.failure_output,
+        on={
+            key: _resolve_confirm_action(action, mode_names, command_name, f"on[{key!r}]")
+            for key, action in model.on.items()
+        },
+        default=(
+            _resolve_confirm_action(model.default, mode_names, command_name, "default")
+            if model.default is not None
+            else None
+        ),
     )
+
+
+def _resolve_confirm_action(
+    model: ModelConfirmAction, mode_names: frozenset[str], command_name: str, entry: str
+) -> ConfirmAction:
+    """Resolve one confirm `on:` entry / `default:` to a `ConfirmAction` (#338 / §3).
+
+    `new_mode` is validated against the platform modes, the same loud boundary the
+    password `success.new_mode` and static `new_mode` use. `entry` names the map
+    slot (`on[<key>]` / `default`) so a multi-entry confirm points the author at
+    the offending action (1st round claude#5).
+    """
+    _require_platform_mode(
+        model.new_mode,
+        mode_names,
+        f"command {command_name!r}: challenge confirm action {entry} new_mode {model.new_mode!r}",
+    )
+    return ConfirmAction(new_mode=model.new_mode, exit=bool(model.exit), output=model.output)
 
 
 def resolve_modes(
@@ -396,11 +449,9 @@ def resolve_transitions(
                 f"{where} {command!r}: transitions key {key!r} is not one of the command's modes "
                 f"{sorted(effective_modes)} — it would never fire (dead entry)"
             )
-        if mt.new_mode is not None and mt.new_mode not in mode_names:
-            raise ValueError(
-                f"{where} {command!r}: transitions[{key!r}].new_mode {mt.new_mode!r} "
-                f"not in platform modes {sorted(mode_names)}"
-            )
+        _require_platform_mode(
+            mt.new_mode, mode_names, f"{where} {command!r}: transitions[{key!r}].new_mode {mt.new_mode!r}"
+        )
         resolved[key] = Transition(new_mode=mt.new_mode, exit=bool(mt.exit))
     return resolved
 

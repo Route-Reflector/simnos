@@ -1,0 +1,13 @@
+command: write erase
+type: simnos
+help: Erase the startup configuration (NVRAM)
+mode:
+- enable
+challenge:
+  kind: confirm
+  prompt: "Erasing the nvram filesystem will remove all configuration files! Continue? [confirm]"
+  "on":
+    "": {output: "[OK]\nErase of nvram: complete"}
+    "y": {output: "[OK]\nErase of nvram: complete"}
+    "n": {}
+  default: {}
