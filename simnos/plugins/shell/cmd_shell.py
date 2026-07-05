@@ -21,11 +21,13 @@ from simnos.core.platform_loader import load_platform_dir, resolve_modes, resolv
 from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
 from simnos.core.resolved_command import (
     NO_OUTPUT,
+    ConfirmAction,
     ModeDef,
     ResolvedChallenge,
     ResolvedCommand,
     ResolvedOutput,
     ResolvedPlatform,
+    Transition,
     compile_template,
 )
 from simnos.core.values_loader import validate_render_values
@@ -917,6 +919,22 @@ class CMDShell:
             return out.template.render(base_prompt=self.base_prompt, username=username)
         return out.text or ""
 
+    def _apply_challenge_transition(self, action: "Transition | ConfirmAction") -> bool:
+        """Apply a challenge outcome's mode change; return whether it closes the session.
+
+        Shared by both `complete_challenge` kinds: a password `success` (a
+        `Transition`) and a confirm `on:` / `default:` (a `ConfirmAction`) carry the
+        same load-validated `exit` / `new_mode` shape (exactly one meaningful, exit
+        winning). `exit` closes the session (no transition); else a set `new_mode`
+        transitions; else the prompt stays put (a confirm cancel). Keeping the two
+        callers on one helper stops the password/confirm branches from drifting.
+        """
+        if action.exit:
+            return True
+        if action.new_mode is not None:
+            self._apply_new_mode(action.new_mode)
+        return False
+
     def complete_challenge(self, pending: "PendingChallenge", entered: str) -> DispatchResult:
         """Verify a challenge answer and return the resulting `DispatchResult` (#338 / §3).
 
@@ -951,14 +969,7 @@ class CMDShell:
                 )
                 body = spec.failure_output
             elif entered == expected:
-                # `success` is a load-validated `Transition` (exactly one of
-                # exit / new_mode), so exit False implies new_mode is set — the
-                # `is not None` narrows it for the type checker, mirroring
-                # `_dispatch_general`'s transition application.
-                if spec.success.exit:
-                    close = True
-                elif spec.success.new_mode is not None:
-                    self._apply_new_mode(spec.success.new_mode)
+                close = self._apply_challenge_transition(spec.success)
             else:
                 body = spec.failure_output
         elif spec.kind == "confirm":
@@ -968,10 +979,7 @@ class CMDShell:
             assert spec.on is not None  # noqa: S101 — loader guarantees a non-empty `on` on a confirm challenge
             action = spec.on.get(entered, spec.default)
             if action is not None:
-                if action.exit:
-                    close = True
-                elif action.new_mode is not None:
-                    self._apply_new_mode(action.new_mode)
+                close = self._apply_challenge_transition(action)
                 body = action.output
         if not self.is_running.is_set():
             close = True

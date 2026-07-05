@@ -73,6 +73,17 @@ def _project_challenge_prompt(out: ResolvedOutput):
     return None
 
 
+def _project_confirm_action(action: ConfirmAction) -> dict:
+    """Project one resolved `ConfirmAction` (a confirm `on:` entry / `default:`).
+
+    `output` is kept as a raw string (not `splitlines()`), matching the sibling
+    challenge body `failure_output` in `project_resolved` — the `_project_output`
+    list form is for the separate `ResolvedOutput` channel (1st round gemini#1
+    declined).
+    """
+    return {"new_mode": action.new_mode, "exit": action.exit, "output": action.output}
+
+
 def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
     """Project resolved commands into a JSON-serializable comparison shape."""
     projection: dict[str, dict] = {}
@@ -122,13 +133,3 @@ def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
                 entry["default"] = _project_confirm_action(ch.default) if ch.default is not None else None
             projection[name]["challenge"] = entry
     return projection
-
-
-def _project_confirm_action(action: ConfirmAction) -> dict:
-    """Project one resolved `ConfirmAction` (a confirm `on:` entry / `default:`).
-
-    `output` is kept as a raw string (not `splitlines()`), matching the sibling
-    challenge body `failure_output` above — the `_project_output` list form is for
-    the separate `ResolvedOutput` channel (1st round gemini#1 declined).
-    """
-    return {"new_mode": action.new_mode, "exit": action.exit, "output": action.output}
