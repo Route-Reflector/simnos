@@ -9,6 +9,29 @@
     ],
     "variants": []
   },
+  "administrator": {
+    "challenge": {
+      "auth": "secret",
+      "failure_output": "Bad password",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "Password: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
+    "exit": false,
+    "help": "enter administrator mode",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "console lines infinity": {
     "disables_paging": true,
     "exit": false,
@@ -18,16 +41,6 @@
       "user"
     ],
     "new_mode": null,
-    "output": null,
-    "variants": []
-  },
-  "enable": {
-    "exit": false,
-    "help": "enter enable mode",
-    "modes": [
-      "user"
-    ],
-    "new_mode": "enable",
     "output": null,
     "variants": []
   },

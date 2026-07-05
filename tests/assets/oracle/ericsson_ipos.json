@@ -1,11 +1,24 @@
 {
-  "enable": {
+  "enable 15": {
+    "challenge": {
+      "auth": "secret",
+      "failure_output": "% Access denied",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "Password: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
     "exit": false,
-    "help": "enter enable mode",
+    "help": "enter privileged (level 15) mode",
     "modes": [
       "user"
     ],
-    "new_mode": "enable",
+    "new_mode": null,
     "output": null,
     "variants": []
   },

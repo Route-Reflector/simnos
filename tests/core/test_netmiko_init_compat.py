@@ -129,6 +129,12 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
             continue
         if rc.new_mode or rc.exit:
             continue
+        # A `challenge:` command (#338) waits for an interactive answer in its
+        # firing mode (e.g. alcatel_sros `enable-admin` in user mode), so a plain
+        # send_command would hang on its sub-prompt. Its literal `output` is only
+        # the non-firing-mode response — never a valid initial-mode probe here.
+        if rc.challenge:
+            continue
         if rc.output.kind != "literal" or not rc.output.text or not rc.output.text.strip():
             continue
         # Valid in the initial mode? (empty mode set = valid in every mode.)

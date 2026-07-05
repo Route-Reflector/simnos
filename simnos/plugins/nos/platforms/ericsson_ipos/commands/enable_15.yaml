@@ -1,0 +1,12 @@
+command: enable 15
+type: simnos
+help: enter privileged (level 15) mode
+mode:
+- user
+challenge:
+  kind: password
+  prompt: "Password: "
+  auth: secret
+  success:
+    new_mode: enable
+  failure_output: "% Access denied"

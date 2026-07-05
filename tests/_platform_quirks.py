@@ -33,16 +33,11 @@ INIT_UNKNOWN_CMD_ALLOWED: dict[str, Quirk] = {
     "vyatta_vyos": Quirk("set terminal width 512", None, "2026-06-08"),
 }
 
-# Platforms where enable()/config_mode() cannot be exercised because they need
-# a secret or sudo. Their initial (show) commands are still tested.
-SKIP_ENABLE: dict[str, Quirk] = {
-    "alcatel_sros": Quirk("requires enable-admin with secret", None, "2026-06-08"),
-    "cisco_apic": Quirk("Linux-based, requires sudo -s for enable", None, "2026-06-08"),
-    "edgecore": Quirk("Linux-based (SONiC), requires sudo -s for enable", None, "2026-06-08"),
-    "ericsson_ipos": Quirk("requires administrator with secret", None, "2026-06-08"),
-    "linux": Quirk("Linux-based, requires sudo -s for enable", None, "2026-06-08"),
-    "yamaha": Quirk("requires enable with secret", None, "2026-06-08"),
-}
+# Platforms where enable()/config_mode() need an interactive secret or sudo
+# password. As of #338 (challenge mechanism, Phase 2) all such platforms model
+# the sub-prompt as A3 `challenge:` data and netmiko's enable() drives it, so
+# this quirk is now empty — the enable/config sweep runs for every platform.
+SKIP_ENABLE: dict[str, Quirk] = {}
 
 # Python-plugin platforms whose "all commands" sweep is xfailed.
 # huawei_smartax was xfailed here until #115 (then via a `changes_prompt`
