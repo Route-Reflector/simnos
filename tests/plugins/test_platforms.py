@@ -136,8 +136,12 @@ class TestPlatforms:
             for command in initial_commands:
                 output = conn.send_command(command)
                 assert isinstance(output, str)
-            # SKIP_ENABLE platforms cannot enter enable()/config_mode() (need a
-            # secret or sudo); their initial (show) commands above still run.
+            # `SKIP_ENABLE` is a (currently empty) registry hook for platforms
+            # whose enable()/config_mode() cannot be exercised. Since #338 (the
+            # challenge mechanism) every enable-secret / sudo platform models its
+            # sub-prompt as A3 `challenge:` data that netmiko's enable() drives,
+            # so the guard passes every platform through today; it is kept so a
+            # future genuinely-unreachable platform can opt out again.
             if enable_commands and platform not in SKIP_ENABLE:
                 conn.enable()
                 for command in enable_commands:

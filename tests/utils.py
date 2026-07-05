@@ -78,20 +78,31 @@ def build_inventory(
 
 
 def creds_from_host(host: Host) -> dict:
-    """Return the username/password/port a netmiko client needs to reach ``host``."""
-    return {"username": host.username, "password": host.password, "port": host.port}
+    """Return the username/password/secret/port a netmiko client needs to reach ``host``."""
+    return {"username": host.username, "password": host.password, "secret": host.secret, "port": host.port}
 
 
 def netmiko_device(device_type: str, creds: dict, **extra) -> dict:
     """Build netmiko ``ConnectHandler`` kwargs (maps the simnos ``device_type``
     to netmiko's canonical device_type via platform.yaml, #266 / D3).
 
+    ``secret`` is the enable/sudo credential netmiko sends when driving a
+    `challenge:` command's password sub-prompt (#338). It mirrors the server's
+    案F resolution: an explicit ``host.secret`` when set (``is not None``, so an
+    empty secret is honoured verbatim), else the login password (the fallback the
+    server also uses for `auth: secret` when no secret is configured). For an
+    `auth: password` challenge (sudo) the server only ever expects the login
+    password, and netmiko always transports ``self.secret`` — so a host that sets
+    a ``secret`` distinct from its password would make those sweeps fail; keep
+    them equal unless a test deliberately exercises the mismatch.
     ``**extra`` merges additional kwargs such as ``session_log``.
     """
+    secret = creds.get("secret")
     return {
         "host": "localhost",
         "username": creds["username"],
         "password": creds["password"],
+        "secret": secret if secret is not None else creds["password"],
         "port": creds["port"],
         "device_type": netmiko_device_type_of(device_type),
         **extra,

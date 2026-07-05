@@ -429,3 +429,38 @@ class TestChallengeWire:
                 conn.disconnect()
         finally:
             net.stop()
+
+    def test_alcatel_sros_enable_admin_per_mode(self):
+        """Pin the C2 per-mode contract for alcatel_sros `enable-admin` (design §6, 案D).
+
+        NokiaSros.check_enable_mode re-sends `enable-admin` and, on seeing the
+        password prompt, escapes it with a bare Enter (RETURN) before reading the
+        prompt back. That empty answer is a single failed attempt (C1) that leaves
+        the user prompt intact, so the escape does not hang:
+
+        - user mode: `enable-admin` fires the challenge → check_enable_mode's bare
+          Enter fails it → back at `>` → "in admin mode" absent → check returns False
+        - after enable() supplies the secret → admin (enable) mode `#`
+        - enable mode: `enable-admin` does NOT fire (challenge.mode=[user]); its
+          `output` carries "in admin mode" so check_enable_mode returns True
+        """
+        net = SimNOS(inventory=build_inventory("alcatel_sros"))
+        net.start()
+        try:
+            port = net.hosts["device"].port
+            conn = ConnectHandler(
+                host="localhost",
+                username=TEST_USERNAME,
+                password=TEST_PASSWORD,
+                port=port,
+                device_type=netmiko_device_type_of("alcatel_sros"),
+                secret=TEST_PASSWORD,  # no inventory secret → server falls back to password (案F)
+            )
+            try:
+                assert conn.check_enable_mode() is False  # bare-Enter escape, still user mode
+                conn.enable()
+                assert conn.check_enable_mode() is True  # enable-mode output carries "in admin mode"
+            finally:
+                conn.disconnect()
+        finally:
+            net.stop()

@@ -9,16 +9,6 @@
     ],
     "variants": []
   },
-  "enable": {
-    "exit": false,
-    "help": "enter enable mode",
-    "modes": [
-      "user"
-    ],
-    "new_mode": "enable",
-    "output": null,
-    "variants": []
-  },
   "fabric show vlan extended": {
     "exit": false,
     "help": "execute the command \"fabric show vlan extended\"",
@@ -60,6 +50,29 @@
       " 14   infra:default                    vxlan-16777209,  Eth1/1, Eth1/48          ",
       "                                       vlan-3914"
     ],
+    "variants": []
+  },
+  "sudo -s": {
+    "challenge": {
+      "auth": "password",
+      "failure_output": "Sorry, try again.",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "[sudo] password for user: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
+    "exit": false,
+    "help": "run a shell as root",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
     "variants": []
   }
 }

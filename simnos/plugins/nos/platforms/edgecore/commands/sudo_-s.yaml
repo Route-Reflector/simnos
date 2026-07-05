@@ -1,0 +1,12 @@
+command: sudo -s
+type: simnos
+help: run a shell as root
+mode:
+- user
+challenge:
+  kind: password
+  prompt: "[sudo] password for {{ username }}: "
+  auth: password
+  success:
+    new_mode: enable
+  failure_output: "Sorry, try again."

@@ -9,16 +9,6 @@
     ],
     "variants": []
   },
-  "enable": {
-    "exit": false,
-    "help": "enter enable mode",
-    "modes": [
-      "user"
-    ],
-    "new_mode": "enable",
-    "output": null,
-    "variants": []
-  },
   "show interfaces brief": {
     "exit": false,
     "help": "execute the command \"show interfaces brief\"",
@@ -717,6 +707,29 @@
       "Status:                Active",
       "Ports/Port Channels:   Eth1/ 3(S) Eth1/ 5(S) Eth1/25(S)"
     ],
+    "variants": []
+  },
+  "sudo -s": {
+    "challenge": {
+      "auth": "password",
+      "failure_output": "Sorry, try again.",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "[sudo] password for user: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
+    "exit": false,
+    "help": "run a shell as root",
+    "modes": [
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
     "variants": []
   }
 }

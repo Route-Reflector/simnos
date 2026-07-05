@@ -21,14 +21,30 @@
     ],
     "variants": []
   },
-  "enable": {
+  "enable-admin": {
+    "challenge": {
+      "auth": "secret",
+      "failure_output": "MINOR: CLI Invalid password.",
+      "kind": "password",
+      "modes": [
+        "user"
+      ],
+      "prompt": "Password: ",
+      "success": {
+        "exit": false,
+        "new_mode": "enable"
+      }
+    },
     "exit": false,
-    "help": "enter enable mode",
+    "help": "enable administrative mode",
     "modes": [
+      "enable",
       "user"
     ],
-    "new_mode": "enable",
-    "output": null,
+    "new_mode": null,
+    "output": [
+      "MINOR: CLI Already in admin mode."
+    ],
     "variants": []
   },
   "environment no more": {

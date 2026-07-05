@@ -1,0 +1,12 @@
+command: administrator
+type: simnos
+help: enter administrator mode
+mode:
+- user
+challenge:
+  kind: password
+  prompt: "Password: "
+  auth: secret
+  success:
+    new_mode: enable
+  failure_output: "Bad password"

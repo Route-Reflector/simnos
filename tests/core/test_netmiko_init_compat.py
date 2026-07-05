@@ -127,7 +127,14 @@ def _get_test_command(device_type: str) -> tuple[str, str] | None:
             continue
         if cmd_name in ("enable", "exit", "quit", "logout", "ex"):
             continue
-        if rc.new_mode or rc.exit:
+        # Skip anything that changes mode or waits for input at the initial
+        # prompt — a plain send_command probe would desync or hang. This mirrors
+        # the `get_host_commands` sweep filter (tests/utils.py) exactly:
+        # `transitions` is the mode-conditional successor to new_mode/exit (#317
+        # P-1), and a `challenge:` command (#338) blocks on its password
+        # sub-prompt (e.g. alcatel_sros `enable-admin` in user mode, whose
+        # literal `output` is only the non-firing-mode response, not a probe).
+        if rc.new_mode or rc.exit or rc.transitions or rc.challenge:
             continue
         if rc.output.kind != "literal" or not rc.output.text or not rc.output.text.strip():
             continue

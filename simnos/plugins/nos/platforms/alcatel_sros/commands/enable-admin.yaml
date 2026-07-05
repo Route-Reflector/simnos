@@ -1,0 +1,16 @@
+command: enable-admin
+type: simnos
+help: enable administrative mode
+mode:
+- user
+- enable
+challenge:
+  mode:
+  - user
+  kind: password
+  prompt: "Password: "
+  auth: secret
+  success:
+    new_mode: enable
+  failure_output: "MINOR: CLI Invalid password."
+output: enable-admin.txt
