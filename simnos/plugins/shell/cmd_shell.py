@@ -924,19 +924,26 @@ class CMDShell:
         (on the bounded executor, like `dispatch`). Stateless — the driver carries
         `pending`, so a mid-challenge disconnect needs no shell-side cleanup.
 
-        A correct answer applies `success` (mode transition or close); a wrong /
-        empty one answers `failure_output` with the prompt unchanged (a single
-        attempt, #338 / C1). The expected value is `secret` (falling back to
-        `password`, 案F) or `password`; if neither is wired (a direct construction
-        that reached a challenge command) the answer fails with a loud warning
-        rather than silently always-failing (1st round claude#5). The entered
-        value is never logged (R5). The tail `is_running` check mirrors
-        `_dispatch_general`, so both dispatch stages share one close contract
-        (1st round claude#6).
+        A password answer applies `success` (mode transition or close) when
+        correct; a wrong / empty one answers `failure_output` with the prompt
+        unchanged (a single attempt, #338 / C1). The expected value is `secret`
+        (falling back to `password`, 案F) or `password`; if neither is wired (a
+        direct construction that reached a challenge command) the answer fails
+        with a loud warning rather than silently always-failing (1st round
+        claude#5). The entered value is never logged (R5).
+
+        A confirm answer is looked up in `on` (falling back to `default`, else a
+        cancel = no-op with the prompt unchanged); the chosen action closes,
+        transitions, and/or emits an `[OK]`-style body. The tail `is_running`
+        check mirrors `_dispatch_general`, so both dispatch stages share one
+        close contract (1st round claude#6).
         """
         spec = pending.spec
         body, close = None, False
         if spec.kind == "password":
+            # The loader guarantees `success` on a password challenge (and a
+            # non-None `on` on a confirm below); assert to narrow the unions.
+            assert spec.success is not None
             expected = self._secret if (spec.auth == "secret" and self._secret is not None) else self._password
             if expected is None:
                 log.warning(
@@ -954,6 +961,18 @@ class CMDShell:
                     self._apply_new_mode(spec.success.new_mode)
             else:
                 body = spec.failure_output
+        elif spec.kind == "confirm":
+            # `on` miss → `default` (may be None) → a plain cancel: the prompt
+            # returns unchanged, no body. The schema forbids `output` with
+            # `exit`, so a closing action never carries a body.
+            assert spec.on is not None
+            action = spec.on.get(entered, spec.default)
+            if action is not None:
+                if action.exit:
+                    close = True
+                elif action.new_mode is not None:
+                    self._apply_new_mode(action.new_mode)
+                body = action.output
         if not self.is_running.is_set():
             close = True
         return DispatchResult(body=body, prompt=self.prompt, close=close, mode=self.current_mode)

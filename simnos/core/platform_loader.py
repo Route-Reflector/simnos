@@ -22,10 +22,17 @@ import os
 from jinja2 import TemplateSyntaxError
 import yaml
 
-from simnos.core.pydantic_models import ModelChallenge, ModelCommandAuthoring, ModelPlatformMeta, ModelTransition
+from simnos.core.pydantic_models import (
+    ModelChallenge,
+    ModelCommandAuthoring,
+    ModelConfirmAction,
+    ModelPlatformMeta,
+    ModelTransition,
+)
 from simnos.core.resolved_command import (
     CHALLENGE_RENDER_VARS,
     NO_OUTPUT,
+    ConfirmAction,
     ModeDef,
     ResolvedChallenge,
     ResolvedCommand,
@@ -307,9 +314,9 @@ def _resolve_challenge(
     modes (checked ⊆ the command's own modes), or the command's effective modes
     when omitted — an all-modes command (empty `cmd_modes`) expands to the full
     platform mode set, the same `cmd_modes or mode_names` rule `resolve_transitions`
-    uses, so a runtime `current_mode in modes` check never silently misses.
-    `success.new_mode` is validated against the platform modes, the same loud
-    boundary the static `new_mode` uses.
+    uses, so a runtime `current_mode in modes` check never silently misses. Every
+    `new_mode` (password `success` or confirm action) is validated against the
+    platform modes, the same loud boundary the static `new_mode` uses.
     """
     effective_cmd_modes = cmd_modes or mode_names
     if model.mode is not None:
@@ -322,20 +329,50 @@ def _resolve_challenge(
         challenge_modes = frozenset(model.mode)
     else:
         challenge_modes = effective_cmd_modes
-    st = model.success
-    if st.new_mode is not None and st.new_mode not in mode_names:
-        raise ValueError(
-            f"command {command_name!r}: challenge.success.new_mode {st.new_mode!r} not in platform modes "
-            f"{sorted(mode_names)}"
+    prompt = _resolve_challenge_prompt(model.prompt, command_name)
+    if model.kind == "password":
+        # The kind-specific validator guarantees `success` here (and `on` below);
+        # assert to narrow the `... | None` unions for the type checker.
+        st = model.success
+        assert st is not None
+        if st.new_mode is not None and st.new_mode not in mode_names:
+            raise ValueError(
+                f"command {command_name!r}: challenge.success.new_mode {st.new_mode!r} not in platform modes "
+                f"{sorted(mode_names)}"
+            )
+        return ResolvedChallenge(
+            kind=model.kind,
+            prompt=prompt,
+            modes=challenge_modes,
+            auth=model.auth,
+            success=Transition(new_mode=st.new_mode, exit=bool(st.exit)),
+            failure_output=model.failure_output,
         )
+    # confirm: resolve every `on` entry (and `default`) to a ConfirmAction.
+    assert model.on is not None
     return ResolvedChallenge(
         kind=model.kind,
-        prompt=_resolve_challenge_prompt(model.prompt, command_name),
+        prompt=prompt,
         modes=challenge_modes,
-        auth=model.auth,
-        success=Transition(new_mode=st.new_mode, exit=bool(st.exit)),
-        failure_output=model.failure_output,
+        on={key: _resolve_confirm_action(action, mode_names, command_name) for key, action in model.on.items()},
+        default=(
+            _resolve_confirm_action(model.default, mode_names, command_name) if model.default is not None else None
+        ),
     )
+
+
+def _resolve_confirm_action(model: ModelConfirmAction, mode_names: frozenset[str], command_name: str) -> ConfirmAction:
+    """Resolve one confirm `on:` entry / `default:` to a `ConfirmAction` (#338 / §3).
+
+    `new_mode` is validated against the platform modes, the same loud boundary the
+    password `success.new_mode` and static `new_mode` use.
+    """
+    if model.new_mode is not None and model.new_mode not in mode_names:
+        raise ValueError(
+            f"command {command_name!r}: challenge confirm action new_mode {model.new_mode!r} not in platform modes "
+            f"{sorted(mode_names)}"
+        )
+    return ConfirmAction(new_mode=model.new_mode, exit=bool(model.exit), output=model.output)
 
 
 def resolve_modes(

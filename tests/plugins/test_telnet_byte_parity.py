@@ -128,6 +128,30 @@ def test_telnet_byte_parity_challenge_session():
     _assert_or_record("challenge_session", steps, platform="linux")
 
 
+def test_telnet_byte_parity_confirm_session():
+    """Pin the interactive confirm wire over Telnet (#338 Phase 3): cisco_ios confirm
+    commands driven through the shared push session, the Telnet counterpart of the SSH
+    `confirm_session` golden — free-line `copy run start` build, literal `write memory`,
+    `reload` cancel (`n` echoes), `reload` confirm (bare Enter closes).
+
+    A NEW golden (a dedicated confirm transcript, not a re-record of the frozen Telnet
+    `interactive_session` baseline).
+    """
+    with _running_telnet_host("cisco_ios") as port:
+        script = [
+            b"enable\r",  # -> enable mode (device#)
+            b"copy running-config startup-config\r",  # confirm: free-line prompt
+            b"\r",  # accept default -> Building.../[OK] + device#
+            b"write memory\r",  # plain literal -> same [OK], no sub-prompt
+            b"reload\r",  # confirm: [confirm] prompt
+            b"n\r",  # cancel: `n` echoes, prompt returns
+            b"reload\r",  # re-fire
+            b"\r",  # bare Enter confirms -> session closes
+        ]
+        steps = asyncio.run(capture_telnet_transcript(port, script))
+    _assert_or_record("confirm_session", steps)
+
+
 def test_telnet_byte_parity_session_close_command():
     """Pin the Telnet wire for a real session-closing command.
 

@@ -19,6 +19,35 @@
     "output": null,
     "variants": []
   },
+  "copy running-config startup-config": {
+    "challenge": {
+      "default": {
+        "exit": false,
+        "new_mode": null,
+        "output": "Building configuration...\n[OK]"
+      },
+      "kind": "confirm",
+      "modes": [
+        "enable"
+      ],
+      "on": {
+        "": {
+          "exit": false,
+          "new_mode": null,
+          "output": "Building configuration...\n[OK]"
+        }
+      },
+      "prompt": "Destination filename [startup-config]? "
+    },
+    "exit": false,
+    "help": "Save the running configuration to startup-config",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "dir": {
     "exit": false,
     "help": "execute the command \"dir\"",
@@ -118,6 +147,45 @@
       "U..U.",
       "Success rate is 0 percent (0/5)"
     ],
+    "variants": []
+  },
+  "reload": {
+    "challenge": {
+      "default": {
+        "exit": false,
+        "new_mode": null,
+        "output": null
+      },
+      "kind": "confirm",
+      "modes": [
+        "enable"
+      ],
+      "on": {
+        "": {
+          "exit": true,
+          "new_mode": null,
+          "output": null
+        },
+        "n": {
+          "exit": false,
+          "new_mode": null,
+          "output": null
+        },
+        "y": {
+          "exit": true,
+          "new_mode": null,
+          "output": null
+        }
+      },
+      "prompt": "Proceed with reload? [confirm]"
+    },
+    "exit": false,
+    "help": "Halt and perform a cold restart",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": null,
+    "output": null,
     "variants": []
   },
   "show access-list": {
@@ -8622,6 +8690,58 @@
       "    74.125.242.82 12 msec",
       "    108.170.238.117 14 msec",
       "  6 172.17.10.225 !H  *  !H"
+    ],
+    "variants": []
+  },
+  "write erase": {
+    "challenge": {
+      "default": {
+        "exit": false,
+        "new_mode": null,
+        "output": null
+      },
+      "kind": "confirm",
+      "modes": [
+        "enable"
+      ],
+      "on": {
+        "": {
+          "exit": false,
+          "new_mode": null,
+          "output": "[OK]\nErase of nvram: complete"
+        },
+        "n": {
+          "exit": false,
+          "new_mode": null,
+          "output": null
+        },
+        "y": {
+          "exit": false,
+          "new_mode": null,
+          "output": "[OK]\nErase of nvram: complete"
+        }
+      },
+      "prompt": "Erasing the nvram filesystem will remove all configuration files! Continue? [confirm]"
+    },
+    "exit": false,
+    "help": "Erase the startup configuration (NVRAM)",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
+  "write memory": {
+    "exit": false,
+    "help": "Save the running configuration to startup-config",
+    "modes": [
+      "enable"
+    ],
+    "new_mode": null,
+    "output": [
+      "Building configuration...",
+      "[OK]"
     ],
     "variants": []
   }

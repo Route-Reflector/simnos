@@ -260,6 +260,43 @@ def test_byte_parity_challenge_session():
     _assert_or_record("challenge_session", steps, platform="linux")
 
 
+def test_byte_parity_confirm_session(cisco_ios_port):
+    """Pin the interactive confirm wire (#338 Phase 3): cisco_ios confirm commands.
+
+    A NEW golden (a dedicated confirm transcript, not a re-record of the frozen
+    `interactive_session` baseline). Exercises the `kind: confirm` driver path,
+    which differs from the password path by echoing the answer and emitting an
+    `[OK]`-style body:
+
+    - `copy running-config startup-config` asks a free-line prompt; Enter accepts
+      the default and builds (`Building configuration...` / `[OK]`), staying in enable
+    - `write memory` is a plain literal (NOT a challenge) — the non-interactive save
+    - `reload` answered `n` cancels (the `n` echoes, the prompt returns unchanged)
+    - `reload` answered with a bare Enter confirms → the session closes (EOF)
+    """
+    transport, channel = _open_shell_channel(cisco_ios_port)
+    steps: list[tuple[bytes, bytes]] = []
+    try:
+        steps.append((b"", _drain(channel)))  # intro + user prompt (device>)
+        script = [
+            b"enable\r",  # -> enable mode (device#), no secret on cisco_ios
+            b"copy running-config startup-config\r",  # confirm fires: "Destination filename ...? "
+            b"\r",  # accept default -> "Building configuration...\r\n[OK]" + device#
+            b"write memory\r",  # plain literal -> same [OK] body, no sub-prompt
+            b"reload\r",  # confirm fires: "Proceed with reload? [confirm]"
+            b"n\r",  # cancel: the `n` echoes, prompt returns (no body)
+            b"reload\r",  # re-fire
+            b"\r",  # bare Enter confirms -> session closes
+        ]
+        for chunk in script:
+            channel.sendall(chunk)
+            steps.append((chunk, _drain(channel)))
+    finally:
+        channel.close()
+        transport.close()
+    _assert_or_record("confirm_session", steps)
+
+
 def test_byte_parity_session_close_command():
     """Pin the wire for a real session-closing command, #297 codex#2.
 
