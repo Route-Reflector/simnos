@@ -104,10 +104,13 @@ output: show_version.txt       # a bare .txt filename, read verbatim (literal)
 ### Interactive challenges
 
 A `challenge:` block turns a command into a two-step interaction: it prints a
-sub-prompt, reads one answer line, and only then transitions — the shape of an
-enable secret (`enable-admin`, `enable 15`, `administrator`) or `sudo -s`
-(#338). Phase 1 supports `kind: password` (the answer is verified against the
-host credentials and never echoed); `confirm` (y/n) lands in a later phase.
+sub-prompt, reads one answer line, and only then transitions. Two kinds:
+`password` (the answer is verified against the host credentials and never echoed
+— an enable secret `enable-admin` / `enable 15` / `administrator`, or `sudo -s`)
+and `confirm` (an echoed y/n or free-line prompt — `reload` `[confirm]`,
+`copy running-config startup-config`) (#338).
+
+**`kind: password`** — hold the transition until the client authenticates:
 
 ```yaml
 command: sudo -s
@@ -128,6 +131,39 @@ challenge:
 - Set the host's `secret` in inventory (same name as netmiko's `secret` arg) for
   `auth: secret`; unset, it falls back to the host `password` so the simulator
   works out of the box.
+
+**`kind: confirm`** — read one echoed line and look it up in an `on:` map:
+
+```yaml
+command: reload
+type: simnos
+mode: [enable]
+challenge:
+  kind: confirm
+  prompt: "Proceed with reload? [confirm]"
+  # `on` MUST be quoted — a bare `on:` is a YAML 1.1 boolean key (parses as True).
+  "on":
+    "": {exit: true}     # bare Enter (what netmiko / scrapli send) — here: close the session
+    "y": {exit: true}
+    "n": {}              # empty map = cancel: no body, the prompt returns unchanged
+  default: {}            # answer not in `on:` → this action (omitted = cancel)
+```
+
+- Each action is a relaxed transition: `exit: true` closes, `new_mode: <mode>`
+  switches mode, an empty `{}` cancels (no-op), and an inline `output: "..."`
+  adds a body (the `[OK]` a `copy running-config startup-config` prints —
+  `exit: true` forbids `output`, since a closing session sends no body). `on` and
+  `default` actions may combine `new_mode` with `output`.
+- The lookup is **exact string match** and case-sensitive: `""` is the bare
+  Enter that netmiko / scrapli send (so wire the real behaviour there), `"y"` and
+  `"n"` are literal keys. A manual user typing `Y` or `yes` falls through to
+  `default`, so keep `default` on the safe side (usually cancel). `on:` keys must
+  be single-line (CR/LF/NUL are rejected — they could never match a read line).
+- A non-interactive command with the same output (e.g. `write memory`, which real
+  IOS saves without prompting) is a plain `output:` command, not a confirm.
+
+Both kinds share these rules:
+
 - **`mode`** inside `challenge:` scopes which modes fire it (default: every mode
   the command is valid in). A mode that does **not** fire the challenge answers
   the command's ordinary `output` instead — this is how a command responds

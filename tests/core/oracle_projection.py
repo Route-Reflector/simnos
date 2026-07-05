@@ -30,7 +30,7 @@ projection but is always None, since the fallback never transitions
 (Decision 3 / D5).
 """
 
-from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput
+from simnos.core.resolved_command import ConfirmAction, ResolvedCommand, ResolvedOutput
 
 # Fixed device prompt for the projection (any value with distinct canonical
 # renders works — Decision 3 "固定 base_prompt").
@@ -124,6 +124,11 @@ def project_resolved(commands: dict[str, ResolvedCommand]) -> dict[str, dict]:
     return projection
 
 
-def _project_confirm_action(action) -> dict:
-    """Project one resolved `ConfirmAction` (a confirm `on:` entry / `default:`)."""
+def _project_confirm_action(action: ConfirmAction) -> dict:
+    """Project one resolved `ConfirmAction` (a confirm `on:` entry / `default:`).
+
+    `output` is kept as a raw string (not `splitlines()`), matching the sibling
+    challenge body `failure_output` above — the `_project_output` list form is for
+    the separate `ResolvedOutput` channel (1st round gemini#1 declined).
+    """
     return {"new_mode": action.new_mode, "exit": action.exit, "output": action.output}

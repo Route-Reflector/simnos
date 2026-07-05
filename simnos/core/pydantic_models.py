@@ -235,6 +235,13 @@ class ModelChallenge(BaseModel):
         else:  # confirm
             if not self.on:
                 raise ValueError("challenge `kind: confirm` requires a non-empty `on:` map")
+            # An `on:` key with CR/LF/NUL can never equal a read answer line (the
+            # driver terminates on CR/LF and drops NUL), so it is a dead entry —
+            # reject it loudly, mirroring `transitions`' dead-key check rather than
+            # silently never firing (1st round claude#3).
+            dead = sorted(k for k in self.on if "\r" in k or "\n" in k or "\x00" in k)
+            if dead:
+                raise ValueError(f"challenge `on:` keys must be single-line (no CR/LF/NUL); {dead} would never match")
             present = sorted(
                 n
                 for n, v in (("auth", self.auth), ("success", self.success), ("failure_output", self.failure_output))

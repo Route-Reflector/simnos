@@ -152,6 +152,11 @@ class TestChallengeSchema:
         with pytest.raises(ValidationError, match="at most one"):
             _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"new_mode": "enable", "exit": True}})
 
+    def test_confirm_on_key_with_control_char_rejected(self):
+        # An `on:` key with CR/LF/NUL can never match a read answer line = dead entry.
+        with pytest.raises(ValidationError, match="single-line"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"y\n": {"exit": True}})
+
     def test_challenge_exclusive_with_handler(self):
         with pytest.raises(ValidationError, match="exclusive"):
             _cmd(command="enable-admin", type="simnos", handler="do_enable", challenge=_OK_CHALLENGE)
@@ -330,6 +335,15 @@ _CONFIRM_OUTPUT_CMD = (
     '  "on":\n    "": {output: "[OK]"}\n  default: {output: "[OK]"}\n'
 )
 
+# A confirm whose actions transition mode (`new_mode`) — one bare, one also with a
+# body — and which authors NO `default:`, so an unknown answer falls through to a
+# plain cancel (the `on` miss + `default is None` path, not a cancel action).
+_CONFIRM_MODE_CMD = (
+    "command: switchmode\ntype: simnos\nmode: [user]\n"
+    'challenge:\n  kind: confirm\n  prompt: "Enter mode? "\n'
+    '  "on":\n    "e": {new_mode: enable}\n    "b": {new_mode: enable, output: "[OK]"}\n'
+)
+
 
 class TestChallengeDispatch:
     def test_fires_in_firing_mode(self, tmp_path):
@@ -490,6 +504,28 @@ class TestConfirmChallenge:
         pending = _fire(shell, "save")
         shell.is_running.clear()
         assert shell.complete_challenge(pending, "").close is True
+
+    def test_confirm_new_mode_transitions(self, tmp_path):
+        # A confirm action can transition mode (the `elif action.new_mode` branch).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "e")
+        assert r.mode == "enable" and r.prompt == "dev#" and r.body is None and r.close is False
+
+    def test_confirm_new_mode_with_output(self, tmp_path):
+        # `new_mode` + `output` compose (the relaxation over a plain transition).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "b")
+        assert r.mode == "enable" and r.body == "[OK]" and r.close is False
+
+    def test_confirm_no_default_cancels_unknown(self, tmp_path):
+        # `on` miss + no `default:` authored → `action is None` → a plain cancel
+        # (distinct from a `default: {}` cancel action; both stay put).
+        shell = _shell(_platform(tmp_path, _CONFIRM_MODE_CMD))
+        pending = _fire(shell, "switchmode")
+        r = shell.complete_challenge(pending, "zzz")
+        assert r.close is False and r.body is None and r.mode == "user" and r.prompt == "dev$"
 
 
 # --------------------------------------------------------------------- creds wiring

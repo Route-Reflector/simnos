@@ -227,7 +227,9 @@ class ResolvedChallenge:
     auth: str | None = None
     success: Transition | None = None
     failure_output: str | None = None
-    on: dict[str, ConfirmAction] | None = None
+    # `Mapping` (read-only) to match the sibling `ResolvedCommand.transitions`
+    # convention for a frozen dataclass map field (1st round claude#4).
+    on: Mapping[str, ConfirmAction] | None = None
     default: ConfirmAction | None = None
 
 

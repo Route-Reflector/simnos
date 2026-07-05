@@ -361,21 +361,32 @@ def _resolve_challenge(
         kind=model.kind,
         prompt=prompt,
         modes=challenge_modes,
-        on={key: _resolve_confirm_action(action, mode_names, command_name) for key, action in model.on.items()},
+        on={
+            key: _resolve_confirm_action(action, mode_names, command_name, f"on[{key!r}]")
+            for key, action in model.on.items()
+        },
         default=(
-            _resolve_confirm_action(model.default, mode_names, command_name) if model.default is not None else None
+            _resolve_confirm_action(model.default, mode_names, command_name, "default")
+            if model.default is not None
+            else None
         ),
     )
 
 
-def _resolve_confirm_action(model: ModelConfirmAction, mode_names: frozenset[str], command_name: str) -> ConfirmAction:
+def _resolve_confirm_action(
+    model: ModelConfirmAction, mode_names: frozenset[str], command_name: str, entry: str
+) -> ConfirmAction:
     """Resolve one confirm `on:` entry / `default:` to a `ConfirmAction` (#338 / §3).
 
     `new_mode` is validated against the platform modes, the same loud boundary the
-    password `success.new_mode` and static `new_mode` use.
+    password `success.new_mode` and static `new_mode` use. `entry` names the map
+    slot (`on[<key>]` / `default`) so a multi-entry confirm points the author at
+    the offending action (1st round claude#5).
     """
     _require_platform_mode(
-        model.new_mode, mode_names, f"command {command_name!r}: challenge confirm action new_mode {model.new_mode!r}"
+        model.new_mode,
+        mode_names,
+        f"command {command_name!r}: challenge confirm action {entry} new_mode {model.new_mode!r}",
     )
     return ConfirmAction(new_mode=model.new_mode, exit=bool(model.exit), output=model.output)
 

@@ -67,7 +67,9 @@ output: show_version.txt       # 裸の .txt ファイル名、verbatim 読込 (
 
 ### 対話 challenge
 
-`challenge:` block はコマンドを 2 段の対話にします: sub-prompt を表示し、応答行を 1 行読み、そのあとで遷移します — enable secret (`enable-admin` / `enable 15` / `administrator`) や `sudo -s` の形 (#338)。Phase 1 は `kind: password` に対応 (応答は host の資格情報で検証され、wire には一切 echo されません); `confirm` (y/n) は後の Phase です。
+`challenge:` block はコマンドを 2 段の対話にします: sub-prompt を表示し、応答行を 1 行読み、そのあとで遷移します。2 種類あります: `password` (応答は host の資格情報で検証され、wire には一切 echo されません — enable secret `enable-admin` / `enable 15` / `administrator` や `sudo -s`) と `confirm` (echo ありの y/n / 自由入力 prompt — `reload` `[confirm]` や `copy running-config startup-config`) (#338)。
+
+**`kind: password`** — 認証が済むまで遷移を保留します:
 
 ```yaml
 command: sudo -s
@@ -84,6 +86,30 @@ challenge:
 
 - 応答は **1 回だけ** 検証されます — 不正解 / 空応答は `failure_output` を表示して現在のモードに留まります (retry ループ無し)。これは netmiko の `enable()` の期待 (再 prompt するとその read が hang する) と整合します。
 - `auth: secret` を使う場合は inventory の host に `secret` (netmiko の `secret` 引数と同名) を設定します; 未設定なら host `password` に fallback するので、シミュレータは out-of-box で動きます。
+
+**`kind: confirm`** — echo ありで 1 行読み、`on:` map で応答を引きます:
+
+```yaml
+command: reload
+type: simnos
+mode: [enable]
+challenge:
+  kind: confirm
+  prompt: "Proceed with reload? [confirm]"
+  # `on` は必ず quote する — 素の `on:` は YAML 1.1 の boolean キー (True になる)。
+  "on":
+    "": {exit: true}     # 素の Enter (netmiko / scrapli が送る) — ここでは session を閉じる
+    "y": {exit: true}
+    "n": {}              # 空 map = cancel: body 無し、prompt はそのまま
+  default: {}            # `on:` に無い応答 → この action (省略時 = cancel)
+```
+
+- 各 action は緩めた遷移です: `exit: true` で close、`new_mode: <mode>` でモード遷移、空 `{}` で cancel (no-op)、inline `output: "..."` で body 追加 (`copy running-config startup-config` の `[OK]` 等 — `exit: true` は body を送らないので `output` と併用不可)。`on` / `default` の action は `new_mode` と `output` を併用できます。
+- 引き当ては **完全一致・大文字小文字を区別** します: `""` は netmiko / scrapli が送る素の Enter (実挙動はここで表現)、`"y"` / `"n"` は literal キーです。手動で `Y` や `yes` と打つと `default` に落ちるので、`default` は安全側 (通常は cancel) にします。`on:` キーは 1 行のみ (CR/LF/NUL は拒否 — 読み取り行と決して一致しないため)。
+- 同じ出力を持つ非対話コマンド (例: 実機 IOS が prompt 無しで保存する `write memory`) は confirm でなく素の `output:` コマンドにします。
+
+両 kind に共通のルール:
+
 - `challenge:` 内の **`mode`** はどのモードで発火するかを絞ります (既定: コマンドが有効な全モード)。発火しないモードでは、代わりにコマンド通常の `output` を返します — これがモードごとに応答を変える方法です (例: `enable-admin` は user モードで challenge、enable 済なら "already in admin mode" を表示) — 別コマンドを作らずに実現できます。
 - `challenge` は `output` / `output_template` (非発火モードの応答) とは共存しますが `handler` / `variants` とは排他で、alias は target の challenge を継承します (再 authoring 不可)。
 
