@@ -90,7 +90,11 @@ def netmiko_device(device_type: str, creds: dict, **extra) -> dict:
     `challenge:` command's password sub-prompt (#338). It mirrors the server's
     案F resolution: an explicit ``host.secret`` when set (``is not None``, so an
     empty secret is honoured verbatim), else the login password (the fallback the
-    server also uses for `auth: secret` when no secret is configured).
+    server also uses for `auth: secret` when no secret is configured). For an
+    `auth: password` challenge (sudo) the server only ever expects the login
+    password, and netmiko always transports ``self.secret`` — so a host that sets
+    a ``secret`` distinct from its password would make those sweeps fail; keep
+    them equal unless a test deliberately exercises the mismatch.
     ``**extra`` merges additional kwargs such as ``session_log``.
     """
     secret = creds.get("secret")
