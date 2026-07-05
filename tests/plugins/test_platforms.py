@@ -136,7 +136,7 @@ class TestPlatforms:
             for command in initial_commands:
                 output = conn.send_command(command)
                 assert isinstance(output, str)
-            # `SKIP_ENABLE` is an (currently empty) registry hook for platforms
+            # `SKIP_ENABLE` is a (currently empty) registry hook for platforms
             # whose enable()/config_mode() cannot be exercised. Since #338 (the
             # challenge mechanism) every enable-secret / sudo platform models its
             # sub-prompt as A3 `challenge:` data that netmiko's enable() drives,
