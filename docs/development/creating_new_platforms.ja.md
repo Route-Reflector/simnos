@@ -105,7 +105,7 @@ challenge:
 ```
 
 - 各 action は緩めた遷移です: `exit: true` で close、`new_mode: <mode>` でモード遷移、空 `{}` で cancel (no-op)、inline `output: "..."` で body 追加 (`copy running-config startup-config` の `[OK]` 等 — `exit: true` は body を送らないので `output` と併用不可)。`on` / `default` の action は `new_mode` と `output` を併用できます。
-- 引き当ては **完全一致・大文字小文字を区別** します: `""` は netmiko / scrapli が送る素の Enter (実挙動はここで表現)、`"y"` / `"n"` は literal キーです。手動で `Y` や `yes` と打つと `default` に落ちるので、`default` は安全側 (通常は cancel) にします。`on:` キーは 1 行のみ (CR/LF/NUL は拒否 — 読み取り行と決して一致しないため)。
+- 引き当ては **完全一致・大文字小文字を区別** します: `""` は netmiko / scrapli が送る素の Enter (実挙動はここで表現)、`"y"` / `"n"` は literal キーです。手動で `Y` や `yes` と打つと `default` に落ちるので、`default` は安全側 (通常は cancel) にします。`on:` キーは制御バイトを含めません (CR/LF/NUL/ESC/BS/DEL は拒否 — 読み取り行と決して一致しないため)。**YAML 1.1 の boolean 語をキーにする場合は quote** します — 素の `yes` / `no` / `true` / `off` キーは string でなく boolean に解決されます (top-level の `on:` を quote するのと同じ理由)。`"yes"` / `"no"` と書きます。
 - 同じ出力を持つ非対話コマンド (例: 実機 IOS が prompt 無しで保存する `write memory`) は confirm でなく素の `output:` コマンドにします。
 
 両 kind に共通のルール:

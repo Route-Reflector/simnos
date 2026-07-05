@@ -235,13 +235,20 @@ class ModelChallenge(BaseModel):
         else:  # confirm
             if not self.on:
                 raise ValueError("challenge `kind: confirm` requires a non-empty `on:` map")
-            # An `on:` key with CR/LF/NUL can never equal a read answer line (the
-            # driver terminates on CR/LF and drops NUL), so it is a dead entry —
-            # reject it loudly, mirroring `transitions`' dead-key check rather than
-            # silently never firing (1st round claude#3).
-            dead = sorted(k for k in self.on if "\r" in k or "\n" in k or "\x00" in k)
+            # An `on:` key can only match a byte the driver leaves in an answer
+            # line. `_read_challenge_line` terminates on CR/LF, drops NUL, and
+            # swallows ESC sequences / BS / DEL (line editing) — a key holding any
+            # of those never fires, so reject it loudly like `transitions`' dead-key
+            # check rather than silently never matching (1st round claude#3, widened
+            # to the driver's full unreachable set 2nd round claude#2). Other control
+            # bytes (e.g. TAB) do reach the buffer, so they stay allowed.
+            unreachable = "\r\n\x00\x1b\x08\x7f"  # CR / LF / NUL / ESC / BS / DEL
+            dead = sorted(k for k in self.on if any(c in k for c in unreachable))
             if dead:
-                raise ValueError(f"challenge `on:` keys must be single-line (no CR/LF/NUL); {dead} would never match")
+                raise ValueError(
+                    f"challenge `on:` keys must not contain control bytes CR/LF/NUL/ESC/BS/DEL; "
+                    f"{dead!r} could never match a read answer line"
+                )
             present = sorted(
                 n
                 for n, v in (("auth", self.auth), ("success", self.success), ("failure_output", self.failure_output))

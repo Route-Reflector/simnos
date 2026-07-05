@@ -158,7 +158,10 @@ challenge:
   Enter that netmiko / scrapli send (so wire the real behaviour there), `"y"` and
   `"n"` are literal keys. A manual user typing `Y` or `yes` falls through to
   `default`, so keep `default` on the safe side (usually cancel). `on:` keys must
-  be single-line (CR/LF/NUL are rejected — they could never match a read line).
+  hold no control bytes (CR/LF/NUL/ESC/BS/DEL are rejected — they could never
+  match a read line). **Quote any key that is a YAML 1.1 boolean word** — a bare
+  `yes` / `no` / `true` / `off` key parses as a boolean, not the literal string
+  (the same reason the top-level `on:` is quoted); write `"yes"` / `"no"`.
 - A non-interactive command with the same output (e.g. `write memory`, which real
   IOS saves without prompting) is a plain `output:` command, not a confirm.
 

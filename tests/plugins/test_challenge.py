@@ -152,10 +152,12 @@ class TestChallengeSchema:
         with pytest.raises(ValidationError, match="at most one"):
             _chal(kind="confirm", prompt="Proceed? [confirm]", on={"": {"new_mode": "enable", "exit": True}})
 
-    def test_confirm_on_key_with_control_char_rejected(self):
-        # An `on:` key with CR/LF/NUL can never match a read answer line = dead entry.
-        with pytest.raises(ValidationError, match="single-line"):
-            _chal(kind="confirm", prompt="Proceed? [confirm]", on={"y\n": {"exit": True}})
+    @pytest.mark.parametrize("bad_key", ["y\n", "y\r", "y\x00", "\x1b[A", "a\x7f", "a\x08"])
+    def test_confirm_on_key_with_control_char_rejected(self, bad_key):
+        # An `on:` key holding a byte the line reader never leaves in the answer
+        # (CR/LF/NUL terminators/drops, ESC/BS/DEL editing) is a dead entry.
+        with pytest.raises(ValidationError, match="control bytes"):
+            _chal(kind="confirm", prompt="Proceed? [confirm]", on={bad_key: {"exit": True}})
 
     def test_challenge_exclusive_with_handler(self):
         with pytest.raises(ValidationError, match="exclusive"):
@@ -291,14 +293,27 @@ class TestChallengeLoader:
         assert ch.on["n"].exit is False and ch.on["n"].new_mode is None  # cancel
         assert ch.default is not None and ch.default.output == "[OK]"
 
-    def test_confirm_action_new_mode_absent_is_loud(self, tmp_path):
+    def test_confirm_on_action_new_mode_absent_is_loud(self, tmp_path):
+        # The error names the offending slot (`on['y']`) so a multi-entry confirm
+        # points the author at the right action (1st claude#5 / 2nd codex#3).
         p = _platform(
             tmp_path,
             "command: reload\ntype: simnos\nmode: [enable]\n"
             'challenge:\n  kind: confirm\n  prompt: "Proceed? [confirm]"\n'
-            '  "on":\n    "": {new_mode: nope}\n',
+            '  "on":\n    "y": {new_mode: nope}\n',
         )
-        with pytest.raises(ValueError, match="new_mode"):
+        with pytest.raises(ValueError, match=r"on\['y'\].*new_mode 'nope'"):
+            load_platform_dir(p)
+
+    def test_confirm_default_action_new_mode_absent_is_loud(self, tmp_path):
+        # The `default:` slot is validated + named the same way as an `on:` entry.
+        p = _platform(
+            tmp_path,
+            "command: reload\ntype: simnos\nmode: [enable]\n"
+            'challenge:\n  kind: confirm\n  prompt: "Proceed? [confirm]"\n'
+            '  "on":\n    "": {}\n  default: {new_mode: nope}\n',
+        )
+        with pytest.raises(ValueError, match=r"default new_mode 'nope'"):
             load_platform_dir(p)
 
     def test_unknown_render_var_is_loud(self, tmp_path):
