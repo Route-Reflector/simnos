@@ -488,7 +488,8 @@ class ModelPlatformMeta(BaseModel):
     mode names only (M2). No `name` field — the platform name is the directory
     name (D1). `netmiko_device_type` / `ntc_platform` are consumed by the platform
     registry (#266) as device-type aliases that resolve to this platform (see
-    `simnos.plugins.nos.register`). `paging` is the optional P3-4 pager settings
+    `simnos.plugins.nos._build_device_type_index`). `paging` is the optional P3-4
+    pager settings
     (#307); omitted = the Cisco-style default `--More--` prompt.
     """
 

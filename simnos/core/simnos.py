@@ -100,10 +100,9 @@ class SimNOS:
     ) -> None:
         # deepcopy the module-global fallback: `_load_inventory` reassigns
         # `self.inventory["default"]` (and `_seed_inventory_default_from_sys_config`
-        # seeds sys_config into it), so
-        # aliasing the global would bake per-instance state into it and leak to
-        # later `SimNOS()` calls (1st round codex#1). An explicit `inventory` is
-        # the caller's own object and left untouched.
+        # seeds sys_config into it), so aliasing the global would bake per-instance
+        # state into it and leak to later `SimNOS()` calls (1st round codex#1). An
+        # explicit `inventory` is the caller's own object and left untouched.
         self.inventory: dict | str = inventory or copy.deepcopy(default_inventory)
         self.plugins: list = plugins or []
 
