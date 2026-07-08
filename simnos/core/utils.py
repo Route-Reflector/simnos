@@ -1,6 +1,20 @@
 """Utility helpers for SimNOS core."""
 
+import os
 from pathlib import Path
+
+
+def _is_unsafe_bare_ref(ref: str) -> bool:
+    """Whether ``ref`` escapes its own directory (the root-confinement invariant).
+
+    A safe reference is a bare filename adjacent to its owner: not empty, not
+    ``.`` / ``..``, no path separators, not absolute. Shared by the A3 authoring
+    schema (`pydantic_models._reject_unsafe_output_ref`) and the overlay loader
+    (`overlay_loader._validate_overlay_ref`) so the one path-traversal defense has
+    a single definition; each caller keeps its own error message (and the overlay
+    its extra ``.txt`` / ``.j2`` extension rule).
+    """
+    return not ref or ref in (".", "..") or ref != os.path.basename(ref) or os.path.isabs(ref)
 
 
 def _is_in_docker() -> bool:

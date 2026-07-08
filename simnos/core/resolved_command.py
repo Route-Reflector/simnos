@@ -25,9 +25,10 @@ if TYPE_CHECKING:
     from simnos.core.command_contract import CommandHandler
 
 # The single known render variable. Extracted template variables minus this
-# set become `ResolvedOutput.required_vars` — the host-facts to check at
-# start time (#265). `base_prompt` is always supplied by the shell, so it is
-# never a "missing var" (#264 / D4, 2nd round gemini #4).
+# set become `ResolvedOutput.required_vars` — the host-facts the build-time gate
+# (`values_loader.validate_render_values`, #287) checks at start. `base_prompt`
+# is always supplied by the shell, so it is never a "missing var" (#264 / D4,
+# 2nd round gemini #4).
 KNOWN_RENDER_VARS: frozenset[str] = frozenset({"base_prompt"})
 
 # The render variables a challenge prompt (#338) may reference. A superset of
@@ -73,9 +74,9 @@ def compile_template(jinja_source: str) -> tuple[Template, frozenset[str]]:
     """Compile jinja2 source and extract its non-`base_prompt` variables.
 
     The extracted variables (minus `KNOWN_RENDER_VARS`) are the host-facts a
-    later render needs; PR-1 only carries them on `ResolvedOutput` for #265
-    to consume — it does not check them against a host context yet
-    (#264 / Decision 7).
+    later render needs; they are carried on `ResolvedOutput.required_vars` and the
+    build-time gate (`values_loader.validate_render_values`, #287) rejects any a
+    host/sidecar cannot supply (#264 / Decision 7).
     """
     required = jinja_meta.find_undeclared_variables(_TEMPLATE_ENV.parse(jinja_source))
     return _TEMPLATE_ENV.from_string(jinja_source), frozenset(required) - KNOWN_RENDER_VARS
@@ -103,7 +104,7 @@ class ResolvedOutput:
     - ``none``: the command writes nothing (`text`/`template`/`handler` all None).
     - ``literal``: `text` is the verbatim wire body (no render step).
     - ``template``: `template` is a compiled jinja2 template rendered with
-      ``base_prompt`` (+ host facts in #265).
+      ``base_prompt`` (+ sidecar-json facts, #287).
     - ``handler``: `handler` is a callable producing the body at dispatch time.
     """
 

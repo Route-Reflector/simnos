@@ -3,7 +3,6 @@ File to contain pydantic models for plugins input/output data validation
 """
 
 import keyword
-import os
 from typing import Annotated, Literal
 
 from pydantic import (
@@ -17,6 +16,8 @@ from pydantic import (
     field_validator,
     model_validator,
 )
+
+from simnos.core.utils import _is_unsafe_bare_ref
 
 # Valid TCP port. Restores the range constraint lost in the pydantic v1 -> v2
 # migration (v1 used `conint(strict=True, gt=0, le=65535)`); #237 / #199 C-15.
@@ -51,7 +52,7 @@ def _reject_unsafe_output_ref(value: str | None) -> str | None:
     """
     if value is None:
         return value
-    if value != os.path.basename(value) or value in ("", ".", "..") or os.path.isabs(value):
+    if _is_unsafe_bare_ref(value):
         raise ValueError(f"output reference {value!r} must be a bare filename in the command's own directory")
     return value
 
@@ -485,8 +486,9 @@ class ModelPlatformMeta(BaseModel):
 
     Modes are declared centrally (name -> prompt template); commands reference
     mode names only (M2). No `name` field — the platform name is the directory
-    name (D1). `netmiko_device_type` / `ntc_platform` are data placeholders the
-    consumer side wires up in #266. `paging` is the optional P3-4 pager settings
+    name (D1). `netmiko_device_type` / `ntc_platform` are consumed by the platform
+    registry (#266) as device-type aliases that resolve to this platform (see
+    `simnos.plugins.nos.register`). `paging` is the optional P3-4 pager settings
     (#307); omitted = the Cisco-style default `--More--` prompt.
     """
 

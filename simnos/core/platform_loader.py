@@ -147,8 +147,7 @@ def _resolve_commands(
         if model.alias is not None:
             target = _follow_alias(name, authored, resolved)
             # An alias carries the target's dispatch fields but keeps its own
-            # help (usually blank) — same as the legacy adapter and v2 do_help
-            # (#264 / D6, Decision 6).
+            # help (usually blank) (#264 / D6, Decision 6).
             aliased = replace(target, name=model.command, help=model.help or "")
             # A `mode:` override lets an alias run in a different mode set than
             # its target (e.g. arista `do show ip int brief`: target is

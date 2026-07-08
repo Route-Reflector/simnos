@@ -113,7 +113,8 @@ class AsyncServerBase:
         self.port: int = port
         # timeout / watchdog_interval are inert on the async path (shutdown is
         # driven by closing the listener/sessions on the shared loop, not a recv
-        # poll); kept for sync-plugin signature + config parity.
+        # poll); kept for inventory config compatibility (the pydantic server
+        # models still accept them, #297 Stage 4).
         self.timeout: int = timeout
         self.watchdog_interval: float = watchdog_interval
         self._simnos = simnos

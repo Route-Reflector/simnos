@@ -680,7 +680,14 @@ class CMDShell:
                     continue
 
     def precmd(self, line):
-        """Method to return line before processing the command"""
+        """Poll for hot-reloaded plugin files, then return the line unchanged.
+
+        Runs before each dispatched line (kept from the cmd.Cmd hook name for
+        familiarity, though the base is gone since #303 P3-3). Its real job is the
+        hot-reload check: in dev mode it diffs this shell's watch roots and
+        reloads any changed platform/py targets before the command runs. The line
+        itself is passed through untouched.
+        """
         # Two-part gate (#281, 1st code review gemini#1/claude#2): the env var
         # keeps the current "env off mid-session stops reloading" semantics, and
         # `_package_root is not None` proves `__init__` actually seeded the watcher
@@ -699,7 +706,13 @@ class CMDShell:
         return line
 
     def postcmd(self, stop, line):
-        """Method to return stop value to stop the shell"""
+        """Return the close flag after a dispatched line (an override seam).
+
+        A pure pass-through today (kept from the cmd.Cmd hook name, base gone
+        since #303 P3-3): `dispatch` calls it with the post-dispatch close flag and
+        the line as typed, so a future subclass can veto/force close per line
+        without touching the dispatch core. No in-tree override exists yet.
+        """
         return stop
 
     def _in_current_mode(self, cmd: ResolvedCommand) -> bool:

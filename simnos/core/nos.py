@@ -262,7 +262,7 @@ class Nos:
         # `auth` has live behavior (ssh_server allows auth-none when nos.auth ==
         # "none"); wire it from the A3 meta so it is not a silent dead field
         # (1st round claude #2). Other meta (netmiko_device_type / ntc_platform)
-        # stay unconsumed placeholders until #266.
+        # is consumed by the platform registry (#266), not here.
         self.auth = self.resolved_platform.auth
 
     def from_file(self, filename: str) -> None:

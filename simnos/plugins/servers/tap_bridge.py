@@ -15,13 +15,10 @@ formerly the standalone ``tap_io`` module's ``process_tap_line``, was folded in
 here at the same time).
 """
 
-import logging
 from typing import TYPE_CHECKING, Protocol
 
 if TYPE_CHECKING:
     from simnos.plugins.shell.cmd_shell import DispatchResult
-
-log = logging.getLogger(__name__)
 
 
 def _process_tap_line(line: str) -> str:

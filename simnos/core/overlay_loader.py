@@ -36,6 +36,7 @@ import os
 
 from simnos.core.platform_loader import _resolve_output_file
 from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput, ResolvedPlatform
+from simnos.core.utils import _is_unsafe_bare_ref
 
 log = logging.getLogger(__name__)
 
@@ -161,7 +162,7 @@ def _validate_overlay_ref(ref: str, *, where: str) -> None:
     the same invariant here: a bare filename, no separators / ``..``, not absolute,
     ``.txt`` / ``.j2`` only (design Decision 10c).
     """
-    if not ref or ref != os.path.basename(ref) or ref in (".", "..") or os.path.isabs(ref):
+    if _is_unsafe_bare_ref(ref):
         raise ValueError(f"{where}: overlay file reference {ref!r} must be a bare filename in the overlay directory")
     if not ref.endswith(_ALLOWED_EXTS):
         raise ValueError(f"{where}: overlay file {ref!r} must end with .txt or .j2")
