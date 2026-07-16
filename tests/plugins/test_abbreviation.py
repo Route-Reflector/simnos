@@ -548,13 +548,16 @@ def test_cross_mode_exact_hit_resolves_in_mode_abbreviation(caplog):
         body, _close, _challenge = shell._dispatch_general("zap")
     assert body == "ENABLE-ZAPALL"
     bypass_logs = [r.getMessage() for r in caplog.records if "bypassed" in r.getMessage()]
-    assert any("'zap'" in m and "'zapall'" in m for m in bypass_logs)
+    assert len(bypass_logs) == 1  # exactly once — no duplicate emission (gemini 1st #5)
+    assert "'zap'" in bypass_logs[0] and "'zapall'" in bypass_logs[0]
 
 
-def test_cross_mode_exact_hit_ambiguous_diagnoses():
+def test_cross_mode_exact_hit_ambiguous_diagnoses(caplog):
     """Cross-mode exact + in-mode ambiguity renders the `_ambiguous_` diagnostic
     (#348 / A-19): the fallback flows through the same special pipeline as a
-    plain ambiguous abbreviation (was `_default_` before #348)."""
+    plain ambiguous abbreviation (was `_default_` before #348). The bypassed
+    exact hit is debug-logged on this diagnostic branch too — pinned here so the
+    observability contract covers both resolve paths (codex 1st #4)."""
     shell = _inventory_shell(
         {
             "zap": {"output": "USER-ZAP", "mode": ["user"]},
@@ -563,8 +566,12 @@ def test_cross_mode_exact_hit_ambiguous_diagnoses():
         }
     )
     shell.current_mode = "enable"
-    body, _close, _challenge = shell._dispatch_general("zap")
+    with caplog.at_level(logging.DEBUG, logger=LOGGER):
+        body, _close, _challenge = shell._dispatch_general("zap")
     assert body == '% Ambiguous command:  "zap"'
+    bypass_logs = [r.getMessage() for r in caplog.records if "bypassed" in r.getMessage()]
+    assert len(bypass_logs) == 1
+    assert "'zap'" in bypass_logs[0] and "ambiguous" in bypass_logs[0]
 
 
 def test_cross_mode_exact_hit_without_in_mode_candidates_keeps_warning(caplog):

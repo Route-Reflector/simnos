@@ -297,11 +297,12 @@ class TestAliasModeOverride:
             load_platform_dir(str(root))
 
     def test_alias_mode_override_keeps_challenge_firing_modes(self, tmp_path):
-        """Pass contract of the challenge stray check (#348 / A-9), two faces:
+        """Pass contract of the challenge stray check (#348 / A-9), two faces —
+        this test pins the loader shape only (the non-firing-mode ordinary-output
+        runtime is the challenge dispatch tests' job):
         (a) an override to exactly the inherited firing set loads fine;
-        (b) a strict superset of an explicit `challenge.mode` loads fine — the
-        extra mode dispatches with the ordinary output, matching real-command
-        semantics (a non-firing mode never was an error on the target itself)."""
+        (b) a strict superset of an explicit `challenge.mode` loads fine, and the
+        firing set stays the explicit one (not widened by the override)."""
         root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
         _cmd(
             commands,
@@ -314,8 +315,8 @@ class TestAliasModeOverride:
         _cmd(
             commands,
             "sudo.yaml",
-            "command: sudo\ntype: simnos\nmode: [user]\nchallenge:\n"
-            "  kind: password\n  prompt: 'Password: '\n  auth: password\n"
+            "command: sudo\ntype: simnos\nmode: [user, enable]\nchallenge:\n"
+            "  kind: password\n  mode: [user]\n  prompt: 'Password: '\n  auth: password\n"
             "  success: {new_mode: enable}\n  failure_output: Sorry\n",
         )
         _cmd(commands, "super.yaml", "command: su\nalias: sudo\nmode: [user, enable]\n")
