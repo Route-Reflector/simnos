@@ -74,13 +74,21 @@ class SimNOS:
 
     :param inventory: SimNOS inventory dictionary or
                       OS path to .yaml file with inventory data
-    :param plugins: Plugins to add extra devices/commands
-                    currently not supported easily.
+    :param plugins: NOS plugins to register on this instance: ready ``Nos``
+                    instances and/or str paths to A3 platform dirs
+                    (see ``_register_nos_plugins``).
     :param sys_config: SimNOS environment config (`sys_config.yaml`): a dict, an
                        OS path to a .yaml file, or None to auto-discover
                        (see ``_discover_sys_config``). Holds environment-wide
                        settings (data_dir, variants_policy); the inventory holds
                        topology (#266 / D4).
+
+    Ownership contract (#346): caller-passed containers — the inventory dict,
+    the sys_config dict, and the plugins list — are borrowed read-only during
+    ``__init__``; SimNOS works on its own copies and never mutates the caller's
+    objects. The one deliberate exception is a ``Nos`` *element* of the plugins
+    list: it is registered as-is and shared/reused for this instance's lifetime
+    (handing over a built instance is the feature's whole point).
 
     Sample usage:
 
@@ -95,25 +103,36 @@ class SimNOS:
     def __init__(
         self,
         inventory: dict | str | None = None,
-        plugins: list | None = None,
+        plugins: list[str | Nos] | None = None,
         sys_config: dict | str | None = None,
     ) -> None:
-        # deepcopy the module-global fallback: `_load_inventory` reassigns
-        # `self.inventory["default"]` (and `_seed_inventory_default_from_sys_config`
-        # seeds sys_config into it), so aliasing the global would bake per-instance
-        # state into it and leak to later `SimNOS()` calls (1st round codex#1). An
-        # explicit `inventory` is the caller's own object and left untouched.
-        # `is None` (not falsy): an explicit `inventory={}` must reach the schema
-        # and fail loudly on the missing `hosts`, not silently become the 3-host
-        # default environment (#345).
-        self.inventory: dict | str = copy.deepcopy(default_inventory) if inventory is None else inventory
-        self.plugins: list = plugins or []
+        # Work on our own copy (#346): aliasing the module-global fallback would
+        # accumulate per-instance state, and an explicit dict belongs to the
+        # caller — `_load_inventory` reassigns `self.inventory["default"]` (with
+        # sys_config seeded in), which must not be baked into the caller's object
+        # (reusing that dict for a second instance would silently inherit the
+        # first instance's seed). A str path is loaded fresh by
+        # `_load_inventory_yaml` and needs no copy. `is None` (not falsy): an
+        # explicit `inventory={}` must reach the schema and fail loudly on the
+        # missing `hosts`, not silently become the 3-host default environment (#345).
+        if inventory is None:
+            inventory = default_inventory
+        self.inventory: dict | str = inventory if isinstance(inventory, str) else copy.deepcopy(inventory)
+        # Copy the container so the caller's list stays untouched; the `Nos`
+        # elements themselves are shared by design (class docstring, #346).
+        self.plugins: list[str | Nos] = list(plugins) if plugins else []
 
         self.hosts: dict[str, Host] = {}
         self.allocated_ports: set[int] = set()
 
         self.shell_plugins = shell_plugins
-        self.nos_plugins = nos_plugins
+        # Per-instance view of the import-time registry (#346): mapping AND value
+        # lists are copied so `_register_nos_plugins` writes (and any list
+        # mutation) stay on this instance and never leak into the module-global,
+        # which is frozen after import — see the plugins/nos docstring. One level
+        # deep is enough: str sources have no depth, and a registered `Nos` value
+        # is shared by design (the caller handed us the built instance to reuse).
+        self.nos_plugins: dict[str, list[str] | Nos] = {name: list(sources) for name, sources in nos_plugins.items()}
         self.servers_plugins = servers_plugins
 
         # The shared asyncio loop the async server plugins (AsyncSshServer +

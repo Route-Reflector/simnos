@@ -4,6 +4,7 @@ The file can be found in simnos/core/simnos.py
 """
 
 # pylint: disable=protected-access
+import copy
 import logging
 import os
 import platform
@@ -17,7 +18,7 @@ import yaml
 
 from a3_paths import PLATFORMS_DIR
 from simnos.core.host import Host
-from simnos.core.nos import available_platforms
+from simnos.core.nos import Nos, available_platforms
 from simnos.core.pydantic_models import ModelOverlay, ModelSysConfig
 from simnos.core.simnos import SimNOS, default_inventory, simnos
 from simnos.core.utils import _is_in_docker
@@ -470,19 +471,17 @@ class TestSimNOS:
         The route `creating_nos_plugin.md` documents for an external
         static-only platform: `SimNOS(plugins=["path/to/dir"])` builds a Nos
         from the dir and keys it by the platform name (= dir basename), so an
-        inventory `nos: {plugin: <basename>}` resolves to it.
+        inventory `nos: {plugin: <basename>}` resolves to it. The registration
+        lands on the per-instance registry only — the module-global stays
+        clean (#346), so no teardown is needed.
         """
-        # `SimNOS.nos_plugins` IS the module-global registry, so the entry must
-        # be dropped on the way out or the registry-invariant tests (which
-        # expect source-path lists, not Nos instances) see the leak.
-        try:
-            net = SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_A3_DIR])
-            assert "synthetic_custom" in net.nos_plugins
-            registered = net.nos_plugins["synthetic_custom"]
-            assert registered.resolved_platform is not None
-            assert "show clock" in registered.resolved_platform.commands
-        finally:
-            nos_plugins.pop("synthetic_custom", None)
+        net = SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_A3_DIR])
+        assert "synthetic_custom" in net.nos_plugins
+        registered = net.nos_plugins["synthetic_custom"]
+        assert isinstance(registered, Nos)
+        assert registered.resolved_platform is not None
+        assert "show clock" in registered.resolved_platform.commands
+        assert "synthetic_custom" not in nos_plugins
 
     def test_plugins_str_py_path_rejected(self):
         """A str plugin pointing at a `.py` file (or any non-dir) is loud (#317 P-4).
@@ -497,7 +496,9 @@ class TestSimNOS:
     def test_plugins_dict_rejected(self):
         """The dict plugin form (legacy `from_dict` inflow) is gone (#317 P-4)."""
         with pytest.raises(TypeError, match=r"supported str \(A3 platform dir\) or Nos"):
-            SimNOS(inventory={"hosts": {}}, plugins=[{"name": "legacy", "commands": {}}])
+            # cast: this deliberately violates the `list[str | Nos]` annotation —
+            # the loud runtime TypeError is exactly what the test pins.
+            SimNOS(inventory={"hosts": {}}, plugins=cast("list[str | Nos]", [{"name": "legacy", "commands": {}}]))
 
     def test_device_type_netmiko_alias_resolves(self):
         """A netmiko-canonical `device_type` resolves to its internal platform (#266 / D2).
@@ -516,14 +517,15 @@ class TestSimNOS:
         assert resolve_device_type("edgecore_sonic") == "edgecore"
 
     def test_resolve_device_type_runtime_registered_and_unknown(self, monkeypatch):
-        """resolve_device_type serves a runtime-registered platform and None-passes the unknown (#266 / D2).
+        """resolve_device_type serves a test-injected platform and None-passes the unknown (#266 / D2).
 
-        This is the mechanism the `nos.plugin` direct-write path relies on
-        (a custom plugin from `SimNOS(plugins=[...])`, or a `nos: {plugin: X}`
-        absent from the import-time index, 1st round codex #3): an unknown value
-        must return None so the `start()` chokepoint falls back to the raw key,
-        and a name added to `nos_plugins` after import must resolve by identity
-        via the dynamic fallback (not just the static reverse index).
+        The unknown → None half is what the `nos: {plugin: X}` path relies on:
+        the `start()` chokepoint falls back to the raw key and resolves it
+        against the per-instance registry — `SimNOS(plugins=[...])` registrations
+        never reach the frozen module-global (#346). The dynamic-fallback half
+        is the deliberate monkeypatch seam the frozen registry keeps: an entry
+        injected into the global still resolves by identity even though the
+        import-time index predates it.
         """
         import simnos.plugins.nos as nos_registry
 
@@ -671,7 +673,119 @@ class TestSimNOS:
         """
         inventory = {"hosts": {"R1": {"port": 5001, "device_type": "cisco_ios"}}}
         net = SimNOS(inventory)
-        assert len(net.nos_plugins["cisco_ios"]) == 2, "Not all files detected"
+        cisco_sources = net.nos_plugins["cisco_ios"]
+        assert isinstance(cisco_sources, list)
+        assert len(cisco_sources) == 2, "Not all files detected"
+
+
+class TestInstanceIsolation:
+    """SimNOS instances do not contaminate each other or their callers (#346).
+
+    Ownership contract: the module-global `nos_plugins` registry is frozen after
+    import — `SimNOS(plugins=[...])` registrations go to the per-instance copy —
+    and caller-passed containers (inventory dict / sys_config dict / plugins
+    list) are borrowed read-only; SimNOS mutates only its own copies.
+    """
+
+    def test_plugin_registration_stays_per_instance(self):
+        """A `plugins=[...]` registration is invisible to the global and to other instances."""
+        net_a = SimNOS(inventory={"hosts": {}}, plugins=[SYNTHETIC_CUSTOM_A3_DIR])
+        net_b = SimNOS(inventory={"hosts": {}})
+        assert "synthetic_custom" in net_a.nos_plugins
+        assert "synthetic_custom" not in nos_plugins
+        assert "synthetic_custom" not in net_b.nos_plugins
+
+    def test_builtin_shadowing_is_instance_local_and_lists_are_copied(self):
+        """Shadowing a built-in name, and mutating an entry list, stay instance-local.
+
+        The identity / append pins run against a NON-shadowed entry on purpose:
+        the shadowed one holds a `Nos` instance, so an identity check against the
+        global's path list would be vacuous (different types) and `append` an
+        AttributeError. What must not leak is an element added to a copied path
+        list — the one-level-deep copy's whole point (#346).
+        """
+        shadow_nos = Nos(filename=os.path.join(PLATFORMS_DIR, "cisco_ios"))
+        net_a = SimNOS(inventory={"hosts": {}}, plugins=[shadow_nos])
+        net_b = SimNOS(inventory={"hosts": {}})
+        # The shadow is visible only inside net_a; global / net_b keep the path list.
+        assert net_a.nos_plugins["cisco_ios"] is shadow_nos
+        assert isinstance(nos_plugins["cisco_ios"], list)
+        assert isinstance(net_b.nos_plugins["cisco_ios"], list)
+        # Value lists are copied, and an element appended to one instance's list
+        # reaches neither the global nor another instance. `cast` for ty: the
+        # runtime isinstance pin narrows to `list | (Nos & list)` (Nos is not
+        # final), which still rejects `.append(str)`.
+        entry_a = cast("list[str]", net_a.nos_plugins["arista_eos"])
+        assert isinstance(entry_a, list)
+        assert entry_a is not nos_plugins["arista_eos"]
+        entry_a.append("<instance-local>")
+        entry_b = cast("list[str]", net_b.nos_plugins["arista_eos"])
+        assert "<instance-local>" not in nos_plugins["arista_eos"]
+        assert "<instance-local>" not in entry_b
+
+    def test_registered_nos_resolves_for_host_and_is_shared_as_is(self):
+        """The documented custom-plugin flow works off the per-instance registry (#346).
+
+        `resolve_device_type` no longer sees instance registrations (the global
+        is frozen), so the raw-key fallback → per-instance lookup chain in
+        `Host.start` is load-bearing — this pins the `creating_nos_plugin.md`
+        flow end to end (the handler-platform variant: the synthetic platform
+        has `handler:` commands, so the Nos needs the A3 dir plus the handler
+        module), plus the contract's deliberate exception: a caller-built `Nos`
+        is registered and reused as-is, never copied.
+        """
+        caller_nos = Nos(filename=[SYNTHETIC_CUSTOM_A3_DIR, SYNTHETIC_CUSTOM_HANDLERS])
+        inventory = {"hosts": {"R1": {"nos": {"plugin": "synthetic_custom"}}}}
+        net = SimNOS(inventory=inventory, plugins=[caller_nos])
+        assert net.plugins[0] is caller_nos
+        assert net.nos_plugins["synthetic_custom"] is caller_nos
+        net.start()
+        try:
+            assert net.hosts["R1"].nos is caller_nos
+        finally:
+            net.stop()
+
+    def test_explicit_inventory_dict_is_not_mutated(self):
+        """An explicit inventory dict is borrowed read-only — no defaults baked in."""
+        caller_inventory = {"hosts": {"R1": {"device_type": "cisco_ios"}}}
+        snapshot = copy.deepcopy(caller_inventory)
+        SimNOS(inventory=caller_inventory)
+        assert caller_inventory == snapshot
+
+    def test_reused_inventory_does_not_inherit_prior_sys_config_seed(self):
+        """The #346 failure scenario: instance A's sys_config seed must not leak into B.
+
+        Before the fix, `_load_inventory` baked A's seeded `variants_policy` into
+        the caller's dict; B's seed check then mistook it for an explicit
+        inventory value and silently inherited A's setting.
+        """
+        inventory = {"hosts": {}}
+        SimNOS(inventory=inventory, sys_config={"variants_policy": {"select": 1}})
+        net_b = SimNOS(inventory=inventory, sys_config={"variants_policy": {"select": 2}})
+        assert isinstance(net_b.inventory, dict)
+        assert net_b.inventory["default"]["variants_policy"]["select"] == 2
+
+    def test_caller_plugins_list_is_not_mutated(self):
+        """The plugins list container is copied; a later caller append is invisible.
+
+        (The `Nos` *elements* are deliberately shared, pinned by
+        `test_registered_nos_resolves_for_host_and_is_shared_as_is`.)
+        """
+        caller_plugins: list[str | Nos] = [SYNTHETIC_CUSTOM_A3_DIR]
+        net = SimNOS(inventory={"hosts": {}}, plugins=caller_plugins)
+        caller_plugins.append("<appended-after-init>")
+        assert net.plugins == [SYNTHETIC_CUSTOM_A3_DIR]
+
+    def test_caller_sys_config_dict_is_not_mutated(self):
+        """An explicit sys_config dict is borrowed read-only (contract symmetry).
+
+        Already true before #346 (`ModelSysConfig(**raw).model_dump()` builds a
+        fresh dict); pinned so all three caller-passed containers stay covered.
+        """
+        caller_sys_config = {"variants_policy": {"select": 1}}
+        snapshot = copy.deepcopy(caller_sys_config)
+        SimNOS(inventory={"hosts": {}}, sys_config=caller_sys_config)
+        assert caller_sys_config == snapshot
 
 
 class TestReservedInventoryFields:
