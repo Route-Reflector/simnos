@@ -187,8 +187,23 @@ class SharedLoop:
         self._thread = threading.Thread(target=_run, daemon=True, name="simnos-shared-loop")
         self._thread.start()
         if not ready.wait(timeout=_LOOP_START_TIMEOUT):
+            # The thread may still come alive later and reach run_forever(). Keep
+            # the refs and go FAILED — the same keep-refs-for-retry contract as
+            # teardown (#347): a later ``teardown_if_idle`` retries the stop+join,
+            # while ``ensure_running`` refuses a restart that would overwrite
+            # ``_loop``/``_thread`` and orphan the running thread. State used to
+            # stay STOPPED here, allowing exactly that orphaning overwrite.
+            self._state = LoopState.FAILED
             raise RuntimeError(f"shared loop failed to start within {_LOOP_START_TIMEOUT}s")
         if start_error:
+            # The thread signalled the error and exited before run_forever(), so
+            # nothing is running — release the never-used executor and drop the
+            # refs (it used to leak, #347). State stays STOPPED: a later
+            # ``ensure_running`` may retry cleanly.
+            self._executor.shutdown(wait=False)
+            self._executor = None
+            self._thread = None
+            self._loop = None
             raise start_error[0]
         self._state = LoopState.RUNNING
 

@@ -24,7 +24,6 @@ paramiko server in Stage 4.
 
 import asyncio
 import logging
-import sys
 import threading
 from typing import TYPE_CHECKING
 
@@ -289,10 +288,13 @@ class AsyncSshServer(AsyncServerBase):
             encoding=None,  # binary channel → byte-exact wire (pinned by the goldens)
             process_factory=self._handle_process,
             allow_pty=True,
-            # Restart-friendly bind (SO_REUSEADDR + SO_REUSEPORT on Linux) so
-            # stop→start does not hit EADDRINUSE.
+            # Restart-friendly bind: SO_REUSEADDR alone covers stop→start
+            # EADDRINUSE (listening sockets do not enter TIME_WAIT). SO_REUSEPORT
+            # was dropped (#347): it let a second SIMNOS instance bind the SAME
+            # port with no error, and the kernel then load-balanced incoming
+            # connections between the two — a silent double-start that bypassed
+            # the #271 port-collision hardening. Now the second bind fails loud.
             reuse_address=True,
-            reuse_port=(sys.platform == "linux"),
         )
         # Read back the bound port so port=0 (ephemeral, #271) resolves to the real
         # OS-assigned port. Done here on the loop thread (the create coroutine), so
