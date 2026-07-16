@@ -1,8 +1,11 @@
-"""
-This module is intended to be used as a template
-for creating new module devices for SIMNOS.
-It has certain attributes and methods which are
-generally common to all devices.
+"""Runtime base class for SIMNOS device modules.
+
+`BaseDevice` is the mandatory base every `platforms_py/<nos>.py` device class
+subclasses (and core imports for its type contracts): configuration loading /
+normalization + the jinja render environment. It lives here — outside
+`platforms_py/`, the registry-glob dir — so it never surfaces as a platform
+(#350; it used to masquerade as an authoring template under
+`platforms_py/_templates/`).
 """
 
 from jinja2 import Environment, PackageLoader, Template

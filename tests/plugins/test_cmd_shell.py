@@ -275,7 +275,7 @@ def _synthetic_a3_handler_platform(tmp_path, *, handler_ref="make_greeting"):
     )
     py = tmp_path / "synplat_handlers.py"
     py.write_text(
-        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+        "from simnos.plugins.nos.base_device import BaseDevice\n"
         "class SynDev(BaseDevice):\n"
         "    def make_greeting(self, device=None, *, base_prompt, current_mode, current_prompt, command):\n"
         '        return f"hello from {current_mode}"\n'

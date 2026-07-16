@@ -19,7 +19,7 @@ Unlike :func:`simnos.core.platform_loader.load_platform_dir`, the overlay has no
 Only ``.txt`` (literal wire text) and ``.j2`` (jinja2 template) are read; yaml
 full-replacement is deferred to a future issue. A facts-bearing ``.j2`` pulls
 its render values from an adjacent sidecar ``<stem>.json`` (#287 / Layer 1):
-``_resolve_output_file`` validates at build time, so a template that needs a
+``resolve_output_file`` validates at build time, so a template that needs a
 value the sidecar does not supply fails loud here instead of at connect time
 (#286 rejected every facts-bearing ``.j2`` because it had no injection path;
 #287 opens that path).
@@ -27,16 +27,16 @@ value the sidecar does not supply fails loud here instead of at connect time
 The output-file *channel* is decided by extension (``.txt``->literal /
 ``.j2``->template), unlike the A3 loader where the authoring yaml field decides
 it (the overlay has no yaml). The extension is translated to ``as_template`` and
-the rest of the read is the part loader's :func:`_resolve_output_file`.
+the rest of the read is the shared :func:`simnos.core.values_loader.resolve_output_file`.
 """
 
 from dataclasses import replace
 import logging
 import os
 
-from simnos.core.platform_loader import _resolve_output_file
 from simnos.core.resolved_command import ResolvedCommand, ResolvedOutput, ResolvedPlatform
 from simnos.core.utils import _is_unsafe_bare_ref
+from simnos.core.values_loader import resolve_output_file
 
 log = logging.getLogger(__name__)
 
@@ -171,16 +171,16 @@ def _validate_overlay_ref(ref: str, *, where: str) -> None:
 def _read_overlay_output(overlay_root: str, filename: str, command: str) -> ResolvedOutput:
     """Read one overlay file into a `ResolvedOutput` (#287 / Layer 1).
 
-    Reuses the part loader (`_resolve_output_file`), translating the extension to
+    Reuses the shared values-loader `resolve_output_file`, translating the extension to
     its ``as_template`` channel. For a ``.j2`` the adjacent sidecar
-    ``<stem>.json`` supplies render values and `_resolve_output_file` validates
+    ``<stem>.json`` supplies render values and `resolve_output_file` validates
     them at build time: a template needing a value the sidecar does not provide
     fails loud here, not at connect time (#287 / D4, D5). #286 rejected every
     facts-bearing ``.j2`` outright (no injection path); #287 opens that path via
     the sidecar, so the explicit ``required_vars`` rejection is gone — the build
-    gate inside `_resolve_output_file` is now the single source of that loud-fail.
+    gate inside `resolve_output_file` is now the single source of that loud-fail.
     """
-    return _resolve_output_file(
+    return resolve_output_file(
         filename,
         overlay_root,
         as_template=filename.endswith(".j2"),

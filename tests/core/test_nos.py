@@ -119,7 +119,7 @@ def test_from_module_empty_commands_dict_is_ignored(tmp_path):
     empty_py = _write_tmp_file(
         tmp_path,
         "empty_commands_plugin.py",
-        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+        "from simnos.plugins.nos.base_device import BaseDevice\n"
         "class Dev(BaseDevice):\n"
         '    """Single local device class."""\n'
         "commands = {}\n",
@@ -157,7 +157,7 @@ def test_from_module_local_class_alias_is_not_a_second_subclass(tmp_path):
     alias_py = _write_tmp_file(
         tmp_path,
         "alias_device_plugin.py",
-        "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+        "from simnos.plugins.nos.base_device import BaseDevice\n"
         "class LocalDevice(BaseDevice):\n"
         '    """The single local device class."""\n'
         "Device = LocalDevice\n",
@@ -203,7 +203,7 @@ class TestHandlerNamespace:
         py = _write_tmp_file(
             tmp_path,
             "handlers_plugin.py",
-            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            "from simnos.plugins.nos.base_device import BaseDevice\n"
             "class Dev(BaseDevice):\n"
             "    def make_a(self, device=None, **kw):\n"
             '        return "a"\n'
@@ -224,7 +224,7 @@ class TestHandlerNamespace:
         py = _write_tmp_file(
             tmp_path,
             "classmethod_plugin.py",
-            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            "from simnos.plugins.nos.base_device import BaseDevice\n"
             "class Dev(BaseDevice):\n"
             "    @classmethod\n"
             "    def make_a(cls, device=None, **kw):\n"
@@ -238,7 +238,7 @@ class TestHandlerNamespace:
         py = _write_tmp_file(
             tmp_path,
             "collision_plugin.py",
-            "from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice\n"
+            "from simnos.plugins.nos.base_device import BaseDevice\n"
             "class Dev(BaseDevice):\n"
             "    def make_a(self, device=None, **kw):\n"
             '        return "method"\n'
@@ -258,7 +258,7 @@ class TestHandlerNamespace:
         # resolution, not a collision, 3rd round codex#3); a handler defined only
         # on the intermediate base is still collected (gemini#1).
         from simnos.core.nos import _build_handler_namespace
-        from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+        from simnos.plugins.nos.base_device import BaseDevice
 
         class Mid(BaseDevice):
             def make_shared(self, device=None, **kw):

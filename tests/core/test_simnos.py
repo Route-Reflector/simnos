@@ -1060,18 +1060,19 @@ class TestPlatformsManifest:
         """
         assert list(available_platforms) == sorted(nos_plugins.keys())
 
-    def test_available_platforms_excludes_base_template(self):
-        """Pin that `base_template` never surfaces in registry or manifest.
+    def test_available_platforms_excludes_base_device(self):
+        """Pin that `base_device` never surfaces in registry or manifest.
 
-        `simnos/plugins/nos/platforms_py/_templates/base_template.py` is the
-        plugin authoring template (BaseDevice example), not a user-facing
-        platform. It is kept out of the registry by living in a subpackage
-        that the non-recursive py glob never scans (#239 — previously a
-        filename filter did this job); this pin catches a future glob
-        recursion or a template module landing back in `platforms_py/`.
+        `simnos/plugins/nos/base_device.py` is the runtime `BaseDevice` base
+        class, not a user-facing platform. It is kept out of the registry by
+        living outside `platforms_py/` — the only dir the non-recursive py
+        glob scans (#239 / #350; previously a filename filter, then a
+        `_templates/` subpackage, did this job). This pin catches the module
+        landing back in `platforms_py/` (where the glob would register it as
+        an orphan platform).
         """
-        assert "base_template" not in available_platforms
-        assert "base_template" not in nos_plugins
+        assert "base_device" not in available_platforms
+        assert "base_device" not in nos_plugins
 
     def test_available_platforms_have_data_source(self):
         """Pin that every supported platform has a backing data source.

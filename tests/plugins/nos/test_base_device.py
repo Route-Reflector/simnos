@@ -1,4 +1,4 @@
-"""Unit tests for the BaseDevice authoring template (#241 / D6).
+"""Unit tests for the `BaseDevice` runtime base class (#241 / D6).
 
 Pins the `_normalize_configurations` contract on both load paths
 (yaml / j2): an empty configuration file means "no configuration"
@@ -10,7 +10,7 @@ import tempfile
 
 import pytest
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 
 class TestLoadConfigurations:

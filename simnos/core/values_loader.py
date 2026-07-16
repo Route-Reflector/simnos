@@ -24,9 +24,9 @@ import json
 import os
 from typing import Any
 
-from jinja2 import UndefinedError
+from jinja2 import TemplateSyntaxError, UndefinedError
 
-from simnos.core.resolved_command import KNOWN_RENDER_VARS, ResolvedOutput
+from simnos.core.resolved_command import KNOWN_RENDER_VARS, ResolvedOutput, compile_template
 
 # Non-empty sentinel base_prompt for the dry-render (#287 / D5, claude#4): an
 # empty string would skip an undefined inside ``{% for %}`` bodies that also
@@ -184,3 +184,42 @@ def validate_render_values(output: ResolvedOutput, command_name: str, source: st
         # Any other jinja evaluation error (filter/type mismatch, bad subscript)
         # is turned into a loud build-time ValueError naming the command/source.
         raise ValueError(f"template for {command_name!r} ({source}) failed dry-render: {e}") from e
+
+
+def resolve_output_file(
+    ref: str, commands_dir: str, *, as_template: bool, where: str, command_name: str
+) -> ResolvedOutput:
+    """Read an adjacent output file into a `ResolvedOutput`.
+
+    The authoring *field* decides the channel, not the extension: ``output`` /
+    variants are read verbatim (literal wire text), ``output_template`` is
+    compiled as jinja2. ``.txt`` / ``.j2`` are a lint-level naming convention,
+    not load semantics.
+
+    For the template channel the adjacent sidecar ``<stem>.json`` (if any) is
+    read into ``values`` and the result is validated at build time: a template
+    that needs a value the sidecar does not supply fails loud here rather than
+    at connect time (#287 / Layer 1, D4/D5). ``command_name`` matches the
+    sidecar envelope entry.
+
+    Lives here (not in the platform loader) because it is shared by both
+    inflows that read adjacent output files — the packaged A3 loader
+    (:mod:`simnos.core.platform_loader`) and the user overlay loader
+    (:mod:`simnos.core.overlay_loader`) — matching this module\'s charter;
+    it was a private cross-module import before (#350).
+    """
+    filepath = os.path.join(commands_dir, ref)
+    if not os.path.isfile(filepath):
+        raise ValueError(f"{where}: output file {ref!r} not found at {filepath}")
+    with open(filepath, encoding="utf-8") as fh:
+        content = fh.read()
+    if as_template:
+        try:
+            template, required = compile_template(content)
+        except TemplateSyntaxError as e:
+            raise ValueError(f"{where}: output template {ref!r} has a jinja2 syntax error: {e}") from e
+        values = load_values(filepath, command_name)
+        output = ResolvedOutput(kind="template", template=template, required_vars=required, values=values)
+        validate_render_values(output, command_name, source=filepath)
+        return output
+    return ResolvedOutput(kind="literal", text=content)

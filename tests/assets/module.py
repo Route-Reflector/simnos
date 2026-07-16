@@ -8,7 +8,7 @@ Since #317 P-4 a py module supplies dynamic behavior only — the device class
 
 import time
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 DEFAULT_CONFIGURATION: str = "tests/assets/test_module.yaml.j2"
 

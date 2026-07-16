@@ -9,7 +9,7 @@ multiple-subclass ValueError nor steal the device slot (a regression to
 a bare `issubclass` filter would be caught here, 3rd code review 🐙 #3).
 """
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 from simnos.plugins.nos.platforms_py.arista_eos import AristaEOS  # noqa: F401 — import mixin on purpose
 from simnos.plugins.nos.platforms_py.cisco_ios import CiscoIOS  # noqa: F401 — import mixin on purpose
 

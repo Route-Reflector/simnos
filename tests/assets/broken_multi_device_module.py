@@ -9,7 +9,7 @@ state untouched (#232 build-before-commit) and never leaks into a
 running shell via hot reload.
 """
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 
 class DeviceA(BaseDevice):
