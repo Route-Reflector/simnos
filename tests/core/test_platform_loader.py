@@ -277,6 +277,56 @@ class TestAliasModeOverride:
         with pytest.raises(ValueError, match=r"drops.*transition mode"):
             load_platform_dir(str(root))
 
+    def test_alias_mode_override_drops_inherited_challenge_mode_rejected(self, tmp_path):
+        """Symmetric with the transitions check (#348 / A-9): a `mode:` override
+        that drops a mode the inherited challenge fires in leaves a dead firing
+        entry — the alias would dispatch without ever challenging (for an
+        enable-type command: no output, no transition). The target omits
+        `challenge.mode`, so the firing set is the command's effective modes —
+        the exact shape the unchecked narrowing used to silently break."""
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(
+            commands,
+            "en.yaml",
+            "command: enable secret\ntype: simnos\nmode: [user, enable]\nchallenge:\n"
+            "  kind: password\n  prompt: 'Password: '\n  auth: secret\n"
+            "  success: {new_mode: enable}\n  failure_output: Bad\n",
+        )
+        _cmd(commands, "alias.yaml", "command: en\nalias: enable secret\nmode: [user]\n")
+        with pytest.raises(ValueError, match=r"drops.*challenge firing mode"):
+            load_platform_dir(str(root))
+
+    def test_alias_mode_override_keeps_challenge_firing_modes(self, tmp_path):
+        """Pass contract of the challenge stray check (#348 / A-9), two faces:
+        (a) an override to exactly the inherited firing set loads fine;
+        (b) a strict superset of an explicit `challenge.mode` loads fine — the
+        extra mode dispatches with the ordinary output, matching real-command
+        semantics (a non-firing mode never was an error on the target itself)."""
+        root, commands = _platform(tmp_path, modes={"user": "{{ base_prompt }}>", "enable": "{{ base_prompt }}#"})
+        _cmd(
+            commands,
+            "en.yaml",
+            "command: enable secret\ntype: simnos\nmode: [user, enable]\nchallenge:\n"
+            "  kind: password\n  prompt: 'Password: '\n  auth: secret\n"
+            "  success: {new_mode: enable}\n  failure_output: Bad\n",
+        )
+        _cmd(commands, "same.yaml", "command: en\nalias: enable secret\nmode: [user, enable]\n")
+        _cmd(
+            commands,
+            "sudo.yaml",
+            "command: sudo\ntype: simnos\nmode: [user]\nchallenge:\n"
+            "  kind: password\n  prompt: 'Password: '\n  auth: password\n"
+            "  success: {new_mode: enable}\n  failure_output: Sorry\n",
+        )
+        _cmd(commands, "super.yaml", "command: su\nalias: sudo\nmode: [user, enable]\n")
+        platform = load_platform_dir(str(root))
+        same = platform.commands["en"]
+        assert same.modes == frozenset({"user", "enable"})  # (a) same set
+        assert same.challenge is not None and same.challenge.modes == frozenset({"user", "enable"})
+        wider = platform.commands["su"]
+        assert wider.modes == frozenset({"user", "enable"})  # (b) strict superset
+        assert wider.challenge is not None and wider.challenge.modes == frozenset({"user"})
+
 
 class TestLoadRejections:
     def test_duplicate_command(self, tmp_path):
@@ -322,10 +372,31 @@ class TestLoadRejections:
             load_platform_dir(str(root))
 
     def test_alias_cycle(self, tmp_path):
+        # A 2-cycle is caught by the chain prohibition (#348 / A-8): every cycle
+        # member targets an alias, so the dedicated cycle traversal is gone.
         root, commands = _platform(tmp_path)
         _cmd(commands, "a.yaml", "command: a\nalias: b\n")
         _cmd(commands, "b.yaml", "command: b\nalias: a\n")
-        with pytest.raises(ValueError, match="cycle"):
+        with pytest.raises(ValueError, match="itself an alias"):
+            load_platform_dir(str(root))
+
+    def test_alias_chain_rejected(self, tmp_path):
+        """alias→alias chains are load errors (#348 / A-8): resolution used to
+        depend on the filename sort order (a mid-chain `mode:` override was
+        inherited only when its file happened to sort first). A chain adds no
+        expressive power — point at the real command instead."""
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "c.yaml", "command: c\ntype: simnos\noutput: c.txt\n", output_files={"c.txt": "C\n"})
+        _cmd(commands, "b.yaml", "command: b\nalias: c\n")
+        _cmd(commands, "a.yaml", "command: a\nalias: b\n")
+        with pytest.raises(ValueError, match="itself an alias"):
+            load_platform_dir(str(root))
+
+    def test_alias_self_rejected(self, tmp_path):
+        # Self-alias is the degenerate chain: the target (itself) is an alias.
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "a.yaml", "command: a\nalias: a\n")
+        with pytest.raises(ValueError, match="itself an alias"):
             load_platform_dir(str(root))
 
     def test_alias_unknown_target(self, tmp_path):

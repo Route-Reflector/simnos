@@ -137,7 +137,13 @@ def _resolve_commands(
     modes: dict[str, ModeDef],
     commands_dir: str,
 ) -> dict[str, ResolvedCommand]:
-    """Two-pass resolve: real commands first, then aliases against them."""
+    """Two-pass resolve: real commands first, then aliases against them.
+
+    An alias must point at a real command — alias chains are rejected (#348 /
+    A-8: following a chain used to inherit a different result depending on the
+    filename sort order, because an alias mid-chain contributed its `mode:`
+    override only when it happened to be resolved already).
+    """
     mode_names = frozenset(modes)
     resolved: dict[str, ResolvedCommand] = {}
     for name, (model, filepath) in authored.items():
@@ -145,7 +151,18 @@ def _resolve_commands(
             resolved[name] = _resolve_command(model, mode_names, commands_dir, filepath)
     for name, (model, _filepath) in authored.items():
         if model.alias is not None:
-            target = _follow_alias(name, authored, resolved)
+            if model.alias not in authored:
+                raise ValueError(f"command {model.command!r} aliases unknown target {model.alias!r}")
+            if authored[model.alias][0].alias is not None:
+                raise ValueError(
+                    f"command {model.command!r} aliases {model.alias!r}, which is itself an alias — "
+                    f"alias chains are not allowed; point at the real command"
+                )
+            # Chains are rejected above, so the target is a real command the
+            # first pass has already resolved — order-independent by construction.
+            # This also subsumes the old cycle detection: any cycle member
+            # targets an alias.
+            target = resolved[model.alias]
             # An alias carries the target's dispatch fields but keeps its own
             # help (usually blank) (#264 / D6, Decision 6).
             aliased = replace(target, name=model.command, help=model.help or "")
@@ -153,7 +170,9 @@ def _resolve_commands(
             # its target (e.g. arista `do show ip int brief`: target is
             # user/enable, the alias is config-only) — the one dispatch field an
             # alias may re-author (#317 / P-1). Validate the names and re-check
-            # any inherited `transitions` against the narrowed modes.
+            # the inherited `transitions` / `challenge` firing modes against the
+            # overridden modes: an entry keyed by a dropped mode can never fire
+            # (dead), and an alias cannot re-author either field (#348 / A-9).
             if model.mode is not None:
                 new_modes = resolve_modes(model.command, model.mode, mode_names)
                 if aliased.transitions is not None:
@@ -163,28 +182,16 @@ def _resolve_commands(
                             f"command {model.command!r}: alias `mode:` override to {sorted(new_modes)} drops "
                             f"transition mode(s) {stray} inherited from target {model.alias!r} (dead entry)"
                         )
+                if aliased.challenge is not None:
+                    stray = sorted(m for m in aliased.challenge.modes if m not in new_modes)
+                    if stray:
+                        raise ValueError(
+                            f"command {model.command!r}: alias `mode:` override to {sorted(new_modes)} drops "
+                            f"challenge firing mode(s) {stray} inherited from target {model.alias!r} (dead entry)"
+                        )
                 aliased = replace(aliased, modes=new_modes)
             resolved[name] = aliased
     return resolved
-
-
-def _follow_alias(
-    start: str,
-    authored: dict[str, tuple[ModelCommandAuthoring, str]],
-    resolved: dict[str, ResolvedCommand],
-) -> ResolvedCommand:
-    """Follow an alias chain to its real target (loud on cycle / unknown)."""
-    seen = {start}
-    current = authored[start][0].alias
-    while True:
-        if current in resolved:
-            return resolved[current]
-        if current not in authored:
-            raise ValueError(f"command {start!r} aliases unknown target {current!r}")
-        if current in seen:
-            raise ValueError(f"alias cycle detected starting at {start!r} (revisits {current!r})")
-        seen.add(current)
-        current = authored[current][0].alias
 
 
 def _require_platform_mode(new_mode: str | None, mode_names: frozenset[str], label: str) -> None:

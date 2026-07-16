@@ -1,10 +1,11 @@
 """Command abbreviation + Tab token-grain completion (#303 / P3-2).
 
 The shell resolves an abbreviated command line (``sh ver`` -> ``show version``)
-only after the exact-match lookup misses, so a full command's wire stays
-byte-identical (the byte-parity goldens pin that separately). These tests cover:
+only after the in-mode exact-match lookup misses, so a full command's wire stays
+byte-identical (the byte-parity goldens pin that separately; a cross-mode exact
+hit deliberately retries as an abbreviation, #348 / A-19). These tests cover:
 
-1. full commands are never diverted to abbreviation (positive invariant);
+1. in-mode full commands are never diverted to abbreviation (positive invariant);
 2. genuinely unknown input still answers with ``_default_`` (negative fixture);
 3. abbreviation / ambiguous / incomplete resolution on real cisco_ios data;
 4. alias safety on real arista_eos data (canonical-only candidate set);
@@ -13,10 +14,14 @@ byte-identical (the byte-parity goldens pin that separately). These tests cover:
 7. the ``_ambiguous_`` / ``_incomplete_`` specials are overridable and flow
    through the normal dispatch pipeline (handler override is None-safe, and the
    specials never transition or close);
-8. abbreviation works on the shared ``_dispatch_general`` core both transports use.
+8. abbreviation works on the shared ``_dispatch_general`` core both transports use;
+9. resolution-order semantics (#348): exact-token-wins is not defeated by the
+   length prune (A-18), and a cross-mode exact hit falls back to the current
+   mode's abbreviation space (A-19).
 """
 
 import dataclasses
+import logging
 import threading
 
 import pytest
@@ -86,12 +91,14 @@ def _enable(shell: CMDShell) -> CMDShell:
 
 # --------------------------------------------------------------- 1. positive invariant
 def test_full_commands_never_diverted_to_abbreviation():
-    """Every real command resolves by exact match, never via abbreviation.
+    """Every real command resolves by exact match in its own mode, never via
+    abbreviation.
 
-    Abbreviation only fires on an exact-match miss, so a full command's dispatch
-    output is whatever the exact ResolvedCommand produces — never an ambiguous /
-    incomplete diagnostic. Pinned across the sweep so the byte-parity-protected
-    full-command path cannot silently regress when abbreviation is in play.
+    Abbreviation only fires on an in-mode exact-match miss (#348 / A-19), so an
+    in-mode full command's dispatch output is whatever the exact ResolvedCommand
+    produces — never an ambiguous / incomplete diagnostic. Pinned across the
+    sweep so the byte-parity-protected full-command path cannot silently regress
+    when abbreviation is in play.
     """
     for platform in SWEEP_PLATFORMS:
         shell = _shell(platform)
@@ -119,7 +126,9 @@ def test_full_commands_never_diverted_to_abbreviation():
 # `(platform, mode, input, reason)` — inputs that must stay `_default_`, NOT be
 # coerced into a command / ambiguous / incomplete by abbreviation. Three kinds:
 # the golden's unknown-command step (`no such command`), clearly-foreign tokens,
-# and real-but-out-of-mode commands (`logout` from config, which real IOS rejects).
+# and real-but-out-of-mode commands (`logout` from config, which real IOS rejects;
+# since #348 it retries as an abbreviation first — config has no `logout…`
+# candidate, so it still lands in `_default_` with the mode-mismatch warning).
 # (`exit` from enable is no longer here: since #327 it is a real all-modes close
 # command, not an out-of-mode `_default_` fall-through — its close is now pinned
 # positively in CLOSE_FIXTURE below.)
@@ -438,3 +447,179 @@ def test_abbreviation_handler_receives_typed_line():
     body, _, _challenge = shell._dispatch_general("sh ver")  # abbreviation -> handler command
     assert body == "ok"
     assert seen == ["sh ver"]  # the typed abbreviation, not the canonical "show version"
+
+
+# --------------------------------------------------------------- 9. resolution-order semantics (#348)
+# Synthetic candidate sets with a short leaf next to longer prefix-sharing
+# commands — the A-18 / A-19 shapes no real platform data has (design Risks).
+
+LOGGER = "simnos.plugins.shell.cmd_shell"
+
+
+def test_exact_token_wins_over_longer_prefix_command():
+    """`show ip ro` must NOT execute `show ipv6 route` (#348 / A-18).
+
+    The exact token `ip` locks the walk onto the 2-token `show ip` leaf, and
+    `ro` has no continuation under it — real IOS answers `% Invalid input`.
+    Before #348 the up-front length prune removed `show ip` first, so the
+    prefix-only `ipv6` survivor silently executed a DIFFERENT command.
+    """
+    shell = _inventory_shell(
+        {
+            "show ip": {"output": "IP", "mode": ["enable"]},
+            "show ipv6 route": {"output": "V6", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    kind, _payload = shell._resolve_abbreviation("show ip ro")
+    assert kind == "none"
+    body, _close, _challenge = shell._dispatch_general("show ip ro")
+    assert body == shell.commands["_default_"].output.render(shell.base_prompt)
+
+
+def test_short_leaf_participates_in_ambiguity():
+    """A prefix-only short leaf makes the position ambiguous (#348 / A-18 副次).
+
+    `show int st` over {`show inter`, `show interface stats`}: position 1 sees
+    two distinct surfaces with no exact winner — real IOS reports ambiguity.
+    Before #348 the length prune removed `show inter` and the long command ran.
+    """
+    shell = _inventory_shell(
+        {
+            "show inter": {"output": "SHORT", "mode": ["enable"]},
+            "show interface stats": {"output": "LONG", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    kind, _payload = shell._resolve_abbreviation("show int st")
+    assert kind == "ambiguous"
+
+
+def test_unknown_input_with_ambiguous_first_token_diagnoses_ambiguous():
+    """cisco_ios user mode: `e x y` is now `% Ambiguous command` (#348 / A-18).
+
+    The user-mode e-prefix candidates are `enable` and `exit`; a real device
+    reports the first token's ambiguity before noticing the junk tail. Before
+    #348 the length prune emptied the pool (no 3-token e-command) and the input
+    fell to `_default_` — the one none→ambiguous diagnostic shift real data
+    exhibits (design 変更3 単調性 bullet).
+    """
+    shell = _shell("cisco_ios")
+    shell.current_mode = "user"
+    kind, _payload = shell._resolve_abbreviation("e x y")
+    assert kind == "ambiguous"
+
+
+def test_cross_mode_exact_hit_falls_back_to_incomplete():
+    """Mode-missed exact `X` with in-mode `X Y` is `% Incomplete command.` (#348 / A-19).
+
+    Real devices resolve per mode: the other mode's `X` leaf must not shadow the
+    current mode's abbreviation space (which sees `X` as a strict prefix of
+    `X Y`). Before #348 the cross-mode exact hit answered `_default_`.
+    """
+    shell = _inventory_shell(
+        {
+            "reset": {"output": "USER-RESET", "mode": ["user"]},
+            "reset counters": {"output": "RC", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    body, close, _challenge = shell._dispatch_general("reset")
+    assert body == INCOMPLETE_DIAG
+    assert close is False
+
+
+def test_cross_mode_exact_hit_resolves_in_mode_abbreviation(caplog):
+    """Mode A `zap` + mode B `zapall`: typing `zap` in B executes `zapall` (#348 / A-19).
+
+    Real devices see `zap` as the unique prefix of `zapall` in B. The bypassed
+    cross-mode exact hit is debug-logged with the typed line and the adopted
+    canonical name — the observability contract that replaces the mode-mismatch
+    warning (design 変更4, gemini 2nd #3 / codex 3rd #3).
+    """
+    shell = _inventory_shell(
+        {
+            "zap": {"output": "USER-ZAP", "mode": ["user"]},
+            "zapall": {"output": "ENABLE-ZAPALL", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    with caplog.at_level(logging.DEBUG, logger=LOGGER):
+        body, _close, _challenge = shell._dispatch_general("zap")
+    assert body == "ENABLE-ZAPALL"
+    bypass_logs = [r.getMessage() for r in caplog.records if "bypassed" in r.getMessage()]
+    assert any("'zap'" in m and "'zapall'" in m for m in bypass_logs)
+
+
+def test_cross_mode_exact_hit_ambiguous_diagnoses():
+    """Cross-mode exact + in-mode ambiguity renders the `_ambiguous_` diagnostic
+    (#348 / A-19): the fallback flows through the same special pipeline as a
+    plain ambiguous abbreviation (was `_default_` before #348)."""
+    shell = _inventory_shell(
+        {
+            "zap": {"output": "USER-ZAP", "mode": ["user"]},
+            "zapall": {"output": "Z1", "mode": ["enable"]},
+            "zapnone": {"output": "Z2", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    body, _close, _challenge = shell._dispatch_general("zap")
+    assert body == '% Ambiguous command:  "zap"'
+
+
+def test_cross_mode_exact_hit_without_in_mode_candidates_keeps_warning(caplog):
+    """Fallback "none" keeps the mode-missed cmd: `_default_` + the mode-mismatch
+    warning survive exactly as before #348 (design 変更4: cmd is not overwritten)."""
+    shell = _inventory_shell({"zap": {"output": "USER-ZAP", "mode": ["user"]}})
+    shell.current_mode = "enable"
+    expected = shell.commands["_default_"].output.render(shell.base_prompt)
+    with caplog.at_level(logging.WARNING, logger=LOGGER):
+        body, _close, _challenge = shell._dispatch_general("zap")
+    assert body == expected
+    assert any("not valid in current mode" in r.getMessage() for r in caplog.records)
+
+
+def test_cross_mode_exact_hit_degraded_special_logs_not_found(caplog):
+    """Special-less platform: the mode-missed exact is dropped so the trail says
+    "not found", not a misleading cross-mode warning for what is really an
+    abbreviation miss (#348, gemini 1st #3). The wire stays `_default_`."""
+    shell = _inventory_shell(
+        {
+            "zap": {"output": "USER-ZAP", "mode": ["user"]},
+            "zapall": {"output": "Z1", "mode": ["enable"]},
+            "zapnone": {"output": "Z2", "mode": ["enable"]},
+        }
+    )
+    del shell.commands["_ambiguous_"]  # simulate the degraded platform the guard covers
+    shell.current_mode = "enable"
+    expected = shell.commands["_default_"].output.render(shell.base_prompt)
+    with caplog.at_level(logging.DEBUG, logger=LOGGER):
+        body, _close, _challenge = shell._dispatch_general("zap")
+    assert body == expected
+    messages = [r.getMessage() for r in caplog.records]
+    assert not any("not valid in current mode" in m for m in messages)
+    assert any("not found" in m for m in messages)
+
+
+def test_completion_shrinks_with_position_prune():
+    """Tab candidate shrinkage, both directions (#348 / A-18 completion 波及).
+
+    ① prefix-only diversification: the short leaf joins the head narrowing and
+       makes it ambiguous → silent Tab (before #348 the pruned-away leaf let
+       `show interface stats detail` be offered for `show int st `).
+    ② exact-lock then prune: the short leaf wins position 1 exactly, and
+       position 2 has nothing under it → silent Tab (before #348
+       `show ipv6 route detail` was offered for `show ip ro `).
+    Both directions only ever shrink the candidate set (design 単調性の系).
+    """
+    shell = _inventory_shell(
+        {
+            "show inter": {"output": "S", "mode": ["enable"]},
+            "show interface stats detail": {"output": "L", "mode": ["enable"]},
+            "show ip": {"output": "IP", "mode": ["enable"]},
+            "show ipv6 route detail": {"output": "V6", "mode": ["enable"]},
+        }
+    )
+    shell.current_mode = "enable"
+    assert shell.completion_candidates("show int st ") == []  # ① head ambiguous
+    assert shell.completion_candidates("show ip ro ") == []  # ② exact-lock then none

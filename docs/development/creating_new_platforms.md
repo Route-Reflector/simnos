@@ -88,10 +88,14 @@ output: show_version.txt       # a bare .txt filename, read verbatim (literal)
 - **`variants`** is the multi-capture contract: a list of `{name, output}`
   entries (`variant_1` mirrors the primary, `variant_2`.. are alternates), each
   pointing at its own `.txt`.
-- **`alias`** makes the command a pure reference to another command. The one
-  dispatch field an alias may re-author is `mode:` (e.g. arista_eos
+- **`alias`** makes the command a pure reference to another command. The target
+  must be a real command — an alias pointing at another alias is a load error
+  (#348; a chain adds nothing, point at the real command). The one dispatch
+  field an alias may re-author is `mode:` (e.g. arista_eos
   `do show ip int brief` is config-only while its target is user/enable, #317);
-  everything else is inherited.
+  everything else is inherited — and the override may not drop a mode the
+  inherited `transitions` map or `challenge` firing set keys on (a dead entry
+  that could never fire is a load error, #348).
 - **`exit`** marks a session-closing command.
 - **`disables_paging`** marks a command that turns the `--More--` pager off for
   the rest of the session (e.g. `terminal length 0`, #307).
@@ -174,7 +178,9 @@ Both kinds share these rules:
   "already in admin mode" once enabled) without a separate command.
 - `challenge` composes with `output` / `output_template` (the non-firing-mode
   response) but not with `handler` / `variants`, and an alias inherits its
-  target's challenge rather than re-authoring it.
+  target's challenge rather than re-authoring it. An alias `mode:` override must
+  keep every inherited firing mode — dropping one would leave a challenge that
+  can never fire, a load error (#348).
 
 ### Authoring conventions
 
