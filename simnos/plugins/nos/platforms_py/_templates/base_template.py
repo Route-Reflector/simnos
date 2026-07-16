@@ -45,8 +45,10 @@ class BaseDevice:
         """
         if not configuration_file:
             return {}
-        if not configuration_file.endswith((".yaml", ".j2")):
-            raise ValueError("Configuration file must be a YAML file or a Jinja2 template.")
+        # `.yml` accepted to match the inventory loader (#345); it takes the
+        # plain-YAML branch below.
+        if not configuration_file.endswith((".yaml", ".yml", ".j2")):
+            raise ValueError("Configuration file must be a YAML file (.yaml/.yml) or a Jinja2 template (.j2).")
         if configuration_file.endswith(".j2"):
             data: str = ""
             with open(configuration_file, encoding="utf-8") as file:

@@ -180,7 +180,15 @@ def main(argv: list[str] | None = None) -> int:
     # .upper() 不要。force=True で main(argv) を同一 process から複数回呼ぶ test でも
     # level 変更が反映される。
     logging.basicConfig(level=args.log_level, force=True)
-    return args.func(args)
+    # argparse 以降の error boundary (#345): 設定/入力起因の想定内エラー (存在しない
+    # inventory path = OSError、schema/値エラー = ValueError [pydantic ValidationError
+    # 含む]、port 占有 = OSError) は raw traceback でなくメッセージ + exit 1 で返す。
+    # argparse の clean な exit 2 と対になる。traceback は -l DEBUG でのみ添付。
+    try:
+        return args.func(args)
+    except (ValueError, OSError) as exc:
+        log.error("%s", exc, exc_info=log.isEnabledFor(logging.DEBUG))
+        return 1
 
 
 def run_cli() -> None:  # pyproject entry point (name preserved)

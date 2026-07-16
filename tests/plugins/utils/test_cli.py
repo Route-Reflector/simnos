@@ -371,3 +371,30 @@ class TestRunCli:
         with pytest.raises(SystemExit) as exc:
             cli.run_cli()
         assert exc.value.code == 0
+
+
+class TestMainErrorBoundary:
+    """`main()` turns expected config/user errors into message + exit 1 (#345).
+
+    Raw tracebacks for a missing inventory path / unknown device_type were
+    inconsistent with argparse's clean exit 2. Unexpected errors (RuntimeError)
+    must still propagate — the boundary catches ValueError/OSError only.
+    """
+
+    # Assertions read capsys stderr, not caplog: main()'s `basicConfig(force=True)`
+    # removes caplog's root handler, so the boundary's log.error only reaches the
+    # fresh stderr StreamHandler.
+
+    def test_missing_inventory_path_returns_1(self, tmp_path, _restore_root_logging, capsys):
+        missing = str(tmp_path / "nope.yaml")
+        assert cli.main(["up", "-i", missing]) == 1
+        assert "nope.yaml" in capsys.readouterr().err
+
+    def test_unknown_device_type_returns_1(self, _restore_root_logging, capsys):
+        assert cli.main(["up", "-d", "bogus_platform"]) == 1
+        assert "bogus_platform is not supported" in capsys.readouterr().err
+
+    def test_unexpected_error_still_propagates(self, monkeypatch, _restore_root_logging):
+        _patch_simnos(monkeypatch, ctor_exc=RuntimeError("unexpected"))
+        with pytest.raises(RuntimeError, match="unexpected"):
+            cli.main(["up", "-d", "cisco_ios"])

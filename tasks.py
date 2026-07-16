@@ -30,7 +30,11 @@ def run_cmd(context, exec_cmd):
 @task
 def ruff(context):
     """Run ruff to check that Python files adherence to ruff standards."""
-    run_cmd(context, "ruff check --diff")
+    # `ruff check --diff` only reports violations that HAVE an autofix (exit 0 on
+    # e.g. F821/S/B/PERF hits), which silently blinded the CI gate to most of the
+    # selected rule set (#344); the plain `check` reports everything. `format
+    # --diff` is a real format check and stays.
+    run_cmd(context, "ruff check")
     run_cmd(context, "ruff format --diff")
 
 
@@ -506,12 +510,15 @@ _PRESERVED_PLATFORM_DOCS: frozenset[str] = frozenset({"index.md", "index.ja.md"}
 NAV_DISPLAY_NAME_OVERRIDES: dict[str, str] = {
     "alcatel_aos": "Alcatel AOS",
     "alcatel_sros": "Alcatel SROS",
+    "allied_telesis_awplus": "Allied Telesis AW+",
     "arista_eos": "Arista EOS",
     "aruba_aoscx": "Aruba AOS-CX",
     "aruba_os": "Aruba OS",
     "avaya_ers": "Avaya ERS",
     "avaya_vsp": "Avaya VSP",
     "broadcom_icos": "Broadcom ICOS",
+    "brocade_fastiron": "Brocade FastIron",
+    "checkpoint_gaia": "Check Point Gaia",
     "ciena_saos": "Ciena SAOS",
     "cisco_apic": "Cisco APIC",
     "cisco_asa": "Cisco ASA",
@@ -536,6 +543,7 @@ NAV_DISPLAY_NAME_OVERRIDES: dict[str, str] = {
     "mikrotik_routeros": "Mikrotik RouterOS",
     "oneaccess_oneos": "OneAccess OneOS",
     "paloalto_panos": "PaloAlto PanOS",
+    "ruckus_fastiron": "Ruckus FastIron",
     "ubiquiti_edgerouter": "Ubiquiti EdgeRouter",
     "ubiquiti_edgeswitch": "Ubiquiti EdgeSwitch",
     "vyatta_vyos": "Vyatta VyOS",
@@ -678,32 +686,36 @@ def netmiko_check(ctx, device_type: str):
     from simnos import SimNOS
 
     init_time = time.time()
+    # Ephemeral port (0) + read-back after start, same as the default inventory
+    # (#271): a fixed 6000 collided with a running `simnos up` / parallel
+    # invocations and died with a raw bind traceback (#344).
     inventory = {
         "hosts": {
             "host1": {
                 "username": "user",
                 "password": "user",
                 "device_type": device_type,
-                "port": 6000,
+                "port": 0,
             }
         }
     }
 
-    credentials = {
-        "host": "localhost",
-        "username": "user",
-        "password": "user",
-        "port": 6000,
-        "device_type": device_type,
-    }
-
     net = SimNOS(inventory=inventory)
+    # try/finally so a Netmiko failure still stops the server (#344); before, a
+    # raise skipped `net.stop()` and left the host running.
     net.start()
-
-    with ConnectHandler(**credentials):
-        time.sleep(1)
-
-    net.stop()
+    try:
+        credentials = {
+            "host": "localhost",
+            "username": "user",
+            "password": "user",
+            "port": net.hosts["host1"].port,
+            "device_type": device_type,
+        }
+        with ConnectHandler(**credentials):
+            time.sleep(1)
+    finally:
+        net.stop()
 
     print("Everything is OK! ✅")
     print(f"Time spent: {time.time() - init_time:.2f}s")

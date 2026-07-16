@@ -77,6 +77,15 @@ class Host:
         self.secret: str | None = secret
         self.port: int = port
         self.simnos = simnos  # SimNOS object
+        # The schema allows `configuration` to be omitted or null on all three
+        # plugin sections, and a host-authored `shell:`/`server:` replaces the
+        # default's whole dict in the shallow `{**default, **host}` merge — so a
+        # schema-valid inventory used to reach the `["configuration"]` accesses
+        # below / in `start()` / in the CLI and die with a raw KeyError (#345).
+        # Normalize once here so downstream can assume a dict.
+        for section in (self.server_inventory, self.shell_inventory, self.nos_inventory):
+            if section.get("configuration") is None:
+                section["configuration"] = {}
         self.shell_inventory["configuration"].setdefault("base_prompt", self.name)
         self.running = False
         self.server = None
@@ -130,6 +139,17 @@ class Host:
         # (e.g. a runtime-registered custom plugin) falls through unchanged.
         plugin_key = resolve_device_type(self.nos_inventory["plugin"]) or self.nos_inventory["plugin"]
         self.nos_plugin = self.simnos.nos_plugins.get(plugin_key, plugin_key)
+        if isinstance(self.nos_plugin, Nos) and self.configuration_file:
+            # A pre-registered Nos instance is reused as-is, so this host's
+            # `configuration_file` never reaches it — warn instead of silently
+            # dropping the setting (anti-silent-bug, same policy as
+            # `_warn_reserved_fields`; #345).
+            log.warning(
+                "Host %s: configuration_file %r is ignored because the nos plugin resolves to a "
+                "pre-registered Nos instance (its device was built from the registrant's configuration).",
+                self.name,
+                self.configuration_file,
+            )
         self.nos = (
             Nos(filename=self.nos_plugin, configuration_file=self.configuration_file)
             if not isinstance(self.nos_plugin, Nos)
@@ -151,7 +171,7 @@ class Host:
             shell=self.shell_plugin,
             shell_configuration=self.shell_inventory["configuration"],
             nos=self.nos,
-            nos_inventory_config=self.nos_inventory.get("configuration", {}),
+            nos_inventory_config=self.nos_inventory["configuration"],
             port=self.port,
             username=self.username,
             password=self.password,

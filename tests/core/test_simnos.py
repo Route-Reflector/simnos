@@ -83,6 +83,11 @@ _REPLICAS_REJECT_CASES = [
         r"port range must be equal to the number of replicas",
         id="len_mismatch",
     ),
+    pytest.param(
+        {"default": {"port": 5000}, "hosts": {"R1": {"port": None}}},
+        r"port must be an integer \(0 = ephemeral\)",
+        id="port_explicit_null",
+    ),
 ]
 
 
@@ -339,6 +344,50 @@ class TestSimNOS:
         """
         with pytest.raises(ValueError, match=match):
             SimNOS(inventory=inventory)
+
+    def test_inventory_empty_dict_is_loud(self):
+        """An explicit `inventory={}` fails on the missing `hosts`, loudly (#345).
+
+        The old `inventory or deepcopy(default)` falsy check silently swapped an
+        empty dict for the 3-host default environment.
+        """
+        with pytest.raises(ValueError, match="hosts"):
+            SimNOS(inventory={})
+
+    def test_get_hosts_as_list_empty_means_none(self):
+        """An explicit empty host list selects NO hosts; only None selects all (#345).
+
+        The old falsy check expanded `hosts=[]` (e.g. a programmatic filter that
+        matched nothing) to every host, so `stop([])` stopped the whole environment.
+        """
+        net = SimNOS()
+        assert net._get_hosts_as_list([]) == []
+        assert len(net._get_hosts_as_list(None)) == len(net.hosts)
+
+    def test_duplicate_host_name_from_replicas_is_loud(self):
+        """A replicas-generated name colliding with an explicit host raises (#345).
+
+        `r` with `replicas: 2` generates `r0`/`r1`; without the guard the later
+        instantiation silently replaced the explicit `r0` in `self.hosts` and one
+        configured host never started.
+        """
+        inventory = {
+            "hosts": {
+                "r0": {"port": 5100},
+                "r": {"replicas": 2, "port": [5000, 5001]},
+            }
+        }
+        with pytest.raises(ValueError, match=r"Duplicate host name 'r0'"):
+            SimNOS(inventory=inventory)
+
+    def test_env_data_dir_empty_is_loud(self, monkeypatch):
+        """A set-but-empty SIMNOS_DATA_DIR raises, matching SIMNOS_SYS_CONFIG (#345).
+
+        The old `if env_data_dir:` truthiness silently ignored an empty override.
+        """
+        monkeypatch.setenv("SIMNOS_DATA_DIR", "  ")
+        with pytest.raises(ValueError, match="SIMNOS_DATA_DIR is set but empty"):
+            SimNOS(inventory={"hosts": {}})
 
     def test_wrong_plugin_name(self):
         """

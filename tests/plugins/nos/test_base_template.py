@@ -33,6 +33,14 @@ class TestLoadConfigurations:
         """No configuration file at all means an empty dict (existing contract)."""
         assert BaseDevice(configuration_file=None).configurations == {}
 
+    def test_yml_suffix_accepted(self):
+        """`.yml` loads on the plain-YAML branch, matching the inventory loader (#345).
+
+        The suffix gate used to accept only `.yaml`/`.j2`, so a `.yml` file the
+        inventory loader happily reads was rejected here.
+        """
+        assert self._load(".yml", "key: value\n") == {"key": "value"}
+
     def test_empty_yaml_normalized_to_empty_dict(self):
         """An empty yaml file means "no configuration", not None.
 
