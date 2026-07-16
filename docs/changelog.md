@@ -62,6 +62,10 @@ automated tooling that only sends commands and reads output.
 - Add terminal paging (`--More--`) for long command output (#307). The page height follows the PTY / Telnet NAWS rows (falling back to `sys_config.paging.default_rows`, default 24); a `terminal length 0`-class command disables paging for the session (the `disables_paging` data flag), and non-interactive clients (netmiko at `height=1000`, scrapers) bypass the pager through a line-count gate that preserves byte parity. The `--More--` string is platform data (`platform.yaml` `paging.more_prompt`, Cisco default `" --More-- "`)
 - Scope the command hot-reload watcher (`SIMNOS_RELOAD_COMMANDS`) to per-shell snapshots and per-platform watches, serialising a shared reload under the host lock so it no longer races concurrent sessions (#281)
 
+**Bug Fixes**
+
+- Stop `SimNOS` instances from contaminating each other and their callers (#346). `SimNOS(plugins=[...])` registrations now land on a per-instance copy of the platform registry instead of a shared module-global, so a custom plugin registered on instance A is no longer visible from instance B — if you relied on that leak, pass the plugin to each `SimNOS(plugins=[...])` that uses it. An explicit `inventory` dict is also no longer mutated in place (and the `plugins` list is likewise copied as a contract): SimNOS works on its own copies — a deep copy of the inventory, a container copy of the plugins list — so reusing one inventory dict across instances with different `sys_config` settings no longer silently inherits the first instance's seeded `variants_policy`
+
 ## v2.3.1
 
 **Bug Fixes**

@@ -61,6 +61,10 @@ golden で固定されています — コマンドを送って出力を読む�
 - 長い出力向けにターミナルページング (`--More--`) を追加 (#307)。ページ高は PTY / Telnet NAWS の行数に従い (取得できなければ `sys_config.paging.default_rows`、既定 24 にフォールバック)、`terminal length 0` 系のコマンドはそのセッションのページングを無効化します (`disables_paging` データフラグ)。非対話クライアント (netmiko の `height=1000`、scraper) は byte-parity を保つ行数ゲートを通じてページャをバイパスします。`--More--` 文字列はプラットフォームデータです (`platform.yaml` の `paging.more_prompt`、Cisco 既定は `" --More-- "`)
 - コマンドの hot-reload ウォッチャ (`SIMNOS_RELOAD_COMMANDS`) を、per-shell スナップショット + プラットフォーム単位 watch にスコープし、共有 reload を host ロック下で直列化することで、並行セッションと競合しないようにしました (#281)
 
+**バグ修正**
+
+- `SimNOS` インスタンス間 (およびインスタンス → 呼び出し元) の状態汚染を解消 (#346)。`SimNOS(plugins=[...])` の登録先が共有 module-global からプラットフォームレジストリの per-instance copy に変わり、インスタンス A で登録した custom plugin はインスタンス B から見えなくなりました — この漏れに依存していた場合は、利用する各 `SimNOS` の `plugins=[...]` に渡してください。また explicit な `inventory` dict を in-place で書き換えなくなりました (`plugins` list も契約として同様に copy されます): SimNOS は自身の copy 上で動作する (inventory は deep copy、plugins list は container copy) ため、同じ inventory dict を異なる `sys_config` 設定のインスタンス間で使い回しても、最初のインスタンスが seed した `variants_policy` を silent に継承しません
+
 ## v2.3.1
 
 **バグ修正**

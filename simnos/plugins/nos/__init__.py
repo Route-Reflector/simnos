@@ -20,6 +20,14 @@ Inventory refers to a platform by its ``device_type`` (#266): besides the
 internal platform name (= directory basename, the registry key), a platform's
 ``netmiko_device_type`` / ``ntc_platform`` aliases also resolve to it via the
 ``device_type_to_platform`` reverse index built below.
+
+Ownership (#346): once this module's import completes, ``nos_plugins`` is
+frozen — production code never writes to it again. Runtime registrations
+(``SimNOS(plugins=[...])``) go to the per-instance copy ``SimNOS.nos_plugins``
+and never land here, so instances cannot contaminate each other. This is a
+*logical* freeze (an ownership contract, not ``MappingProxyType``-enforced
+immutability); tests may still deliberately monkeypatch entries in — the
+dynamic fallback in ``resolve_device_type`` remains as that injection seam.
 """
 
 import glob
@@ -33,7 +41,7 @@ from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_m
 
 log = logging.getLogger(__name__)
 
-nos_plugins: dict = {}
+nos_plugins: dict[str, list[str]] = {}
 
 current_file_path = os.path.abspath(__file__)
 current_directory = os.path.dirname(current_file_path)
@@ -135,11 +143,12 @@ def resolve_device_type(device_type: str) -> str | None:
 
     Returns the internal platform name for any accepted ``device_type``:
     - a ``netmiko_device_type`` / ``ntc_platform`` alias, via the static index;
-    - any registered platform's own name (*identity*), checked dynamically
-      against ``nos_plugins`` so that platforms registered *after* import — a
-      custom plugin from ``SimNOS(plugins=[...])`` or a test-injected one —
-      still resolve by their own name even though the import-time index predates
-      them.
+    - the own name (*identity*) of any platform present in ``nos_plugins``,
+      checked dynamically so a test-injected entry (the monkeypatch seam the
+      frozen registry deliberately keeps, #346) still resolves by its own name
+      even though the import-time index predates it. ``SimNOS(plugins=[...])``
+      registrations do NOT land here — they live on the per-instance copy and
+      resolve via the raw-key fallback below.
 
     Returns ``None`` when the value is not a known device_type, which lets
     callers fall back to the raw value (the chokepoint then hands it to the
@@ -170,8 +179,9 @@ def assert_platform_supported(platform: str) -> None:
         # netmiko/ntc aliases are accepted too, so a user who typed an alias
         # is not misled by the canonical-only list (#266 1st round gemini #4).
         # Built from the live registry (not the import-time `available_platforms`
-        # tuple) so runtime-registered platforms appear, matching what
-        # `resolve_device_type` just checked against (#344).
+        # tuple) so test-injected platforms appear, matching what
+        # `resolve_device_type` just checked against (#344; the registry is
+        # otherwise frozen after import — #346).
         raise ValueError(
             f"Platform {platform} is not supported by SIMNOS. Supported platforms are: "
             f"{', '.join(sorted(nos_plugins))} (their netmiko_device_type / ntc_platform aliases are also accepted)."
