@@ -52,7 +52,7 @@ class HuaweiSmartAX(BaseDevice):
             results = self._add_whitespaces([title, *board_column])
             board_column = results[1:]
             titles[index] = results[0]
-            for board in boards:
-                board[title] = board_column[boards.index(board)]
+            for board_index, board in enumerate(boards):
+                board[title] = board_column[board_index]
         rows = [list(board.values()) for board in boards]
         return self.render("huawei_smartax/display_board.j2", titles=titles, rows=rows)

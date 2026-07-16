@@ -5,7 +5,6 @@ Custom shell class to interact with NOS.
 from dataclasses import dataclass, replace
 import hashlib
 import logging
-import os
 import random
 import string
 import threading
@@ -30,6 +29,7 @@ from simnos.core.resolved_command import (
     Transition,
     compile_template,
 )
+from simnos.core.utils import env_flag_enabled
 from simnos.core.values_loader import validate_render_values
 
 # `nos_pkg` is the package module (for `__path__`); the `__init__` arg `nos` is a
@@ -428,7 +428,7 @@ class CMDShell:
         self._watch_roots: list[str] = []
         self._reload_snapshot: dict[str, float] = {}
         self._package_root: str | None = None
-        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
+        if env_flag_enabled("SIMNOS_RELOAD_COMMANDS"):
             self._package_root = nos_pkg.__path__[0]  # rollup root; module ref avoids the `nos` arg shadowing (D5)
             self._watch_roots = platform_watch_roots(nos_plugins.get(self.nos.name, []))
             self._reload_snapshot = get_files_lasttime_changed(get_files_under_roots(self._watch_roots))
@@ -451,7 +451,7 @@ class CMDShell:
         edits propagate to new connections, so there is no shared snapshot (the
         per-shell `_render_config` carries the overlay through `_rebuild`).
         """
-        if os.environ.get("SIMNOS_RELOAD_COMMANDS"):
+        if env_flag_enabled("SIMNOS_RELOAD_COMMANDS"):
             return None
         return build_resolved_platform(nos, nos_inventory_config.get("commands", {}), render_config)
 
@@ -696,7 +696,7 @@ class CMDShell:
         # (no baseline seeded) or `python -O` degrades to a graceful no-op instead
         # of a `TypeError` deep in `resolve_reload_targets`. The diff runs against
         # this shell's own snapshot (per-shell, D1), then swaps in the returned one.
-        if os.environ.get("SIMNOS_RELOAD_COMMANDS") and self._package_root is not None:
+        if env_flag_enabled("SIMNOS_RELOAD_COMMANDS") and self._package_root is not None:
             reload_targets, self._reload_snapshot = get_files_changed(
                 self._watch_roots, self._package_root, self._reload_snapshot
             )

@@ -3,6 +3,21 @@
 import os
 from pathlib import Path
 
+# Spellings a user plausibly means as "off" when setting an on/off env flag.
+_FALSY_ENV_VALUES = frozenset({"", "0", "false", "no", "off"})
+
+
+def env_flag_enabled(name: str) -> bool:
+    """Whether the on/off environment flag ``name`` is enabled.
+
+    Unset — or set to a falsy spelling (case-insensitive: empty, ``0``,
+    ``false``, ``no``, ``off``) — reads as disabled; any other value enables.
+    Plain truthiness checks treated ``SIMNOS_RELOAD_COMMANDS=0`` / ``=false``
+    as *enabled* (#345); this is the single interpretation every flag site
+    shares.
+    """
+    return os.environ.get(name, "").strip().lower() not in _FALSY_ENV_VALUES
+
 
 def _is_unsafe_bare_ref(ref: str) -> bool:
     """Whether ``ref`` escapes its own directory (the root-confinement invariant).

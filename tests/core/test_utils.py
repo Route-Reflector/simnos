@@ -2,7 +2,33 @@
 
 from unittest.mock import MagicMock, patch
 
-from simnos.core.utils import _is_in_docker
+import pytest
+
+from simnos.core.utils import _is_in_docker, env_flag_enabled
+
+
+class TestEnvFlagEnabled:
+    """Pins the single on/off interpretation shared by env-flag sites (#345).
+
+    The regression class: plain truthiness checks treated
+    ``SIMNOS_RELOAD_COMMANDS=0`` / ``=false`` as *enabled*.
+    """
+
+    _FLAG = "SIMNOS_TEST_FLAG"
+
+    def test_unset_is_disabled(self, monkeypatch):
+        monkeypatch.delenv(self._FLAG, raising=False)
+        assert env_flag_enabled(self._FLAG) is False
+
+    @pytest.mark.parametrize("value", ["", "0", "false", "FALSE", "no", "off", "OFF", " off "])
+    def test_falsy_spellings_are_disabled(self, monkeypatch, value):
+        monkeypatch.setenv(self._FLAG, value)
+        assert env_flag_enabled(self._FLAG) is False
+
+    @pytest.mark.parametrize("value", ["1", "ON", "true", "yes", " 1 "])
+    def test_other_values_are_enabled(self, monkeypatch, value):
+        monkeypatch.setenv(self._FLAG, value)
+        assert env_flag_enabled(self._FLAG) is True
 
 
 class TestIsInDocker:

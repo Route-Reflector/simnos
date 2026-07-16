@@ -103,7 +103,10 @@ class SimNOS:
         # seeds sys_config into it), so aliasing the global would bake per-instance
         # state into it and leak to later `SimNOS()` calls (1st round codex#1). An
         # explicit `inventory` is the caller's own object and left untouched.
-        self.inventory: dict | str = inventory or copy.deepcopy(default_inventory)
+        # `is None` (not falsy): an explicit `inventory={}` must reach the schema
+        # and fail loudly on the missing `hosts`, not silently become the 3-host
+        # default environment (#345).
+        self.inventory: dict | str = copy.deepcopy(default_inventory) if inventory is None else inventory
         self.plugins: list = plugins or []
 
         self.hosts: dict[str, Host] = {}
@@ -170,8 +173,13 @@ class SimNOS:
         raw = self._discover_sys_config(sys_config)
         resolved = ModelSysConfig(**raw).model_dump()
         # env > sys_config file (Decision 7): SIMNOS_DATA_DIR overrides the file.
+        # Set-but-empty is loud, matching the SIMNOS_SYS_CONFIG contract (#267 /
+        # #345) — an empty override would otherwise be silently ignored.
         env_data_dir = os.environ.get("SIMNOS_DATA_DIR")
-        if env_data_dir:
+        if env_data_dir is not None:
+            env_data_dir = env_data_dir.strip()
+            if not env_data_dir:
+                raise ValueError("SIMNOS_DATA_DIR is set but empty; unset it or provide a path")
             resolved["data_dir"] = env_data_dir
         self.sys_config: dict = resolved
 
@@ -305,6 +313,12 @@ class SimNOS:
         if replicas is None:
             if isinstance(port, list):
                 raise ValueError("If replicas is not set, port must be an integer.")
+            if not isinstance(port, int):
+                # An explicit `port: null` overrides the default's 0 in the
+                # per-host merge and passes the schema (port is Optional there);
+                # reject it here instead of dying later on the narrowing assert
+                # in `_get_hosts_and_ports` (#345).
+                raise ValueError(f"port must be an integer (0 = ephemeral), got {port!r}.")
             return  # port is int, no further check needed
         if replicas < 1:
             raise ValueError("If replicas is set, replicas must be greater than 0.")
@@ -368,6 +382,11 @@ class SimNOS:
         :param port: port to allocate
         :param params: parameters to pass to the host like configurations
         """
+        if host in self.hosts:
+            # Replica-generated names (`f"{name}{i}"`) can collide with an
+            # explicit host; without this guard the later instantiation silently
+            # replaced the earlier one and a configured host never started (#345).
+            raise ValueError(f"Duplicate host name '{host}' (a replicas-generated name collides with another host).")
         self._allocate_port(port)
         self.hosts[host] = Host(name=host, port=port, simnos=self, **params)
 
@@ -419,7 +438,10 @@ class SimNOS:
         :param hosts: string or list of strings
         :return: list of Host objects
         """
-        if not hosts:
+        # `is None` (not falsy): an explicit empty list means "no hosts" — a
+        # programmatic filter that matches nothing must not fan out to every
+        # host (#345). Only the omitted/None default selects all.
+        if hosts is None:
             hosts = list(self.hosts.keys())
         if isinstance(hosts, str):
             hosts = [hosts]

@@ -63,7 +63,7 @@ platforms_directory_py: str = os.path.join(current_directory, "platforms_py")
 py_files = glob.glob(os.path.join(platforms_directory_py, "*.py"))
 py_files = [file for file in py_files if os.path.basename(file) != "__init__.py"]
 for file in py_files:
-    platform_name: str = os.path.basename(file).replace(".py", "")
+    platform_name: str = os.path.basename(file).removesuffix(".py")
     if platform_name in nos_plugins:
         nos_plugins[platform_name].append(file)
     else:
@@ -167,7 +167,10 @@ def assert_platform_supported(platform: str) -> None:
         # registry container type (tuple vs list repr). Spell out that
         # netmiko/ntc aliases are accepted too, so a user who typed an alias
         # is not misled by the canonical-only list (#266 1st round gemini #4).
+        # Built from the live registry (not the import-time `available_platforms`
+        # tuple) so runtime-registered platforms appear, matching what
+        # `resolve_device_type` just checked against (#344).
         raise ValueError(
             f"Platform {platform} is not supported by SIMNOS. Supported platforms are: "
-            f"{', '.join(available_platforms)} (their netmiko_device_type / ntc_platform aliases are also accepted)."
+            f"{', '.join(sorted(nos_plugins))} (their netmiko_device_type / ntc_platform aliases are also accepted)."
         )

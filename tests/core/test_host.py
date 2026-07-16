@@ -3,13 +3,15 @@ Test module for the module simnos.core.host
 under simnos/core/host.py
 """
 
+import logging
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
 from simnos import SimNOS
 from simnos.core.host import Host
-from simnos.core.nos import available_platforms
+from simnos.core.nos import Nos, available_platforms
+from tests.utils import SYNTHETIC_CUSTOM_A3_DIR
 
 
 class TestHost:
@@ -219,6 +221,60 @@ class TestHost:
         platform = available_platforms[0]
         # pylint: disable=protected-access
         host._check_if_platform_is_supported(platform)
+
+
+class TestConfigurationNormalization:
+    """Schema-valid plugin sections without `configuration` must not KeyError (#345).
+
+    The schema allows `configuration` to be omitted or null on all three plugin
+    sections, and a host-authored `shell:`/`server:` replaces the default's whole
+    dict in the shallow merge — so these inventories passed validation and then
+    died with a raw KeyError (shell at `Host.__init__`, server at `Host.start`).
+    """
+
+    def test_shell_without_configuration_constructs(self):
+        """`shell: {plugin: CMDShell}` (no configuration key) builds the host."""
+        inventory = {"hosts": {"r1": {"device_type": "cisco_ios", "port": 0, "shell": {"plugin": "CMDShell"}}}}
+        net = SimNOS(inventory=inventory)
+        assert net.hosts["r1"].shell_inventory["configuration"]["base_prompt"] == "r1"
+
+    def test_server_with_null_configuration_normalized(self):
+        """`server: {plugin: AsyncSshServer, configuration: null}` normalizes to {}."""
+        inventory = {
+            "hosts": {
+                "r1": {
+                    "device_type": "cisco_ios",
+                    "port": 0,
+                    "server": {"plugin": "AsyncSshServer", "configuration": None},
+                }
+            }
+        }
+        net = SimNOS(inventory=inventory)
+        assert net.hosts["r1"].server_inventory["configuration"] == {}
+
+
+class TestConfigurationFileIgnoredWarning:
+    """A host whose nos plugin resolves to a pre-registered Nos instance warns
+    when `configuration_file` is set (set-but-inert, anti-silent-bug; #345)."""
+
+    def test_registered_nos_with_configuration_file_warns(self, caplog):
+        server = {"plugin": "server_plugin", "configuration": {}}
+        shell = {"plugin": "shell_plugin", "configuration": {}}
+        nos = {"plugin": "nos_plugin", "configuration": {}}
+        net = Mock()
+        server_plugin = Mock()
+        server_plugin.return_value.port = 22
+        net.servers_plugins = {"server_plugin": server_plugin}
+        net.shell_plugins = {"shell_plugin": Mock()}
+        # The registry value is a real (registered) Nos instance, so `start()`
+        # reuses it as-is and the host's configuration_file never reaches it.
+        net.nos_plugins = {"nos_plugin": Nos(filename=SYNTHETIC_CUSTOM_A3_DIR)}
+        with patch.object(Host, "_check_if_platform_is_supported", return_value=None):
+            host = Host("name", "username", "password", 22, server, shell, nos, net, configuration_file="ignored.yaml")
+        with caplog.at_level(logging.WARNING):
+            host.start()
+        host.stop()
+        assert "configuration_file 'ignored.yaml' is ignored" in caplog.text
 
 
 class TestResolveOverlayRoot:
