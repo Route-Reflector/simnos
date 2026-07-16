@@ -716,10 +716,12 @@ class TestInstanceIsolation:
         # runtime isinstance pin narrows to `list | (Nos & list)` (Nos is not
         # final), which still rejects `.append(str)`.
         entry_a = cast("list[str]", net_a.nos_plugins["arista_eos"])
+        entry_b = cast("list[str]", net_b.nos_plugins["arista_eos"])
         assert isinstance(entry_a, list)
         assert entry_a is not nos_plugins["arista_eos"]
+        assert entry_b is not nos_plugins["arista_eos"]
+        assert entry_a is not entry_b
         entry_a.append("<instance-local>")
-        entry_b = cast("list[str]", net_b.nos_plugins["arista_eos"])
         assert "<instance-local>" not in nos_plugins["arista_eos"]
         assert "<instance-local>" not in entry_b
 
@@ -739,8 +741,10 @@ class TestInstanceIsolation:
         net = SimNOS(inventory=inventory, plugins=[caller_nos])
         assert net.plugins[0] is caller_nos
         assert net.nos_plugins["synthetic_custom"] is caller_nos
-        net.start()
+        # start() inside the try: a mid-start failure must still reach stop()
+        # (partial-start resources would otherwise leak into later tests).
         try:
+            net.start()
             assert net.hosts["R1"].nos is caller_nos
         finally:
             net.stop()
@@ -775,6 +779,9 @@ class TestInstanceIsolation:
         net = SimNOS(inventory={"hosts": {}}, plugins=caller_plugins)
         caller_plugins.append("<appended-after-init>")
         assert net.plugins == [SYNTHETIC_CUSTOM_A3_DIR]
+        # And the read-only-borrow half: SimNOS wrote nothing into the caller's
+        # list — only the caller's own append is there.
+        assert caller_plugins == [SYNTHETIC_CUSTOM_A3_DIR, "<appended-after-init>"]
 
     def test_caller_sys_config_dict_is_not_mutated(self):
         """An explicit sys_config dict is borrowed read-only (contract symmetry).

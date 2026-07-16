@@ -64,7 +64,7 @@ automated tooling that only sends commands and reads output.
 
 **Bug Fixes**
 
-- Stop `SimNOS` instances from contaminating each other and their callers (#346). `SimNOS(plugins=[...])` registrations now land on a per-instance copy of the platform registry instead of a shared module-global, so a custom plugin registered on instance A is no longer visible from instance B — if you relied on that leak, pass the plugin to each `SimNOS(plugins=[...])` that uses it. An explicit `inventory` dict (and the `plugins` list) is also no longer mutated in place: SimNOS works on its own copies — a deep copy of the inventory, a container copy of the plugins list — so reusing one inventory dict across instances with different `sys_config` settings no longer silently inherits the first instance's seeded `variants_policy`
+- Stop `SimNOS` instances from contaminating each other and their callers (#346). `SimNOS(plugins=[...])` registrations now land on a per-instance copy of the platform registry instead of a shared module-global, so a custom plugin registered on instance A is no longer visible from instance B — if you relied on that leak, pass the plugin to each `SimNOS(plugins=[...])` that uses it. An explicit `inventory` dict is also no longer mutated in place (and the `plugins` list is likewise copied as a contract): SimNOS works on its own copies — a deep copy of the inventory, a container copy of the plugins list — so reusing one inventory dict across instances with different `sys_config` settings no longer silently inherits the first instance's seeded `variants_policy`
 
 ## v2.3.1
 

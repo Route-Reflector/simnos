@@ -63,7 +63,7 @@ golden で固定されています — コマンドを送って出力を読む�
 
 **バグ修正**
 
-- `SimNOS` インスタンス間 (およびインスタンス → 呼び出し元) の状態汚染を解消 (#346)。`SimNOS(plugins=[...])` の登録先が共有 module-global からプラットフォームレジストリの per-instance copy に変わり、インスタンス A で登録した custom plugin はインスタンス B から見えなくなりました — この漏れに依存していた場合は、利用する各 `SimNOS` の `plugins=[...]` に渡してください。また explicit な `inventory` dict (と `plugins` list) を in-place で書き換えなくなりました: SimNOS は自身の copy 上で動作する (inventory は deep copy、plugins list は container copy) ため、同じ inventory dict を異なる `sys_config` 設定のインスタンス間で使い回しても、最初のインスタンスが seed した `variants_policy` を silent に継承しません
+- `SimNOS` インスタンス間 (およびインスタンス → 呼び出し元) の状態汚染を解消 (#346)。`SimNOS(plugins=[...])` の登録先が共有 module-global からプラットフォームレジストリの per-instance copy に変わり、インスタンス A で登録した custom plugin はインスタンス B から見えなくなりました — この漏れに依存していた場合は、利用する各 `SimNOS` の `plugins=[...]` に渡してください。また explicit な `inventory` dict を in-place で書き換えなくなりました (`plugins` list も契約として同様に copy されます): SimNOS は自身の copy 上で動作する (inventory は deep copy、plugins list は container copy) ため、同じ inventory dict を異なる `sys_config` 設定のインスタンス間で使い回しても、最初のインスタンスが seed した `variants_policy` を silent に継承しません
 
 ## v2.3.1
 

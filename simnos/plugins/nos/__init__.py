@@ -143,10 +143,10 @@ def resolve_device_type(device_type: str) -> str | None:
 
     Returns the internal platform name for any accepted ``device_type``:
     - a ``netmiko_device_type`` / ``ntc_platform`` alias, via the static index;
-    - any platform present in ``nos_plugins``'s own name (*identity*), checked
-      dynamically so a test-injected entry (the monkeypatch seam the frozen
-      registry deliberately keeps, #346) still resolves by its own name even
-      though the import-time index predates it. ``SimNOS(plugins=[...])``
+    - the own name (*identity*) of any platform present in ``nos_plugins``,
+      checked dynamically so a test-injected entry (the monkeypatch seam the
+      frozen registry deliberately keeps, #346) still resolves by its own name
+      even though the import-time index predates it. ``SimNOS(plugins=[...])``
       registrations do NOT land here — they live on the per-instance copy and
       resolve via the raw-key fallback below.
 
