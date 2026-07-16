@@ -39,7 +39,7 @@ def _find_device_classes(module: types.ModuleType) -> list[type]:
     # itself is still initializing — see the `available_platforms`
     # re-export at the end of this file, which is deferred for the same
     # circular-import reason.
-    from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+    from simnos.plugins.nos.base_device import BaseDevice
 
     return list(
         dict.fromkeys(
@@ -80,7 +80,7 @@ def _build_handler_namespace(module: types.ModuleType, device_classes: list[type
     precedence — fail at startup). The caller assigns the result as a fresh dict
     (rollback-safe under hot reload).
     """
-    from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+    from simnos.plugins.nos.base_device import BaseDevice
 
     class_ns: dict[str, CommandHandler] = {}
     for device_cls in device_classes:

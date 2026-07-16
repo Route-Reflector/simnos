@@ -8,7 +8,7 @@ channel only, it authors no commands). Loaded as
 ``Nos(filename=[A3_DIR, THIS_FILE])`` / registry-injected by the e2e.
 """
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 # The dynamic handler's return value — the e2e asserts this reaches the wire,
 # proving registry → merge bind → handler dispatch works for a custom platform.

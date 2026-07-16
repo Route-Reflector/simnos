@@ -7,7 +7,10 @@ on. The async-server integration (real listeners, byte parity, 100-host stress)
 lives in the SSH tests; here a fake ``AsyncListener`` stands in.
 """
 
+import asyncio
 import threading
+import time
+from unittest.mock import Mock
 
 import pytest
 
@@ -176,3 +179,63 @@ def test_max_workers_env_override(monkeypatch):
     monkeypatch.setenv("SIMNOS_DISPATCH_WORKERS", "3")
     sl = SharedLoop()
     assert sl._max_workers == 3
+
+
+def test_start_error_releases_executor_and_allows_retry(monkeypatch):
+    """A loop-thread startup error cleans up and stays STOPPED for a clean retry (#347).
+
+    The thread signalled the error and exited before run_forever(), so nothing is
+    running: the never-used executor used to leak and the dead thread/loop refs
+    stayed set. Now they are released and a later ensure_running starts fresh.
+    """
+    real_new_event_loop = asyncio.new_event_loop
+    monkeypatch.setattr("asyncio.new_event_loop", Mock(side_effect=RuntimeError("no loop for you")))
+    sl = SharedLoop()
+    with pytest.raises(RuntimeError, match="no loop for you"):
+        sl.ensure_running()
+    assert sl.state is LoopState.STOPPED
+    assert sl._executor is None
+    assert sl._thread is None
+    assert sl._loop is None
+    monkeypatch.setattr("asyncio.new_event_loop", real_new_event_loop)
+    sl.ensure_running()  # clean retry
+    assert sl.state is LoopState.RUNNING
+    assert sl.teardown_if_idle() is True
+
+
+def test_start_timeout_goes_failed_not_overwritten(monkeypatch):
+    """A ready-wait timeout keeps the refs and goes FAILED (#347).
+
+    The slow thread may still reach run_forever() later; the state used to stay
+    STOPPED, so the next ensure_running rebuilt everything over the live refs and
+    orphaned the running loop thread (no handle left to join). FAILED reuses the
+    teardown contract: ensure_running refuses, teardown_if_idle retries the
+    stop+join once the thread is up, and the loop is restartable again.
+    """
+    import simnos.core.shared_loop as sl_mod
+
+    release = threading.Event()
+    real_new_event_loop = asyncio.new_event_loop
+
+    def _slow_new_event_loop():
+        release.wait(timeout=10)
+        return real_new_event_loop()
+
+    monkeypatch.setattr(sl_mod, "_LOOP_START_TIMEOUT", 0.05)
+    monkeypatch.setattr("asyncio.new_event_loop", _slow_new_event_loop)
+    sl = SharedLoop()
+    with pytest.raises(RuntimeError, match="failed to start"):
+        sl.ensure_running()
+    assert sl.state is LoopState.FAILED
+    assert sl._thread is not None  # refs kept for the retry join
+    with pytest.raises(RuntimeError, match="FAILED"):
+        sl.ensure_running()  # refuses the restart that would orphan the thread
+    # Let the slow thread come alive, then verify the FAILED loop is recoverable.
+    release.set()
+    deadline = time.monotonic() + 5
+    while time.monotonic() < deadline:
+        if sl._loop is not None and sl._loop.is_running():
+            break
+        time.sleep(0.01)
+    assert sl.teardown_if_idle() is True
+    assert sl.state is LoopState.STOPPED

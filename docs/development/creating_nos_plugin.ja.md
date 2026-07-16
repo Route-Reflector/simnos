@@ -112,7 +112,7 @@ handler: make_show_marker
 ```python
 """my_platform_handlers.py"""
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 DEFAULT_CONFIGURATION = "path/to/configurations/my_platform.yaml.j2"  # 任意
 

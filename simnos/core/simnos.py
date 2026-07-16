@@ -497,13 +497,19 @@ class SimNOS:
         hosts: list[Host] = self._get_hosts_as_list(hosts)
         # Collect managed threads before stopping (Host.stop sets server to None)
         managed_threads = self._collect_server_threads(hosts)
-        self._execute_function_over_hosts(
+        # collect_errors: one host's stop() raising must not abort the sweep —
+        # the remaining hosts, the thread join, and the shared-loop teardown
+        # below must still run, or a single bad server plugin leaks the loop
+        # thread and leaves other hosts running (#347). The first error is
+        # re-raised at the end so the caller still learns stop() failed.
+        errors = self._execute_function_over_hosts(
             hosts,
             "stop",
             host_running=True,
             parallel=parallel,
             workers=workers,
             deadline=deadline,
+            collect_errors=True,
         )
         if managed_threads:
             remaining = max(0, deadline - time.monotonic())
@@ -513,6 +519,8 @@ class SimNOS:
         # per host). A partial stop that leaves async hosts running is a no-op here
         # (refcount > 0), so the loop keeps serving them.
         self._shared_loop.teardown_if_idle(deadline)
+        if errors:
+            raise errors[0]
 
     def _collect_server_threads(self, hosts: list[Host]) -> list[threading.Thread]:
         """Collect all managed threads from host servers before stopping."""
@@ -547,7 +555,8 @@ class SimNOS:
         parallel: bool = False,
         workers: int | None = None,
         deadline: float | None = None,
-    ) -> None:
+        collect_errors: bool = False,
+    ) -> list[Exception]:
         """
         Function that executes a function like start or stop over
         the selected hosts.
@@ -557,24 +566,43 @@ class SimNOS:
         :param parallel: if True, execute in parallel using threads.
         :param workers: max number of worker threads.
         :param deadline: optional monotonic deadline; skip remaining hosts if exceeded.
+        :param collect_errors: if True, a host's raise is logged + collected and
+            the sweep continues (the stop path, #347); if False, it propagates
+            immediately (the start path keeps fail-fast). KeyboardInterrupt and
+            other BaseExceptions always propagate.
+        :return: the collected per-host errors (empty unless ``collect_errors``).
         """
         for host in hosts:
             if host not in self.hosts.values():
                 raise ValueError(f"Host {host} not found")
+        errors: list[Exception] = []
+
+        def _invoke(h: Host) -> None:
+            try:
+                getattr(h, func)()
+            except Exception as exc:
+                if not collect_errors:
+                    raise
+                log.exception("Host %s: %s() raised; continuing over the remaining hosts", h.name, func)
+                errors.append(exc)
+
         targets = [h for h in hosts if h.running == host_running]
         if not parallel or len(targets) <= 1:
             for i, h in enumerate(targets):
                 if deadline is not None and time.monotonic() >= deadline:
                     log.warning("Global stop deadline exceeded, %d host(s) not stopped", len(targets) - i)
                     break
-                getattr(h, func)()
-            return
+                _invoke(h)
+            return errors
         if workers is not None and workers < 1:
             raise ValueError(f"workers must be >= 1, got {workers}")
         max_workers = workers or min(32, len(targets))
         remaining = max(0, deadline - time.monotonic()) if deadline is not None else None
         ex = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
-        futures = [ex.submit(getattr(h, func)) for h in targets]
+        # _invoke runs on the workers, so the collect/propagate policy is applied
+        # there and `f.result()` only re-raises what _invoke let through
+        # (non-collected errors / BaseExceptions).
+        futures = [ex.submit(_invoke, h) for h in targets]
         timed_out = False
         try:
             for f in concurrent.futures.as_completed(futures, timeout=remaining):
@@ -587,6 +615,7 @@ class SimNOS:
                 ex.shutdown(wait=False, cancel_futures=True)
             else:
                 ex.shutdown(wait=True)
+        return errors
 
     @staticmethod
     def _warn_security(host: Host) -> None:

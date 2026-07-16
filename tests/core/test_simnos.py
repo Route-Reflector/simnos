@@ -389,6 +389,51 @@ class TestSimNOS:
         with pytest.raises(ValueError, match="SIMNOS_DATA_DIR is set but empty"):
             SimNOS(inventory={"hosts": {}})
 
+    @staticmethod
+    def _sweep_mock_host(name: str, running: bool) -> Mock:
+        """A minimal Host stand-in for the start/stop sweep tests (#347)."""
+        h = Mock()
+        h.name = name
+        h.running = running
+        h.server = None  # keeps _collect_server_threads empty
+        return h
+
+    @pytest.mark.parametrize("parallel", [False, True], ids=["serial", "parallel"])
+    def test_stop_sweep_survives_one_host_failure(self, parallel):
+        """One host's stop() raising no longer aborts the stop sweep (#347).
+
+        The remaining hosts are still stopped, the shared-loop teardown still
+        runs (it used to be skipped, leaking the loop thread), and the first
+        error is re-raised at the end so the caller still learns stop() failed.
+        """
+        net = SimNOS(inventory={"hosts": {}})
+        bad = self._sweep_mock_host("bad", running=True)
+        bad.stop.side_effect = RuntimeError("stop boom")
+        good = self._sweep_mock_host("good", running=True)
+        net.hosts = {"bad": bad, "good": good}
+        teardown = Mock(return_value=True)
+        net._shared_loop.teardown_if_idle = teardown
+        with pytest.raises(RuntimeError, match="stop boom"):
+            net.stop(parallel=parallel)
+        good.stop.assert_called_once()
+        teardown.assert_called_once()
+
+    def test_start_sweep_stays_fail_fast(self):
+        """start() keeps fail-fast semantics: a failing host aborts immediately (#347).
+
+        The collect-and-continue boundary is a stop-path contract only; starting
+        the remaining environment after one host failed would hand the caller a
+        partially-started cluster that looks successful.
+        """
+        net = SimNOS(inventory={"hosts": {}})
+        bad = self._sweep_mock_host("bad", running=False)
+        bad.start.side_effect = RuntimeError("bind failed")
+        second = self._sweep_mock_host("second", running=False)
+        net.hosts = {"bad": bad, "second": second}
+        with pytest.raises(RuntimeError, match="bind failed"):
+            net.start()
+        second.start.assert_not_called()
+
     def test_wrong_plugin_name(self):
         """
         Test that the function _check_plugin_name raises an exception
@@ -1015,18 +1060,19 @@ class TestPlatformsManifest:
         """
         assert list(available_platforms) == sorted(nos_plugins.keys())
 
-    def test_available_platforms_excludes_base_template(self):
-        """Pin that `base_template` never surfaces in registry or manifest.
+    def test_available_platforms_excludes_base_device(self):
+        """Pin that `base_device` never surfaces in registry or manifest.
 
-        `simnos/plugins/nos/platforms_py/_templates/base_template.py` is the
-        plugin authoring template (BaseDevice example), not a user-facing
-        platform. It is kept out of the registry by living in a subpackage
-        that the non-recursive py glob never scans (#239 — previously a
-        filename filter did this job); this pin catches a future glob
-        recursion or a template module landing back in `platforms_py/`.
+        `simnos/plugins/nos/base_device.py` is the runtime `BaseDevice` base
+        class, not a user-facing platform. It is kept out of the registry by
+        living outside `platforms_py/` — the only dir the non-recursive py
+        glob scans (#239 / #350; previously a filename filter, then a
+        `_templates/` subpackage, did this job). This pin catches the module
+        landing back in `platforms_py/` (where the glob would register it as
+        an orphan platform).
         """
-        assert "base_template" not in available_platforms
-        assert "base_template" not in nos_plugins
+        assert "base_device" not in available_platforms
+        assert "base_device" not in nos_plugins
 
     def test_available_platforms_have_data_source(self):
         """Pin that every supported platform has a backing data source.

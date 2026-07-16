@@ -61,8 +61,8 @@ class ModelCommandVariant(BaseModel):
     """One alternate capture of a multi-output command (#264 / D3).
 
     Each variant points at an output file read verbatim as literal wire text:
-    the authoring *field* decides the channel, not the extension (the loader's
-    `_resolve_output_file` reads variants with ``as_template=False``). ``.j2``
+    the authoring *field* decides the channel, not the extension (the shared
+    `values_loader.resolve_output_file` reads variants with ``as_template=False``). ``.j2``
     templates in variants are out of scope for P1-1 (Decision 6) — a variant
     must reference a literal ``.txt`` (the file-name convention is enforced by
     the data lint, not the loader).

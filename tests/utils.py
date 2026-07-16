@@ -150,8 +150,8 @@ def get_py_platforms() -> list[str]:
     """Return platforms that have a Python plugin module (sorted).
 
     Derived from the `nos_plugins` registry (the same source the server
-    uses): values are lists of absolute plugin file paths, and authoring
-    templates (`platforms_py/_templates/`) are already outside the registry
+    uses): values are lists of absolute plugin file paths, and shared infra
+    (`plugins/nos/base_device.py`, #350) is already outside the registry
     glob, so no manual listdir filtering is needed here.
     """
     return sorted(p for p, files in nos_plugins.items() if any(f.endswith(".py") for f in files))

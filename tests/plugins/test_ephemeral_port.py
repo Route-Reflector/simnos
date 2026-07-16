@@ -122,3 +122,27 @@ def test_explicit_port_in_use_fails_loudly():
         with pytest.raises(OSError):
             net.start()
         net.stop()  # idempotent cleanup of any partial start
+
+
+@pytest.mark.timeout(30)
+def test_second_instance_on_same_port_fails_loudly():
+    """A second SIMNOS instance binding the same SSH port fails loud (#347).
+
+    The SSH listener used to set SO_REUSEPORT on Linux, which let a second
+    instance bind the SAME port with no error while the kernel load-balanced
+    incoming connections between the two — a silent double-start
+    (`test_explicit_port_in_use_fails_loudly` cannot catch this: its occupying
+    socket does not opt in, and port sharing needs every socket to). Both binds
+    here come from SIMNOS itself, so this pins that the server socket no longer
+    opts into port sharing.
+    """
+    first = SimNOS(inventory=build_inventory("cisco_ios"))
+    first.start()
+    try:
+        port = first.hosts["device"].port
+        second = SimNOS(inventory=build_inventory("cisco_ios", port=port))
+        with pytest.raises(OSError):
+            second.start()
+        second.stop()  # idempotent cleanup of any partial start
+    finally:
+        first.stop()

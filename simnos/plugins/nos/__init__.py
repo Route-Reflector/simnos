@@ -52,9 +52,11 @@ if os.path.isdir(platforms_directory_a3):
 
 # Load the python handler modules, appending each to its platform's existing
 # A3 entry (registration order: A3 dir first, py module last).
-# The glob is non-recursive on purpose: authoring templates (BaseDevice in
-# `platforms_py/_templates/`) live in a subpackage and never surface as
-# platforms (#239 — previously a filename filter excluded base_template.py).
+# The glob is non-recursive on purpose: only platform handler modules may live
+# directly in `platforms_py/` — shared infra (the `BaseDevice` base class) lives
+# outside it in `plugins/nos/base_device.py` so it never surfaces as a platform
+# (#239 / #350 — previously a filename filter, then a `_templates/` subpackage,
+# did this job).
 # A py module with no co-named A3 dir is NOT registered (#317 P-4): py-only
 # platforms are gone (the merge requires A3 command data), and registering one
 # would only defer the failure to `Host.start` — warn at import instead, so the

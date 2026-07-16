@@ -8,7 +8,7 @@ this module only ships the device class whose methods back the A3
 
 import time
 
-from simnos.plugins.nos.platforms_py._templates.base_template import BaseDevice
+from simnos.plugins.nos.base_device import BaseDevice
 
 
 class AristaEOS(BaseDevice):
