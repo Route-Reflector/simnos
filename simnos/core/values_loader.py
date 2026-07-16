@@ -205,7 +205,7 @@ def resolve_output_file(
     Lives here (not in the platform loader) because it is shared by both
     inflows that read adjacent output files — the packaged A3 loader
     (:mod:`simnos.core.platform_loader`) and the user overlay loader
-    (:mod:`simnos.core.overlay_loader`) — matching this module\'s charter;
+    (:mod:`simnos.core.overlay_loader`) — matching this module's charter;
     it was a private cross-module import before (#350).
     """
     filepath = os.path.join(commands_dir, ref)
