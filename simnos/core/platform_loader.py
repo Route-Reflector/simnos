@@ -175,19 +175,16 @@ def _resolve_commands(
             # (dead), and an alias cannot re-author either field (#348 / A-9).
             if model.mode is not None:
                 new_modes = resolve_modes(model.command, model.mode, mode_names)
-                if aliased.transitions is not None:
-                    stray = sorted(k for k in aliased.transitions if k not in new_modes)
+                inherited_mode_keys = (
+                    ("transition mode(s)", aliased.transitions or {}),
+                    ("challenge firing mode(s)", aliased.challenge.modes if aliased.challenge else ()),
+                )
+                for label, modes_in_use in inherited_mode_keys:
+                    stray = sorted(m for m in modes_in_use if m not in new_modes)
                     if stray:
                         raise ValueError(
                             f"command {model.command!r}: alias `mode:` override to {sorted(new_modes)} drops "
-                            f"transition mode(s) {stray} inherited from target {model.alias!r} (dead entry)"
-                        )
-                if aliased.challenge is not None:
-                    stray = sorted(m for m in aliased.challenge.modes if m not in new_modes)
-                    if stray:
-                        raise ValueError(
-                            f"command {model.command!r}: alias `mode:` override to {sorted(new_modes)} drops "
-                            f"challenge firing mode(s) {stray} inherited from target {model.alias!r} (dead entry)"
+                            f"{label} {stray} inherited from target {model.alias!r} (dead entry)"
                         )
                 aliased = replace(aliased, modes=new_modes)
             resolved[name] = aliased
