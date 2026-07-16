@@ -64,6 +64,7 @@ golden で固定されています — コマンドを送って出力を読む�
 **バグ修正**
 
 - `SimNOS` インスタンス間 (およびインスタンス → 呼び出し元) の状態汚染を解消 (#346)。`SimNOS(plugins=[...])` の登録先が共有 module-global からプラットフォームレジストリの per-instance copy に変わり、インスタンス A で登録した custom plugin はインスタンス B から見えなくなりました — この漏れに依存していた場合は、利用する各 `SimNOS` の `plugins=[...]` に渡してください。また explicit な `inventory` dict を in-place で書き換えなくなりました (`plugins` list も契約として同様に copy されます): SimNOS は自身の copy 上で動作する (inventory は deep copy、plugins list は container copy) ため、同じ inventory dict を異なる `sys_config` 設定のインスタンス間で使い回しても、最初のインスタンスが seed した `variants_policy` を silent に継承しません
+- コマンド解決を deterministic + 実機準拠に是正 (#348)。省略マッチは、短いコマンドが exact トークンを持つときに**別の**コマンドを実行しなくなりました (`show ip` と `show ipv6 route` が両方あるとき `show ip ro` は、`show ipv6 route` を実行する代わりに実機 IOS 同様 unknown-command エラーを返します)。また別モードのコマンドへの exact match が現在モードの省略マッチ空間を shadow しなくなりました (実機は per-mode 解決なので、返すべき場面では `% Incomplete command.` 等を返します)。loader 側では、別の alias を指す alias が load error になり (chain の解決結果がファイル名 sort 順に silent 依存していたため — alias は real コマンドを直接指してください)、継承した challenge 発火モードを落とす alias `mode:` override も既存の transitions check と同様に拒否されます。full な in-mode コマンドは省略マッチに入らないため scraper の wire は byte 同一 — 変わるのは従来誤動作していた入力だけです
 
 ## v2.3.1
 

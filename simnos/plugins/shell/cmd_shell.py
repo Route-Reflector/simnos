@@ -757,17 +757,21 @@ class CMDShell:
         still longer than the input), ``"ambiguous"`` (a position matches more
         than one distinct surface token), or ``"none"`` (nothing matches).
 
-        Commands shorter than the input can never match, so they are pruned up
-        front — this also keeps `c[2][j]` in range for the whole loop and stops a
-        short command from pruning a longer one. At each position an exact token
-        match wins over a strict-prefix match (so `ip` is not shadowed by `ipv6`).
-        Because the candidate set is canonical-only, distinct surface tokens at a
-        position mean distinct real commands = genuine ambiguity.
+        A candidate with no token at position j is dropped when the loop reaches
+        j — NOT up front (#348 / A-18): a shorter command must participate in
+        exact-token-wins for every position it has, the way a real device locks
+        each token to its exact node before looking at the next one. Pruning by
+        input length first let `show ip ro` slide past the exact `ip` node into
+        `show ipv6 route`. Survivors of the full loop always carry at least
+        ``len(tokens)`` tokens, so the caller's full/incomplete split is
+        unaffected. At each position an exact token match wins over a
+        strict-prefix match (so `ip` is not shadowed by `ipv6`). Because the
+        candidate set is canonical-only, distinct surface tokens at a position
+        mean distinct real commands = genuine ambiguity.
         """
-        candidates = [c for c in self._abbrev_candidates() if len(c[2]) >= len(tokens)]
-        if not candidates:
-            return ("none", [])
+        candidates = self._abbrev_candidates()
         for j, itok in enumerate(tokens):
+            candidates = [c for c in candidates if len(c[2]) > j]
             matched = [c for c in candidates if c[2][j].startswith(itok)]
             if not matched:
                 return ("none", [])
@@ -782,9 +786,10 @@ class CMDShell:
     def _resolve_abbreviation(self, line: str) -> tuple[str, ResolvedCommand | str | None]:
         """Resolve an abbreviated command line, real-IOS style (#303 P3-2).
 
-        Called only after the exact-match lookup misses, so full commands never
-        reach here and their wire stays byte-identical. Returns ``(kind,
-        payload)``:
+        Called only after the in-mode exact-match lookup misses, so in-mode full
+        commands never reach here and their wire stays byte-identical (a
+        cross-mode exact hit retries as an abbreviation, #348 / A-19). Returns
+        ``(kind, payload)``:
 
         - ``("command", ResolvedCommand)``: a unique full command (token counts
           match, each input token a prefix of the canonical token).
@@ -1026,23 +1031,37 @@ class CMDShell:
         """
         log.debug("shell.dispatch '%s' running command '%s'", self.base_prompt, [line])
         cmd = self.commands.get(line)
-        # Command abbreviation (#303 / P3-2): only on an exact-match miss, so a
-        # full command's wire is byte-identical (scrapers send full commands and
-        # never reach here). An ambiguous / incomplete abbreviation swaps in the
-        # `_ambiguous_` / `_incomplete_` overridable special so it flows through
-        # the very same dispatch pipeline as `_default_` (handler / new_mode
-        # supported); `abbrev_input` then drives the `{input}` interpolation
-        # after the body is finalized.
+        # Command abbreviation (#303 / P3-2): only on an in-mode exact-match
+        # miss, so a full command's wire is byte-identical (scrapers send full
+        # in-mode commands and never reach here). A cross-mode exact hit retries
+        # as an abbreviation (#348 / A-19): real devices resolve per mode, so
+        # `X` in a mode that only has `X Y` is `% Incomplete command.`, not
+        # unknown — on "none" the mode-missed cmd is kept so the mode-mismatch
+        # warning path below still fires. An ambiguous / incomplete abbreviation
+        # swaps in the `_ambiguous_` / `_incomplete_` overridable special so it
+        # flows through the very same dispatch pipeline as `_default_` (handler /
+        # new_mode supported); `abbrev_input` then drives the `{input}`
+        # interpolation after the body is finalized.
         abbrev_input = None
-        if cmd is None:
+        if cmd is None or not self._in_current_mode(cmd):
+            bypassed = cmd  # non-None only for a cross-mode exact hit
             kind, payload = self._resolve_abbreviation(line)
             if kind == "command":
                 cmd = cast("ResolvedCommand", payload)
+                if bypassed is not None:
+                    log.debug("cross-mode exact hit %r bypassed; resolved as abbreviation of %r", line, cmd.name)
             elif kind in ("ambiguous", "incomplete"):
+                if bypassed is not None:
+                    log.debug("cross-mode exact hit %r bypassed; abbreviation is %s", line, kind)
                 special = self.commands.get("_ambiguous_" if kind == "ambiguous" else "_incomplete_")
                 if special is not None:  # BASIC always provides these; guard the degraded case
                     cmd = special
                     abbrev_input = line  # set only when the special was actually swapped in
+                else:
+                    # Degraded platform without the special: drop a mode-missed
+                    # exact hit so the trail logs "not found", not a misleading
+                    # cross-mode warning for what is really an abbreviation miss.
+                    cmd = None
         if cmd is not None and self._in_current_mode(cmd):
             # Interactive challenge (#338 / §3): a `challenge:` command in a firing
             # mode holds its transition and hands the driver a `PendingChallenge`

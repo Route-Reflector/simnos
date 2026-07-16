@@ -59,7 +59,7 @@ output: show_version.txt       # 裸の .txt ファイル名、verbatim 読込 (
 - **`new_mode`** はコマンド実行後に遷移するモード名 (旧 `new_prompt` の後継)。
 - **`transitions`** はモード条件付き遷移 map で、`new_mode` / `exit` と排他: key はコマンドの mode のいずれか、値は `{new_mode: <mode>}` または `{exit: true}` (#317)。例: arista_eos の `exit` は user/enable ではセッションを閉じ、config では enable に落ちます。
 - **`variants`** は multi-capture 契約: `{name, output}` エントリのリスト (`variant_1` が primary を mirror、`variant_2`.. が alternate)、各々が自身の `.txt` を指す。
-- **`alias`** はコマンドを別コマンドへの純粋な参照にします。alias が再指定できる唯一の dispatch field は `mode:` です (例: arista_eos の `do show ip int brief` は target が user/enable なのに対し config 専用、#317) — それ以外はすべて継承。
+- **`alias`** はコマンドを別コマンドへの純粋な参照にします。target は real コマンドでなければなりません — alias が別の alias を指すのは load error です (#348。chain に表現力はないので real コマンドを直接指してください)。alias が再指定できる唯一の dispatch field は `mode:` です (例: arista_eos の `do show ip int brief` は target が user/enable なのに対し config 専用、#317) — それ以外はすべて継承。また、この override は継承した `transitions` map / `challenge` 発火 set が使うモードを落とせません (発火しえない dead entry は load error、#348)。
 - **`exit`** はセッションを閉じるコマンドを表します。
 - **`disables_paging`** は `--More--` ページャーをそのセッション以降無効化するコマンドを表します (例: `terminal length 0`、#307)。
 - **`challenge`** はコマンド実行後にパスワードを求める (enable secret / `sudo -s`、#338) — [対話 challenge](#対話-challenge) を参照。
@@ -111,7 +111,7 @@ challenge:
 両 kind に共通のルール:
 
 - `challenge:` 内の **`mode`** はどのモードで発火するかを絞ります (既定: コマンドが有効な全モード)。発火しないモードでは、代わりにコマンド通常の `output` を返します — これがモードごとに応答を変える方法です (例: `enable-admin` は user モードで challenge、enable 済なら "already in admin mode" を表示) — 別コマンドを作らずに実現できます。
-- `challenge` は `output` / `output_template` (非発火モードの応答) とは共存しますが `handler` / `variants` とは排他で、alias は target の challenge を継承します (再 authoring 不可)。
+- `challenge` は `output` / `output_template` (非発火モードの応答) とは共存しますが `handler` / `variants` とは排他で、alias は target の challenge を継承します (再 authoring 不可)。alias の `mode:` override は継承した発火モードをすべて残す必要があります — 落とすと発火しえない challenge が残るため load error です (#348)。
 
 ### authoring 規約
 
