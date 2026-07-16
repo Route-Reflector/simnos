@@ -26,7 +26,7 @@ frozen — production code never writes to it again. Runtime registrations
 (``SimNOS(plugins=[...])``) go to the per-instance copy ``SimNOS.nos_plugins``
 and never land here, so instances cannot contaminate each other. This is a
 *logical* freeze (an ownership contract, not ``MappingProxyType``-enforced
-immutability); tests may still monkeypatch entries in deliberately — the
+immutability); tests may still deliberately monkeypatch entries in — the
 dynamic fallback in ``resolve_device_type`` remains as that injection seam.
 """
 
