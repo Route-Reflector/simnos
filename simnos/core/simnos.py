@@ -125,6 +125,9 @@ class SimNOS:
         self.hosts: dict[str, Host] = {}
         self.allocated_ports: set[int] = set()
 
+        # The shell/servers registries are aliased, not copied: they are
+        # read-only class maps with no runtime write path (unlike nos_plugins
+        # below, whose `_register_nos_plugins` writes forced the #346 copy).
         self.shell_plugins = shell_plugins
         # Per-instance view of the import-time registry (#346): mapping AND value
         # lists are copied so `_register_nos_plugins` writes (and any list

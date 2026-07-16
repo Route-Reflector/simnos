@@ -516,7 +516,7 @@ class TestSimNOS:
         # The alias resolves to the internal platform key (the reverse-index core).
         assert resolve_device_type("edgecore_sonic") == "edgecore"
 
-    def test_resolve_device_type_runtime_registered_and_unknown(self, monkeypatch):
+    def test_resolve_device_type_test_injected_and_unknown(self, monkeypatch):
         """resolve_device_type serves a test-injected platform and None-passes the unknown (#266 / D2).
 
         The unknown → None half is what the `nos: {plugin: X}` path relies on:
