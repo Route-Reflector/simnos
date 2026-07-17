@@ -23,7 +23,7 @@ executor-agnostic (and unit-testable with fakes):
 from collections import deque
 from collections.abc import Awaitable, Callable
 import logging
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Literal, Protocol
 
 from simnos.plugins.servers.tap_bridge import _assemble_wire, _render_intro, _render_response
 
@@ -82,7 +82,7 @@ class AsyncPushTransport(Protocol):
 
 
 # --------------------------------------------------------------------- terminator
-def _consume_terminator(byte: bytes, skip_lf: bool, nul_resets: bool) -> tuple[str, bool]:
+def _consume_terminator(byte: bytes, skip_lf: bool, nul_resets: bool) -> tuple[Literal["drop", "line", "char"], bool]:
     """Classify one input byte against the CR/LF/NUL terminator machine (#350).
 
     The single step function behind every byte consumer in this module (main

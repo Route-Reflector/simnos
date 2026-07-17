@@ -217,7 +217,10 @@ class TestHost:
         host.start()
         old_nos = host.nos
         host.stop()
-        new_plugin = Mock()
+        # A plain platform-name str (the registry's `Nos | str | list[str]` type),
+        # not a Mock: it fails `isinstance(_, Nos)` so `_build_nos` constructs (and
+        # raises); `.get` hands back this exact object so the `is` assert holds.
+        new_plugin = "dummy_new_plugin"
         host.simnos.nos_plugins["nos_plugin"] = new_plugin
         with patch("simnos.core.host.Nos", _RaisingNos), pytest.raises(RuntimeError, match="nos build boom"):
             host.start()
