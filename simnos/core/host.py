@@ -139,34 +139,8 @@ class Host:
         # (e.g. a runtime-registered custom plugin) falls through unchanged.
         plugin_key = resolve_device_type(self.nos_inventory["plugin"]) or self.nos_inventory["plugin"]
         self.nos_plugin = self.simnos.nos_plugins.get(plugin_key, plugin_key)
-        if isinstance(self.nos_plugin, Nos) and self.configuration_file:
-            # A pre-registered Nos instance is reused as-is, so this host's
-            # `configuration_file` never reaches it — warn instead of silently
-            # dropping the setting (anti-silent-bug, same policy as
-            # `_warn_reserved_fields`; #345).
-            log.warning(
-                "Host %s: configuration_file %r is ignored because the nos plugin resolves to a "
-                "pre-registered Nos instance (its device was built from the registrant's configuration).",
-                self.name,
-                self.configuration_file,
-            )
-        self.nos = (
-            Nos(filename=self.nos_plugin, configuration_file=self.configuration_file)
-            if not isinstance(self.nos_plugin, Nos)
-            else self.nos_plugin
-        )
-        # Parse the per-host variant policy to its typed model at the carrier
-        # boundary so the shell only ever sees `ModelVariantsPolicy`, never a raw
-        # dict (#287 / D6 K — typed-model-first). The inventory schema already
-        # validated this value (precedence-merged whole, D8), so re-parsing only
-        # materializes the typed object + defaults (select=0).
-        variants_policy = ModelVariantsPolicy(**self.variants_policy) if self.variants_policy else None
-        render_config = HostRenderConfig(
-            overlay_root=self._resolve_overlay_root(plugin_key),
-            override_commands=(self.overlay or {}).get("override_commands"),
-            variants_policy=variants_policy,
-            host_name=self.name,
-        )
+        self.nos = self._build_nos(self.nos_plugin)
+        render_config = self._build_render_config(plugin_key)
         self.server = self.server_plugin(
             shell=self.shell_plugin,
             shell_configuration=self.shell_inventory["configuration"],
@@ -222,6 +196,50 @@ class Host:
                 self.server = None
                 self.running = False
             raise
+
+    def _build_nos(self, nos_plugin: "Nos | str | list[str]") -> Nos:
+        """Build (or reuse) this host's :class:`Nos` from the resolved plugin (#350).
+
+        A side-effect-free factory: it warns and constructs, but writes no
+        attributes — ``start()`` owns the ``self.nos`` assignment so the state
+        transitions stay in one place. ``nos_plugin`` is the registry lookup
+        result from ``start()`` — a pre-registered :class:`Nos` (reused as-is) or a
+        platform name / A3 file list for construction.
+        """
+        if isinstance(nos_plugin, Nos):
+            if self.configuration_file:
+                # A pre-registered Nos instance is reused as-is, so this host's
+                # `configuration_file` never reaches it — warn instead of silently
+                # dropping the setting (anti-silent-bug, same policy as
+                # `_warn_reserved_fields`; #345).
+                log.warning(
+                    "Host %s: configuration_file %r is ignored because the nos plugin resolves to a "
+                    "pre-registered Nos instance (its device was built from the registrant's configuration).",
+                    self.name,
+                    self.configuration_file,
+                )
+            return nos_plugin
+        return Nos(filename=nos_plugin, configuration_file=self.configuration_file)
+
+    def _build_render_config(self, plugin_key: str) -> HostRenderConfig:
+        """Build the inventory render config carrier for the shell (#350).
+
+        Precondition: call AFTER ``self.nos`` is built — ``_resolve_overlay_root``
+        reads ``self.nos.resolved_platform`` to reject an overlay opt-in on a
+        py-only platform.
+        """
+        # Parse the per-host variant policy to its typed model at the carrier
+        # boundary so the shell only ever sees `ModelVariantsPolicy`, never a raw
+        # dict (#287 / D6 K — typed-model-first). The inventory schema already
+        # validated this value (precedence-merged whole, D8), so re-parsing only
+        # materializes the typed object + defaults (select=0).
+        variants_policy = ModelVariantsPolicy(**self.variants_policy) if self.variants_policy else None
+        return HostRenderConfig(
+            overlay_root=self._resolve_overlay_root(plugin_key),
+            override_commands=(self.overlay or {}).get("override_commands"),
+            variants_policy=variants_policy,
+            host_name=self.name,
+        )
 
     def _resolve_overlay_root(self, plugin_key: str) -> str | None:
         """Resolve this host's overlay dir, or None when overlay is not opted in (#286).

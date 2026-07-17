@@ -10,8 +10,13 @@ malformed UTF-8 / login skip_lf).
 
 import asyncio
 
+import pytest
+
 from simnos.core.resolved_command import ResolvedChallenge, ResolvedOutput, Transition
 from simnos.plugins.servers.async_session import (
+    _CSI_ACTIONS,
+    _consume_escape,
+    _consume_terminator,
     _read_challenge_line,
     _resolve_rows,
     async_interactive_login,
@@ -114,6 +119,90 @@ def _drive(transport: _FakeTransport, shell: _FakeShell, **kwargs) -> bytes:
 
     asyncio.run(run_async_push_session(transport, shell, _dispatch, **kwargs))
     return bytes(transport.out)
+
+
+# ---------------------------------------------------------------- shared byte step functions (#350)
+@pytest.mark.parametrize(
+    ("byte", "skip_lf", "nul_resets", "expected"),
+    [
+        # NUL is always dropped; nul_resets (Telnet) clears a pending skip_lf, SSH preserves it.
+        (b"\x00", False, False, ("drop", False)),
+        (b"\x00", False, True, ("drop", False)),
+        (b"\x00", True, True, ("drop", False)),  # Telnet CR NUL: clear the pending skip_lf
+        (b"\x00", True, False, ("drop", True)),  # SSH: NUL preserves the pending skip_lf
+        # A pending skip_lf consumes the LF half of a CR LF (nul_resets irrelevant).
+        (b"\n", True, False, ("drop", False)),
+        (b"\n", True, True, ("drop", False)),
+        # CR / LF terminate the line; CR arms skip_lf for the next byte.
+        (b"\r", False, False, ("line", True)),
+        (b"\r", True, False, ("line", True)),  # CR always arms, even clearing a pending skip_lf
+        (b"\n", False, False, ("line", False)),
+        # Data byte -> char; a pending skip_lf is cleared (only valid 1 byte after CR).
+        (b"a", False, False, ("char", False)),
+        (b"a", True, False, ("char", False)),
+    ],
+)
+def test_consume_terminator_truth_table(byte, skip_lf, nul_resets, expected):
+    """Every cell of the §1 truth table — the SSoT for all four byte consumers (#350)."""
+    assert _consume_terminator(byte, skip_lf, nul_resets) == expected
+
+
+def test_consume_escape_seed_starts_and_restarts_collection():
+    """An ESC byte seeds the buffer, and a second ESC restarts it (abandons a partial)."""
+    esc = bytearray()
+    assert _consume_escape(esc, b"\x1b") == "consumed"
+    assert bytes(esc) == b"\x1b"
+    esc += b"["  # pretend a partial CSI accumulated
+    assert _consume_escape(esc, b"\x1b") == "consumed"
+    assert bytes(esc) == b"\x1b"  # restarted from scratch
+
+
+def test_consume_escape_no_pending_passes_byte():
+    """With no escape pending a normal byte returns "pass" (process it normally)."""
+    esc = bytearray()
+    assert _consume_escape(esc, b"a") == "pass"
+    assert bytes(esc) == b""
+
+
+def test_consume_escape_lone_esc_then_non_csi_passes():
+    """ESC followed by a non-CSI/SS3 byte is a lone ESC: cleared and the byte passes."""
+    esc = bytearray(b"\x1b")
+    assert _consume_escape(esc, b"a") == "pass"
+    assert bytes(esc) == b""  # cleared so the byte reprocesses on the normal path
+
+
+def test_consume_escape_completes_action_then_discards_unknown():
+    """A complete CSI maps to its action; a complete-but-unknown CSI is swallowed."""
+    esc = bytearray(b"\x1b[")
+    assert _consume_escape(esc, b"D") == "left"  # CSI D -> cursor left
+    assert bytes(esc) == b""
+    esc = bytearray(b"\x1b[")
+    assert _consume_escape(esc, b"Z") == "consumed"  # complete but unhandled -> discard
+    assert bytes(esc) == b""
+
+
+def test_consume_escape_collecting_and_maxlen_drop():
+    """Mid-collection returns "consumed"; an over-long unterminated escape is dropped."""
+    esc = bytearray(b"\x1b")
+    assert _consume_escape(esc, b"[") == "consumed"  # still collecting
+    assert bytes(esc) == b"\x1b["
+    esc = bytearray(b"\x1b[" + b"1" * 5)  # 7 bytes; the 8th hits _MAX_ESC_LEN
+    assert _consume_escape(esc, b"2") == "consumed"  # incomplete at maxlen -> dropped
+    assert bytes(esc) == b""
+
+
+def test_consume_escape_control_byte_mid_csi_passes():
+    """A control byte mid-CSI cannot continue the sequence: cleared, byte passes."""
+    esc = bytearray(b"\x1b[")
+    assert _consume_escape(esc, b"\r") == "pass"
+    assert bytes(esc) == b""  # cleared so the CR reprocesses on the normal path
+
+
+def test_csi_actions_disjoint_from_reserved_verdicts():
+    """Action names must stay disjoint from the control verdicts sharing the str
+    namespace, or a new `_CSI_ACTIONS` entry would be misread as a verdict (§3)."""
+    reserved = {"pass", "consumed", "incomplete", "discard"}
+    assert reserved.isdisjoint(_CSI_ACTIONS.values())
 
 
 def test_intro_then_echo_and_response():
@@ -250,6 +339,46 @@ def test_async_interactive_login_wrong_password_fails():
 
     ok, _ = asyncio.run(_run())
     assert ok is False
+
+
+@pytest.mark.parametrize("nul_resets", [False, True])
+def test_async_login_nul_dropped_from_username(nul_resets):
+    """A NUL mid-username is dropped, never buffered into the credential (#350 login
+    bug fix). The old `_async_read_line` only checked NUL inside the skip_lf branch, so
+    a non-adjacent NUL fell through, echoed, and corrupted the credential comparison."""
+
+    async def _run():
+        transport = _FakeTransport([b"us\x00er\r", b"pw\r"], nul_resets_skip_lf=nul_resets)
+        ok, _ = await async_interactive_login(transport, "user", "pw", user_prompt=b"User: ", pass_prompt=b"Pass: ")
+        return ok, bytes(transport.out)
+
+    ok, out = asyncio.run(_run())
+    assert ok is True  # username parsed as "user" (the NUL dropped, not buffered)
+    assert b"\x00" not in out  # NUL never echoed
+
+
+def test_async_login_ssh_nul_lf_after_username_cr_password_intact():
+    """Consumer-level 4-condition pin (#350 login bug, codex 1st#5): on SSH, a NUL then
+    the LF half of the username's CR (``\\x00\\n``) before the password must be fully
+    consumed — NUL dropped, skip_lf preserved across the NUL, LF consumed as the CR
+    half — so the password parses cleanly, auth succeeds, and the final skip_lf is True.
+    The old code buffered the NUL into the password and terminated early on the LF."""
+
+    async def _run():
+        # One chunk: username "admin\r", then the SSH CR-pair tail "\x00\n" and the
+        # password "secret\r" (recv(1) feeds the login readers one byte at a time).
+        transport = _FakeTransport([b"admin\r\x00\nsecret\r"], nul_resets_skip_lf=False)
+        ok, skip_lf = await async_interactive_login(
+            transport, "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+        return ok, skip_lf, bytes(transport.out)
+
+    ok, skip_lf, out = asyncio.run(_run())
+    assert ok is True  # password parsed as "secret" (NUL + LF consumed, not buffered)
+    assert skip_lf is True  # password line ended on CR
+    assert b"\x00" not in out  # NUL never echoed
+    assert b"secret" not in out  # password (echo off) never on the wire
+    assert b"User: admin\r\n" in out  # username echo carries no extra NUL/LF artifact
 
 
 # ---------------------------------------------------------------- paging (#307 P3-4)
@@ -395,6 +524,20 @@ def test_paging_telnet_enter_cr_nul_consumed():
         _PagingShell("L1\nL2\nL3\nL4"),
     )
     assert out == (b"Custom SSH Shell\r\ndevice>show\r\nL1\r\nL2\r\nL3\r\n" + _MORE + _ERASE + b"L4\r\ndevice>")
+
+
+def test_paging_ssh_nul_in_skip_lf_no_phantom_enter():
+    """SSH bug fix (#350): a NUL arriving while skip_lf is pending must NOT clear the
+    pending state (SSH preserves it), so the following LF is consumed as the CR half
+    and does NOT phantom-advance the pager. The old `_emit_paged` cleared skip_lf on
+    every byte and mis-fired the LF as a pager Enter (advancing one line early)."""
+    # Launching "show\r" arms skip_lf; SSH "\x00\n" (a NUL, then the LF half of the CR)
+    # must both be consumed, then Space advances the remaining lines to the prompt.
+    out = _drive(
+        _FakeTransport([b"show\r", b"\x00\n", b" "], rows=3, nul_resets_skip_lf=False),
+        _PagingShell("L1\nL2\nL3\nL4\nL5"),
+    )
+    assert out == (b"Custom SSH Shell\r\ndevice>show\r\nL1\r\nL2\r\nL3\r\n" + _MORE + _ERASE + b"L4\r\nL5\r\ndevice>")
 
 
 def test_paging_disabled_flag_skips_pager():

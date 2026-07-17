@@ -14,6 +14,19 @@ from simnos.core.nos import Nos, available_platforms
 from tests.utils import SYNTHETIC_CUSTOM_A3_DIR
 
 
+class _RaisingNos:
+    """Stand-in for `Nos` whose construction always raises.
+
+    Patched over `simnos.core.host.Nos` as a REAL type (not a MagicMock) so the
+    `isinstance(nos_plugin, Nos)` reuse check in `_build_nos` still evaluates —
+    a plain `patch(..., side_effect=...)` would replace `Nos` with a mock and
+    break `isinstance`.
+    """
+
+    def __init__(self, *args, **kwargs):
+        raise RuntimeError("nos build boom")
+
+
 class TestHost:
     """
     Test module for the Host class
@@ -174,6 +187,47 @@ class TestHost:
         assert host.server is good_server
         assert host.running
         good_server.start.assert_called_once()
+
+    def test_start_nos_build_failure_preserves_exception_state(self, host):
+        """A Nos build failure leaves the documented partial state (#350 helper contract).
+
+        `_build_nos` writes no attributes and `start()` assigns `nos_plugin` (the
+        registry lookup) before calling it, so a raise inside the helper leaves
+        `nos_plugin` resolved while `nos` / `server` stay None and `running` False —
+        the exact exception-time public state of the pre-split `start()`. This pins
+        that the helper is side-effect-free (a future tuple-return regression, which
+        would leave `nos_plugin` unassigned on raise, fails here).
+        """
+        resolved_plugin = host.simnos.nos_plugins["nos_plugin"]
+        with patch("simnos.core.host.Nos", _RaisingNos), pytest.raises(RuntimeError, match="nos build boom"):
+            host.start()
+        assert host.nos_plugin is resolved_plugin  # registry lookup ran (assigned in start())
+        assert host.nos is None  # _build_nos raised before start() could assign self.nos
+        assert host.server is None
+        assert not host.running
+
+    def test_restart_nos_build_failure_keeps_old_nos_identity(self, host):
+        """A restart whose Nos rebuild fails keeps the OLD nos object (#350 codex 3rd#3).
+
+        After a successful start/stop, swapping the registry to a new entry whose Nos
+        build raises must leave the new `nos_plugin` but the OLD `nos` object — the
+        half-update contract (`_build_nos` must not null `self.nos`). This catches a
+        future helper change that clears `self.nos` before a failing rebuild.
+        """
+        host.start()
+        old_nos = host.nos
+        host.stop()
+        # A plain platform-name str (the registry's `Nos | str | list[str]` type),
+        # not a Mock: it fails `isinstance(_, Nos)` so `_build_nos` constructs (and
+        # raises); `.get` hands back this exact object so the `is` assert holds.
+        new_plugin = "dummy_new_plugin"
+        host.simnos.nos_plugins["nos_plugin"] = new_plugin
+        with patch("simnos.core.host.Nos", _RaisingNos), pytest.raises(RuntimeError, match="nos build boom"):
+            host.start()
+        assert host.nos_plugin is new_plugin  # new registry value assigned in start()
+        assert host.nos is old_nos  # old device preserved (helper wrote nothing)
+        assert host.server is None
+        assert not host.running
 
     def test_stop(self, host):
         """
