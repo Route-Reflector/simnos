@@ -424,7 +424,6 @@ async def _emit_paged(
     n = len(shell.more_prompt)
     erase = b"\b" * n + b" " * n + b"\b" * n
     total = len(body_lines)
-    nul_resets = transport.nul_resets_skip_lf
     prompt_bytes = _assemble_wire([result.prompt])
 
     def _wire(start: int, count: int) -> bytes:
@@ -447,7 +446,7 @@ async def _emit_paged(
         # half of a preceding CR (the launching command's CR-LF on entry, or a
         # prior pager Enter's) is dropped — read from the SAME stream so a
         # cross-chunk split cannot mistake it for a fresh pager key.
-        event, skip_lf = _consume_terminator(byte, skip_lf, nul_resets)
+        event, skip_lf = _consume_terminator(byte, skip_lf, transport.nul_resets_skip_lf)
         if event == "drop":
             continue
         if event == "line":
@@ -482,11 +481,11 @@ async def _read_challenge_line(
     the main loop (#350) but never runs the line editor: an answer must not enter
     history nor Tab-complete, and a password (``echo=False``) must never reach the
     wire. Escape sequences (arrow keys) are swallowed so they cannot land in the
-    answer. The terminating CR/LF is NOT
-    echoed — the held ``\\r\\n`` of the following ``_render_response`` supplies the
-    answer line's newline (the main-loop held-echo principle), so exactly one
-    ``\\r\\n`` reaches the wire per Enter. Returns ``(answer, next_skip_lf)``, or
-    ``(None, skip_lf)`` on an EOF (peer gone mid-challenge).
+    answer. The terminating CR/LF is NOT echoed — the held ``\\r\\n`` of the
+    following ``_render_response`` supplies the answer line's newline (the
+    main-loop held-echo principle), so exactly one ``\\r\\n`` reaches the wire per
+    Enter. Returns ``(answer, next_skip_lf)``, or ``(None, skip_lf)`` on an EOF
+    (peer gone mid-challenge).
     """
     buf = bytearray()
     esc = bytearray()
