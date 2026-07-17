@@ -81,6 +81,38 @@ class AsyncPushTransport(Protocol):
         ...
 
 
+# --------------------------------------------------------------------- terminator
+def _consume_terminator(byte: bytes, skip_lf: bool, nul_resets: bool) -> tuple[str, bool]:
+    """Classify one input byte against the CR/LF/NUL terminator machine (#350).
+
+    The single step function behind every byte consumer in this module (main
+    loop / ``--More--`` pager / challenge answer / in-band login), so the four
+    stay structurally byte-identical. Semantics are the main loop's — the
+    reference implementation pinned by the byte-parity goldens:
+
+    - NUL is dropped no matter the state (never echoed, never buffered);
+      ``nul_resets`` (Telnet RFC 854: CR NUL is a complete sequence) also
+      clears a pending ``skip_lf``, while SSH preserves it.
+    - A pending ``skip_lf`` consumes an immediately following LF (the LF half
+      of CR LF); any other byte clears the pending state and is classified
+      normally.
+    - CR / LF terminate the line; CR arms ``skip_lf`` for the next byte.
+
+    Returns ``(event, next_skip_lf)`` with event one of ``"drop"`` (swallow the
+    byte), ``"line"`` (line terminator), ``"char"`` (data byte — the caller
+    decides echo / buffer / key handling). ``"char"`` always returns
+    ``next_skip_lf=False`` because a pending ``skip_lf`` is only valid for the
+    single byte after a CR.
+    """
+    if byte == b"\x00":
+        return "drop", (False if nul_resets else skip_lf)
+    if skip_lf and byte == b"\n":
+        return "drop", False
+    if byte in (b"\r", b"\n"):
+        return "line", byte == b"\r"
+    return "char", False
+
+
 # --------------------------------------------------------------------- line editor
 # Interactive line editing for the SSH push session (#303 P3-1). This rides ON TOP
 # of the binary byte machine in run_async_push_session and only fires on keystrokes
@@ -98,6 +130,10 @@ class AsyncPushTransport(Protocol):
 #     (editing a multibyte character may split it). Network CLIs are ASCII.
 
 #: CSI/SS3 final sequence (after the ``\x1b[`` / ``\x1bO`` prefix) → editor action.
+#: The values share a str namespace with `_consume_escape`'s control verdicts and
+#: `_parse_escape`'s intermediate results, so `"pass"` / `"consumed"` /
+#: `"incomplete"` / `"discard"` are RESERVED and must never be used as an action
+#: name here (a disjoint assert in test_async_session.py pins this).
 _CSI_ACTIONS = {
     b"A": "up",
     b"B": "down",
@@ -129,6 +165,41 @@ def _parse_escape(seq: bytes) -> str:
     if 0x40 <= seq[-1] <= 0x7E:  # CSI/SS3 final byte → sequence complete
         return _CSI_ACTIONS.get(bytes(seq[2:]), "discard")
     return "incomplete"  # still collecting parameter bytes
+
+
+def _consume_escape(esc: bytearray, byte: bytes) -> str:
+    """Feed one byte through the escape-sequence collector (#350, ex-#343 defer).
+
+    ``esc`` is the caller-owned in-flight buffer (empty = no escape pending).
+    An ESC byte (re)starts collection, abandoning any partial sequence.
+    Returns:
+
+    - ``"pass"`` — the byte is not part of an escape; the caller must process it
+      on the normal path in the SAME iteration (a lone ESC or a control byte
+      mid-CSI abandons the sequence without swallowing this byte);
+    - ``"consumed"`` — swallowed (collecting, discarded, or maxlen-dropped);
+    - an action name (``"left"`` / ``"up"`` / ...) — the sequence completed. The
+      caller decides whether to apply it (main loop) or swallow it (challenge
+      answer).
+    """
+    if byte == b"\x1b":
+        esc.clear()  # (re)start; abandon any partial sequence
+        esc += b"\x1b"
+        return "consumed"
+    if not esc:
+        return "pass"
+    if len(esc) == 1 and byte not in (b"[", b"O"):
+        esc.clear()
+        return "pass"  # lone ESC: reprocess this byte on the normal path
+    if b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
+        esc += byte
+        action = _parse_escape(bytes(esc))
+        if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
+            return "consumed"  # still collecting
+        esc.clear()
+        return "consumed" if action in ("incomplete", "discard") else action
+    esc.clear()
+    return "pass"  # control byte mid-CSI: reprocess this byte on the normal path
 
 
 class _LineEditor:
@@ -372,20 +443,17 @@ async def _emit_paged(
         byte = await read_byte()
         if byte is None:
             return skip_lf  # client gone mid-pager: discard the rest, send no prompt
-        # Consume the LF (or Telnet NUL) half of a preceding CR — the launching
-        # command's CR-LF on entry, or a prior pager Enter's — read from the SAME
-        # stream so a cross-chunk split cannot mistake it for a fresh pager key.
-        if skip_lf and (byte == b"\n" or (nul_resets and byte == b"\x00")):
-            skip_lf = False
-            byte = await read_byte()
-            if byte is None:
-                return skip_lf  # EOF after consuming the CR pair (skip_lf already False); send no prompt
-        skip_lf = False
-        if byte == b" ":
+        # Classify against the shared terminator machine (#350). A NUL or the LF
+        # half of a preceding CR (the launching command's CR-LF on entry, or a
+        # prior pager Enter's) is dropped — read from the SAME stream so a
+        # cross-chunk split cannot mistake it for a fresh pager key.
+        event, skip_lf = _consume_terminator(byte, skip_lf, nul_resets)
+        if event == "drop":
+            continue
+        if event == "line":
+            count = 1  # pager Enter (skip_lf already re-armed for a CR by the step fn)
+        elif byte == b" ":
             count = min(rows, total - sent)
-        elif byte in (b"\r", b"\n"):
-            skip_lf = byte == b"\r"
-            count = 1
         elif byte in (b"q", b"Q"):
             transport.send(erase + prompt_bytes)
             await transport.drain()
@@ -410,10 +478,11 @@ async def _read_challenge_line(
 ) -> tuple[str | None, bool]:
     """Read one challenge answer line from the shared byte source (#338 / §4).
 
-    Mirrors the main loop's terminator / NUL / skip_lf handling but never runs the
-    line editor: an answer must not enter history nor Tab-complete, and a password
-    (``echo=False``) must never reach the wire. Escape sequences (arrow keys) are
-    swallowed so they cannot land in the answer. The terminating CR/LF is NOT
+    Shares the ``_consume_terminator`` / ``_consume_escape`` step functions with
+    the main loop (#350) but never runs the line editor: an answer must not enter
+    history nor Tab-complete, and a password (``echo=False``) must never reach the
+    wire. Escape sequences (arrow keys) are swallowed so they cannot land in the
+    answer. The terminating CR/LF is NOT
     echoed — the held ``\\r\\n`` of the following ``_render_response`` supplies the
     answer line's newline (the main-loop held-echo principle), so exactly one
     ``\\r\\n`` reaches the wire per Enter. Returns ``(answer, next_skip_lf)``, or
@@ -426,34 +495,16 @@ async def _read_challenge_line(
         if byte is None:
             return None, skip_lf  # EOF mid-challenge
         # Swallow an escape sequence (cursor / history keys) so it neither lands in
-        # the answer buffer nor echoes — mirrors the main loop's ESC handling.
-        if byte == b"\x1b":
-            esc = bytearray(b"\x1b")
+        # the answer buffer nor echoes; a "pass" verdict means process this byte on
+        # the normal path below (shared step functions with the main loop, #350).
+        if _consume_escape(esc, byte) != "pass":
             continue
-        if esc:
-            if len(esc) == 1 and byte not in (b"[", b"O"):
-                esc.clear()  # lone ESC: reprocess this byte on the normal path below
-            elif b"\x20" <= byte <= b"\x7e":
-                esc += byte
-                if _parse_escape(bytes(esc)) == "incomplete" and len(esc) < _MAX_ESC_LEN:
-                    continue  # still collecting
-                esc.clear()
-                continue  # escape consumed (applied / discarded / maxlen-dropped)
-            else:
-                esc.clear()  # control byte mid-CSI: reprocess this byte below
-        # Drop NUL (Telnet CR NUL resets the pending skip_lf; SSH preserves it).
-        if byte == b"\x00":
-            if transport.nul_resets_skip_lf:
-                skip_lf = False
+        event, skip_lf = _consume_terminator(byte, skip_lf, transport.nul_resets_skip_lf)
+        if event == "drop":
             continue
-        # Consume the LF (or Telnet NUL, above) half of a preceding CR.
-        if skip_lf:
-            skip_lf = False
-            if byte == b"\n":
-                continue
-        if byte in (b"\r", b"\n"):
+        if event == "line":
             # No terminator echo: the following `_render_response` held `\r\n` is it.
-            return buf.decode("utf-8", errors="replace"), byte == b"\r"
+            return buf.decode("utf-8", errors="replace"), skip_lf
         if byte in (b"\x08", b"\x7f"):
             if buf:
                 del buf[-1:]
@@ -579,52 +630,28 @@ async def run_async_push_session(
         if byte is None:
             return  # EOF / read closed (recv error already logged in read_byte)
         try:
-            # Interactive escape sequence (cursor / history / delete). A scraper
-            # sends no ESC, so editing=False (and a non-editing session) never
-            # enters here and the byte falls through to the unchanged machine.
-            if editing and byte == b"\x1b":
-                esc = bytearray(b"\x1b")  # (re)start; abandon any partial sequence
-                continue
-            if esc:
-                if len(esc) == 1 and byte not in (b"[", b"O"):
-                    # The byte right after ESC must be '[' or 'O' to begin a
-                    # CSI/SS3 sequence. Anything else means the ESC was lone (a
-                    # stray ESC, or an unhandled meta-key like Alt+key): drop the
-                    # ESC and reprocess this byte on the normal path below, so a
-                    # lone ESC neither swallows the following character (claude
-                    # 2nd#4) nor the following Enter/Backspace.
-                    esc.clear()
-                elif b"\x20" <= byte <= b"\x7e":  # a CSI/SS3 continuation byte
-                    esc += byte
-                    action = _parse_escape(bytes(esc))
-                    if action == "incomplete" and len(esc) < _MAX_ESC_LEN:
-                        continue  # still collecting
-                    esc.clear()
-                    if action not in ("incomplete", "discard"):
-                        editor.apply_action(action)
-                    continue  # escape consumed (applied / discarded / maxlen-dropped)
-                else:
-                    # A control byte mid-CSI cannot continue the escape: abandon
-                    # the malformed sequence and reprocess this byte on the normal
-                    # path below instead of swallowing it until the escape buffer
-                    # fills (gemini 1st#1 / claude 1st#2).
-                    esc.clear()
+            # Interactive escape sequence (cursor / history / delete), via the
+            # shared `_consume_escape` step function (#350). A scraper sends no
+            # ESC, so editing=False (and a non-editing session) never enters here
+            # and the byte falls through to the shared terminator machine. A
+            # "pass" verdict means the byte is not (part of) an escape and must be
+            # processed on the normal path in the SAME iteration (a lone ESC / a
+            # control byte mid-CSI abandons the sequence without swallowing it —
+            # claude 2nd#4 / gemini 1st#1).
+            if editing:
+                verdict = _consume_escape(esc, byte)
+                if verdict != "pass":
+                    if verdict != "consumed":
+                        editor.apply_action(verdict)  # a completed action key
+                    continue  # escape consumed (collecting / applied / discarded)
 
-            # Drop NUL completely (no echo, no buffer). Telnet (RFC 854): CR NUL
-            # is a complete sequence, so reset skip_lf; SSH preserves it.
-            if byte == b"\x00":
-                if transport.nul_resets_skip_lf:
-                    skip_lf = False
+            # Classify the byte against the shared terminator machine (#350): a NUL
+            # (never echoed/buffered) and the LF half of a CR LF are dropped.
+            event, skip_lf = _consume_terminator(byte, skip_lf, transport.nul_resets_skip_lf)
+            if event == "drop":
                 continue
 
-            # Consume the LF half of a CR LF pair.
-            if skip_lf:
-                skip_lf = False
-                if byte == b"\n":
-                    continue
-
-            if byte in (b"\r", b"\n"):
-                skip_lf = byte == b"\r"
+            if event == "line":
                 # errors="replace" keeps malformed UTF-8 from crashing the
                 # session (gemini#2).
                 line = editor.take_line().decode("utf-8", errors="replace")
@@ -697,20 +724,16 @@ async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf
         byte = await transport.recv(1)
         if not byte:  # EOF
             return buf.decode("utf-8", errors="replace"), False
-        if skip_lf:
-            skip_lf = False
-            if byte == b"\n":
-                continue
-            if byte == b"\x00" and transport.nul_resets_skip_lf:
-                continue
-        if byte == b"\r":
+        # Shared terminator machine (#350): a NUL is always dropped (never echoed
+        # nor buffered into the credential), and the LF half of a CR LF is
+        # consumed via the carried skip_lf.
+        event, skip_lf = _consume_terminator(byte, skip_lf, transport.nul_resets_skip_lf)
+        if event == "drop":
+            continue
+        if event == "line":
             if echo:
                 transport.send(b"\r\n")
-            return buf.decode("utf-8", errors="replace"), True
-        if byte == b"\n":
-            if echo:
-                transport.send(b"\r\n")
-            return buf.decode("utf-8", errors="replace"), False
+            return buf.decode("utf-8", errors="replace"), skip_lf
         if echo:
             transport.send(byte)
         buf += byte
