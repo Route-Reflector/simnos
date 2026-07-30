@@ -125,7 +125,7 @@ def _consume_terminator(byte: bytes, skip_lf: bool, nul_resets: bool) -> tuple[L
 # contract is unaffected either way):
 #   - Terminal-width wrapping is NOT modelled — the redraw assumes the line fits on
 #     one row, so a line longer than the terminal miscounts its \b-based redraw
-#     (horizontal-scroll/wrap is a P3-4 follow-up).
+#     (horizontal-scroll/wrap is intentionally out of scope).
 #   - The cursor moves by BYTE, not grapheme — ASCII-exact, multibyte best-effort
 #     (editing a multibyte character may split it). Network CLIs are ASCII.
 
@@ -418,7 +418,7 @@ async def _emit_paged(
     N = ``len(more_prompt)``; this is correct because the ``ModelPlatformPaging``
     schema enforces a single-line ASCII ``more_prompt`` (char count == byte count
     == display columns). A wide/CJK prompt would need column-width math and is
-    rejected at load instead (a terminal-width follow-up).
+    rejected at load instead (wide-prompt support is intentionally out of scope).
     """
     more = shell.more_prompt.encode("utf-8")
     n = len(shell.more_prompt)
