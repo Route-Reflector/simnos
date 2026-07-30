@@ -17,7 +17,12 @@ from jinja2 import TemplateSyntaxError
 from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
-from simnos.core.platform_loader import invalidate_platform_cache, resolve_modes, resolve_transitions
+from simnos.core.platform_loader import (
+    PLATFORM_META_FILENAME,
+    invalidate_platform_cache,
+    resolve_modes,
+    resolve_transitions,
+)
 from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
 from simnos.core.resolved_command import (
     NO_OUTPUT,
@@ -684,7 +689,10 @@ class CMDShell:
         parse window the old per-host `cache_clear()` left (#281 / D6 follow-up).
         """
         with self._reload_lock:
-            if any(os.path.isdir(target) for target in reload_targets):
+            # "Is an A3 dir" = carries a platform.yaml, not merely "is a dir" —
+            # a future package-form py plugin (a dir with __init__.py) must not
+            # trigger a cache invalidation (code review gemini#3).
+            if any(os.path.isfile(os.path.join(target, PLATFORM_META_FILENAME)) for target in reload_targets):
                 invalidate_platform_cache()
             for target in reload_targets:
                 snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}

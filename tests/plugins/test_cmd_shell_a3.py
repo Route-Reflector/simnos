@@ -546,6 +546,44 @@ class TestA3HotReload:
         assert blocked
         assert built  # proceeds once the lock is released
 
+    def test_init_self_build_applies_under_lock(self, tmp_path, monkeypatch):
+        """The self-build holds `nos.reload_lock` THROUGH `_apply_platform`
+        (#349 gap c, design review gemini 2nd#3): a spy asserts the lock is
+        held when the install (incl. the device pin) runs, so reverting to the
+        old "build under lock, apply outside" shape fails here — the blocking
+        test alone cannot tell the two apart (code review codex#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        held_at_apply: list[bool] = []
+        orig_apply = CMDShell._apply_platform
+
+        def spying_apply(self, platform):
+            held_at_apply.append(nos_obj.reload_lock.locked())
+            return orig_apply(self, platform)
+
+        monkeypatch.setattr(CMDShell, "_apply_platform", spying_apply)
+        CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        assert held_at_apply == [True]
+
+    def test_failed_reload_keeps_table_and_device_pair(self, tmp_path, monkeypatch):
+        """A failed reload rolls back the nos AND leaves the shell's table +
+        device pin as the old, consistent pair (#349 rollback×pin contract,
+        code review codex#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        old_commands = shell.commands
+        old_device = shell._device
+
+        def broken_from_file(target):
+            raise ValueError("simulated broken reload target")
+
+        monkeypatch.setattr(nos_obj, "from_file", broken_from_file)
+        shell.reload_commands([str(platform_dir)])  # error is logged, not raised
+        assert shell.commands is old_commands
+        assert shell._device is old_device
+        assert nos_obj.device is old_device  # nos side rolled back / untouched too
+
     def test_device_pin_survives_sibling_reload(self, tmp_path):
         """`_invoke_handler` runs against the per-shell device pin, not the live
         `nos.device` (#349 gap c): a sibling reload swapping the shared device
@@ -577,14 +615,21 @@ class TestA3HotReload:
         platform_dir = _a3_platform(tmp_path)
         nos_obj = Nos(filename=str(platform_dir))
         shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
-        calls: list[int] = []
-        monkeypatch.setattr("simnos.plugins.shell.cmd_shell.invalidate_platform_cache", lambda: calls.append(1))
+        events: list[str] = []
+        monkeypatch.setattr("simnos.plugins.shell.cmd_shell.invalidate_platform_cache", lambda: events.append("inv"))
+        orig_from_file = nos_obj.from_file
+        monkeypatch.setattr(nos_obj, "from_file", lambda target: (events.append("load"), orig_from_file(target))[1])
         # .py-only batch: the gate is evaluated before the load, so even this
         # missing module (whose load fails and rolls back) proves the skip.
         shell.reload_commands([str(tmp_path / "missing_mod.py")])
-        assert calls == []
-        shell.reload_commands([str(platform_dir)])
-        assert calls == [1]  # once per batch, not per target
+        assert events == ["load"]
+        events.clear()
+        # A batch with TWO A3 dir targets: invalidate fires once, BEFORE the
+        # first load — not per target (code review codex#3; a second copy of the
+        # platform under another root keeps the shared nos state consistent).
+        second_dir = _a3_platform(tmp_path / "second")
+        shell.reload_commands([str(platform_dir), str(second_dir)])
+        assert events == ["inv", "load", "load"]
 
     def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
         """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).

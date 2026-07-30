@@ -462,24 +462,31 @@ class TestLoadCache:
         assert load_platform_dir(str(root)) is returned  # cached at current generation
 
     def test_same_generation_concurrent_miss_converges_on_winner(self, tmp_path, monkeypatch):
-        """Same-generation concurrent misses converge on the first committed
-        entry (`setdefault`): identity is per generation, not per caller
-        (design review codex 2nd#2). Simulated by having a second load commit
-        the winner while the first is still parsing (no generation change)."""
+        """Same-generation concurrent misses converge on one identity via the
+        real protocol (design review codex 2nd#2, code review codex#1): two
+        threads both take the miss path, a barrier proves their parses overlap
+        outside `_CACHE_LOCK`, and both public-API returns are the SAME object
+        (the `setdefault` winner) — no lock-external cache poking."""
+        import threading
+
         import simnos.core.platform_loader as loader_mod
 
         root, commands = _platform(tmp_path)
         _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
         real_uncached = loader_mod._load_platform_dir_uncached
-        winners: list = []
+        barrier = threading.Barrier(2, timeout=5)
 
-        def parse_with_concurrent_winner(path):
+        def overlapping_parse(path):
             result = real_uncached(path)
-            if not winners:  # emulate a sibling miss committing first (same generation)
-                winner = real_uncached(path)
-                winners.append(winner)
-                loader_mod._CACHE[path] = winner
+            barrier.wait()  # both threads are mid-miss before either commits
             return result
 
-        monkeypatch.setattr(loader_mod, "_load_platform_dir_uncached", parse_with_concurrent_winner)
-        assert load_platform_dir(str(root)) is winners[0]  # loser adopts the winner
+        monkeypatch.setattr(loader_mod, "_load_platform_dir_uncached", overlapping_parse)
+        results: list = []
+        threads = [threading.Thread(target=lambda: results.append(load_platform_dir(str(root)))) for _ in range(2)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=10)
+        assert len(results) == 2
+        assert results[0] is results[1]  # both callers got the committed winner
