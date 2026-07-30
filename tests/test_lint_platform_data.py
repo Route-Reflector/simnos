@@ -10,10 +10,12 @@ actually fails — without these a bug in the lint logic would read as
 """
 
 from tasks import (
+    _RENDER_VAR_NAMES,
     check_platform_data,
     check_platform_data_device_type_collisions,
     check_platform_data_py_modules,
     check_platform_data_ratchet,
+    check_platform_data_render_leaks,
     check_platform_data_warnings,
     is_stub_help,
 )
@@ -120,6 +122,78 @@ class TestConventions:
 def test_absent_dir_is_clean(tmp_path):
     # No platforms dir at all (the state before any A3 migration) is not an error.
     assert check_platform_data(str(tmp_path / "nonexistent")) == []
+
+
+class TestRenderLeaks:
+    """Render-variable leak guard for literal ``.txt`` outputs (#329).
+
+    Pins both halves of the issue's contract: the #328 regression class
+    (``{base_prompt}`` served verbatim from a literal file) is caught, and the
+    real-device literal braces the issue catalogued (hp_comware ``{ACDEF}``,
+    juniper ``{master}``, cisco crypto ``flags={...}``) stay false-positive-free.
+    """
+
+    def test_single_brace_leak_flagged(self, tmp_path):
+        # The exact #328 shape: str.format heritage moved verbatim into .txt.
+        commands = _platform(tmp_path)
+        _write(commands / "show_hostname.yaml", "command: show hostname\ntype: simnos\noutput: show_hostname.txt\n")
+        _write(commands / "show_hostname.txt", "Hostname: {base_prompt}\n")
+        violations = check_platform_data_render_leaks(str(tmp_path))
+        assert len(violations) == 1
+        assert "show_hostname.txt:1" in violations[0]
+        assert "{base_prompt}" in violations[0]
+
+    def test_double_brace_leak_flagged(self, tmp_path):
+        # The jinja spelling in a literal file is the same authoring mistake.
+        commands = _platform(tmp_path)
+        _write(commands / "show.yaml", "command: show\ntype: simnos\noutput: show.txt\n")
+        _write(commands / "show.txt", "line one\n{{ base_prompt }} uptime is 1 day\n")
+        violations = check_platform_data_render_leaks(str(tmp_path))
+        assert len(violations) == 1
+        assert "show.txt:2" in violations[0]
+
+    def test_username_challenge_var_flagged(self, tmp_path):
+        # `username` is a CHALLENGE_RENDER_VARS member and equally has no
+        # legitimate braced reading in a literal file.
+        commands = _platform(tmp_path)
+        _write(commands / "sudo.yaml", "command: sudo -s\ntype: simnos\noutput: sudo.txt\n")
+        _write(commands / "sudo.txt", "[sudo] password for {username}:\n")
+        violations = check_platform_data_render_leaks(str(tmp_path))
+        assert len(violations) == 1
+
+    def test_real_device_literal_braces_pass(self, tmp_path):
+        # The false-positive catalogue from #329: real devices print these
+        # braces literally and a naive "any `{` in .txt" rule would flag them.
+        commands = _platform(tmp_path)
+        _write(commands / "display.yaml", "command: display link-aggregation\ntype: simnos\noutput: display.txt\n")
+        _write(
+            commands / "display.txt",
+            "Flag: {ACDEF} {ACG} {EF}\n"
+            "flags={origin_is_acl,}\n"
+            "current outbound spi: 0x0(0), flags={Transport UDP-Encaps, }\n"
+            "{master}\n"
+            "idle{idle: cpu7}\n",
+        )
+        assert check_platform_data_render_leaks(str(tmp_path)) == []
+
+    def test_j2_channel_is_exempt(self, tmp_path):
+        # `.j2` is the render channel — `{{ base_prompt }}` there is the point.
+        commands = _platform(tmp_path)
+        _write(commands / "show.yaml", "command: show\ntype: simnos\noutput_template: show.j2\n")
+        _write(commands / "show.j2", "{{ base_prompt }} uptime is 1 day\n")
+        assert check_platform_data_render_leaks(str(tmp_path)) == []
+
+    def test_real_repo_is_clean(self):
+        # Zero leaks in the shipped data is what makes this check safe to gate.
+        assert check_platform_data_render_leaks() == []
+
+    def test_var_names_stay_in_sync_with_loader(self):
+        # tasks.py hardcodes the names (it must stay simnos-import-free, #264 /
+        # D1); this pin is the sync contract — adding a render variable to the
+        # loader without extending the lint fails here, not in production.
+        from simnos.core.resolved_command import CHALLENGE_RENDER_VARS, KNOWN_RENDER_VARS
+
+        assert set(_RENDER_VAR_NAMES) == set(KNOWN_RENDER_VARS | CHALLENGE_RENDER_VARS)
 
 
 class TestWarnings:
