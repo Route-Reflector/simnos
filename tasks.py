@@ -226,7 +226,9 @@ _RENDER_VAR_NAMES = ("base_prompt", "username")
 # double-brace (`{{ base_prompt }}`, the jinja spelling) and any mismatched
 # hybrid are all flagged, including trailing jinja filters / format specs
 # (`{{ base_prompt | upper }}` / `{base_prompt:<20}` — `[^}]*` up to the closing
-# brace, 1st round codex #1): a brace expression *starting* with a render-var
+# brace, 1st round codex #1) and jinja whitespace-control (`{{- base_prompt }}`
+# — `[-\s]*` after the braces, 2nd round codex #1; the closing-side `-}}` is
+# already inside `[^}]*`): a brace expression *starting* with a render-var
 # name (`\b` keeps `{base_prompt_style}` a different identifier) has no
 # legitimate reading in a literal file. Real-device literals (`{ACDEF}` /
 # `{master}` / `flags={origin_is_acl,}`) never start with these exact names,
@@ -234,7 +236,7 @@ _RENDER_VAR_NAMES = ("base_prompt", "username")
 # no-op for the current names but keeps a future metachar-bearing name from
 # becoming a wildcard (1st round gemini #1).
 _RENDER_VAR_LEAK_RE = re.compile(
-    r"\{\{?\s*(?:" + "|".join(re.escape(name) for name in _RENDER_VAR_NAMES) + r")\b[^}]*\}?\}"
+    r"\{\{?[-\s]*(?:" + "|".join(re.escape(name) for name in _RENDER_VAR_NAMES) + r")\b[^}]*\}?\}"
 )
 
 

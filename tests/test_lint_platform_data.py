@@ -157,11 +157,17 @@ class TestRenderLeaks:
         # (1st round codex #1): the expression *starts* with the render var.
         commands = _platform(tmp_path)
         _write(commands / "show.yaml", "command: show\ntype: simnos\noutput: show.txt\n")
-        _write(commands / "show.txt", "{{ base_prompt | upper }} ready\npadded: {base_prompt:<20}|\n")
+        _write(
+            commands / "show.txt",
+            "{{ base_prompt | upper }} ready\npadded: {base_prompt:<20}|\n{{- base_prompt -}} trimmed\n",
+        )
         violations = check_platform_data_render_leaks(str(tmp_path))
-        assert len(violations) == 2
+        assert len(violations) == 3
         assert "show.txt:1" in violations[0]
         assert "show.txt:2" in violations[1]
+        # jinja whitespace-control is a valid spelling of the same leak
+        # (2nd round codex #1).
+        assert "show.txt:3" in violations[2]
 
     def test_similar_identifier_not_flagged(self, tmp_path):
         # `\b` pins the name as a whole identifier: `base_prompt_style` is a
