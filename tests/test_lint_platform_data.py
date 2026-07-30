@@ -152,6 +152,36 @@ class TestRenderLeaks:
         assert len(violations) == 1
         assert "show.txt:2" in violations[0]
 
+    def test_jinja_filter_and_format_spec_flagged(self, tmp_path):
+        # A trailing jinja filter / format spec is the same unsubstituted leak
+        # (1st round codex #1): the expression *starts* with the render var.
+        commands = _platform(tmp_path)
+        _write(commands / "show.yaml", "command: show\ntype: simnos\noutput: show.txt\n")
+        _write(commands / "show.txt", "{{ base_prompt | upper }} ready\npadded: {base_prompt:<20}|\n")
+        violations = check_platform_data_render_leaks(str(tmp_path))
+        assert len(violations) == 2
+        assert "show.txt:1" in violations[0]
+        assert "show.txt:2" in violations[1]
+
+    def test_similar_identifier_not_flagged(self, tmp_path):
+        # `\b` pins the name as a whole identifier: `base_prompt_style` is a
+        # different token and must not trip the guard.
+        commands = _platform(tmp_path)
+        _write(commands / "show.yaml", "command: show\ntype: simnos\noutput: show.txt\n")
+        _write(commands / "show.txt", "style is {base_prompt_style} today\n")
+        assert check_platform_data_render_leaks(str(tmp_path)) == []
+
+    def test_broken_encoding_does_not_crash_and_still_reports(self, tmp_path):
+        # errors="replace" contract (docstring): a broken encoding is the
+        # encoding gate's violation, but this pass must survive the file and
+        # still report the leak with the right line number (1st round codex #2).
+        commands = _platform(tmp_path)
+        _write(commands / "show.yaml", "command: show\ntype: simnos\noutput: show.txt\n")
+        _write(commands / "show.txt", b"\xff\xfe garbage\n{base_prompt}\n", binary=True)
+        violations = check_platform_data_render_leaks(str(tmp_path))
+        assert len(violations) == 1
+        assert "show.txt:2" in violations[0]
+
     def test_username_challenge_var_flagged(self, tmp_path):
         # `username` is a CHALLENGE_RENDER_VARS member and equally has no
         # legitimate braced reading in a literal file.

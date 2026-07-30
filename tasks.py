@@ -225,11 +225,18 @@ def check_platform_data_device_type_collisions(platforms_dir: str = PLATFORMS_A3
 _RENDER_VAR_NAMES = ("base_prompt", "username")
 # Single-brace (`{base_prompt}`, the str.format heritage that leaked in #328),
 # double-brace (`{{ base_prompt }}`, the jinja spelling) and any mismatched
-# hybrid are all flagged — a render-var name inside braces has no legitimate
-# reading in a literal file. Real-device literals (`{ACDEF}` / `{master}` /
-# `flags={origin_is_acl,}`) never wrap these exact names, which is what keeps
-# the false-positive rate at zero (#329).
-_RENDER_VAR_LEAK_RE = re.compile(r"\{\{?\s*(?:" + "|".join(_RENDER_VAR_NAMES) + r")\s*\}?\}")
+# hybrid are all flagged, including trailing jinja filters / format specs
+# (`{{ base_prompt | upper }}` / `{base_prompt:<20}` — `[^}]*` up to the closing
+# brace, 1st round codex #1): a brace expression *starting* with a render-var
+# name (`\b` keeps `{base_prompt_style}` a different identifier) has no
+# legitimate reading in a literal file. Real-device literals (`{ACDEF}` /
+# `{master}` / `flags={origin_is_acl,}`) never start with these exact names,
+# which is what keeps the false-positive rate at zero (#329). `re.escape` is a
+# no-op for the current names but keeps a future metachar-bearing name from
+# becoming a wildcard (1st round gemini #1).
+_RENDER_VAR_LEAK_RE = re.compile(
+    r"\{\{?\s*(?:" + "|".join(re.escape(name) for name in _RENDER_VAR_NAMES) + r")\b[^}]*\}?\}"
+)
 
 
 def check_platform_data_render_leaks(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
