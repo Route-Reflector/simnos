@@ -509,13 +509,31 @@ async def _emit_paged(
 
 
 # --------------------------------------------------------------- credential readers
-async def _accept_capped_byte(transport: AsyncPushTransport, buf: bytearray, byte: bytes, *, echo: bool) -> None:
+#: Longest client-supplied credential fragment echoed into a log record. The cap
+#: lets a username run to `_LINE_MAX`, and a failed login logs it, so clip it
+#: rather than spilling 4 KB of attacker text into the operator's log (#269).
+_LOG_CLIP = 64
+
+
+def _clip(text: str) -> str:
+    """Shorten *text* for a log record (see ``_LOG_CLIP``)."""
+    return text if len(text) <= _LOG_CLIP else text[:_LOG_CLIP] + "…"
+
+
+async def _accept_capped_byte(transport: AsyncPushTransport, buf: bytearray, byte: bytes, *, echo: bool) -> bool:
     """Buffer one client byte under the ``_LINE_MAX`` cap, echoing what it keeps.
 
     The single inflow gate behind both credential readers — the challenge answer
     (#347) and the in-band login (#269) — so the bound and the echo backpressure
     stay identical across them, the way ``_consume_terminator`` keeps their
     terminator handling identical (#350).
+
+    Returns whether the byte was kept. ``False`` means the line was already at the
+    cap, which the login reader turns into an authentication failure rather than
+    letting a truncated credential compare equal to a shorter configured one
+    (#269, codex 1st#3). The challenge answer reader ignores the result and keeps
+    truncating — that is the behaviour #347 shipped, and changing it is a separate
+    decision from this bound.
 
     Past the cap the byte is dropped unechoed (the editor's "ignored, no bell"
     convention) and costs no ``drain`` await, so a CR-less flood is free. The
@@ -524,11 +542,12 @@ async def _accept_capped_byte(transport: AsyncPushTransport, buf: bytearray, byt
     wire byte stream is unchanged — it only paces a client that stopped reading.
     """
     if len(buf) >= _LINE_MAX:
-        return
+        return False  # at the cap: drop it, echo nothing, and spend no drain await
     buf += byte
     if echo:
         transport.send(byte)
         await transport.drain()
+    return True
 
 
 # --------------------------------------------------------------------- challenge (#338)
@@ -788,21 +807,27 @@ async def run_async_push_session(
             return
 
 
-async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf: bool) -> tuple[str, bool]:
+async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf: bool) -> tuple[str, bool, bool]:
     """Read one line byte-by-byte for the in-band login.
 
-    Returns ``(line without trailing CR/LF, next_skip_lf)``; a CR sets
+    Returns ``(line without trailing CR/LF, next_skip_lf, overflowed)``; a CR sets
     ``next_skip_lf=True`` so the next read consumes the LF half of a CR LF pair.
     Reads one byte per ``recv`` (login is short and not perf-critical, so this
     avoids a leftover-buffer between the two reads). EOF returns the partial line.
     The credential is capped at ``_LINE_MAX`` and the echo is drained per byte
     (#269), matching the post-auth editor and challenge reader.
+
+    ``overflowed`` reports that bytes were dropped at the cap, so the caller can
+    refuse the credential instead of comparing a truncated one (#269, codex
+    1st#3): without it, an over-long input whose first ``_LINE_MAX`` bytes match a
+    configured credential of exactly that length would authenticate.
     """
     buf = bytearray()  # bytearray, not bytes: amortised O(1) append (#269)
+    overflowed = False
     while True:
         byte = await transport.recv(1)
         if not byte:  # EOF
-            return buf.decode("utf-8", errors="replace"), False
+            return buf.decode("utf-8", errors="replace"), False, overflowed
         # Shared terminator machine (#350): a NUL is always dropped (never echoed
         # nor buffered into the credential), and the LF half of a CR LF is
         # consumed via the carried skip_lf. It runs ahead of the cap below, so a
@@ -813,8 +838,9 @@ async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf
         if event == "line":
             if echo:
                 transport.send(b"\r\n")
-            return buf.decode("utf-8", errors="replace"), skip_lf
-        await _accept_capped_byte(transport, buf, byte, echo=echo)
+            return buf.decode("utf-8", errors="replace"), skip_lf, overflowed
+        if not await _accept_capped_byte(transport, buf, byte, echo=echo):
+            overflowed = True
 
 
 async def async_interactive_login(
@@ -837,19 +863,25 @@ async def async_interactive_login(
     here rather than at the call sites so every caller — current and future —
     inherits it; a timeout returns ``(False, False)``, which drops into the
     close-on-failed-login path the callers already have.
+
+    ``asyncio.timeout`` is used over ``wait_for`` so ``expired()`` can tell the
+    deadline apart from a ``TimeoutError`` the transport itself raised — the
+    builtin is an ``OSError`` subclass, so a socket ETIMEDOUT surfaces as one too
+    (claude 1st#2). A transport-origin one is re-raised for the caller's existing
+    I/O handler rather than mislabelled as the login deadline.
     """
     try:
-        return await asyncio.wait_for(
-            _interactive_login_body(
+        async with asyncio.timeout(_LOGIN_DEADLINE) as budget:
+            return await _interactive_login_body(
                 transport,
                 username,
                 password,
                 user_prompt=user_prompt,
                 pass_prompt=pass_prompt,
-            ),
-            _LOGIN_DEADLINE,
-        )
+            )
     except TimeoutError:
+        if not budget.expired():
+            raise  # transport I/O timeout, not our deadline
         log.warning(
             "async_session [%s] login deadline exceeded (%ss), closing session",
             transport.name,
@@ -875,16 +907,19 @@ async def _interactive_login_body(
     backpressure point.
     """
     transport.send(user_prompt)
-    entered_user, skip_lf = await _async_read_line(transport, echo=True, skip_lf=False)
+    entered_user, skip_lf, user_over = await _async_read_line(transport, echo=True, skip_lf=False)
     transport.send(pass_prompt)
-    entered_pass, skip_lf = await _async_read_line(transport, echo=False, skip_lf=skip_lf)
+    entered_pass, skip_lf, pass_over = await _async_read_line(transport, echo=False, skip_lf=skip_lf)
     transport.send(b"\r\n")
     await transport.drain()
-    authenticated = entered_user == username and entered_pass == password
+    # An over-long credential is refused outright (#269): comparing the truncated
+    # prefix would let a longer input authenticate against a configured value of
+    # exactly _LINE_MAX bytes.
+    authenticated = not (user_over or pass_over) and entered_user == username and entered_pass == password
     log.debug(
         "async_session.async_interactive_login [%s] %s for user %s",
         transport.name,
         "succeeded" if authenticated else "failed",
-        entered_user,
+        _clip(entered_user),
     )
     return authenticated, skip_lf

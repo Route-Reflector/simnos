@@ -537,6 +537,9 @@ def test_async_login_password_cap_is_silent():
     no drain — a CR-less flood past the cap costs neither bytes nor awaits (#269)."""
 
     async def _run():
+        # Lowercase `p` appears in neither prompt (`Pass: ` is capitalised), so
+        # asserting its absence isolates the password echo the same way test 1
+        # isolates the username echo with `x`.
         transport = _FakeTransport([b"admin\r", b"p" * (_LINE_MAX + 50) + b"\r"])
         ok, _ = await async_interactive_login(
             transport, "admin", "p" * _LINE_MAX, user_prompt=b"User: ", pass_prompt=b"Pass: "
@@ -544,10 +547,29 @@ def test_async_login_password_cap_is_silent():
         return ok, transport
 
     ok, transport = asyncio.run(_run())
-    assert ok is True  # the password truncated to exactly _LINE_MAX matched
     assert b"p" not in transport.out  # echo off: never on the wire, capped or not
     # username echo (5) + closing drain (1); the password read adds none.
     assert transport.drains == 6
+    # An over-long password is REFUSED, not silently truncated to its first
+    # _LINE_MAX bytes — otherwise this input (a correct _LINE_MAX-byte password
+    # plus 50 bytes of junk) would authenticate against the configured one
+    # (#269, codex 1st#3).
+    assert ok is False
+
+
+def test_async_login_overflow_refused_even_when_prefix_matches():
+    """Overflow refusal is decided by the overflow flag, not by the compared text:
+    the truncated credential here is byte-for-byte the configured one, and it still
+    fails (#269, codex 1st#3). Pins that the cap cannot be used as a prefix oracle."""
+
+    async def _run():
+        # Username is exactly _LINE_MAX correct bytes + 1 extra byte before the CR.
+        name = "u" * _LINE_MAX
+        transport = _FakeTransport([name.encode() + b"Z\r", b"pw\r"])
+        return await async_interactive_login(transport, name, "pw", user_prompt=b"User: ", pass_prompt=b"Pass: ")
+
+    ok, _ = asyncio.run(_run())
+    assert ok is False
 
 
 def test_async_login_echo_drains_per_byte():
@@ -600,7 +622,15 @@ def test_async_login_deadline_bounds_a_capped_flood(monkeypatch):
 
     class _FloodTransport(_FakeTransport):
         async def recv(self, n: int) -> bytes:
-            await asyncio.sleep(0)  # yield so the deadline can fire
+            # The `sleep(0)` models the real readers, which suspend once their
+            # buffer empties (`StreamReader.read` awaits `_wait_for_data`) — that
+            # suspension is what lets the deadline's timer run. A fake returning
+            # bytes with no suspension at all would spin forever, which is a
+            # property of the fake, not of the transports this bounds; the live
+            # end-to-end pin is
+            # `test_telnet_server.py::test_preauth_flood_is_closed_at_the_deadline`
+            # (codex 1st#1).
+            await asyncio.sleep(0)
             return b"a"  # never a terminator
 
     async def _run():
@@ -610,6 +640,26 @@ def test_async_login_deadline_bounds_a_capped_flood(monkeypatch):
 
     ok, _ = asyncio.run(_run())
     assert ok is False
+
+
+@pytest.mark.timeout(30)
+def test_async_login_transport_timeout_is_not_swallowed_as_the_deadline():
+    """A `TimeoutError` raised by the transport itself propagates to the caller's
+    I/O handler instead of being reported as the login deadline (#269, claude
+    1st#2). The builtin is an `OSError` subclass, so a socket ETIMEDOUT arrives as
+    one; `asyncio.timeout().expired()` is what tells the two apart."""
+
+    class _TimingOutTransport(_FakeTransport):
+        async def recv(self, n: int) -> bytes:
+            raise TimeoutError("simulated socket ETIMEDOUT")
+
+    async def _run():
+        return await async_interactive_login(
+            _TimingOutTransport([]), "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+
+    with pytest.raises(TimeoutError, match="simulated socket ETIMEDOUT"):
+        asyncio.run(_run())
 
 
 # ---------------------------------------------------------------- paging (#307 P3-4)

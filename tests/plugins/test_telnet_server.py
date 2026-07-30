@@ -9,6 +9,7 @@ client, and the auth-failure close path (message delivered + graceful FIN).
 """
 
 import asyncio
+import contextlib
 from contextlib import contextmanager
 import socket
 import threading
@@ -187,6 +188,50 @@ def test_telnet_auth_failure_raw_surplus_delivers_message_and_fin():
             sock.close()
     assert b"Authentication failed" in buf  # (1) message delivered
     assert eof  # (2) graceful FIN, not RST, despite surplus unread input
+
+
+@pytest.mark.timeout(60)
+def test_preauth_flood_is_closed_at_the_deadline(monkeypatch):
+    """A CR-less pre-auth flood from a client that never reads is closed by the
+    login deadline (#269), end to end on a real listener.
+
+    This is the live counterpart to the fake-transport deadline tests, and it is
+    what settles two cross-review claims (codex 1st#1 / 1st#2) that the deadline
+    could not fire in this scenario: (1) that the capped read loop never yields,
+    so the timer never runs, and (2) that the deadline fires inside a blocked
+    ``drain``, after which the caller's own unbounded ``drain`` of
+    ``Authentication failed.`` hangs and the session is never torn down.
+
+    Both predict "the server never closes". On v3 (no cap, no deadline) this
+    connection genuinely stays open; here it must close. The real reader suspends
+    once its buffer empties, which lets the timer run, and the whole pre-auth
+    write volume (prompt + echo capped at ``_LINE_MAX``) stays far below the
+    transport's high-water mark, so no ``drain`` ever blocks.
+    """
+    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", 2.0)
+    flood = b"A" * 65536  # no CR/LF anywhere: the login line never completes
+    with _running_telnet_host() as port:
+        sock = socket.create_connection(("127.0.0.1", port), timeout=8)
+        sock.settimeout(8)
+        try:
+            with contextlib.suppress(OSError):
+                sock.sendall(flood)  # peer may already be gone on a slow runner
+            # Never read the echo back: the client is deliberately non-draining.
+            closed = False
+            deadline = time.monotonic() + 30.0
+            while time.monotonic() < deadline:
+                try:
+                    if not sock.recv(65536):  # b"" = server closed
+                        closed = True
+                        break
+                except TimeoutError:
+                    continue
+                except OSError:
+                    closed = True  # RST also means the server let go
+                    break
+        finally:
+            sock.close()
+    assert closed, "pre-auth flood held the session open past the login deadline"
 
 
 @pytest.mark.parametrize("device_type", ["cisco_ios"])
