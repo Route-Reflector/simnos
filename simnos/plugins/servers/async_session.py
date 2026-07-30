@@ -152,10 +152,11 @@ _HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memo
 # chars); 4096 is far above any realistic CLI line — the longest byte-parity
 # golden line is 34 bytes — so the cap is unreachable for scrapers and the wire
 # stays byte-identical. Past the cap a byte is dropped unechoed (the editor's
-# "ignored, no bell" convention). Enforced at the single growth points
-# (`_LineEditor.insert` / the challenge answer buffer); `set_line` inflows are
-# themselves built from capped lines, so this is an abuse bound, not an exact
-# length contract.
+# "ignored, no bell" convention). Enforced at the client-byte growth points
+# (`_LineEditor.insert` / the challenge answer buffer) and at `set_line` (the
+# Tab-completion inflow that bypasses `insert` — an oversized replacement is
+# refused); history / `_saved` re-entry is built from already-capped lines, so
+# every inflow honours the bound.
 _LINE_MAX = 4096
 
 

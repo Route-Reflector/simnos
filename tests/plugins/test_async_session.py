@@ -392,9 +392,12 @@ def test_set_line_refuses_oversized_replacement():
 
     sent = bytearray()
     editor = _LineEditor(sent.extend)
+    editor.insert(b"s")
+    editor.insert(b"h")
+    sent.clear()
     editor.set_line(b"x" * (_LINE_MAX + 1))
-    assert editor.line_text == ""  # refused: line unchanged
-    assert bytes(sent) == b""  # ...and nothing echoed
+    assert editor.line_text == "sh"  # refused: the existing line is preserved
+    assert bytes(sent) == b""  # ...and nothing echoed (no clear-on-reject either)
     editor.set_line(b"x" * _LINE_MAX)  # exactly at the cap is still accepted
     assert len(editor.line_text) == _LINE_MAX
 
