@@ -212,7 +212,6 @@ class AsyncSshServer(AsyncServerBase):
         render_config: "HostRenderConfig | None" = None,
         simnos: "SimNOS | None" = None,
         page_default_rows: int = 24,
-        reload_lock: "threading.Lock | None" = None,
     ) -> None:
         super().__init__(
             shell,
@@ -229,7 +228,6 @@ class AsyncSshServer(AsyncServerBase):
             render_config=render_config,
             simnos=simnos,
             page_default_rows=page_default_rows,
-            reload_lock=reload_lock,
         )
         self.ssh_banner: str = ssh_banner
         self._authorized_keys = self._load_authorized_keys(authorized_keys)

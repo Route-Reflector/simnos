@@ -6,6 +6,7 @@ import importlib.util
 import inspect
 import logging
 import os
+import threading
 import types
 from typing import TYPE_CHECKING
 
@@ -125,6 +126,13 @@ class Nos:
     (``platforms/<name>/`` -> `resolved_platform`); a py module supplies the
     device class + the ``handler:`` namespace only. The legacy py dict form
     (``commands`` / scalar prompts / ``from_dict``) was removed.
+
+    Hot-reload contract (#349): `reload_lock` (owned by each instance) is what
+    every shell serializes reloads and self-builds on, so an instance shared by
+    several hosts (``SimNOS(plugins=[Nos(...)])``) is mutated under one lock.
+    ``auth`` is rewritten by a reload like the other state, but servers read it
+    once at construction — hot-reloading ``auth:`` never affects a live server
+    (an intentional no-op).
     """
 
     def __init__(
@@ -146,6 +154,13 @@ class Nos:
         self.name = name
         self.auth: str | None = None
         self.device = None
+        # Hot-reload serialization lock (#349): guards THIS instance's mutable
+        # reload state (the `_NOS_RELOAD_ATTRS` set — `device` / `handlers` /
+        # `sources` / `resolved_platform` / ...). The lock lives on the Nos
+        # because that is the resource it protects — see the class docstring's
+        # hot-reload contract (shared instance -> shared lock; the #281 per-host
+        # locks let two hosts mutate one instance under different locks).
+        self.reload_lock: threading.Lock = threading.Lock()
         # Every path handed to `from_file`, in load order — diagnostics only.
         # A py-only Nos keeps the constructor-default name (the module's legacy
         # ``NAME`` constant is no longer read, #317 P-4), so the A3-required

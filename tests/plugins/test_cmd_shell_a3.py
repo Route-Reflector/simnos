@@ -476,20 +476,22 @@ class TestA3HotReload:
         assert shell2.commands["show version"].output.render("R1") == "Shared V2\n"
 
     def test_concurrent_reload_same_lock_no_corruption(self, tmp_path):
-        """Two sessions reloading concurrently under the shared host lock stay consistent (#281 / D6).
+        """Two sessions reloading concurrently share the Nos-owned lock and stay consistent (#281 / D6, #349).
 
-        Injects ONE lock into both shells (as `Host.start` does per host) and
-        fires `reload_commands` from two threads at a barrier. Per-shell fallback
-        locks would not serialize the shared-`nos` mutation, so the explicit
-        single lock is what this pins; both shells must end consistent and the
-        shared nos uncorrupted.
+        Since #349 the lock is not injected: both shells derive it from the SAME
+        shared `nos.reload_lock`, which is exactly what serializes the shared-
+        `nos` mutation (two hosts of one registered Nos included). Fires
+        `reload_commands` from two threads at a barrier; both shells must end
+        consistent and the shared nos uncorrupted.
         """
         platform_dir = _a3_platform(tmp_path)
         nos_obj = Nos(filename=str(platform_dir))
-        lock = threading.Lock()
         common = {"nos_inventory_config": {}, "base_prompt": "R1"}
-        shell1 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
-        shell2 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
+        shell1 = CMDShell(nos=nos_obj, is_running=threading.Event(), **common)
+        shell2 = CMDShell(nos=nos_obj, is_running=threading.Event(), **common)
+        # The #349 gap-a contract: same Nos -> same lock, no injection needed.
+        assert shell1._reload_lock is nos_obj.reload_lock
+        assert shell2._reload_lock is nos_obj.reload_lock
         _write(platform_dir / "commands" / "show_version.txt", "Concurrent\n")
         barrier = threading.Barrier(2)
         errors: list[BaseException] = []
@@ -512,16 +514,17 @@ class TestA3HotReload:
         assert nos_obj.name == "cisco_ios"  # shared nos not corrupted by the concurrent reloads
 
     def test_init_self_build_acquires_reload_lock(self, tmp_path):
-        """A new connection's self-build runs under the reload lock (#281 / D6, gemini#1).
+        """A new connection's self-build runs under the Nos-owned reload lock (#281 / D6, #349).
 
         When `resolved_platform` is None (hot-reload mode) the `__init__` builds
-        from the shared `nos`; that read must hold the per-host lock so a
-        concurrent executor reload cannot mutate `nos` mid-read. Holding the lock
-        in the main thread must therefore block a shell construction until release.
+        from the shared `nos` AND installs it (`_apply_platform`, incl. the
+        device pin) under `nos.reload_lock`, so a concurrent executor reload can
+        neither mutate `nos` mid-read nor swap the device between build and pin
+        (#349 gap c, design review gemini 2nd#3). Holding the Nos's own lock in
+        the main thread must therefore block a shell construction until release.
         """
         platform_dir = _a3_platform(tmp_path)
         nos_obj = Nos(filename=str(platform_dir))
-        lock = threading.Lock()
         built: list[CMDShell] = []
 
         def _build():
@@ -531,11 +534,10 @@ class TestA3HotReload:
                     nos_inventory_config={},
                     base_prompt="R1",
                     is_running=threading.Event(),
-                    reload_lock=lock,
                 )
             )
 
-        with lock:
+        with nos_obj.reload_lock:
             t = threading.Thread(target=_build)
             t.start()
             t.join(timeout=0.3)
@@ -543,6 +545,115 @@ class TestA3HotReload:
         t.join(timeout=2)
         assert blocked
         assert built  # proceeds once the lock is released
+
+    def test_init_self_build_applies_under_lock(self, tmp_path, monkeypatch):
+        """The self-build holds `nos.reload_lock` THROUGH `_apply_platform`
+        (#349 gap c, design review gemini 2nd#3): a spy asserts the lock is
+        held when the install (incl. the device pin) runs, so reverting to the
+        old "build under lock, apply outside" shape fails here — the blocking
+        test alone cannot tell the two apart (code review codex#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        held_at_apply: list[bool] = []
+        orig_apply = CMDShell._apply_platform
+
+        def spying_apply(self, platform):
+            held_at_apply.append(nos_obj.reload_lock.locked())
+            return orig_apply(self, platform)
+
+        monkeypatch.setattr(CMDShell, "_apply_platform", spying_apply)
+        CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        assert held_at_apply == [True]
+
+    def test_failed_reload_keeps_table_and_device_pair(self, tmp_path, monkeypatch):
+        """A failed reload rolls back the nos AND leaves the shell's table +
+        device pin as the old, consistent pair (#349 rollback×pin contract,
+        code review codex#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        old_commands = shell.commands
+        old_device = shell._device
+        old_resolved = nos_obj.resolved_platform
+
+        def mutating_broken_from_file(target):
+            # Mutate BEFORE raising so the test identifies the snapshot-restore
+            # loop itself — a no-mutation fake would pass even with the rollback
+            # deleted (code review codex 2nd#2).
+            nos_obj.device = object()
+            nos_obj.resolved_platform = None
+            raise ValueError("simulated broken reload target")
+
+        monkeypatch.setattr(nos_obj, "from_file", mutating_broken_from_file)
+        shell.reload_commands([str(platform_dir)])  # error is logged, not raised
+        assert shell.commands is old_commands
+        assert shell._device is old_device
+        assert nos_obj.device is old_device  # partial mutation rolled back
+        assert nos_obj.resolved_platform is old_resolved  # the exact snapshot restored
+
+    def test_device_pin_survives_sibling_reload(self, tmp_path):
+        """`_invoke_handler` runs against the per-shell device pin, not the live
+        `nos.device` (#349 gap c): a sibling reload swapping the shared device
+        cannot pair a new device with this shell's old handlers. The shell's OWN
+        `_rebuild` is what moves it to the new generation."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        pinned = shell._device
+        assert pinned is nos_obj.device  # pin captured at install
+        sentinel = object()
+        nos_obj.device = sentinel  # a sibling session's reload swaps the shared device
+        seen: list = []
+
+        def handler(device, **_kwargs):
+            seen.append(device)
+            return "ok"
+
+        shell._invoke_handler(handler, "show test")
+        assert seen == [pinned]  # old, generation-consistent device — not the sentinel
+        shell._rebuild()  # own reload: installs the new generation (table + device pair)
+        assert shell._device is sentinel
+
+    def test_reload_invalidates_cache_only_for_a3_dir_targets(self, tmp_path, monkeypatch):
+        """`reload_commands` invalidates the parse cache once per batch and only
+        when the batch contains an A3 dir target — a `.py`-only reload never
+        touches `load_platform_dir` and must not force other hosts into
+        re-parses (#349 / 案B4, design review codex#3 / gemini#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        events: list[str] = []
+        monkeypatch.setattr("simnos.plugins.shell.cmd_shell.invalidate_platform_cache", lambda: events.append("inv"))
+        orig_from_file = nos_obj.from_file
+        monkeypatch.setattr(nos_obj, "from_file", lambda target: (events.append("load"), orig_from_file(target))[1])
+        # .py-only batch: the gate is evaluated before the load, so even this
+        # missing module (whose load fails and rolls back) proves the skip.
+        shell.reload_commands([str(tmp_path / "missing_mod.py")])
+        assert events == ["load"]
+        events.clear()
+        # A batch with TWO A3 dir targets: invalidate fires once, BEFORE the
+        # first load — not per target (code review codex#3; a second copy of the
+        # platform under another root keeps the shared nos state consistent).
+        second_dir = _a3_platform(tmp_path / "second")
+        shell.reload_commands([str(platform_dir), str(second_dir)])
+        assert events == ["inv", "load", "load"]
+
+    def test_meta_deletion_invalidates_and_rolls_back(self, tmp_path):
+        """Deleting platform.yaml (a normal watcher event) still invalidates the
+        cache, so the reload re-parses, FAILS loudly and rolls back — instead of
+        "succeeding" off a stale cache hit (code review codex 2nd#1; this is why
+        the A3 gate is `isdir`, not a platform.yaml-presence probe)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        old_commands = shell.commands
+        old_device = shell._device
+        old_resolved = nos_obj.resolved_platform
+        (platform_dir / "platform.yaml").unlink()
+        shell.reload_commands([str(platform_dir)])  # parse failure is logged + rolled back
+        assert shell.commands is old_commands  # NOT silently "reloaded" from stale cache
+        assert shell._device is old_device
+        assert nos_obj.resolved_platform is old_resolved  # rollback restored the exact snapshot
 
     def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
         """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).

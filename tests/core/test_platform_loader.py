@@ -9,15 +9,15 @@ isolation.
 
 import pytest
 
-from simnos.core.platform_loader import load_platform_dir
+from simnos.core.platform_loader import invalidate_platform_cache, load_platform_dir
 
 
 @pytest.fixture(autouse=True)
 def _clear_loader_cache():
     """Isolate the module-level load_platform_dir cache between tests."""
-    load_platform_dir.cache_clear()
+    invalidate_platform_cache()
     yield
-    load_platform_dir.cache_clear()
+    invalidate_platform_cache()
 
 
 def _write(path, content):
@@ -427,9 +427,67 @@ class TestLoadCache:
         second = load_platform_dir(str(root))
         assert first is second  # shared parse, not re-read
 
-    def test_cache_clear_forces_reparse(self, tmp_path):
+    def test_invalidate_forces_reparse(self, tmp_path):
         root, commands = _platform(tmp_path)
         _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
         first = load_platform_dir(str(root))
-        load_platform_dir.cache_clear()
+        invalidate_platform_cache()
         assert load_platform_dir(str(root)) is not first
+
+    def test_generation_guard_discards_parse_straddling_invalidation(self, tmp_path, monkeypatch):
+        """#349 / 案B4 keystone: a miss whose parse straddles an invalidation is
+        neither cached nor returned — the caller gets the retried, current-
+        generation result (design review codex 2nd#1). Pinned by injecting an
+        invalidation mid-parse on the first attempt only."""
+        import simnos.core.platform_loader as loader_mod
+
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
+        real_uncached = loader_mod._load_platform_dir_uncached
+        results: list = []
+
+        def parse_with_midflight_invalidate(path):
+            result = real_uncached(path)
+            results.append(result)
+            if len(results) == 1:  # first (straddling) parse only
+                invalidate_platform_cache()
+            return result
+
+        monkeypatch.setattr(loader_mod, "_load_platform_dir_uncached", parse_with_midflight_invalidate)
+        returned = load_platform_dir(str(root))
+        # The straddling first parse was discarded: the caller received the
+        # retry's result, and that (not the stale one) is what got cached.
+        assert len(results) == 2
+        assert returned is results[1] and returned is not results[0]
+        assert load_platform_dir(str(root)) is returned  # cached at current generation
+
+    def test_same_generation_concurrent_miss_converges_on_winner(self, tmp_path, monkeypatch):
+        """Same-generation concurrent misses converge on one identity via the
+        real protocol (design review codex 2nd#2, code review codex#1): two
+        threads both take the miss path, a barrier proves their parses overlap
+        outside `_CACHE_LOCK`, and both public-API returns are the SAME object
+        (the `setdefault` winner) — no lock-external cache poking."""
+        import threading
+
+        import simnos.core.platform_loader as loader_mod
+
+        root, commands = _platform(tmp_path)
+        _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
+        real_uncached = loader_mod._load_platform_dir_uncached
+        barrier = threading.Barrier(2, timeout=5)
+
+        def overlapping_parse(path):
+            result = real_uncached(path)
+            barrier.wait()  # both threads are mid-miss before either commits
+            return result
+
+        monkeypatch.setattr(loader_mod, "_load_platform_dir_uncached", overlapping_parse)
+        results: list = []
+        threads = [threading.Thread(target=lambda: results.append(load_platform_dir(str(root)))) for _ in range(2)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join(timeout=10)
+            assert not t.is_alive()  # a hung protocol fails here, not downstream
+        assert len(results) == 2
+        assert results[0] is results[1]  # both callers got the committed winner

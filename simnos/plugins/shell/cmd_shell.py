@@ -5,6 +5,7 @@ Custom shell class to interact with NOS.
 from dataclasses import dataclass, replace
 import hashlib
 import logging
+import os
 import random
 import string
 import threading
@@ -16,7 +17,7 @@ from jinja2 import TemplateSyntaxError
 from simnos.core.command_contract import CommandHandler
 from simnos.core.nos import Nos
 from simnos.core.overlay_loader import resolve_overlay
-from simnos.core.platform_loader import load_platform_dir, resolve_modes, resolve_transitions
+from simnos.core.platform_loader import invalidate_platform_cache, resolve_modes, resolve_transitions
 from simnos.core.pydantic_models import ModelInventoryCommand, NosPluginConfig
 from simnos.core.resolved_command import (
     NO_OUTPUT,
@@ -339,7 +340,6 @@ class CMDShell:
         resolved_platform=None,
         render_config=None,
         page_default_rows=24,
-        reload_lock=None,
         username=None,
         password=None,
         secret=None,
@@ -391,14 +391,18 @@ class CMDShell:
         # connection (true non-determinism, the realism opt-in; D6). Seeded
         # selection uses `_stable_hash` instead, not this RNG.
         self._connection_rng = random.Random()  # noqa: S311 — variant pick, not cryptographic
-        # Per-host shared reload lock (#281 / D6): serializes the executor-thread
-        # `reload_commands` against both a concurrent reload (another session of
-        # this host) and this `__init__`'s self-build read below, all of which
-        # touch the host-shared `self.nos`. The server injects one lock per host
-        # (`Host.start` -> server kwarg); a direct construction / test gets a
-        # private fallback. Established BEFORE the self-build so the read is
-        # already protected.
-        self._reload_lock: threading.Lock = reload_lock or threading.Lock()
+        # Per-Nos shared reload lock (#281 / D6, ownership moved in #349):
+        # serializes the executor-thread `reload_commands` against both a
+        # concurrent reload (another session — possibly of ANOTHER host sharing
+        # a registered Nos) and this `__init__`'s self-build read below, all of
+        # which touch the shared `self.nos`. The lock lives on the Nos itself
+        # (`nos.reload_lock`) so every host/shell of one instance serializes on
+        # the same lock — the former per-host injection let two hosts mutate a
+        # shared registered Nos under different locks (#349 gap a). The
+        # `getattr` fallback exists only for non-Nos test fakes; a real `Nos`
+        # always owns the lock. Established BEFORE the self-build so the read
+        # is already protected.
+        self._reload_lock: threading.Lock = getattr(nos, "reload_lock", None) or threading.Lock()
         # The merged platform is per-host invariant (base_prompt is the host name,
         # nos/inventory are shared), so the server normalizes it once at
         # Host.start and passes it to every connection's shell (#264 / Impact —
@@ -407,17 +411,23 @@ class CMDShell:
         # fails loudly here (the #172 lenient fallback is gone, #264 / D5). In
         # hot-reload dev mode the shared snapshot is None (`build_shared_platform`
         # returns None), so every connection self-builds from the live shared
-        # `nos` — done under the reload lock so a concurrent executor reload does
-        # not mutate `nos` mid-read (#281 / D6, gemini#1). `_build_shell` runs on
-        # the shared event-loop thread, so a new connection contending here with an
-        # in-flight reload briefly blocks the loop until the reload releases the
-        # lock — dev-only (production passes a non-None shared platform, skipping
-        # this branch entirely) and accepted as the cost of the no-mid-mutation
-        # guarantee (#281 / Risks, 1st code review claude#1).
+        # `nos` — build AND install both run under the reload lock so a
+        # concurrent executor reload neither mutates `nos` mid-read nor swaps
+        # `nos.device` between the build and `_apply_platform`'s device pin
+        # (#281 / D6, gemini#1; the pin-pairing window is #349 gap c, design
+        # review gemini 2nd#3). `_build_shell` runs on the shared event-loop
+        # thread, so a new connection contending here with an in-flight reload
+        # briefly blocks the loop until the reload releases the lock — for a
+        # registered Nos shared across hosts that block now spans every sharing
+        # host's I/O (#349) — dev-only (production passes a non-None shared
+        # platform, skipping this branch entirely) and accepted as the cost of
+        # the no-mid-mutation guarantee (#281 / Risks, 1st code review claude#1).
         if resolved_platform is None:
             with self._reload_lock:
                 resolved_platform = build_resolved_platform(self.nos, self._inventory_commands, self._render_config)
-        self._apply_platform(resolved_platform)
+                self._apply_platform(resolved_platform)
+        else:
+            self._apply_platform(resolved_platform)
         # Hot-reload watcher state (#281 / D1, D2, D5). Built ONLY in dev hot-reload
         # mode so production (env off) does no walk and holds no snapshot — the
         # per-shell baseline replaces the #274 process-global consume-once snapshot.
@@ -498,6 +508,15 @@ class CMDShell:
         # The pager prompt rides with the platform so a hot reload that swaps it
         # also refreshes the `--More--` string (#307 / P3-4).
         self.more_prompt = platform.more_prompt
+        # Per-shell device pin (#349 gap c): the device generation is captured
+        # in the SAME exception-free commit as the command table, so
+        # `_invoke_handler` always runs a handler against the device it was
+        # installed with. A sibling session's reload swapping `nos.device`
+        # cannot hand this shell a "new device × old handler" mismatch pair —
+        # this shell answers with its own (old, consistent) generation until
+        # its OWN precmd reload re-installs. Callers hold the reload lock in
+        # every mutating context (self-build / `_rebuild`), pairing the read.
+        self._device = self.nos.device
 
     @property
     def paging_disabled(self) -> bool:
@@ -640,9 +659,12 @@ class CMDShell:
         atomic, so live `self.commands` is never touched by a failed reload
         (2nd round codex #1).
 
-        The A3 platform parse is cached by `load_platform_dir`; drop that cache
-        first so a reload re-reads the changed files instead of the stale parse
-        (#264 / D6 cache bypass). No-op for py module reloads.
+        The A3 platform parse is cached by `load_platform_dir`; invalidate that
+        cache first so a reload re-reads the changed files instead of the stale
+        parse (#264 / D6 cache bypass). Only when the batch actually contains an
+        A3 dir target — a `.py` module reload never touches the parse cache, so
+        invalidating for it would only force other hosts into pointless
+        re-parses (#349, design review codex#3).
 
         `reload_targets` are reload units (A3 platform dirs / `.py` modules), not
         raw changed files (#274 / D1). Per-platform watch (#281 / D2) means a
@@ -650,17 +672,27 @@ class CMDShell:
         cannot contain a sibling platform — the #274 ownership filter is gone as
         unreachable dead code (#281 / D7).
 
-        Serialized by the per-host `_reload_lock` (#281 / D6): `self.nos` is shared
-        by every session of this host, and dispatch runs on a bounded executor, so
-        two sessions could otherwise reload concurrently and corrupt the shared
-        `nos` (or race this method against a new connection's self-build read in
-        `__init__`). The whole body — including `load_platform_dir.cache_clear()` —
-        is under the lock: clearing the cache outside it would let session B drop
-        the cache while session A is still populating from it, re-opening the stale
-        parse window the cache bypass closes (#281 / D6, claude#2/codex#2).
+        Serialized by the per-Nos `_reload_lock` (#281 / D6, ownership moved to
+        the Nos in #349): `self.nos` is shared by every session of every host
+        using this Nos, and dispatch runs on a bounded executor, so two sessions
+        could otherwise reload concurrently and corrupt the shared `nos` (or
+        race this method against a new connection's self-build in `__init__`).
+        Cross-host cache consistency is NOT this lock's job any more: the
+        generation guard inside `load_platform_dir` guarantees a parse that
+        straddled an invalidation is neither cached nor returned (#349 / 案B4),
+        so another Nos's concurrent reload can no longer re-open the stale
+        parse window the old per-host `cache_clear()` left (#281 / D6 follow-up).
         """
         with self._reload_lock:
-            load_platform_dir.cache_clear()
+            # `isdir` is the A3 classifier ON PURPOSE — it matches the reload
+            # target contract ("A3 platform dir or .py file", same dispatch as
+            # `Nos.from_file`) and, unlike a platform.yaml-presence probe, still
+            # invalidates when the meta file was DELETED: that reload must
+            # re-parse, fail loudly and roll back, not "succeed" off a stale
+            # cache hit (code review codex 2nd#1; a package-form py plugin is
+            # out of contract until `Nos.from_file` itself learns the type).
+            if any(os.path.isdir(target) for target in reload_targets):
+                invalidate_platform_cache()
             for target in reload_targets:
                 snapshot_attrs = {attr: getattr(self.nos, attr) for attr in self._NOS_RELOAD_ATTRS}
                 try:
@@ -898,8 +930,12 @@ class CMDShell:
         log line — same shape as the crash boundary in the caller, so broken
         plugin code never puts garbage on the wire (#317 / P-2).
         """
+        # `self._device`, not `self.nos.device` (#349 gap c): the pin captured in
+        # `_apply_platform`'s commit keeps this handler paired with the device
+        # generation it was installed with, immune to a sibling reload swapping
+        # the shared `nos.device` mid-session.
         ret = handler(
-            self.nos.device,
+            self._device,
             base_prompt=self.base_prompt,
             current_mode=self.current_mode,
             current_prompt=self.prompt,
