@@ -160,6 +160,7 @@ class TestRenderLeaks:
         _write(commands / "sudo.txt", "[sudo] password for {username}:\n")
         violations = check_platform_data_render_leaks(str(tmp_path))
         assert len(violations) == 1
+        assert "{username}" in violations[0]
 
     def test_real_device_literal_braces_pass(self, tmp_path):
         # The false-positive catalogue from #329: real devices print these
