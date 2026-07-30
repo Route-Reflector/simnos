@@ -56,8 +56,7 @@ def bandit(context):
 def _iter_platform_command_dirs(platforms_dir: str):
     """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
 
-    The single walk shared by the lint passes (`check_platform_data` /
-    `check_platform_data_warnings` / `check_platform_data_ratchet`) — an
+    The single walk shared by every ``check_platform_data_*`` lint pass — an
     absent platforms dir or a platform without a ``commands/`` subdir is
     skipped, so callers loop over real targets only.
     """
@@ -214,6 +213,58 @@ def check_platform_data_device_type_collisions(platforms_dir: str = PLATFORMS_A3
             continue
         register(meta.get("netmiko_device_type"), platform, "netmiko_device_type")
         register(meta.get("ntc_platform"), platform, "ntc_platform")
+    return violations
+
+
+# Render variables the loader substitutes in the `.j2` / challenge channels,
+# mirrored from `simnos.core.resolved_command` (KNOWN_RENDER_VARS |
+# CHALLENGE_RENDER_VARS). Hardcoded because tasks.py stays simnos-import-free
+# (#264 / D1); `tests/test_lint_platform_data.py` pins this tuple against the
+# real constants so a new render variable cannot silently escape the guard.
+_RENDER_VAR_NAMES = ("base_prompt", "username")
+# Single-brace (`{base_prompt}`, the str.format heritage that leaked in #328),
+# double-brace (`{{ base_prompt }}`, the jinja spelling) and any mismatched
+# hybrid are all flagged, including trailing jinja filters / format specs
+# (`{{ base_prompt | upper }}` / `{base_prompt:<20}` — `[^}]*` up to the closing
+# brace, 1st round codex #1) and jinja whitespace-control (`{{- base_prompt }}`
+# — `-?\s*` after the braces, 2nd/3rd round codex; the closing-side `-}}` is
+# already inside `[^}]*`): a brace expression *starting* with a render-var
+# name (`\b` keeps `{base_prompt_style}` a different identifier) has no
+# legitimate reading in a literal file. Real-device literals (`{ACDEF}` /
+# `{master}` / `flags={origin_is_acl,}`) never start with these exact names,
+# which is what keeps the false-positive rate at zero (#329). `re.escape` is a
+# no-op for the current names but keeps a future metachar-bearing name from
+# becoming a wildcard (1st round gemini #1).
+_RENDER_VAR_LEAK_RE = re.compile(
+    r"\{\{?-?\s*(?:" + "|".join(re.escape(name) for name in _RENDER_VAR_NAMES) + r")\b[^}]*\}?\}"
+)
+
+
+def check_platform_data_render_leaks(platforms_dir: str = PLATFORMS_A3_DIR) -> list[str]:
+    """Flag jinja render variables leaked into literal ``.txt`` outputs (#329).
+
+    The ``.txt`` channel is served verbatim (never rendered), so a
+    ``{base_prompt}`` / ``{{ base_prompt }}`` inside one reaches the wire
+    unsubstituted — the #328 arista_eos ``show hostname`` regression class. A
+    body that needs a render variable must be authored as ``.j2``
+    (``output_template:``) instead. Scans every ``.txt`` under ``commands/``
+    (variants included); ``.j2`` is the render channel and exempt. Undecodable
+    bytes are replaced rather than raised — a broken encoding is already a
+    gating violation in `check_platform_data` and must not crash this pass.
+
+    Returns a list of human-readable violation strings (empty = clean).
+    """
+    violations: list[str] = []
+    for platform, commands_dir in _iter_platform_command_dirs(platforms_dir):
+        for txt_path in sorted(glob.glob(os.path.join(commands_dir, "*.txt"))):
+            with open(txt_path, encoding="utf-8", errors="replace") as f:
+                content = f.read()
+            for match in _RENDER_VAR_LEAK_RE.finditer(content):
+                line_no = content.count("\n", 0, match.start()) + 1
+                violations.append(
+                    f"{platform}/commands/{os.path.basename(txt_path)}:{line_no}: render variable "
+                    f"{match.group(0)!r} in a literal .txt — author it as a .j2 output_template instead (#328)"
+                )
     return violations
 
 
@@ -437,7 +488,9 @@ def lint_platform_data(context):
     `check_platform_data_ratchet`) + device_type alias collisions across
     platforms (#266, see `check_platform_data_device_type_collisions`)
     + py-module cross-checks (orphan ``platforms_py`` module / unbindable
-    ``handler:`` ref, #317 P-4, see `check_platform_data_py_modules`).
+    ``handler:`` ref, #317 P-4, see `check_platform_data_py_modules`)
+    + render-variable leaks into literal ``.txt`` (#329, see
+    `check_platform_data_render_leaks`).
     Warning-tier (printed, non-blocking):
     filename convention + ``type: ntc`` provenance (see
     `check_platform_data_warnings`).
@@ -460,6 +513,7 @@ def lint_platform_data(context):
         + check_platform_data_ratchet()
         + check_platform_data_device_type_collisions()
         + check_platform_data_py_modules()
+        + check_platform_data_render_leaks()
     )
     for violation in violations:
         print(violation)
