@@ -235,29 +235,37 @@ class _LineEditor:
     def line_text(self) -> str:
         return self._line.decode("utf-8", errors="replace")
 
-    def insert(self, byte: bytes) -> None:
+    def insert(self, byte: bytes) -> bool:
+        """Insert *byte* at the cursor; returns whether anything was echoed.
+
+        ``False`` = the byte was dropped at the ``_LINE_MAX`` cap (no echo), so
+        the caller can skip the backpressure drain for no-op input (#347).
+        """
         if len(self._line) >= _LINE_MAX:
-            return  # line cap (#347): drop + no echo, real-device style
+            return False  # line cap (#347): drop + no echo, real-device style
         if self._pos == len(self._line):
             self._send(byte)  # fast path: raw echo at end (byte-parity preserved)
             self._line += byte
             self._pos += 1
-            return
+            return True
         # Mid-line insert (only after a cursor move): echo the tail, then step back.
         self._line[self._pos : self._pos] = byte
         self._pos += 1
         tail = bytes(self._line[self._pos - 1 :])
         self._send(tail)
         self._send(b"\b" * (len(tail) - 1))
+        return True
 
-    def backspace(self) -> None:
+    def backspace(self) -> bool:
+        """Delete before the cursor; returns whether anything was echoed."""
         if self._pos == 0:
-            return
+            return False
         del self._line[self._pos - 1 : self._pos]
         self._pos -= 1
         tail = bytes(self._line[self._pos :])
         self._send(b"\b" + tail + b" ")  # move left, rewrite tail, clear the freed cell
         self._send(b"\b" * (len(tail) + 1))  # cursor back to the edit point
+        return True
 
     def delete(self) -> None:
         if self._pos >= len(self._line):
@@ -300,7 +308,17 @@ class _LineEditor:
         self._pos = len(self._line)
 
     def set_line(self, new: bytes) -> None:
-        """Replace the line (Tab completion)."""
+        """Replace the line (Tab completion).
+
+        An oversized replacement is refused as a no-op rather than truncated —
+        a cut command is a *different* command, so completing to it would
+        dispatch the wrong thing (#347, 1st round codex #1). This keeps the
+        ``_LINE_MAX`` bound intact for the one inflow that does not pass through
+        ``insert`` (completion candidates are canonical commands, not client
+        bytes; history / ``_saved`` re-entry is built from already-capped lines).
+        """
+        if len(new) > _LINE_MAX:
+            return
         self._replace_line(new)
 
     def history_prev(self) -> None:
@@ -724,8 +742,8 @@ async def run_async_push_session(
                 if result.close:
                     return
             elif editing and byte in (b"\x08", b"\x7f"):
-                editor.backspace()
-                await transport.drain()  # echo backpressure (#347), see above
+                if editor.backspace():
+                    await transport.drain()  # echo backpressure (#347), see above
             elif editing and byte == b"\t":
                 _complete(editor, shell, transport)
                 await transport.drain()  # echo backpressure (#347), see above
@@ -733,8 +751,11 @@ async def run_async_push_session(
                 # Regular character: immediate raw echo at the line end
                 # (interactive latency + byte-parity unchanged — `drain` writes
                 # nothing, it only paces a client that stopped reading, #347).
-                editor.insert(byte)
-                await transport.drain()
+                # The drain is gated on "echoed something" so a CR-less flood
+                # past the line cap costs no await per dropped byte (1st round
+                # codex #4).
+                if editor.insert(byte):
+                    await transport.drain()
         except transport.io_errors as e:
             log.error("async_session [%s] client write error: %s", transport.name, e)
             return

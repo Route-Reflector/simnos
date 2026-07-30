@@ -330,6 +330,73 @@ def test_line_cap_truncates_input_and_echo():
     asyncio.run(run_async_push_session(transport, _FakeShell(), _dispatch))
     assert len(seen) == 1 and len(seen[0]) == _LINE_MAX  # excess bytes dropped
     assert transport.out.count(b"a") == _LINE_MAX  # ...and never echoed
+    # Dropped bytes cost no drain either (1st round codex #4): intro(1) +
+    # one per accepted char (_LINE_MAX) + response(1).
+    assert transport.drains == _LINE_MAX + 2
+
+
+def test_line_cap_backspace_reopens_the_line():
+    """At the cap the line is still editable (real-device behaviour, 1st round
+    codex #2): backspace frees a byte, the next byte is accepted and echoed
+    again, and CR dispatches the edited line."""
+    seen: list[str] = []
+
+    async def _dispatch(line: str):
+        seen.append(line)
+        return DispatchResult(body=None, prompt="device>", close=True, mode="user")
+
+    flood = b"a" * (_LINE_MAX + 10) + b"\x7f" + b"b" + b"\r"
+    transport = _FakeTransport([flood])
+    asyncio.run(run_async_push_session(transport, _FakeShell(), _dispatch, editing=True))
+    assert len(seen[0]) == _LINE_MAX
+    assert seen[0].endswith("ab")  # freed cell refilled with the new byte
+    assert transport.out.count(b"b") == 1  # the replacement byte echoed
+
+
+def test_challenge_answer_cap_backspace_reopens():
+    """The challenge answer stays editable at its cap too (1st round codex #2):
+    backspace frees a byte and the next byte lands."""
+    transport = _FakeTransport([])
+    data = b"y" * (_LINE_MAX + 5) + b"\x08" + b"n" + b"\r"
+    stream = iter(data[i : i + 1] for i in range(len(data)))
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, _skip = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered is not None and len(entered) == _LINE_MAX
+    assert entered.endswith("yn")
+
+
+def test_challenge_answer_cap_echo_off_silent():
+    """echo=False (password) at the cap: the buffer is bounded and nothing at
+    all reaches the wire — no echo, no drain (1st round gemini #1)."""
+    transport = _FakeTransport([])
+    data = b"p" * (_LINE_MAX + 50) + b"\r"
+    stream = iter(data[i : i + 1] for i in range(len(data)))
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, _skip = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=False))
+    assert entered is not None and len(entered) == _LINE_MAX
+    assert bytes(transport.out) == b""
+    assert transport.drains == 0
+
+
+def test_set_line_refuses_oversized_replacement():
+    """`set_line` (the Tab-completion inflow that bypasses `insert`) refuses an
+    oversized replacement as a no-op — truncating would complete to a
+    *different* command (1st round codex #1)."""
+    from simnos.plugins.servers.async_session import _LineEditor
+
+    sent = bytearray()
+    editor = _LineEditor(sent.extend)
+    editor.set_line(b"x" * (_LINE_MAX + 1))
+    assert editor.line_text == ""  # refused: line unchanged
+    assert bytes(sent) == b""  # ...and nothing echoed
+    editor.set_line(b"x" * _LINE_MAX)  # exactly at the cap is still accepted
+    assert len(editor.line_text) == _LINE_MAX
 
 
 def test_challenge_answer_cap():
