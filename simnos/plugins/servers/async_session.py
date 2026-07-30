@@ -147,6 +147,16 @@ _CSI_ACTIONS = {
 }
 _MAX_ESC_LEN = 8  # give up on an unterminated escape past this many bytes
 _HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memory)
+# Per-line input cap (#347): a client that never sends CR/LF must not grow the
+# line buffer without bound. Real devices cap the edit buffer too (IOS ~256
+# chars); 4096 is far above any realistic CLI line — the longest byte-parity
+# golden line is 34 bytes — so the cap is unreachable for scrapers and the wire
+# stays byte-identical. Past the cap a byte is dropped unechoed (the editor's
+# "ignored, no bell" convention). Enforced at the single growth points
+# (`_LineEditor.insert` / the challenge answer buffer); `set_line` inflows are
+# themselves built from capped lines, so this is an abuse bound, not an exact
+# length contract.
+_LINE_MAX = 4096
 
 
 def _parse_escape(seq: bytes) -> str:
@@ -226,6 +236,8 @@ class _LineEditor:
         return self._line.decode("utf-8", errors="replace")
 
     def insert(self, byte: bytes) -> None:
+        if len(self._line) >= _LINE_MAX:
+            return  # line cap (#347): drop + no echo, real-device style
         if self._pos == len(self._line):
             self._send(byte)  # fast path: raw echo at end (byte-parity preserved)
             self._line += byte
@@ -509,10 +521,16 @@ async def _read_challenge_line(
                 del buf[-1:]
                 if echo:
                     transport.send(b"\b \b")  # erase one echoed char (confirm only)
+                    await transport.drain()
             continue
+        if len(buf) >= _LINE_MAX:
+            continue  # answer cap (#347): drop + no echo, same bound as the editor
         buf += byte
         if echo:
             transport.send(byte)
+            # Interactive echo backpressure (#347): flush before the next key so a
+            # client that never reads cannot grow the write buffer without bound.
+            await transport.drain()
 
 
 async def _run_challenge(
@@ -642,6 +660,12 @@ async def run_async_push_session(
                 if verdict != "pass":
                     if verdict != "consumed":
                         editor.apply_action(verdict)  # a completed action key
+                        # Interactive echo backpressure (#347): the redraw a
+                        # cursor/history action emits is flushed before the next
+                        # key, so a client that never reads cannot grow the write
+                        # buffer without bound. `drain` writes nothing (pacing
+                        # only), so the wire byte stream is untouched.
+                        await transport.drain()
                     continue  # escape consumed (collecting / applied / discarded)
 
             # Classify the byte against the shared terminator machine (#350): a NUL
@@ -699,12 +723,16 @@ async def run_async_push_session(
                     return
             elif editing and byte in (b"\x08", b"\x7f"):
                 editor.backspace()
+                await transport.drain()  # echo backpressure (#347), see above
             elif editing and byte == b"\t":
                 _complete(editor, shell, transport)
+                await transport.drain()  # echo backpressure (#347), see above
             else:
                 # Regular character: immediate raw echo at the line end
-                # (interactive latency + byte-parity unchanged).
+                # (interactive latency + byte-parity unchanged — `drain` writes
+                # nothing, it only paces a client that stopped reading, #347).
                 editor.insert(byte)
+                await transport.drain()
         except transport.io_errors as e:
             log.error("async_session [%s] client write error: %s", transport.name, e)
             return

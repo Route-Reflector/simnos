@@ -15,6 +15,7 @@ import pytest
 from simnos.core.resolved_command import ResolvedChallenge, ResolvedOutput, Transition
 from simnos.plugins.servers.async_session import (
     _CSI_ACTIONS,
+    _LINE_MAX,
     _consume_escape,
     _consume_terminator,
     _read_challenge_line,
@@ -78,6 +79,7 @@ class _FakeTransport:
         # (#307, the phantom-Enter keystone, codex 4th#4).
         self._chunks = list(chunks)
         self.out = bytearray()
+        self.drains = 0  # drain() call count — pins the echo backpressure sites (#347)
         self._fail_on = fail_on
         # page_rows() return value: None = paging off (the default, byte-identical
         # path); a positive int makes the driver page over-long bodies (#307).
@@ -106,6 +108,7 @@ class _FakeTransport:
         self.out += data
 
     async def drain(self) -> None:
+        self.drains += 1
         if self._fail_drain_on is not None and self._fail_drain_on in self.out:
             raise OSError("simulated drain failure")
 
@@ -309,6 +312,59 @@ def test_write_failure_ends_session():
     # Intro write succeeds, the response write raises -> driver returns (no crash).
     out = _drive(transport, _FakeShell())
     assert out.startswith(b"Custom SSH Shell\r\ndevice>show vlan")
+
+
+# ---------------------------------------------------------------- line buffer bound + echo backpressure (#347)
+def test_line_cap_truncates_input_and_echo():
+    """A CR-less byte flood stops accumulating AND echoing at `_LINE_MAX`; the
+    eventual CR dispatches the truncated line. Pins the #347 unbounded-line
+    bound; the cap (4096) is ~120x the longest golden line, so the scraper wire
+    never reaches this branch and byte parity is untouched."""
+    seen: list[str] = []
+
+    async def _dispatch(line: str):
+        seen.append(line)
+        return DispatchResult(body=None, prompt="device>", close=True, mode="user")
+
+    transport = _FakeTransport([b"a" * (_LINE_MAX + 100) + b"\r"])
+    asyncio.run(run_async_push_session(transport, _FakeShell(), _dispatch))
+    assert len(seen) == 1 and len(seen[0]) == _LINE_MAX  # excess bytes dropped
+    assert transport.out.count(b"a") == _LINE_MAX  # ...and never echoed
+
+
+def test_challenge_answer_cap():
+    """The challenge answer buffer shares the `_LINE_MAX` bound (#347): a CR-less
+    flood mid-challenge cannot grow the answer (nor its echo) without limit."""
+    transport = _FakeTransport([])
+    data = b"y" * (_LINE_MAX + 50) + b"\r"
+    stream = iter(data[i : i + 1] for i in range(len(data)))
+
+    async def _read_byte():
+        return next(stream, None)
+
+    entered, _skip = asyncio.run(_read_challenge_line(transport, _read_byte, False, echo=True))
+    assert entered is not None and len(entered) == _LINE_MAX
+    assert transport.out.count(b"y") == _LINE_MAX
+
+
+def test_interactive_echo_drains_per_key():
+    """Every interactive echo site is followed by a drain (#347): regular char,
+    backspace, Tab, escape action. A client that stops reading is paced by the
+    transport's backpressure instead of growing the user-space write buffer.
+    `drain` writes nothing, so the wire byte stream is unchanged."""
+    # intro(1) + 'a'(1) + 'b'(1) + backspace(1) + Tab(1) + Up action(1) + response(1)
+    transport = _FakeTransport([b"ab\x7f\t\x1b[A\r"])
+    _drive(transport, _FakeShell(), editing=True)
+    assert transport.drains == 7
+
+
+def test_scraper_path_drains_per_char():
+    """The non-editing (Telnet / scraper) char echo drains too — the #347 bound
+    is not gated on the editing flag."""
+    transport = _FakeTransport([b"hi\r"])
+    _drive(transport, _FakeShell())
+    # intro(1) + 'h'(1) + 'i'(1) + response(1)
+    assert transport.drains == 4
 
 
 def test_async_interactive_login_success_and_skip_lf():
