@@ -584,9 +584,7 @@ def test_async_login_deadline_folds_into_failed_auth(monkeypatch):
 
     async def _run():
         transport = _HangingTransport([])
-        return await async_interactive_login(
-            transport, "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
-        )
+        return await async_interactive_login(transport, "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: ")
 
     ok, skip_lf = asyncio.run(_run())
     assert ok is False

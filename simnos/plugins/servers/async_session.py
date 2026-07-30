@@ -153,16 +153,17 @@ _HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memo
 # chars); 4096 is far above any realistic CLI line — the longest byte-parity
 # golden line is 34 bytes — so the cap is unreachable for scrapers and the wire
 # stays byte-identical. Past the cap a byte is dropped unechoed (the editor's
-# "ignored, no bell" convention). Enforced at the client-byte growth points
-# (`_LineEditor.insert`, the challenge answer buffer and the pre-auth login read)
-# and at `set_line` (the Tab-completion inflow that bypasses `insert` — an
-# oversized replacement is refused); history / `_saved` re-entry is built from
+# "ignored, no bell" convention). Enforced at the client-byte growth points —
+# `_LineEditor.insert` for the edited line, `_accept_capped_byte` for both
+# credential readers (challenge answer #347 / pre-auth login #269) — and at
+# `set_line` (the Tab-completion inflow that bypasses `insert` — an oversized
+# replacement is refused); history / `_saved` re-entry is built from
 # already-capped lines, so every inflow honours the bound.
 _LINE_MAX = 4096
 # Total wall-clock budget for one in-band login (#269): both prompts and both
 # line reads. A client that never sends CR/LF must not hold an unauthenticated
 # session open forever. Real devices bound the login response the same way, so
-# the cap is natural for fidelity too, and interactive tests complete in
+# the budget is natural for fidelity too, and interactive tests complete in
 # milliseconds — orders of magnitude below it. Exceeding it is folded into
 # "authentication failed" rather than raised, so it joins the existing
 # close-on-failure path at both call sites.
@@ -507,6 +508,29 @@ async def _emit_paged(
     return skip_lf
 
 
+# --------------------------------------------------------------- credential readers
+async def _accept_capped_byte(transport: AsyncPushTransport, buf: bytearray, byte: bytes, *, echo: bool) -> None:
+    """Buffer one client byte under the ``_LINE_MAX`` cap, echoing what it keeps.
+
+    The single inflow gate behind both credential readers — the challenge answer
+    (#347) and the in-band login (#269) — so the bound and the echo backpressure
+    stay identical across them, the way ``_consume_terminator`` keeps their
+    terminator handling identical (#350).
+
+    Past the cap the byte is dropped unechoed (the editor's "ignored, no bell"
+    convention) and costs no ``drain`` await, so a CR-less flood is free. The
+    caller keeps reading either way: the terminator machine runs ahead of this,
+    so a capped line still submits on CR/LF. ``drain`` writes nothing, so the
+    wire byte stream is unchanged — it only paces a client that stopped reading.
+    """
+    if len(buf) >= _LINE_MAX:
+        return
+    buf += byte
+    if echo:
+        transport.send(byte)
+        await transport.drain()
+
+
 # --------------------------------------------------------------------- challenge (#338)
 async def _read_challenge_line(
     transport: AsyncPushTransport,
@@ -553,14 +577,7 @@ async def _read_challenge_line(
                     transport.send(b"\b \b")  # erase one echoed char (confirm only)
                     await transport.drain()
             continue
-        if len(buf) >= _LINE_MAX:
-            continue  # answer cap (#347): drop + no echo, same bound as the editor
-        buf += byte
-        if echo:
-            transport.send(byte)
-            # Interactive echo backpressure (#347): flush before the next key so a
-            # client that never reads cannot grow the write buffer without bound.
-            await transport.drain()
+        await _accept_capped_byte(transport, buf, byte, echo=echo)
 
 
 async def _run_challenge(
@@ -797,15 +814,7 @@ async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf
             if echo:
                 transport.send(b"\r\n")
             return buf.decode("utf-8", errors="replace"), skip_lf
-        if len(buf) >= _LINE_MAX:
-            continue  # credential cap (#269): drop + no echo, same bound as the editor
-        buf += byte
-        if echo:
-            transport.send(byte)
-            # Echo backpressure (#269): flush before the next byte so a client
-            # that never reads cannot grow the write buffer without bound. Past
-            # the cap nothing is echoed, so a CR-less flood costs no await.
-            await transport.drain()
+        await _accept_capped_byte(transport, buf, byte, echo=echo)
 
 
 async def async_interactive_login(
@@ -831,7 +840,7 @@ async def async_interactive_login(
     """
     try:
         return await asyncio.wait_for(
-            _async_interactive_login(
+            _interactive_login_body(
                 transport,
                 username,
                 password,
@@ -849,7 +858,7 @@ async def async_interactive_login(
         return False, False
 
 
-async def _async_interactive_login(
+async def _interactive_login_body(
     transport: AsyncPushTransport,
     username: str,
     password: str,
