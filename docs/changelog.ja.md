@@ -58,7 +58,7 @@ golden で固定されています — コマンドを送って出力を読む�
 - データ駆動の facts レンダリングとコマンド単位の出力バリアントを追加 (#287)。コマンド出力は `.j2` テンプレート + 隣接するサイドカー `.json` (ビルド時に厳格検証) の facts として記述でき、コマンドは `variants_policy` (`int` / `random`、任意で seed) で選択される複数の `variants` を宣言できます。canonical 出力を共有し、二相のアトミック swap で書き出します
 - SSH セッションに対話的ラインエディタを追加: `?` の文脈ヘルプ (現在モードのコマンド一覧)、コマンドツリーに対する Tab 補完、`↑` / `↓` 履歴、`←` / `→` カーソル移動と backspace を、push-dispatch ループ上の軽量 readline レイヤとして実装 (#303)。編集シーケンスは対話的なキー入力時のみ出力されるため、scraper からのフルライン入力には影響せず byte-parity で同一を維持します
 - 実機式のコマンド省略マッチを追加: トークン単位で一意な prefix が完全なコマンドに解決され、曖昧なときは `% Ambiguous command`、部分一致のときは incomplete-command メッセージを返します (#305)。省略マッチは dispatch コア (既定 ON) と Tab 補完で共有されます
-- 長い出力向けにターミナルページング (`--More--`) を追加 (#307)。ページ高は PTY / Telnet NAWS の行数に従い (取得できなければ `sys_config.paging.default_rows`、既定 24 にフォールバック)、`terminal length 0` 系のコマンドはそのセッションのページングを無効化します (`disables_paging` データフラグ)。非対話クライアント (netmiko の `height=1000`、scraper) は byte-parity を保つ行数ゲートを通じてページャをバイパスします。`--More--` 文字列はプラットフォームデータです (`platform.yaml` の `paging.more_prompt`、Cisco 既定は `" --More-- "`)
+- 長い出力向けにターミナルページング (`--More--`) を追加 (#307)。ページ高は PTY / Telnet NAWS の行数に従い (取得できなければ `sys_config.paging.default_rows`、既定 24 にフォールバック)、`terminal length 0` 系のコマンドはそのセッションのページングを無効化します (`disables_paging` データフラグ — scraper はセッション準備でこれを送るため、自動化クライアント向けの主防壁はこちらです)。加えて、ページ高に収まる出力 (netmiko の `height=1000` など) は行数ゲートで素の応答に直行し、byte-parity を保ちます。`--More--` 文字列はプラットフォームデータです (`platform.yaml` の `paging.more_prompt`、Cisco 既定は `" --More-- "`)
 - コマンドの hot-reload ウォッチャ (`SIMNOS_RELOAD_COMMANDS`) を、per-shell スナップショット + プラットフォーム単位 watch にスコープし、共有 reload を host ロック下で直列化することで、並行セッションと競合しないようにしました (#281)
 
 **バグ修正**

@@ -29,7 +29,7 @@ line editing:
 - **←/→** move the cursor within the line; **↑/↓** browse command history.
 - **Backspace** / **Delete** edit the current line.
 - **Tab** completes a command from those valid in the current mode.
-- **`?`** lists the commands available in the current mode.
+- **`?`** (typed alone, followed by **Enter**) lists the commands available in the current mode.
 
 Editing only reacts to those interactive keystrokes. Automation tools that send
 whole lines (Netmiko, Scrapli, Ansible) never trigger it, so they see exactly the
