@@ -497,7 +497,9 @@ async def _read_challenge_line(
     following ``_render_response`` supplies the answer line's newline (the
     main-loop held-echo principle), so exactly one ``\\r\\n`` reaches the wire per
     Enter. Returns ``(answer, next_skip_lf)``, or ``(None, skip_lf)`` on an EOF
-    (peer gone mid-challenge).
+    (peer gone mid-challenge). The answer shares the ``_LINE_MAX`` bound (#347):
+    past it a byte is dropped unechoed, while backspace and the terminating
+    CR/LF keep working.
     """
     buf = bytearray()
     esc = bytearray()
