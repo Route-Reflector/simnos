@@ -18,15 +18,6 @@
 
 **Prompt:**
 
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- cisco_apic$
-
 ### fabric show vlan extended
 
 **Output:**
@@ -69,4 +60,13 @@ apic1# fabric 203 show vlan extended
 **Prompt:**
 - cisco_apic$
 - cisco_apic#
+
+### sudo -s
+
+**Output:** None
+
+**Help:** run a shell as root
+
+**Prompt:**
+- cisco_apic$
 

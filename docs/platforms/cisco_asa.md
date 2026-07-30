@@ -80,6 +80,17 @@ Directory of disk0:/
 **Prompt:**
 - cisco_asa(config)#
 
+### exit
+
+**Output:** None
+
+**Help:** Exit from the current mode
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
+- cisco_asa(config)#
+
 ### login
 
 **Output:** None
@@ -88,6 +99,16 @@ Directory of disk0:/
 
 **Prompt:**
 - cisco_asa>
+
+### logout
+
+**Output:** None
+
+**Help:** Exit from the EXEC
+
+**Prompt:**
+- cisco_asa>
+- cisco_asa#
 
 ### ping
 

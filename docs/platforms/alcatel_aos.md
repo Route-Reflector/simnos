@@ -16,16 +16,6 @@
 **Prompt:**
 - alcatel_aos>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- alcatel_aos>
-- alcatel_aos#
-
 ### show chassis
 
 **Output:**

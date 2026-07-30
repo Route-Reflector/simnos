@@ -361,15 +361,6 @@ System Boot Information
 - linux$
 - linux#
 
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- linux$
-
 ### ip address show
 
 **Output:**
@@ -745,6 +736,15 @@ sockets: 1
 **Prompt:**
 - linux$
 - linux#
+
+### sudo -s
+
+**Output:** None
+
+**Help:** run a shell as root
+
+**Prompt:**
+- linux$
 
 ### top
 

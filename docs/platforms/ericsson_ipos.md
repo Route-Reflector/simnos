@@ -7,11 +7,11 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
-### enable
+### enable 15
 
 **Output:** None
 
-**Help:** enter enable mode
+**Help:** enter privileged (level 15) mode
 
 **Prompt:**
 - ericsson_ipos>

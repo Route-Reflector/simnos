@@ -18,15 +18,6 @@
 
 **Prompt:**
 
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- edgecore$
-
 ### show interfaces brief
 
 **Output:**
@@ -726,4 +717,13 @@ Ports/Port Channels:   Eth1/ 3(S) Eth1/ 5(S) Eth1/25(S)
 **Prompt:**
 - edgecore$
 - edgecore#
+
+### sudo -s
+
+**Output:** None
+
+**Help:** run a shell as root
+
+**Prompt:**
+- edgecore$
 

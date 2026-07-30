@@ -52,16 +52,6 @@ Input/output error
 **Prompt:**
 - cisco_nxos>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- cisco_nxos>
-- cisco_nxos#
-
 ### show access-lists
 
 **Output:**

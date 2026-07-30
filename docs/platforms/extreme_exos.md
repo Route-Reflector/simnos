@@ -47,16 +47,6 @@
 **Prompt:**
 - extreme_exos>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- extreme_exos>
-- extreme_exos#
-
 ### show fdb
 
 **Output:**

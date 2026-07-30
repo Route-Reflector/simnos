@@ -7,6 +7,15 @@
     open an issue on the GitHub repository. Thanks! 🤗📖
 ## Commands
 
+### administrator
+
+**Output:** None
+
+**Help:** enter administrator mode
+
+**Prompt:**
+- yamaha>
+
 ### console lines infinity
 
 **Output:** None
@@ -27,15 +36,6 @@ Error: Invalid command name
 **Help:** default output for unknown commands
 
 **Prompt:**
-
-### enable
-
-**Output:** None
-
-**Help:** enter enable mode
-
-**Prompt:**
-- yamaha>
 
 ### show environment
 

@@ -27,16 +27,6 @@
 **Prompt:**
 - ubiquiti_edgeswitch>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- ubiquiti_edgeswitch>
-- ubiquiti_edgeswitch#
-
 ### show arp
 
 **Output:**
