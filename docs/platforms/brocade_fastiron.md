@@ -37,6 +37,26 @@ Type ? for a list
 **Prompt:**
 - brocade_fastiron>
 
+### end
+
+**Output:** None
+
+**Help:** End configuration mode and return to privileged EXEC
+
+**Prompt:**
+- brocade_fastiron(config)#
+
+### exit
+
+**Output:** None
+
+**Help:** Exit the current CLI level
+
+**Prompt:**
+- brocade_fastiron>
+- brocade_fastiron#
+- brocade_fastiron(config)#
+
 ### show arp
 
 **Output:**

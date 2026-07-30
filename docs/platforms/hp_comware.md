@@ -793,10 +793,11 @@ VLAN ID   Name                             Port
 
 **Output:** None
 
-**Help:** exit the terminal (user view only; from system view use `return` to go back to user view)
+**Help:** Exit the current view (user-view logs out; system-view returns to user-view)
 
 **Prompt:**
 - <hp_comware>
+- [hp_comware]
 
 ### return
 

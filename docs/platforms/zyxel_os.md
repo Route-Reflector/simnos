@@ -261,16 +261,6 @@ Unknown command
 **Prompt:**
 - zyxel_os>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- zyxel_os>
-- zyxel_os#
-
 ### sys atsh
 
 **Output:**

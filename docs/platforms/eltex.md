@@ -16,16 +16,6 @@
 **Prompt:**
 - eltex>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- eltex>
-- eltex#
-
 ### show interface
 
 **Output:**

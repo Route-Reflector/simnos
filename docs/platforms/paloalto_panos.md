@@ -24,15 +24,6 @@ maint             READY             9.1.2
 **Prompt:**
 - paloalto_panos>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- paloalto_panos>
-
 ### request license info
 
 **Output:**

@@ -18,14 +18,18 @@ Error: Bad command.
 
 **Prompt:**
 
-### enable
+### enable-admin
 
-**Output:** None
+**Output:**
+```
+MINOR: CLI Already in admin mode.
+```
 
-**Help:** enter enable mode
+**Help:** enable administrative mode
 
 **Prompt:**
 - alcatel_sros>
+- alcatel_sros#
 
 ### //environment more false
 

@@ -27,21 +27,11 @@
 **Prompt:**
 - avaya_ers>
 
-### ex
-
-**Output:** None
-
-**Help:** exit the terminal
-
-**Prompt:**
-- avaya_ers>
-- avaya_ers#
-
 ### logout
 
 **Output:** None
 
-**Help:** Execute the command logout. This automatically generated.
+**Help:** Logout of the CLI session
 
 **Prompt:**
 - avaya_ers>

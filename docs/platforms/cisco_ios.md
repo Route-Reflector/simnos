@@ -16,6 +16,15 @@
 **Prompt:**
 - cisco_ios#
 
+### copy running-config startup-config
+
+**Output:** None
+
+**Help:** Save the running configuration to startup-config
+
+**Prompt:**
+- cisco_ios#
+
 ### _default_
 
 **Output:**
@@ -77,10 +86,22 @@ Directory of bootflash:/
 
 **Output:** None
 
-**Help:** exit current configuration sub-mode (from config mode returns to enable)
+**Help:** Exit from the EXEC or configuration mode
 
 **Prompt:**
+- cisco_ios>
+- cisco_ios#
 - cisco_ios(config)#
+
+### logout
+
+**Output:** None
+
+**Help:** Exit from the EXEC
+
+**Prompt:**
+- cisco_ios>
+- cisco_ios#
 
 ### ping
 
@@ -96,6 +117,15 @@ Success rate is 0 percent (0/5)
 
 **Prompt:**
 - cisco_ios>
+- cisco_ios#
+
+### reload
+
+**Output:** None
+
+**Help:** Halt and perform a cold restart
+
+**Prompt:**
 - cisco_ios#
 
 ### show access-list
@@ -8579,5 +8609,27 @@ VRF info: (vrf in name/id, vrf out name/id)
 
 **Prompt:**
 - cisco_ios>
+- cisco_ios#
+
+### write erase
+
+**Output:** None
+
+**Help:** Erase the startup configuration (NVRAM)
+
+**Prompt:**
+- cisco_ios#
+
+### write memory
+
+**Output:**
+```
+Building configuration...
+[OK]
+```
+
+**Help:** Save the running configuration to startup-config
+
+**Prompt:**
 - cisco_ios#
 
