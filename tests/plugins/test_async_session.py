@@ -597,6 +597,30 @@ class _HangingTransport(_FakeTransport):
         raise AssertionError("unreachable")  # pragma: no cover
 
 
+class _FloodTransport(_FakeTransport):
+    """Transport that answers every read with a non-terminator byte (#269 deadline).
+
+    The ``sleep(0)`` models the real readers, which suspend once their buffer
+    empties (``StreamReader.read`` awaits ``_wait_for_data``) — that suspension is
+    what lets the deadline's timer run. A fake returning bytes with no suspension
+    at all would spin forever, which is a property of the fake, not of the
+    transports this bounds; the live end-to-end pin is
+    ``test_telnet_server.py::test_preauth_flood_is_closed_at_the_deadline``
+    (codex 1st#1).
+    """
+
+    async def recv(self, n: int) -> bytes:
+        await asyncio.sleep(0)
+        return b"a"  # never a terminator
+
+
+class _TimingOutTransport(_FakeTransport):
+    """Transport that raises ``TimeoutError`` itself, as a socket ETIMEDOUT does."""
+
+    async def recv(self, n: int) -> bytes:
+        raise TimeoutError("simulated socket ETIMEDOUT")
+
+
 @pytest.mark.timeout(30)  # a lost deadline must fail fast here, not stall the run
 def test_async_login_deadline_folds_into_failed_auth(monkeypatch):
     """A client that never answers is cut loose at `_LOGIN_DEADLINE`, and the
@@ -620,19 +644,6 @@ def test_async_login_deadline_bounds_a_capped_flood(monkeypatch):
     ends the session (#269) — the two bounds are complementary, not redundant."""
     monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", 0.05)
 
-    class _FloodTransport(_FakeTransport):
-        async def recv(self, n: int) -> bytes:
-            # The `sleep(0)` models the real readers, which suspend once their
-            # buffer empties (`StreamReader.read` awaits `_wait_for_data`) — that
-            # suspension is what lets the deadline's timer run. A fake returning
-            # bytes with no suspension at all would spin forever, which is a
-            # property of the fake, not of the transports this bounds; the live
-            # end-to-end pin is
-            # `test_telnet_server.py::test_preauth_flood_is_closed_at_the_deadline`
-            # (codex 1st#1).
-            await asyncio.sleep(0)
-            return b"a"  # never a terminator
-
     async def _run():
         return await async_interactive_login(
             _FloodTransport([]), "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
@@ -648,10 +659,6 @@ def test_async_login_transport_timeout_is_not_swallowed_as_the_deadline():
     I/O handler instead of being reported as the login deadline (#269, claude
     1st#2). The builtin is an `OSError` subclass, so a socket ETIMEDOUT arrives as
     one; `asyncio.timeout().expired()` is what tells the two apart."""
-
-    class _TimingOutTransport(_FakeTransport):
-        async def recv(self, n: int) -> bytes:
-            raise TimeoutError("simulated socket ETIMEDOUT")
 
     async def _run():
         return await async_interactive_login(

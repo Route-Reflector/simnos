@@ -164,9 +164,10 @@ _LINE_MAX = 4096
 # line reads. A client that never sends CR/LF must not hold an unauthenticated
 # session open forever. Real devices bound the login response the same way, so
 # the budget is natural for fidelity too, and interactive tests complete in
-# milliseconds — orders of magnitude below it. Exceeding it is folded into
+# milliseconds — orders of magnitude below it. Running out is folded into
 # "authentication failed" rather than raised, so it joins the existing
-# close-on-failure path at both call sites.
+# close-on-failure path at both call sites; a `TimeoutError` the transport itself
+# raised still propagates (see `async_interactive_login`).
 _LOGIN_DEADLINE = 60
 
 
@@ -508,7 +509,9 @@ async def _emit_paged(
     return skip_lf
 
 
-# --------------------------------------------------------------- credential readers
+# ------------------------------------------------- credential reader helpers (shared)
+# Used by both credential readers: `_read_challenge_line` just below (#338/#347)
+# and `_async_read_line`, the pre-auth login reader further down (#269).
 #: Longest client-supplied credential fragment echoed into a log record. The cap
 #: lets a username run to `_LINE_MAX`, and a failed login logs it, so clip it
 #: rather than spilling 4 KB of attacker text into the operator's log (#269).

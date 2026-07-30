@@ -207,6 +207,11 @@ def test_preauth_flood_is_closed_at_the_deadline(monkeypatch):
     once its buffer empties, which lets the timer run, and the whole pre-auth
     write volume (prompt + echo capped at ``_LINE_MAX``) stays far below the
     transport's high-water mark, so no ``drain`` ever blocks.
+
+    What is pinned is the teardown within ``close_budget`` of a client that stayed
+    silent past the deadline — not the exact instant the server let go, which this
+    socket-level view cannot distinguish (codex 3rd#2). That is enough to separate
+    "bounded" from "never", which is the claim under test.
     """
     login_deadline = 1.5
     quiet = login_deadline + 1.5  # not one recv() in this window: the client is non-draining
