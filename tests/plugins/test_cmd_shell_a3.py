@@ -574,6 +574,7 @@ class TestA3HotReload:
         shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
         old_commands = shell.commands
         old_device = shell._device
+        old_resolved = nos_obj.resolved_platform
 
         def mutating_broken_from_file(target):
             # Mutate BEFORE raising so the test identifies the snapshot-restore
@@ -588,7 +589,7 @@ class TestA3HotReload:
         assert shell.commands is old_commands
         assert shell._device is old_device
         assert nos_obj.device is old_device  # partial mutation rolled back
-        assert nos_obj.resolved_platform is not None  # ...for every snapshot attr
+        assert nos_obj.resolved_platform is old_resolved  # the exact snapshot restored
 
     def test_device_pin_survives_sibling_reload(self, tmp_path):
         """`_invoke_handler` runs against the per-shell device pin, not the live
@@ -647,11 +648,12 @@ class TestA3HotReload:
         shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
         old_commands = shell.commands
         old_device = shell._device
+        old_resolved = nos_obj.resolved_platform
         (platform_dir / "platform.yaml").unlink()
         shell.reload_commands([str(platform_dir)])  # parse failure is logged + rolled back
         assert shell.commands is old_commands  # NOT silently "reloaded" from stale cache
         assert shell._device is old_device
-        assert nos_obj.resolved_platform is not None  # rollback restored the nos
+        assert nos_obj.resolved_platform is old_resolved  # rollback restored the exact snapshot
 
     def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
         """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).
