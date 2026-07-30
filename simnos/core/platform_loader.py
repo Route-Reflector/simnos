@@ -15,9 +15,9 @@ boundary just above.
 """
 
 from dataclasses import replace
-import functools
 import glob
 import os
+import threading
 
 from jinja2 import TemplateSyntaxError
 import yaml
@@ -48,24 +48,86 @@ PLATFORM_META_FILENAME = "platform.yaml"
 COMMANDS_SUBDIR = "commands"
 
 
-@functools.cache
-def load_platform_dir(path: str) -> ResolvedPlatform:
-    """Load an A3 platform directory into a `ResolvedPlatform`.
+# Explicit generation-guarded cache for `load_platform_dir` (#349 / 案B4).
+# `functools.cache` could not stop a parse that STARTED before an invalidation
+# from committing its (possibly stale) result afterwards — a `Host.start` build
+# racing a hot reload could permanently re-poison the cache, and worse, hand the
+# stale parse to its own Nos/shell. The generation counter closes both: a
+# result whose parse straddled an invalidation is neither cached nor returned
+# (the loader retries at the current generation). `_CACHE_LOCK` guards only the
+# dict/counter operations (a few instructions) — parsing runs outside it, so
+# 100-host startup parallelism is untouched. Lock ordering is one-way by
+# construction: callers may hold a `Nos.reload_lock` when loading, and nothing
+# under `_CACHE_LOCK` ever takes a Nos lock.
+_CACHE: dict[str, ResolvedPlatform] = {}
+_CACHE_LOCK = threading.Lock()
+_cache_generation = 0
 
-    Cached by `path` (#264 / D6): the result is immutable and
+
+def invalidate_platform_cache() -> None:
+    """Drop every cached platform parse and start a new generation (#349).
+
+    Called by the hot-reload path (once per reload batch that contains an A3
+    dir target) instead of the former ``cache_clear()``. Bumping the generation
+    makes any in-flight `load_platform_dir` parse that began before this call
+    retry instead of committing/returning a result that may predate the change
+    being reloaded. Global by design: it also evicts unrelated platforms and
+    rejects their in-flight commits (they simply re-parse on next access) — the
+    conservative direction, and no worse than the previous global
+    ``cache_clear()``; a per-path generation was rejected for simplicity
+    (#349 / 案B4).
+    """
+    global _cache_generation
+    with _CACHE_LOCK:
+        _CACHE.clear()
+        _cache_generation += 1
+
+
+def load_platform_dir(path: str) -> ResolvedPlatform:
+    """Load an A3 platform directory into a `ResolvedPlatform`, cached by path.
+
+    The cache (#264 / D6): the result is immutable and
     ``configuration_file``-independent (per-host state lives on the `BaseDevice`,
     built separately), so every host / replica of a platform shares one parse
     instead of re-reading platform.yaml + the command files on each
     ``Host.start()``. Consumers MUST treat the result read-only (the shell
     layers it into a fresh dict, never mutating it). The hot-reload path calls
-    `load_platform_dir.cache_clear()` so a changed file is re-read; an unbounded
-    `functools.cache` is fine at ~50 platforms (an LRU bound is a future option
-    if platform count grows — D6).
+    `invalidate_platform_cache()` so a changed file is re-read; an unbounded
+    cache is fine at ~50 platforms (an LRU bound is a future option if platform
+    count grows — D6).
+
+    Guarantees (#349 / 案B4): a miss whose parse straddles an invalidation is
+    neither cached nor returned — the loop retries at the current generation.
+    Concurrent same-generation misses converge on the first committed entry
+    (``setdefault`` — same generation, same object). A hit linearizes at its
+    locked read: a load overlapping an invalidation may legitimately return the
+    just-previous generation, which the per-Nos reload lock (not this cache)
+    orders against same-Nos mutation.
 
     :param path: directory holding ``platform.yaml`` and ``commands/``
     :raises ValueError: on any schema, reference, or render violation — the
         loud load-time boundary that replaces v2's silent fallbacks (#264 / D5)
     """
+    while True:
+        with _CACHE_LOCK:
+            generation = _cache_generation
+            cached = _CACHE.get(path)
+        if cached is not None:
+            return cached
+        result = _load_platform_dir_uncached(path)
+        with _CACHE_LOCK:
+            if _cache_generation == generation:
+                return _CACHE.setdefault(path, result)
+        # An invalidation landed mid-parse: this result may predate the change
+        # that triggered it. Retry — returning it would let the caller's
+        # Nos/shell install a stale generation AFTER another host committed the
+        # fresh one (#349, design review codex 2nd#1). Termination: reloads are
+        # rare dev events; the generation stabilizes as soon as edits and the
+        # per-shell watcher catch-up stop.
+
+
+def _load_platform_dir_uncached(path: str) -> ResolvedPlatform:
+    """The uncached parse body of `load_platform_dir` (split for #349 / 案B4)."""
     meta = _load_platform_meta(os.path.join(path, PLATFORM_META_FILENAME))
     modes = _build_modes(meta)
     commands_dir = os.path.join(path, COMMANDS_SUBDIR)

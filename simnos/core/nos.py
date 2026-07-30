@@ -6,6 +6,7 @@ import importlib.util
 import inspect
 import logging
 import os
+import threading
 import types
 from typing import TYPE_CHECKING
 
@@ -146,6 +147,17 @@ class Nos:
         self.name = name
         self.auth: str | None = None
         self.device = None
+        # Hot-reload serialization lock (#349): guards THIS instance's mutable
+        # reload state (the `_NOS_RELOAD_ATTRS` set — `device` / `handlers` /
+        # `sources` / `resolved_platform` / ...). The lock lives on the Nos
+        # because that is the resource it protects: a pre-registered instance
+        # shared by several hosts (`SimNOS(plugins=[Nos(...)])`) hands every
+        # host/shell the SAME lock, closing the cross-host mutate race the #281
+        # per-host locks could not (each host used to mint its own). Note that
+        # `auth` is also rewritten by a reload but servers read it once at
+        # construction — hot-reloading `auth:` never affects a live server (an
+        # intentional no-op, #349 / Decision 5).
+        self.reload_lock: threading.Lock = threading.Lock()
         # Every path handed to `from_file`, in load order — diagnostics only.
         # A py-only Nos keeps the constructor-default name (the module's legacy
         # ``NAME`` constant is no longer read, #317 P-4), so the A3-required

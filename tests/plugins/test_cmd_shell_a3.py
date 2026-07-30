@@ -476,20 +476,22 @@ class TestA3HotReload:
         assert shell2.commands["show version"].output.render("R1") == "Shared V2\n"
 
     def test_concurrent_reload_same_lock_no_corruption(self, tmp_path):
-        """Two sessions reloading concurrently under the shared host lock stay consistent (#281 / D6).
+        """Two sessions reloading concurrently share the Nos-owned lock and stay consistent (#281 / D6, #349).
 
-        Injects ONE lock into both shells (as `Host.start` does per host) and
-        fires `reload_commands` from two threads at a barrier. Per-shell fallback
-        locks would not serialize the shared-`nos` mutation, so the explicit
-        single lock is what this pins; both shells must end consistent and the
-        shared nos uncorrupted.
+        Since #349 the lock is not injected: both shells derive it from the SAME
+        shared `nos.reload_lock`, which is exactly what serializes the shared-
+        `nos` mutation (two hosts of one registered Nos included). Fires
+        `reload_commands` from two threads at a barrier; both shells must end
+        consistent and the shared nos uncorrupted.
         """
         platform_dir = _a3_platform(tmp_path)
         nos_obj = Nos(filename=str(platform_dir))
-        lock = threading.Lock()
         common = {"nos_inventory_config": {}, "base_prompt": "R1"}
-        shell1 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
-        shell2 = CMDShell(nos=nos_obj, is_running=threading.Event(), reload_lock=lock, **common)
+        shell1 = CMDShell(nos=nos_obj, is_running=threading.Event(), **common)
+        shell2 = CMDShell(nos=nos_obj, is_running=threading.Event(), **common)
+        # The #349 gap-a contract: same Nos -> same lock, no injection needed.
+        assert shell1._reload_lock is nos_obj.reload_lock
+        assert shell2._reload_lock is nos_obj.reload_lock
         _write(platform_dir / "commands" / "show_version.txt", "Concurrent\n")
         barrier = threading.Barrier(2)
         errors: list[BaseException] = []
@@ -512,16 +514,17 @@ class TestA3HotReload:
         assert nos_obj.name == "cisco_ios"  # shared nos not corrupted by the concurrent reloads
 
     def test_init_self_build_acquires_reload_lock(self, tmp_path):
-        """A new connection's self-build runs under the reload lock (#281 / D6, gemini#1).
+        """A new connection's self-build runs under the Nos-owned reload lock (#281 / D6, #349).
 
         When `resolved_platform` is None (hot-reload mode) the `__init__` builds
-        from the shared `nos`; that read must hold the per-host lock so a
-        concurrent executor reload cannot mutate `nos` mid-read. Holding the lock
-        in the main thread must therefore block a shell construction until release.
+        from the shared `nos` AND installs it (`_apply_platform`, incl. the
+        device pin) under `nos.reload_lock`, so a concurrent executor reload can
+        neither mutate `nos` mid-read nor swap the device between build and pin
+        (#349 gap c, design review gemini 2nd#3). Holding the Nos's own lock in
+        the main thread must therefore block a shell construction until release.
         """
         platform_dir = _a3_platform(tmp_path)
         nos_obj = Nos(filename=str(platform_dir))
-        lock = threading.Lock()
         built: list[CMDShell] = []
 
         def _build():
@@ -531,11 +534,10 @@ class TestA3HotReload:
                     nos_inventory_config={},
                     base_prompt="R1",
                     is_running=threading.Event(),
-                    reload_lock=lock,
                 )
             )
 
-        with lock:
+        with nos_obj.reload_lock:
             t = threading.Thread(target=_build)
             t.start()
             t.join(timeout=0.3)
@@ -543,6 +545,46 @@ class TestA3HotReload:
         t.join(timeout=2)
         assert blocked
         assert built  # proceeds once the lock is released
+
+    def test_device_pin_survives_sibling_reload(self, tmp_path):
+        """`_invoke_handler` runs against the per-shell device pin, not the live
+        `nos.device` (#349 gap c): a sibling reload swapping the shared device
+        cannot pair a new device with this shell's old handlers. The shell's OWN
+        `_rebuild` is what moves it to the new generation."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        pinned = shell._device
+        assert pinned is nos_obj.device  # pin captured at install
+        sentinel = object()
+        nos_obj.device = sentinel  # a sibling session's reload swaps the shared device
+        seen: list = []
+
+        def handler(device, **_kwargs):
+            seen.append(device)
+            return "ok"
+
+        shell._invoke_handler(handler, "show test")
+        assert seen == [pinned]  # old, generation-consistent device — not the sentinel
+        shell._rebuild()  # own reload: installs the new generation (table + device pair)
+        assert shell._device is sentinel
+
+    def test_reload_invalidates_cache_only_for_a3_dir_targets(self, tmp_path, monkeypatch):
+        """`reload_commands` invalidates the parse cache once per batch and only
+        when the batch contains an A3 dir target — a `.py`-only reload never
+        touches `load_platform_dir` and must not force other hosts into
+        re-parses (#349 / 案B4, design review codex#3 / gemini#2)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        calls: list[int] = []
+        monkeypatch.setattr("simnos.plugins.shell.cmd_shell.invalidate_platform_cache", lambda: calls.append(1))
+        # .py-only batch: the gate is evaluated before the load, so even this
+        # missing module (whose load fails and rolls back) proves the skip.
+        shell.reload_commands([str(tmp_path / "missing_mod.py")])
+        assert calls == []
+        shell.reload_commands([str(platform_dir)])
+        assert calls == [1]  # once per batch, not per target
 
     def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
         """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).
