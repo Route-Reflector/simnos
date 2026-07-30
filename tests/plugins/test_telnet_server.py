@@ -208,18 +208,27 @@ def test_preauth_flood_is_closed_at_the_deadline(monkeypatch):
     write volume (prompt + echo capped at ``_LINE_MAX``) stays far below the
     transport's high-water mark, so no ``drain`` ever blocks.
     """
-    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", 2.0)
+    login_deadline = 1.5
+    quiet = login_deadline + 1.5  # not one recv() in this window: the client is non-draining
+    close_budget = 12.0  # generous for a loaded CI runner, but far below "never"
+    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", login_deadline)
     flood = b"A" * 65536  # no CR/LF anywhere: the login line never completes
     with _running_telnet_host() as port:
         sock = socket.create_connection(("127.0.0.1", port), timeout=8)
-        sock.settimeout(8)
         try:
+            sent_at = time.monotonic()
             with contextlib.suppress(OSError):
                 sock.sendall(flood)  # peer may already be gone on a slow runner
-            # Never read the echo back: the client is deliberately non-draining.
+            # The whole point: stay silent past the deadline without reading a
+            # single byte, so the server's echo sits in its write buffer while the
+            # budget expires (codex 2nd#4 — the first version read continuously
+            # from here, which quietly made the client a draining one).
+            time.sleep(quiet)
+            # Only now drain what was buffered, and require the close to have
+            # happened within the budget rather than merely "eventually".
+            sock.settimeout(1.0)
             closed = False
-            deadline = time.monotonic() + 30.0
-            while time.monotonic() < deadline:
+            while time.monotonic() - sent_at < close_budget:
                 try:
                     if not sock.recv(65536):  # b"" = server closed
                         closed = True
