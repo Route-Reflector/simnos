@@ -147,6 +147,17 @@ _CSI_ACTIONS = {
 }
 _MAX_ESC_LEN = 8  # give up on an unterminated escape past this many bytes
 _HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memory)
+# Per-line input cap (#347): a client that never sends CR/LF must not grow the
+# line buffer without bound. Real devices cap the edit buffer too (IOS ~256
+# chars); 4096 is far above any realistic CLI line — the longest byte-parity
+# golden line is 34 bytes — so the cap is unreachable for scrapers and the wire
+# stays byte-identical. Past the cap a byte is dropped unechoed (the editor's
+# "ignored, no bell" convention). Enforced at the client-byte growth points
+# (`_LineEditor.insert` / the challenge answer buffer) and at `set_line` (the
+# Tab-completion inflow that bypasses `insert` — an oversized replacement is
+# refused); history / `_saved` re-entry is built from already-capped lines, so
+# every inflow honours the bound.
+_LINE_MAX = 4096
 
 
 def _parse_escape(seq: bytes) -> str:
@@ -225,27 +236,37 @@ class _LineEditor:
     def line_text(self) -> str:
         return self._line.decode("utf-8", errors="replace")
 
-    def insert(self, byte: bytes) -> None:
+    def insert(self, byte: bytes) -> bool:
+        """Insert *byte* at the cursor; returns whether anything was echoed.
+
+        ``False`` = the byte was dropped at the ``_LINE_MAX`` cap (no echo), so
+        the caller can skip the backpressure drain for no-op input (#347).
+        """
+        if len(self._line) >= _LINE_MAX:
+            return False  # line cap (#347): drop + no echo, real-device style
         if self._pos == len(self._line):
             self._send(byte)  # fast path: raw echo at end (byte-parity preserved)
             self._line += byte
             self._pos += 1
-            return
+            return True
         # Mid-line insert (only after a cursor move): echo the tail, then step back.
         self._line[self._pos : self._pos] = byte
         self._pos += 1
         tail = bytes(self._line[self._pos - 1 :])
         self._send(tail)
         self._send(b"\b" * (len(tail) - 1))
+        return True
 
-    def backspace(self) -> None:
+    def backspace(self) -> bool:
+        """Delete before the cursor; returns whether anything was echoed."""
         if self._pos == 0:
-            return
+            return False
         del self._line[self._pos - 1 : self._pos]
         self._pos -= 1
         tail = bytes(self._line[self._pos :])
         self._send(b"\b" + tail + b" ")  # move left, rewrite tail, clear the freed cell
         self._send(b"\b" * (len(tail) + 1))  # cursor back to the edit point
+        return True
 
     def delete(self) -> None:
         if self._pos >= len(self._line):
@@ -288,7 +309,17 @@ class _LineEditor:
         self._pos = len(self._line)
 
     def set_line(self, new: bytes) -> None:
-        """Replace the line (Tab completion)."""
+        """Replace the line (Tab completion).
+
+        An oversized replacement is refused as a no-op rather than truncated —
+        a cut command is a *different* command, so completing to it would
+        dispatch the wrong thing (#347, 1st round codex #1). This keeps the
+        ``_LINE_MAX`` bound intact for the one inflow that does not pass through
+        ``insert`` (completion candidates are canonical commands, not client
+        bytes; history / ``_saved`` re-entry is built from already-capped lines).
+        """
+        if len(new) > _LINE_MAX:
+            return
         self._replace_line(new)
 
     def history_prev(self) -> None:
@@ -485,7 +516,9 @@ async def _read_challenge_line(
     following ``_render_response`` supplies the answer line's newline (the
     main-loop held-echo principle), so exactly one ``\\r\\n`` reaches the wire per
     Enter. Returns ``(answer, next_skip_lf)``, or ``(None, skip_lf)`` on an EOF
-    (peer gone mid-challenge).
+    (peer gone mid-challenge). The answer shares the ``_LINE_MAX`` bound (#347):
+    past it a byte is dropped unechoed, while backspace and the terminating
+    CR/LF keep working.
     """
     buf = bytearray()
     esc = bytearray()
@@ -509,10 +542,16 @@ async def _read_challenge_line(
                 del buf[-1:]
                 if echo:
                     transport.send(b"\b \b")  # erase one echoed char (confirm only)
+                    await transport.drain()
             continue
+        if len(buf) >= _LINE_MAX:
+            continue  # answer cap (#347): drop + no echo, same bound as the editor
         buf += byte
         if echo:
             transport.send(byte)
+            # Interactive echo backpressure (#347): flush before the next key so a
+            # client that never reads cannot grow the write buffer without bound.
+            await transport.drain()
 
 
 async def _run_challenge(
@@ -642,6 +681,12 @@ async def run_async_push_session(
                 if verdict != "pass":
                     if verdict != "consumed":
                         editor.apply_action(verdict)  # a completed action key
+                        # Interactive echo backpressure (#347): the redraw a
+                        # cursor/history action emits is flushed before the next
+                        # key, so a client that never reads cannot grow the write
+                        # buffer without bound. `drain` writes nothing (pacing
+                        # only), so the wire byte stream is untouched.
+                        await transport.drain()
                     continue  # escape consumed (collecting / applied / discarded)
 
             # Classify the byte against the shared terminator machine (#350): a NUL
@@ -698,13 +743,20 @@ async def run_async_push_session(
                 if result.close:
                     return
             elif editing and byte in (b"\x08", b"\x7f"):
-                editor.backspace()
+                if editor.backspace():
+                    await transport.drain()  # echo backpressure (#347), see above
             elif editing and byte == b"\t":
                 _complete(editor, shell, transport)
+                await transport.drain()  # echo backpressure (#347), see above
             else:
                 # Regular character: immediate raw echo at the line end
-                # (interactive latency + byte-parity unchanged).
-                editor.insert(byte)
+                # (interactive latency + byte-parity unchanged — `drain` writes
+                # nothing, it only paces a client that stopped reading, #347).
+                # The drain is gated on "echoed something" so a CR-less flood
+                # past the line cap costs no await per dropped byte (1st round
+                # codex #4).
+                if editor.insert(byte):
+                    await transport.drain()
         except transport.io_errors as e:
             log.error("async_session [%s] client write error: %s", transport.name, e)
             return
