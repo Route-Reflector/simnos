@@ -488,5 +488,6 @@ class TestLoadCache:
             t.start()
         for t in threads:
             t.join(timeout=10)
+            assert not t.is_alive()  # a hung protocol fails here, not downstream
         assert len(results) == 2
         assert results[0] is results[1]  # both callers got the committed winner

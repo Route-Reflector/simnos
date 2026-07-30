@@ -575,14 +575,20 @@ class TestA3HotReload:
         old_commands = shell.commands
         old_device = shell._device
 
-        def broken_from_file(target):
+        def mutating_broken_from_file(target):
+            # Mutate BEFORE raising so the test identifies the snapshot-restore
+            # loop itself — a no-mutation fake would pass even with the rollback
+            # deleted (code review codex 2nd#2).
+            nos_obj.device = object()
+            nos_obj.resolved_platform = None
             raise ValueError("simulated broken reload target")
 
-        monkeypatch.setattr(nos_obj, "from_file", broken_from_file)
+        monkeypatch.setattr(nos_obj, "from_file", mutating_broken_from_file)
         shell.reload_commands([str(platform_dir)])  # error is logged, not raised
         assert shell.commands is old_commands
         assert shell._device is old_device
-        assert nos_obj.device is old_device  # nos side rolled back / untouched too
+        assert nos_obj.device is old_device  # partial mutation rolled back
+        assert nos_obj.resolved_platform is not None  # ...for every snapshot attr
 
     def test_device_pin_survives_sibling_reload(self, tmp_path):
         """`_invoke_handler` runs against the per-shell device pin, not the live
@@ -630,6 +636,22 @@ class TestA3HotReload:
         second_dir = _a3_platform(tmp_path / "second")
         shell.reload_commands([str(platform_dir), str(second_dir)])
         assert events == ["inv", "load", "load"]
+
+    def test_meta_deletion_invalidates_and_rolls_back(self, tmp_path):
+        """Deleting platform.yaml (a normal watcher event) still invalidates the
+        cache, so the reload re-parses, FAILS loudly and rolls back — instead of
+        "succeeding" off a stale cache hit (code review codex 2nd#1; this is why
+        the A3 gate is `isdir`, not a platform.yaml-presence probe)."""
+        platform_dir = _a3_platform(tmp_path)
+        nos_obj = Nos(filename=str(platform_dir))
+        shell = CMDShell(nos=nos_obj, nos_inventory_config={}, base_prompt="R1", is_running=threading.Event())
+        old_commands = shell.commands
+        old_device = shell._device
+        (platform_dir / "platform.yaml").unlink()
+        shell.reload_commands([str(platform_dir)])  # parse failure is logged + rolled back
+        assert shell.commands is old_commands  # NOT silently "reloaded" from stale cache
+        assert shell._device is old_device
+        assert nos_obj.resolved_platform is not None  # rollback restored the nos
 
     def test_env_off_builds_no_watcher_state(self, tmp_path, monkeypatch):
         """Production (env off): `__init__` builds no watcher state and does no walk (#281 / D2, D5).
