@@ -20,6 +20,7 @@ executor-agnostic (and unit-testable with fakes):
   bounded executor and returns the :class:`DispatchResult`.
 """
 
+import asyncio
 from collections import deque
 from collections.abc import Awaitable, Callable
 import logging
@@ -153,11 +154,19 @@ _HISTORY_MAX = 1000  # per-session command-history cap (bounds long-session memo
 # golden line is 34 bytes — so the cap is unreachable for scrapers and the wire
 # stays byte-identical. Past the cap a byte is dropped unechoed (the editor's
 # "ignored, no bell" convention). Enforced at the client-byte growth points
-# (`_LineEditor.insert` / the challenge answer buffer) and at `set_line` (the
-# Tab-completion inflow that bypasses `insert` — an oversized replacement is
-# refused); history / `_saved` re-entry is built from already-capped lines, so
-# every inflow honours the bound.
+# (`_LineEditor.insert`, the challenge answer buffer and the pre-auth login read)
+# and at `set_line` (the Tab-completion inflow that bypasses `insert` — an
+# oversized replacement is refused); history / `_saved` re-entry is built from
+# already-capped lines, so every inflow honours the bound.
 _LINE_MAX = 4096
+# Total wall-clock budget for one in-band login (#269): both prompts and both
+# line reads. A client that never sends CR/LF must not hold an unauthenticated
+# session open forever. Real devices bound the login response the same way, so
+# the cap is natural for fidelity too, and interactive tests complete in
+# milliseconds — orders of magnitude below it. Exceeding it is folded into
+# "authentication failed" rather than raised, so it joins the existing
+# close-on-failure path at both call sites.
+_LOGIN_DEADLINE = 60
 
 
 def _parse_escape(seq: bytes) -> str:
@@ -769,15 +778,18 @@ async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf
     ``next_skip_lf=True`` so the next read consumes the LF half of a CR LF pair.
     Reads one byte per ``recv`` (login is short and not perf-critical, so this
     avoids a leftover-buffer between the two reads). EOF returns the partial line.
+    The credential is capped at ``_LINE_MAX`` and the echo is drained per byte
+    (#269), matching the post-auth editor and challenge reader.
     """
-    buf = b""
+    buf = bytearray()  # bytearray, not bytes: amortised O(1) append (#269)
     while True:
         byte = await transport.recv(1)
         if not byte:  # EOF
             return buf.decode("utf-8", errors="replace"), False
         # Shared terminator machine (#350): a NUL is always dropped (never echoed
         # nor buffered into the credential), and the LF half of a CR LF is
-        # consumed via the carried skip_lf.
+        # consumed via the carried skip_lf. It runs ahead of the cap below, so a
+        # capped line still terminates on CR/LF.
         event, skip_lf = _consume_terminator(byte, skip_lf, transport.nul_resets_skip_lf)
         if event == "drop":
             continue
@@ -785,9 +797,15 @@ async def _async_read_line(transport: AsyncPushTransport, *, echo: bool, skip_lf
             if echo:
                 transport.send(b"\r\n")
             return buf.decode("utf-8", errors="replace"), skip_lf
+        if len(buf) >= _LINE_MAX:
+            continue  # credential cap (#269): drop + no echo, same bound as the editor
+        buf += byte
         if echo:
             transport.send(byte)
-        buf += byte
+            # Echo backpressure (#269): flush before the next byte so a client
+            # that never reads cannot grow the write buffer without bound. Past
+            # the cap nothing is echoed, so a CR-less flood costs no await.
+            await transport.drain()
 
 
 async def async_interactive_login(
@@ -805,6 +823,41 @@ async def async_interactive_login(
     skip_lf)``; ``skip_lf`` is forwarded to ``run_async_push_session`` as
     ``initial_skip_lf`` so it consumes the trailing LF/NUL left by the final CR of
     the password line.
+
+    The whole exchange is bounded by ``_LOGIN_DEADLINE`` (#269). The budget lives
+    here rather than at the call sites so every caller — current and future —
+    inherits it; a timeout returns ``(False, False)``, which drops into the
+    close-on-failed-login path the callers already have.
+    """
+    try:
+        return await asyncio.wait_for(
+            _async_interactive_login(
+                transport,
+                username,
+                password,
+                user_prompt=user_prompt,
+                pass_prompt=pass_prompt,
+            ),
+            _LOGIN_DEADLINE,
+        )
+    except TimeoutError:
+        log.warning(
+            "async_session [%s] login deadline exceeded (%ss), closing session",
+            transport.name,
+            _LOGIN_DEADLINE,
+        )
+        return False, False
+
+
+async def _async_interactive_login(
+    transport: AsyncPushTransport,
+    username: str,
+    password: str,
+    *,
+    user_prompt: bytes,
+    pass_prompt: bytes,
+) -> tuple[bool, bool]:
+    """Body of :func:`async_interactive_login`, run under its deadline.
 
     Each prompt is ``send``-buffered without an explicit ``drain``; the prompt
     still reaches the client because the following ``await _async_read_line``
