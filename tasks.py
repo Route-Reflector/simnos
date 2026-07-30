@@ -56,8 +56,7 @@ def bandit(context):
 def _iter_platform_command_dirs(platforms_dir: str):
     """Yield ``(platform, commands_dir)`` for every platform with a commands dir.
 
-    The single walk shared by the lint passes (`check_platform_data` /
-    `check_platform_data_warnings` / `check_platform_data_ratchet`) — an
+    The single walk shared by every ``check_platform_data_*`` lint pass — an
     absent platforms dir or a platform without a ``commands/`` subdir is
     skipped, so callers loop over real targets only.
     """
