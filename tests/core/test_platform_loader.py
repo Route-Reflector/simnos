@@ -427,7 +427,7 @@ class TestLoadCache:
         second = load_platform_dir(str(root))
         assert first is second  # shared parse, not re-read
 
-    def test_cache_clear_forces_reparse(self, tmp_path):
+    def test_invalidate_forces_reparse(self, tmp_path):
         root, commands = _platform(tmp_path)
         _cmd(commands, "x.yaml", "command: x\ntype: ntc\noutput: x.txt\n", output_files={"x.txt": "v\n"})
         first = load_platform_dir(str(root))
