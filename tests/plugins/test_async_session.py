@@ -507,6 +507,168 @@ def test_async_login_ssh_nul_lf_after_username_cr_password_intact():
     assert b"User: admin\r\n" in out  # username echo carries no extra NUL/LF artifact
 
 
+# ------------------------------------------------ pre-auth input bound (#269)
+def test_async_login_username_cap_and_terminator_survival():
+    """The pre-auth username read shares the `_LINE_MAX` bound (#269): a CR-less
+    flood stops accumulating AND echoing at the cap, yet the terminator machine
+    still runs ahead of it, so the CR ends the line and the password read follows.
+    That ordering is the contract: moving the cap check above `_consume_terminator`
+    would strand a capped session with no way to submit."""
+
+    async def _run():
+        # `x` appears in neither prompt, so counting it isolates the username echo.
+        transport = _FakeTransport([b"x" * (_LINE_MAX + 100) + b"\r", b"pw\r"])
+        ok, skip_lf = await async_interactive_login(
+            transport, "admin", "pw", user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+        return ok, skip_lf, transport
+
+    ok, skip_lf, transport = asyncio.run(_run())
+    assert ok is False  # the capped credential is not "admin"
+    assert skip_lf is True  # ...but the password line WAS read, and ended on CR
+    assert transport.out.count(b"x") == _LINE_MAX  # excess never echoed
+    # One drain per accepted+echoed byte (_LINE_MAX); the 100 dropped bytes cost
+    # no await, the password read is silent (echo off), + the closing drain(1).
+    assert transport.drains == _LINE_MAX + 1
+
+
+def test_async_login_password_cap_is_silent():
+    """The password read (echo off) is capped too, and stays wire-silent: no echo,
+    no drain — a CR-less flood past the cap costs neither bytes nor awaits (#269)."""
+
+    async def _run():
+        # Lowercase `p` appears in neither prompt (`Pass: ` is capitalised), so
+        # asserting its absence isolates the password echo the same way test 1
+        # isolates the username echo with `x`.
+        transport = _FakeTransport([b"admin\r", b"p" * (_LINE_MAX + 50) + b"\r"])
+        ok, _ = await async_interactive_login(
+            transport, "admin", "p" * _LINE_MAX, user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+        return ok, transport
+
+    ok, transport = asyncio.run(_run())
+    assert b"p" not in transport.out  # echo off: never on the wire, capped or not
+    # username echo (5) + closing drain (1); the password read adds none.
+    assert transport.drains == 6
+    # An over-long password is REFUSED, not silently truncated to its first
+    # _LINE_MAX bytes — otherwise this input (a correct _LINE_MAX-byte password
+    # plus 50 bytes of junk) would authenticate against the configured one
+    # (#269, codex 1st#3).
+    assert ok is False
+
+
+def test_async_login_overflow_refused_even_when_prefix_matches():
+    """Overflow refusal is decided by the overflow flag, not by the compared text:
+    the truncated credential here is byte-for-byte the configured one, and it still
+    fails (#269, codex 1st#3). Pins that the cap cannot be used as a prefix oracle."""
+
+    async def _run():
+        # Username is exactly _LINE_MAX correct bytes + 1 extra byte before the CR.
+        name = "u" * _LINE_MAX
+        transport = _FakeTransport([name.encode() + b"Z\r", b"pw\r"])
+        return await async_interactive_login(transport, name, "pw", user_prompt=b"User: ", pass_prompt=b"Pass: ")
+
+    ok, _ = asyncio.run(_run())
+    assert ok is False
+
+
+def test_async_login_echo_drains_per_byte():
+    """Every echoed pre-auth byte is followed by a drain (#269), so a client that
+    stops reading is paced by transport backpressure instead of growing the
+    user-space write buffer. `drain` writes nothing, so the wire is unchanged."""
+
+    async def _run():
+        transport = _FakeTransport([b"admin\r", b"secret\r"])
+        await async_interactive_login(transport, "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: ")
+        return transport
+
+    transport = asyncio.run(_run())
+    # 'a','d','m','i','n' echoed (5) + the closing `\r\n` drain (1). The CR
+    # terminator and the echo-off password contribute none.
+    assert transport.drains == 6
+
+
+class _HangingTransport(_FakeTransport):
+    """Transport whose ``recv`` never completes — a client that opens the
+    connection and then says nothing (#269 deadline)."""
+
+    async def recv(self, n: int) -> bytes:
+        await asyncio.Event().wait()  # never set
+        raise AssertionError("unreachable")  # pragma: no cover
+
+
+class _FloodTransport(_FakeTransport):
+    """Transport that answers every read with a non-terminator byte (#269 deadline).
+
+    The ``sleep(0)`` models the real readers, which suspend once their buffer
+    empties (``StreamReader.read`` awaits ``_wait_for_data``) — that suspension is
+    what lets the deadline's timer run. A fake returning bytes with no suspension
+    at all would spin forever, which is a property of the fake, not of the
+    transports this bounds; the live end-to-end pin is
+    ``test_telnet_server.py::test_preauth_flood_is_closed_at_the_deadline``
+    (codex 1st#1).
+    """
+
+    async def recv(self, n: int) -> bytes:
+        await asyncio.sleep(0)
+        return b"a"  # never a terminator
+
+
+class _TimingOutTransport(_FakeTransport):
+    """Transport that raises ``TimeoutError`` itself, as a socket ETIMEDOUT does."""
+
+    async def recv(self, n: int) -> bytes:
+        raise TimeoutError("simulated socket ETIMEDOUT")
+
+
+@pytest.mark.timeout(30)  # a lost deadline must fail fast here, not stall the run
+def test_async_login_deadline_folds_into_failed_auth(monkeypatch):
+    """A client that never answers is cut loose at `_LOGIN_DEADLINE`, and the
+    timeout is folded into `(False, False)` rather than raised (#269) — that is
+    what lets both call sites stay unchanged and reuse their close-on-failure path."""
+    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", 0.05)
+
+    async def _run():
+        transport = _HangingTransport([])
+        return await async_interactive_login(transport, "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: ")
+
+    ok, skip_lf = asyncio.run(_run())
+    assert ok is False
+    assert skip_lf is False
+
+
+@pytest.mark.timeout(30)  # ditto: without the deadline this loop never returns
+def test_async_login_deadline_bounds_a_capped_flood(monkeypatch):
+    """The cap alone bounds memory; the deadline bounds *time*. A client that
+    floods past the cap forever still never completes a line, so only the deadline
+    ends the session (#269) — the two bounds are complementary, not redundant."""
+    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", 0.05)
+
+    async def _run():
+        return await async_interactive_login(
+            _FloodTransport([]), "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+
+    ok, _ = asyncio.run(_run())
+    assert ok is False
+
+
+@pytest.mark.timeout(30)
+def test_async_login_transport_timeout_is_not_swallowed_as_the_deadline():
+    """A `TimeoutError` raised by the transport itself propagates to the caller's
+    I/O handler instead of being reported as the login deadline (#269, claude
+    1st#2). The builtin is an `OSError` subclass, so a socket ETIMEDOUT arrives as
+    one; `asyncio.timeout().expired()` is what tells the two apart."""
+
+    async def _run():
+        return await async_interactive_login(
+            _TimingOutTransport([]), "admin", "secret", user_prompt=b"User: ", pass_prompt=b"Pass: "
+        )
+
+    with pytest.raises(TimeoutError, match="simulated socket ETIMEDOUT"):
+        asyncio.run(_run())
+
+
 # ---------------------------------------------------------------- paging (#307 P3-4)
 class _PagingShell(_FakeShell):
     """PushShell stub whose ``dispatch`` returns a fixed multi-line body.

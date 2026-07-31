@@ -9,6 +9,7 @@ client, and the auth-failure close path (message delivered + graceful FIN).
 """
 
 import asyncio
+import contextlib
 from contextlib import contextmanager
 import socket
 import threading
@@ -187,6 +188,64 @@ def test_telnet_auth_failure_raw_surplus_delivers_message_and_fin():
             sock.close()
     assert b"Authentication failed" in buf  # (1) message delivered
     assert eof  # (2) graceful FIN, not RST, despite surplus unread input
+
+
+@pytest.mark.timeout(60)
+def test_preauth_flood_is_closed_at_the_deadline(monkeypatch):
+    """A CR-less pre-auth flood from a client that never reads is closed by the
+    login deadline (#269), end to end on a real listener.
+
+    This is the live counterpart to the fake-transport deadline tests, and it is
+    what settles two cross-review claims (codex 1st#1 / 1st#2) that the deadline
+    could not fire in this scenario: (1) that the capped read loop never yields,
+    so the timer never runs, and (2) that the deadline fires inside a blocked
+    ``drain``, after which the caller's own unbounded ``drain`` of
+    ``Authentication failed.`` hangs and the session is never torn down.
+
+    Both predict "the server never closes". On v3 (no cap, no deadline) this
+    connection genuinely stays open; here it must close. The real reader suspends
+    once its buffer empties, which lets the timer run, and the whole pre-auth
+    write volume (prompt + echo capped at ``_LINE_MAX``) stays far below the
+    transport's high-water mark, so no ``drain`` ever blocks.
+
+    What is pinned is the teardown within ``close_budget`` of a client that stayed
+    silent past the deadline — not the exact instant the server let go, which this
+    socket-level view cannot distinguish (codex 3rd#2). That is enough to separate
+    "bounded" from "never", which is the claim under test.
+    """
+    login_deadline = 1.5
+    quiet = login_deadline + 1.5  # not one recv() in this window: the client is non-draining
+    close_budget = 12.0  # generous for a loaded CI runner, but far below "never"
+    monkeypatch.setattr("simnos.plugins.servers.async_session._LOGIN_DEADLINE", login_deadline)
+    flood = b"A" * 65536  # no CR/LF anywhere: the login line never completes
+    with _running_telnet_host() as port:
+        sock = socket.create_connection(("127.0.0.1", port), timeout=8)
+        try:
+            sent_at = time.monotonic()
+            with contextlib.suppress(OSError):
+                sock.sendall(flood)  # peer may already be gone on a slow runner
+            # The whole point: stay silent past the deadline without reading a
+            # single byte, so the server's echo sits in its write buffer while the
+            # budget expires (codex 2nd#4 — the first version read continuously
+            # from here, which quietly made the client a draining one).
+            time.sleep(quiet)
+            # Only now drain what was buffered, and require the close to have
+            # happened within the budget rather than merely "eventually".
+            sock.settimeout(1.0)
+            closed = False
+            while time.monotonic() - sent_at < close_budget:
+                try:
+                    if not sock.recv(65536):  # b"" = server closed
+                        closed = True
+                        break
+                except TimeoutError:
+                    continue
+                except OSError:
+                    closed = True  # RST also means the server let go
+                    break
+        finally:
+            sock.close()
+    assert closed, "pre-auth flood held the session open past the login deadline"
 
 
 @pytest.mark.parametrize("device_type", ["cisco_ios"])
