@@ -7,9 +7,9 @@ SIMNOS の主要な変更点をここに記録します。
 
 <!-- リリース時にこの見出しを `## v3.0.0 - YYYY-MM-DD` に差し替える。 -->
 
-> **プレリリース:** `v3.0.0rc1` (2026-09-25) — git タグのみで PyPI / Docker には
-> 公開していない。pin は
-> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc1`。
+> **プレリリース:** `v3.0.0rc2` (2026-09-25。同日に `v3.0.0rc1`) — git タグのみで
+> PyPI / Docker には公開していない。pin は
+> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc2`。
 
 SIMNOS v3 は SSH/Telnet コアとプラグインのデータレイアウトを clean rewrite した
 ものです。破壊的変更は以下の移行ガイドに集約しています。各行は後述の詳細エントリへ
@@ -70,6 +70,12 @@ golden で固定されています — コマンドを送って出力を読む�
 - `SimNOS` インスタンス間 (およびインスタンス → 呼び出し元) の状態汚染を解消 (#346)。`SimNOS(plugins=[...])` の登録先が共有 module-global からプラットフォームレジストリの per-instance copy に変わり、インスタンス A で登録した custom plugin はインスタンス B から見えなくなりました — この漏れに依存していた場合は、利用する各 `SimNOS` の `plugins=[...]` に渡してください。また explicit な `inventory` dict を in-place で書き換えなくなりました (`plugins` list も契約として同様に copy されます): SimNOS は自身の copy 上で動作する (inventory は deep copy、plugins list は container copy) ため、同じ inventory dict を異なる `sys_config` 設定のインスタンス間で使い回しても、最初のインスタンスが seed した `variants_policy` を silent に継承しません
 - コマンド解決を deterministic + 実機準拠に是正 (#348)。省略マッチは、短いコマンドが exact トークンを持つときに**別の**コマンドを実行しなくなりました (`show ip` と `show ipv6 route` が両方あるとき `show ip ro` は、`show ipv6 route` を実行する代わりに実機 IOS 同様 unknown-command エラーを返します)。また別モードのコマンドへの exact match が現在モードの省略マッチ空間を shadow しなくなりました (実機は per-mode 解決なので、返すべき場面では `% Incomplete command.` 等を返します)。loader 側では、別の alias を指す alias が load error になり (chain の解決結果がファイル名 sort 順に silent 依存していたため — alias は real コマンドを直接指してください)、継承した challenge 発火モードを落とす alias `mode:` override も既存の transitions check と同様に拒否されます。full な in-mode コマンドは省略マッチに入らないため scraper の wire は byte 同一 — 変わるのは従来誤動作していた入力だけです
 - async session driver に 4 箇所コピーされていた CR/LF/NUL 終端 state machine を単一の step 関数に統一し、byte 分類の divergence 2 件を修正 (#350)。`--More--` pager は、CR-LF 分割の pending 中に SSH の NUL が来ても phantom でページを進めなくなりました (NUL が pending を clear せず保持するようになり、後続の LF が CR の片割れとして消費されます)。また in-band login (auth-none / Telnet) は、迷子の NUL を echo して username/password に混入させなくなりました (CR 隣接の 1 個だけでなく、全 NUL を drop)。どちらもほぼ到達不能な byte 列にのみ影響し、scraper の wire は byte 同一 — byte-parity golden は無変更です
+- `arista_eos` と `cisco_ios` の `show version` を user EXEC でも実行可能に (#377)。どちらも enable 専用の定義だったため、接続時に enable しない netmiko ドライバ (`arista_eos` など) では unknown-command の応答になっていました。実機の EOS / IOS は `enable` なしで応答します。user mode を持つ全 platform についてこれを検査するテストを追加しました
+- netmiko が接続時・切断時に送るコマンドのうち、一部 platform で未定義だったものを追加 (#378): `vyatta_vyos` の `set terminal width 512` (あわせて `set terminal length 0` がコマンド文字列を出力していたのを無出力に)、`cisco_apic` の `terminal length 0`、`cisco_wlc_ssh` の `config paging enable` / `logout`。netmiko 初期化テストは `Unknown command` の固定文字列ではなく各 platform 固有の unknown-command 文言で判定するようになり、これまで見逃していたこれらを検出します
+
+**ドキュメント**
+
+- 自動テストのガイドに、同梱 platform は未知のコマンドに platform 固有の実機文言 (`_default_`) で応答するため、`Unknown command` の固定文字列の判定ではほとんどの platform でエラーを見逃す、という注意を追記
 
 ## v2.3.1
 
