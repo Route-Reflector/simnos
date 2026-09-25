@@ -167,3 +167,12 @@ def get_ports_used_in_decorator():
 
 !!! note
     device_type パラメータを使用すると、ランダムなポートが割り当てられます。これはテストが他のシステムに影響しないための意図的な仕様です。特定のポートを使用したい場合は、インベントリで指定できます。
+
+!!! warning "エラー応答の検出"
+    同梱の各 platform は、未知のコマンドや権限外のコマンドに対して、その platform の
+    `_default_` コマンドに定義された実機の文言で応答します。たとえば `cisco_ios` は
+    `% Invalid input detected at '^' marker.`、`vyatta_vyos` は `Invalid command: [ ]`、
+    `juniper_junos` は `unknown command.` です。組み込みの `Unknown command` を返すのは
+    独自の `_default_` を持たない platform だけなので、`assert "Unknown command" not in output`
+    という判定では、ほとんどの platform でエラーを見逃します。platform ごとの文言で
+    判定してください (`simnos/plugins/nos/platforms/<platform>/` の `commands/default.yaml`)。

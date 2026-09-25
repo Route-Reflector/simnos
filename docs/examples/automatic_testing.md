@@ -167,3 +167,14 @@ In this case I get the following result:
 
 !!! note
     When using the device_type parameter, a random port will be assigned. This decision is intentional so that the tests does not affect other systems. If you want to use a specific port, you can specify it using the inventory.
+
+!!! warning "Detecting error answers"
+    Each shipped platform answers an unknown or unauthorized command in its own
+    device wording, taken from the platform's `_default_` command — for example
+    `% Invalid input detected at '^' marker.` on `cisco_ios`,
+    `Invalid command: [ ]` on `vyatta_vyos` and `unknown command.` on
+    `juniper_junos`. Only platforms without their own `_default_` answer the
+    built-in `Unknown command`, so an `assert "Unknown command" not in output`
+    guard misses errors on most platforms. Check for the platform's own wording
+    instead (see `commands/default.yaml` under
+    `simnos/plugins/nos/platforms/<platform>/`).
