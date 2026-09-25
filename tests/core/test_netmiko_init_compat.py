@@ -32,6 +32,7 @@ from tests.utils import (
     get_platforms_from_md,
     get_py_platforms,
     netmiko_device,
+    unknown_command_marker,
 )
 
 HOSTNAME = "router"  # Inventory host key; also used as base_prompt in output formatting
@@ -59,7 +60,12 @@ class TestNetmikoInitCompat:
     @pytest.mark.timeout(30)
     @pytest.mark.parametrize("device_type", get_platforms_from_md())
     def test_no_unknown_command_on_init(self, device_type, tmp_path):
-        """ConnectHandler init should not produce 'Unknown command'."""
+        """ConnectHandler init should not hit the platform's unknown-command answer.
+
+        Every command netmiko's `session_preparation()` sends on connect must be
+        defined, so the session log carries no `_default_` answer in the
+        platform's own wording (not just the built-in "Unknown command").
+        """
         if device_type in INIT_UNKNOWN_CMD_ALLOWED:
             pytest.skip(f"{device_type}: {INIT_UNKNOWN_CMD_ALLOWED[device_type].reason}")
 
@@ -71,8 +77,9 @@ class TestNetmikoInitCompat:
             with ConnectHandler(**device):
                 pass
             session_output = log_file.read_text()
-            assert "Unknown command" not in session_output, (
-                f"{device_type}: 'Unknown command' found in session log during init"
+            marker = unknown_command_marker(device_type)
+            assert marker not in session_output, (
+                f"{device_type}: unknown-command answer {marker!r} found in session log during init"
             )
         finally:
             net.stop()

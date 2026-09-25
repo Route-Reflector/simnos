@@ -7,10 +7,11 @@ import random
 import string
 
 from simnos.core.host import Host
-from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta
+from simnos.core.platform_loader import PLATFORM_META_FILENAME, _load_platform_meta, load_platform_dir
 from simnos.core.pydantic_models import EPHEMERAL_PORT
 from simnos.core.resolved_command import ModeDef, ResolvedPlatform, compile_template
 from simnos.plugins.nos import nos_plugins
+from simnos.plugins.shell.cmd_shell import BASIC_COMMANDS
 
 # Default credentials used to build single-host test inventories.
 TEST_USERNAME = "test_user"
@@ -75,6 +76,21 @@ def build_inventory(
     port = port if port is not None else EPHEMERAL_PORT
     host = {"username": username, "password": password, "port": port, "device_type": device_type, **extra}
     return {"hosts": {host_key: host}}
+
+
+def unknown_command_marker(device_type: str) -> str:
+    """Return the first line of the platform's unknown-command answer (`_default_`).
+
+    Platforms word it differently (`% Invalid input detected ...` on cisco_ios,
+    `Invalid command: [ ]` on vyatta_vyos, ...), so a check for the literal
+    ``"Unknown command"`` only fits platforms that keep the built-in default.
+    """
+    for path in nos_plugins.get(device_type, []):
+        if os.path.isfile(os.path.join(path, PLATFORM_META_FILENAME)):
+            default = load_platform_dir(path).commands.get("_default_")
+            if default is not None and default.output.text:
+                return default.output.text.strip().splitlines()[0]
+    return BASIC_COMMANDS["_default_"].output.text
 
 
 def creds_from_host(host: Host) -> dict:

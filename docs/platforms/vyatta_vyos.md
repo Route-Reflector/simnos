@@ -29,12 +29,19 @@ Invalid command: [ ]
 
 ### set terminal length 0
 
-**Output:**
-```
-set terminal length 0
-```
+**Output:** None
 
-**Help:** set the terminal to max width
+**Help:** disable paging
+
+**Prompt:**
+- vyatta_vyos~$
+- vyatta_vyos#
+
+### set terminal width 512
+
+**Output:** None
+
+**Help:** set the terminal width to 512 columns (sent by netmiko on connect)
 
 **Prompt:**
 - vyatta_vyos~$

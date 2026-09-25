@@ -70,3 +70,13 @@ apic1# fabric 203 show vlan extended
 **Prompt:**
 - cisco_apic$
 
+### terminal length 0
+
+**Output:** None
+
+**Help:** disable paging (sent by netmiko on connect)
+
+**Prompt:**
+- cisco_apic$
+- cisco_apic#
+

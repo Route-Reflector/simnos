@@ -22,15 +22,23 @@ class Quirk:
     last_reviewed: str  # "YYYY-MM-DD"
 
 
-# Platforms where netmiko's session_preparation() emits "Unknown command"
-# during init because of a missing command definition. Fix individually.
+# Platforms where netmiko's session_preparation() hits the platform's
+# unknown-command answer during init. Missing command definitions are fixed in
+# platform data; an entry stays only when the error is what the real device
+# answers too.
 INIT_UNKNOWN_CMD_ALLOWED: dict[str, Quirk] = {
-    "aruba_os": Quirk("no paging command", None, "2026-06-08"),
-    "brocade_fastiron": Quirk("enable (repeated)", None, "2026-06-08"),
-    "dlink_ds": Quirk("disable clipaging", None, "2026-06-08"),
-    "huawei_smartax": Quirk("enable password", "#70", "2026-06-08"),
-    "ruckus_fastiron": Quirk("enable (repeated), skip-page-display", None, "2026-06-08"),
-    "vyatta_vyos": Quirk("set terminal width 512", None, "2026-06-08"),
+    # netmiko's HuaweiSmartAXSSH.enable() uses pattern="" and so always sends
+    # the secret after `enable`. Real SmartAX enters `#` without a password, so
+    # the device rejects that stray line as well — faithful, not a data gap.
+    "huawei_smartax": Quirk("secret sent after a password-less enable", "#70", "2026-09-25"),
+    # netmiko's RuckusFastironBase.enable() resends `enable` (up to 3 times)
+    # until it sees a password prompt or "No password has been assigned". The
+    # shipped `enable` models no enable password and enters `#` silently, so
+    # the resends hit the unknown-command answer. Adding a password challenge
+    # would fail every connect made without `secret`; fixing it needs the real
+    # no-password wording from a device capture.
+    "brocade_fastiron": Quirk("enable resent until a password prompt appears", None, "2026-09-25"),
+    "ruckus_fastiron": Quirk("enable resent until a password prompt appears", None, "2026-09-25"),
 }
 
 # Platforms where enable()/config_mode() need an interactive secret or sudo

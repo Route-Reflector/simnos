@@ -1,0 +1,9 @@
+# netmiko's CiscoWlcSSH.cleanup() ends the session with `logout`. Static
+# `exit: true` like cisco_ios `logout` (#327).
+command: logout
+type: simnos
+help: Exit from the EXEC
+mode:
+- user
+- enable
+exit: true

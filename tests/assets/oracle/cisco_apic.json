@@ -74,5 +74,17 @@
     "new_mode": null,
     "output": null,
     "variants": []
+  },
+  "terminal length 0": {
+    "disables_paging": true,
+    "exit": false,
+    "help": "disable paging (sent by netmiko on connect)",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
   }
 }

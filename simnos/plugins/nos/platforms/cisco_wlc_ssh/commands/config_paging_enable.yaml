@@ -1,0 +1,6 @@
+command: config paging enable
+type: simnos
+help: enable paging (sent by netmiko on disconnect)
+mode:
+- user
+- enable

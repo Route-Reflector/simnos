@@ -1,0 +1,6 @@
+command: set terminal width 512
+type: simnos
+help: set the terminal width to 512 columns (sent by netmiko on connect)
+mode:
+- user
+- enable

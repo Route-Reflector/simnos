@@ -22,15 +22,24 @@
   "set terminal length 0": {
     "disables_paging": true,
     "exit": false,
-    "help": "set the terminal to max width",
+    "help": "disable paging",
     "modes": [
       "enable",
       "user"
     ],
     "new_mode": null,
-    "output": [
-      "set terminal length 0"
+    "output": null,
+    "variants": []
+  },
+  "set terminal width 512": {
+    "exit": false,
+    "help": "set the terminal width to 512 columns (sent by netmiko on connect)",
+    "modes": [
+      "enable",
+      "user"
     ],
+    "new_mode": null,
+    "output": null,
     "variants": []
   },
   "show arp": {

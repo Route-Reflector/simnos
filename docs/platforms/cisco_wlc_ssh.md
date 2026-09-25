@@ -17,6 +17,16 @@
 - cisco_wlc_ssh>
 - cisco_wlc_ssh#
 
+### config paging enable
+
+**Output:** None
+
+**Help:** enable paging (sent by netmiko on disconnect)
+
+**Prompt:**
+- cisco_wlc_ssh>
+- cisco_wlc_ssh#
+
 ### _default_
 
 **Output:**
@@ -36,6 +46,16 @@
 
 **Prompt:**
 - cisco_wlc_ssh>
+
+### logout
+
+**Output:** None
+
+**Help:** Exit from the EXEC
+
+**Prompt:**
+- cisco_wlc_ssh>
+- cisco_wlc_ssh#
 
 ### show 802.11a
 
