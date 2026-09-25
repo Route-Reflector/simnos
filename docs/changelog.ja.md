@@ -7,6 +7,10 @@ SIMNOS の主要な変更点をここに記録します。
 
 <!-- リリース時にこの見出しを `## v3.0.0 - YYYY-MM-DD` に差し替える。 -->
 
+> **プレリリース:** `v3.0.0rc1` (2026-09-25) — git タグのみで PyPI / Docker には
+> 公開していない。pin は
+> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc1`。
+
 SIMNOS v3 は SSH/Telnet コアとプラグインのデータレイアウトを clean rewrite した
 ものです。破壊的変更は以下の移行ガイドに集約しています。各行は後述の詳細エントリへ
 リンクしています。
