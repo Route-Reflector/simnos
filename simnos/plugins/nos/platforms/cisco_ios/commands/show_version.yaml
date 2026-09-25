@@ -2,5 +2,6 @@ command: show version
 type: simnos
 help: System hardware and software status
 mode:
+- user
 - enable
 output_template: show_version.j2

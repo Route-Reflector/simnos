@@ -8070,7 +8070,8 @@
     "exit": false,
     "help": "System hardware and software status",
     "modes": [
-      "enable"
+      "enable",
+      "user"
     ],
     "new_mode": null,
     "output": [
