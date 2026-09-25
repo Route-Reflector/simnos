@@ -7,6 +7,10 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 
 <!-- At release, rename this heading to `## v3.0.0 - YYYY-MM-DD`. -->
 
+> **Pre-release:** `v3.0.0rc1` (2026-09-25) — git tag only, not published to
+> PyPI / Docker. Pin with
+> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc1`.
+
 SIMNOS v3 is a clean rewrite of the SSH/Telnet core and the plugin data
 layout. The breaking changes are consolidated in the migration guide below;
 each links to its detailed entry further down.
