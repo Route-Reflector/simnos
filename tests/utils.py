@@ -85,12 +85,14 @@ def unknown_command_marker(device_type: str) -> str:
     `Invalid command: [ ]` on vyatta_vyos, ...), so a check for the literal
     ``"Unknown command"`` only fits platforms that keep the built-in default.
     """
+    text = BASIC_COMMANDS["_default_"].output.text
     for path in nos_plugins.get(device_type, []):
         if os.path.isfile(os.path.join(path, PLATFORM_META_FILENAME)):
             default = load_platform_dir(path).commands.get("_default_")
             if default is not None and default.output.text:
-                return default.output.text.strip().splitlines()[0]
-    return BASIC_COMMANDS["_default_"].output.text
+                text = default.output.text
+    assert text, f"{device_type}: no literal `_default_` answer to match"
+    return text.strip().splitlines()[0]
 
 
 def creds_from_host(host: Host) -> dict:
