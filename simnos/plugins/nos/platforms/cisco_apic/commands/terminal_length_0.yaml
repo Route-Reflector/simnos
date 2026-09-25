@@ -1,0 +1,7 @@
+command: terminal length 0
+type: simnos
+disables_paging: true
+help: disable paging (sent by netmiko on connect)
+mode:
+- user
+- enable

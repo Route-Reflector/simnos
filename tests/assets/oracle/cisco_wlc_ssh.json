@@ -21,6 +21,17 @@
     "output": null,
     "variants": []
   },
+  "config paging enable": {
+    "exit": false,
+    "help": "enable paging (sent by netmiko on disconnect)",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
+    "output": null,
+    "variants": []
+  },
   "enable": {
     "exit": false,
     "help": "enter enable mode",
@@ -28,6 +39,17 @@
       "user"
     ],
     "new_mode": "enable",
+    "output": null,
+    "variants": []
+  },
+  "logout": {
+    "exit": true,
+    "help": "Exit from the EXEC",
+    "modes": [
+      "enable",
+      "user"
+    ],
+    "new_mode": null,
     "output": null,
     "variants": []
   },
