@@ -8062,6 +8062,7 @@ Configuration register is 0x2102
 **Help:** System hardware and software status
 
 **Prompt:**
+- cisco_ios>
 - cisco_ios#
 
 ### show vlan
