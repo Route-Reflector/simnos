@@ -19,7 +19,9 @@ def cisco_ios_simnos():
     with SimNOS(inventory=inventory) as net:
         # Read the real OS-assigned port back after start, then build creds.
         creds = {
-            "host": "localhost",
+            # Pin IPv4: the listener binds 127.0.0.1 only, and ansible's libssh
+            # backend resolves "localhost" to ::1 first without falling back.
+            "host": "127.0.0.1",
             "username": TEST_USERNAME,
             "password": TEST_PASSWORD,
             "port": net.hosts["device"].port,
