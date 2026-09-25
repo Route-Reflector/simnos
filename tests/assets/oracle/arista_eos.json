@@ -2798,7 +2798,8 @@
     "exit": false,
     "help": "Software and hardware versions",
     "modes": [
-      "enable"
+      "enable",
+      "user"
     ],
     "new_mode": null,
     "output": [

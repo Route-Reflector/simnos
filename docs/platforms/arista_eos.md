@@ -2605,6 +2605,7 @@ Free memory: 1816320 kB
 **Help:** Software and hardware versions
 
 **Prompt:**
+- arista_eos>
 - arista_eos#
 
 ### show vlan
