@@ -7,9 +7,9 @@ For full details, see the [GitHub Releases](https://github.com/Route-Reflector/s
 
 <!-- At release, rename this heading to `## v3.0.0 - YYYY-MM-DD`. -->
 
-> **Pre-release:** `v3.0.0rc1` (2026-09-25) — git tag only, not published to
-> PyPI / Docker. Pin with
-> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc1`.
+> **Pre-release:** `v3.0.0rc2` (2026-09-25; `v3.0.0rc1` the same day) — git tag
+> only, not published to PyPI / Docker. Pin with
+> `simnos @ git+https://github.com/Route-Reflector/simnos@v3.0.0rc2`.
 
 SIMNOS v3 is a clean rewrite of the SSH/Telnet core and the plugin data
 layout. The breaking changes are consolidated in the migration guide below;
@@ -71,6 +71,12 @@ automated tooling that only sends commands and reads output.
 - Stop `SimNOS` instances from contaminating each other and their callers (#346). `SimNOS(plugins=[...])` registrations now land on a per-instance copy of the platform registry instead of a shared module-global, so a custom plugin registered on instance A is no longer visible from instance B — if you relied on that leak, pass the plugin to each `SimNOS(plugins=[...])` that uses it. An explicit `inventory` dict is also no longer mutated in place (and the `plugins` list is likewise copied as a contract): SimNOS works on its own copies — a deep copy of the inventory, a container copy of the plugins list — so reusing one inventory dict across instances with different `sys_config` settings no longer silently inherits the first instance's seeded `variants_policy`
 - Make command resolution deterministic and real-device-faithful (#348). Abbreviation no longer executes a *different* command when a shorter command holds the exact token (`show ip ro` with both `show ip` and `show ipv6 route` present now answers the unknown-command error like real IOS, instead of running `show ipv6 route`); an exact command match from another mode no longer shadows the current mode's abbreviation space (real devices resolve per mode, so e.g. `% Incomplete command.` is answered where it should be). On the loader side, an alias pointing at another alias is now a load error (chain resolution silently depended on the filename sort order — point the alias at the real command), and an alias `mode:` override that drops an inherited challenge firing mode is rejected like the existing transitions check. Full in-mode commands never enter abbreviation, so the scraper wire is byte-identical — only inputs that previously misbehaved change
 - Unify the four copies of the CR/LF/NUL terminator state machine in the async session driver onto one step function, fixing two byte-classification divergences (#350). The `--More--` pager no longer phantom-advances a page when an SSH NUL arrives while the CR-LF split is pending (the NUL now preserves the pending state instead of clearing it, so the following LF is consumed as the CR half), and the in-band login (auth-none / Telnet) no longer echoes and buffers a stray NUL into the entered username/password (every NUL is dropped, not just one adjacent to a CR). Both fixes affect only near-unreachable byte sequences and the scraper wire is byte-identical — the byte-parity goldens are unchanged
+- Allow `show version` from user EXEC on `arista_eos` and `cisco_ios` (#377). Both definitions were enable-only, so netmiko drivers that do not enable on connect (e.g. `arista_eos`) got the unknown-command answer; real EOS / IOS answer it without `enable`. A new test pins this for every platform that has a user mode
+- Define the commands netmiko sends on connect / disconnect that some platforms were missing (#378): `set terminal width 512` on `vyatta_vyos` (whose `set terminal length 0` also stops echoing the command as output), `terminal length 0` on `cisco_apic`, and `config paging enable` / `logout` on `cisco_wlc_ssh`. The netmiko init test now matches each platform's own unknown-command wording instead of the literal `Unknown command`, which had hidden these
+
+**Documentation**
+
+- Note in the automatic-testing guide that each shipped platform answers unknown commands in its own device wording (`_default_`), so a check for the literal `Unknown command` misses errors on most platforms
 
 ## v2.3.1
 
