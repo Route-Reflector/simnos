@@ -163,8 +163,9 @@ class TelnetServer(AsyncServerBase):
         # if start()'s result() already timed out (codex 1st#1). telnetlib3 returns
         # a telnetlib3.server.Server (a wrapper holding the asyncio.Server in
         # `._server` and proxying close()/wait_closed()/sockets = the Listener
-        # protocol); asyncio's create_server defaults reuse_address=True on POSIX, so
-        # stop→start does not hit EADDRINUSE (parity with the asyncssh reuse_address bind).
+        # protocol); asyncio's create_server defaults reuse_address=True on POSIX only, so
+        # stop→start does not hit EADDRINUSE and Windows keeps a second bind of the same
+        # port failing loud (parity with the asyncssh reuse_address bind, #376).
         self._acceptor = await telnetlib3.create_server(
             host=self.address,
             port=self.port,

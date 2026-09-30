@@ -72,6 +72,7 @@ golden で固定されています — コマンドを送って出力を読む�
 - async session driver に 4 箇所コピーされていた CR/LF/NUL 終端 state machine を単一の step 関数に統一し、byte 分類の divergence 2 件を修正 (#350)。`--More--` pager は、CR-LF 分割の pending 中に SSH の NUL が来ても phantom でページを進めなくなりました (NUL が pending を clear せず保持するようになり、後続の LF が CR の片割れとして消費されます)。また in-band login (auth-none / Telnet) は、迷子の NUL を echo して username/password に混入させなくなりました (CR 隣接の 1 個だけでなく、全 NUL を drop)。どちらもほぼ到達不能な byte 列にのみ影響し、scraper の wire は byte 同一 — byte-parity golden は無変更です
 - `arista_eos` と `cisco_ios` の `show version` を user EXEC でも実行可能に (#377)。どちらも enable 専用の定義だったため、接続時に enable しない netmiko ドライバ (`arista_eos` など) では unknown-command の応答になっていました。実機の EOS / IOS は `enable` なしで応答します。user mode を持つ全 platform についてこれを検査するテストを追加しました
 - netmiko が接続時・切断時に送るコマンドのうち、一部 platform で未定義だったものを追加 (#378): `vyatta_vyos` の `set terminal width 512` (あわせて `set terminal length 0` がコマンド文字列を出力していたのを無出力に)、`cisco_apic` の `terminal length 0`、`cisco_wlc_ssh` の `config paging enable` / `logout`。netmiko 初期化テストは `Unknown command` の固定文字列ではなく各 platform 固有の unknown-command 文言で判定するようになり、これまで見逃していたこれらを検出します
+- Windows でも、使用中の SSH ポートに 2 つ目の SIMNOS インスタンスを起動するとエラーになるように修正 (#376)。SSH の listener は全 OS で `SO_REUSEADDR` を立てていましたが、Windows ではこのオプションで使用中のポートに別ソケットが bind できてしまい、#347 で Linux について塞いだ「黙って二重起動」が残っていました。POSIX でのみ立てるようにしました (Telnet の listener は asyncio の POSIX 限定の既定値にすでに従っていました)。あわせて hot-reload のウォッチャが、Windows のパスでも platform の旧形式 `configurations/` / `templates/` の jinja ファイルの編集を検出するようにしました
 
 **ドキュメント**
 
