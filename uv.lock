@@ -1342,7 +1342,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "asyncssh", specifier = ">=2.23,<3.0" },
+    { name = "asyncssh", specifier = ">=2.24,<3.0" },
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "pydantic", specifier = "<3.0" },
     { name = "pyyaml", specifier = "<7.0" },
