@@ -78,6 +78,10 @@ automated tooling that only sends commands and reads output.
 
 - Note in the automatic-testing guide that each shipped platform answers unknown commands in its own device wording (`_default_`), so a check for the literal `Unknown command` misses errors on most platforms
 
+**Dependencies**
+
+- Raise the `asyncssh` floor from `>=2.23` to `>=2.24` so installs cannot resolve a version affected by GHSA-rw4j-r22c-9gc3 / CVE-2026-62949 (a channel open with a maximum packet size of 0 freezes the asyncio event loop; SIMNOS runs the asyncssh SSH server, so a crafted client could stall every host). The lock already pinned 2.24.0, so SIMNOS's own tests are unaffected
+
 ## v2.3.1
 
 **Bug Fixes**
