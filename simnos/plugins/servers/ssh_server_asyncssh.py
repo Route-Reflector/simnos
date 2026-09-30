@@ -24,6 +24,7 @@ paramiko server in Stage 4.
 
 import asyncio
 import logging
+import os
 import threading
 from typing import TYPE_CHECKING
 
@@ -292,7 +293,11 @@ class AsyncSshServer(AsyncServerBase):
             # port with no error, and the kernel then load-balanced incoming
             # connections between the two — a silent double-start that bypassed
             # the #271 port-collision hardening. Now the second bind fails loud.
-            reuse_address=True,
+            # POSIX only (#376): Windows SO_REUSEADDR lets another socket bind a
+            # port already in use — the same silent double-start — and Windows
+            # needs no opt-in for a restart bind. Mirrors asyncio's own default,
+            # which the Telnet listener inherits.
+            reuse_address=os.name == "posix",
         )
         # Read back the bound port so port=0 (ephemeral, #271) resolves to the real
         # OS-assigned port. Done here on the loop thread (the create coroutine), so

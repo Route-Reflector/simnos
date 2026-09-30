@@ -221,10 +221,10 @@ def compute_diff(
 
 def _ntc_source(raw_path: str, ntc_commit: str) -> dict:
     """The A3 ``source`` block for an NTC-derived command (provenance)."""
-    rel = raw_path
-    marker = f"{os.sep}tests{os.sep}"
-    if marker in raw_path:
-        rel = "tests/" + raw_path.split(marker, 1)[1].replace(os.sep, "/")
+    # Normalize to "/" first: callers may hand either separator on Windows (#376).
+    rel = raw_path.replace(os.sep, "/")
+    if "/tests/" in rel:
+        rel = "tests/" + rel.split("/tests/", 1)[1]
     return {"ntc_template": rel, "ntc_commit": ntc_commit}
 
 

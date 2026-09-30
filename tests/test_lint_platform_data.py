@@ -26,7 +26,8 @@ def _write(path, content, *, binary=False):
     if binary:
         path.write_bytes(content)
     else:
-        path.write_text(content, encoding="utf-8")
+        # newline="\n": text mode writes CRLF on Windows, which the lint rejects (#376).
+        path.write_text(content, encoding="utf-8", newline="\n")
 
 
 def _platform(tmp_path, name="p"):

@@ -137,16 +137,16 @@ def _legacy_jinja_to_py(filepath: str) -> str | None:
     None so the caller drops it — mapping it blindly would fabricate a bogus
     py path that `from_file` can only fail on (1st round codex #1). Only
     reached for `.j2` paths NOT under an A3 platform dir (those are rolled up
-    by `resolve_reload_targets` first — A3 priority). POSIX ``/`` separators
-    are a pre-existing assumption of the legacy py-plugin layout (unlike the
-    ``os.sep``-aware `_a3_platform_dir`).
+    by `resolve_reload_targets` first — A3 priority). The path is split on
+    ``os.sep`` after `os.path.normpath`, like `_a3_platform_dir`, so a Windows
+    ``\\`` path maps too (#376).
     """
-    parts = filepath.split("/")
+    parts = os.path.normpath(filepath).split(os.sep)
     if len(parts) >= 3 and parts[-2] == "configurations" and parts[-1].endswith(".yaml.j2"):
         platform = parts[-1][: -len(".yaml.j2")]
-        return "/".join([*parts[:-2], f"{platform}.py"])
+        return os.sep.join([*parts[:-2], f"{platform}.py"])
     if len(parts) >= 4 and parts[-3] == "templates":
-        return "/".join([*parts[:-3], f"{parts[-2]}.py"])
+        return os.sep.join([*parts[:-3], f"{parts[-2]}.py"])
     return None
 
 
