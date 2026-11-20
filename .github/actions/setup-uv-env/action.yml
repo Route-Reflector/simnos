@@ -9,8 +9,10 @@ description: >-
 inputs:
   python-version:
     description: >-
-      Python version for uv to set up. Leave empty to let uv resolve from
-      pyproject.toml's `requires-python` (used by lint-only jobs).
+      Python version for uv to set up. Pass it explicitly: left empty, uv
+      picks the newest Python that pyproject.toml's `requires-python` admits,
+      so raising that upper bound silently moves the job to a new Python
+      (the #391 trap).
     required: false
     default: ""
   activate-environment:
