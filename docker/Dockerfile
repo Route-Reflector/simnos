@@ -7,7 +7,7 @@ ARG PYTHON_VER=3.13
 FROM python:${PYTHON_VER}-alpine AS builder
 
 # Copy uv binary from official image (version pinned to match CI)
-COPY --from=ghcr.io/astral-sh/uv:0.9.8 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /uvx /bin/
 
 WORKDIR /app
 

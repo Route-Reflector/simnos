@@ -64,6 +64,7 @@ golden で固定されています — コマンドを送って出力を読む�
 - 実機式のコマンド省略マッチを追加: トークン単位で一意な prefix が完全なコマンドに解決され、曖昧なときは `% Ambiguous command`、部分一致のときは incomplete-command メッセージを返します (#305)。省略マッチは dispatch コア (既定 ON) と Tab 補完で共有されます
 - 長い出力向けにターミナルページング (`--More--`) を追加 (#307)。ページ高は PTY / Telnet NAWS の行数に従い (取得できなければ `sys_config.paging.default_rows`、既定 24 にフォールバック)、`terminal length 0` 系のコマンドはそのセッションのページングを無効化します (`disables_paging` データフラグ — scraper はセッション準備でこれを送るため、自動化クライアント向けの主防壁はこちらです)。加えて、ページ高に収まる出力 (netmiko の `height=1000` など) は行数ゲートで素の応答に直行し、byte-parity を保ちます。`--More--` 文字列はプラットフォームデータです (`platform.yaml` の `paging.more_prompt`、Cisco 既定は `" --More-- "`)
 - コマンドの hot-reload ウォッチャ (`SIMNOS_RELOAD_COMMANDS`) を、per-shell スナップショット + プラットフォーム単位 watch にスコープし、共有 reload を host ロック下で直列化することで、並行セッションと競合しないようにしました (#281)
+- Python 3.15 に対応 (#391)。`requires-python` を `>=3.13,<3.16` に変更し (従来は `<3.15` が上限で、3.15 へのインストールは拒否されていました)、CI でテストと Docker build を 3.13 / 3.14 / 3.15 で回すようにしました。コードの変更は不要でした。lock は `pydantic` 2.14.4 / `pydantic-core` 2.50.5 (Python 3.15 用 wheel のある最初の `pydantic-core`) に更新しています。`pyyaml` は 3.15 用 wheel がまだ無く、ソースからビルドされます。ansible の互換テストは `ansible-pylibssh` の 3.15 用 wheel が出るまで 3.13 / 3.14 のみです
 
 **バグ修正**
 

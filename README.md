@@ -31,7 +31,7 @@ SIMNOS is an independent project derived from [FakeNOS](https://github.com/faken
 - Package name: `simnos` (on PyPI)
 - Package manager: uv (migrated from Poetry)
 - Linter/Formatter: Ruff (migrated from Black/Pylint)
-- Python support: 3.13 / 3.14
+- Python support: 3.13 / 3.14 / 3.15
 - CI: Modernized GitHub Actions workflow
 - NOS platforms: 5 additional platforms enabled (brocade_fastiron, ciena_saos, fortinet, juniper_screenos, ruckus_fastiron)
 - Transports: async SSH (asyncssh) + Telnet (telnetlib3) on a shared event loop, with push-dispatch session handling
@@ -64,7 +64,7 @@ SIMNOS can:
 - Provide high-level API to create custom NOS plugins
 - Run in docker container to simplify integration with your infrastructure
 - Make use of SIMNOS CLI tool for quick run and prototype simulations
-- Works on Windows, Mac and Linux under Python 3.13 and 3.14
+- Works on Windows, Mac and Linux under Python 3.13, 3.14 and 3.15
 
 ## How?
 
