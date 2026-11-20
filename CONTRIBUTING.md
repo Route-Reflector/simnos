@@ -66,8 +66,8 @@ New platform contributions are welcome! A few things to keep in mind:
 
 ### Prerequisites
 
-- Python 3.13 or 3.14
-- [uv](https://docs.astral.sh/uv/) (package manager)
+- Python 3.13, 3.14 or 3.15
+- [uv](https://docs.astral.sh/uv/) (package manager) — 0.13.9 or later is recommended for Python 3.15 (the version CI and the Docker image use; which Python patch releases uv can download depends on the uv release). Select the version with `uv sync --python 3.15`
 - Docker (optional, for container-based testing)
 
 ### Getting Started

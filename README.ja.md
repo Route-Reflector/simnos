@@ -28,7 +28,7 @@ SIMNOS は [FakeNOS](https://github.com/fakenos/fakenos)（Denis Mulyalin 氏が
 - パッケージ名: `simnos`（PyPI 上）
 - パッケージマネージャ: uv（Poetry から移行）
 - リンター/フォーマッター: Ruff（Black/Pylint から移行）
-- Python サポート: 3.13 / 3.14
+- Python サポート: 3.13 / 3.14 / 3.15
 - CI: GitHub Actions ワークフローの近代化
 - NOS プラットフォーム: 5 種を追加有効化（brocade_fastiron, ciena_saos, fortinet, juniper_screenos, ruckus_fastiron）
 - トランスポート: 共有イベントループ上の非同期 SSH（asyncssh）+ Telnet（telnetlib3）、push-dispatch セッション処理
@@ -50,7 +50,7 @@ SIMNOS でできること：
 - カスタム NOS プラグイン作成のための高レベル API の提供
 - Docker コンテナでの実行によるインフラとの統合の簡素化
 - SIMNOS CLI ツールによるシミュレーションの素早い起動とプロトタイプ作成
-- Windows、Mac、Linux 上の Python 3.13 / 3.14 で動作
+- Windows、Mac、Linux 上の Python 3.13 / 3.14 / 3.15 で動作
 
 ## どうやって？
 
